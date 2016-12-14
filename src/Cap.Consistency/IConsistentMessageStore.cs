@@ -25,7 +25,7 @@ namespace Cap.Consistency
         /// </summary>
         /// <param name="message">The message to create in the store.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="IdentityResult"/> of the asynchronous query.</returns>
+        /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="OperateResult"/> of the asynchronous query.</returns>
         Task<OperateResult> CreateAsync(TMessage message, CancellationToken cancellationToken);
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Cap.Consistency
         /// </summary>
         /// <param name="message">The message to update in the store.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="IdentityResult"/> of the asynchronous query.</returns>
+        /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="OperateResult"/> of the asynchronous query.</returns>
         Task<OperateResult> UpdateAsync(TMessage message, CancellationToken cancellationToken);
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Cap.Consistency
         /// </summary>
         /// <param name="message">The message to delete in the store.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="IdentityResult"/> of the asynchronous query.</returns>
+        /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="OperateResult"/> of the asynchronous query.</returns>
         Task<OperateResult> DeleteAsync(TMessage message, CancellationToken cancellationToken);
 
         /// <summary>

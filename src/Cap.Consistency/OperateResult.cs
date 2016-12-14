@@ -8,7 +8,10 @@ namespace Cap.Consistency
     /// </summary>
     public class OperateResult
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly OperateResult _success = new OperateResult { Succeeded = true };
+
+        // ReSharper disable once FieldCanBeMadeReadOnly.Local
         private List<OperateError> _errors = new List<OperateError>();
 
         /// <summary>
@@ -24,16 +27,16 @@ namespace Cap.Consistency
         public IEnumerable<OperateError> Errors => _errors;
 
         /// <summary>
-        /// Returns an <see cref="IdentityResult"/> indicating a successful identity operation.
+        /// Returns an <see cref="OperateResult"/> indicating a successful identity operation.
         /// </summary>
-        /// <returns>An <see cref="IdentityResult"/> indicating a successful operation.</returns>
+        /// <returns>An <see cref="OperateResult"/> indicating a successful operation.</returns>
         public static OperateResult Success => _success;
 
         /// <summary>
-        /// Creates an <see cref="IdentityResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.
+        /// Creates an <see cref="OperateResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.
         /// </summary>
-        /// <param name="errors">An optional array of <see cref="IdentityError"/>s which caused the operation to fail.</param>
-        /// <returns>An <see cref="IdentityResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.</returns>
+        /// <param name="errors">An optional array of <see cref="OperateError"/>s which caused the operation to fail.</param>
+        /// <returns>An <see cref="OperateResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.</returns>
         public static OperateResult Failed(params OperateError[] errors) {
             var result = new OperateResult { Succeeded = false };
             if (errors != null) {
@@ -43,9 +46,9 @@ namespace Cap.Consistency
         }
 
         /// <summary>
-        /// Converts the value of the current <see cref="IdentityResult"/> object to its equivalent string representation.
+        /// Converts the value of the current <see cref="OperateResult"/> object to its equivalent string representation.
         /// </summary>
-        /// <returns>A string representation of the current <see cref="IdentityResult"/> object.</returns>
+        /// <returns>A string representation of the current <see cref="OperateResult"/> object.</returns>
         /// <remarks>
         /// If the operation was successful the ToString() will return "Succeeded" otherwise it returned
         /// "Failed : " followed by a comma delimited list of error codes from its <see cref="Errors"/> collection, if any.

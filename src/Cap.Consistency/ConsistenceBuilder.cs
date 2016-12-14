@@ -3,13 +3,14 @@ using System;
 
 namespace Cap.Consistency
 {
-    /// <summary>
-    /// Creates a new instance of <see cref="ConsistenceBuilder"/>.
-    /// </summary>
-    /// <param name="message">The <see cref="Type"/> to use for the message.</param>
-    /// <param name="services">The <see cref="IServiceCollection"/> to attach to.</param>
+
     public class ConsistenceBuilder
     {
+        /// <summary>
+        /// Creates a new instance of <see cref="ConsistenceBuilder"/>.
+        /// </summary>
+        /// <param name="message">The <see cref="Type"/> to use for the message.</param>
+        /// <param name="service">The <see cref="IServiceCollection"/> to attach to.</param>
         public ConsistenceBuilder(Type message, IServiceCollection service) {
             MessageType = message;
             Services = service;
@@ -32,10 +33,10 @@ namespace Cap.Consistency
         public Type MessageType { get; private set; }
 
         /// <summary>
-        /// Adds a <see cref="IRoleStore{TRole}"/> for the <seealso cref="RoleType"/>.
+        /// Adds a <see cref="IConsistentMessageStore{TMessage}"/> for the <seealso cref="MessageType"/>.
         /// </summary>
         /// <typeparam name="T">The role type held in the store.</typeparam>
-        /// <returns>The current <see cref="IdentityBuilder"/> instance.</returns>
+        /// <returns>The current <see cref="ConsistenceBuilder"/> instance.</returns>
         public virtual ConsistenceBuilder AddMessageStore<T>() where T : class {
             return AddScoped(typeof(IConsistentMessageStore<>).MakeGenericType(MessageType), typeof(T));
         }

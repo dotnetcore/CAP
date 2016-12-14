@@ -103,7 +103,7 @@ namespace Cap.Consistency
         /// <summary>
         /// Finds and returns a message, if any, who has the specified <paramref name="messageId"/>.
         /// </summary>
-        /// <param name="userId">The message ID to search for.</param>
+        /// <param name="messageId">The message ID to search for.</param>
         /// <returns>
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the user matching the specified <paramref name="messageId"/> if it exists.
         /// </returns>
@@ -113,9 +113,9 @@ namespace Cap.Consistency
         }
 
         /// <summary>
-        /// Gets the message identifier for the specified <paramref name="user"/>.
+        /// Gets the message identifier for the specified <paramref name="message"/>.
         /// </summary>
-        /// <param name="user">The message whose identifier should be retrieved.</param>
+        /// <param name="message">The message whose identifier should be retrieved.</param>
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the identifier for the specified <paramref name="message"/>.</returns>
         public virtual async Task<string> GetMessageIdAsync(TMessage message) {
             ThrowIfDisposed();
