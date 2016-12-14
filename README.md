@@ -1,0 +1,3 @@
+# kafkabus
+
+a .net core message consistence middleware , and now developing...
