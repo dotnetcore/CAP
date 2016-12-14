@@ -6,8 +6,8 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Savorboard")]
-[assembly: AssemblyProduct("Cap.Consistence")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("Cap.Consistency.Test")]
 [assembly: AssemblyTrademark("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible
@@ -16,4 +16,4 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("e8af8611-0ea4-4b19-bc48-87c57a87dc66")]
+[assembly: Guid("3a444cf8-1611-407f-8d32-5d0cdc3dd49d")]
