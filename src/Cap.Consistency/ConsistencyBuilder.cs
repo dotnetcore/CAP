@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Reflection;
 
 namespace Cap.Consistency
 {
@@ -43,9 +44,28 @@ namespace Cap.Consistency
             return AddScoped(typeof(IConsistencyMessageStore<>).MakeGenericType(MessageType), typeof(T));
         }
 
+        /// <summary>
+        /// Adds a <see cref="ConsistencyMessageManager{TUser}"/> for the <seealso cref="MessageType"/>.
+        /// </summary>
+        /// <typeparam name="TMessageManager">The type of the message manager to add.</typeparam>
+        /// <returns>The current <see cref="ConsistencyBuilder"/> instance.</returns>
+        public virtual ConsistencyBuilder AddConsistencyMessageManager<TMessageManager>() where TMessageManager : class {
+            var messageManagerType = typeof(ConsistencyMessageManager<>).MakeGenericType(MessageType);
+            var customType = typeof(TMessageManager);
+            if (messageManagerType == customType ||
+                !messageManagerType.GetTypeInfo().IsAssignableFrom(customType.GetTypeInfo())) {
+                throw new InvalidOperationException($"Type {customType.Name} must be derive from ConsistencyMessageManager<{MessageType.Name}>");
+            }
+            Services.AddScoped(customType, services => services.GetRequiredService(messageManagerType));
+            return AddScoped(messageManagerType, customType);
+        }
+
+
         private ConsistencyBuilder AddScoped(Type serviceType, Type concreteType) {
             Services.AddScoped(serviceType, concreteType);
             return this;
         }
+
+
     }
 }

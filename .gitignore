@@ -28,4 +28,5 @@ project.lock.json
 .vs
 .build/
 .testPublish/
-/src/Cap.Consistency/obj/Debug/netstandard1.6
+obj/
+bin/

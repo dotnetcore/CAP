@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
-    /// Contains extension methods to <see cref="IServiceCollection"/> for configuring kafka consistence services.
+    /// Contains extension methods to <see cref="IServiceCollection"/> for configuring consistence services.
     /// </summary>
     public static class ServiceCollectionExtensions
     {
@@ -14,9 +14,12 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services">The services available in the application.</param>
         /// <returns>An <see cref="IServiceCollection"/> for application services.</returns>
-        public static ConsistencyBuilder AddKafkaConsistence<TMessage>(this IServiceCollection services)
+        public static ConsistencyBuilder AddConsistency<TMessage>(this IServiceCollection services)
             where TMessage : class {
+
             services.TryAddSingleton<ConsistencyMarkerService>();
+
+            services.TryAddScoped<ConsistencyMessageManager<TMessage>, ConsistencyMessageManager<TMessage>>();
 
             return new ConsistencyBuilder(typeof(TMessage), services);
         }
