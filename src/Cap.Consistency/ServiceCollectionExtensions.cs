@@ -15,12 +15,12 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="services">The services available in the application.</param>
         /// <returns>An <see cref="IServiceCollection"/> for application services.</returns>
-        public static ConsistenceBuilder AddKafkaConsistence<TMessage>(this IServiceCollection services)
+        public static ConsistencyBuilder AddKafkaConsistence<TMessage>(this IServiceCollection services)
             where TMessage : class {
 
-            services.TryAddSingleton<KafkaConsistenceMarkerService>();
+            services.TryAddSingleton<ConsistencyMarkerService>();
 
-            return new ConsistenceBuilder(typeof(TMessage), services);
+            return new ConsistencyBuilder(typeof(TMessage), services);
         }
     }
 }

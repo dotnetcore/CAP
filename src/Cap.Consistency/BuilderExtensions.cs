@@ -6,12 +6,12 @@ using System;
 namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
-    /// KafkaConsostence extensions for <see cref="IApplicationBuilder"/>
+    /// Consistence extensions for <see cref="IApplicationBuilder"/>
     /// </summary>
     public static class BuilderExtensions
     {
         /// <summary>
-        /// Enables KafkaConsistence for the current application
+        /// Enables Consistence for the current application
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
         /// <returns>The <see cref="IApplicationBuilder"/> instance this method extends.</returns>
@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Builder
                 throw new ArgumentNullException(nameof(app));
             }
 
-            var marker = app.ApplicationServices.GetService<KafkaConsistenceMarkerService>();
+            var marker = app.ApplicationServices.GetService<ConsistencyMarkerService>();
             if (marker == null) {
                 throw new InvalidOperationException("AddKafkaConsistence must be called on the service collection.");
             }

@@ -3,15 +3,17 @@ using System;
 
 namespace Cap.Consistency
 {
-
-    public class ConsistenceBuilder
+    /// <summary>
+    /// Helper functions for configuring consistency services.
+    /// </summary>
+    public class ConsistencyBuilder
     {
         /// <summary>
-        /// Creates a new instance of <see cref="ConsistenceBuilder"/>.
+        /// Creates a new instance of <see cref="ConsistencyBuilder"/>.
         /// </summary>
         /// <param name="message">The <see cref="Type"/> to use for the message.</param>
         /// <param name="service">The <see cref="IServiceCollection"/> to attach to.</param>
-        public ConsistenceBuilder(Type message, IServiceCollection service) {
+        public ConsistencyBuilder(Type message, IServiceCollection service) {
             MessageType = message;
             Services = service;
         }
@@ -33,15 +35,15 @@ namespace Cap.Consistency
         public Type MessageType { get; private set; }
 
         /// <summary>
-        /// Adds a <see cref="IConsistentMessageStore{TMessage}"/> for the <seealso cref="MessageType"/>.
+        /// Adds a <see cref="IConsistencyMessageStore{TMessage}"/> for the <seealso cref="MessageType"/>.
         /// </summary>
         /// <typeparam name="T">The role type held in the store.</typeparam>
-        /// <returns>The current <see cref="ConsistenceBuilder"/> instance.</returns>
-        public virtual ConsistenceBuilder AddMessageStore<T>() where T : class {
-            return AddScoped(typeof(IConsistentMessageStore<>).MakeGenericType(MessageType), typeof(T));
+        /// <returns>The current <see cref="ConsistencyBuilder"/> instance.</returns>
+        public virtual ConsistencyBuilder AddMessageStore<T>() where T : class {
+            return AddScoped(typeof(IConsistencyMessageStore<>).MakeGenericType(MessageType), typeof(T));
         }
 
-        private ConsistenceBuilder AddScoped(Type serviceType, Type concreteType) {
+        private ConsistencyBuilder AddScoped(Type serviceType, Type concreteType) {
             Services.AddScoped(serviceType, concreteType);
             return this;
         }

@@ -11,21 +11,21 @@ namespace Cap.Consistency
     /// Provides the APIs for managing message in a persistence store.
     /// </summary>
     /// <typeparam name="TMessage">The type encapsulating a message.</typeparam>
-    public class ConsistentMessageManager<TMessage> : IDisposable where TMessage : class
+    public class ConsistencyMessageManager<TMessage> : IDisposable where TMessage : class
     {
         private bool _disposed;
         private readonly HttpContext _context;
         private CancellationToken CancellationToken => _context?.RequestAborted ?? CancellationToken.None;
 
         /// <summary>
-        /// Constructs a new instance of <see cref="ConsistentMessageManager{TMessage}"/>.
+        /// Constructs a new instance of <see cref="ConsistencyMessageManager{TMessage}"/>.
         /// </summary>
         /// <param name="store">The persistence store the manager will operate over.</param>
         /// <param name="services">The <see cref="IServiceProvider"/> used to resolve services.</param>
         /// <param name="logger">The logger used to log messages, warnings and errors.</param>
-        public ConsistentMessageManager(IConsistentMessageStore<TMessage> store,
+        public ConsistencyMessageManager(IConsistencyMessageStore<TMessage> store,
             IServiceProvider services,
-            ILogger<ConsistentMessageManager<TMessage>> logger) {
+            ILogger<ConsistencyMessageManager<TMessage>> logger) {
             if (store == null) {
                 throw new ArgumentNullException(nameof(store));
             }
@@ -42,7 +42,7 @@ namespace Cap.Consistency
         ///  Gets or sets the persistence store the manager operates over.
         /// </summary>
         /// <value>The persistence store the manager operates over.</value>
-        protected internal IConsistentMessageStore<TMessage> Store { get; set; }
+        protected internal IConsistencyMessageStore<TMessage> Store { get; set; }
 
         /// <summary>
         /// Gets the <see cref="ILogger"/> used to log messages from the manager.

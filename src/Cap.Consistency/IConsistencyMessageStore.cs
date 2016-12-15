@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 namespace Cap.Consistency
 {
     /// <summary>
-    /// Provides an abstraction for a store which manages kafka consistent message.
+    /// Provides an abstraction for a store which manages consistent message.
     /// </summary>
     /// <typeparam name="TMessage"></typeparam>
-    public interface IConsistentMessageStore<TMessage> : IDisposable where TMessage : class
+    public interface IConsistencyMessageStore<TMessage> : IDisposable where TMessage : class
     {
         /// <summary>
         /// Finds and returns a message, if any, who has the specified <paramref name="messageId"/>.
