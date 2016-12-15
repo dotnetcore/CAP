@@ -9,7 +9,6 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class ServiceCollectionExtensions
     {
-
         /// <summary>
         /// Adds and configures the consistence services for the consitence.
         /// </summary>
@@ -17,7 +16,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>An <see cref="IServiceCollection"/> for application services.</returns>
         public static ConsistencyBuilder AddKafkaConsistence<TMessage>(this IServiceCollection services)
             where TMessage : class {
-
             services.TryAddSingleton<ConsistencyMarkerService>();
 
             return new ConsistencyBuilder(typeof(TMessage), services);

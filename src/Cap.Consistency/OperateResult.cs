@@ -60,7 +60,6 @@ namespace Cap.Consistency
         }
     }
 
-
     /// <summary>
     /// Encapsulates an error from the operate subsystem.
     /// </summary>
