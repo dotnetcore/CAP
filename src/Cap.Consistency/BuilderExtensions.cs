@@ -15,14 +15,14 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
         /// <returns>The <see cref="IApplicationBuilder"/> instance this method extends.</returns>
-        public static IApplicationBuilder UseKafkaConsistence(this IApplicationBuilder app) {
+        public static IApplicationBuilder UseConsistency(this IApplicationBuilder app) {
             if (app == null) {
                 throw new ArgumentNullException(nameof(app));
             }
 
             var marker = app.ApplicationServices.GetService<ConsistencyMarkerService>();
             if (marker == null) {
-                throw new InvalidOperationException("AddKafkaConsistence must be called on the service collection.");
+                throw new InvalidOperationException("Add Consistency must be called on the service collection.");
             }
 
             return app;
