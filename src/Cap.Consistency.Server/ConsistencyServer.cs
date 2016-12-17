@@ -33,6 +33,7 @@ namespace Cap.Consistency.Server
 
         public void Dispose()
         {
+            
             throw new NotImplementedException();
         }
     }
