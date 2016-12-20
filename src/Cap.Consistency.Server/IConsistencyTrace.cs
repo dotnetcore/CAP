@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Extensions.Logging;
 
-namespace Cap.Consistency.Server.Internal.Infrastructure
+namespace Cap.Consistency.Server
 {
     public interface IConsistencyTrace : ILogger
     {

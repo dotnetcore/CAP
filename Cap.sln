@@ -23,6 +23,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{9E5A7F
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Cap.Consistency.Server", "src\Cap.Consistency.Server\Cap.Consistency.Server.xproj", "{55CF2C48-D390-40CF-8AD9-FA39F90E9217}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Cap.Consistency.EntityFrameworkCore", "src\Cap.Consistency.EntityFrameworkCore\Cap.Consistency.EntityFrameworkCore.xproj", "{96111249-C4C3-4DC9-A887-32D583723AB1}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Cap.Consistency.EntityFrameworkCore.Test", "test\Cap.Consistency.EntityFrameworkCore.Test\Cap.Consistency.EntityFrameworkCore.Test.xproj", "{7442C942-1DDC-40E4-8F1B-654E721EAA45}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -41,6 +45,14 @@ Global
 		{55CF2C48-D390-40CF-8AD9-FA39F90E9217}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55CF2C48-D390-40CF-8AD9-FA39F90E9217}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55CF2C48-D390-40CF-8AD9-FA39F90E9217}.Release|Any CPU.Build.0 = Release|Any CPU
+		{96111249-C4C3-4DC9-A887-32D583723AB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96111249-C4C3-4DC9-A887-32D583723AB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96111249-C4C3-4DC9-A887-32D583723AB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96111249-C4C3-4DC9-A887-32D583723AB1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -50,5 +62,7 @@ Global
 		{3A444CF8-1611-407F-8D32-5D0CDC3DD49D} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 		{9E5A7F49-8E31-4A71-90CC-1DA9AEDA99EE} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 		{55CF2C48-D390-40CF-8AD9-FA39F90E9217} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{96111249-C4C3-4DC9-A887-32D583723AB1} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{7442C942-1DDC-40E4-8F1B-654E721EAA45} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 	EndGlobalSection
 EndGlobal

@@ -6,7 +6,7 @@ namespace Cap.Consistency.Server.Internal.Infrastructure
     /// <summary>
     /// Summary description for KestrelTrace
     /// </summary>
-    public class ConsistencyTrace 
+    public class ConsistencyTrace : IConsistencyTrace
     {
         private static readonly Action<ILogger, string, Exception> _connectionStart;
         private static readonly Action<ILogger, string, Exception> _connectionStop;

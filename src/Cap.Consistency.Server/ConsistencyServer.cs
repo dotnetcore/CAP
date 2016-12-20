@@ -4,13 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.AspNetCore.Hosting.Server.Features;
 using System.Reflection;
 using Cap.Consistency.Server.Internal.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace Cap.Consistency.Server
 {
@@ -19,7 +18,6 @@ namespace Cap.Consistency.Server
         private Stack<IDisposable> _disposables;
         private readonly IApplicationLifetime _applicationLifetime;
         private readonly ILogger _logger;
-        private readonly IServerAddressesFeature _serverAddresses;
         private readonly IConsumer _consumer;
 
         public ConsistencyServer(IOptions<ConsistencyServerOptions> options, IApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory) {
@@ -39,14 +37,11 @@ namespace Cap.Consistency.Server
             _applicationLifetime = applicationLifetime;
             _logger = loggerFactory.CreateLogger(typeof(ConsistencyServer).GetTypeInfo().Namespace);
             _consumer = Options.ApplicationServices.GetService<IConsumer>();
-            Features = new FeatureCollection();
-            _serverAddresses = new ServerAddressesFeature();
-            Features.Set(_serverAddresses);
         }
 
-        public IFeatureCollection Features { get; }
-
         public ConsistencyServerOptions Options { get; }
+
+        public IFeatureCollection Features { get; set; }
 
         public void Start<TContext>(IHttpApplication<TContext> application) {
             if (_disposables != null) {
@@ -55,6 +50,8 @@ namespace Cap.Consistency.Server
             }
             _disposables = new Stack<IDisposable>();
             var trace = new ConsistencyTrace(_logger);
+
+            _consumer.Log = trace;
 
             _disposables.Push(_consumer);
 
@@ -66,7 +63,12 @@ namespace Cap.Consistency.Server
                     "ThreadCount must be positive.");
             }
 
-            _consumer.Start();
+            try {
+                _consumer.Start(threadCount);
+            }
+            catch (Exception ex) {
+                throw ex;
+            }
         }
 
         public void Dispose() {

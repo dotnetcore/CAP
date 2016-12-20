@@ -15,7 +15,7 @@ namespace Cap.Consistency.Server
 
         void Stop();
 
-        ILogger Log { get; set; }
+        IConsistencyTrace Log { get; set; }
 
         ConsistencyServerOptions ServerOptions { get; set; }
 
