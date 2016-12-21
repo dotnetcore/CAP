@@ -16,7 +16,7 @@ namespace Cap.Consistency.EntityFrameworkCore
     public static class ConsistencyEntityFrameworkBuilderExtensions
     {
         /// <summary>
-        /// Adds an Entity Framework implementation of identity information stores.
+        /// Adds an Entity Framework implementation of message stores.
         /// </summary>
         /// <typeparam name="TContext">The Entity Framework database context to use.</typeparam>
         /// <param name="builder">The <see cref="ConsistencyBuilder"/> instance this method extends.</param>
@@ -28,7 +28,7 @@ namespace Cap.Consistency.EntityFrameworkCore
         }
 
         /// <summary>
-        /// Adds an Entity Framework implementation of identity information stores.
+        /// Adds an Entity Framework implementation of message stores.
         /// </summary>
         /// <typeparam name="TContext">The Entity Framework database context to use.</typeparam>
         /// <typeparam name="TKey">The type of the primary key used for the users and roles.</typeparam>
