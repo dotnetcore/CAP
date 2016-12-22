@@ -130,7 +130,6 @@ namespace Cap.Consistency.EntityFrameworkCore
             return id.ToString();
         }
 
-
         public Task<string> GetMessageIdAsync(TMessage message, CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
