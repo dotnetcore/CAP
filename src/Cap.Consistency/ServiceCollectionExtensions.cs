@@ -1,7 +1,7 @@
-﻿using Cap.Consistency;
+﻿using System;
+using Cap.Consistency;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -11,7 +11,6 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class ServiceCollectionExtensions
     {
-
         /// <summary>
         /// Adds and configures the consistence services for the consitence.
         /// </summary>
@@ -30,7 +29,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>An <see cref="ConsistencyBuilder"/> for application services.</returns>
         public static ConsistencyBuilder AddConsistency<TMessage>(this IServiceCollection services, Action<ConsistencyOptions> setupAction)
             where TMessage : class {
-
             services.TryAddSingleton<ConsistencyMarkerService>();
 
             services.TryAddScoped<ConsistencyMessageManager<TMessage>, ConsistencyMessageManager<TMessage>>();

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Cap.Consistency.EntityFrameworkCore
 {
@@ -19,7 +16,6 @@ namespace Cap.Consistency.EntityFrameworkCore
         RollbackSuccessed = 3,
         RollbackFailed = 4
     }
-
 
     public class ConsistencyMessage<TKey> where TKey : IEquatable<TKey>
     {

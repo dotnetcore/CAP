@@ -1,6 +1,6 @@
-﻿using Cap.Consistency;
+﻿using System;
+using Cap.Consistency;
 using Microsoft.Extensions.DependencyInjection;
-using System;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder

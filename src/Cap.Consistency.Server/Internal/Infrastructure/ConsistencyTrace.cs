@@ -27,8 +27,7 @@ namespace Cap.Consistency.Server.Internal.Infrastructure
 
         protected readonly ILogger _logger;
 
-        static ConsistencyTrace()
-        {
+        static ConsistencyTrace() {
             _connectionStart = LoggerMessage.Define<string>(LogLevel.Debug, 1, @"Connection id ""{ConnectionId}"" started.");
             _connectionStop = LoggerMessage.Define<string>(LogLevel.Debug, 2, @"Connection id ""{ConnectionId}"" stopped.");
             // ConnectionRead: Reserved: 3
@@ -50,120 +49,96 @@ namespace Cap.Consistency.Server.Internal.Infrastructure
             _requestProcessingError = LoggerMessage.Define<string>(LogLevel.Information, 20, @"Connection id ""{ConnectionId}"" request processing ended abnormally.");
         }
 
-        public ConsistencyTrace(ILogger logger)
-        {
+        public ConsistencyTrace(ILogger logger) {
             _logger = logger;
         }
 
-        public virtual void ConnectionStart(string connectionId)
-        {
+        public virtual void ConnectionStart(string connectionId) {
             _connectionStart(_logger, connectionId, null);
         }
 
-        public virtual void ConnectionStop(string connectionId)
-        {
+        public virtual void ConnectionStop(string connectionId) {
             _connectionStop(_logger, connectionId, null);
         }
 
-        public virtual void ConnectionRead(string connectionId, int count)
-        {
-
+        public virtual void ConnectionRead(string connectionId, int count) {
         }
 
-        public virtual void ConnectionPause(string connectionId)
-        {
+        public virtual void ConnectionPause(string connectionId) {
             _connectionPause(_logger, connectionId, null);
         }
 
-        public virtual void ConnectionResume(string connectionId)
-        {
+        public virtual void ConnectionResume(string connectionId) {
             _connectionResume(_logger, connectionId, null);
         }
 
-        public virtual void ConnectionReadFin(string connectionId)
-        {
+        public virtual void ConnectionReadFin(string connectionId) {
             _connectionReadFin(_logger, connectionId, null);
         }
 
-        public virtual void ConnectionWriteFin(string connectionId)
-        {
+        public virtual void ConnectionWriteFin(string connectionId) {
             _connectionWriteFin(_logger, connectionId, null);
         }
 
-        public virtual void ConnectionWroteFin(string connectionId, int status)
-        {
+        public virtual void ConnectionWroteFin(string connectionId, int status) {
             _connectionWroteFin(_logger, connectionId, status, null);
         }
 
-        public virtual void ConnectionKeepAlive(string connectionId)
-        {
+        public virtual void ConnectionKeepAlive(string connectionId) {
             _connectionKeepAlive(_logger, connectionId, null);
         }
 
-        public virtual void ConnectionDisconnect(string connectionId)
-        {
+        public virtual void ConnectionDisconnect(string connectionId) {
             _connectionDisconnect(_logger, connectionId, null);
         }
 
-        public virtual void ConnectionWrite(string connectionId, int count)
-        {
+        public virtual void ConnectionWrite(string connectionId, int count) {
             // Don't log for now since this could be *too* verbose.
             // Reserved: Event ID 11
         }
 
-        public virtual void ConnectionWriteCallback(string connectionId, int status)
-        {
+        public virtual void ConnectionWriteCallback(string connectionId, int status) {
             // Don't log for now since this could be *too* verbose.
             // Reserved: Event ID 12
         }
 
-        public virtual void ApplicationError(string connectionId, Exception ex)
-        {
+        public virtual void ApplicationError(string connectionId, Exception ex) {
             _applicationError(_logger, connectionId, ex);
         }
 
-        public virtual void ConnectionError(string connectionId, Exception ex)
-        {
+        public virtual void ConnectionError(string connectionId, Exception ex) {
             _connectionError(_logger, connectionId, ex);
         }
 
-        public virtual void ConnectionDisconnectedWrite(string connectionId, int count, Exception ex)
-        {
+        public virtual void ConnectionDisconnectedWrite(string connectionId, int count, Exception ex) {
             _connectionDisconnectedWrite(_logger, connectionId, count, ex);
         }
 
-        public virtual void ConnectionHeadResponseBodyWrite(string connectionId, long count)
-        {
+        public virtual void ConnectionHeadResponseBodyWrite(string connectionId, long count) {
             _connectionHeadResponseBodyWrite(_logger, connectionId, count, null);
         }
 
-        public virtual void NotAllConnectionsClosedGracefully()
-        {
+        public virtual void NotAllConnectionsClosedGracefully() {
             _notAllConnectionsClosedGracefully(_logger, null);
         }
 
-        public virtual void ConnectionReset(string connectionId)
-        {
+        public virtual void ConnectionReset(string connectionId) {
             _connectionReset(_logger, connectionId, null);
         }
 
-        public virtual void RequestProcessingError(string connectionId, Exception ex)
-        {
+        public virtual void RequestProcessingError(string connectionId, Exception ex) {
             _requestProcessingError(_logger, connectionId, ex);
         }
 
-        public virtual void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
-        {
+        public virtual void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter) {
             _logger.Log(logLevel, eventId, state, exception, formatter);
         }
 
-        public virtual bool IsEnabled(LogLevel logLevel)
-        {
+        public virtual bool IsEnabled(LogLevel logLevel) {
             return _logger.IsEnabled(logLevel);
         }
 
-        public virtual IDisposable BeginScope<TState>(TState state)
-        {
+        public virtual IDisposable BeginScope<TState>(TState state) {
             return _logger.BeginScope(state);
         }
     }

@@ -1,42 +1,37 @@
-﻿using Cap.Consistency;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Threading;
-using Microsoft.EntityFrameworkCore;
+﻿using System;
 using System.ComponentModel;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 
 namespace Cap.Consistency.EntityFrameworkCore
 {
-
     public class ConsistencyMessageStore : ConsistencyMessageStore<ConsistencyMessage, DbContext, string>
     {
-        public ConsistencyMessageStore(DbContext context) : base(context) { }
+        public ConsistencyMessageStore(DbContext context) : base(context) {
+        }
     }
-
 
     public class ConsistencyMessageStore<TMessage> : ConsistencyMessageStore<TMessage, DbContext, string>
-    where TMessage : ConsistencyMessage<string>
+        where TMessage : ConsistencyMessage<string>
     {
-        public ConsistencyMessageStore(DbContext context) : base(context) { }
+        public ConsistencyMessageStore(DbContext context) : base(context) {
+        }
     }
-
 
     public class ConsistencyMessageStore<TMessage, TContext> : ConsistencyMessageStore<TMessage, TContext, string>
         where TMessage : ConsistencyMessage<string>
         where TContext : DbContext
     {
-        public ConsistencyMessageStore(TContext context) : base(context) { }
+        public ConsistencyMessageStore(TContext context) : base(context) {
+        }
     }
-
 
     public abstract class ConsistencyMessageStore<TMessage, TContext, TKey> : IConsistencyMessageStore<TMessage>
         where TMessage : ConsistencyMessage<TKey>
         where TContext : DbContext
         where TKey : IEquatable<TKey>
     {
-
         private bool _disposed;
 
         public ConsistencyMessageStore(TContext context) {
@@ -117,7 +112,6 @@ namespace Cap.Consistency.EntityFrameworkCore
             return (TKey)TypeDescriptor.GetConverter(typeof(TKey)).ConvertFromInvariantString(id);
         }
 
-
         /// <summary>
         /// Converts the provided <paramref name="id"/> to its string representation.
         /// </summary>
@@ -189,7 +183,4 @@ namespace Cap.Consistency.EntityFrameworkCore
             _disposed = true;
         }
     }
-
-
-
 }

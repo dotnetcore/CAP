@@ -1,6 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Cap.Consistency
 {
@@ -60,12 +60,9 @@ namespace Cap.Consistency
             return AddScoped(messageManagerType, customType);
         }
 
-
         private ConsistencyBuilder AddScoped(Type serviceType, Type concreteType) {
             Services.AddScoped(serviceType, concreteType);
             return this;
         }
-
-
     }
 }

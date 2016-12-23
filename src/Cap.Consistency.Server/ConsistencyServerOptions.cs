@@ -1,20 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Cap.Consistency.Server
 {
     public class ConsistencyServerOptions
     {
-
         /// <summary>
         /// Enables the Consistency Server options callback to resolve and use services registered by the application during startup.
         /// Typically initialized by <see cref="Cap.Consistency.UseConsistency(Action{ConsistencyServerOptions})"/>.
         /// </summary>
         public IServiceProvider ApplicationServices { get; set; }
-
-
 
         /// <summary>
         /// The amount of time after the server begins shutting down before connections will be forcefully closed.
