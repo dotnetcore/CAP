@@ -18,16 +18,21 @@ namespace Cap.Consistency.Server
         private readonly ILogger _logger;
         private readonly IConsumer _consumer;
 
-        public ConsistencyServer(IOptions<ConsistencyServerOptions> options, IApplicationLifetime applicationLifetime, ILoggerFactory loggerFactory) {
-            if (options == null) {
+        public ConsistencyServer(IOptions<ConsistencyServerOptions> options, IApplicationLifetime applicationLifetime,
+            ILoggerFactory loggerFactory)
+        {
+            if (options == null)
+            {
                 throw new ArgumentNullException(nameof(options));
             }
 
-            if (applicationLifetime == null) {
+            if (applicationLifetime == null)
+            {
                 throw new ArgumentNullException(nameof(applicationLifetime));
             }
 
-            if (loggerFactory == null) {
+            if (loggerFactory == null)
+            {
                 throw new ArgumentNullException(nameof(loggerFactory));
             }
 
@@ -41,8 +46,10 @@ namespace Cap.Consistency.Server
 
         public IFeatureCollection Features { get; set; }
 
-        public void Start<TContext>(IHttpApplication<TContext> application) {
-            if (_disposables != null) {
+        public void Start<TContext>(IHttpApplication<TContext> application)
+        {
+            if (_disposables != null)
+            {
                 // The server has already started and/or has not been cleaned up yet
                 throw new InvalidOperationException("Server has already started.");
             }
@@ -55,23 +62,29 @@ namespace Cap.Consistency.Server
 
             var threadCount = Options.ThreadCount;
 
-            if (threadCount <= 0) {
+            if (threadCount <= 0)
+            {
                 throw new ArgumentOutOfRangeException(nameof(threadCount),
                     threadCount,
                     "ThreadCount must be positive.");
             }
 
-            try {
+            try
+            {
                 _consumer.Start(threadCount);
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 throw ex;
             }
         }
 
-        public void Dispose() {
-            if (_disposables != null) {
-                while (_disposables.Count > 0) {
+        public void Dispose()
+        {
+            if (_disposables != null)
+            {
+                while (_disposables.Count > 0)
+                {
                     _disposables.Pop().Dispose();
                 }
                 _disposables = null;
