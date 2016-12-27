@@ -6,6 +6,9 @@ namespace Cap.Consistency.EntityFrameworkCore
     {
         public ConsistencyMessage() {
             Id = Guid.NewGuid().ToString();
+            SendTime = DateTime.Now;
+            UpdateTime = SendTime;
+            Status = MessageStatus.WaitForSend;
         }
     }
 

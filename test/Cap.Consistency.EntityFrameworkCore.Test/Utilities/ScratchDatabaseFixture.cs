@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Internal;
 
-namespace Cap.Consistency.EntityFrameworkCore.Test.Utilities
+namespace Cap.Consistency.EntityFrameworkCore.Test
 {
     public class ScratchDatabaseFixture : IDisposable
     {

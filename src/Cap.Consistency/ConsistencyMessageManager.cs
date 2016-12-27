@@ -75,7 +75,7 @@ namespace Cap.Consistency
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="OperateResult"/>
         /// of the operation.
         /// </returns>
-        public virtual Task<OperateResult> UpdateMessageAsync(TMessage message) {
+        public virtual Task<OperateResult> UpdateAsync(TMessage message) {
             ThrowIfDisposed();
             //todo: validation message fileds is correct
 
@@ -90,7 +90,7 @@ namespace Cap.Consistency
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="OperateResult"/>
         /// of the operation.
         /// </returns>
-        public virtual Task<OperateResult> DeleteMessageAsync(TMessage message) {
+        public virtual Task<OperateResult> DeleteAsync(TMessage message) {
             ThrowIfDisposed();
 
             if (message == null) {

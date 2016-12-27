@@ -68,7 +68,7 @@ namespace Cap.Consistency.Test
             Assert.True(operateResult.Succeeded);
 
             var messageId = await manager.GetMessageIdAsync(message);
-            operateResult = await manager.DeleteMessageAsync(message);
+            operateResult = await manager.DeleteAsync(message);
             Assert.Null(await manager.FindByIdAsync(messageId));
         }
 
