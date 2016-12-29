@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 using System.IO;
 using System.Threading;
 
-namespace Cap.Consistency.EntityFrameworkCore.Test.Utilities
+namespace Cap.Consistency.EntityFrameworkCore.Test
 {
     public class SqlServerTestStore : IDisposable
     {

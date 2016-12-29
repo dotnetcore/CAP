@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using Microsoft.Extensions.Configuration;
 
-namespace Cap.Consistency.EntityFrameworkCore.Test.Utilities
+namespace Cap.Consistency.EntityFrameworkCore.Test
 {
     public class TestEnvironment
     {
