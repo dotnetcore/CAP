@@ -6,27 +6,58 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Cap.Consistency.EntityFrameworkCore
 {
+    /// <summary>
+    /// Represents a new instance of a persistence store for messages, using the default implementation
+    /// of <see cref="ConsistencyMessage{TKey}"/> with a string as a primary key.
+    /// </summary>
     public class ConsistencyMessageStore : ConsistencyMessageStore<ConsistencyMessage, DbContext, string>
     {
+        /// <summary>
+        /// Constructs a new instance of <see cref="ConsistencyMessageStore"/>.
+        /// </summary>
+        /// <param name="context">The <see cref="DbContext"/>.</param>
         public ConsistencyMessageStore(DbContext context) : base(context) {
         }
     }
 
+    /// <summary>
+    /// Creates a new instance of a persistence store for the specified message type.
+    /// </summary>
+    /// <typeparam name="TMessage">The type representing a message.</typeparam>
     public class ConsistencyMessageStore<TMessage> : ConsistencyMessageStore<TMessage, DbContext, string>
         where TMessage : ConsistencyMessage<string>
     {
+        /// <summary>
+        /// Constructs a new instance of <see cref="ConsistencyMessageStore{TMessage}"/>.
+        /// </summary>
+        /// <param name="context">The <see cref="DbContext"/>.</param>
         public ConsistencyMessageStore(DbContext context) : base(context) {
         }
     }
 
+    /// <summary>
+    /// Represents a new instance of a persistence store for the specified message types.
+    /// </summary>
+    /// <typeparam name="TMessage">The type representing a message.</typeparam>
+    /// <typeparam name="TContext">The type of the data context class used to access the store.</typeparam>
     public class ConsistencyMessageStore<TMessage, TContext> : ConsistencyMessageStore<TMessage, TContext, string>
         where TMessage : ConsistencyMessage<string>
         where TContext : DbContext
     {
+        /// <summary>
+        /// Constructs a new instance of <see cref="ConsistencyMessageStore{TMessage, TContext, TKey}"/>.
+        /// </summary>
+        /// <param name="context">The <see cref="DbContext"/>.</param>
         public ConsistencyMessageStore(TContext context) : base(context) {
         }
     }
 
+    /// <summary>
+    /// Represents a new instance of a persistence store for the specified message types.
+    /// </summary>
+    /// <typeparam name="TMessage">The type representing a message.</typeparam>
+    /// <typeparam name="TContext">The type of the data context class used to access the store.</typeparam>
+    /// <typeparam name="TKey">The type of the primary key for a message.</typeparam>
     public abstract class ConsistencyMessageStore<TMessage, TContext, TKey> : IConsistencyMessageStore<TMessage>
         where TMessage : ConsistencyMessage<TKey>
         where TContext : DbContext
@@ -34,6 +65,10 @@ namespace Cap.Consistency.EntityFrameworkCore
     {
         private bool _disposed;
 
+        /// <summary>
+        /// Constructs a new instance of <see cref="ConsistencyMessageStore{TMessage, TContext, TKey}"/>.
+        /// </summary>
+        /// <param name="context">The <see cref="DbContext"/>.</param>
         public ConsistencyMessageStore(TContext context) {
             if (context == null) {
                 throw new ArgumentNullException(nameof(context));
@@ -46,7 +81,7 @@ namespace Cap.Consistency.EntityFrameworkCore
         private DbSet<TMessage> MessageSet { get { return Context.Set<TMessage>(); } }
 
         /// <summary>
-        /// Creates the specified <paramref name="user"/> in the consistency message store.
+        /// Creates the specified <paramref name="message"/> in the consistency message store.
         /// </summary>
         /// <param name="message">The message to create.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
@@ -91,7 +126,7 @@ namespace Cap.Consistency.EntityFrameworkCore
         /// <param name="messageId">The message ID to search for.</param>
         /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
         /// <returns>
-        /// The <see cref="Task"/> that represents the asynchronous operation, containing the user matching the specified <paramref name="messageId"/> if it exists.
+        /// The <see cref="Task"/> that represents the asynchronous operation, containing the message matching the specified <paramref name="messageId"/> if it exists.
         /// </returns>
         public virtual Task<TMessage> FindByIdAsync(string messageId, CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
@@ -124,6 +159,12 @@ namespace Cap.Consistency.EntityFrameworkCore
             return id.ToString();
         }
 
+        /// <summary>
+        /// Gets the message identifier for the specified <paramref name="message"/>.
+        /// </summary>
+        /// <param name="message">The message whose identifier should be retrieved.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the identifier for the specified <paramref name="message"/>.</returns>
         public Task<string> GetMessageIdAsync(TMessage message, CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
@@ -133,6 +174,12 @@ namespace Cap.Consistency.EntityFrameworkCore
             return Task.FromResult(ConvertIdToString(message.Id));
         }
 
+        /// <summary>
+        /// Updates the specified <paramref name="message"/> in the message store.
+        /// </summary>
+        /// <param name="message">The message to update.</param>
+        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
+        /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="OperateResult"/> of the update operation.</returns>
         public async virtual Task<OperateResult> UpdateAsync(TMessage message, CancellationToken cancellationToken) {
             cancellationToken.ThrowIfCancellationRequested();
             ThrowIfDisposed();
