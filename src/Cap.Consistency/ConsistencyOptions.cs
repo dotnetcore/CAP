@@ -7,7 +7,6 @@ namespace Microsoft.AspNetCore.Builder
     /// </summary>
     public class ConsistencyOptions
     {
-
         /// <summary>
         /// Gets or sets the <see cref="BrokerOptions"/> for the consistency system.
         /// </summary>
