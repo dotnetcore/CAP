@@ -14,6 +14,7 @@ namespace Microsoft.AspNetCore.Builder
 
         public long MaxPendingEventNumber { get; set; }
 
+
         public int MaxPendingEventNumber32 {
             get {
                 if (this.MaxPendingEventNumber < int.MaxValue) {
