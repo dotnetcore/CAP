@@ -7,7 +7,7 @@ namespace Cap.Consistency.Server
     {
         void Start();
 
-        void Start(int count);
+        void Start(int count);  
 
         void Stop();
 
