@@ -5,7 +5,7 @@ namespace Cap.Consistency.Server
 {
     public interface IConsumer : IDisposable
     {
-        void Start();
+        void Start(); 
 
         void Start(int count);  
 
