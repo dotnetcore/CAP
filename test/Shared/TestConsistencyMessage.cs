@@ -2,6 +2,7 @@
 
 namespace Cap.Consistency.Test
 {
+    
     public class TestConsistencyMessage : TestConsistencyMessage<string>
     {
         public TestConsistencyMessage() {
