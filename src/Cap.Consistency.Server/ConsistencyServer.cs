@@ -68,6 +68,7 @@ namespace Cap.Consistency.Server
                     threadCount,
                     "ThreadCount must be positive.");
             }
+
             try
             {
                 _consumer.Start(threadCount);
