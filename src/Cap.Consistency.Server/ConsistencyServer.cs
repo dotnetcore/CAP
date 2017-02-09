@@ -57,6 +57,7 @@ namespace Cap.Consistency.Server
                 consumer.Start();
 
                 _logger.LogInformation("Started consumer...");
+               
             }
         }
     }

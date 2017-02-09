@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Reflection;
+using System.Collections.Concurrent;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Generic;
 
 namespace Cap.Consistency
 {
@@ -42,6 +45,17 @@ namespace Cap.Consistency
         /// <returns>The current <see cref="ConsistencyBuilder"/> instance.</returns>
         public virtual ConsistencyBuilder AddMessageStore<T>() where T : class {
             return AddScoped(typeof(IConsistencyMessageStore<>).MakeGenericType(MessageType), typeof(T));
+        }
+
+        public virtual ConsistencyBuilder AddMessageMethodTable() {
+            var provider = Services.BuildServiceProvider();
+
+            var finder = provider.GetRequiredService<QMessageFinder>();
+
+             finder.GetQMessageMethods(Services);
+            return null;
+           // Services.AddSingleton(serviceType, concreteType);
+           // return Add(typeof(IConsistencyMessageStore<>).MakeGenericType(MessageType), typeof(T));
         }
 
         /// <summary>

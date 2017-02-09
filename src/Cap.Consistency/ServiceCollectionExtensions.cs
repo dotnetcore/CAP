@@ -33,6 +33,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddScoped<ConsistencyMessageManager<TMessage>, ConsistencyMessageManager<TMessage>>();
 
+
+            services.AddSingleton<QMessageFinder>();
+
+
             if (setupAction != null) {
                 services.Configure(setupAction);
             }
