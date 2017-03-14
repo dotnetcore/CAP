@@ -51,11 +51,10 @@ namespace Cap.Consistency
             var provider = Services.BuildServiceProvider();
 
             var finder = provider.GetRequiredService<QMessageFinder>();
-
-             finder.GetQMessageMethods(Services);
+            finder.GetQMessageMethods(Services);               
             return null;
-           // Services.AddSingleton(serviceType, concreteType);
-           // return Add(typeof(IConsistencyMessageStore<>).MakeGenericType(MessageType), typeof(T));
+            // Services.AddSingleton(serviceType, concreteType);
+            // return Add(typeof(IConsistencyMessageStore<>).MakeGenericType(MessageType), typeof(T));
         }
 
         /// <summary>
