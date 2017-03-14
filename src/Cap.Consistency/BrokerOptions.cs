@@ -3,6 +3,8 @@
     public class BrokerOptions
     {
         public string HostName { get; set; }
+        
+
 
     }
 }
