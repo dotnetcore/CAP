@@ -14,13 +14,16 @@ namespace Cap.Consistency.Internal
 {
     public class ConsumerExcutorSelector : IConsumerExcutorSelector
     {
-        public ConsumerExecutorDescriptor SelectBestCandidate(TopicRouteContext context,
-            IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor) {
+        private readonly IServiceProvider _serviceProvider;
 
-            var key = context.Message.MessageKey;
+        public ConsumerExcutorSelector(IServiceProvider serviceProvider) {
+            _serviceProvider = serviceProvider;
+        }
+
+        public ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor) {
             return executeDescriptor.FirstOrDefault(x => x.Topic.Name == key);
         }
-         
+
         public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(TopicRouteContext context) {
 
             var consumerServices = context.ServiceProvider.GetServices<IConsumerService>();
@@ -37,16 +40,20 @@ namespace Cap.Consistency.Internal
                     var topicAttr = method.GetCustomAttribute<TopicAttribute>(true);
                     if (topicAttr == null) continue;
 
-                    executorDescriptorList.Add(InitDescriptor(topicAttr));
+                    executorDescriptorList.Add(InitDescriptor(topicAttr, method, typeInfo));
                 }
             }
 
             return executorDescriptorList;
         }
-        private ConsumerExecutorDescriptor InitDescriptor(TopicAttribute attr) {
+        private ConsumerExecutorDescriptor InitDescriptor(TopicAttribute attr,
+            MethodInfo methodInfo, TypeInfo implType
+            ) {
             var descriptor = new ConsumerExecutorDescriptor();
 
             descriptor.Topic = new TopicInfo(attr.Name);
+            descriptor.MethodInfo = methodInfo;
+            descriptor.ImplTypeInfo = implType;
 
             return descriptor;
         }
