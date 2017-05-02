@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Cap.Consistency.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace Cap.Consistency.Internal
 {
@@ -16,29 +17,15 @@ namespace Cap.Consistency.Internal
         private readonly ObjectMethodExecutor _executor;
         protected readonly ConsumerContext _consumerContext;
 
-        private Dictionary<string, object> _arguments;
-
         public ConsumerInvoker(ILogger logger,
             IServiceProvider serviceProvider,
-            ConsumerContext consumerContext,
-            ObjectMethodExecutor objectMethodExecutor) {
-            if (logger == null) {
-                throw new ArgumentNullException(nameof(logger));
-            }
+            ConsumerContext consumerContext) {
 
-            if (consumerContext == null) {
-                throw new ArgumentNullException(nameof(consumerContext));
-            }
-
-            if (objectMethodExecutor == null) {
-                throw new ArgumentNullException(nameof(objectMethodExecutor));
-            }
-
-            _logger = logger;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
             _serviceProvider = serviceProvider;
-            _consumerContext = consumerContext;
+            _consumerContext = consumerContext ?? throw new ArgumentNullException(nameof(consumerContext));
             _executor = ObjectMethodExecutor.Create(_consumerContext.ConsumerDescriptor.MethodInfo,
-                _consumerContext.ConsumerDescriptor.ImplType.GetTypeInfo());
+                _consumerContext.ConsumerDescriptor.ImplTypeInfo);
         }
 
 
@@ -50,8 +37,16 @@ namespace Cap.Consistency.Internal
 
                     try {
 
-                        var obj = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider, _consumerContext.ConsumerDescriptor.ImplType);
-                        _executor.Execute(obj, null);
+                        var obj = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider, _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
+
+                        var bodyString = Encoding.UTF8.GetString(_consumerContext.DeliverMessage.Body);
+                        var firstParameter = _executor.MethodParameters[0];
+                        object firstParameterObj = null;
+                        if (firstParameter != null) {
+                            firstParameterObj = JsonConvert.DeserializeObject(bodyString, firstParameter.ParameterType);
+                        }
+                        _executor.Execute(obj, firstParameterObj);
+
                         return Task.CompletedTask;
                     }
                     finally {
@@ -59,76 +54,6 @@ namespace Cap.Consistency.Internal
                         _logger.LogDebug("Executed consumer method .");
                     }
                 }
-            }
-            finally {
-
-            }
-        }
-
-        private object _controller;
-
-        private async Task InvokeConsumerMethodAsync() {
-            var controllerContext = _consumerContext;
-            var executor = _executor;
-            var controller = _controller;
-            var arguments = _arguments;
-            var orderedArguments = ConsumerMethodExecutor.PrepareArguments(arguments, executor);
-
-            var logger = _logger;
-
-            object result = null;
-            try {
-
-                var returnType = executor.MethodReturnType;
-                if (returnType == typeof(void)) {
-                    executor.Execute(controller, orderedArguments);
-                    result = new object();
-                }
-                else if (returnType == typeof(Task)) {
-                    await (Task)executor.Execute(controller, orderedArguments);
-                    result = new object();
-                }
-                //else if (executor.TaskGenericType == typeof(IActionResult)) {
-                //    result = await (Task<IActionResult>)executor.Execute(controller, orderedArguments);
-                //    if (result == null) {
-                //        throw new InvalidOperationException(
-                //            Resources.FormatActionResult_ActionReturnValueCannotBeNull(typeof(IActionResult)));
-                //    }
-                //}
-                //else if (executor.IsTypeAssignableFromIActionResult) {
-                //    if (_executor.IsMethodAsync) {
-                //        result = (IActionResult)await _executor.ExecuteAsync(controller, orderedArguments);
-                //    }
-                //    else {
-                //        result = (IActionResult)_executor.Execute(controller, orderedArguments);
-                //    }
-
-                //    if (result == null) {
-                //        throw new InvalidOperationException(
-                //            Resources.FormatActionResult_ActionReturnValueCannotBeNull(_executor.TaskGenericType ?? returnType));
-                //    }
-                //}
-                //else if (!executor.IsMethodAsync) {
-                //    var resultAsObject = executor.Execute(controller, orderedArguments);
-                //    result = resultAsObject as IActionResult ?? new ObjectResult(resultAsObject) {
-                //        DeclaredType = returnType,
-                //    };
-                //}
-                //else if (executor.TaskGenericType != null) {
-                //    var resultAsObject = await executor.ExecuteAsync(controller, orderedArguments);
-                //    result = resultAsObject as IActionResult ?? new ObjectResult(resultAsObject) {
-                //        DeclaredType = executor.TaskGenericType,
-                //    };
-                //}
-                //else {
-                //    // This will be the case for types which have derived from Task and Task<T> or non Task types.
-                //    throw new InvalidOperationException(Resources.FormatActionExecutor_UnexpectedTaskInstance(
-                //        executor.MethodInfo.Name,
-                //        executor.MethodInfo.DeclaringType));
-                //}
-
-                //_result = result;
-                // logger.ActionMethodExecuted(controllerContext, result);
             }
             finally {
 
