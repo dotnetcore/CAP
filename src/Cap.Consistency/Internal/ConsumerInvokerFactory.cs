@@ -11,24 +11,20 @@ namespace Cap.Consistency.Internal
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ObjectMethodExecutor _executor;
 
         public ConsumerInvokerFactory(
-            ILoggerFactory loggerFactory, 
-            IServiceProvider serviceProvider,
-            ObjectMethodExecutor executor) {
+            ILoggerFactory loggerFactory,
+            IServiceProvider serviceProvider) {
 
             _logger = loggerFactory.CreateLogger<ConsumerInvokerFactory>();
             _serviceProvider = serviceProvider;
-            _executor = executor;
         }
 
         public IConsumerInvoker CreateInvoker(ConsumerContext consumerContext) {
 
             var context = new ConsumerInvokerContext(consumerContext);
 
-            context.Result = new ConsumerInvoker(_logger, _serviceProvider,
-                consumerContext, _executor);
+            context.Result = new ConsumerInvoker(_logger, _serviceProvider, consumerContext);
 
             return context.Result;
         }
