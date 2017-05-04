@@ -9,7 +9,7 @@ namespace Cap.Consistency.Internal
         public static object[] PrepareArguments(
             IDictionary<string, object> actionParameters,
             ObjectMethodExecutor actionMethodExecutor) {
-            var declaredParameterInfos = actionMethodExecutor.ActionParameters;
+            var declaredParameterInfos = actionMethodExecutor.MethodParameters;
             var count = declaredParameterInfos.Length;
             if (count == 0) {
                 return null;
