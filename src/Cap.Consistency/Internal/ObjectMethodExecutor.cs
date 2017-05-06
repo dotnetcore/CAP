@@ -25,7 +25,7 @@ namespace Cap.Consistency.Internal
 
             MethodInfo = methodInfo;
             TargetTypeInfo = targetTypeInfo;
-            ActionParameters = methodInfo.GetParameters();
+            MethodParameters = methodInfo.GetParameters();
             MethodReturnType = methodInfo.ReturnType;
             IsMethodAsync = typeof(Task).IsAssignableFrom(MethodReturnType);
             TaskGenericType = IsMethodAsync ? GetTaskInnerTypeOrNull(MethodReturnType) : null;
@@ -41,7 +41,7 @@ namespace Cap.Consistency.Internal
                 _executor = GetExecutor(methodInfo, targetTypeInfo);
             }
 
-            _parameterDefaultValues = GetParameterDefaultValues(ActionParameters);
+            _parameterDefaultValues = GetParameterDefaultValues(MethodParameters);
         }
 
         private delegate Task<object> ConsumerMethodExecutorAsync(object target, object[] parameters);
@@ -52,7 +52,7 @@ namespace Cap.Consistency.Internal
 
         public MethodInfo MethodInfo { get; }
 
-        public ParameterInfo[] ActionParameters { get; }
+        public ParameterInfo[] MethodParameters { get; }
 
         public TypeInfo TargetTypeInfo { get; }
 
@@ -70,16 +70,16 @@ namespace Cap.Consistency.Internal
             return executor;
         }
 
-        public Task<object> ExecuteAsync(object target, object[] parameters) {
+        public Task<object> ExecuteAsync(object target, params object[] parameters) {
             return _executorAsync(target, parameters);
         }
 
-        public object Execute(object target, object[] parameters) {
+        public object Execute(object target, params object[] parameters) {
             return _executor(target, parameters);
         }
 
         public object GetDefaultValueForParameter(int index) {
-            if (index < 0 || index > ActionParameters.Length - 1) {
+            if (index < 0 || index > MethodParameters.Length - 1) {
                 throw new ArgumentOutOfRangeException(nameof(index));
             }
 
