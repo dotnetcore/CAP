@@ -9,10 +9,10 @@ namespace Cap.Consistency.Abstractions
     {
         public MethodInfo MethodInfo { get; set; }
 
-        public Type ImplType { get; set; }
+        public TypeInfo ImplTypeInfo { get; set; }
 
         public TopicInfo Topic { get; set; }
 
-        public int GroupId { get; set; }
+        public string GroupId { get; set; }
     }
 }
