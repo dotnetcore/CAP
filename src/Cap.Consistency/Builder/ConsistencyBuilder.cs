@@ -5,7 +5,10 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Generic;
 using Cap.Consistency.Consumer;
-using Cap.Consistency.Consumer.Kafka;
+using Cap.Consistency.Routing;
+using Cap.Consistency.Infrastructure;
+using Cap.Consistency.Internal;
+using Cap.Consistency.Abstractions;
 
 namespace Cap.Consistency
 {
@@ -24,6 +27,8 @@ namespace Cap.Consistency
             Services = service;
 
             AddConsumerServices();
+
+            AddKafkaServices();
         }
 
         /// <summary>
@@ -60,14 +65,17 @@ namespace Cap.Consistency
                     Services.AddSingleton(typeof(IConsumerService), type);
                 }
             }
+
+            Services.AddSingleton<IConsumerExcutorSelector, ConsumerExcutorSelector>();        
+            Services.AddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
+            Services.AddSingleton<MethodMatcherCache>();
+
             return this;
         }
 
         public virtual ConsistencyBuilder AddKafkaServices() {
 
-
-            Services.AddSingleton<IConsumerHandler, KafkaConsumerHandler>();
-            return this;
+            return AddScoped(typeof(ITopicRoute), typeof(ConsumerHandler<>).MakeGenericType(MessageType));
         }
 
 
