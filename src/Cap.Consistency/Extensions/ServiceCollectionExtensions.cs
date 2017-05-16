@@ -1,5 +1,6 @@
 ﻿using System;
 using Cap.Consistency;
+using Cap.Consistency.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
@@ -17,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">The services available in the application.</param>
         /// <returns>An <see cref="ConsistencyBuilder"/> for application services.</returns>
         public static ConsistencyBuilder AddConsistency<TMessage>(this IServiceCollection services)
-            where TMessage : class {
+            where TMessage : ConsistencyMessage {
             return services.AddConsistency<TMessage>(setupAction: null);
         }
 
@@ -28,12 +29,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="setupAction">An action to configure the <see cref="ConsistencyOptions"/>.</param>
         /// <returns>An <see cref="ConsistencyBuilder"/> for application services.</returns>
         public static ConsistencyBuilder AddConsistency<TMessage>(this IServiceCollection services, Action<ConsistencyOptions> setupAction)
-            where TMessage : class {
+            where TMessage : ConsistencyMessage {
             services.TryAddSingleton<ConsistencyMarkerService>();
 
             services.TryAddScoped<ConsistencyMessageManager<TMessage>, ConsistencyMessageManager<TMessage>>();
-
-            services.AddSingleton<KafkaConsistency>();
 
             if (setupAction != null) {
                 services.Configure(setupAction);

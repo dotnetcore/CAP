@@ -11,7 +11,7 @@ namespace Microsoft.AspNetCore.Builder
     /// </summary>
     public static class BuilderExtensions
     {
-        /// <summary>
+        ///<summary>
         /// Enables Consistence for the current application
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
@@ -20,34 +20,20 @@ namespace Microsoft.AspNetCore.Builder
             if (app == null) {
                 throw new ArgumentNullException(nameof(app));
             }
-
+            
             var marker = app.ApplicationServices.GetService<ConsistencyMarkerService>();
+         
             if (marker == null) {
                 throw new InvalidOperationException("Add Consistency must be called on the service collection.");
             }
 
-            return app;
-        }
-
-        public static IApplicationBuilder UserRouter(this IApplicationBuilder builder, ITopicRoute router) {
-            if (builder == null) {
-                throw new ArgumentNullException(nameof(builder));
-            }
-
-            if (router == null) {
-                throw new ArgumentNullException(nameof(router));
-            }
-
-            var marker = builder.ApplicationServices.GetService<ConsistencyMarkerService>();
-            if (marker == null) {
-                throw new InvalidOperationException("Add Consistency must be called on the service collection.");
-            }
+            var router = app.ApplicationServices.GetService<ITopicRoute>();
 
             var context = new TopicRouteContext();
 
             router.RouteAsync(context).Wait();
 
-            return builder;
+            return app;
         }
 
     }
