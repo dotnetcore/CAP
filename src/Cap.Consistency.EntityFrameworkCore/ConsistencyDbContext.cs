@@ -1,4 +1,5 @@
 ﻿using System;
+using Cap.Consistency.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cap.Consistency.EntityFrameworkCore
