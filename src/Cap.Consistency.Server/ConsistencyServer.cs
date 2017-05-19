@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using RdKafka;
 using System.Text;
 
 namespace Cap.Consistency.Server
@@ -40,25 +39,25 @@ namespace Cap.Consistency.Server
 
         public void Run() {
             //配置消费者组
-            var config = new Config() { GroupId = "example-csharp-consumer" };
-            using (var consumer = new EventConsumer(config, "127.0.0.1:9092")) {
+            //var config = new Config() { GroupId = "example-csharp-consumer" };
+            //using (var consumer = new EventConsumer(config, "127.0.0.1:9092")) {
 
-                //注册一个事件
-                consumer.OnMessage += (obj, msg) =>
-                {
-                    string text = Encoding.UTF8.GetString(msg.Payload, 0, msg.Payload.Length);
-                    Console.WriteLine($"Topic: {msg.Topic} Partition: {msg.Partition} Offset: {msg.Offset} {text}");
-                };
+            //    //注册一个事件
+            //    consumer.OnMessage += (obj, msg) =>
+            //    {
+            //        string text = Encoding.UTF8.GetString(msg.Payload, 0, msg.Payload.Length);
+            //        Console.WriteLine($"Topic: {msg.Topic} Partition: {msg.Partition} Offset: {msg.Offset} {text}");
+            //    };
 
-                //订阅一个或者多个Topic
-                consumer.Subscribe(new[] { "testtopic" });
+            //    //订阅一个或者多个Topic
+            //    consumer.Subscribe(new[] { "testtopic" });
 
-                //启动
-                consumer.Start();
+            //    //启动
+            //    consumer.Start();
 
-                _logger.LogInformation("Started consumer...");
+            //    _logger.LogInformation("Started consumer...");
                
-            }
+            //}
         }
     }
 }
