@@ -1,5 +1,6 @@
 ﻿using System;
 using Cap.Consistency;
+using Cap.Consistency.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
@@ -27,5 +28,25 @@ namespace Microsoft.AspNetCore.Builder
 
             return app;
         }
+
+        public static IApplicationBuilder UserRouter(this IApplicationBuilder builder, ITopicRoute router) {
+            if (builder == null) {
+                throw new ArgumentNullException(nameof(builder));
+            }
+
+            if (router == null) {
+                throw new ArgumentNullException(nameof(router));
+            }
+
+            var marker = builder.ApplicationServices.GetService<ConsistencyMarkerService>();
+            if (marker == null) {
+                throw new InvalidOperationException("Add Consistency must be called on the service collection.");
+            }
+
+            var context = new TopicRouteContext();
+
+
+        }
+         
     }
 }

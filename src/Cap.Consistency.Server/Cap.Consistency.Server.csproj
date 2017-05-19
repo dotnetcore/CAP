@@ -16,9 +16,27 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.1" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="1.1.1" />
+    <Compile Remove="x64\**" />
+    <Compile Remove="x86\**" />
+    <Content Remove="x64\**" />
+    <Content Remove="x86\**" />
+    <EmbeddedResource Remove="x64\**" />
+    <EmbeddedResource Remove="x86\**" />
+    <None Remove="x64\**" />
+    <None Remove="x86\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\yangxiaodong\.nuget\packages\rdkafka.internal.librdkafka\0.9.2-ci-28\build\..\runtimes\win7-x64\native\librdkafka.dll" />
+    <Content Remove="C:\Users\yangxiaodong\.nuget\packages\rdkafka.internal.librdkafka\0.9.2-ci-28\build\..\runtimes\win7-x64\native\zlib.dll" />
+    <Content Remove="C:\Users\yangxiaodong\.nuget\packages\rdkafka.internal.librdkafka\0.9.2-ci-28\build\..\runtimes\win7-x86\native\librdkafka.dll" />
+    <Content Remove="C:\Users\yangxiaodong\.nuget\packages\rdkafka.internal.librdkafka\0.9.2-ci-28\build\..\runtimes\win7-x86\native\zlib.dll" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="1.1.2" />
     <PackageReference Include="RdKafka" Version="0.9.2-ci-189" />
   </ItemGroup>
 

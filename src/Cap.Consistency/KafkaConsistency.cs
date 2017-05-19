@@ -4,10 +4,11 @@ using System.Text;
 using System.Linq;
 using Cap.Consistency.Consumer;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 
 namespace Cap.Consistency
 {
-    public class KafkaConsistency
+    public class KafkaConsistency:IRoute
     {
         private IServiceProvider _serviceProvider;
         private IEnumerable<IConsumerHandler> _handlers;
@@ -29,5 +30,9 @@ namespace Cap.Consistency
                 handler.Stop();
             }
         }
-    }
+
+        public async Task Start() {
+
+        }
+        
 }

@@ -17,7 +17,6 @@ namespace Cap.Consistency.Consumer.Kafka
 
         }
 
-
         public void Start(TopicRouteContext routeContext )  {
 
             string brokerList = null;// args[0];

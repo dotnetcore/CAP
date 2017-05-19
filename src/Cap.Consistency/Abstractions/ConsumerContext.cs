@@ -13,6 +13,8 @@ namespace Cap.Consistency.Abstractions
         }
 
         public ConsumerExecutorDescriptor ConsumerDescriptor { get; set; }
+
+
      
     }
 }

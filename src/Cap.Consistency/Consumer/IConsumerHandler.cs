@@ -1,15 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Cap.Consistency.Routing;
 
 namespace Cap.Consistency.Consumer
 {
-    public interface IConsumerHandler
+    public interface IConsumerHandler : ITopicRoute
     {
-        void Start(IEnumerable<IConsumerService> consumers);
 
-        void Stop();
     }
-
-     
 }
