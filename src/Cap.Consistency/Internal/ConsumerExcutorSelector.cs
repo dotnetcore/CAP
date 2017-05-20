@@ -7,7 +7,7 @@ using Cap.Consistency.Abstractions;
 using Cap.Consistency.Attributes;
 using Cap.Consistency.Consumer;
 using Cap.Consistency.Infrastructure;
-using Cap.Consistency.Route;
+using Cap.Consistency.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Cap.Consistency.Internal
@@ -20,7 +20,7 @@ namespace Cap.Consistency.Internal
             var key = context.Message.MessageKey;
             return executeDescriptor.FirstOrDefault(x => x.Topic.Name == key);
         }
-
+         
         public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(TopicRouteContext context) {
 
             var consumerServices = context.ServiceProvider.GetServices<IConsumerService>();
@@ -43,7 +43,6 @@ namespace Cap.Consistency.Internal
 
             return executorDescriptorList;
         }
-
         private ConsumerExecutorDescriptor InitDescriptor(TopicAttribute attr) {
             var descriptor = new ConsumerExecutorDescriptor();
 
@@ -51,7 +50,5 @@ namespace Cap.Consistency.Internal
 
             return descriptor;
         }
-
-
     }
 }

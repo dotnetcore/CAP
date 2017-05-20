@@ -7,7 +7,8 @@ namespace Cap.Consistency.Abstractions
     public class ConsumerInvokerContext
     {
         public ConsumerInvokerContext(ConsumerContext consumerContext) {
-            ConsumerContext = consumerContext ?? throw new ArgumentNullException(nameof(consumerContext));
+            ConsumerContext = consumerContext ?? 
+                throw new ArgumentNullException(nameof(consumerContext));
 
         }
 

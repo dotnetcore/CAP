@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Cap.Consistency.Route;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
 

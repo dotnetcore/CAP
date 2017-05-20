@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Cap.Consistency
 {
-    public class KafkaConsistency:IRoute
+    public class KafkaConsistency : IRoute
     {
         private IServiceProvider _serviceProvider;
         private IEnumerable<IConsumerHandler> _handlers;
@@ -34,5 +34,6 @@ namespace Cap.Consistency
         public async Task Start() {
 
         }
-        
+
+    }
 }

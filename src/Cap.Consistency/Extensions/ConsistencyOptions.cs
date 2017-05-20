@@ -12,6 +12,9 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         public BrokerOptions Broker { get; set; } = new BrokerOptions();
 
+
+        public string BrokerUrlList { get; set; }
+
          
     }
 }

@@ -25,11 +25,11 @@ namespace Cap.Consistency.Consumer
             IConsumerExcutorSelector selector,
             ILoggerFactory loggerFactory) {
 
-            _serviceProvider = serviceProvider;
-            _consumerInvokerFactory = consumerInvokerFactory;
-            _loggerFactory = loggerFactory;
             _selector = selector;
             _logger = loggerFactory.CreateLogger<ConsumerHandler>();
+            _loggerFactory = loggerFactory;
+            _serviceProvider = serviceProvider;
+            _consumerInvokerFactory = consumerInvokerFactory;
         }
 
         public Task RouteAsync(TopicRouteContext context) {
@@ -41,6 +41,27 @@ namespace Cap.Consistency.Consumer
             context.ServiceProvider = _serviceProvider;
 
             var matchs = _selector.SelectCandidates(context);
+
+
+
+            var config = new Dictionary<string, object>
+            {
+                { "group.id", "simple-csharp-consumer" },
+                { "bootstrap.servers", brokerList }
+            };
+
+            using (var consumer = new Consumer<Null, string>(config, null, new StringDeserializer(Encoding.UTF8))) {
+                //consumer.Assign(new List<TopicInfo> { new TopicInfo(topics.First(), 0, 0) });
+
+                while (true) {
+                    Message<Null, string> msg;
+                    if (consumer.Consume(out msg)) {
+                        Console.WriteLine($"Topic: {msg.Topic} Partition: {msg.Partition} Offset: {msg.Offset} {msg.Value}");
+                    }
+                }
+            }
+
+
 
             if (matchs == null || matchs.Count == 0) {
                 _logger.LogInformation("can not be fond topic route");
