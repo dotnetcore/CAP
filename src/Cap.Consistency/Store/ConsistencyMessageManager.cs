@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Cap.Consistency.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -11,7 +12,7 @@ namespace Cap.Consistency
     /// Provides the APIs for managing message in a persistence store.
     /// </summary>
     /// <typeparam name="TMessage">The type encapsulating a message.</typeparam>
-    public class ConsistencyMessageManager<TMessage> : IDisposable where TMessage : class
+    public class ConsistencyMessageManager<TMessage> : IDisposable where TMessage : ConsistencyMessage
     {
         private bool _disposed;
         private readonly HttpContext _context;
@@ -63,6 +64,9 @@ namespace Cap.Consistency
         public virtual Task<OperateResult> CreateAsync(TMessage message) {
             ThrowIfDisposed();
             //todo: validation message fileds is correct
+
+
+
 
             return Store.CreateAsync(message, CancellationToken);
         }
