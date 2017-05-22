@@ -10,6 +10,6 @@ namespace Cap.Consistency.Infrastructure
     {
         IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(TopicRouteContext context);
 
-        ConsumerExecutorDescriptor SelectBestCandidate(TopicRouteContext context, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor);
+        ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor);
     }
 }

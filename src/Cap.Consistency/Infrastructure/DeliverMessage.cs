@@ -16,6 +16,8 @@ namespace Cap.Consistency.Infrastructure
 
 
         public byte[] Body { get; set; }
+
+        public string Value { get; set; }
     }
 
 
@@ -27,6 +29,5 @@ namespace Cap.Consistency.Infrastructure
         public long Offset { get; set; }
 
         public string MessageId { get; set; }
-
     }
 }
