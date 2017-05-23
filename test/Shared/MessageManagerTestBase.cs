@@ -4,6 +4,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Cap.Consistency.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,12 +14,12 @@ using Xunit;
 namespace Cap.Consistency.Test
 {
     public abstract class MessageManagerTestBase<TMessage> : MessageManagerTestBase<TMessage, string>
-        where TMessage : class
+        where TMessage : ConsistencyMessage
     {
     }
 
     public abstract class MessageManagerTestBase<TMessage, TKey>
-        where TMessage : class
+        where TMessage : ConsistencyMessage
         where TKey : IEquatable<TKey>
     {
         private const string NullValue = "(null)";

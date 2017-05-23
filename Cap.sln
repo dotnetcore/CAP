@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26228.4
+VisualStudioVersion = 15.0.26430.6
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9B2AE124-6636-4DE9-83A3-70360DABD0C4}"
 EndProject
@@ -25,6 +25,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cap.Consistency.EntityFrameworkCore", "src\Cap.Consistency.EntityFrameworkCore\Cap.Consistency.EntityFrameworkCore.csproj", "{96111249-C4C3-4DC9-A887-32D583723AB1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cap.Consistency.EntityFrameworkCore.Test", "test\Cap.Consistency.EntityFrameworkCore.Test\Cap.Consistency.EntityFrameworkCore.Test.csproj", "{7442C942-1DDC-40E4-8F1B-654E721EAA45}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3A6B6931-A123-477A-9469-8B468B5385AF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Kafka", "samples\Sample.Kafka\Sample.Kafka.csproj", "{2F095ED9-5BC9-4512-9013-A47685FB2508}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -52,6 +56,10 @@ Global
 		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F095ED9-5BC9-4512-9013-A47685FB2508}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F095ED9-5BC9-4512-9013-A47685FB2508}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F095ED9-5BC9-4512-9013-A47685FB2508}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F095ED9-5BC9-4512-9013-A47685FB2508}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -63,5 +71,6 @@ Global
 		{55CF2C48-D390-40CF-8AD9-FA39F90E9217} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{96111249-C4C3-4DC9-A887-32D583723AB1} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{7442C942-1DDC-40E4-8F1B-654E721EAA45} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
+		{2F095ED9-5BC9-4512-9013-A47685FB2508} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 	EndGlobalSection
 EndGlobal

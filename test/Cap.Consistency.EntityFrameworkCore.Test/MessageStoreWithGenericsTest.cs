@@ -1,4 +1,5 @@
 ﻿using System;
+using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Test;
 using Microsoft.AspNetCore.Testing;
 using Microsoft.EntityFrameworkCore;

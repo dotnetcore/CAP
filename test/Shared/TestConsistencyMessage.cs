@@ -1,23 +1,11 @@
 ﻿using System;
+using Cap.Consistency.Infrastructure;
 
 namespace Cap.Consistency.Test
 {
-    
-    public class TestConsistencyMessage : TestConsistencyMessage<string>
+
+    public class TestConsistencyMessage : ConsistencyMessage
     {
-        public TestConsistencyMessage() {
-            Id = Guid.NewGuid().ToString();
-        }
+       
     }
-
-
-    public class TestConsistencyMessage<TKey> where TKey : IEquatable<TKey>
-    {
-        public TestConsistencyMessage() { }
-
-        public virtual TKey Id { get; set; }
-
-        public virtual DateTime Time { get; set; }
-    }
-
 }

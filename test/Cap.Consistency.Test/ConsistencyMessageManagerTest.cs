@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Cap.Consistency.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -52,7 +53,7 @@ namespace Cap.Consistency.Test
         [Fact]
         public async Task CreateCallsStore() {
             var store = new Mock<IConsistencyMessageStore<TestConsistencyMessage>>();
-            var message = new TestConsistencyMessage { Time = DateTime.Now };
+            var message = new TestConsistencyMessage { SendTime = DateTime.Now };
             store.Setup(x => x.CreateAsync(message, CancellationToken.None)).ReturnsAsync(OperateResult.Success).Verifiable();
             var messageManager = TestConsistencyMessageManager(store.Object);
 
@@ -63,7 +64,7 @@ namespace Cap.Consistency.Test
         }
 
         public ConsistencyMessageManager<TMessage> TestConsistencyMessageManager<TMessage>(IConsistencyMessageStore<TMessage> store = null)
-            where TMessage : class {
+            where TMessage : ConsistencyMessage {
             store = store ?? new Mock<IConsistencyMessageStore<TMessage>>().Object;
             var mockLogger = new Mock<ILogger<ConsistencyMessageManager<TMessage>>>().Object;
             var manager = new ConsistencyMessageManager<TMessage>(store, null, mockLogger);
