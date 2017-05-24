@@ -17,6 +17,7 @@
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\..\src\Cap.Consistency.Kafka\Cap.Consistency.Kafka.csproj" />
     <ProjectReference Include="..\..\src\Cap.Consistency\Cap.Consistency.csproj" />
   </ItemGroup>
 

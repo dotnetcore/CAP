@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Cap.Consistency.Attributes;
 using Cap.Consistency.Consumer;
+using Cap.Consistency.Kafka;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Sample.Kafka.Controllers
