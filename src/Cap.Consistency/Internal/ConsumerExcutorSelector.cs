@@ -4,7 +4,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using Cap.Consistency.Abstractions;
-using Cap.Consistency.Attributes;
 using Cap.Consistency.Consumer;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Routing;

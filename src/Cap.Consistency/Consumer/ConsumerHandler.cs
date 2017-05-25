@@ -1,17 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
 using Cap.Consistency.Abstractions;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Routing;
-using Confluent.Kafka;
-using Confluent.Kafka.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Cap.Consistency.Consumer.Kafka;
 using Cap.Consistency.Internal;
 
 namespace Cap.Consistency.Consumer
@@ -20,6 +16,7 @@ namespace Cap.Consistency.Consumer
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IConsumerInvokerFactory _consumerInvokerFactory;
+        private readonly IConsumerClientFactory _consumerClientFactory;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
         private readonly MethodMatcherCache _selector;
@@ -31,6 +28,7 @@ namespace Cap.Consistency.Consumer
         public ConsumerHandler(
             IServiceProvider serviceProvider,
             IConsumerInvokerFactory consumerInvokerFactory,
+            IConsumerClientFactory consumerClientFactory,
             ILoggerFactory loggerFactory,
             ConsistencyMessageManager<T> messageManager,
             MethodMatcherCache selector,
@@ -41,6 +39,7 @@ namespace Cap.Consistency.Consumer
             _loggerFactory = loggerFactory;
             _serviceProvider = serviceProvider;
             _consumerInvokerFactory = consumerInvokerFactory;
+            _consumerClientFactory = consumerClientFactory;
             _options = options.Value;
             _messageManager = messageManager;
         }
@@ -63,7 +62,7 @@ namespace Cap.Consistency.Consumer
             var groupingMatchs = matchs.GroupBy(x => x.Value.GroupId);
 
             foreach (var matchGroup in groupingMatchs) {
-                using (var client = new KafkaConsumerClient(matchGroup.Key, _options.BrokerUrlList)) {
+                using (var client = _consumerClientFactory.Create(matchGroup.Key, _options.BrokerUrlList)) {
                     client.MessageReceieved += OnMessageReceieved;
 
                     foreach (var item in matchGroup) {

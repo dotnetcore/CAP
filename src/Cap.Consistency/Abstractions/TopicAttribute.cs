@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Cap.Consistency.Attributes
+namespace Cap.Consistency.Abstractions
 {
 
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
@@ -18,8 +18,6 @@ namespace Cap.Consistency.Attributes
             get { return _name; }
         }
 
-
         public bool IsOneWay { get; set; }
-
     }
 }
