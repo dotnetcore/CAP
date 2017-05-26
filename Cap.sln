@@ -33,6 +33,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Kafka", "samples\Sam
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cap.Consistency.Kafka", "src\Cap.Consistency.Kafka\Cap.Consistency.Kafka.csproj", "{C42CDE33-0878-4BA0-96F2-4CB7C8FDEAAD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cap.Consistency.RabbitMQ", "src\Cap.Consistency.RabbitMQ\Cap.Consistency.RabbitMQ.csproj", "{9961B80E-0718-4280-B2A0-271B003DE26B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{C42CDE33-0878-4BA0-96F2-4CB7C8FDEAAD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C42CDE33-0878-4BA0-96F2-4CB7C8FDEAAD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C42CDE33-0878-4BA0-96F2-4CB7C8FDEAAD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9961B80E-0718-4280-B2A0-271B003DE26B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9961B80E-0718-4280-B2A0-271B003DE26B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9961B80E-0718-4280-B2A0-271B003DE26B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9961B80E-0718-4280-B2A0-271B003DE26B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -75,5 +81,6 @@ Global
 		{7442C942-1DDC-40E4-8F1B-654E721EAA45} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 		{2F095ED9-5BC9-4512-9013-A47685FB2508} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 		{C42CDE33-0878-4BA0-96F2-4CB7C8FDEAAD} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{9961B80E-0718-4280-B2A0-271B003DE26B} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 	EndGlobalSection
 EndGlobal
