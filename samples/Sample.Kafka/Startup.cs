@@ -5,10 +5,10 @@ using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Sample.Kafka.Entity;
 
 namespace Sample.Kafka
 {
@@ -27,11 +27,17 @@ namespace Sample.Kafka
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services) {
+
+            services.AddDbContext<AppDbContext>();
+
+            services.AddConsistency<ConsistencyMessage>()
+                    .AddEntityFrameworkStores<AppDbContext>()
+                    .AddKafka();
+
             // Add framework services.
             services.AddMvc();
-
-            services.AddConsistency<ConsistencyMessage>();
         }
+
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory) {
