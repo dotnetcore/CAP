@@ -19,7 +19,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>An <see cref="ConsistencyBuilder"/> for application services.</returns>
         public static ConsistencyBuilder AddConsistency<TMessage>(this IServiceCollection services)
             where TMessage : ConsistencyMessage {
-            return services.AddConsistency<TMessage>(setupAction: null);
+            return services.AddConsistency<TMessage>(x => new ConsistencyOptions());
         }
 
         /// <summary>
@@ -34,9 +34,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddScoped<ConsistencyMessageManager<TMessage>, ConsistencyMessageManager<TMessage>>();
 
-            if (setupAction != null) {
-                services.Configure(setupAction);
-            }
+            services.Configure(setupAction);
 
             return new ConsistencyBuilder(typeof(TMessage), services);
         }

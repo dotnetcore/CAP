@@ -31,7 +31,7 @@ namespace Microsoft.AspNetCore.Builder
 
             var context = new TopicRouteContext();
 
-            router.RouteAsync(context).Wait();
+            router.RouteAsync(context);
 
             return app;
         }
