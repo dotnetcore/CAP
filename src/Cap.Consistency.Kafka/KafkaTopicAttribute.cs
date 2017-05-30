@@ -7,7 +7,7 @@ namespace Cap.Consistency.Kafka
 {
     public class KafkaTopicAttribute : TopicAttribute
     {
-        public KafkaTopicAttribute(string topicName) 
+        public KafkaTopicAttribute(string topicName)
             : this(topicName, 0) { }
 
         public KafkaTopicAttribute(string topicName, int partition)

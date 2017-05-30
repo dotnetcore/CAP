@@ -38,6 +38,7 @@ namespace Cap.Consistency.Kafka
                 InitKafkaClient();
             }
             _consumerClient.Assignment.Add(new TopicPartition(topicName, partition));
+            _consumerClient.Subscribe(topicName);
         }
 
         public void Listening(TimeSpan timeout) {
@@ -65,11 +66,12 @@ namespace Cap.Consistency.Kafka
         private void ConsumerClient_OnMessage(object sender, Message<Null, string> e) {
             var message = new DeliverMessage {
                 MessageKey = e.Topic,
-                Value = e.Value
+                Value = e.Value,
+                Body = Encoding.UTF8.GetBytes(e.Value)
             };
             MessageReceieved?.Invoke(sender, message);
         }
-    
+
         #endregion
 
     }
