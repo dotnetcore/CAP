@@ -5,10 +5,9 @@ using System.Threading.Tasks;
 using Cap.Consistency.Abstractions;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Routing;
-using Microsoft.AspNetCore.Builder;
+using Cap.Consistency.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Cap.Consistency.Internal;
 
 namespace Cap.Consistency.Consumer
 {
@@ -59,18 +58,20 @@ namespace Cap.Consistency.Consumer
 
             var matchs = _selector.GetCandidatesMethods(context);
 
-            var groupingMatchs = matchs.GroupBy(x => x.Value.GroupId);
+            var groupingMatchs = matchs.GroupBy(x => x.Value.Attribute.GroupOrExchange);
 
             foreach (var matchGroup in groupingMatchs) {
-                using (var client = _consumerClientFactory.Create(matchGroup.Key, _options.BrokerUrlList)) {
-                    client.MessageReceieved += OnMessageReceieved;
+                Task.Factory.StartNew(() => {
+                    using (var client = _consumerClientFactory.Create(matchGroup.Key, _options.BrokerUrlList)) {
+                        client.MessageReceieved += OnMessageReceieved;
 
-                    foreach (var item in matchGroup) {
-                        client.Subscribe(item.Key, item.Value.Topic.Partition);
+                        foreach (var item in matchGroup) {
+                            client.Subscribe(item.Key);
+                        }
+
+                        client.Listening(TimeSpan.FromSeconds(1));
                     }
-
-                    client.Listening(TimeSpan.Zero);
-                }
+                }, TaskCreationOptions.LongRunning);
             }
             return Task.CompletedTask;
         }
@@ -100,8 +101,6 @@ namespace Cap.Consistency.Consumer
             catch (Exception ex) {
 
                 _logger.LogError("exception raised when excute method : " + ex.Message);
-
-                throw ex;
             }
         }
     }

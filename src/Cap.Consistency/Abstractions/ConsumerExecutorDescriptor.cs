@@ -11,8 +11,6 @@ namespace Cap.Consistency.Abstractions
 
         public TypeInfo ImplTypeInfo { get; set; }
 
-        public TopicInfo Topic { get; set; }
-
-        public string GroupId { get; set; }
+        public TopicAttribute Attribute { get; set; }
     }
 }

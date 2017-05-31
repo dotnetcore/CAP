@@ -18,6 +18,8 @@ namespace Cap.Consistency.Abstractions
             get { return _name; }
         }
 
+        public string GroupOrExchange { get; set; }
+
         public bool IsOneWay { get; set; }
     }
 }

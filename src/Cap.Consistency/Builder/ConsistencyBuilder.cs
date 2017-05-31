@@ -27,8 +27,6 @@ namespace Cap.Consistency
             Services = service;
 
             AddConsumerServices();
-
-            AddKafkaServices();
         }
 
         /// <summary>
@@ -70,13 +68,10 @@ namespace Cap.Consistency
             Services.AddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             Services.AddSingleton<MethodMatcherCache>();
 
+            Services.AddSingleton(typeof(ITopicRoute), typeof(ConsumerHandler<>).MakeGenericType(MessageType));
+
             return this;
-        }
-
-        public virtual ConsistencyBuilder AddKafkaServices() {
-
-            return AddScoped(typeof(ITopicRoute), typeof(ConsumerHandler<>).MakeGenericType(MessageType));
-        }
+        } 
 
 
         /// <summary>
