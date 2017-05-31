@@ -20,7 +20,7 @@ namespace Cap.Consistency.Internal
         }
 
         public ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor) {
-            return executeDescriptor.FirstOrDefault(x => x.Topic.Name == key);
+            return executeDescriptor.FirstOrDefault(x => x.Attribute.Name == key);
         }
 
         public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(TopicRouteContext context) {
@@ -50,7 +50,7 @@ namespace Cap.Consistency.Internal
             ) {
             var descriptor = new ConsumerExecutorDescriptor();
 
-            descriptor.Topic = new TopicInfo(attr.Name);
+            descriptor.Attribute = attr;
             descriptor.MethodInfo = methodInfo;
             descriptor.ImplTypeInfo = implType;
 

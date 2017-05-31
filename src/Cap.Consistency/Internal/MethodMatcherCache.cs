@@ -18,13 +18,13 @@ namespace Cap.Consistency.Internal
 
         public ConcurrentDictionary<string, ConsumerExecutorDescriptor> GetCandidatesMethods(TopicRouteContext routeContext) {
 
-            if (Entries == null) {
+            if (Entries.Count == 0) {
 
                 var executorCollection = _selector.SelectCandidates(routeContext);
 
                 foreach (var item in executorCollection) {
 
-                    Entries.GetOrAdd(item.Topic.Name, item);
+                    Entries.GetOrAdd(item.Attribute.Name, item);
                 }
             }
             return Entries;
