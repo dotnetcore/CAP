@@ -13,4 +13,8 @@
     <ProjectReference Include="..\Cap.Consistency\Cap.Consistency.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Microsoft.Extensions.DependencyInjection\" />
+  </ItemGroup>
+
 </Project>
