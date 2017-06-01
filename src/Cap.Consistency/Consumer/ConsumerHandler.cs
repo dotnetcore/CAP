@@ -4,14 +4,14 @@ using System.Linq;
 using System.Threading.Tasks;
 using Cap.Consistency.Abstractions;
 using Cap.Consistency.Infrastructure;
-using Cap.Consistency.Routing;
 using Cap.Consistency.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Cap.Consistency.Store;
 
 namespace Cap.Consistency.Consumer
 {
-    public class ConsumerHandler<T> : IConsumerHandler<T> where T : ConsistencyMessage, new()
+    public class ConsumerHandler : IConsumerHandler
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IConsumerInvokerFactory _consumerInvokerFactory;
@@ -20,21 +20,21 @@ namespace Cap.Consistency.Consumer
         private readonly ILogger _logger;
         private readonly MethodMatcherCache _selector;
         private readonly ConsistencyOptions _options;
-        private readonly ConsistencyMessageManager<T> _messageManager;
+        private readonly ConsistencyMessageManager _messageManager;
 
-        public event EventHandler<T> MessageReceieved;
+        public event EventHandler<ConsistencyMessage> MessageReceieved;
 
         public ConsumerHandler(
             IServiceProvider serviceProvider,
             IConsumerInvokerFactory consumerInvokerFactory,
             IConsumerClientFactory consumerClientFactory,
             ILoggerFactory loggerFactory,
-            ConsistencyMessageManager<T> messageManager,
+            ConsistencyMessageManager messageManager,
             MethodMatcherCache selector,
             IOptions<ConsistencyOptions> options) {
 
             _selector = selector;
-            _logger = loggerFactory.CreateLogger<ConsumerHandler<T>>();
+            _logger = loggerFactory.CreateLogger<ConsumerHandler>();
             _loggerFactory = loggerFactory;
             _serviceProvider = serviceProvider;
             _consumerInvokerFactory = consumerInvokerFactory;
@@ -44,7 +44,7 @@ namespace Cap.Consistency.Consumer
         }
 
 
-        protected virtual void OnMessageReceieved(T message) {
+        protected virtual void OnMessageReceieved(ConsistencyMessage message) {
             MessageReceieved?.Invoke(this, message);
         }
 
@@ -77,7 +77,7 @@ namespace Cap.Consistency.Consumer
         }
 
         private void OnMessageReceieved(object sender, DeliverMessage message) {
-            T consistencyMessage = new T() {
+            var consistencyMessage = new ConsistencyMessage() {
                 Id = message.MessageKey,
                 Payload = Encoding.UTF8.GetString(message.Body)
             };
