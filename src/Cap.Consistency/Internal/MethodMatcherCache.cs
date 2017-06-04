@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Text;
 using Cap.Consistency.Abstractions;
 using Cap.Consistency.Infrastructure;
-using Cap.Consistency.Routing;
 
 namespace Cap.Consistency.Internal
 {

@@ -6,7 +6,6 @@ using System.Text;
 using Cap.Consistency.Abstractions;
 using Cap.Consistency.Consumer;
 using Cap.Consistency.Infrastructure;
-using Cap.Consistency.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Cap.Consistency.Internal
