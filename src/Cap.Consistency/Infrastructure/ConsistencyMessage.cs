@@ -5,7 +5,7 @@ namespace Cap.Consistency.Infrastructure
     /// <summary>
     /// The default implementation of <see cref="ConsistencyMessage{TKey}"/> which uses a string as a primary key.
     /// </summary>
-    public class ConsistencyMessage : ConsistencyMessage<string>
+    public class ConsistencyMessage 
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ConsistencyMessage"/>.
@@ -19,6 +19,16 @@ namespace Cap.Consistency.Infrastructure
             UpdateTime = SendTime;
             Status = MessageStatus.WaitForSend;
         }
+
+        public string Id { get; set; }
+
+        public DateTime SendTime { get; set; }
+
+        public string Payload { get; set; }
+
+        public MessageStatus Status { get; set; }
+
+        public virtual DateTime? UpdateTime { get; set; }
     }
 
     /// <summary>
@@ -30,22 +40,5 @@ namespace Cap.Consistency.Infrastructure
         WaitForSend = 1,
         RollbackSuccessed = 3,
         RollbackFailed = 4
-    }
-
-    /// <summary>
-    /// Represents a message in the consistency system
-    /// </summary>
-    /// <typeparam name="TKey">The type used for the primary key for the message.</typeparam>
-    public class ConsistencyMessage<TKey> where TKey : IEquatable<TKey>
-    {
-        public virtual TKey Id { get; set; }
-
-        public virtual DateTime SendTime { get; set; }
-
-        public string Payload { get; set; }
-
-        public MessageStatus Status { get; set; }
-
-        public virtual DateTime? UpdateTime { get; set; }
     }
 }
