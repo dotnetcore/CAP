@@ -6,27 +6,27 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Cap.Consistency
+namespace Cap.Consistency.Store
 {
     /// <summary>
     /// Provides the APIs for managing message in a persistence store.
     /// </summary>
-    /// <typeparam name="TMessage">The type encapsulating a message.</typeparam>
-    public class ConsistencyMessageManager<TMessage> : IDisposable where TMessage : ConsistencyMessage
+    /// <typeparam name="ConsistencyMessage">The type encapsulating a message.</typeparam>
+    public class ConsistencyMessageManager: IDisposable 
     {
         private bool _disposed;
         private readonly HttpContext _context;
         private CancellationToken CancellationToken => _context?.RequestAborted ?? CancellationToken.None;
 
         /// <summary>
-        /// Constructs a new instance of <see cref="ConsistencyMessageManager{TMessage}"/>.
+        /// Constructs a new instance of <see cref="ConsistencyMessageManager{ConsistencyMessage}"/>.
         /// </summary>
         /// <param name="store">The persistence store the manager will operate over.</param>
         /// <param name="services">The <see cref="IServiceProvider"/> used to resolve services.</param>
         /// <param name="logger">The logger used to log messages, warnings and errors.</param>
-        public ConsistencyMessageManager(IConsistencyMessageStore<TMessage> store,
+        public ConsistencyMessageManager(IConsistencyMessageStore store,
             IServiceProvider services,
-            ILogger<ConsistencyMessageManager<TMessage>> logger) {
+            ILogger<ConsistencyMessageManager> logger) {
             if (store == null) {
                 throw new ArgumentNullException(nameof(store));
             }
@@ -43,7 +43,7 @@ namespace Cap.Consistency
         ///  Gets or sets the persistence store the manager operates over.
         /// </summary>
         /// <value>The persistence store the manager operates over.</value>
-        protected internal IConsistencyMessageStore<TMessage> Store { get; set; }
+        protected internal IConsistencyMessageStore Store { get; set; }
 
         /// <summary>
         /// Gets the <see cref="ILogger"/> used to log messages from the manager.
@@ -61,7 +61,7 @@ namespace Cap.Consistency
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="OperateResult"/>
         /// of the operation.
         /// </returns>
-        public virtual Task<OperateResult> CreateAsync(TMessage message) {
+        public virtual Task<OperateResult> CreateAsync(ConsistencyMessage message) {
             ThrowIfDisposed();
             //todo: validation message fileds is correct
 
@@ -79,7 +79,7 @@ namespace Cap.Consistency
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="OperateResult"/>
         /// of the operation.
         /// </returns>
-        public virtual Task<OperateResult> UpdateAsync(TMessage message) {
+        public virtual Task<OperateResult> UpdateAsync(ConsistencyMessage message) {
             ThrowIfDisposed();
             //todo: validation message fileds is correct
 
@@ -94,7 +94,7 @@ namespace Cap.Consistency
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the <see cref="OperateResult"/>
         /// of the operation.
         /// </returns>
-        public virtual Task<OperateResult> DeleteAsync(TMessage message) {
+        public virtual Task<OperateResult> DeleteAsync(ConsistencyMessage message) {
             ThrowIfDisposed();
 
             if (message == null) {
@@ -111,7 +111,7 @@ namespace Cap.Consistency
         /// <returns>
         /// The <see cref="Task"/> that represents the asynchronous operation, containing the user matching the specified <paramref name="messageId"/> if it exists.
         /// </returns>
-        public virtual Task<TMessage> FindByIdAsync(string messageId) {
+        public virtual Task<ConsistencyMessage> FindByIdAsync(string messageId) {
             ThrowIfDisposed();
             return Store.FindByIdAsync(messageId, CancellationToken);
         }
@@ -121,9 +121,9 @@ namespace Cap.Consistency
         /// </summary>
         /// <param name="message">The message whose identifier should be retrieved.</param>
         /// <returns>The <see cref="Task"/> that represents the asynchronous operation, containing the identifier for the specified <paramref name="message"/>.</returns>
-        public virtual async Task<string> GetMessageIdAsync(TMessage message) {
+        public virtual async Task<string> GeConsistencyMessageIdAsync(ConsistencyMessage message) {
             ThrowIfDisposed();
-            return await Store.GetMessageIdAsync(message, CancellationToken);
+            return await Store.GeConsistencyMessageIdAsync(message, CancellationToken);
         }
 
         public void Dispose() {
@@ -136,8 +136,7 @@ namespace Cap.Consistency
         /// </summary>
         /// <param name="disposing">true to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing) {
-            if (disposing && !_disposed) {
-                Store.Dispose();
+            if (disposing && !_disposed) {            
                 _disposed = true;
             }
         }
