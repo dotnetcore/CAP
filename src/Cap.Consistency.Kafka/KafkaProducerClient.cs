@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Producer;
+using Cap.Consistency.Store;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
 using Microsoft.Extensions.Logging;
@@ -17,7 +18,7 @@ namespace Cap.Consistency.Kafka
         private readonly ConsistencyOptions _options;
         private readonly ILogger _logger;
 
-        public KafkaProducerClient(IOptions<ConsistencyOptions> options, ILoggerFactory loggerFactory) {
+        public KafkaProducerClient(IOptions<ConsistencyOptions> options, ILoggerFactory loggerFactory, IConsistencyMessageStore store) {
             _options = options.Value;
             _logger = loggerFactory.CreateLogger(nameof(KafkaProducerClient));
         }
