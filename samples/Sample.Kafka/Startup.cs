@@ -30,7 +30,7 @@ namespace Sample.Kafka
 
             services.AddDbContext<AppDbContext>();
 
-            services.AddConsistency<ConsistencyMessage>()
+            services.AddConsistency()
                     .AddEntityFrameworkStores<AppDbContext>()
                     .AddKafka();
 
