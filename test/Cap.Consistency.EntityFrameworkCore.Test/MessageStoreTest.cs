@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
+using Cap.Consistency.Store;
 using Cap.Consistency.Test;
 using Microsoft.AspNetCore.Testing;
 using Microsoft.AspNetCore.Testing.xunit;
@@ -24,7 +25,7 @@ namespace Cap.Consistency.EntityFrameworkCore.Test
             return TestPlatformHelper.IsMono || !TestPlatformHelper.IsWindows;
         }
 
-        public class ApplicationDbContext : ConsistencyDbContext<ApplicationMessage, string>
+        public class ApplicationDbContext : ConsistencyDbContext
         {
             public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
         }
@@ -95,7 +96,7 @@ namespace Cap.Consistency.EntityFrameworkCore.Test
         }
 
         protected override void AddMessageStore(IServiceCollection services, object context = null) {
-            services.AddSingleton<IConsistencyMessageStore<ConsistencyMessage>>(new ConsistencyMessageStore<ConsistencyMessage>((ConsistencyDbContext)context));
+            services.AddSingleton<IConsistencyMessageStore>(new ConsistencyMessageStore<ConsistencyDbContext>((ConsistencyDbContext)context));
         }
     }
 

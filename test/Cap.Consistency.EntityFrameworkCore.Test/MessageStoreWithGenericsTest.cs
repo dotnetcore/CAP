@@ -1,5 +1,6 @@
 ﻿using System;
 using Cap.Consistency.Infrastructure;
+using Cap.Consistency.Store;
 using Cap.Consistency.Test;
 using Microsoft.AspNetCore.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -17,7 +18,7 @@ namespace Cap.Consistency.EntityFrameworkCore.Test
         }
 
         protected override void AddMessageStore(IServiceCollection services, object context = null) {
-            services.AddSingleton<IConsistencyMessageStore<MessageWithGenerics>>(new MessageStoreWithGenerics((ContextWithGenerics)context));
+            services.AddSingleton<IConsistencyMessageStore>(new MessageStoreWithGenerics((ContextWithGenerics)context));
         }
 
         protected override object CreateTestContext() {
@@ -48,15 +49,15 @@ namespace Cap.Consistency.EntityFrameworkCore.Test
     {
     }
 
-    public class MessageStoreWithGenerics : ConsistencyMessageStore<MessageWithGenerics>
+    public class MessageStoreWithGenerics : ConsistencyMessageStore<ContextWithGenerics>
     {
-        public MessageStoreWithGenerics(DbContext context) : base(context) {
+        public MessageStoreWithGenerics(ContextWithGenerics context) : base(context) {
         }
     }
 
-    public class ContextWithGenerics : ConsistencyDbContext<MessageWithGenerics, string>
+    public class ContextWithGenerics : ConsistencyDbContext
     {
-        public ContextWithGenerics(DbContextOptions options) : base(options) {
+        public ContextWithGenerics() {
         }
     }
 }

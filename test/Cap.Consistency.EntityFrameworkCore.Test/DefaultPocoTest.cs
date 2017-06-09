@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
+using Cap.Consistency.Store;
 using Microsoft.AspNetCore.Builder.Internal;
 using Microsoft.AspNetCore.Testing.xunit;
 using Microsoft.EntityFrameworkCore;
@@ -20,7 +21,7 @@ namespace Cap.Consistency.EntityFrameworkCore.Test
 
             services
                 .AddDbContext<ConsistencyDbContext>(o => o.UseSqlServer(fixture.ConnectionString))
-                .AddConsistency<ConsistencyMessage>()
+                .AddConsistency()
                 .AddEntityFrameworkStores<ConsistencyDbContext>();
 
             services.AddLogging();
@@ -39,8 +40,8 @@ namespace Cap.Consistency.EntityFrameworkCore.Test
         [OSSkipCondition(OperatingSystems.Linux)]
         [OSSkipCondition(OperatingSystems.MacOSX)]
         public async Task EnsureStartupUsageWorks() {
-            var messageStore = _builder.ApplicationServices.GetRequiredService<IConsistencyMessageStore<ConsistencyMessage>>();
-            var messageManager = _builder.ApplicationServices.GetRequiredService<ConsistencyMessageManager<ConsistencyMessage>>();
+            var messageStore = _builder.ApplicationServices.GetRequiredService<IConsistencyMessageStore>();
+            var messageManager = _builder.ApplicationServices.GetRequiredService<ConsistencyMessageManager>();
 
             Assert.NotNull(messageStore);
             Assert.NotNull(messageManager);
