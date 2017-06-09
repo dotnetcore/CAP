@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Cap.Consistency.Store;
 using Xunit;
 
 namespace Cap.Consistency.Test
