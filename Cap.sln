@@ -12,7 +12,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{9E5A7F49-8E31-4A71-90CC-1DA9AEDA99EE}"
 	ProjectSection(SolutionItems) = preProject
 		test\Shared\MessageManagerTestBase.cs = test\Shared\MessageManagerTestBase.cs
-		test\Shared\TestConsistencyMessage.cs = test\Shared\TestConsistencyMessage.cs
 		test\Shared\TestLogger.cs = test\Shared\TestLogger.cs
 	EndProjectSection
 	ProjectSection(FolderStartupServices) = postProject
