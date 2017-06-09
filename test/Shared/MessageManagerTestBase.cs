@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
+using Cap.Consistency.Store;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,13 +31,13 @@ namespace Cap.Consistency.Test
 
         protected virtual void SetupMessageServices(IServiceCollection services, object context = null) {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddConsistency<TMessage>();
+            services.AddConsistency();
             AddMessageStore(services, context);
 
-            services.AddSingleton<ILogger<ConsistencyMessageManager<TMessage>>>(new TestLogger<ConsistencyMessageManager<TMessage>>());
+            services.AddSingleton<ILogger<ConsistencyMessageManager>>(new TestLogger<ConsistencyMessageManager>());
         }
 
-        protected virtual ConsistencyMessageManager<TMessage> CreateManager(object context = null, IServiceCollection services = null, Action<IServiceCollection> configureServices = null) {
+        protected virtual ConsistencyMessageManager CreateManager(object context = null, IServiceCollection services = null, Action<IServiceCollection> configureServices = null) {
             if (services == null) {
                 services = new ServiceCollection();
             }
@@ -47,7 +48,7 @@ namespace Cap.Consistency.Test
 
             configureServices?.Invoke(services);
 
-            return services.BuildServiceProvider().GetService<ConsistencyMessageManager<TMessage>>();
+            return services.BuildServiceProvider().GetService<ConsistencyMessageManager>();
         }
 
         protected abstract object CreateTestContext();
@@ -68,7 +69,7 @@ namespace Cap.Consistency.Test
             Assert.NotNull(operateResult);
             Assert.True(operateResult.Succeeded);
 
-            var messageId = await manager.GetMessageIdAsync(message);
+            var messageId = await manager.GeConsistencyMessageIdAsync(message);
             operateResult = await manager.DeleteAsync(message);
             Assert.Null(await manager.FindByIdAsync(messageId));
         }
@@ -85,7 +86,7 @@ namespace Cap.Consistency.Test
             Assert.NotNull(operateResult);
             Assert.True(operateResult.Succeeded);
 
-            var messageId = await manager.GetMessageIdAsync(message);
+            var messageId = await manager.GeConsistencyMessageIdAsync(message);
             Assert.NotNull(await manager.FindByIdAsync(messageId));
         }
     }
