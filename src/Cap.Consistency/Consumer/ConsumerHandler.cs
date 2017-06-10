@@ -84,7 +84,7 @@ namespace Cap.Consistency.Consumer
 
             _logger.LogInformation("message receieved message topic name: " + consistencyMessage.Id);
 
-            _messageManager.CreateAsync(consistencyMessage);
+            _messageManager.CreateAsync(consistencyMessage).Wait();
 
             try {
                 var executeDescriptor = _selector.GetTopicExector(message.MessageKey);
@@ -95,7 +95,7 @@ namespace Cap.Consistency.Consumer
 
                 invoker.InvokeAsync();
 
-                _messageManager.UpdateAsync(consistencyMessage);
+                _messageManager.UpdateAsync(consistencyMessage).Wait();
 
             }
             catch (Exception ex) {

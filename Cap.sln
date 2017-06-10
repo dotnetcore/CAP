@@ -34,6 +34,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cap.Consistency.Kafka", "sr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cap.Consistency.RabbitMQ", "src\Cap.Consistency.RabbitMQ\Cap.Consistency.RabbitMQ.csproj", "{9961B80E-0718-4280-B2A0-271B003DE26B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{10C0818D-9160-4B80-BB86-DDE925B64D43}"
+	ProjectSection(SolutionItems) = preProject
+		build.cake = build.cake
+		build.ps1 = build.ps1
+		build.sh = build.sh
+		build\common.props = build\common.props
+		build\index.cake = build\index.cake
+		build\util.cake = build\util.cake
+		build\version.cake = build\version.cake
+		build\version.props = build\version.props
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

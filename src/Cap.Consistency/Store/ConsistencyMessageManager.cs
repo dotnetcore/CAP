@@ -65,9 +65,6 @@ namespace Cap.Consistency.Store
             ThrowIfDisposed();
             //todo: validation message fileds is correct
 
-
-
-
             return Store.CreateAsync(message, CancellationToken);
         }
 
