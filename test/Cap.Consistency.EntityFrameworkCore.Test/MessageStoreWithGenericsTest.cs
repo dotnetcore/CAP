@@ -3,7 +3,6 @@ using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Store;
 using Cap.Consistency.Test;
 using Microsoft.AspNetCore.Testing;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

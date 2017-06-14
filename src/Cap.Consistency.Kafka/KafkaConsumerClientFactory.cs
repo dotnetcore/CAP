@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Cap.Consistency.Consumer;
+﻿using Cap.Consistency.Consumer;
 
 namespace Cap.Consistency.Kafka
 {

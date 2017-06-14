@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using System.Threading.Tasks;
 using Cap.Consistency.Consumer;
 using Cap.Consistency.Infrastructure;
 using RabbitMQ.Client;
@@ -39,8 +38,7 @@ namespace Cap.Consistency.RabbitMQ
         }
 
         public void Listening(TimeSpan timeout) {
-
-         //   Task.Delay(timeout).Wait();
+            //   Task.Delay(timeout).Wait();
 
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnConsumerReceived;

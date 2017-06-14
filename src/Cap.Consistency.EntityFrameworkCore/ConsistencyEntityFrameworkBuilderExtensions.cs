@@ -17,7 +17,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>The <see cref="ConsistencyBuilder"/> instance this method extends.</returns>
         public static ConsistencyBuilder AddEntityFrameworkStores<TContext>(this ConsistencyBuilder builder)
             where TContext : DbContext {
-
             builder.Services.AddScoped<IConsistencyMessageStore, ConsistencyMessageStore<TContext>>();
 
             return builder;

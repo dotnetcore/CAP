@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
@@ -27,7 +26,8 @@ namespace Cap.Consistency.EntityFrameworkCore.Test
 
         public class ApplicationDbContext : ConsistencyDbContext
         {
-            public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) { }
+            public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options) {
+            }
         }
 
         [ConditionalFact]
@@ -74,7 +74,6 @@ namespace Cap.Consistency.EntityFrameworkCore.Test
             Assert.NotNull(result);
             Assert.True(result.Succeeded);
         }
-
 
         public ConsistencyDbContext CreateContext(bool delete = false) {
             var db = DbUtil.Create<ConsistencyDbContext>(_fixture.ConnectionString);

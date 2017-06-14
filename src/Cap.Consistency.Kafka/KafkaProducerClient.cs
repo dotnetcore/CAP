@@ -14,7 +14,6 @@ namespace Cap.Consistency.Kafka
 {
     public class KafkaProducerClient : IProducerClient
     {
-
         private readonly ConsistencyOptions _options;
         private readonly ILogger _logger;
 
@@ -22,7 +21,6 @@ namespace Cap.Consistency.Kafka
             _options = options.Value;
             _logger = loggerFactory.CreateLogger(nameof(KafkaProducerClient));
         }
-
 
         public Task SendAsync(string topic, string content) {
             var config = new Dictionary<string, object> { { "bootstrap.servers", _options.BrokerUrlList } };

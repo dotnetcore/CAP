@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Store;
 using Microsoft.AspNetCore.Builder.Internal;
@@ -54,6 +51,5 @@ namespace Cap.Consistency.EntityFrameworkCore.Test
             operateResult = await messageManager.DeleteAsync(user);
             Assert.True(operateResult.Succeeded);
         }
-
     }
 }

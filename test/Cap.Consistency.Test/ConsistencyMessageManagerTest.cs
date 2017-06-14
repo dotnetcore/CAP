@@ -64,8 +64,7 @@ namespace Cap.Consistency.Test
             store.VerifyAll();
         }
 
-        public ConsistencyMessageManager TestConsistencyMessageManager(IConsistencyMessageStore store = null)
-        {
+        public ConsistencyMessageManager TestConsistencyMessageManager(IConsistencyMessageStore store = null) {
             store = store ?? new Mock<IConsistencyMessageStore>().Object;
             var mockLogger = new Mock<ILogger<ConsistencyMessageManager>>().Object;
             var manager = new ConsistencyMessageManager(store, null, mockLogger);

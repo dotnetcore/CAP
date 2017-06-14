@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Text;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Producer;
@@ -12,7 +10,6 @@ namespace Cap.Consistency.RabbitMQ
 {
     public class RabbitMQProducerClient : IProducerClient
     {
-
         private readonly ConsistencyOptions _options;
         private readonly ILogger _logger;
 
@@ -27,7 +24,6 @@ namespace Cap.Consistency.RabbitMQ
             using (var channel = connection.CreateModel()) {
                 channel.ExchangeDeclare(exchange: "topic_logs",
                                         type: "topic");
-
 
                 var body = Encoding.UTF8.GetBytes(content);
                 channel.BasicPublish(exchange: "topic_logs",

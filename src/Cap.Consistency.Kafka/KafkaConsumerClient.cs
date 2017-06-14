@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using Cap.Consistency.Consumer;
 using Cap.Consistency.Infrastructure;
@@ -11,7 +10,6 @@ namespace Cap.Consistency.Kafka
 {
     public class KafkaConsumerClient : IConsumerClient
     {
-
         private readonly string _groupId;
         private readonly string _bootstrapServers;
 
@@ -33,7 +31,6 @@ namespace Cap.Consistency.Kafka
         }
 
         public void Subscribe(string topicName, int partition) {
-
             if (_consumerClient == null) {
                 InitKafkaClient();
             }
@@ -72,7 +69,6 @@ namespace Cap.Consistency.Kafka
             MessageReceieved?.Invoke(sender, message);
         }
 
-        #endregion
-
+        #endregion private methods
     }
 }
