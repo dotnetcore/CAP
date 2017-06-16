@@ -15,7 +15,7 @@ namespace Cap.Consistency.Internal
             _selector = selector;
         }
 
-        public ConcurrentDictionary<string, ConsumerExecutorDescriptor> GetCandidatesMethods(TopicRouteContext routeContext) {
+        public ConcurrentDictionary<string, ConsumerExecutorDescriptor> GetCandidatesMethods(TopicContext routeContext) {
 
             if (Entries.Count == 0) {
 

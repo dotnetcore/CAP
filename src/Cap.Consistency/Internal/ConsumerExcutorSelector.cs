@@ -22,7 +22,7 @@ namespace Cap.Consistency.Internal
             return executeDescriptor.FirstOrDefault(x => x.Attribute.Name == key);
         }
 
-        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(TopicRouteContext context) {
+        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(TopicContext context) {
 
             var consumerServices = context.ServiceProvider.GetServices<IConsumerService>();
 
