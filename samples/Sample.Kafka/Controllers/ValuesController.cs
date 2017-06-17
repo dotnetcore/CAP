@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Cap.Consistency.Consumer;
+using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Kafka;
 using Cap.Consistency.Producer;
 using Microsoft.AspNetCore.Mvc;
@@ -13,13 +14,25 @@ namespace Sample.Kafka.Controllers
     public class ValuesController : Controller, IConsumerService
     {
         private readonly IProducerClient _producer;
+        private readonly AppDbContext _dbContext;
 
-        public ValuesController(IProducerClient producer) {
+        public ValuesController(IProducerClient producer, AppDbContext dbContext) {
             _producer = producer;
+            _dbContext = dbContext;
         }
 
         [Route("/")]
         public IActionResult Index() {
+
+            _dbContext.Add(new ConsistencyMessage {
+                Id = Guid.NewGuid().ToString(),
+                SendTime = DateTime.Now,
+                Payload = "testdata",
+                UpdateTime = DateTime.Now
+            });
+
+            _dbContext.SaveChanges();
+
             return Ok();
         }
 

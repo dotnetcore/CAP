@@ -10,6 +10,16 @@ namespace Sample.Kafka
 {
     public class AppDbContext : DbContext
     {
+
+        public AppDbContext(DbContextOptions options) : base(options) {
+        }
+
         public DbSet<ConsistencyMessage> Messages { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+            //optionsBuilder.UseSqlServer
+            base.OnConfiguring(optionsBuilder);
+        }
+
     }
 }

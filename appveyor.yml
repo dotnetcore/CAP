@@ -1,0 +1,22 @@
+version: '{build}'
+os: Visual Studio 2015
+environment:
+  BUILDING_ON_PLATFORM: win
+  BuildEnvironment: appveyor
+  Jobs_SqlServer_ConnectionStringTemplate: Server=.\SQL2012SP1;Database={0};User ID=sa;Password=Password12!
+services:
+  - mssql2012sp1
+build_script:
+- ps: ./ConfigureMSDTC.ps1
+- ps: ./build.ps1
+test: off
+artifacts:
+- path: artifacts/packages/*.nupkg
+deploy:
+  provider: NuGet
+  on:
+    appveyor_repo_tag: true
+  api_key:
+    secure: PWCeOQ12fgAhPiBjgkBAqHbvaPQArarsO2sI+8KCeXjBjE+AHaMIMW8b7efmDzQ6
+  skip_symbols: true
+  artifact: /artifacts\/packages\/.+\.nupkg/
