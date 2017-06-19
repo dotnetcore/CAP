@@ -7,7 +7,7 @@ namespace Cap.Consistency.Infrastructure
 {
     public interface IConsumerExcutorSelector
     {
-        IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(TopicRouteContext context);
+        IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(TopicContext context);
 
         ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor);
     }

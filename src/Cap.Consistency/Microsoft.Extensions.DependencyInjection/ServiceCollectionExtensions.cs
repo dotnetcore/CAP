@@ -37,10 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static ConsistencyBuilder AddConsistency(this IServiceCollection services, Action<ConsistencyOptions> setupAction) {
             services.TryAddSingleton<ConsistencyMarkerService>();
 
-            services.TryAddSingleton<ConsistencyMessageManager>();
-
             services.Configure(setupAction);
-
 
             var IConsumerListenerServices = new Dictionary<Type, Type>();
             foreach (var rejectedServices in services) {
@@ -64,7 +61,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();
 
-            services.TryAddSingleton(typeof(ITopicRouteHandler), typeof(ConsumerHandler));
+            services.TryAddSingleton(typeof(ITopicServer), typeof(ConsumerHandler));
 
             return new ConsistencyBuilder(services);
         }
@@ -73,6 +70,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static ConsistencyBuilder AddMessageStore<T>(this ConsistencyBuilder build)
             where T : class, IConsistencyMessageStore {
             build.Services.AddScoped<IConsistencyMessageStore, T>();
+            build.Services.TryAddScoped<ConsistencyMessageManager>();
             return build;
         }
     }

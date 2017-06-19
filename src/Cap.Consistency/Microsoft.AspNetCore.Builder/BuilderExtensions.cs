@@ -26,14 +26,10 @@ namespace Microsoft.AspNetCore.Builder
                 throw new InvalidOperationException("Add Consistency must be called on the service collection.");
             }
 
-            var router = app.ApplicationServices.GetService<ITopicRouteHandler>();
-
-            var context = new TopicRouteContext();
-
-            router.RouteAsync(context);
-
+            var provider = app.ApplicationServices;
+            var bootstrapper = provider.GetRequiredService<ITopicServer>();
+            bootstrapper.Start();
             return app;
         }
-
     }
 }

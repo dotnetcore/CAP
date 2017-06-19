@@ -1,28 +1,35 @@
 ﻿using System;
-using System.Text;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Cap.Consistency.Abstractions;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Internal;
+using Cap.Consistency.Store;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Cap.Consistency.Store;
 
 namespace Cap.Consistency.Consumer
 {
-    public class ConsumerHandler : IConsumerHandler
+    public class ConsumerHandler : IConsumerHandler, IDisposable
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly IConsumerInvokerFactory _consumerInvokerFactory;
         private readonly IConsumerClientFactory _consumerClientFactory;
         private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
+
         private readonly MethodMatcherCache _selector;
         private readonly ConsistencyOptions _options;
         private readonly ConsistencyMessageManager _messageManager;
+        private readonly CancellationTokenSource _cts;
 
         public event EventHandler<ConsistencyMessage> MessageReceieved;
+
+        private TopicContext _context;
+        private Task _compositeTask;
+        private bool _disposed;
 
         public ConsumerHandler(
             IServiceProvider serviceProvider,
@@ -32,7 +39,6 @@ namespace Cap.Consistency.Consumer
             ConsistencyMessageManager messageManager,
             MethodMatcherCache selector,
             IOptions<ConsistencyOptions> options) {
-
             _selector = selector;
             _logger = loggerFactory.CreateLogger<ConsumerHandler>();
             _loggerFactory = loggerFactory;
@@ -41,22 +47,17 @@ namespace Cap.Consistency.Consumer
             _consumerClientFactory = consumerClientFactory;
             _options = options.Value;
             _messageManager = messageManager;
+            _cts = new CancellationTokenSource();
         }
-
 
         protected virtual void OnMessageReceieved(ConsistencyMessage message) {
             MessageReceieved?.Invoke(this, message);
         }
 
-        public Task RouteAsync(TopicRouteContext context) {
+        public void Start() {
+            _context = new TopicContext(_serviceProvider, _cts.Token);
 
-            if (context == null) {
-                throw new ArgumentNullException(nameof(context));
-            }
-
-            context.ServiceProvider = _serviceProvider;
-
-            var matchs = _selector.GetCandidatesMethods(context);
+            var matchs = _selector.GetCandidatesMethods(_context);
 
             var groupingMatchs = matchs.GroupBy(x => x.Value.Attribute.GroupOrExchange);
 
@@ -73,10 +74,10 @@ namespace Cap.Consistency.Consumer
                     }
                 }, TaskCreationOptions.LongRunning);
             }
-            return Task.CompletedTask;
+            _compositeTask = Task.CompletedTask;
         }
 
-        private void OnMessageReceieved(object sender, DeliverMessage message) {
+        public virtual void OnMessageReceieved(object sender, DeliverMessage message) {
             var consistencyMessage = new ConsistencyMessage() {
                 Id = message.MessageKey,
                 Payload = Encoding.UTF8.GetString(message.Body)
@@ -96,11 +97,29 @@ namespace Cap.Consistency.Consumer
                 invoker.InvokeAsync();
 
                 _messageManager.UpdateAsync(consistencyMessage).Wait();
-
             }
             catch (Exception ex) {
-
                 _logger.LogError("exception raised when excute method : " + ex.Message);
+            }
+        }
+
+        public void Dispose() {
+            if (_disposed) {
+                return;
+            }
+            _disposed = true;
+
+            _logger.ServerShuttingDown();
+            _cts.Cancel();
+
+            try {
+                _compositeTask.Wait((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
+            }
+            catch (AggregateException ex) {
+                var innerEx = ex.InnerExceptions[0];
+                if (!(innerEx is OperationCanceledException)) {
+                    _logger.ExpectedOperationCanceledException(innerEx);
+                }
             }
         }
     }
