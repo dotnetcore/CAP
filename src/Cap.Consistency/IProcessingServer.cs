@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Cap.Consistency
 {
-    public interface ITopicServer : IDisposable
+    public interface IProcessingServer : IDisposable
     {
         void Start();
     }

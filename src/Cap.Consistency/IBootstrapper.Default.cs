@@ -1,31 +1,34 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Store;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Cap.Consistency
 {
-    public abstract class BootstrapperBase : IBootstrapper
+    public class DefaultBootstrapper : IBootstrapper
     {
         private IApplicationLifetime _appLifetime;
         private CancellationTokenSource _cts;
         private CancellationTokenRegistration _ctsRegistration;
         private Task _bootstrappingTask;
 
-        public BootstrapperBase(
-            ConsistencyOptions options,
+        public DefaultBootstrapper(
+            IOptions<ConsistencyOptions> options,
             ConsistencyMessageManager storage,
-            ITopicServer server,
             IApplicationLifetime appLifetime,
             IServiceProvider provider) {
-            Options = options;
+
+            Options = options.Value;
             Storage = storage;
-            Server = server;
             _appLifetime = appLifetime;
             Provider = provider;
-
+            Servers = Provider.GetServices<IProcessingServer>();
             _cts = new CancellationTokenSource();
             _ctsRegistration = appLifetime.ApplicationStopping.Register(() => {
                 _cts.Cancel();
@@ -41,7 +44,7 @@ namespace Cap.Consistency
 
         protected ConsistencyMessageManager Storage { get; }
 
-        protected ITopicServer Server { get; }
+        protected IEnumerable<IProcessingServer> Servers { get; }
 
         public IServiceProvider Provider { get; private set; }
 
@@ -57,14 +60,24 @@ namespace Cap.Consistency
             await BootstrapCoreAsync();
             if (_cts.IsCancellationRequested) return;
 
-            Server.Start();
+            foreach (var item in Servers) {
+                try {
+                    item.Start();
+                }
+                catch (Exception) {
+                }
+            }
 
             _ctsRegistration.Dispose();
             _cts.Dispose();
         }
 
         public virtual Task BootstrapCoreAsync() {
-            _appLifetime.ApplicationStopping.Register(() => Server.Dispose());
+            _appLifetime.ApplicationStopping.Register(() => {
+                foreach (var item in Servers) {
+                    item.Dispose();
+                }
+            });
             return Task.FromResult(0);
         }
     }

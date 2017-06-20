@@ -1,6 +1,7 @@
 ﻿namespace Cap.Consistency.Consumer
 {
-    public interface IConsumerHandler : ITopicServer
+    public interface IConsumerHandler : IProcessingServer
     {
+
     }
 }
