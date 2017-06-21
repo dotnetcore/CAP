@@ -9,14 +9,18 @@ using Microsoft.Extensions.Logging;
 
 namespace Cap.Consistency.Job
 {
-    public class CronJobProcessor : IProcessor
+    public class CronJobProcessor : IJobProcessor
     {
         private ILogger _logger;
         private IServiceProvider _provider;
+        private DefaultCronJobRegistry _jobRegistry;
 
         public CronJobProcessor(
+            DefaultCronJobRegistry jobRegistry,
             ILogger<CronJobProcessor> logger,
             IServiceProvider provider) {
+
+            _jobRegistry = jobRegistry;
             _logger = logger;
             _provider = provider;
         }
@@ -31,7 +35,8 @@ namespace Cap.Consistency.Job
         private async Task ProcessCoreAsync(ProcessingContext context) {
             //var storage = context.Storage;
             //var jobs = await GetJobsAsync(storage);
-            var jobs = GetJobsAsync();
+
+            var jobs = GetJobs();
             if (!jobs.Any()) {
                 _logger.CronJobsNotFound();
 
@@ -92,7 +97,7 @@ namespace Cap.Consistency.Job
                         //var connection = provider.GetRequiredService<IStorageConnection>();
                         //await connection.AttachCronJobAsync(computedJob.Job);
 
-                        //computedJob.Update(DateTime.UtcNow);
+                        computedJob.Update(DateTime.UtcNow);
 
                         //await connection.UpdateCronJobAsync(computedJob.Job);
                     }
@@ -126,24 +131,18 @@ namespace Cap.Consistency.Job
             return computedJob.FirstTry.AddSeconds(retryBehavior.RetryIn(retries));
         }
 
-        //private async Task<CronJob[]> GetJobsAsync(IStorage storage) {
-        //    using (var scope = _provider.CreateScope()) {
-        //        var provider = scope.ServiceProvider;
-        //        var connection = provider.GetRequiredService<IStorageConnection>();
-
-        //        return await connection.GetCronJobsAsync();
-        //    }
-        //}
-
-        private CronJob[] GetJobsAsync() {
-            return new CronJob[] {
-                new CronJob {
-                     Id= Guid.NewGuid().ToString(),
-                     Cron= "* * * * *",
-                     Name="Cap.Messages",
-                     TypeName = null
-                }
-            };
+        private CronJob[] GetJobs() {
+            var cronJobs = new List<CronJob>();
+            var entries = _jobRegistry.Build() ?? new CronJobRegistry.Entry[0];
+            foreach (var entry in entries) {
+                cronJobs.Add(new CronJob {
+                    Name = entry.Name,
+                    TypeName = entry.JobType.AssemblyQualifiedName,
+                    Cron = entry.Cron,
+                    LastRun = DateTime.MinValue
+                });
+            }
+            return cronJobs.ToArray();
         }
 
         private ComputedCronJob[] Compute(IEnumerable<CronJob> jobs, CronJobRegistry.Entry[] entries)
