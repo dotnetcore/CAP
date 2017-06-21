@@ -6,10 +6,10 @@ using Cap.Consistency.Abstractions.ModelBinding;
 using Cap.Consistency.Consumer;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Internal;
+using Cap.Consistency.Job;
 using Cap.Consistency.Store;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
 {
     /// <summary>
@@ -34,18 +34,43 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">The services available in the application.</param>
         /// <param name="setupAction">An action to configure the <see cref="ConsistencyOptions"/>.</param>
         /// <returns>An <see cref="ConsistencyBuilder"/> for application services.</returns>
-        public static ConsistencyBuilder AddConsistency(this IServiceCollection services, Action<ConsistencyOptions> setupAction) {
-            services.TryAddSingleton<ConsistencyMarkerService>();
+        public static ConsistencyBuilder AddConsistency(
+            this IServiceCollection services,
+            Action<ConsistencyOptions> setupAction) {
 
+            services.TryAddSingleton<ConsistencyMarkerService>();
             services.Configure(setupAction);
 
-            var IConsumerListenerServices = new Dictionary<Type, Type>();
+            AddConsumerServices(services);
+
+            services.TryAddSingleton<IConsumerExcutorSelector, ConsumerExcutorSelector>();
+            services.TryAddSingleton<IModelBinder, DefaultModelBinder>();
+            services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
+            services.TryAddSingleton<MethodMatcherCache>();
+
+            services.TryAddScoped<ConsistencyMessageManager>();
+
+            services.AddSingleton<IProcessingServer, ConsumerHandler>();
+            services.AddSingleton<IProcessingServer, JobProcessingServer>();
+            services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
+
+            services.TryAddTransient<IJobProcessor, CronJobProcessor>();
+            services.TryAddSingleton<IJob, CapJob>();
+            services.TryAddTransient<DefaultCronJobRegistry>();
+
+            return new ConsistencyBuilder(services);
+        }
+
+        private static void AddConsumerServices(IServiceCollection services) {
+            var consumerListenerServices = new Dictionary<Type, Type>();
             foreach (var rejectedServices in services) {
-                if (rejectedServices.ImplementationType != null && typeof(IConsumerService).IsAssignableFrom(rejectedServices.ImplementationType))
-                    IConsumerListenerServices.Add(typeof(IConsumerService), rejectedServices.ImplementationType);
+                if (rejectedServices.ImplementationType != null
+                    && typeof(IConsumerService).IsAssignableFrom(rejectedServices.ImplementationType))
+
+                    consumerListenerServices.Add(typeof(IConsumerService), rejectedServices.ImplementationType);
             }
 
-            foreach (var service in IConsumerListenerServices) {
+            foreach (var service in consumerListenerServices) {
                 services.AddSingleton(service.Key, service.Value);
             }
 
@@ -55,23 +80,6 @@ namespace Microsoft.Extensions.DependencyInjection
                     services.AddSingleton(typeof(IConsumerService), type);
                 }
             }
-
-            services.TryAddSingleton<IConsumerExcutorSelector, ConsumerExcutorSelector>();
-            services.TryAddSingleton<IModelBinder, DefaultModelBinder>();
-            services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
-            services.TryAddSingleton<MethodMatcherCache>();
-
-            services.TryAddSingleton(typeof(ITopicServer), typeof(ConsumerHandler));
-
-            return new ConsistencyBuilder(services);
-        }
-
-
-        public static ConsistencyBuilder AddMessageStore<T>(this ConsistencyBuilder build)
-            where T : class, IConsistencyMessageStore {
-            build.Services.AddScoped<IConsistencyMessageStore, T>();
-            build.Services.TryAddScoped<ConsistencyMessageManager>();
-            return build;
         }
     }
 }
