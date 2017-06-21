@@ -27,8 +27,8 @@ namespace Microsoft.AspNetCore.Builder
             }
 
             var provider = app.ApplicationServices;
-            var bootstrapper = provider.GetRequiredService<ITopicServer>();
-            bootstrapper.Start();
+            var bootstrapper = provider.GetRequiredService<IBootstrapper>();
+            bootstrapper.BootstrapAsync();
             return app;
         }
     }

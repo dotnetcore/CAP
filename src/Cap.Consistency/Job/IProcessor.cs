@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Cap.Consistency.Job
 {
-    public interface IProcessor
+    public interface IJobProcessor
     {
         Task ProcessAsync(ProcessingContext context);
     }
