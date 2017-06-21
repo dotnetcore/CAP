@@ -6,13 +6,13 @@ using Microsoft.Extensions.Logging;
 
 namespace Cap.Consistency.Job
 {
-    public class InfiniteRetryProcessor : IProcessor
+    public class InfiniteRetryProcessor : IJobProcessor
     {
-        private IProcessor _inner;
+        private IJobProcessor _inner;
         private ILogger _logger;
 
         public InfiniteRetryProcessor(
-            IProcessor inner,
+            IJobProcessor inner,
             ILoggerFactory loggerFactory) {
             _inner = inner;
             _logger = loggerFactory.CreateLogger<InfiniteRetryProcessor>();
