@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Cap.Consistency;
 using Cap.Consistency.Consumer;
 using Cap.Consistency.Kafka;
-using Cap.Consistency.Producer;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Sample.Kafka.Controllers
