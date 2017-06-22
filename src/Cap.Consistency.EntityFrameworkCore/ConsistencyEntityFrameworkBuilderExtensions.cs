@@ -1,5 +1,5 @@
-﻿using Cap.Consistency.EntityFrameworkCore;
-using Cap.Consistency.Store;
+﻿using Cap.Consistency;
+using Cap.Consistency.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 namespace Microsoft.Extensions.DependencyInjection

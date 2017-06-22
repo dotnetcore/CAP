@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
-using Cap.Consistency.Store;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cap.Consistency.EntityFrameworkCore
@@ -125,6 +125,24 @@ namespace Cap.Consistency.EntityFrameworkCore
             }
             return OperateResult.Success;
         }
+
+        public Task<ConsistencyMessage> GetFirstEnqueuedMessageAsync(CancellationToken cancellationToken) {
+            cancellationToken.ThrowIfCancellationRequested();
+            return MessageSet.AsNoTracking().Where(x => x.Status == MessageStatus.WaitForSend).FirstOrDefaultAsync(cancellationToken);
+        }
+
+        //public void ChangeState(ConsistencyMessage message, MessageStatus status) {
+        //    Context.Attach(message);
+        //    message.Status = status;
+        //    Context.Update(message);
+        //    try {
+        //        await SaveChanges(cancellationToken);
+        //    }
+        //    catch (DbUpdateConcurrencyException ex) {
+        //        return OperateResult.Failed(new OperateError() { Code = "DbUpdateConcurrencyException", Description = ex.Message });
+        //    }
+        //    return OperateResult.Success;
+        //}
 
         /// <summary>
         /// Gets or sets a flag indicating if changes should be persisted after CreateAsync, UpdateAsync and DeleteAsync are called.
