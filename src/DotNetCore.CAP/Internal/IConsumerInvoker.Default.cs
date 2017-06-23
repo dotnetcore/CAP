@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class ConsumerInvoker : IConsumerInvoker
+    public class DefaultConsumerInvoker : IConsumerInvoker
     {
         protected readonly ILogger _logger;
         protected readonly IServiceProvider _serviceProvider;
@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Internal
         private readonly ObjectMethodExecutor _executor;
         protected readonly ConsumerContext _consumerContext;
 
-        public ConsumerInvoker(ILogger logger,
+        public DefaultConsumerInvoker(ILogger logger,
             IServiceProvider serviceProvider,
             IModelBinder modelBinder,
             ConsumerContext consumerContext)
