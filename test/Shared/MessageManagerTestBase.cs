@@ -4,15 +4,15 @@
 //using System.Linq.Expressions;
 //using System.Security.Claims;
 //using System.Threading.Tasks;
-//using Cap.Consistency.Infrastructure;
-//using Cap.Consistency.Store;
+//using DotNetCore.CAP.Infrastructure;
+//using DotNetCore.CAP.Store;
 //using Microsoft.AspNetCore.Builder;
 //using Microsoft.AspNetCore.Http;
 //using Microsoft.Extensions.DependencyInjection;
 //using Microsoft.Extensions.Logging;
 //using Xunit;
 
-//namespace Cap.Consistency.Test
+//namespace DotNetCore.CAP.Test
 //{
 //    public abstract class MessageManagerTestBase<TMessage> : MessageManagerTestBase<TMessage, string>
 //        where TMessage : ConsistencyMessage

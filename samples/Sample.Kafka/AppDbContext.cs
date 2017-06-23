@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Cap.Consistency.Infrastructure;
+using DotNetCore.CAP.Infrastructure;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 

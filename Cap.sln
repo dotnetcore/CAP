@@ -1,13 +1,16 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.6
+VisualStudioVersion = 15.0.26430.13
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9B2AE124-6636-4DE9-83A3-70360DABD0C4}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{57A8A8E5-5715-41BF-A0A6-46B819933FBC}"
+	ProjectSection(SolutionItems) = preProject
+		CAP.vssettings = CAP.vssettings
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{9E5A7F49-8E31-4A71-90CC-1DA9AEDA99EE}"
 	ProjectSection(SolutionItems) = preProject
@@ -18,21 +21,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Shared", "Shared", "{9E5A7F
 		{82A7F48D-3B50-4B1E-B82E-3ADA8210C358} = {82A7F48D-3B50-4B1E-B82E-3ADA8210C358}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cap.Consistency", "src\Cap.Consistency\Cap.Consistency.csproj", "{E8AF8611-0EA4-4B19-BC48-87C57A87DC66}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP", "src\DotNetCore.CAP\DotNetCore.CAP.csproj", "{E8AF8611-0EA4-4B19-BC48-87C57A87DC66}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cap.Consistency.Test", "test\Cap.Consistency.Test\Cap.Consistency.Test.csproj", "{3A444CF8-1611-407F-8D32-5D0CDC3DD49D}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cap.Consistency.EntityFrameworkCore", "src\Cap.Consistency.EntityFrameworkCore\Cap.Consistency.EntityFrameworkCore.csproj", "{96111249-C4C3-4DC9-A887-32D583723AB1}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cap.Consistency.EntityFrameworkCore.Test", "test\Cap.Consistency.EntityFrameworkCore.Test\Cap.Consistency.EntityFrameworkCore.Test.csproj", "{7442C942-1DDC-40E4-8F1B-654E721EAA45}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.EntityFrameworkCore", "src\DotNetCore.CAP.EntityFrameworkCore\DotNetCore.CAP.EntityFrameworkCore.csproj", "{96111249-C4C3-4DC9-A887-32D583723AB1}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "samples", "samples", "{3A6B6931-A123-477A-9469-8B468B5385AF}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.Kafka", "samples\Sample.Kafka\Sample.Kafka.csproj", "{2F095ED9-5BC9-4512-9013-A47685FB2508}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cap.Consistency.Kafka", "src\Cap.Consistency.Kafka\Cap.Consistency.Kafka.csproj", "{C42CDE33-0878-4BA0-96F2-4CB7C8FDEAAD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.Kafka", "src\DotNetCore.CAP.Kafka\DotNetCore.CAP.Kafka.csproj", "{C42CDE33-0878-4BA0-96F2-4CB7C8FDEAAD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cap.Consistency.RabbitMQ", "src\Cap.Consistency.RabbitMQ\Cap.Consistency.RabbitMQ.csproj", "{9961B80E-0718-4280-B2A0-271B003DE26B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.RabbitMQ", "src\DotNetCore.CAP.RabbitMQ\DotNetCore.CAP.RabbitMQ.csproj", "{9961B80E-0718-4280-B2A0-271B003DE26B}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{10C0818D-9160-4B80-BB86-DDE925B64D43}"
 	ProjectSection(SolutionItems) = preProject
@@ -46,6 +45,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{10C0818D
 		build\version.props = build\version.props
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.EntityFrameworkCore.Test", "test\DotNetCore.CAP.EntityFrameworkCore.Test\DotNetCore.CAP.EntityFrameworkCore.Test.csproj", "{69370370-9873-4D6A-965D-D1E16694047D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.Test", "test\DotNetCore.CAP.Test\DotNetCore.CAP.Test.csproj", "{F608B509-A99B-4AC7-8227-42051DD4A578}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -56,18 +59,10 @@ Global
 		{E8AF8611-0EA4-4B19-BC48-87C57A87DC66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E8AF8611-0EA4-4B19-BC48-87C57A87DC66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E8AF8611-0EA4-4B19-BC48-87C57A87DC66}.Release|Any CPU.Build.0 = Release|Any CPU
-		{3A444CF8-1611-407F-8D32-5D0CDC3DD49D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{3A444CF8-1611-407F-8D32-5D0CDC3DD49D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{3A444CF8-1611-407F-8D32-5D0CDC3DD49D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{3A444CF8-1611-407F-8D32-5D0CDC3DD49D}.Release|Any CPU.Build.0 = Release|Any CPU
 		{96111249-C4C3-4DC9-A887-32D583723AB1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{96111249-C4C3-4DC9-A887-32D583723AB1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96111249-C4C3-4DC9-A887-32D583723AB1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96111249-C4C3-4DC9-A887-32D583723AB1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7442C942-1DDC-40E4-8F1B-654E721EAA45}.Release|Any CPU.Build.0 = Release|Any CPU
 		{2F095ED9-5BC9-4512-9013-A47685FB2508}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2F095ED9-5BC9-4512-9013-A47685FB2508}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2F095ED9-5BC9-4512-9013-A47685FB2508}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -80,6 +75,14 @@ Global
 		{9961B80E-0718-4280-B2A0-271B003DE26B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9961B80E-0718-4280-B2A0-271B003DE26B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9961B80E-0718-4280-B2A0-271B003DE26B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69370370-9873-4D6A-965D-D1E16694047D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69370370-9873-4D6A-965D-D1E16694047D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69370370-9873-4D6A-965D-D1E16694047D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69370370-9873-4D6A-965D-D1E16694047D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F608B509-A99B-4AC7-8227-42051DD4A578}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F608B509-A99B-4AC7-8227-42051DD4A578}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F608B509-A99B-4AC7-8227-42051DD4A578}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F608B509-A99B-4AC7-8227-42051DD4A578}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -87,11 +90,11 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{9E5A7F49-8E31-4A71-90CC-1DA9AEDA99EE} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 		{E8AF8611-0EA4-4B19-BC48-87C57A87DC66} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
-		{3A444CF8-1611-407F-8D32-5D0CDC3DD49D} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 		{96111249-C4C3-4DC9-A887-32D583723AB1} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
-		{7442C942-1DDC-40E4-8F1B-654E721EAA45} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 		{2F095ED9-5BC9-4512-9013-A47685FB2508} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 		{C42CDE33-0878-4BA0-96F2-4CB7C8FDEAAD} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{9961B80E-0718-4280-B2A0-271B003DE26B} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{69370370-9873-4D6A-965D-D1E16694047D} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
+		{F608B509-A99B-4AC7-8227-42051DD4A578} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 	EndGlobalSection
 EndGlobal

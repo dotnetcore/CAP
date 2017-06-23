@@ -1,7 +1,7 @@
 ﻿using System;
-using Cap.Consistency.Infrastructure;
+using DotNetCore.CAP.Infrastructure;
 
-namespace Cap.Consistency.Test
+namespace DotNetCore.CAP.Test
 {
 
 }

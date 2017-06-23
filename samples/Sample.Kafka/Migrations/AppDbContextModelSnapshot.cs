@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Sample.Kafka;
-using Cap.Consistency.Infrastructure;
+using DotNetCore.CAP.Infrastructure;
 
 namespace Sample.Kafka.Migrations
 {
@@ -17,7 +17,7 @@ namespace Sample.Kafka.Migrations
                 .HasAnnotation("ProductVersion", "1.1.2")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("Cap.Consistency.Infrastructure.ConsistencyMessage", b =>
+            modelBuilder.Entity("DotNetCore.CAP.Infrastructure.ConsistencyMessage", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();

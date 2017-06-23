@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Cap.Consistency;
-using Cap.Consistency.Consumer;
-using Cap.Consistency.Kafka;
+using DotNetCore.CAP;
+using DotNetCore.CAP.Kafka;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Sample.Kafka.Controllers
@@ -10,9 +9,9 @@ namespace Sample.Kafka.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller, IConsumerService
     {
-        private readonly IProducerClient _producer;
+        private readonly ICapProducerService _producer;
 
-        public ValuesController(IProducerClient producer) {
+        public ValuesController(ICapProducerService producer) {
             _producer = producer;
         }
 
