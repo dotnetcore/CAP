@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Abstractions.ModelBinding;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
@@ -22,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>An <see cref="CapBuilder"/> for application services.</returns>
         public static CapBuilder AddConsistency(this IServiceCollection services)
         {
-            services.AddConsistency(x => new ConsistencyOptions());
+            services.AddConsistency(x => new CapOptions());
 
             return new CapBuilder(services);
         }
@@ -31,18 +32,18 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Adds and configures the consistence services for the consitence.
         /// </summary>
         /// <param name="services">The services available in the application.</param>
-        /// <param name="setupAction">An action to configure the <see cref="ConsistencyOptions"/>.</param>
+        /// <param name="setupAction">An action to configure the <see cref="CapOptions"/>.</param>
         /// <returns>An <see cref="CapBuilder"/> for application services.</returns>
         public static CapBuilder AddConsistency(
             this IServiceCollection services,
-            Action<ConsistencyOptions> setupAction)
+            Action<CapOptions> setupAction)
         {
             services.TryAddSingleton<CapMarkerService>();
             services.Configure(setupAction);
 
             AddConsumerServices(services);
 
-            services.TryAddSingleton<IConsumerExcutorSelector, ConsumerExcutorSelector>();
+            services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
             services.TryAddSingleton<IModelBinder, DefaultModelBinder>();
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();

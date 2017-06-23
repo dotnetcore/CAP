@@ -9,10 +9,10 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     public class RabbitMQProducerClient : ICapProducerService
     {
-        private readonly ConsistencyOptions _options;
+        private readonly CapOptions _options;
         private readonly ILogger _logger;
 
-        public RabbitMQProducerClient(IOptions<ConsistencyOptions> options, ILoggerFactory loggerFactory)
+        public RabbitMQProducerClient(IOptions<CapOptions> options, ILoggerFactory loggerFactory)
         {
             _options = options.Value;
             _logger = loggerFactory.CreateLogger(nameof(RabbitMQProducerClient));

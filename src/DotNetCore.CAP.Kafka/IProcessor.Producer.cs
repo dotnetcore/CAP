@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Kafka
 {
     public class KafkaJobProcessor : IJobProcessor
     {
-        private readonly ConsistencyOptions _options;
+        private readonly CapOptions _options;
         private readonly CancellationTokenSource _cts;
 
         private readonly IServiceProvider _provider;
@@ -26,7 +26,7 @@ namespace DotNetCore.CAP.Kafka
         private TimeSpan _pollingDelay;
 
         public KafkaJobProcessor(
-            IOptions<ConsistencyOptions> options,
+            IOptions<CapOptions> options,
             ILogger<KafkaJobProcessor> logger,
             IServiceProvider provider)
         {

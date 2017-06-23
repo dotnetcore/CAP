@@ -5,9 +5,9 @@ namespace DotNetCore.CAP.Job
 {
     public class DefaultCronJobRegistry : CronJobRegistry
     {
-        private readonly ConsistencyOptions _options;
+        private readonly CapOptions _options;
 
-        public DefaultCronJobRegistry(IOptions<ConsistencyOptions> options)
+        public DefaultCronJobRegistry(IOptions<CapOptions> options)
         {
             _options = options.Value;
 

@@ -3,13 +3,13 @@ using System.Threading;
 
 namespace DotNetCore.CAP
 {
-    public class TopicContext
+    public class CapStartContext
     {
-        public TopicContext()
+        public CapStartContext()
         {
         }
 
-        public TopicContext(IServiceProvider provider, CancellationToken cancellationToken)
+        public CapStartContext(IServiceProvider provider, CancellationToken cancellationToken)
         {
             ServiceProvider = provider;
             CancellationToken = cancellationToken;

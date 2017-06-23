@@ -18,7 +18,7 @@ namespace DotNetCore.CAP
         private IServiceProvider _provider;
         private IJobProcessor[] _processors;
         private CancellationTokenSource _cts;
-        private ConsistencyOptions _options;
+        private CapOptions _options;
         private ProcessingContext _context;
         private DefaultCronJobRegistry _defaultJobRegistry;
         private Task _compositeTask;
@@ -29,7 +29,7 @@ namespace DotNetCore.CAP
             ILoggerFactory loggerFactory,
             IServiceProvider provider,
             DefaultCronJobRegistry defaultJobRegistry,
-            IOptions<ConsistencyOptions> options)
+            IOptions<CapOptions> options)
         {
             _logger = logger;
             _loggerFactory = loggerFactory;

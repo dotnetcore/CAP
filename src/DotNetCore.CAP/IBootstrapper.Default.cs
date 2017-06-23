@@ -17,7 +17,7 @@ namespace DotNetCore.CAP
         private Task _bootstrappingTask;
 
         public DefaultBootstrapper(
-            IOptions<ConsistencyOptions> options,
+            IOptions<CapOptions> options,
             ICapMessageStore storage,
             IApplicationLifetime appLifetime,
             IServiceProvider provider)
@@ -41,7 +41,7 @@ namespace DotNetCore.CAP
             });
         }
 
-        protected ConsistencyOptions Options { get; }
+        protected CapOptions Options { get; }
 
         protected ICapMessageStore Storage { get; }
 

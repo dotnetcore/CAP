@@ -7,14 +7,14 @@ namespace DotNetCore.CAP.Internal
 {
     public class MethodMatcherCache
     {
-        private readonly IConsumerExcutorSelector _selector;
+        private readonly IConsumerServiceSelector _selector;
 
-        public MethodMatcherCache(IConsumerExcutorSelector selector)
+        public MethodMatcherCache(IConsumerServiceSelector selector)
         {
             _selector = selector;
         }
 
-        public ConcurrentDictionary<string, ConsumerExecutorDescriptor> GetCandidatesMethods(TopicContext routeContext)
+        public ConcurrentDictionary<string, ConsumerExecutorDescriptor> GetCandidatesMethods(CapStartContext routeContext)
         {
             if (Entries.Count == 0)
             {

@@ -3,26 +3,39 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class ConsumerExcutorSelector : IConsumerExcutorSelector
+    /// <summary>
+    ///  A default <see cref="IConsumerServiceSelector"/> implementation.
+    /// </summary>
+    public class DefaultConsumerServiceSelector : IConsumerServiceSelector
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public ConsumerExcutorSelector(IServiceProvider serviceProvider)
+        /// <summary>
+        /// Creates a new <see cref="DefaultConsumerServiceSelector"/>.
+        /// </summary>
+        /// <param name="serviceProvider"></param>
+        public DefaultConsumerServiceSelector(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
-        public ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="key"></param>
+        /// <param name="executeDescriptor"></param>
+        /// <returns></returns>
+        public ConsumerExecutorDescriptor SelectBestCandidate(string key,
+            IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
             return executeDescriptor.FirstOrDefault(x => x.Attribute.Name == key);
         }
 
-        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(TopicContext context)
+        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(CapStartContext context)
         {
             var consumerServices = context.ServiceProvider.GetServices<IConsumerService>();
 

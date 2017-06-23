@@ -20,13 +20,13 @@ namespace DotNetCore.CAP
         private readonly ILogger _logger;
 
         private readonly MethodMatcherCache _selector;
-        private readonly ConsistencyOptions _options;
+        private readonly CapOptions _options;
         private readonly ICapMessageStore _messageStore;
         private readonly CancellationTokenSource _cts;
 
         public event EventHandler<ConsistencyMessage> MessageReceieved;
 
-        private TopicContext _context;
+        private CapStartContext _context;
         private Task _compositeTask;
         private bool _disposed;
 
@@ -37,7 +37,7 @@ namespace DotNetCore.CAP
             ILoggerFactory loggerFactory,
             ICapMessageStore messageStore,
             MethodMatcherCache selector,
-            IOptions<ConsistencyOptions> options) {
+            IOptions<CapOptions> options) {
             _selector = selector;
             _logger = loggerFactory.CreateLogger<ConsumerHandler>();
             _loggerFactory = loggerFactory;
@@ -54,7 +54,7 @@ namespace DotNetCore.CAP
         }
 
         public void Start() {
-            _context = new TopicContext(_serviceProvider, _cts.Token);
+            _context = new CapStartContext(_serviceProvider, _cts.Token);
 
             var matchs = _selector.GetCandidatesMethods(_context);
 
