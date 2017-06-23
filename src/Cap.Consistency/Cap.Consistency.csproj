@@ -20,6 +20,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.1" />
     <PackageReference Include="ncrontab" Version="3.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.2" />
+    <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

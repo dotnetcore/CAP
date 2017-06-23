@@ -7,7 +7,6 @@ using Cap.Consistency.Consumer;
 using Cap.Consistency.Infrastructure;
 using Cap.Consistency.Internal;
 using Cap.Consistency.Job;
-using Cap.Consistency.Store;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -48,8 +47,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();
 
-            services.TryAddScoped<ConsistencyMessageManager>();
-
             services.AddSingleton<IProcessingServer, ConsumerHandler>();
             services.AddSingleton<IProcessingServer, JobProcessingServer>();
             services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
@@ -57,6 +54,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddTransient<IJobProcessor, CronJobProcessor>();
             services.TryAddSingleton<IJob, CapJob>();
             services.TryAddTransient<DefaultCronJobRegistry>();
+
+            services.TryAddScoped<IProducerClient, DefaultProducerClient>();
 
             return new ConsistencyBuilder(services);
         }

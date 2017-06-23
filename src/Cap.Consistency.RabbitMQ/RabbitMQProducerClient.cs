@@ -1,7 +1,6 @@
 ﻿using System.Text;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
-using Cap.Consistency.Producer;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;

@@ -10,5 +10,7 @@ namespace Cap.Consistency.Infrastructure
         public string BrokerUrlList { get; set; } = "localhost:9092";
 
         public string CronExp { get; set; } = Cron.Minutely();
+
+        public int PollingDelay { get; set; } = 8;
     }
 }

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Cap.Consistency.Infrastructure;
-using Cap.Consistency.Store;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -20,7 +19,7 @@ namespace Cap.Consistency
 
         public DefaultBootstrapper(
             IOptions<ConsistencyOptions> options,
-            ConsistencyMessageManager storage,
+            IConsistencyMessageStore  storage,
             IApplicationLifetime appLifetime,
             IServiceProvider provider) {
 
@@ -42,7 +41,7 @@ namespace Cap.Consistency
 
         protected ConsistencyOptions Options { get; }
 
-        protected ConsistencyMessageManager Storage { get; }
+        protected IConsistencyMessageStore  Storage { get; }
 
         protected IEnumerable<IProcessingServer> Servers { get; }
 
@@ -58,6 +57,7 @@ namespace Cap.Consistency
             if (_cts.IsCancellationRequested) return;
 
             await BootstrapCoreAsync();
+
             if (_cts.IsCancellationRequested) return;
 
             foreach (var item in Servers) {

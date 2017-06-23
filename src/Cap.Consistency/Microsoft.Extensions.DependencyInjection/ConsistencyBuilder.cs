@@ -1,6 +1,6 @@
 ﻿using System;
+using Cap.Consistency;
 using Cap.Consistency.Job;
-using Cap.Consistency.Store;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -44,6 +44,12 @@ namespace Microsoft.Extensions.DependencyInjection
             where T : class, IJob {
 
             return AddSingleton<IJob, T>();
+        }
+
+        public virtual ConsistencyBuilder AddProducerClient<T>()
+            where T:class, IProducerClient {
+
+            return AddScoped(typeof(IProducerClient), typeof(T));
         }
     }
 }

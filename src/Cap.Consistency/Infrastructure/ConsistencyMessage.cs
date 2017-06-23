@@ -5,7 +5,7 @@ namespace Cap.Consistency.Infrastructure
     /// <summary>
     /// The default implementation of <see cref="ConsistencyMessage{TKey}"/> which uses a string as a primary key.
     /// </summary>
-    public class ConsistencyMessage 
+    public class ConsistencyMessage
     {
         /// <summary>
         /// Initializes a new instance of <see cref="ConsistencyMessage"/>.
@@ -24,11 +24,15 @@ namespace Cap.Consistency.Infrastructure
 
         public DateTime SendTime { get; set; }
 
+        public string Topic { get; set; }
+
         public string Payload { get; set; }
 
         public MessageStatus Status { get; set; }
 
         public virtual DateTime? UpdateTime { get; set; }
+
+        public byte[] RowVersion { get; set; }
     }
 
     /// <summary>
@@ -38,7 +42,10 @@ namespace Cap.Consistency.Infrastructure
     {
         Deleted = 0,
         WaitForSend = 1,
+        Processing = 2,
         RollbackSuccessed = 3,
-        RollbackFailed = 4
+        RollbackFailed = 4,
+        Successed = 5,
+        Received = 6
     }
 }
