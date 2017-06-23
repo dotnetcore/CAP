@@ -2,6 +2,9 @@
 
 namespace DotNetCore.CAP.Abstractions
 {
+    /// <summary>
+    /// a context of consumer invoker.
+    /// </summary>
     public class ConsumerInvokerContext
     {
         public ConsumerInvokerContext(ConsumerContext consumerContext)

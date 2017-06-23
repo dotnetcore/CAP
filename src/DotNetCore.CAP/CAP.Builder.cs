@@ -49,7 +49,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return AddSingleton<IJob, T>();
         }
 
-        public virtual CapBuilder AddProducerClient<T>()
+        public virtual CapBuilder AddProducerService<T>()
             where T : class, ICapProducerService
         {
             return AddScoped(typeof(ICapProducerService), typeof(T));
