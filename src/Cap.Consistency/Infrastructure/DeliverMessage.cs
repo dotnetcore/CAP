@@ -19,15 +19,4 @@ namespace Cap.Consistency.Infrastructure
 
         public string Value { get; set; }
     }
-
-
-    public class KafkaDeliverMessage : DeliverMessage
-    {
-
-        public int Partition { get; set; }
-
-        public long Offset { get; set; }
-
-        public string MessageId { get; set; }
-    }
 }
