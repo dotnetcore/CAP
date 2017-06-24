@@ -21,7 +21,7 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         /// </para>
         /// <para>
         /// A model binder that completes successfully should set <see cref="ModelBindingContext.Result"/> to
-        /// a value returned from <see cref="ModelBindingResult.Success"/>. 
+        /// a value returned from <see cref="ModelBindingResult.Success"/>.
         /// </para>
         /// </returns>
         Task BindModelAsync(ModelBindingContext bindingContext);

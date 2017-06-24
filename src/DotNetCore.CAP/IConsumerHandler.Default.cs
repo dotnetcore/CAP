@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
@@ -24,7 +23,7 @@ namespace DotNetCore.CAP
         private readonly ICapMessageStore _messageStore;
         private readonly CancellationTokenSource _cts;
 
-        public event EventHandler<ConsistencyMessage> MessageReceieved;
+        public event EventHandler<CapMessage> MessageReceieved;
 
         private CapStartContext _context;
         private Task _compositeTask;
@@ -37,7 +36,8 @@ namespace DotNetCore.CAP
             ILoggerFactory loggerFactory,
             ICapMessageStore messageStore,
             MethodMatcherCache selector,
-            IOptions<CapOptions> options) {
+            IOptions<CapOptions> options)
+        {
             _selector = selector;
             _logger = loggerFactory.CreateLogger<ConsumerHandler>();
             _loggerFactory = loggerFactory;
@@ -49,23 +49,29 @@ namespace DotNetCore.CAP
             _cts = new CancellationTokenSource();
         }
 
-        protected virtual void OnMessageReceieved(ConsistencyMessage message) {
+        protected virtual void OnMessageReceieved(CapMessage message)
+        {
             MessageReceieved?.Invoke(this, message);
         }
 
-        public void Start() {
+        public void Start()
+        {
             _context = new CapStartContext(_serviceProvider, _cts.Token);
 
             var matchs = _selector.GetCandidatesMethods(_context);
 
             var groupingMatchs = matchs.GroupBy(x => x.Value.Attribute.GroupOrExchange);
 
-            foreach (var matchGroup in groupingMatchs) {
-                Task.Factory.StartNew(() => {
-                    using (var client = _consumerClientFactory.Create(matchGroup.Key, _options.BrokerUrlList)) {
+            foreach (var matchGroup in groupingMatchs)
+            {
+                Task.Factory.StartNew(() =>
+                {
+                    using (var client = _consumerClientFactory.Create(matchGroup.Key, _options.BrokerUrlList))
+                    {
                         client.MessageReceieved += OnMessageReceieved;
 
-                        foreach (var item in matchGroup) {
+                        foreach (var item in matchGroup)
+                        {
                             client.Subscribe(item.Key);
                         }
 
@@ -76,19 +82,17 @@ namespace DotNetCore.CAP
             _compositeTask = Task.CompletedTask;
         }
 
-        public virtual void OnMessageReceieved(object sender, DeliverMessage message) {
-            var consistencyMessage = new ConsistencyMessage() {
-                Topic = message.MessageKey,
-                Payload = "Reveived:" + Encoding.UTF8.GetString(message.Body),
-                Status = MessageStatus.Received
-            };
+        public virtual void OnMessageReceieved(object sender, MessageBase message)
+        {
+            var capMessage = new CapReceivedMessage(message);
 
-            _logger.LogInformation("message receieved message topic name: " + consistencyMessage.Id);
+            _logger.LogInformation("message receieved message topic name: " + capMessage.Id);
 
-            _messageStore.CreateAsync(consistencyMessage, _cts.Token).Wait();
+            _messageStore.StoreReceivedMessageAsync(capMessage).Wait();
 
-            try {
-                var executeDescriptor = _selector.GetTopicExector(message.MessageKey);
+            try
+            {
+                var executeDescriptor = _selector.GetTopicExector(message.KeyName);
 
                 var consumerContext = new ConsumerContext(executeDescriptor, message);
 
@@ -96,15 +100,18 @@ namespace DotNetCore.CAP
 
                 invoker.InvokeAsync();
 
-                _messageStore.UpdateAsync(consistencyMessage, _cts.Token).Wait();
+                _messageStore.UpdateReceivedMessageAsync(capMessage).Wait();
             }
-            catch (Exception ex) {
+            catch (Exception ex)
+            {
                 _logger.LogError("exception raised when excute method : " + ex.Message);
             }
         }
 
-        public void Dispose() {
-            if (_disposed) {
+        public void Dispose()
+        {
+            if (_disposed)
+            {
                 return;
             }
             _disposed = true;
@@ -112,12 +119,15 @@ namespace DotNetCore.CAP
             _logger.ServerShuttingDown();
             _cts.Cancel();
 
-            try {
+            try
+            {
                 _compositeTask.Wait((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
             }
-            catch (AggregateException ex) {
+            catch (AggregateException ex)
+            {
                 var innerEx = ex.InnerExceptions[0];
-                if (!(innerEx is OperationCanceledException)) {
+                if (!(innerEx is OperationCanceledException))
+                {
                     _logger.ExpectedOperationCanceledException(innerEx);
                 }
             }

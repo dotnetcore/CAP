@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -13,7 +12,6 @@ namespace DotNetCore.CAP
     {
         private readonly ICapMessageStore _store;
         private readonly ILogger _logger;
-        private readonly CancellationTokenSource _cts;
 
         public DefaultProducerService(
             ICapMessageStore store,
@@ -21,7 +19,6 @@ namespace DotNetCore.CAP
         {
             _store = store;
             _logger = logger;
-            _cts = new CancellationTokenSource();
         }
 
         public Task SendAsync(string topic, string content)
@@ -45,20 +42,17 @@ namespace DotNetCore.CAP
 
         private async Task StoreMessage(string topic, string content)
         {
-            var message = new ConsistencyMessage
+            var message = new CapSentMessage
             {
-                Topic = topic,
-                Payload = content
+                KeyName = topic,
+                Content = content
             };
 
-            await _store.CreateAsync(message, _cts.Token);
+            await _store.StoreSentMessageAsync(message);
 
             WaitHandleEx.PulseEvent.Set();
 
-            if (_logger.IsEnabled(LogLevel.Debug))
-            {
-                _logger.LogDebug("Enqueuing a topic to be store. topic:{topic}, content:{content}", topic, content);
-            }
+            _logger.EnqueuingMessage(topic, content);
         }
     }
 }

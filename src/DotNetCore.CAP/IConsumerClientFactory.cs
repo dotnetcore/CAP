@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DotNetCore.CAP
+﻿namespace DotNetCore.CAP
 {
     /// <summary>
     /// Consumer client factory to create consumer client instance.

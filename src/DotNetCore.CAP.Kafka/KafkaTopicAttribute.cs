@@ -11,7 +11,8 @@ namespace DotNetCore.CAP.Kafka
             : this(topicName, partition, 0) { }
 
         public KafkaTopicAttribute(string topicName, int partition, long offset)
-            : base(topicName) {
+            : base(topicName)
+        {
             Offset = offset;
             Partition = partition;
         }
@@ -24,7 +25,8 @@ namespace DotNetCore.CAP.Kafka
 
         public bool IsOffset { get { return Offset == 0; } }
 
-        public override string ToString() {
+        public override string ToString()
+        {
             return Name;
         }
     }

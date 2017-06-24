@@ -1,5 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP
@@ -11,49 +10,40 @@ namespace DotNetCore.CAP
     public interface ICapMessageStore
     {
         /// <summary>
-        /// Finds and returns a message, if any, who has the specified <paramref name="messageId"/>.
-        /// </summary>
-        /// <param name="messageId">The message ID to search for.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-        /// <returns>
-        /// The <see cref="Task"/> that represents the asynchronous operation, containing the message matching the specified <paramref name="messageId"/> if it exists.
-        /// </returns>
-        Task<ConsistencyMessage> FindByIdAsync(string messageId, CancellationToken cancellationToken);
-
-        /// <summary>
         ///  Creates a new message in a store as an asynchronous operation.
         /// </summary>
         /// <param name="message">The message to create in the store.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="OperateResult"/> of the asynchronous query.</returns>
-        Task<OperateResult> CreateAsync(ConsistencyMessage message, CancellationToken cancellationToken);
+        Task<OperateResult> StoreSentMessageAsync(CapSentMessage message);
+
+        /// <summary>
+        /// Fetches the next message to be executed.
+        /// </summary>
+        /// <returns></returns>
+        Task<CapSentMessage> GetNextSentMessageToBeEnqueuedAsync();
 
         /// <summary>
         /// Updates a message in a store as an asynchronous operation.
         /// </summary>
         /// <param name="message">The message to update in the store.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="OperateResult"/> of the asynchronous query.</returns>
-        Task<OperateResult> UpdateAsync(ConsistencyMessage message, CancellationToken cancellationToken);
+        Task<OperateResult> UpdateSentMessageAsync(CapSentMessage message);
 
         /// <summary>
         /// Deletes a message from the store as an asynchronous operation.
         /// </summary>
         /// <param name="message">The message to delete in the store.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that represents the <see cref="OperateResult"/> of the asynchronous query.</returns>
-        Task<OperateResult> DeleteAsync(ConsistencyMessage message, CancellationToken cancellationToken);
+        Task<OperateResult> RemoveSentMessageAsync(CapSentMessage message);
 
         /// <summary>
-        /// Gets the ID for a message from the store as an asynchronous operation.
+        /// Creates a new message in a store as an asynchronous operation.
         /// </summary>
-        /// <param name="message">The message whose ID should be returned.</param>
-        /// <param name="cancellationToken">The <see cref="CancellationToken"/> used to propagate notifications that the operation should be canceled.</param>
-        /// <returns>A <see cref="Task{TResult}"/> that contains the ID of the message.</returns>
-        Task<string> GeConsistencyMessageIdAsync(ConsistencyMessage message, CancellationToken cancellationToken);
+        /// <param name="message"></param>
+        /// <returns></returns>
+        Task<OperateResult> StoreReceivedMessageAsync(CapReceivedMessage message);
 
-        Task<ConsistencyMessage> GetFirstEnqueuedMessageAsync(CancellationToken cancellationToken);
-
-        // void ChangeState(ConsistencyMessage message, MessageStatus status);
+        /// <summary>
+        /// Updates a message in a store as an asynchronous operation.
+        /// </summary>
+        /// <param name="message">The message to update in the store.</param>
+        Task<OperateResult> UpdateReceivedMessageAsync(CapReceivedMessage message);
     }
 }

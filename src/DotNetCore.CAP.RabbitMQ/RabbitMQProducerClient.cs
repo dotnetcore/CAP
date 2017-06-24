@@ -38,7 +38,8 @@ namespace DotNetCore.CAP.RabbitMQ
             }
         }
 
-        public Task SendAsync<T>(string topic, T contentObj) {
+        public Task SendAsync<T>(string topic, T contentObj)
+        {
             throw new NotImplementedException();
         }
     }

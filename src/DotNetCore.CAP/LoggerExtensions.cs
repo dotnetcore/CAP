@@ -17,6 +17,8 @@ namespace DotNetCore.CAP
         private static Action<ILogger, string, double, Exception> _cronJobExecuted;
         private static Action<ILogger, string, Exception> _cronJobFailed;
 
+        private static Action<ILogger, string, string, Exception> _enqueuingMessage;
+
         static LoggerExtensions()
         {
             _serverStarting = LoggerMessage.Define<int, int>(
@@ -53,6 +55,16 @@ namespace DotNetCore.CAP
                 LogLevel.Warning,
                 4,
                 "Cron job '{jobName}' failed to execute.");
+
+            _enqueuingMessage = LoggerMessage.Define<string, string>(
+                LogLevel.Debug,
+                2,
+                "Enqueuing a topic to the store. NameKey: {NameKey}. Content: {Content}");
+        }
+
+        public static void EnqueuingMessage(this ILogger logger, string nameKey, string content)
+        {
+            _enqueuingMessage(logger, nameKey, content, null);
         }
 
         public static void ServerStarting(this ILogger logger, int machineProcessorCount, int processorCount)

@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         public object Model { get; set; }
 
         /// <summary>
-        /// Gets or sets the name of the model. 
+        /// Gets or sets the name of the model.
         /// </summary>
         public string ModelName { get; set; }
 

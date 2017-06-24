@@ -13,7 +13,7 @@ namespace DotNetCore.CAP.Abstractions
         /// </summary>
         /// <param name="descriptor">consumer method descriptor. </param>
         /// <param name="message"> reveied message.</param>
-        public ConsumerContext(ConsumerExecutorDescriptor descriptor, DeliverMessage message)
+        public ConsumerContext(ConsumerExecutorDescriptor descriptor, MessageBase message)
         {
             ConsumerDescriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
             DeliverMessage = message ?? throw new ArgumentNullException(nameof(message));
@@ -27,6 +27,6 @@ namespace DotNetCore.CAP.Abstractions
         /// <summary>
         /// consumer reveived message.
         /// </summary>
-        public DeliverMessage DeliverMessage { get; set; }
+        public MessageBase DeliverMessage { get; set; }
     }
 }

@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.Kafka
 
         private Consumer<Null, string> _consumerClient;
 
-        public event EventHandler<DeliverMessage> MessageReceieved;
+        public event EventHandler<MessageBase> MessageReceieved;
 
         public IDeserializer<string> StringDeserializer { get; set; }
 
@@ -69,11 +69,10 @@ namespace DotNetCore.CAP.Kafka
 
         private void ConsumerClient_OnMessage(object sender, Message<Null, string> e)
         {
-            var message = new DeliverMessage
+            var message = new MessageBase
             {
-                MessageKey = e.Topic,
-                Value = e.Value,
-                Body = Encoding.UTF8.GetBytes(e.Value)
+                KeyName = e.Topic,
+                Content = e.Value
             };
             MessageReceieved?.Invoke(sender, message);
         }

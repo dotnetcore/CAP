@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP
 {
     /// <summary>
-    /// consumer client 
+    /// consumer client
     /// </summary>
     public interface IConsumerClient : IDisposable
     {
@@ -16,6 +14,6 @@ namespace DotNetCore.CAP
 
         void Listening(TimeSpan timeout);
 
-        event EventHandler<DeliverMessage> MessageReceieved;
+        event EventHandler<MessageBase> MessageReceieved;
     }
 }

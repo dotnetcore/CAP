@@ -24,7 +24,8 @@ namespace DotNetCore.CAP.Internal
         }
 
         /// <summary>
-        /// 
+        /// Selects the best <see cref="ConsumerExecutorDescriptor"/> candidate from <paramref name="candidates"/> for the
+        /// current message associated.
         /// </summary>
         /// <param name="key"></param>
         /// <param name="executeDescriptor"></param>

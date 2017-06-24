@@ -83,14 +83,14 @@ namespace DotNetCore.CAP.Kafka
                 var messageStore = provider.GetRequiredService<ICapMessageStore>();
                 try
                 {
-                    var message = await messageStore.GetFirstEnqueuedMessageAsync(_cts.Token);
+                    var message = await messageStore.GetNextSentMessageToBeEnqueuedAsync();
                     if (message != null)
                     {
                         var sp = Stopwatch.StartNew();
-                        message.Status = MessageStatus.Processing;
-                        await messageStore.UpdateAsync(message, _cts.Token);
+                        message.StateName = StateName.Processing;
+                        await messageStore.UpdateSentMessageAsync(message);
 
-                        var jobResult = ExecuteJob(message.Topic, message.Payload);
+                        var jobResult = ExecuteJob(message.KeyName, message.Content);
 
                         sp.Stop();
 
@@ -100,14 +100,15 @@ namespace DotNetCore.CAP.Kafka
                         }
                         else
                         {
-                            message.Status = MessageStatus.Successed;
-                            await messageStore.UpdateAsync(message, _cts.Token);
-                            //await messageStore.DeleteAsync(message, _cts.Token);
+                            //TODO ： the state will be deleted when release.
+                            message.StateName = StateName.Succeeded;
+                            await messageStore.UpdateSentMessageAsync(message);
+
                             _logger.JobExecuted(sp.Elapsed.TotalSeconds);
                         }
                     }
                 }
-                catch (Exception )
+                catch (Exception)
                 {
                     return false;
                 }

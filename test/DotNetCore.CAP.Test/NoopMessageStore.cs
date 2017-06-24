@@ -7,42 +7,32 @@ namespace DotNetCore.CAP.Test
 {
     public class NoopMessageStore : ICapMessageStore
     {
-        public Task<OperateResult> CreateAsync(ConsistencyMessage message, CancellationToken cancellationToken)
+        public Task<CapSentMessage> GetNextSentMessageToBeEnqueuedAsync()
         {
             throw new NotImplementedException();
         }
 
-        public Task<OperateResult> DeleteAsync(ConsistencyMessage message, CancellationToken cancellationToken)
+        public Task<OperateResult> RemoveSentMessageAsync(CapSentMessage message)
         {
             throw new NotImplementedException();
         }
 
-        public void Dispose()
+        public Task<OperateResult> StoreReceivedMessageAsync(CapReceivedMessage message)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ConsistencyMessage> FindByIdAsync(string messageId, CancellationToken cancellationToken)
+        public Task<OperateResult> StoreSentMessageAsync(CapSentMessage message)
         {
             throw new NotImplementedException();
         }
 
-        public Task<string> GeConsistencyMessageIdAsync(ConsistencyMessage message, CancellationToken cancellationToken)
+        public Task<OperateResult> UpdateReceivedMessageAsync(CapReceivedMessage message)
         {
             throw new NotImplementedException();
         }
 
-        public Task<ConsistencyMessage> GetFirstEnqueuedMessageAsync(CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<string> GetMessageIdAsync(ConsistencyMessage message, CancellationToken cancellationToken)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<OperateResult> UpdateAsync(ConsistencyMessage message, CancellationToken cancellationToken)
+        public Task<OperateResult> UpdateSentMessageAsync(CapSentMessage message)
         {
             throw new NotImplementedException();
         }

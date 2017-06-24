@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static CapBuilder AddEntityFrameworkStores<TContext>(this CapBuilder builder)
             where TContext : DbContext
         {
-            builder.Services.AddScoped<ICapMessageStore, ConsistencyMessageStore<TContext>>();
+            builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
 
             return builder;
         }

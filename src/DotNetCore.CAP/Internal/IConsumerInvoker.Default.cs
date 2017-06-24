@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Abstractions.ModelBinding;
@@ -41,13 +40,13 @@ namespace DotNetCore.CAP.Internal
                     {
                         var obj = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider, _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
 
-                        var bodyString = Encoding.UTF8.GetString(_consumerContext.DeliverMessage.Body);
+                        var value = _consumerContext.DeliverMessage.Content;
 
                         if (_executor.MethodParameters.Length > 0)
                         {
                             var firstParameter = _executor.MethodParameters[0];
 
-                            var bindingContext = ModelBindingContext.CreateBindingContext(bodyString,
+                            var bindingContext = ModelBindingContext.CreateBindingContext(value,
                                 firstParameter.Name, firstParameter.ParameterType);
 
                             _modelBinder.BindModelAsync(bindingContext);

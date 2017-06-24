@@ -19,7 +19,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private string _queueName;
 
-        public event EventHandler<DeliverMessage> MessageReceieved;
+        public event EventHandler<MessageBase> MessageReceieved;
 
         public RabbitMQConsumerClient(string exchange, string hostName)
         {
@@ -65,11 +65,10 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
-            var message = new DeliverMessage
+            var message = new MessageBase
             {
-                MessageKey = e.RoutingKey,
-                Body = e.Body,
-                Value = Encoding.UTF8.GetString(e.Body)
+                KeyName = e.RoutingKey,
+                Content = Encoding.UTF8.GetString(e.Body)
             };
             MessageReceieved?.Invoke(sender, message);
         }

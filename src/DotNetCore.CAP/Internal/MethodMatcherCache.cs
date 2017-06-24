@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Internal
 {
