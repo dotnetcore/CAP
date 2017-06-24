@@ -5,16 +5,16 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
-    /// Consistence extensions for <see cref="IApplicationBuilder"/>
+    /// app extensions for <see cref="IApplicationBuilder"/>
     /// </summary>
     public static class AppBuilderExtensions
     {
         ///<summary>
-        /// Enables Consistence for the current application
+        /// Enables cap for the current application
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
         /// <returns>The <see cref="IApplicationBuilder"/> instance this method extends.</returns>
-        public static IApplicationBuilder UseConsistency(this IApplicationBuilder app)
+        public static IApplicationBuilder UseCap(this IApplicationBuilder app)
         {
             if (app == null)
             {

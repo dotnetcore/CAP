@@ -38,7 +38,7 @@ namespace Sample.Kafka
 
             app.UseMvc();
 
-            app.UseConsistency();
+            app.UseCap();
         }
     }
 }
