@@ -9,6 +9,9 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
 {
+    /// <summary>
+    /// Default implement of <see cref="IBootstrapper"/>.
+    /// </summary>
     public class DefaultBootstrapper : IBootstrapper
     {
         private IApplicationLifetime _appLifetime;
@@ -27,6 +30,7 @@ namespace DotNetCore.CAP
             _appLifetime = appLifetime;
             Provider = provider;
             Servers = Provider.GetServices<IProcessingServer>();
+
             _cts = new CancellationTokenSource();
             _ctsRegistration = appLifetime.ApplicationStopping.Register(() =>
             {

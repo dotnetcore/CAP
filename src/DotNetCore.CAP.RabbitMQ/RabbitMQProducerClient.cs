@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.Logging;
@@ -35,6 +36,10 @@ namespace DotNetCore.CAP.RabbitMQ
 
                 return Task.CompletedTask;
             }
+        }
+
+        public Task SendAsync<T>(string topic, T contentObj) {
+            throw new NotImplementedException();
         }
     }
 }
