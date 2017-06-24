@@ -11,14 +11,20 @@ namespace Sample.Kafka
     public class AppDbContext : DbContext
     {
 
-        public DbSet<ConsistencyMessage> Messages { get; set; }
+        public DbSet<CapSentMessage> SentMessages { get; set; }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder) {
+        public DbSet<CapReceivedMessage> ReceivedMessages { get; set; }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
             optionsBuilder.UseSqlServer("Server=192.168.2.206;Initial Catalog=Test;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True");
         }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder) {
-            modelBuilder.Entity<ConsistencyMessage>().Property(x => x.RowVersion).IsConcurrencyToken();
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CapSentMessage>().Property(x => x.StateName).HasMaxLength(50);
+            modelBuilder.Entity<CapReceivedMessage>().Property(x => x.StateName).HasMaxLength(50);
+
             base.OnModelCreating(modelBuilder);
         }
     }
