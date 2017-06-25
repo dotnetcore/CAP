@@ -84,15 +84,20 @@ namespace DotNetCore.CAP
 
         public virtual void OnMessageReceieved(object sender, MessageBase message)
         {
-            var capMessage = new CapReceivedMessage(message);
+            _logger.EnqueuingReceivedMessage(message.KeyName, message.Content);
 
-            _logger.LogInformation("message receieved message topic name: " + capMessage.Id);
-
+            var capMessage = new CapReceivedMessage(message)
+            {
+                StateName = StateName.Enqueued,
+                Added = DateTime.Now
+            };
             _messageStore.StoreReceivedMessageAsync(capMessage).Wait();
+
+            ConsumerExecutorDescriptor executeDescriptor = null;
 
             try
             {
-                var executeDescriptor = _selector.GetTopicExector(message.KeyName);
+                executeDescriptor = _selector.GetTopicExector(message.KeyName);
 
                 var consumerContext = new ConsumerContext(executeDescriptor, message);
 
@@ -104,7 +109,7 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                _logger.LogError("exception raised when excute method : " + ex.Message);
+                _logger.ConsumerMethodExecutingFailed(executeDescriptor.MethodInfo.Name, ex);
             }
         }
 

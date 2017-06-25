@@ -48,11 +48,12 @@ namespace DotNetCore.CAP
                 Content = content
             };
 
+            message.StateName = StateName.Enqueued;
             await _store.StoreSentMessageAsync(message);
 
             WaitHandleEx.PulseEvent.Set();
 
-            _logger.EnqueuingMessage(topic, content);
+            _logger.EnqueuingSentMessage(topic, content);
         }
     }
 }

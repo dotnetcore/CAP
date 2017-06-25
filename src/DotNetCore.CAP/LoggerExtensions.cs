@@ -17,7 +17,9 @@ namespace DotNetCore.CAP
         private static Action<ILogger, string, double, Exception> _cronJobExecuted;
         private static Action<ILogger, string, Exception> _cronJobFailed;
 
-        private static Action<ILogger, string, string, Exception> _enqueuingMessage;
+        private static Action<ILogger, string, string, Exception> _enqueuingSentMessage;
+        private static Action<ILogger, string, string, Exception> _enqueuingReceivdeMessage;
+        private static Action<ILogger, string, Exception> _executingConsumerMethod;
 
         static LoggerExtensions()
         {
@@ -56,15 +58,35 @@ namespace DotNetCore.CAP
                 4,
                 "Cron job '{jobName}' failed to execute.");
 
-            _enqueuingMessage = LoggerMessage.Define<string, string>(
+            _enqueuingSentMessage = LoggerMessage.Define<string, string>(
                 LogLevel.Debug,
                 2,
-                "Enqueuing a topic to the store. NameKey: {NameKey}. Content: {Content}");
+                "Enqueuing a topic to the sent message store. NameKey: {NameKey}. Content: {Content}");
+
+            _enqueuingReceivdeMessage = LoggerMessage.Define<string, string>(
+                LogLevel.Debug,
+                2,
+                "Enqueuing a topic to the received message store. NameKey: {NameKey}. Content: {Content}");
+
+            _executingConsumerMethod = LoggerMessage.Define<string>(
+                LogLevel.Error,
+                5,
+                "Consumer method '{methodName}' failed to execute.");
         }
 
-        public static void EnqueuingMessage(this ILogger logger, string nameKey, string content)
+        public static void ConsumerMethodExecutingFailed(this ILogger logger, string methodName, Exception ex)
         {
-            _enqueuingMessage(logger, nameKey, content, null);
+            _executingConsumerMethod(logger, methodName, ex);
+        }
+
+        public static void EnqueuingReceivedMessage(this ILogger logger, string nameKey, string content)
+        {
+            _enqueuingReceivdeMessage(logger, nameKey, content, null);
+        }
+
+        public static void EnqueuingSentMessage(this ILogger logger, string nameKey, string content)
+        {
+            _enqueuingSentMessage(logger, nameKey, content, null);
         }
 
         public static void ServerStarting(this ILogger logger, int machineProcessorCount, int processorCount)
