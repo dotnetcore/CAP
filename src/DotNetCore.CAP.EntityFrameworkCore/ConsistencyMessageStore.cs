@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         public async Task<OperateResult> StoreSentMessageAsync(CapSentMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
-
+           
             Context.Add(message);
             await Context.SaveChangesAsync();
             return OperateResult.Success;
