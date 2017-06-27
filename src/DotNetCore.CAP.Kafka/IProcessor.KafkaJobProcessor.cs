@@ -16,25 +16,27 @@ namespace DotNetCore.CAP.Kafka
 {
     public class KafkaJobProcessor : IJobProcessor
     {
-        private readonly CapOptions _options;
+        private readonly CapOptions _capOptions;
+        private readonly KafkaOptions _kafkaOptions;
         private readonly CancellationTokenSource _cts;
 
         private readonly IServiceProvider _provider;
         private readonly ILogger _logger;
 
-        //internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
         private TimeSpan _pollingDelay;
 
         public KafkaJobProcessor(
-            IOptions<CapOptions> options,
+            IOptions<CapOptions> capOptions,
+            IOptions<KafkaOptions> kafkaOptions,
             ILogger<KafkaJobProcessor> logger,
             IServiceProvider provider)
         {
             _logger = logger;
-            _options = options.Value;
+            _capOptions = capOptions.Value;
+            _kafkaOptions = kafkaOptions.Value;
             _provider = provider;
             _cts = new CancellationTokenSource();
-            _pollingDelay = TimeSpan.FromSeconds(_options.PollingDelay);
+            _pollingDelay = TimeSpan.FromSeconds(_capOptions.PollingDelay);
         }
 
         public bool Waiting { get; private set; }
@@ -62,7 +64,8 @@ namespace DotNetCore.CAP.Kafka
                     var token = GetTokenToWaitOn(context);
                 }
 
-                await WaitHandleEx.WaitAnyAsync(WaitHandleEx.PulseEvent, context.CancellationToken.WaitHandle, _pollingDelay);
+                await WaitHandleEx.WaitAnyAsync(WaitHandleEx.PulseEvent,
+                    context.CancellationToken.WaitHandle, _pollingDelay);
             }
             finally
             {
@@ -120,7 +123,7 @@ namespace DotNetCore.CAP.Kafka
         {
             try
             {
-                var config = new Dictionary<string, object> { { "bootstrap.servers", _options.BrokerUrlList } };
+                var config = new Dictionary<string, object> { { "bootstrap.servers", _kafkaOptions.Host } };
                 using (var producer = new Producer<Null, string>(config, null, new StringSerializer(Encoding.UTF8)))
                 {
                     var message = producer.ProduceAsync(topic, null, content).Result;
