@@ -8,7 +8,8 @@ namespace Sample.Kafka
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env) {
+        public Startup(IHostingEnvironment env)
+        {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -20,19 +21,27 @@ namespace Sample.Kafka
         public IConfigurationRoot Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services) {
+        public void ConfigureServices(IServiceCollection services)
+        {
             services.AddDbContext<AppDbContext>();
 
             services.AddConsistency()
-                    .AddEntityFrameworkStores<AppDbContext>()
-                    .AddKafka();
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddRabbitMQ(x =>
+                {
+                    x.HostName = "192.168.2.206";
+                    x.UserName = "admin";
+                    x.Password = "123123";
+                });
+            //.AddKafka();
 
             // Add framework services.
             services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory) {
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
