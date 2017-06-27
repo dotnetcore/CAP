@@ -10,28 +10,38 @@ namespace DotNetCore.CAP.RabbitMQ
     {
         public const string TYPE = "topic";
 
+        private string _queueName;
         private readonly string _exchange;
-        private readonly string _hostName;
+        private readonly RabbitMQOptions _rabbitMQOptions;
 
         private IConnectionFactory _connectionFactory;
         private IConnection _connection;
         private IModel _channel;
 
-        private string _queueName;
-
         public event EventHandler<MessageBase> MessageReceieved;
 
-        public RabbitMQConsumerClient(string exchange, string hostName)
+        public RabbitMQConsumerClient(string exchange, RabbitMQOptions options)
         {
             _exchange = exchange;
-            _hostName = hostName;
+            _rabbitMQOptions = options;
 
             InitClient();
         }
 
         private void InitClient()
         {
-            _connectionFactory = new ConnectionFactory { HostName = _hostName };
+            _connectionFactory = new ConnectionFactory()
+            {
+                HostName = _rabbitMQOptions.HostName,
+                UserName = _rabbitMQOptions.UserName,
+                Port = _rabbitMQOptions.Port,
+                Password = _rabbitMQOptions.Password,
+                VirtualHost = _rabbitMQOptions.VirtualHost,
+                RequestedConnectionTimeout = _rabbitMQOptions.RequestedConnectionTimeout,
+                SocketReadTimeout = _rabbitMQOptions.SocketReadTimeout,
+                SocketWriteTimeout = _rabbitMQOptions.SocketWriteTimeout
+            };
+
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
             _channel.ExchangeDeclare(exchange: _exchange, type: TYPE);
@@ -40,8 +50,6 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public void Listening(TimeSpan timeout)
         {
-            //   Task.Delay(timeout).Wait();
-
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnConsumerReceived;
             _channel.BasicConsume(_queueName, true, consumer);

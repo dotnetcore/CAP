@@ -1,10 +1,20 @@
-﻿namespace DotNetCore.CAP.RabbitMQ
+﻿using DotNetCore.CAP.Infrastructure;
+using Microsoft.Extensions.Options;
+
+namespace DotNetCore.CAP.RabbitMQ
 {
     public class RabbitMQConsumerClientFactory : IConsumerClientFactory
     {
-        public IConsumerClient Create(string groupId, string clientHostAddress)
+        private readonly RabbitMQOptions _rabbitMQOptions;
+
+        public RabbitMQConsumerClientFactory(IOptions<RabbitMQOptions> rabbitMQOptions)
         {
-            return new RabbitMQConsumerClient(groupId, clientHostAddress);
+            _rabbitMQOptions = rabbitMQOptions.Value;
+        }
+
+        public IConsumerClient Create(string groupId)
+        {
+            return new RabbitMQConsumerClient(groupId, _rabbitMQOptions);
         }
     }
 }
