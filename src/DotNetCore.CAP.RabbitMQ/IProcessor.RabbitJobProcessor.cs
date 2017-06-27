@@ -136,11 +136,10 @@ namespace DotNetCore.CAP.RabbitMQ
                 using (var connection = factory.CreateConnection())
                 using (var channel = connection.CreateModel())
                 {
-                    channel.ExchangeDeclare(exchange: "topic_logs",
+                    channel.ExchangeDeclare(exchange: "test",
                                             type: "topic");
-
                     var body = Encoding.UTF8.GetBytes(content);
-                    channel.BasicPublish(exchange: "topic_logs",
+                    channel.BasicPublish(exchange: "test",
                                          routingKey: topic,
                                          basicProperties: null,
                                          body: body);

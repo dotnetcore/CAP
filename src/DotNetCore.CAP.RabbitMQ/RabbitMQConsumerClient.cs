@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
@@ -53,6 +54,10 @@ namespace DotNetCore.CAP.RabbitMQ
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnConsumerReceived;
             _channel.BasicConsume(_queueName, true, consumer);
+            while (true)
+            {
+                Task.Delay(timeout);
+            }
         }
 
         public void Subscribe(string topic)
