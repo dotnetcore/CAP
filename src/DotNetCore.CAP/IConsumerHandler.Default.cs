@@ -66,7 +66,7 @@ namespace DotNetCore.CAP
             {
                 Task.Factory.StartNew(() =>
                 {
-                    using (var client = _consumerClientFactory.Create(matchGroup.Key, _options.BrokerUrlList))
+                    using (var client = _consumerClientFactory.Create(matchGroup.Key))
                     {
                         client.MessageReceieved += OnMessageReceieved;
 

@@ -24,7 +24,9 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         /// <summary>
         /// Gets or sets the <see cref="DbSet{ConsistencyMessage}"/> of Messages.
         /// </summary>
-        public DbSet<CapMessage> Messages { get; set; }
+        public DbSet<CapSentMessage> CapSentMessages { get; set; }
+
+        public DbSet<CapReceivedMessage> CapReceivedMessages { get; set; }
 
         /// <summary>
         /// Configures the schema for the identity framework.
@@ -34,10 +36,15 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         /// </param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CapMessage>(b =>
+            modelBuilder.Entity<CapSentMessage>(b =>
             {
                 b.HasKey(m => m.Id);
-                b.ToTable("ConsistencyMessages");
+                b.Property(p => p.StateName).HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<CapReceivedMessage>(b =>
+            {
+                b.Property(p => p.StateName).HasMaxLength(50);
             });
         }
     }

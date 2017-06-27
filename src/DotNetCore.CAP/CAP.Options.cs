@@ -7,12 +7,7 @@ namespace DotNetCore.CAP.Infrastructure
     /// </summary>
     public class CapOptions
     {
-        /// <summary>
-        /// kafka or rabbitMQ brokers connection string.
-        /// </summary>
-        public string BrokerUrlList { get; set; } = "localhost:9092";
-
-        /// <summary>
+         /// <summary>
         /// Corn expression for configuring retry cron job. Default is 1 min.
         /// </summary>
         public string CronExp { get; set; } = Cron.Minutely();

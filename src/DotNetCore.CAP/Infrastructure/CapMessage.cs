@@ -3,7 +3,7 @@
 namespace DotNetCore.CAP.Infrastructure
 {
     /// <summary>
-    /// The default implementation of <see cref="ConsistencyMessage{TKey}"/> which uses a string as a primary key.
+    /// cap messages store model.
     /// </summary>
     public abstract class CapMessage : MessageBase
     {
@@ -36,6 +36,9 @@ namespace DotNetCore.CAP.Infrastructure
         public string StateName { get; set; }
     }
 
+    /// <summary>
+    /// The message state name.
+    /// </summary>
     public struct StateName
     {
         public const string Enqueued = nameof(Enqueued);

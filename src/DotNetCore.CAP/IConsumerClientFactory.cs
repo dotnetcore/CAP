@@ -9,8 +9,6 @@
         /// Create a new instance of <see cref="IConsumerClient"/>.
         /// </summary>
         /// <param name="groupId"></param>
-        /// <param name="clientHostAddress"></param>
-        /// <returns></returns>
-        IConsumerClient Create(string groupId, string clientHostAddress);
+        IConsumerClient Create(string groupId);
     }
 }
