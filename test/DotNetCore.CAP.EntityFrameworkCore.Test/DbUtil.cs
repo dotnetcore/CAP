@@ -7,7 +7,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
     public static class DbUtil
     {
         public static IServiceCollection ConfigureDbServices(string connectionString, IServiceCollection services = null) {
-            return ConfigureDbServices<ConsistencyDbContext>(connectionString, services);
+            return ConfigureDbServices<CapDbContext>(connectionString, services);
         }
 
         public static IServiceCollection ConfigureDbServices<TContext>(string connectionString, IServiceCollection services = null) where TContext : DbContext {

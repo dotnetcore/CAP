@@ -1,94 +1,113 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Linq.Expressions;
-//using System.Security.Claims;
-//using System.Threading.Tasks;
-//using DotNetCore.CAP.Infrastructure;
-//using DotNetCore.CAP.Store;
-//using Microsoft.AspNetCore.Builder;
-//using Microsoft.AspNetCore.Http;
-//using Microsoft.Extensions.DependencyInjection;
-//using Microsoft.Extensions.Logging;
-//using Xunit;
+﻿using System;
+using System.Threading.Tasks;
+using DotNetCore.CAP.Infrastructure;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Xunit;
 
-//namespace DotNetCore.CAP.Test
-//{
-//    public abstract class MessageManagerTestBase<TMessage> : MessageManagerTestBase<TMessage, string>
-//        where TMessage : ConsistencyMessage
-//    {
-//    }
+namespace DotNetCore.CAP.Test
+{
 
-//    public abstract class MessageManagerTestBase<TMessage, TKey>
-//        where TMessage : ConsistencyMessage
-//        where TKey : IEquatable<TKey>
-//    {
-//        private const string NullValue = "(null)";
+    public abstract class MessageManagerTestBase
+    {
+        private const string NullValue = "(null)";
 
-//        protected virtual bool ShouldSkipDbTests() {
-//            return false;
-//        }
+        protected virtual bool ShouldSkipDbTests()
+        {
+            return false;
+        }
 
-//        protected virtual void SetupMessageServices(IServiceCollection services, object context = null) {
-//            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-//            services.AddConsistency();
-//            AddMessageStore(services, context);
+        protected virtual void SetupMessageServices(IServiceCollection services, object context = null)
+        {
+            services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+            services.AddConsistency();
+            AddMessageStore(services, context);
 
-//            services.AddSingleton<ILogger<IConsistencyMessageStore >>(new TestLogger<IConsistencyMessageStore >());
-//        }
+            services.AddSingleton<ILogger<ICapMessageStore>>(new TestLogger<ICapMessageStore>());
+        }
 
-//        protected virtual IConsistencyMessageStore  CreateManager(object context = null, IServiceCollection services = null, Action<IServiceCollection> configureServices = null) {
-//            if (services == null) {
-//                services = new ServiceCollection();
-//            }
-//            if (context == null) {
-//                context = CreateTestContext();
-//            }
-//            SetupMessageServices(services, context);
+        protected virtual ICapMessageStore CreateManager(object context = null, IServiceCollection services = null, Action<IServiceCollection> configureServices = null)
+        {
+            if (services == null)
+            {
+                services = new ServiceCollection();
+            }
+            if (context == null)
+            {
+                context = CreateTestContext();
+            }
+            SetupMessageServices(services, context);
 
-//            configureServices?.Invoke(services);
+            configureServices?.Invoke(services);
 
-//            return services.BuildServiceProvider().GetService<IConsistencyMessageStore >();
-//        }
+            return services.BuildServiceProvider().GetService<ICapMessageStore>();
+        }
 
-//        protected abstract object CreateTestContext();
+        protected abstract object CreateTestContext();
 
-//        protected abstract TMessage CreateTestMessage(string payload = "");
+        protected abstract CapSentMessage CreateTestSentMessage(string content = "");
+        protected abstract CapReceivedMessage CreateTestReceivedMessage(string content = "");
 
-//        protected abstract void AddMessageStore(IServiceCollection services, object context = null);
+        protected abstract void AddMessageStore(IServiceCollection services, object context = null);
 
-//        [Fact]
-//        public async Task CanDeleteMessage() {
-//            if (ShouldSkipDbTests()) {
-//                return;
-//            }
+        [Fact]
+        public async Task CanDeleteSentMessage()
+        {
+            if (ShouldSkipDbTests())
+            {
+                return;
+            }
 
-//            var manager = CreateManager();
-//            var message = CreateTestMessage();
-//            var operateResult = await manager.CreateAsync(message);
-//            Assert.NotNull(operateResult);
-//            Assert.True(operateResult.Succeeded);
+            var manager = CreateManager();
+            var message = CreateTestSentMessage();
+            var operateResult = await manager.StoreSentMessageAsync(message);
+            Assert.NotNull(operateResult);
+            Assert.True(operateResult.Succeeded);
 
-//            var messageId = await manager.GeConsistencyMessageIdAsync(message);
-//            operateResult = await manager.DeleteAsync(message);
-//            Assert.Null(await manager.FindByIdAsync(messageId));
-//        }
+            operateResult = await manager.RemoveSentMessageAsync(message);
+            Assert.NotNull(operateResult);
+            Assert.True(operateResult.Succeeded);
+        }
 
-//        [Fact]
-//        public async Task CanFindById() {
-//            if (ShouldSkipDbTests()) {
-//                return;
-//            }
-//            var manager = CreateManager();
-//            var message = CreateTestMessage();
+        [Fact]
+        public async Task CanUpdateReceivedMessage()
+        {
+            if (ShouldSkipDbTests())
+            {
+                return;
+            }
 
-//            var operateResult = await manager.CreateAsync(message);
-//            Assert.NotNull(operateResult);
-//            Assert.True(operateResult.Succeeded);
+            var manager = CreateManager();
+            var message = CreateTestReceivedMessage();
+            var operateResult = await manager.StoreReceivedMessageAsync(message);
+            Assert.NotNull(operateResult);
+            Assert.True(operateResult.Succeeded);
 
-//            var messageId = await manager.GeConsistencyMessageIdAsync(message);
-//            Assert.NotNull(await manager.FindByIdAsync(messageId));
-//        }
-//    }
+            message.StateName = StateName.Processing;
+            operateResult = await manager.UpdateReceivedMessageAsync(message);
+            Assert.NotNull(operateResult);
+            Assert.True(operateResult.Succeeded);
+        }
 
-//}
+        [Fact]
+        public async Task CanGetNextSendMessage()
+        {
+            if (ShouldSkipDbTests())
+            {
+                return;
+            }
+            var manager = CreateManager();
+            var message = CreateTestSentMessage();
+
+            var operateResult = await manager.StoreSentMessageAsync(message);
+            Assert.NotNull(operateResult);
+            Assert.True(operateResult.Succeeded);
+
+            var storeMessage = await manager.GetNextSentMessageToBeEnqueuedAsync();
+
+            Assert.Equal(message, storeMessage);
+        }
+    }
+
+}
