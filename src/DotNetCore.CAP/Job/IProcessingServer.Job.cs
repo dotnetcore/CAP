@@ -13,14 +13,15 @@ namespace DotNetCore.CAP
 {
     public class JobProcessingServer : IProcessingServer, IDisposable
     {
-        private ILogger _logger;
-        private ILoggerFactory _loggerFactory;
-        private IServiceProvider _provider;
+        private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
+        private readonly IServiceProvider _provider;
+        private readonly CancellationTokenSource _cts;
+        private readonly CapOptions _options;
+        private readonly DefaultCronJobRegistry _defaultJobRegistry;
+
         private IJobProcessor[] _processors;
-        private CancellationTokenSource _cts;
-        private CapOptions _options;
         private ProcessingContext _context;
-        private DefaultCronJobRegistry _defaultJobRegistry;
         private Task _compositeTask;
         private bool _disposed;
 

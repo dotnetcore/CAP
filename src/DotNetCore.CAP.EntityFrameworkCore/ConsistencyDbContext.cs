@@ -4,22 +4,22 @@ using Microsoft.EntityFrameworkCore;
 namespace DotNetCore.CAP.EntityFrameworkCore
 {
     /// <summary>
-    /// Base class for the Entity Framework database context used for consistency.
+    /// Base class for the Entity Framework database context used for CAP.
     /// </summary>
     /// <typeparam name="TMessage">The type of message objects.</typeparam>
     /// <typeparam name="Tkey">The type of the primarky key for messages.</typeparam>
-    public class ConsistencyDbContext : DbContext
+    public class CapDbContext : DbContext
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsistencyDbContext"/>.
+        /// Initializes a new instance of the <see cref="CapDbContext"/>.
         /// </summary>
-        public ConsistencyDbContext() { }
+        public CapDbContext() { }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ConsistencyDbContext"/>.
+        /// Initializes a new instance of the <see cref="CapDbContext"/>.
         /// </summary>
         /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
-        public ConsistencyDbContext(DbContextOptions options) : base(options) { }
+        public CapDbContext(DbContextOptions options) : base(options) { }
 
         /// <summary>
         /// Gets or sets the <see cref="DbSet{ConsistencyMessage}"/> of Messages.

@@ -32,8 +32,8 @@ namespace Sample.Kafka
                     x.HostName = "192.168.2.206";
                     x.UserName = "admin";
                     x.Password = "123123";
-                });
-            //.AddKafka();
+                })
+                .AddKafka(x => x.Servers = "");
 
             // Add framework services.
             services.AddMvc();

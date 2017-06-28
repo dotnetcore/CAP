@@ -7,7 +7,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// <summary>
     /// Contains extension methods to <see cref="CapBuilder"/> for adding entity framework stores.
     /// </summary>
-    public static class ConsistencyEntityFrameworkBuilderExtensions
+    public static class CapEntityFrameworkBuilderExtensions
     {
         /// <summary>
         /// Adds an Entity Framework implementation of message stores.

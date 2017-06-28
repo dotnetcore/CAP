@@ -9,33 +9,28 @@ namespace DotNetCore.CAP.Job
     {
         private IServiceScope _scope;
 
-        private ProcessingContext(ProcessingContext other)
-        {
-            Provider = other.Provider;
-            //Storage = other.Storage;
-            CronJobRegistry = other.CronJobRegistry;
-            CancellationToken = other.CancellationToken;
-        }
-
         public ProcessingContext()
         {
         }
 
+        private ProcessingContext(ProcessingContext other)
+        {
+            Provider = other.Provider;
+            CronJobRegistry = other.CronJobRegistry;
+            CancellationToken = other.CancellationToken;
+        }
+
         public ProcessingContext(
             IServiceProvider provider,
-            //IStorage storage,
             CronJobRegistry cronJobRegistry,
             CancellationToken cancellationToken)
         {
             Provider = provider;
-            //Storage = storage;
             CronJobRegistry = cronJobRegistry;
             CancellationToken = cancellationToken;
         }
 
         public IServiceProvider Provider { get; private set; }
-
-        //public IStorage Storage { get; }
 
         public CronJobRegistry CronJobRegistry { get; private set; }
 

@@ -2,5 +2,6 @@
 {
     public class CapSentMessage : CapMessage
     {
+
     }
 }

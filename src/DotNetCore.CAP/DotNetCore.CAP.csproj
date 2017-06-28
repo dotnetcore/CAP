@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="Job\IProcessor.CronJob.cs" />
+    <None Include="Job\IJobProcessor.CronJob.cs" />
   </ItemGroup>
 
   <ItemGroup>
