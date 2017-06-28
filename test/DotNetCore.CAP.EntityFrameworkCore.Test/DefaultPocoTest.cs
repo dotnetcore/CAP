@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using Microsoft.AspNetCore.Builder.Internal;
-using Microsoft.AspNetCore.Testing.xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -33,10 +32,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
             }
         }
 
-        [ConditionalFact]
-        [FrameworkSkipCondition(RuntimeFrameworks.Mono)]
-        [OSSkipCondition(OperatingSystems.Linux)]
-        [OSSkipCondition(OperatingSystems.MacOSX)]
+        [Fact]
         public async Task EnsureStartupUsageWorks()
         {
             var messageStore = _builder.ApplicationServices.GetRequiredService<ICapMessageStore>();

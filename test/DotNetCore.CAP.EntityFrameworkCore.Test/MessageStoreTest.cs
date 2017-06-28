@@ -3,8 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Test;
-using Microsoft.AspNetCore.Testing;
-using Microsoft.AspNetCore.Testing.xunit;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -20,11 +18,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
             _fixture = fixture;
         }
 
-        protected override bool ShouldSkipDbTests()
-        {
-            return TestPlatformHelper.IsMono || !TestPlatformHelper.IsWindows;
-        }
-
         public class ApplicationDbContext : CapDbContext
         {
             public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
@@ -32,10 +25,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
             }
         }
 
-        [ConditionalFact]
-        [FrameworkSkipCondition(RuntimeFrameworks.Mono)]
-        [OSSkipCondition(OperatingSystems.Linux)]
-        [OSSkipCondition(OperatingSystems.MacOSX)]
+        [Fact]
         public void CanCreateSentMessageUsingEF()
         {
             using (var db = CreateContext())
@@ -54,10 +44,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
             }
         }
 
-        [ConditionalFact]
-        [FrameworkSkipCondition(RuntimeFrameworks.Mono)]
-        [OSSkipCondition(OperatingSystems.Linux)]
-        [OSSkipCondition(OperatingSystems.MacOSX)]
+        [Fact]
         public async Task CanCreateUsingManager()
         {
             var manager = CreateManager();
