@@ -3,44 +3,49 @@ using System.Data.SqlClient;
 
 namespace DotNetCore.CAP.EntityFrameworkCore.Test
 {
-	public static class ConnectionUtil
-	{
-		private const string DatabaseVariable = "Cap_SqlServer_DatabaseName";
-		private const string ConnectionStringTemplateVariable = "Cap_SqlServer_ConnectionStringTemplate";
+    public static class ConnectionUtil
+    {
+        private const string DatabaseVariable = "Cap_SqlServer_DatabaseName";
+        private const string ConnectionStringTemplateVariable = "Cap_SqlServer_ConnectionStringTemplate";
 
-		private const string MasterDatabaseName = "master";
-		private const string DefaultDatabaseName = @"DotNetCore.CAP.EntityFrameworkCore.Test";
+        private const string MasterDatabaseName = "master";
+        private const string DefaultDatabaseName = @"DotNetCore.CAP.EntityFrameworkCore.Test";
 
-		private const string DefaultConnectionStringTemplate = @"Server=.\sqlexpress;Database={0};Trusted_Connection=True;";
+        //private const string DefaultConnectionStringTemplate = @"Server=.\sqlexpress;Database={0};Trusted_Connection=True;";
+        private const string DefaultConnectionStringTemplate = @"Server=192.168.2.206;Initial Catalog={0};User Id=sa;Password=123123;MultipleActiveResultSets=True";
 
-		public static string GetDatabaseName()
-		{
-			return Environment.GetEnvironmentVariable(DatabaseVariable) ?? DefaultDatabaseName;
-		}
+        public static string GetDatabaseName()
+        {
+            return Environment.GetEnvironmentVariable(DatabaseVariable) ?? DefaultDatabaseName;
+        }
 
-		public static string GetMasterConnectionString()
-		{
-			return string.Format(GetConnectionStringTemplate(), MasterDatabaseName);
-		}
+        public static string GetMasterConnectionString()
+        {
+            return string.Format(GetConnectionStringTemplate(), MasterDatabaseName);
+        }
 
-		public static string GetConnectionString()
-		{
-			return string.Format(GetConnectionStringTemplate(), GetDatabaseName());
-		}
+        public static string GetConnectionString()
+        {
+            //if (Environment.GetEnvironmentVariable("ASPNETCore_Environment") == "Development")
+            //{
+            //    return "Server=192.168.2.206;Initial Catalog=Test2;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True";
+            //}
+            return string.Format(GetConnectionStringTemplate(), GetDatabaseName());
+        }
 
-		private static string GetConnectionStringTemplate()
-		{
-			return
-				Environment.GetEnvironmentVariable(ConnectionStringTemplateVariable) ??
-				DefaultConnectionStringTemplate;
-		}
+        private static string GetConnectionStringTemplate()
+        {
+            return
+                Environment.GetEnvironmentVariable(ConnectionStringTemplateVariable) ??
+                DefaultConnectionStringTemplate;
+        }
 
-		public static SqlConnection CreateConnection(string connectionString = null)
-		{
-			connectionString = connectionString ?? GetConnectionString();
-			var connection = new SqlConnection(connectionString);
-			connection.Open();
-			return connection;
-		}
-	}
+        public static SqlConnection CreateConnection(string connectionString = null)
+        {
+            connectionString = connectionString ?? GetConnectionString();
+            var connection = new SqlConnection(connectionString);
+            connection.Open();
+            return connection;
+        }
+    }
 }

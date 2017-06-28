@@ -1,4 +1,5 @@
 using System.Data;
+using System.Threading.Tasks;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,10 +27,10 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
 			{
 				using (CreateScope())
 				{
-					var context = GetService<CapDbContext>();
+					var context = GetService<TestDbContext>();
 					context.Database.EnsureDeleted();
 					context.Database.Migrate();
-					_sqlObjectInstalled = true;
+                    _sqlObjectInstalled = true;
 				}
 			}
 		}
@@ -38,7 +39,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
 		{
 			using (CreateScope())
 			{
-				var context = GetService<CapDbContext>();
+				var context = GetService<TestDbContext>();
 
 				var commands = new[]
 				{

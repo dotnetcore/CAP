@@ -1,7 +1,0 @@
-﻿{
-  "Test": {
-    "SqlServer": {
-      "DefaultConnectionString": "Server=192.168.2.206;Initial Catalog=Test;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True"
-    }
-  }
-}
