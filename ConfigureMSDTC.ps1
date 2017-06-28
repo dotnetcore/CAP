@@ -1,6 +1,6 @@
-# â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+# ————————————
 # Enable MSDTC
-# â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”â€”
+# ————————————
 
 Write-Host "Enabling MSDTC..." -ForegroundColor Yellow
 $DTCSecurity = "Incoming"
@@ -10,31 +10,31 @@ $RegPath = "HKLM:\SOFTWARE\Microsoft\MSDTC\"
 
 $RegSecurityPath = "$RegPath\Security"
 
-Set-ItemProperty â€“path $RegSecurityPath â€“name "NetworkDtcAccess" â€“value 1
-Set-ItemProperty â€“path $RegSecurityPath â€“name "NetworkDtcAccessClients" â€“value 1
-Set-ItemProperty â€“path $RegSecurityPath â€“name "NetworkDtcAccessTransactions" â€“value 1
-Set-ItemProperty â€“path $RegSecurityPath â€“name "NetworkDtcAccessInbound" â€“value 1
-Set-ItemProperty â€“path $RegSecurityPath â€“name "NetworkDtcAccessOutbound" â€“value 1
-Set-ItemProperty â€“path $RegSecurityPath â€“name "LuTransactions" â€“value 1
+Set-ItemProperty –path $RegSecurityPath –name "NetworkDtcAccess" –value 1
+Set-ItemProperty –path $RegSecurityPath –name "NetworkDtcAccessClients" –value 1
+Set-ItemProperty –path $RegSecurityPath –name "NetworkDtcAccessTransactions" –value 1
+Set-ItemProperty –path $RegSecurityPath –name "NetworkDtcAccessInbound" –value 1
+Set-ItemProperty –path $RegSecurityPath –name "NetworkDtcAccessOutbound" –value 1
+Set-ItemProperty –path $RegSecurityPath –name "LuTransactions" –value 1
 
-if ($DTCSecurity â€“eq "None")
+if ($DTCSecurity –eq "None")
 {
-	Set-ItemProperty â€“path $RegPath â€“name "TurnOffRpcSecurity" â€“value 1
-	Set-ItemProperty â€“path $RegPath â€“name "AllowOnlySecureRpcCalls" â€“value 0
-	Set-ItemProperty â€“path $RegPath â€“name "FallbackToUnsecureRPCIfNecessary" â€“value 0
+	Set-ItemProperty –path $RegPath –name "TurnOffRpcSecurity" –value 1
+	Set-ItemProperty –path $RegPath –name "AllowOnlySecureRpcCalls" –value 0
+	Set-ItemProperty –path $RegPath –name "FallbackToUnsecureRPCIfNecessary" –value 0
 }
-elseif ($DTCSecurity â€“eq "Incoming")
+elseif ($DTCSecurity –eq "Incoming")
 {
-	Set-ItemProperty â€“path $RegPath â€“name "TurnOffRpcSecurity" â€“value 0
-	Set-ItemProperty â€“path $RegPath â€“name "AllowOnlySecureRpcCalls" â€“value 0
-	Set-ItemProperty â€“path $RegPath â€“name "FallbackToUnsecureRPCIfNecessary" â€“value 1
+	Set-ItemProperty –path $RegPath –name "TurnOffRpcSecurity" –value 0
+	Set-ItemProperty –path $RegPath –name "AllowOnlySecureRpcCalls" –value 0
+	Set-ItemProperty –path $RegPath –name "FallbackToUnsecureRPCIfNecessary" –value 1
 }
 else
 {
-	Set-ItemProperty â€“path $RegPath â€“name "TurnOffRpcSecurity" â€“value 0
-	Set-ItemProperty â€“path $RegPath â€“name "AllowOnlySecureRpcCalls" â€“value 1
-	Set-ItemProperty â€“path $RegPath â€“name "FallbackToUnsecureRPCIfNecessary" â€“value 0
+	Set-ItemProperty –path $RegPath –name "TurnOffRpcSecurity" –value 0
+	Set-ItemProperty –path $RegPath –name "AllowOnlySecureRpcCalls" –value 1
+	Set-ItemProperty –path $RegPath –name "FallbackToUnsecureRPCIfNecessary" –value 0
 }
 
 Restart-Service MSDTC
-Write-Host "â€”â€”MSDTC has been configuredâ€”â€“" â€“foregroundcolor green
+Write-Host "——MSDTC has been configured—–" –foregroundcolor green
