@@ -1,33 +1,49 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace DotNetCore.CAP.Kafka
 {
+    /// <summary>
+    /// Provides programmatic configuration for the CAP kafka project.
+    /// </summary>
     public class KafkaOptions
     {
-        /// <summary>
-        ///     Gets the Kafka broker id.
-        /// </summary>
-        public int BrokerId { get; }
+        public KafkaOptions()
+        {
+            MainConfig = new Dictionary<string, object>();
+        }
 
         /// <summary>
-        ///     Gets the Kafka broker hostname.
+        /// librdkafka configuration parameters (refer to https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md).
+        /// <para>
+        /// Topic configuration parameters are specified via the "default.topic.config" sub-dictionary config parameter.
+        /// </para>
         /// </summary>
-        public string Host { get; }
+        public IDictionary<string, object> MainConfig { get; private set; }
 
         /// <summary>
-        ///     Gets the Kafka broker port.
+        /// The `bootstrap.servers` item config of `MainConfig`.
+        /// <para>
+        /// Initial list of brokers as a CSV list of broker host or host:port.
+        /// </para>
         /// </summary>
-        public int Port { get; }
+        public string Servers { get; set; }
 
-        /// <summary>
-        ///     Returns a JSON representation of the BrokerMetadata object.
-        /// </summary>
-        /// <returns>
-        ///     A JSON representation of the BrokerMetadata object.
-        /// </returns>
-        public override string ToString()
-            => $"{{ \"BrokerId\": {BrokerId}, \"Host\": \"{Host}\", \"Port\": {Port} }}";
+        internal IEnumerable<KeyValuePair<string, object>> AsRdkafkaConfig()
+        {
+            if (!MainConfig.ContainsKey("bootstrap.servers"))
+            {
+                if (string.IsNullOrEmpty(Servers))
+                {
+                    throw new ArgumentNullException(nameof(Servers));
+                }
+                else
+                {
+                    MainConfig.Add("bootstrap.servers", Servers);
+                }
+            }
+            return MainConfig.AsEnumerable();
+        }
     }
 }

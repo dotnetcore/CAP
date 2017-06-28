@@ -18,7 +18,6 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>An <see cref="CapBuilder"/> for creating and configuring the CAP system.</returns>
         public static CapBuilder AddKafka(this CapBuilder builder, Action<KafkaOptions> setupAction)
         {
-
             if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
             builder.Services.Configure(setupAction);

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
@@ -56,12 +55,11 @@ namespace DotNetCore.CAP.Kafka
 
         private void InitKafkaClient()
         {
-            var config = new Dictionary<string, object>{
-                { "group.id", _groupId },
-                { "bootstrap.servers", _kafkaOptions.Host }
-            };
+            _kafkaOptions.MainConfig.Add("group.id", _groupId);
 
+            var config = _kafkaOptions.AsRdkafkaConfig();
             _consumerClient = new Consumer<Null, string>(config, null, StringDeserializer);
+
             _consumerClient.OnMessage += ConsumerClient_OnMessage;
         }
 

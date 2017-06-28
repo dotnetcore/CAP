@@ -1,5 +1,4 @@
-﻿using DotNetCore.CAP.Infrastructure;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.RabbitMQ
 {

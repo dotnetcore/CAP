@@ -7,7 +7,7 @@ namespace DotNetCore.CAP.Infrastructure
     /// </summary>
     public class CapOptions
     {
-         /// <summary>
+        /// <summary>
         /// Corn expression for configuring retry cron job. Default is 1 min.
         /// </summary>
         public string CronExp { get; set; } = Cron.Minutely();

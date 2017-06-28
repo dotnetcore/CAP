@@ -123,7 +123,7 @@ namespace DotNetCore.CAP.Kafka
         {
             try
             {
-                var config = new Dictionary<string, object> { { "bootstrap.servers", _kafkaOptions.Host } };
+                var config = _kafkaOptions.AsRdkafkaConfig();
                 using (var producer = new Producer<Null, string>(config, null, new StringSerializer(Encoding.UTF8)))
                 {
                     var message = producer.ProduceAsync(topic, null, content).Result;
