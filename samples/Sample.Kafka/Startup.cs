@@ -24,8 +24,8 @@ namespace Sample.Kafka
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>();
-
-            services.AddConsistency()
+        
+        services.AddConsistency()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddRabbitMQ(x =>
                 {

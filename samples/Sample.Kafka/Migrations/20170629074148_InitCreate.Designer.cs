@@ -8,8 +8,8 @@ using Sample.Kafka;
 namespace Sample.Kafka.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20170624095008_CreateDatabase")]
-    partial class CreateDatabase
+    [Migration("20170629074148_InitCreate")]
+    partial class InitCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -32,7 +32,7 @@ namespace Sample.Kafka.Migrations
 
                     b.Property<int>("Retries");
 
-                    b.Property<string>("StateName")
+                    b.Property<string>("StatusName")
                         .HasMaxLength(50);
 
                     b.HasKey("Id");
@@ -55,7 +55,7 @@ namespace Sample.Kafka.Migrations
 
                     b.Property<int>("Retries");
 
-                    b.Property<string>("StateName")
+                    b.Property<string>("StatusName")
                         .HasMaxLength(50);
 
                     b.HasKey("Id");

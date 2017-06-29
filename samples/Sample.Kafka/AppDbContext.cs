@@ -22,8 +22,8 @@ namespace Sample.Kafka
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CapSentMessage>().Property(x => x.StateName).HasMaxLength(50);
-            modelBuilder.Entity<CapReceivedMessage>().Property(x => x.StateName).HasMaxLength(50);
+            modelBuilder.Entity<CapSentMessage>().Property(x => x.StatusName).HasMaxLength(50);
+            modelBuilder.Entity<CapReceivedMessage>().Property(x => x.StatusName).HasMaxLength(50);
 
             base.OnModelCreating(modelBuilder);
         }
