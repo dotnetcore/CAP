@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -20,12 +21,10 @@ namespace DotNetCore.CAP
 
         private readonly MethodMatcherCache _selector;
         private readonly CapOptions _options;
-        private readonly ICapMessageStore _messageStore;
         private readonly CancellationTokenSource _cts;
 
         public event EventHandler<CapMessage> MessageReceieved;
 
-        private CapStartContext _context;
         private Task _compositeTask;
         private bool _disposed;
 
@@ -34,7 +33,6 @@ namespace DotNetCore.CAP
             IConsumerInvokerFactory consumerInvokerFactory,
             IConsumerClientFactory consumerClientFactory,
             ILoggerFactory loggerFactory,
-            ICapMessageStore messageStore,
             MethodMatcherCache selector,
             IOptions<CapOptions> options)
         {
@@ -45,7 +43,6 @@ namespace DotNetCore.CAP
             _consumerInvokerFactory = consumerInvokerFactory;
             _consumerClientFactory = consumerClientFactory;
             _options = options.Value;
-            _messageStore = messageStore;
             _cts = new CancellationTokenSource();
         }
 
@@ -56,9 +53,7 @@ namespace DotNetCore.CAP
 
         public void Start()
         {
-            _context = new CapStartContext(_serviceProvider, _cts.Token);
-
-            var matchs = _selector.GetCandidatesMethods(_context);
+            var matchs = _selector.GetCandidatesMethods(_serviceProvider);
 
             var groupingMatchs = matchs.GroupBy(x => x.Value.Attribute.GroupOrExchange);
 
@@ -86,30 +81,36 @@ namespace DotNetCore.CAP
         {
             _logger.EnqueuingReceivedMessage(message.KeyName, message.Content);
 
-            var capMessage = new CapReceivedMessage(message)
+            using (var scope = _serviceProvider.CreateScope())
             {
-                StateName = StateName.Enqueued,
-                Added = DateTime.Now
-            };
-            _messageStore.StoreReceivedMessageAsync(capMessage).Wait();
+                var provider = scope.ServiceProvider;
+                var messageStore = provider.GetRequiredService<ICapMessageStore>();
 
-            ConsumerExecutorDescriptor executeDescriptor = null;
+                var capMessage = new CapReceivedMessage(message)
+                {
+                    StatusName = StatusName.Enqueued,
+                    Added = DateTime.Now
+                };
+                messageStore.StoreReceivedMessageAsync(capMessage).Wait();
 
-            try
-            {
-                executeDescriptor = _selector.GetTopicExector(message.KeyName);
+                ConsumerExecutorDescriptor executeDescriptor = null;
 
-                var consumerContext = new ConsumerContext(executeDescriptor, message);
+                try
+                {
+                    executeDescriptor = _selector.GetTopicExector(message.KeyName);
 
-                var invoker = _consumerInvokerFactory.CreateInvoker(consumerContext);
+                    var consumerContext = new ConsumerContext(executeDescriptor, message);
 
-                invoker.InvokeAsync();
+                    var invoker = _consumerInvokerFactory.CreateInvoker(consumerContext);
 
-                _messageStore.UpdateReceivedMessageAsync(capMessage).Wait();
-            }
-            catch (Exception ex)
-            {
-                _logger.ConsumerMethodExecutingFailed(executeDescriptor.MethodInfo.Name, ex);
+                    invoker.InvokeAsync();
+                    
+                    messageStore.ChangeReceivedMessageStateAsync(capMessage,StatusName.Succeeded).Wait();
+                }
+                catch (Exception ex)
+                {
+                    _logger.ConsumerMethodExecutingFailed(executeDescriptor.MethodInfo.Name, ex);
+                }
             }
         }
 

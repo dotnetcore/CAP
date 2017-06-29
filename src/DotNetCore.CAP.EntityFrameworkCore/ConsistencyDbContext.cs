@@ -39,12 +39,12 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             modelBuilder.Entity<CapSentMessage>(b =>
             {
                 b.HasKey(m => m.Id);
-                b.Property(p => p.StateName).HasMaxLength(50);
+                b.Property(p => p.StatusName).HasMaxLength(50);
             });
 
             modelBuilder.Entity<CapReceivedMessage>(b =>
             {
-                b.Property(p => p.StateName).HasMaxLength(50);
+                b.Property(p => p.StatusName).HasMaxLength(50);
             });
         }
     }

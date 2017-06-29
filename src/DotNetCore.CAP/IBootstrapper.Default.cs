@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
@@ -14,20 +15,23 @@ namespace DotNetCore.CAP
     /// </summary>
     public class DefaultBootstrapper : IBootstrapper
     {
-        private IApplicationLifetime _appLifetime;
-        private CancellationTokenSource _cts;
-        private CancellationTokenRegistration _ctsRegistration;
+        private readonly ILogger<DefaultBootstrapper> _logger;
+        private readonly IApplicationLifetime _appLifetime;
+        private readonly CancellationTokenSource _cts;
+        private readonly CancellationTokenRegistration _ctsRegistration;
         private Task _bootstrappingTask;
 
         public DefaultBootstrapper(
+            ILogger<DefaultBootstrapper> logger,
             IOptions<CapOptions> options,
             ICapMessageStore storage,
             IApplicationLifetime appLifetime,
             IServiceProvider provider)
         {
+            _logger = logger;
+            _appLifetime = appLifetime;
             Options = options.Value;
             Storage = storage;
-            _appLifetime = appLifetime;
             Provider = provider;
             Servers = Provider.GetServices<IProcessingServer>();
 
@@ -39,8 +43,9 @@ namespace DotNetCore.CAP
                 {
                     _bootstrappingTask?.Wait();
                 }
-                catch (OperationCanceledException)
+                catch (OperationCanceledException ex)
                 {
+                    _logger.ExpectedOperationCanceledException(ex);
                 }
             });
         }
@@ -74,8 +79,9 @@ namespace DotNetCore.CAP
                 {
                     item.Start();
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
+                    _logger.ServerStartedError(ex);
                 }
             }
 

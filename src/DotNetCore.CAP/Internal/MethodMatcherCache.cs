@@ -13,11 +13,11 @@ namespace DotNetCore.CAP.Internal
             _selector = selector;
         }
 
-        public ConcurrentDictionary<string, ConsumerExecutorDescriptor> GetCandidatesMethods(CapStartContext routeContext)
+        public ConcurrentDictionary<string, ConsumerExecutorDescriptor> GetCandidatesMethods(IServiceProvider provider)
         {
             if (Entries.Count == 0)
             {
-                var executorCollection = _selector.SelectCandidates(routeContext);
+                var executorCollection = _selector.SelectCandidates(provider);
 
                 foreach (var item in executorCollection)
                 {

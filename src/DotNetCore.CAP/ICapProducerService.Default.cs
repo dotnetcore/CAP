@@ -48,7 +48,7 @@ namespace DotNetCore.CAP
                 Content = content
             };
 
-            message.StateName = StateName.Enqueued;
+            message.StatusName = StatusName.Enqueued;
             await _store.StoreSentMessageAsync(message);
 
             WaitHandleEx.PulseEvent.Set();

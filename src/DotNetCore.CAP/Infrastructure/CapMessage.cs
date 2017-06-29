@@ -33,13 +33,13 @@ namespace DotNetCore.CAP.Infrastructure
 
         public int Retries { get; set; }
 
-        public string StateName { get; set; }
+        public string StatusName { get; set; }
     }
 
     /// <summary>
-    /// The message state name.
+    /// The message status name.
     /// </summary>
-    public struct StateName
+    public struct StatusName
     {
         public const string Enqueued = nameof(Enqueued);
         public const string Processing = nameof(Processing);

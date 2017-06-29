@@ -41,12 +41,31 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             return OperateResult.Success;
         }
 
+        public async Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string status, bool autoSaveChanges = true)
+        {
+            Context.Attach(message);
+            message.LastRun = DateTime.Now;
+            message.StatusName = status;
+            try
+            {
+                if (autoSaveChanges)
+                {
+                    await Context.SaveChangesAsync();
+                }
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return OperateResult.Failed(new OperateError() { Code = "DbUpdateConcurrencyException", Description = ex.Message });
+            }
+            return OperateResult.Success;
+        }
+
         /// <summary>
         /// First Enqueued Message.
         /// </summary>
         public async Task<CapSentMessage> GetNextSentMessageToBeEnqueuedAsync()
         {
-            return await SentMessages.FirstOrDefaultAsync(x => x.StateName == StateName.Enqueued);
+            return await SentMessages.FirstOrDefaultAsync(x => x.StatusName == StatusName.Enqueued);
         }
 
         /// <summary>
@@ -105,6 +124,30 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             return OperateResult.Success;
         }
 
+        public async Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string status, bool autoSaveChanges = true)
+        {
+            Context.Attach(message);
+            message.LastRun = DateTime.Now;
+            message.StatusName = status;
+            try
+            {
+                if (autoSaveChanges)
+                {
+                    await Context.SaveChangesAsync();
+                }
+            }
+            catch (DbUpdateConcurrencyException ex)
+            {
+                return OperateResult.Failed(new OperateError() { Code = "DbUpdateConcurrencyException", Description = ex.Message });
+            }
+            return OperateResult.Success;
+        }
+
+        public async Task<CapReceivedMessage> GetNextReceivedMessageToBeExcuted()
+        {
+            return await ReceivedMessages.FirstOrDefaultAsync(x => x.StatusName == StatusName.Enqueued);
+        }
+
         /// <summary>
         /// Updates the specified <paramref name="message"/> in the message store.
         /// </summary>
@@ -127,5 +170,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore
                 return OperateResult.Failed(new OperateError() { Code = "DbUpdateConcurrencyException", Description = ex.Message });
             }
         }
+
     }
 }

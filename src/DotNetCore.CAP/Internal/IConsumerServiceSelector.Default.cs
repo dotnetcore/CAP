@@ -36,9 +36,9 @@ namespace DotNetCore.CAP.Internal
             return executeDescriptor.FirstOrDefault(x => x.Attribute.Name == key);
         }
 
-        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(CapStartContext context)
+        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(IServiceProvider provider)
         {
-            var consumerServices = context.ServiceProvider.GetServices<IConsumerService>();
+            var consumerServices = provider.GetServices<IConsumerService>();
 
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
             foreach (var service in consumerServices)

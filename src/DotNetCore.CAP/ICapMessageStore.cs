@@ -16,6 +16,14 @@ namespace DotNetCore.CAP
         Task<OperateResult> StoreSentMessageAsync(CapSentMessage message);
 
         /// <summary>
+        /// Change <see cref="CapSentMessage"/> model status name.
+        /// </summary>
+        /// <param name="message">The type of <see cref="CapSentMessage"/>.</param>
+        /// <param name="statusName">The status name.</param>
+        /// <returns></returns>
+        Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string statusName, bool autoSaveChanges = true);
+
+        /// <summary>
         /// Fetches the next message to be executed.
         /// </summary>
         /// <returns></returns>
@@ -33,12 +41,28 @@ namespace DotNetCore.CAP
         /// <param name="message">The message to delete in the store.</param>
         Task<OperateResult> RemoveSentMessageAsync(CapSentMessage message);
 
+
+
+
         /// <summary>
         /// Creates a new message in a store as an asynchronous operation.
         /// </summary>
         /// <param name="message"></param>
         /// <returns></returns>
         Task<OperateResult> StoreReceivedMessageAsync(CapReceivedMessage message);
+
+        /// <summary>
+        /// Change <see cref="CapReceivedMessage"/> model status name.
+        /// </summary>
+        /// <param name="message">The type of <see cref="CapReceivedMessage"/>.</param>
+        /// <param name="statusName">The status name.</param>
+        /// <returns></returns>
+        Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string statusName, bool autoSaveChanges = true);
+
+        /// <summary>
+        /// Fetches the next message to be executed.
+        /// </summary>
+        Task<CapReceivedMessage> GetNextReceivedMessageToBeExcuted();
 
         /// <summary>
         /// Updates a message in a store as an asynchronous operation.

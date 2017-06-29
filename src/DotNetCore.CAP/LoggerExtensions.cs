@@ -9,6 +9,7 @@ namespace DotNetCore.CAP
     internal static class LoggerExtensions
     {
         private static Action<ILogger, int, int, Exception> _serverStarting;
+        private static Action<ILogger, Exception> _serverStartingError;
         private static Action<ILogger, Exception> _serverShuttingDown;
         private static Action<ILogger, string, Exception> _expectedOperationCanceledException;
 
@@ -27,6 +28,11 @@ namespace DotNetCore.CAP
                 LogLevel.Debug,
                 1,
                 "Starting the processing server. Detected {MachineProcessorCount} machine processor(s). Initiating {ProcessorCount} job processor(s).");
+
+            _serverStartingError = LoggerMessage.Define(
+              LogLevel.Error,
+              5,
+              "Starting the processing server throw an exception.");
 
             _serverShuttingDown = LoggerMessage.Define(
                 LogLevel.Debug,
@@ -92,6 +98,11 @@ namespace DotNetCore.CAP
         public static void ServerStarting(this ILogger logger, int machineProcessorCount, int processorCount)
         {
             _serverStarting(logger, machineProcessorCount, processorCount, null);
+        }
+
+        public static void ServerStartedError(this ILogger logger, Exception ex)
+        {
+            _serverStartingError(logger, ex);
         }
 
         public static void ServerShuttingDown(this ILogger logger)

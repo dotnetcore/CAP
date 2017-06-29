@@ -26,7 +26,6 @@ namespace DotNetCore.CAP.RabbitMQ
         public RabbitJobProcessor(
             IOptions<CapOptions> capOptions,
             IOptions<RabbitMQOptions> rabbitMQOptions,
-            IOptions<RabbitMQOptions> options,
             ILogger<RabbitJobProcessor> logger,
             IServiceProvider provider)
         {
@@ -88,7 +87,7 @@ namespace DotNetCore.CAP.RabbitMQ
                     if (message != null)
                     {
                         var sp = Stopwatch.StartNew();
-                        message.StateName = StateName.Processing;
+                        message.StatusName = StatusName.Processing;
                         await messageStore.UpdateSentMessageAsync(message);
 
                         var jobResult = ExecuteJob(message.KeyName, message.Content);
@@ -102,7 +101,7 @@ namespace DotNetCore.CAP.RabbitMQ
                         else
                         {
                             //TODO ： the state will be deleted when release.
-                            message.StateName = StateName.Succeeded;
+                            message.StatusName = StatusName.Succeeded;
                             await messageStore.UpdateSentMessageAsync(message);
 
                             _logger.JobExecuted(sp.Elapsed.TotalSeconds);
