@@ -9,10 +9,8 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     public class RabbitMQConsumerClient : IConsumerClient
     {
-        public const string TYPE = "topic";
-
-        private string _queueName;
-        private readonly string _exchange;
+        private readonly string _exchageName;
+        private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
         private IConnectionFactory _connectionFactory;
@@ -21,10 +19,11 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public event EventHandler<MessageBase> MessageReceieved;
 
-        public RabbitMQConsumerClient(string exchange, RabbitMQOptions options)
+        public RabbitMQConsumerClient(string queueName, RabbitMQOptions options)
         {
-            _exchange = exchange;
+            _queueName = queueName;
             _rabbitMQOptions = options;
+            _exchageName = options.TopicExchangeName;
 
             InitClient();
         }
@@ -45,8 +44,8 @@ namespace DotNetCore.CAP.RabbitMQ
 
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(exchange: _exchange, type: TYPE);
-            _queueName = _channel.QueueDeclare().QueueName;
+            _channel.ExchangeDeclare(exchange: _exchageName, type: _rabbitMQOptions.EXCHANGE_TYPE);
+            _channel.QueueDeclare(_queueName);
         }
 
         public void Listening(TimeSpan timeout)
@@ -62,12 +61,12 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public void Subscribe(string topic)
         {
-            _channel.QueueBind(_queueName, _exchange, topic);
+            _channel.QueueBind(_queueName, _exchageName, topic);
         }
 
         public void Subscribe(string topic, int partition)
         {
-            _channel.QueueBind(_queueName, _exchange, topic);
+            _channel.QueueBind(_queueName, _exchageName, topic);
         }
 
         public void Dispose()

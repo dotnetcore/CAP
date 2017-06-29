@@ -94,16 +94,9 @@ namespace DotNetCore.CAP.RabbitMQ
 
                         sp.Stop();
 
-                        if (!jobResult)
+                        if (jobResult)
                         {
-                            _logger.JobFailed(new Exception("topic send failed"));
-                        }
-                        else
-                        {
-                            //TODO ： the state will be deleted when release.
-                            message.StatusName = StatusName.Succeeded;
-                            await messageStore.UpdateSentMessageAsync(message);
-
+                            await messageStore.RemoveSentMessageAsync(message);
                             _logger.JobExecuted(sp.Elapsed.TotalSeconds);
                         }
                     }
@@ -135,10 +128,10 @@ namespace DotNetCore.CAP.RabbitMQ
                 using (var connection = factory.CreateConnection())
                 using (var channel = connection.CreateModel())
                 {
-                    channel.ExchangeDeclare(exchange: "test",
-                                            type: "topic");
                     var body = Encoding.UTF8.GetBytes(content);
-                    channel.BasicPublish(exchange: "test",
+
+                    channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, _rabbitMQOptions.EXCHANGE_TYPE);
+                    channel.BasicPublish(exchange: _rabbitMQOptions.TopicExchangeName,
                                          routingKey: topic,
                                          basicProperties: null,
                                          body: body);
