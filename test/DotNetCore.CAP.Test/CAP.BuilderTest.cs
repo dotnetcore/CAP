@@ -71,6 +71,21 @@ namespace DotNetCore.CAP.Test
 
         private class MyMessageStore : ICapMessageStore
         {
+            public Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string statusName, bool autoSaveChanges = true)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string statusName, bool autoSaveChanges = true)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task<CapReceivedMessage> GetNextReceivedMessageToBeExcuted()
+            {
+                throw new NotImplementedException();
+            }
+
             public Task<CapSentMessage> GetNextSentMessageToBeEnqueuedAsync()
             {
                 throw new NotImplementedException();

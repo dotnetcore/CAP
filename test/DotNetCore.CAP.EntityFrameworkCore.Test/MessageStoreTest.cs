@@ -18,14 +18,14 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
                 {
                     Id = guid,
                     Content = "this is message body",
-                    StateName = StateName.Enqueued
+                    StatusName = StatusName.Enqueued
                 };
                 db.Attach(message).State = Microsoft.EntityFrameworkCore.EntityState.Added;
 
                 db.SaveChanges();
                 
                 Assert.True(db.CapSentMessages.Any(u => u.Id == guid));
-                Assert.NotNull(db.CapSentMessages.FirstOrDefault(u => u.StateName == StateName.Enqueued));
+                Assert.NotNull(db.CapSentMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued));
             }
         }
 

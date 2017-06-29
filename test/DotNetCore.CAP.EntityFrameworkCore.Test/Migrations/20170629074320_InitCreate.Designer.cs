@@ -8,8 +8,8 @@ using DotNetCore.CAP.EntityFrameworkCore.Test;
 namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
 {
     [DbContext(typeof(TestDbContext))]
-    [Migration("20170628102530_Init")]
-    partial class Init
+    [Migration("20170629074320_InitCreate")]
+    partial class InitCreate
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -32,7 +32,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
 
                     b.Property<int>("Retries");
 
-                    b.Property<string>("StateName")
+                    b.Property<string>("StatusName")
                         .HasMaxLength(50);
 
                     b.HasKey("Id");
@@ -55,7 +55,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
 
                     b.Property<int>("Retries");
 
-                    b.Property<string>("StateName")
+                    b.Property<string>("StatusName")
                         .HasMaxLength(50);
 
                     b.HasKey("Id");

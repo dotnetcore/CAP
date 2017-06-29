@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
 {
-    public partial class Init : Migration
+    public partial class InitCreate : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
                     KeyName = table.Column<string>(nullable: true),
                     LastRun = table.Column<DateTime>(nullable: false),
                     Retries = table.Column<int>(nullable: false),
-                    StateName = table.Column<string>(maxLength: 50, nullable: true)
+                    StatusName = table.Column<string>(maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
                     KeyName = table.Column<string>(nullable: true),
                     LastRun = table.Column<DateTime>(nullable: false),
                     Retries = table.Column<int>(nullable: false),
-                    StateName = table.Column<string>(maxLength: 50, nullable: true)
+                    StatusName = table.Column<string>(maxLength: 50, nullable: true)
                 },
                 constraints: table =>
                 {

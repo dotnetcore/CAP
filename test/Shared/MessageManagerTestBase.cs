@@ -84,7 +84,7 @@ namespace DotNetCore.CAP.Test
             Assert.NotNull(operateResult);
             Assert.True(operateResult.Succeeded);
 
-            message.StateName = StateName.Processing;
+            message.StatusName = StatusName.Processing;
             operateResult = await manager.UpdateReceivedMessageAsync(message);
             Assert.NotNull(operateResult);
             Assert.True(operateResult.Succeeded);
