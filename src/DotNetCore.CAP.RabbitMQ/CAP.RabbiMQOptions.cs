@@ -25,8 +25,16 @@
         /// <remarks> PLEASE KEEP THIS MATCHING THE DOC ABOVE.</remarks>
         public const string DefaultVHost = "/";
 
+        /// <summary>
+        /// Default exchange name (value: "cap").
+        /// </summary>
+        public const string DefaultExchangeName = "cap";
+
         /// <summary>The host to connect to.</summary>
         public string HostName { get; set; } = "localhost";
+
+        /// <summary> The topic exchange type. </summary>
+        internal string EXCHANGE_TYPE = "topic";
 
         /// <summary>
         /// Password to use when authenticating to the server.
@@ -42,6 +50,11 @@
         /// Virtual host to access during this connection.
         /// </summary>
         public string VirtualHost { get; set; } = DefaultVHost;
+
+        /// <summary>
+        /// Topic exchange name when declare a topic exchange.
+        /// </summary>
+        public string TopicExchangeName { get; set; } = DefaultExchangeName;
 
         /// <summary>
         /// Timeout setting for connection attempts (in milliseconds).
