@@ -78,6 +78,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
                 Assert.NotNull(selectedMessage);
 
                 db.CapSentMessages.Remove(selectedMessage);
+                db.SaveChanges();
                 selectedMessage = db.CapSentMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued);
                 Assert.Null(selectedMessage);
             }
@@ -99,8 +100,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
 
                 db.SaveChanges();
 
-                Assert.True(db.CapSentMessages.Any(u => u.Id == guid));
-                Assert.NotNull(db.CapSentMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued));
+                Assert.True(db.CapReceivedMessages.Any(u => u.Id == guid));
+                Assert.NotNull(db.CapReceivedMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued));
             }
         }
 
@@ -120,14 +121,14 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
 
                 db.SaveChanges();
 
-                var selectedMessage = db.CapSentMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued);
+                var selectedMessage = db.CapReceivedMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued);
                 Assert.NotNull(selectedMessage);
 
                 selectedMessage.StatusName = StatusName.Succeeded;
                 selectedMessage.Content = "Test";
                 db.SaveChanges();
 
-                selectedMessage = db.CapSentMessages.FirstOrDefault(u => u.StatusName == StatusName.Succeeded);
+                selectedMessage = db.CapReceivedMessages.FirstOrDefault(u => u.StatusName == StatusName.Succeeded);
                 Assert.NotNull(selectedMessage);
                 Assert.True(selectedMessage.Content == "Test");
             }
@@ -149,11 +150,12 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
 
                 db.SaveChanges();
 
-                var selectedMessage = db.CapSentMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued);
+                var selectedMessage = db.CapReceivedMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued);
                 Assert.NotNull(selectedMessage);
 
-                db.CapSentMessages.Remove(selectedMessage);
-                selectedMessage = db.CapSentMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued);
+                db.CapReceivedMessages.Remove(selectedMessage);
+                db.SaveChanges();
+                selectedMessage = db.CapReceivedMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued);
                 Assert.Null(selectedMessage);
             }
         }
