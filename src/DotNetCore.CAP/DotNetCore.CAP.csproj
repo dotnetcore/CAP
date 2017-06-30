@@ -4,7 +4,6 @@
   
   <PropertyGroup>
     <PackageId>DotNetCore.CAP</PackageId>
-    <Description></Description>
     <TargetFramework>netstandard1.6</TargetFramework>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>

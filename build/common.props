@@ -9,10 +9,13 @@
 	<PropertyGroup Label="Package">
 		<Product>CAP</Product>
 		<Authors>Savorboard</Authors>
+    <RepositoryUrl>https://github.com/dotnetcore/CAP</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
     <PackageIconUrl>https://avatars2.githubusercontent.com/u/19404084</PackageIconUrl>
 		<PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
 		<PackageLicenseUrl>https://github.com/dotnetcore/CAP/blob/master/LICENSE</PackageLicenseUrl>
     <PackageTags>aspnetcore;cap;consistency</PackageTags>
+    <Description>Eventually consistency in distributed architectures.</Description>
 	</PropertyGroup>
 
 </Project>
