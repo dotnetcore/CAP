@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.Test
         public void CanOverrideMessageStore()
         {
             var services = new ServiceCollection();
-            services.AddConsistency().AddMessageStore<MyMessageStore>();
+            services.AddCap().AddMessageStore<MyMessageStore>();
 
             var thingy = services.BuildServiceProvider()
 
@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Test
         public void CanOverrideJobs()
         {
             var services = new ServiceCollection();
-            services.AddConsistency().AddJobs<MyJobTest>();
+            services.AddCap().AddJobs<MyJobTest>();
 
             var thingy = services.BuildServiceProvider()
                 .GetRequiredService<IJob>() as MyJobTest;
@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.Test
         public void CanOverrideProducerService()
         {
             var services = new ServiceCollection();
-            services.AddConsistency().AddProducerService<MyProducerService>();
+            services.AddCap().AddProducerService<MyProducerService>();
 
             var thingy = services.BuildServiceProvider()
                 .GetRequiredService<ICapProducerService>() as MyProducerService;
