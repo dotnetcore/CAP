@@ -21,7 +21,7 @@ namespace DotNetCore.CAP.Test
         protected virtual void SetupMessageServices(IServiceCollection services, object context = null)
         {
             services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
-            services.AddConsistency();
+            services.AddCap();
             AddMessageStore(services, context);
 
             services.AddSingleton<ILogger<ICapMessageStore>>(new TestLogger<ICapMessageStore>());

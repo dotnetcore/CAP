@@ -24,17 +24,17 @@ namespace Sample.Kafka
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<AppDbContext>();
-        
-        services.AddConsistency()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddRabbitMQ(x =>
-                {
-                    x.HostName = "192.168.2.206";
-                    x.UserName = "admin";
-                    x.Password = "123123";
-                })
-                .AddKafka(x => x.Servers = "");
 
+            services.AddCap()
+                    .AddEntityFrameworkStores<AppDbContext>()
+                    .AddRabbitMQ(x =>
+                    {
+                        x.HostName = "192.168.2.206";
+                        x.UserName = "admin";
+                        x.Password = "123123";
+                    });
+            //.AddKafka(x => x.Servers = "");
+            
             // Add framework services.
             services.AddMvc();
         }

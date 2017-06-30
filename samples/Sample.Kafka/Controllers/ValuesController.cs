@@ -24,18 +24,26 @@ namespace Sample.Kafka.Controllers
         }
         public string ServerPath => ((IHostingEnvironment)HttpContext.RequestServices.GetService(typeof(IHostingEnvironment))).ContentRootPath;
 
-        [KafkaTopic("zzwl.topic.finace.callBack", IsOneWay = true, GroupOrExchange = "test")]
-        [NonAction]
-        public void KafkaTest()
+        [KafkaTopic("zzwl.topic.finace.callBack", GroupOrExchange = "test")]
+        public void KafkaTest(Person person)
         {
-            Console.WriteLine("kafka test invoked");
+            Console.WriteLine(person.Name);
+            Console.WriteLine(person.Age);
+            
         }
 
         [Route("~/send")]
         public async Task<IActionResult> SendTopic()
         {
-            await _producer.SendAsync("zzwl.topic.finace.callBack", "{\"msgBody\":\"{\\\"dealno\\\":null,\\\"businesstype\\\":\\\"1\\\",\\\"serialno\\\":\\\"435ldfhj345\\\",\\\"bankno\\\":\\\"650001\\\",\\\"amt\\\":20.0,\\\"virtualstatus\\\":1,\\\"paystatus\\\":1}\",\"callbackTopicName\":\"zzwl.topic.finace.callBack\",\"createId\":null,\"retryLimit\":0}");
+            await _producer.SendAsync("zzwl.topic.finace.callBack", new Person { Name = "Test", Age = 11 });
             return Ok();
+        }
+
+        public class Person
+        {
+            public string Name { get; set; }
+
+            public int Age { get; set; }
         }
     }
 }
