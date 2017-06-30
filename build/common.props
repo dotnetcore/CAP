@@ -7,10 +7,12 @@
 	</PropertyGroup>
 
 	<PropertyGroup Label="Package">
-		<Product>Cap</Product>
+		<Product>CAP</Product>
 		<Authors>Savorboard</Authors>
-		<PackageProjectUrl>https://github.com/ouraspnet/cap</PackageProjectUrl>
-		<PackageLicenseUrl>https://github.com/ouraspnet/cap/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageIconUrl>https://avatars2.githubusercontent.com/u/19404084</PackageIconUrl>
+		<PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
+		<PackageLicenseUrl>https://github.com/dotnetcore/CAP/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageTags>aspnetcore;cap;consistency</PackageTags>
 	</PropertyGroup>
 
 </Project>
