@@ -41,15 +41,23 @@ namespace DotNetCore.CAP.Job
                 var nextReceivedMessage = await messageStore.GetNextReceivedMessageToBeExcuted();
                 if (nextReceivedMessage != null)
                 {
-                    var executeDescriptor = matchs[nextReceivedMessage.KeyName];
-                    var consumerContext = new ConsumerContext(executeDescriptor, nextReceivedMessage);
-                    var invoker = _consumerInvokerFactory.CreateInvoker(consumerContext);
+                    try
+                    {
+                        var executeDescriptor = matchs[nextReceivedMessage.KeyName];
+                        var consumerContext = new ConsumerContext(executeDescriptor, nextReceivedMessage);
+                        var invoker = _consumerInvokerFactory.CreateInvoker(consumerContext);
 
-                    await messageStore.ChangeReceivedMessageStateAsync(nextReceivedMessage, StatusName.Processing);
+                        await messageStore.ChangeReceivedMessageStateAsync(nextReceivedMessage, StatusName.Processing);
 
-                    await invoker.InvokeAsync();
+                        await invoker.InvokeAsync();
 
-                    await messageStore.ChangeReceivedMessageStateAsync(nextReceivedMessage,StatusName.Succeeded);
+                        await messageStore.ChangeReceivedMessageStateAsync(nextReceivedMessage, StatusName.Succeeded);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.ReceivedMessageRetryExecutingFailed(nextReceivedMessage.KeyName, ex);
+                    }
+
                 }
             }
         }

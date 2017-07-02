@@ -11,9 +11,9 @@ namespace DotNetCore.CAP.Internal
     {
         protected readonly ILogger _logger;
         protected readonly IServiceProvider _serviceProvider;
+        protected readonly ConsumerContext _consumerContext;
         private readonly IModelBinder _modelBinder;
         private readonly ObjectMethodExecutor _executor;
-        protected readonly ConsumerContext _consumerContext;
 
         public DefaultConsumerInvoker(ILogger logger,
             IServiceProvider serviceProvider,
@@ -30,42 +30,29 @@ namespace DotNetCore.CAP.Internal
 
         public Task InvokeAsync()
         {
-            try
+            using (_logger.BeginScope("consumer invoker begin"))
             {
-                using (_logger.BeginScope("consumer invoker begin"))
+                _logger.LogDebug("Executing consumer Topic: {0}", _consumerContext.ConsumerDescriptor.MethodInfo.Name);
+
+                var obj = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider, _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
+
+                var value = _consumerContext.DeliverMessage.Content;
+
+                if (_executor.MethodParameters.Length > 0)
                 {
-                    _logger.LogDebug("Executing consumer Topic: {0}", _consumerContext.ConsumerDescriptor.Attribute);
+                    var firstParameter = _executor.MethodParameters[0];
 
-                    try
-                    {
-                        var obj = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider, _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
+                    var bindingContext = ModelBindingContext.CreateBindingContext(value,
+                        firstParameter.Name, firstParameter.ParameterType);
 
-                        var value = _consumerContext.DeliverMessage.Content;
-
-                        if (_executor.MethodParameters.Length > 0)
-                        {
-                            var firstParameter = _executor.MethodParameters[0];
-
-                            var bindingContext = ModelBindingContext.CreateBindingContext(value,
-                                firstParameter.Name, firstParameter.ParameterType);
-
-                            _modelBinder.BindModelAsync(bindingContext);
-                            _executor.Execute(obj, bindingContext.Result);
-                        }
-                        else
-                        {
-                            _executor.Execute(obj);
-                        }
-                        return Task.CompletedTask;
-                    }
-                    finally
-                    {
-                        _logger.LogDebug("Executed consumer method .");
-                    }
+                    _modelBinder.BindModelAsync(bindingContext);
+                    _executor.Execute(obj, bindingContext.Result);
                 }
-            }
-            finally
-            {
+                else
+                {
+                    _executor.Execute(obj);
+                }
+                return Task.CompletedTask;
             }
         }
     }

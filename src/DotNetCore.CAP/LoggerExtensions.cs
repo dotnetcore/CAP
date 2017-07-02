@@ -21,6 +21,7 @@ namespace DotNetCore.CAP
         private static Action<ILogger, string, string, Exception> _enqueuingSentMessage;
         private static Action<ILogger, string, string, Exception> _enqueuingReceivdeMessage;
         private static Action<ILogger, string, Exception> _executingConsumerMethod;
+        private static Action<ILogger, string, Exception> _receivedMessageRetryExecuting;
 
         static LoggerExtensions()
         {
@@ -78,11 +79,21 @@ namespace DotNetCore.CAP
                 LogLevel.Error,
                 5,
                 "Consumer method '{methodName}' failed to execute.");
+
+            _receivedMessageRetryExecuting = LoggerMessage.Define<string>(
+                LogLevel.Error,
+                5,
+                "Received message topic method '{topicName}' failed to execute.");
         }
 
         public static void ConsumerMethodExecutingFailed(this ILogger logger, string methodName, Exception ex)
         {
             _executingConsumerMethod(logger, methodName, ex);
+        }
+
+        public static void ReceivedMessageRetryExecutingFailed(this ILogger logger, string topicName, Exception ex)
+        {
+            _receivedMessageRetryExecuting(logger, topicName, ex);
         }
 
         public static void EnqueuingReceivedMessage(this ILogger logger, string nameKey, string content)
