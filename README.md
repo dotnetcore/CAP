@@ -3,7 +3,7 @@
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
-CAP is a library to achieve eventually consistent in distributed architectures system like SOA,MicroService. It is lightweight,easy to use and efficiently.
+CAP is a library to achieve eventually consistent in distributed architectures system like SOA,MicroService. 	It is lightweight,easy to use and efficiently.
 
 ## OverView
 
@@ -68,7 +68,7 @@ public void Configure(IApplicationBuilder app)
 
 ```
 
-### Publishing
+### Publish
 
 Inject `ICapProducerService` in your Controller, then use the `ICapProducerService` to send message
 
@@ -95,7 +95,7 @@ public class PublishController : Controller
 
 ```
 
-### Subscribing
+### Subscribe
 
 **Action Method**
 
@@ -128,7 +128,7 @@ public class PublishController : Controller
 
 **Service Method**
 
-If your subscribing method is not in the Controller,then your subscribe class need to Inheritance `IConsumerService`: 
+If your subscribe method is not in the Controller,then your subscribe class need to Inheritance `IConsumerService`: 
 
 ```cs
 
