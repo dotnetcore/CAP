@@ -3,17 +3,17 @@
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
-CAP is a library to achieve eventually consistent in distributed architectures system like SOA,MicroService. It is lightweight,easy to use and efficiently
+CAP is a library to achieve eventually consistent in distributed architectures system like SOA,MicroService.It is lightweight,easy to use and efficiently.
 
 ## OverView
 
-CAP is a library that used in an ASP.NET Core project,Of Course you can ues it in ASP.NET Core with .NET Framework 
+CAP is a library that used in an ASP.NET Core project,Of Course you can ues it in ASP.NET Core with .NET Framework.
 
-You can think of CAP as an EventBus because it has all the features of EventBus, and CAP provides a easier way to handle the publishing and subscribing in EventBus.
+You can think of CAP as an EventBus because it has all the features of EventBus, and CAP provides a easier way to handle the publishing and subscribing than EventBus.
 
-CAP has the function of message persistence, and it guarantees the reliability of the message when your service is restarted or down. CAP provides a Microsoft Pro-based Producer Service service that integrates seamlessly with your business services and supports strong consistency transactions.
+CAP has the function of Message Presistence, and it makes messages reliability when your service is restarted or down. CAP provides a Producer Service based on Microsoft DI that integrates seamlessly with your business services and supports strong consistency transactions.
 
-This is a diagram of the CAP work in the ASP.NET Core MicroService architecture:
+This is a diagram of the CAP working in the ASP.NET Core MicroService architecture:
 
 ![](http://images2015.cnblogs.com/blog/250417/201706/250417-20170630143600289-1065294295.png)
 
@@ -23,21 +23,21 @@ This is a diagram of the CAP work in the ASP.NET Core MicroService architecture:
 
 ### NuGet (Coming soon)
 
-你可以运行以下下命令在你的项目中安装 CAP。
+You can run the following command to install the CAP in your project.
 
-如果你的消息队列使用的是 Kafka 的话，你可以：
+If your Message Queue is using Kafka, you can：
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka
 ```
 
-如果你的消息队列使用的是 RabbitMQ 的话，你可以：
+or RabbitMQ：
 
 ```
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP 默认提供了 Entity Framwork 作为数据库存储：
+CAP provides EntityFramework as default database store extension ：
 
 ```
 PM> Install-Package DotNetCore.CAP.EntityFrameworkCore
@@ -45,7 +45,7 @@ PM> Install-Package DotNetCore.CAP.EntityFrameworkCore
 
 ### Configuration
 
-首先配置CAP到 Startup.cs 文件中，如下：
+First,You need to config CAP in your Startup.cs：
 
 ```cs
 public void ConfigureServices(IServiceCollection services)
@@ -68,9 +68,9 @@ public void Configure(IApplicationBuilder app)
 
 ```
 
-### 发布
+### Publishing
 
-在 Controller 中注入 `ICapProducerService` 然后使用 `ICapProducerService` 进行消息发送
+Inject `ICapProducerService` in your Controller, then use the `ICapProducerService` to send message
 
 ```cs
 public class PublishController : Controller
@@ -86,7 +86,7 @@ public class PublishController : Controller
 	[Route("~/checkAccount")]
 	public async Task<IActionResult> PublishMessage()
 	{
-		//指定发送的消息头和内容
+		//Specifies the message header and content to be sent
 		await _producer.SendAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
 		return Ok();
@@ -95,13 +95,13 @@ public class PublishController : Controller
 
 ```
 
-### 订阅
+### Subscribing
 
 **Action Method**
 
-在Action上添加 Attribute 来订阅相关消息。
+Add Attribute on Action to subscribe message:
 
-如果你使用的是 Kafak 则使用 `[KafkaTopic()]`, 如果是 RabbitMQ 则使用 `[RabbitMQTopic()]`
+If you are using Kafka the Attribute is `[KafkaTopic()]`, and RabbitMQ is  `[RabbitMQTopic()]`
 
 ```cs
 public class PublishController : Controller
@@ -128,7 +128,7 @@ public class PublishController : Controller
 
 **Service Method**
 
-如果你的订阅方法没有位于 Controller 中，则你订阅的类需要继承 `IConsumerService`：
+If your subscribing method is not in the Controller,then your subscribe class need to Inheritance `IConsumerService`: 
 
 ```cs
 
@@ -152,7 +152,7 @@ namespace xxx.Service
 
 ```
 
-then inject your  `ISubscriberService`  class in Startup.cs 
+Then inject your  `ISubscriberService`  class in Startup.cs 
 
 ```cs
 public void ConfigureServices(IServiceCollection services)
@@ -167,4 +167,4 @@ One of the easiest ways to contribute is to participate in discussions and discu
 
 ### License
 
-MIT
+[MIT](https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt)
