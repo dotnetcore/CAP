@@ -3,7 +3,7 @@
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
-CAP is a library to achieve eventually consistent in distributed architectures system like SOA,MicroService.It is lightweight,easy to use and efficiently.
+CAP is a library to achieve eventually consistent in distributed architectures system like SOA,MicroService. It is lightweight,easy to use and efficiently.
 
 ## OverView
 
