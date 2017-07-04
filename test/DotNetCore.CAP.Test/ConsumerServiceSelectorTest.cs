@@ -45,6 +45,7 @@ namespace DotNetCore.CAP.Test
             Assert.NotNull(bestCandidates.MethodInfo);
             Assert.Equal(bestCandidates.MethodInfo.ReturnType, typeof(Task));
         }
+
     }
 
     public class CandidatesTopic : TopicAttribute
@@ -86,6 +87,11 @@ namespace DotNetCore.CAP.Test
         public void GetBar2()
         {
             Console.WriteLine("GetBar2() method has bee excuted.");
+        }
+
+        public void GetBar3()
+        {
+            Console.WriteLine("GetBar3() method has bee excuted.");
         }
     }
 
