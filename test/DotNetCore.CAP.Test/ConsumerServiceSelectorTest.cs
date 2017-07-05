@@ -58,7 +58,7 @@ namespace DotNetCore.CAP.Test
     public interface IFooTest { }
     public interface IBarTest { }
 
-    public class CandidatesFooTest : IFooTest, IConsumerService
+    public class CandidatesFooTest : IFooTest, ICapSubscribe
     {
         [CandidatesTopic("Candidates.Foo")]
         public Task GetFoo()

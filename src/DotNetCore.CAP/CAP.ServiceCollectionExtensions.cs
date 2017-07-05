@@ -67,9 +67,9 @@ namespace Microsoft.Extensions.DependencyInjection
             foreach (var rejectedServices in services)
             {
                 if (rejectedServices.ImplementationType != null
-                    && typeof(IConsumerService).IsAssignableFrom(rejectedServices.ImplementationType))
+                    && typeof(ICapSubscribe).IsAssignableFrom(rejectedServices.ImplementationType))
 
-                    consumerListenerServices.Add(typeof(IConsumerService), rejectedServices.ImplementationType);
+                    consumerListenerServices.Add(typeof(ICapSubscribe), rejectedServices.ImplementationType);
             }
 
             foreach (var service in consumerListenerServices)

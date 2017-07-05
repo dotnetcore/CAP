@@ -54,11 +54,11 @@ namespace DotNetCore.CAP.Internal
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
-            var consumerServices = provider.GetServices<IConsumerService>();
+            var consumerServices = provider.GetServices<ICapSubscribe>();
             foreach (var service in consumerServices)
             {
                 var typeInfo = service.GetType().GetTypeInfo();
-                if (!typeof(IConsumerService).GetTypeInfo().IsAssignableFrom(typeInfo))
+                if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
                 {
                     continue;
                 }
