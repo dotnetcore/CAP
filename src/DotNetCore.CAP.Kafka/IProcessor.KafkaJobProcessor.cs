@@ -84,64 +84,44 @@ namespace DotNetCore.CAP.Kafka
             {
                 var provider = scopedContext.Provider;
                 var messageStore = provider.GetRequiredService<ICapMessageStore>();
-                try
+                var message = await messageStore.GetNextSentMessageToBeEnqueuedAsync();
+                if (message != null)
                 {
-                    var message = await messageStore.GetNextSentMessageToBeEnqueuedAsync();
-                    if (message != null)
+                    try
                     {
+
                         var sp = Stopwatch.StartNew();
                         message.StatusName = StatusName.Processing;
                         await messageStore.UpdateSentMessageAsync(message);
 
-                        var jobResult = ExecuteJob(message.KeyName, message.Content);
+                        await ExecuteJobAsync(message.KeyName, message.Content);
 
                         sp.Stop();
 
-                        if (!jobResult)
-                        {
-                            _logger.JobFailed(new Exception("topic send failed"));
-                        }
-                        else
-                        {
-                            //TODO ： the state will be deleted when release.
-                            message.StatusName = StatusName.Succeeded;
-                            await messageStore.UpdateSentMessageAsync(message);
+                        message.StatusName = StatusName.Succeeded;
+                        await messageStore.UpdateSentMessageAsync(message);
 
-                            _logger.JobExecuted(sp.Elapsed.TotalSeconds);
-                        }
+                        _logger.JobExecuted(sp.Elapsed.TotalSeconds);
                     }
-                }
-                catch (Exception)
-                {
-                    return false;
+                    catch (Exception ex)
+                    {
+                        _logger.ExceptionOccuredWhileExecutingJob(message.KeyName, ex);
+                        return false;
+                    }
                 }
             }
             return true;
         }
 
-        private bool ExecuteJob(string topic, string content)
+        private Task ExecuteJobAsync(string topic, string content)
         {
-            try
+            var config = _kafkaOptions.AsRdkafkaConfig();
+            using (var producer = new Producer<Null, string>(config, null, new StringSerializer(Encoding.UTF8)))
             {
-                var config = _kafkaOptions.AsRdkafkaConfig();
-                using (var producer = new Producer<Null, string>(config, null, new StringSerializer(Encoding.UTF8)))
-                {
-                    var message = producer.ProduceAsync(topic, null, content).Result;
-                    if (message.Error.Code == ErrorCode.NoError)
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
-                }
+                producer.ProduceAsync(topic, null, content);
+                producer.Flush();
             }
-            catch (Exception ex)
-            {
-                _logger.ExceptionOccuredWhileExecutingJob(topic, ex);
-                return false;
-            }
+            return Task.CompletedTask;
         }
     }
 }

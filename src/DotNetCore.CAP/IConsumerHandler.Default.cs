@@ -54,8 +54,7 @@ namespace DotNetCore.CAP
         public void Start()
         {
             var matchs = _selector.GetCandidatesMethods(_serviceProvider);
-
-            var groupingMatchs = matchs.GroupBy(x => x.Value.Attribute.GroupOrExchange);
+            var groupingMatchs = matchs.GroupBy(x => x.Value.Attribute.Group);
 
             foreach (var matchGroup in groupingMatchs)
             {

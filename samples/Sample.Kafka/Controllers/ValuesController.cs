@@ -24,7 +24,7 @@ namespace Sample.Kafka.Controllers
         }
         public string ServerPath => ((IHostingEnvironment)HttpContext.RequestServices.GetService(typeof(IHostingEnvironment))).ContentRootPath;
 
-        [KafkaTopic("zzwl.topic.finace.callBack", GroupOrExchange = "test")]
+        [KafkaTopic("zzwl.topic.finace.callBack", Group = "test")]
         public void KafkaTest(Person person)
         {
             Console.WriteLine(person.Name);

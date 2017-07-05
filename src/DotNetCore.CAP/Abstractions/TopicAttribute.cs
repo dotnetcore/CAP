@@ -24,10 +24,14 @@ namespace DotNetCore.CAP.Abstractions
         }
 
         /// <summary>
-        /// the consumer group.
+        /// kafak --> groups.id
+        /// rabbitmq --> queue.name
         /// </summary>
-        public string GroupOrExchange { get; set; }
+        public string Group { get; set; } = "cap.default.group";
 
+        /// <summary>
+        /// unused now
+        /// </summary>
         public bool IsOneWay { get; set; }
     }
 }

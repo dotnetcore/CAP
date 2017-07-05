@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Reflection;
 using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Infrastructure
@@ -45,6 +46,36 @@ namespace DotNetCore.CAP.Infrastructure
         public static DateTime FromTimestamp(long value)
         {
             return Epoch.AddSeconds(value);
+        }
+
+        public static bool IsController(TypeInfo typeInfo)
+        {
+            if (!typeInfo.IsClass)
+            {
+                return false;
+            }
+
+            if (typeInfo.IsAbstract)
+            {
+                return false;
+            }
+
+            if (!typeInfo.IsPublic)
+            {
+                return false;
+            }
+
+            if (typeInfo.ContainsGenericParameters)
+            {
+                return false;
+            }
+
+            if (!typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            return true;
         }
     }
 }
