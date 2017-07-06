@@ -100,7 +100,6 @@ namespace DotNetCore.CAP.Kafka
 
                         message.StatusName = StatusName.Succeeded;
                         await messageStore.UpdateSentMessageAsync(message);
-
                         _logger.JobExecuted(sp.Elapsed.TotalSeconds);
                     }
                     catch (Exception ex)
