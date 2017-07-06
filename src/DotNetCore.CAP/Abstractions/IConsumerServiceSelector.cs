@@ -23,6 +23,7 @@ namespace DotNetCore.CAP.Abstractions
         /// <param name="key">topic or exchange router key.</param>
         /// <param name="candidates">the set of <see cref="ConsumerExecutorDescriptor"/> candidates.</param>
         /// <returns></returns>
-        ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> candidates);
+        ConsumerExecutorDescriptor
+            SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> candidates);
     }
 }

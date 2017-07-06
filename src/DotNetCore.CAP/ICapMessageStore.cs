@@ -4,9 +4,8 @@ using DotNetCore.CAP.Infrastructure;
 namespace DotNetCore.CAP
 {
     /// <summary>
-    /// Provides an abstraction for a store which manages consistent message.
+    /// Provides an abstraction for a store which manages CAP message.
     /// </summary>
-    /// <typeparam name="ConsistencyMessage"></typeparam>
     public interface ICapMessageStore
     {
         /// <summary>
@@ -20,8 +19,10 @@ namespace DotNetCore.CAP
         /// </summary>
         /// <param name="message">The type of <see cref="CapSentMessage"/>.</param>
         /// <param name="statusName">The status name.</param>
+        /// <param name="autoSaveChanges">auto save dbcontext changes.</param>
         /// <returns></returns>
-        Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string statusName, bool autoSaveChanges = true);
+        Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string statusName,
+            bool autoSaveChanges = true);
 
         /// <summary>
         /// Fetches the next message to be executed.
@@ -42,8 +43,6 @@ namespace DotNetCore.CAP
         Task<OperateResult> RemoveSentMessageAsync(CapSentMessage message);
 
 
-
-
         /// <summary>
         /// Creates a new message in a store as an asynchronous operation.
         /// </summary>
@@ -56,8 +55,10 @@ namespace DotNetCore.CAP
         /// </summary>
         /// <param name="message">The type of <see cref="CapReceivedMessage"/>.</param>
         /// <param name="statusName">The status name.</param>
+        /// <param name="autoSaveChanges">auto save dbcontext changes.</param>
         /// <returns></returns>
-        Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string statusName, bool autoSaveChanges = true);
+        Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string statusName,
+            bool autoSaveChanges = true);
 
         /// <summary>
         /// Fetches the next message to be executed.

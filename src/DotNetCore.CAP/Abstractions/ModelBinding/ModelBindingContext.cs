@@ -3,7 +3,7 @@ using Microsoft.Extensions.Primitives;
 
 namespace DotNetCore.CAP.Abstractions.ModelBinding
 {
-    // <summary>
+    /// <summary>
     /// A context that contains operating information for model binding and validation.
     /// </summary>
     public class ModelBindingContext

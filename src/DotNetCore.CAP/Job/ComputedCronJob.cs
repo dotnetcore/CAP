@@ -5,7 +5,7 @@ namespace DotNetCore.CAP.Job
 {
     public class ComputedCronJob
     {
-        private CronJobRegistry.Entry _entry;
+        private readonly CronJobRegistry.Entry _entry;
 
         public ComputedCronJob()
         {

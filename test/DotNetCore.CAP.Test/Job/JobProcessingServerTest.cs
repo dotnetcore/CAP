@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.Test.Job
             services.AddTransient<DefaultCronJobRegistry>();
             services.AddLogging();
             services.AddSingleton(_options);
-            services.AddSingleton(_mockStorage.Object); 
+            services.AddSingleton(_mockStorage.Object);
             _provider = services.BuildServiceProvider();
 
             _context = new ProcessingContext(_provider, null, _cancellationTokenSource.Token);

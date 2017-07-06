@@ -16,14 +16,13 @@ namespace DotNetCore.CAP.Kafka
 {
     public class KafkaJobProcessor : IJobProcessor
     {
-        private readonly CapOptions _capOptions;
         private readonly KafkaOptions _kafkaOptions;
         private readonly CancellationTokenSource _cts;
 
         private readonly IServiceProvider _provider;
         private readonly ILogger _logger;
 
-        private TimeSpan _pollingDelay;
+        private readonly TimeSpan _pollingDelay;
 
         public KafkaJobProcessor(
             IOptions<CapOptions> capOptions,
@@ -32,11 +31,10 @@ namespace DotNetCore.CAP.Kafka
             IServiceProvider provider)
         {
             _logger = logger;
-            _capOptions = capOptions.Value;
             _kafkaOptions = kafkaOptions.Value;
             _provider = provider;
             _cts = new CancellationTokenSource();
-            _pollingDelay = TimeSpan.FromSeconds(_capOptions.PollingDelay);
+            _pollingDelay = TimeSpan.FromSeconds(capOptions.Value.PollingDelay);
         }
 
         public bool Waiting { get; private set; }
@@ -85,28 +83,25 @@ namespace DotNetCore.CAP.Kafka
                 var provider = scopedContext.Provider;
                 var messageStore = provider.GetRequiredService<ICapMessageStore>();
                 var message = await messageStore.GetNextSentMessageToBeEnqueuedAsync();
-                if (message != null)
+                if (message == null) return true;
+                try
                 {
-                    try
-                    {
+                    var sp = Stopwatch.StartNew();
+                    message.StatusName = StatusName.Processing;
+                    await messageStore.UpdateSentMessageAsync(message);
 
-                        var sp = Stopwatch.StartNew();
-                        message.StatusName = StatusName.Processing;
-                        await messageStore.UpdateSentMessageAsync(message);
+                    await ExecuteJobAsync(message.KeyName, message.Content);
 
-                        await ExecuteJobAsync(message.KeyName, message.Content);
+                    sp.Stop();
 
-                        sp.Stop();
-
-                        message.StatusName = StatusName.Succeeded;
-                        await messageStore.UpdateSentMessageAsync(message);
-                        _logger.JobExecuted(sp.Elapsed.TotalSeconds);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.ExceptionOccuredWhileExecutingJob(message.KeyName, ex);
-                        return false;
-                    }
+                    message.StatusName = StatusName.Succeeded;
+                    await messageStore.UpdateSentMessageAsync(message);
+                    _logger.JobExecuted(sp.Elapsed.TotalSeconds);
+                }
+                catch (Exception ex)
+                {
+                    _logger.ExceptionOccuredWhileExecutingJob(message.KeyName, ex);
+                    return false;
                 }
             }
             return true;

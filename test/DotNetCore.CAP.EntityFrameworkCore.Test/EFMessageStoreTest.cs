@@ -23,7 +23,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
                 db.Attach(message).State = Microsoft.EntityFrameworkCore.EntityState.Added;
 
                 db.SaveChanges();
-                
+
                 Assert.True(db.CapSentMessages.Any(u => u.Id == guid));
                 Assert.NotNull(db.CapSentMessages.FirstOrDefault(u => u.StatusName == StatusName.Enqueued));
             }

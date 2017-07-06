@@ -57,7 +57,6 @@ namespace DotNetCore.CAP.Job
                     {
                         _logger.ReceivedMessageRetryExecutingFailed(nextReceivedMessage.KeyName, ex);
                     }
-
                 }
             }
         }

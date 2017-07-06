@@ -15,14 +15,13 @@ namespace DotNetCore.CAP.Internal
 
         public ConcurrentDictionary<string, ConsumerExecutorDescriptor> GetCandidatesMethods(IServiceProvider provider)
         {
-            if (Entries.Count == 0)
-            {
-                var executorCollection = _selector.SelectCandidates(provider);
+            if (Entries.Count != 0) return Entries;
 
-                foreach (var item in executorCollection)
-                {
-                    Entries.GetOrAdd(item.Attribute.Name, item);
-                }
+            var executorCollection = _selector.SelectCandidates(provider);
+
+            foreach (var item in executorCollection)
+            {
+                Entries.GetOrAdd(item.Attribute.Name, item);
             }
             return Entries;
         }
@@ -38,6 +37,6 @@ namespace DotNetCore.CAP.Internal
         }
 
         public ConcurrentDictionary<string, ConsumerExecutorDescriptor> Entries { get; } =
-               new ConcurrentDictionary<string, ConsumerExecutorDescriptor>();
+            new ConcurrentDictionary<string, ConsumerExecutorDescriptor>();
     }
 }

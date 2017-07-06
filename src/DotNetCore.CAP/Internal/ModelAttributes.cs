@@ -16,12 +16,7 @@ namespace DotNetCore.CAP.Internal
         /// <param name="typeAttributes">The set of attributes for the <see cref="Type"/>.</param>
         public ModelAttributes(IEnumerable<object> typeAttributes)
         {
-            if (typeAttributes == null)
-            {
-                throw new ArgumentNullException(nameof(typeAttributes));
-            }
-
-            Attributes = typeAttributes.ToArray();
+            Attributes = typeAttributes?.ToArray() ?? throw new ArgumentNullException(nameof(typeAttributes));
             TypeAttributes = Attributes;
         }
 
@@ -34,18 +29,12 @@ namespace DotNetCore.CAP.Internal
         /// </param>
         public ModelAttributes(IEnumerable<object> propertyAttributes, IEnumerable<object> typeAttributes)
         {
-            if (propertyAttributes == null)
-            {
-                throw new ArgumentNullException(nameof(propertyAttributes));
-            }
+            PropertyAttributes = propertyAttributes?.ToArray()
+                                 ?? throw new ArgumentNullException(nameof(propertyAttributes));
 
-            if (typeAttributes == null)
-            {
-                throw new ArgumentNullException(nameof(typeAttributes));
-            }
+            TypeAttributes = typeAttributes?.ToArray()
+                             ?? throw new ArgumentNullException(nameof(typeAttributes));
 
-            PropertyAttributes = propertyAttributes.ToArray();
-            TypeAttributes = typeAttributes.ToArray();
             Attributes = PropertyAttributes.Concat(TypeAttributes).ToArray();
         }
 

@@ -32,16 +32,16 @@ namespace DotNetCore.CAP.Kafka
 
         internal IEnumerable<KeyValuePair<string, object>> AsRdkafkaConfig()
         {
-            if (!MainConfig.ContainsKey("bootstrap.servers"))
+            if (MainConfig.ContainsKey("bootstrap.servers")) 
+                return MainConfig.AsEnumerable();
+            
+            if (string.IsNullOrEmpty(Servers))
             {
-                if (string.IsNullOrEmpty(Servers))
-                {
-                    throw new ArgumentNullException(nameof(Servers));
-                }
-                else
-                {
-                    MainConfig.Add("bootstrap.servers", Servers);
-                }
+                throw new ArgumentNullException(nameof(Servers));
+            }
+            else
+            {
+                MainConfig.Add("bootstrap.servers", Servers);
             }
             return MainConfig.AsEnumerable();
         }

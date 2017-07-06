@@ -9,7 +9,6 @@ namespace DotNetCore.CAP.Test
 {
     public class ObjectMethodExecutorTest
     {
-
         [Fact]
         public void CanCreateInstance()
         {
@@ -72,7 +71,6 @@ namespace DotNetCore.CAP.Test
     {
         public void Foo()
         {
-
         }
 
         public int GetThree()
@@ -87,7 +85,6 @@ namespace DotNetCore.CAP.Test
 
         public void WithDefaultValue(string aaa = "aaa", string bbb = "bbb")
         {
-
         }
     }
 }

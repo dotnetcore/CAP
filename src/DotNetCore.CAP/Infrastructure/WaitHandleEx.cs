@@ -23,7 +23,7 @@ namespace DotNetCore.CAP.Infrastructure
                 var tcs = new TaskCompletionSource<bool>();
                 registeredHandle = ThreadPool.RegisterWaitForSingleObject(
                     handle,
-                    (state, timedOut) => ((TaskCompletionSource<bool>)state).TrySetResult(!timedOut),
+                    (state, timedOut) => ((TaskCompletionSource<bool>) state).TrySetResult(!timedOut),
                     tcs,
                     timeout,
                     true);
@@ -31,10 +31,7 @@ namespace DotNetCore.CAP.Infrastructure
             }
             finally
             {
-                if (registeredHandle != null)
-                {
-                    registeredHandle.Unregister(null);
-                }
+                registeredHandle?.Unregister(null);
             }
         }
     }

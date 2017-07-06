@@ -6,8 +6,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore
     /// <summary>
     /// Base class for the Entity Framework database context used for CAP.
     /// </summary>
-    /// <typeparam name="TMessage">The type of message objects.</typeparam>
-    /// <typeparam name="Tkey">The type of the primarky key for messages.</typeparam>
     public class CapDbContext : DbContext
     {
         /// <summary>
@@ -22,10 +20,13 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         public CapDbContext(DbContextOptions options) : base(options) { }
 
         /// <summary>
-        /// Gets or sets the <see cref="DbSet{ConsistencyMessage}"/> of Messages.
+        /// Gets or sets the <see cref="CapSentMessage"/> of Messages.
         /// </summary>
         public DbSet<CapSentMessage> CapSentMessages { get; set; }
-
+        
+        /// <summary>
+        /// Gets or sets the <see cref="CapReceivedMessages"/> of Messages.
+        /// </summary>
         public DbSet<CapReceivedMessage> CapReceivedMessages { get; set; }
 
         /// <summary>

@@ -10,15 +10,15 @@ namespace DotNetCore.CAP.Job
         public static readonly RetryBehavior DefaultRetry;
         public static readonly RetryBehavior NoRetry;
 
-        private static Random _random = new Random();
+        private static readonly Random _random = new Random();
 
-        private Func<int, int> _retryInThunk;
+        private readonly Func<int, int> _retryInThunk;
 
         static RetryBehavior()
         {
             DefaultRetryCount = 25;
             DefaultRetryInThunk = retries =>
-                (int)Math.Round(Math.Pow(retries - 1, 4) + 15 + (_random.Next(30) * (retries)));
+                (int) Math.Round(Math.Pow(retries - 1, 4) + 15 + (_random.Next(30) * (retries)));
 
             DefaultRetry = new RetryBehavior(true);
             NoRetry = new RetryBehavior(false);

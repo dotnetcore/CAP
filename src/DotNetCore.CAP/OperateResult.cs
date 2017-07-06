@@ -9,7 +9,6 @@ namespace DotNetCore.CAP
     public class OperateResult
     {
         // ReSharper disable once InconsistentNaming
-        private static readonly OperateResult _success = new OperateResult { Succeeded = true };
 
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
         private List<OperateError> _errors = new List<OperateError>();
@@ -30,7 +29,7 @@ namespace DotNetCore.CAP
         /// Returns an <see cref="OperateResult"/> indicating a successful identity operation.
         /// </summary>
         /// <returns>An <see cref="OperateResult"/> indicating a successful operation.</returns>
-        public static OperateResult Success => _success;
+        public static OperateResult Success { get; } = new OperateResult {Succeeded = true};
 
         /// <summary>
         /// Creates an <see cref="OperateResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.
@@ -39,7 +38,7 @@ namespace DotNetCore.CAP
         /// <returns>An <see cref="OperateResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.</returns>
         public static OperateResult Failed(params OperateError[] errors)
         {
-            var result = new OperateResult { Succeeded = false };
+            var result = new OperateResult {Succeeded = false};
             if (errors != null)
             {
                 result._errors.AddRange(errors);
@@ -57,9 +56,9 @@ namespace DotNetCore.CAP
         /// </remarks>
         public override string ToString()
         {
-            return Succeeded ?
-                   "Succeeded" :
-                   string.Format("{0} : {1}", "Failed", string.Join(",", Errors.Select(x => x.Code).ToList()));
+            return Succeeded
+                ? "Succeeded"
+                : string.Format("{0} : {1}", "Failed", string.Join(",", Errors.Select(x => x.Code).ToList()));
         }
     }
 

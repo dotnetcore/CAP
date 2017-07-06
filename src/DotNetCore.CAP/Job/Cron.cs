@@ -96,7 +96,7 @@ namespace DotNetCore.CAP.Job
         /// <param name="minute">The minute in which the schedule will be activated (0-59).</param>
         public static string Weekly(DayOfWeek dayOfWeek, int hour, int minute)
         {
-            return string.Format("{0} {1} * * {2}", minute, hour, (int)dayOfWeek);
+            return string.Format("{0} {1} * * {2}", minute, hour, (int) dayOfWeek);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace DotNetCore.CAP.Job
         /// <param name="minute">The minute in which the schedule will be activated (0-59).</param>
         public static string Yearly(int month, int day, int hour, int minute)
         {
-            return string.Format("{0} {1} {2} {3} *", minute, hour, day, month);
+            return $"{minute} {hour} {day} {month} *";
         }
     }
 }

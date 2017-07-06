@@ -17,50 +17,50 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity("DotNetCore.CAP.Infrastructure.CapReceivedMessage", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<string>("Id")
+                    .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("Added");
+                b.Property<DateTime>("Added");
 
-                    b.Property<string>("Content");
+                b.Property<string>("Content");
 
-                    b.Property<string>("KeyName");
+                b.Property<string>("KeyName");
 
-                    b.Property<DateTime>("LastRun");
+                b.Property<DateTime>("LastRun");
 
-                    b.Property<int>("Retries");
+                b.Property<int>("Retries");
 
-                    b.Property<string>("StatusName")
-                        .HasMaxLength(50);
+                b.Property<string>("StatusName")
+                    .HasMaxLength(50);
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("CapReceivedMessages");
-                });
+                b.ToTable("CapReceivedMessages");
+            });
 
             modelBuilder.Entity("DotNetCore.CAP.Infrastructure.CapSentMessage", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
+            {
+                b.Property<string>("Id")
+                    .ValueGeneratedOnAdd();
 
-                    b.Property<DateTime>("Added");
+                b.Property<DateTime>("Added");
 
-                    b.Property<string>("Content");
+                b.Property<string>("Content");
 
-                    b.Property<string>("KeyName");
+                b.Property<string>("KeyName");
 
-                    b.Property<DateTime>("LastRun");
+                b.Property<DateTime>("LastRun");
 
-                    b.Property<int>("Retries");
+                b.Property<int>("Retries");
 
-                    b.Property<string>("StatusName")
-                        .HasMaxLength(50);
+                b.Property<string>("StatusName")
+                    .HasMaxLength(50);
 
-                    b.HasKey("Id");
+                b.HasKey("Id");
 
-                    b.ToTable("CapSentMessages");
-                });
+                b.ToTable("CapSentMessages");
+            });
         }
     }
 }

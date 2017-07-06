@@ -14,14 +14,13 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     public class RabbitJobProcessor : IJobProcessor
     {
-        private readonly CapOptions _capOptions;
-        private readonly RabbitMQOptions _rabbitMQOptions;
+        private readonly RabbitMQOptions _rabbitMqOptions;
         private readonly CancellationTokenSource _cts;
 
         private readonly IServiceProvider _provider;
         private readonly ILogger _logger;
 
-        private TimeSpan _pollingDelay;
+        private readonly TimeSpan _pollingDelay;
 
         public RabbitJobProcessor(
             IOptions<CapOptions> capOptions,
@@ -30,11 +29,12 @@ namespace DotNetCore.CAP.RabbitMQ
             IServiceProvider provider)
         {
             _logger = logger;
-            _capOptions = capOptions.Value;
-            _rabbitMQOptions = rabbitMQOptions.Value;
+            _rabbitMqOptions = rabbitMQOptions.Value;
             _provider = provider;
             _cts = new CancellationTokenSource();
-            _pollingDelay = TimeSpan.FromSeconds(_capOptions.PollingDelay);
+            
+            var capOptions1 = capOptions.Value;
+            _pollingDelay = TimeSpan.FromSeconds(capOptions1.PollingDelay);
         }
 
         public bool Waiting { get; private set; }
@@ -62,7 +62,8 @@ namespace DotNetCore.CAP.RabbitMQ
                     var token = GetTokenToWaitOn(context);
                 }
 
-                await WaitHandleEx.WaitAnyAsync(WaitHandleEx.PulseEvent, context.CancellationToken.WaitHandle, _pollingDelay);
+                await WaitHandleEx.WaitAnyAsync(WaitHandleEx.PulseEvent, 
+                    context.CancellationToken.WaitHandle, _pollingDelay);
             }
             finally
             {
@@ -102,7 +103,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 }
                 catch (Exception ex)
                 {
-                    _logger.ExceptionOccuredWhileExecutingJob(message.KeyName, ex);
+                    _logger.ExceptionOccuredWhileExecutingJob(message?.KeyName, ex);
                     return false;
                 }
             }
@@ -113,14 +114,14 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             var factory = new ConnectionFactory()
             {
-                HostName = _rabbitMQOptions.HostName,
-                UserName = _rabbitMQOptions.UserName,
-                Port = _rabbitMQOptions.Port,
-                Password = _rabbitMQOptions.Password,
-                VirtualHost = _rabbitMQOptions.VirtualHost,
-                RequestedConnectionTimeout = _rabbitMQOptions.RequestedConnectionTimeout,
-                SocketReadTimeout = _rabbitMQOptions.SocketReadTimeout,
-                SocketWriteTimeout = _rabbitMQOptions.SocketWriteTimeout
+                HostName = _rabbitMqOptions.HostName,
+                UserName = _rabbitMqOptions.UserName,
+                Port = _rabbitMqOptions.Port,
+                Password = _rabbitMqOptions.Password,
+                VirtualHost = _rabbitMqOptions.VirtualHost,
+                RequestedConnectionTimeout = _rabbitMqOptions.RequestedConnectionTimeout,
+                SocketReadTimeout = _rabbitMqOptions.SocketReadTimeout,
+                SocketWriteTimeout = _rabbitMqOptions.SocketWriteTimeout
             };
 
             using (var connection = factory.CreateConnection())
@@ -128,8 +129,8 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 var body = Encoding.UTF8.GetBytes(content);
 
-                channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, _rabbitMQOptions.EXCHANGE_TYPE);
-                channel.BasicPublish(exchange: _rabbitMQOptions.TopicExchangeName,
+                channel.ExchangeDeclare(_rabbitMqOptions.TopicExchangeName, _rabbitMqOptions.EXCHANGE_TYPE);
+                channel.BasicPublish(exchange: _rabbitMqOptions.TopicExchangeName,
                                      routingKey: topic,
                                      basicProperties: null,
                                      body: body);

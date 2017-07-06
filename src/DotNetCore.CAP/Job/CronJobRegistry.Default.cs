@@ -5,13 +5,11 @@ namespace DotNetCore.CAP.Job
 {
     public class DefaultCronJobRegistry : CronJobRegistry
     {
-        private readonly CapOptions _options;
-
         public DefaultCronJobRegistry(IOptions<CapOptions> options)
         {
-            _options = options.Value;
+            var options1 = options.Value;
 
-            RegisterJob<CapJob>(nameof(DefaultCronJobRegistry), _options.CronExp, RetryBehavior.DefaultRetry);
+            RegisterJob<CapJob>(nameof(DefaultCronJobRegistry), options1.CronExp, RetryBehavior.DefaultRetry);
         }
     }
 }

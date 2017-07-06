@@ -5,13 +5,17 @@ namespace DotNetCore.CAP.Kafka
     public class CapSubscribeAttribute : TopicAttribute
     {
         public CapSubscribeAttribute(string topicName)
-            : this(topicName, 0) { }
+            : this(topicName, 0)
+        {
+        }
 
         /// <summary>
         /// Not support
         /// </summary>
         public CapSubscribeAttribute(string topicName, int partition)
-            : this(topicName, partition, 0) { }
+            : this(topicName, partition, 0)
+        {
+        }
 
         /// <summary>
         /// Not support
@@ -27,9 +31,9 @@ namespace DotNetCore.CAP.Kafka
 
         public long Offset { get; }
 
-        public bool IsPartition { get { return Partition == 0; } }
+        public bool IsPartition => Partition == 0;
 
-        public bool IsOffset { get { return Offset == 0; } }
+        public bool IsOffset => Offset == 0;
 
         public override string ToString()
         {

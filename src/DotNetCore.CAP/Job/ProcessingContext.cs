@@ -58,10 +58,7 @@ namespace DotNetCore.CAP.Job
 
         public void Dispose()
         {
-            if (_scope != null)
-            {
-                _scope.Dispose();
-            }
+            _scope?.Dispose();
         }
     }
 }

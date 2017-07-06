@@ -4,10 +4,10 @@
     {
         public CapReceivedMessage()
         {
-
         }
 
-        public CapReceivedMessage(MessageBase baseMessage) : base(baseMessage)
+        public CapReceivedMessage(MessageBase baseMessage)
+            : base(baseMessage)
         {
         }
     }

@@ -72,8 +72,7 @@
         public int SocketWriteTimeout { get; set; } = DefaultConnectionTimeout;
 
         /// <summary>
-        /// The port to connect on. <see cref="AmqpTcpEndpoint.UseDefaultPort"/>
-        ///  indicates the default for the protocol should be used.
+        /// The port to connect on. 
         /// </summary>
         public int Port { get; set; } = -1;
     }

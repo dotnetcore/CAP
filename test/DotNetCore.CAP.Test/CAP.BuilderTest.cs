@@ -17,7 +17,6 @@ namespace DotNetCore.CAP.Test
             services.AddCap().AddMessageStore<MyMessageStore>();
 
             var thingy = services.BuildServiceProvider()
-
                 .GetRequiredService<ICapMessageStore>() as MyMessageStore;
 
             Assert.NotNull(thingy);
@@ -55,7 +54,8 @@ namespace DotNetCore.CAP.Test
                 throw new NotImplementedException();
             }
 
-            public Task SendAsync<T>(string topic, T contentObj) {
+            public Task SendAsync<T>(string topic, T contentObj)
+            {
                 throw new NotImplementedException();
             }
         }
@@ -71,12 +71,14 @@ namespace DotNetCore.CAP.Test
 
         private class MyMessageStore : ICapMessageStore
         {
-            public Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string statusName, bool autoSaveChanges = true)
+            public Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string statusName,
+                bool autoSaveChanges = true)
             {
                 throw new NotImplementedException();
             }
 
-            public Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string statusName, bool autoSaveChanges = true)
+            public Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string statusName,
+                bool autoSaveChanges = true)
             {
                 throw new NotImplementedException();
             }

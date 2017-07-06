@@ -103,12 +103,12 @@ namespace DotNetCore.CAP
                     var invoker = _consumerInvokerFactory.CreateInvoker(consumerContext);
 
                     invoker.InvokeAsync();
-                    
-                    messageStore.ChangeReceivedMessageStateAsync(capMessage,StatusName.Succeeded).Wait();
+
+                    messageStore.ChangeReceivedMessageStateAsync(capMessage, StatusName.Succeeded).Wait();
                 }
                 catch (Exception ex)
                 {
-                    _logger.ConsumerMethodExecutingFailed(executeDescriptor.MethodInfo.Name, ex);
+                    _logger.ConsumerMethodExecutingFailed(executeDescriptor?.MethodInfo.Name, ex);
                 }
             }
         }
@@ -126,7 +126,7 @@ namespace DotNetCore.CAP
 
             try
             {
-                _compositeTask.Wait((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
+                _compositeTask.Wait((int) TimeSpan.FromSeconds(60).TotalMilliseconds);
             }
             catch (AggregateException ex)
             {

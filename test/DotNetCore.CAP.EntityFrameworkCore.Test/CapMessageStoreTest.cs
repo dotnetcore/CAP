@@ -7,6 +7,5 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
 {
     public class CapMessageStoreTest
     {
-
     }
 }

@@ -5,23 +5,18 @@ namespace DotNetCore.CAP.Abstractions
     /// <summary>
     /// An abstract attribute that for  kafka attribute or rabbitmq attribute
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, Inherited = true, AllowMultiple = true)]
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
     public abstract class TopicAttribute : Attribute
     {
-        private readonly string _name;
-
-        public TopicAttribute(string topicName)
+        protected TopicAttribute(string topicName)
         {
-            this._name = topicName;
+            Name = topicName;
         }
 
         /// <summary>
         /// topic or exchange route key name.
         /// </summary>
-        public string Name
-        {
-            get { return _name; }
-        }
+        public string Name { get; }
 
         /// <summary>
         /// kafak --> groups.id

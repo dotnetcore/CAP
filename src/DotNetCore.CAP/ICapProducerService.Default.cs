@@ -45,10 +45,10 @@ namespace DotNetCore.CAP
             var message = new CapSentMessage
             {
                 KeyName = topic,
-                Content = content
+                Content = content,
+                StatusName = StatusName.Enqueued
             };
 
-            message.StatusName = StatusName.Enqueued;
             await _store.StoreSentMessageAsync(message);
 
             WaitHandleEx.PulseEvent.Set();

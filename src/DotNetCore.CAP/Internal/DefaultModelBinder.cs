@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.Internal
             {
                 bindingContext.Model = CreateModel(bindingContext);
             }
-            
+
             bindingContext.Result = Helper.FromJson(bindingContext.Values, bindingContext.ModelType);
 
             return Task.CompletedTask;
@@ -30,18 +30,16 @@ namespace DotNetCore.CAP.Internal
                 throw new ArgumentNullException(nameof(bindingContext));
             }
 
-            if (_modelCreator == null)
+            if (_modelCreator != null) return _modelCreator();
+            var modelTypeInfo = bindingContext.ModelType.GetTypeInfo();
+            if (modelTypeInfo.IsAbstract || modelTypeInfo.GetConstructor(Type.EmptyTypes) == null)
             {
-                var modelTypeInfo = bindingContext.ModelType.GetTypeInfo();
-                if (modelTypeInfo.IsAbstract || modelTypeInfo.GetConstructor(Type.EmptyTypes) == null)
-                {
-                    throw new InvalidOperationException();
-                }
-
-                _modelCreator = Expression
-                    .Lambda<Func<object>>(Expression.New(bindingContext.ModelType))
-                    .Compile();
+                throw new InvalidOperationException();
             }
+
+            _modelCreator = Expression
+                .Lambda<Func<object>>(Expression.New(bindingContext.ModelType))
+                .Compile();
 
             return _modelCreator();
         }

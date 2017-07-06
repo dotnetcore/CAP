@@ -15,27 +15,20 @@ namespace DotNetCore.CAP.Internal
         private readonly ConsumerMethodExecutor _executor;
 
         private static readonly MethodInfo _convertOfTMethod =
-            typeof(ObjectMethodExecutor).GetRuntimeMethods().Single(methodInfo => methodInfo.Name == nameof(ObjectMethodExecutor.Convert));
+            typeof(ObjectMethodExecutor).GetRuntimeMethods()
+                .Single(methodInfo => methodInfo.Name == nameof(Convert));
 
         private ObjectMethodExecutor(MethodInfo methodInfo, TypeInfo targetTypeInfo)
         {
-            if (methodInfo == null)
-            {
-                throw new ArgumentNullException(nameof(methodInfo));
-            }
-
-            MethodInfo = methodInfo;
+            MethodInfo = methodInfo ?? throw new ArgumentNullException(nameof(methodInfo));
             TargetTypeInfo = targetTypeInfo;
             MethodParameters = methodInfo.GetParameters();
             MethodReturnType = methodInfo.ReturnType;
             IsMethodAsync = typeof(Task).IsAssignableFrom(MethodReturnType);
             TaskGenericType = IsMethodAsync ? GetTaskInnerTypeOrNull(MethodReturnType) : null;
-            //IsTypeAssignableFromIActionResult = typeof(IActionResult).IsAssignableFrom(TaskGenericType ?? MethodReturnType);
 
             if (IsMethodAsync && TaskGenericType != null)
             {
-                // For backwards compatibility we're creating a sync-executor for an async method. This was
-                // supported in the past even though MVC wouldn't have called it.
                 _executor = GetExecutor(methodInfo, targetTypeInfo);
                 _executorAsync = GetExecutorAsync(TaskGenericType, methodInfo, targetTypeInfo);
             }
@@ -129,21 +122,25 @@ namespace DotNetCore.CAP.Internal
             {
                 // must coerce methodCall to match ActionExecutor signature
                 var castMethodCall = Expression.Convert(methodCall, typeof(object));
-                var lambda = Expression.Lambda<ConsumerMethodExecutor>(castMethodCall, targetParameter, parametersParameter);
+                var lambda =
+                    Expression.Lambda<ConsumerMethodExecutor>(castMethodCall, targetParameter, parametersParameter);
                 return lambda.Compile();
             }
         }
 
         private static ConsumerMethodExecutor WrapVoidAction(VoidActionExecutor executor)
         {
-            return delegate (object target, object[] parameters)
+            return delegate(object target, object[] parameters)
             {
                 executor(target, parameters);
                 return null;
             };
         }
 
-        private static ConsumerMethodExecutorAsync GetExecutorAsync(Type taskInnerType, MethodInfo methodInfo, TypeInfo targetTypeInfo)
+        private static ConsumerMethodExecutorAsync GetExecutorAsync(
+            Type taskInnerType,
+            MethodInfo methodInfo,
+            TypeInfo targetTypeInfo)
         {
             // Parameters to executor
             var targetParameter = Expression.Parameter(typeof(object), "target");
@@ -167,7 +164,10 @@ namespace DotNetCore.CAP.Internal
             var methodCall = Expression.Call(instanceCast, methodInfo, parameters);
 
             var coerceMethodCall = GetCoerceMethodCallExpression(taskInnerType, methodCall, methodInfo);
-            var lambda = Expression.Lambda<ConsumerMethodExecutorAsync>(coerceMethodCall, targetParameter, parametersParameter);
+
+            var lambda = Expression.Lambda<ConsumerMethodExecutorAsync>(coerceMethodCall,
+                targetParameter, parametersParameter);
+
             return lambda.Compile();
         }
 
@@ -181,8 +181,6 @@ namespace DotNetCore.CAP.Internal
             MethodInfo methodInfo)
         {
             var castMethodCall = Expression.Convert(methodCall, typeof(object));
-            // for: public Task<T> Action()
-            // constructs: return (Task<object>)Convert<T>((Task<T>)result)
             var genericMethodInfo = _convertOfTMethod.MakeGenericMethod(taskValueType);
             var genericMethodCall = Expression.Call(null, genericMethodInfo, castMethodCall);
             var convertedResult = Expression.Convert(genericMethodCall, typeof(Task<object>));
@@ -194,7 +192,7 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         private static async Task<object> CastToObject<T>(Task<T> task)
         {
-            return (object)await task;
+            return (object) await task;
         }
 
         private static Type GetTaskInnerTypeOrNull(Type type)
@@ -281,7 +279,7 @@ namespace DotNetCore.CAP.Internal
 
         private static Task<object> Convert<T>(object taskAsObject)
         {
-            var task = (Task<T>)taskAsObject;
+            var task = (Task<T>) taskAsObject;
             return CastToObject<T>(task);
         }
 

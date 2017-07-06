@@ -1,6 +1,6 @@
 ﻿using DotNetCore.CAP.Job;
 
-namespace DotNetCore.CAP.Infrastructure
+namespace DotNetCore.CAP
 {
     /// <summary>
     /// Represents all the options you can use to configure the system.

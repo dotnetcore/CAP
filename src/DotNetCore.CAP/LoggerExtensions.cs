@@ -8,20 +8,20 @@ namespace DotNetCore.CAP
 {
     internal static class LoggerExtensions
     {
-        private static Action<ILogger, int, int, Exception> _serverStarting;
-        private static Action<ILogger, Exception> _serverStartingError;
-        private static Action<ILogger, Exception> _serverShuttingDown;
-        private static Action<ILogger, string, Exception> _expectedOperationCanceledException;
+        private static readonly Action<ILogger, int, int, Exception> _serverStarting;
+        private static readonly Action<ILogger, Exception> _serverStartingError;
+        private static readonly Action<ILogger, Exception> _serverShuttingDown;
+        private static readonly Action<ILogger, string, Exception> _expectedOperationCanceledException;
 
-        private static Action<ILogger, Exception> _cronJobsNotFound;
-        private static Action<ILogger, int, Exception> _cronJobsScheduling;
-        private static Action<ILogger, string, double, Exception> _cronJobExecuted;
-        private static Action<ILogger, string, Exception> _cronJobFailed;
+        private static readonly Action<ILogger, Exception> _cronJobsNotFound;
+        private static readonly Action<ILogger, int, Exception> _cronJobsScheduling;
+        private static readonly Action<ILogger, string, double, Exception> _cronJobExecuted;
+        private static readonly Action<ILogger, string, Exception> _cronJobFailed;
 
-        private static Action<ILogger, string, string, Exception> _enqueuingSentMessage;
-        private static Action<ILogger, string, string, Exception> _enqueuingReceivdeMessage;
-        private static Action<ILogger, string, Exception> _executingConsumerMethod;
-        private static Action<ILogger, string, Exception> _receivedMessageRetryExecuting;
+        private static readonly Action<ILogger, string, string, Exception> _enqueuingSentMessage;
+        private static readonly Action<ILogger, string, string, Exception> _enqueuingReceivdeMessage;
+        private static readonly Action<ILogger, string, Exception> _executingConsumerMethod;
+        private static readonly Action<ILogger, string, Exception> _receivedMessageRetryExecuting;
 
         static LoggerExtensions()
         {
@@ -31,9 +31,9 @@ namespace DotNetCore.CAP
                 "Starting the processing server. Detected {MachineProcessorCount} machine processor(s). Initiating {ProcessorCount} job processor(s).");
 
             _serverStartingError = LoggerMessage.Define(
-              LogLevel.Error,
-              5,
-              "Starting the processing server throw an exception.");
+                LogLevel.Error,
+                5,
+                "Starting the processing server throw an exception.");
 
             _serverShuttingDown = LoggerMessage.Define(
                 LogLevel.Debug,

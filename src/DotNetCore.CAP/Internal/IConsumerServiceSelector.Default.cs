@@ -18,19 +18,15 @@ namespace DotNetCore.CAP.Internal
         /// <summary>
         /// Creates a new <see cref="DefaultConsumerServiceSelector"/>.
         /// </summary>
-        /// <param name="serviceProvider"></param>
         public DefaultConsumerServiceSelector(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
         }
 
         /// <summary>
-        /// Selects the best <see cref="ConsumerExecutorDescriptor"/> candidate from <paramref name="candidates"/> for the
+        /// Selects the best <see cref="ConsumerExecutorDescriptor"/> candidate from <paramref name="executeDescriptor"/> for the
         /// current message associated.
         /// </summary>
-        /// <param name="key"></param>
-        /// <param name="executeDescriptor"></param>
-        /// <returns></returns>
         public ConsumerExecutorDescriptor SelectBestCandidate(string key,
             IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
@@ -49,7 +45,7 @@ namespace DotNetCore.CAP.Internal
         }
 
 
-        private IReadOnlyList<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
+        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
@@ -74,7 +70,7 @@ namespace DotNetCore.CAP.Internal
             return executorDescriptorList;
         }
 
-        private IReadOnlyList<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes(
+        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes(
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
@@ -83,24 +79,23 @@ namespace DotNetCore.CAP.Internal
             foreach (var controller in controllers)
             {
                 var typeInfo = controller.GetType().GetTypeInfo();
-                //double check
-                if (Helper.IsController(typeInfo))
-                {
-                    foreach (var method in typeInfo.DeclaredMethods)
-                    {
-                        var topicAttr = method.GetCustomAttribute<TopicAttribute>(true);
-                        if (topicAttr == null) continue;
 
-                        executorDescriptorList.Add(InitDescriptor(topicAttr, method, typeInfo));
-                    }
+                //double check
+                if (!Helper.IsController(typeInfo)) continue;
+
+                foreach (var method in typeInfo.DeclaredMethods)
+                {
+                    var topicAttr = method.GetCustomAttribute<TopicAttribute>(true);
+                    if (topicAttr == null) continue;
+
+                    executorDescriptorList.Add(InitDescriptor(topicAttr, method, typeInfo));
                 }
-                continue;
             }
 
             return executorDescriptorList;
         }
 
-        private ConsumerExecutorDescriptor InitDescriptor(
+        private static ConsumerExecutorDescriptor InitDescriptor(
             TopicAttribute attr,
             MethodInfo methodInfo,
             TypeInfo implType)

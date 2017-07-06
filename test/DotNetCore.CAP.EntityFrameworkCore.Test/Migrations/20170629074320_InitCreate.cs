@@ -20,10 +20,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
                     Retries = table.Column<int>(nullable: false),
                     StatusName = table.Column<string>(maxLength: 50, nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CapReceivedMessages", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_CapReceivedMessages", x => x.Id); });
 
             migrationBuilder.CreateTable(
                 name: "CapSentMessages",
@@ -37,10 +34,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
                     Retries = table.Column<int>(nullable: false),
                     StatusName = table.Column<string>(maxLength: 50, nullable: true)
                 },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_CapSentMessages", x => x.Id);
-                });
+                constraints: table => { table.PrimaryKey("PK_CapSentMessages", x => x.Id); });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

@@ -8,7 +8,6 @@ using Xunit;
 
 namespace DotNetCore.CAP.Test
 {
-
     public abstract class MessageManagerTestBase
     {
         private const string NullValue = "(null)";
@@ -27,7 +26,8 @@ namespace DotNetCore.CAP.Test
             services.AddSingleton<ILogger<ICapMessageStore>>(new TestLogger<ICapMessageStore>());
         }
 
-        protected virtual ICapMessageStore CreateManager(object context = null, IServiceCollection services = null, Action<IServiceCollection> configureServices = null)
+        protected virtual ICapMessageStore CreateManager(object context = null, IServiceCollection services = null,
+            Action<IServiceCollection> configureServices = null)
         {
             if (services == null)
             {
@@ -109,5 +109,4 @@ namespace DotNetCore.CAP.Test
             Assert.Equal(message, storeMessage);
         }
     }
-
 }

@@ -11,7 +11,6 @@ namespace DotNetCore.CAP.Test
 {
     public class ConsumerServiceSelectorTest
     {
-
         private IServiceProvider _provider;
 
         public ConsumerServiceSelectorTest()
@@ -45,7 +44,6 @@ namespace DotNetCore.CAP.Test
             Assert.NotNull(bestCandidates.MethodInfo);
             Assert.Equal(bestCandidates.MethodInfo.ReturnType, typeof(Task));
         }
-
     }
 
     public class CandidatesTopic : TopicAttribute
@@ -55,8 +53,13 @@ namespace DotNetCore.CAP.Test
         }
     }
 
-    public interface IFooTest { }
-    public interface IBarTest { }
+    public interface IFooTest
+    {
+    }
+
+    public interface IBarTest
+    {
+    }
 
     public class CandidatesFooTest : IFooTest, ICapSubscribe
     {
@@ -94,5 +97,4 @@ namespace DotNetCore.CAP.Test
             Console.WriteLine("GetBar3() method has bee excuted.");
         }
     }
-
 }

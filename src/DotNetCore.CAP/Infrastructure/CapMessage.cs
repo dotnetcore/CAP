@@ -13,13 +13,13 @@ namespace DotNetCore.CAP.Infrastructure
         /// <remarks>
         /// The Id property is initialized to from a new GUID string value.
         /// </remarks>
-        public CapMessage()
+        protected CapMessage()
         {
             Id = Guid.NewGuid().ToString();
             Added = DateTime.Now;
         }
 
-        public CapMessage(MessageBase message)
+        protected CapMessage(MessageBase message)
         {
             KeyName = message.KeyName;
             Content = message.Content;

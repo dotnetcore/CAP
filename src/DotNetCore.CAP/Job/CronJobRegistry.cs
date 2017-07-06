@@ -7,9 +7,9 @@ namespace DotNetCore.CAP.Job
 {
     public abstract class CronJobRegistry
     {
-        private List<Entry> _entries;
+        private readonly List<Entry> _entries;
 
-        public CronJobRegistry()
+        protected CronJobRegistry()
         {
             _entries = new List<Entry>();
         }

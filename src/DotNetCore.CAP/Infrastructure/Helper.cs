@@ -7,24 +7,24 @@ namespace DotNetCore.CAP.Infrastructure
     internal static class Helper
     {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
-        private static JsonSerializerSettings SerializerSettings;
+        private static JsonSerializerSettings _serializerSettings;
 
         public static void SetSerializerSettings(JsonSerializerSettings setting)
         {
-            SerializerSettings = setting;
+            _serializerSettings = setting;
         }
 
         public static string ToJson(object value)
         {
             return value != null
-                ? JsonConvert.SerializeObject(value, SerializerSettings)
+                ? JsonConvert.SerializeObject(value, _serializerSettings)
                 : null;
         }
 
         public static T FromJson<T>(string value)
         {
             return value != null
-                ? JsonConvert.DeserializeObject<T>(value, SerializerSettings)
+                ? JsonConvert.DeserializeObject<T>(value, _serializerSettings)
                 : default(T);
         }
 
@@ -33,14 +33,14 @@ namespace DotNetCore.CAP.Infrastructure
             if (type == null) throw new ArgumentNullException(nameof(type));
 
             return value != null
-                ? JsonConvert.DeserializeObject(value, type, SerializerSettings)
+                ? JsonConvert.DeserializeObject(value, type, _serializerSettings)
                 : null;
         }
 
         public static long ToTimestamp(DateTime value)
         {
             var elapsedTime = value - Epoch;
-            return (long)elapsedTime.TotalSeconds;
+            return (long) elapsedTime.TotalSeconds;
         }
 
         public static DateTime FromTimestamp(long value)
@@ -65,17 +65,8 @@ namespace DotNetCore.CAP.Infrastructure
                 return false;
             }
 
-            if (typeInfo.ContainsGenericParameters)
-            {
-                return false;
-            }
-
-            if (!typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase))
-            {
-                return false;
-            }
-
-            return true;
+            return !typeInfo.ContainsGenericParameters
+                   && typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

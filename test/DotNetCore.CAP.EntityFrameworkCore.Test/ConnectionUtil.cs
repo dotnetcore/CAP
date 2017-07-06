@@ -11,7 +11,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
         private const string MasterDatabaseName = "master";
         private const string DefaultDatabaseName = @"DotNetCore.CAP.EntityFrameworkCore.Test";
 
-        private const string DefaultConnectionStringTemplate = @"Server=192.168.2.206;Initial Catalog={0};User Id=sa;Password=123123;MultipleActiveResultSets=True";
+        private const string DefaultConnectionStringTemplate =
+            @"Server=192.168.2.206;Initial Catalog={0};User Id=sa;Password=123123;MultipleActiveResultSets=True";
 
         public static string GetDatabaseName()
         {

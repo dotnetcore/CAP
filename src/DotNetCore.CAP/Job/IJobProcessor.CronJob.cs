@@ -10,9 +10,9 @@ namespace DotNetCore.CAP.Job
 {
     public class CronJobProcessor : IJobProcessor
     {
-        private ILogger _logger;
+        private readonly ILogger _logger;
         private IServiceProvider _provider;
-        private DefaultCronJobRegistry _jobRegistry;
+        private readonly DefaultCronJobRegistry _jobRegistry;
 
         public CronJobProcessor(
             DefaultCronJobRegistry jobRegistry,
@@ -105,12 +105,7 @@ namespace DotNetCore.CAP.Job
 
                     if (success)
                     {
-                        //var connection = provider.GetRequiredService<IStorageConnection>();
-                        //await connection.AttachCronJobAsync(computedJob.Job);
-
                         computedJob.Update(DateTime.UtcNow);
-
-                        //await connection.UpdateCronJobAsync(computedJob.Job);
                     }
                 }
             }

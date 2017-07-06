@@ -6,7 +6,8 @@ namespace DotNetCore.CAP.Test
     public class OperateResultTest
     {
         [Fact]
-        public void VerifyDefaultConstructor() {
+        public void VerifyDefaultConstructor()
+        {
             var result = new OperateResult();
 
             Assert.False(result.Succeeded);
@@ -14,7 +15,8 @@ namespace DotNetCore.CAP.Test
         }
 
         [Fact]
-        public void NullFaildUsesEmptyErrors() {
+        public void NullFaildUsesEmptyErrors()
+        {
             var result = OperateResult.Failed();
 
             Assert.False(result.Succeeded);

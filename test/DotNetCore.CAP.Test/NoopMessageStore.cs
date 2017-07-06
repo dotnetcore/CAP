@@ -7,12 +7,14 @@ namespace DotNetCore.CAP.Test
 {
     public class NoopMessageStore : ICapMessageStore
     {
-        public Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string statusName, bool autoSaveChanges = true)
+        public Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string statusName,
+            bool autoSaveChanges = true)
         {
             throw new NotImplementedException();
         }
 
-        public Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string statusName, bool autoSaveChanges = true)
+        public Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string statusName,
+            bool autoSaveChanges = true)
         {
             throw new NotImplementedException();
         }

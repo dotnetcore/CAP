@@ -4,12 +4,11 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Job;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Job
 {
     public class JobProcessingServer : IProcessingServer, IDisposable
     {
@@ -43,7 +42,6 @@ namespace DotNetCore.CAP
         public void Start()
         {
             var processorCount = Environment.ProcessorCount;
-            processorCount = 1;
             _processors = GetProcessors(processorCount);
             _logger.ServerStarting(processorCount, 1);
 
@@ -53,7 +51,7 @@ namespace DotNetCore.CAP
                 _cts.Token);
 
             var processorTasks = _processors
-                .Select(p => InfiniteRetry(p))
+                .Select(InfiniteRetry)
                 .Select(p => p.ProcessAsync(_context));
             _compositeTask = Task.WhenAll(processorTasks);
         }
@@ -70,7 +68,7 @@ namespace DotNetCore.CAP
             _cts.Cancel();
             try
             {
-                _compositeTask.Wait((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
+                _compositeTask.Wait((int) TimeSpan.FromSeconds(60).TotalMilliseconds);
             }
             catch (AggregateException ex)
             {
@@ -97,7 +95,7 @@ namespace DotNetCore.CAP
                 {
                     if (processor is CronJobProcessor)
                     {
-                        if (i == 0)  // only add first cronJob
+                        if (i == 0) // only add first cronJob
                             returnedProcessors.Add(processor);
                     }
                     else

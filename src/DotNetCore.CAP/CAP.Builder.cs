@@ -1,13 +1,15 @@
 ﻿using System;
-using DotNetCore.CAP;
 using DotNetCore.CAP.Job;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Microsoft.Extensions.DependencyInjection
+namespace DotNetCore.CAP
 {
     /// <summary>
     /// Used to verify cap service was called on a ServiceCollection
     /// </summary>
-    public class CapMarkerService { }
+    public class CapMarkerService
+    {
+    }
 
     /// <summary>
     /// Allows fine grained configuration of CAP services.

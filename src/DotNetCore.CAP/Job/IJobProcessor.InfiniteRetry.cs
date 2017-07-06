@@ -6,8 +6,8 @@ namespace DotNetCore.CAP.Job
 {
     public class InfiniteRetryProcessor : IJobProcessor
     {
-        private IJobProcessor _inner;
-        private ILogger _logger;
+        private readonly IJobProcessor _inner;
+        private readonly ILogger _logger;
 
         public InfiniteRetryProcessor(
             IJobProcessor inner,

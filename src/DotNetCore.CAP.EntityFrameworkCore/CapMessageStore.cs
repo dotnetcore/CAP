@@ -8,13 +8,11 @@ namespace DotNetCore.CAP.EntityFrameworkCore
     /// <summary>
     /// Represents a new instance of a persistence store for the specified message types.
     /// </summary>
-    /// <typeparam name="ConsistencyMessage">The type representing a message.</typeparam>
     /// <typeparam name="TContext">The type of the data context class used to access the store.</typeparam>
-    /// <typeparam name="TKey">The type of the primary key for a message.</typeparam>
     public class CapMessageStore<TContext> : ICapMessageStore where TContext : DbContext
     {
         /// <summary>
-        /// Constructs a new instance of <see cref="ConsistencyMessageStore{ConsistencyMessage, TContext, TKey}"/>.
+        /// Constructs a new instance of <see cref="TContext"/>.
         /// </summary>
         /// <param name="context">The <see cref="DbContext"/>.</param>
         public CapMessageStore(TContext context)
@@ -24,9 +22,9 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         public TContext Context { get; private set; }
 
-        private DbSet<CapSentMessage> SentMessages { get { return Context.Set<CapSentMessage>(); } }
+        private DbSet<CapSentMessage> SentMessages => Context.Set<CapSentMessage>();
 
-        private DbSet<CapReceivedMessage> ReceivedMessages { get { return Context.Set<CapReceivedMessage>(); } }
+        private DbSet<CapReceivedMessage> ReceivedMessages => Context.Set<CapReceivedMessage>();
 
         /// <summary>
         /// Creates the specified <paramref name="message"/> in the cap message store.
@@ -41,7 +39,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             return OperateResult.Success;
         }
 
-        public async Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string status, bool autoSaveChanges = true)
+        public async Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string status,
+            bool autoSaveChanges = true)
         {
             Context.Attach(message);
             message.LastRun = DateTime.Now;
@@ -55,7 +54,12 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                return OperateResult.Failed(new OperateError() { Code = "DbUpdateConcurrencyException", Description = ex.Message });
+                return OperateResult.Failed(
+                    new OperateError()
+                    {
+                        Code = "DbUpdateConcurrencyException",
+                        Description = ex.Message
+                    });
             }
             return OperateResult.Success;
         }
@@ -87,7 +91,11 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                return OperateResult.Failed(new OperateError() { Code = "DbUpdateConcurrencyException", Description = ex.Message });
+                return OperateResult.Failed(new OperateError()
+                {
+                    Code = "DbUpdateConcurrencyException",
+                    Description = ex.Message
+                });
             }
         }
 
@@ -107,7 +115,11 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                return OperateResult.Failed(new OperateError() { Code = "DbUpdateConcurrencyException", Description = ex.Message });
+                return OperateResult.Failed(new OperateError()
+                {
+                    Code = "DbUpdateConcurrencyException",
+                    Description = ex.Message
+                });
             }
         }
 
@@ -124,7 +136,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             return OperateResult.Success;
         }
 
-        public async Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string status, bool autoSaveChanges = true)
+        public async Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string status,
+            bool autoSaveChanges = true)
         {
             Context.Attach(message);
             message.LastRun = DateTime.Now;
@@ -138,7 +151,11 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                return OperateResult.Failed(new OperateError() { Code = "DbUpdateConcurrencyException", Description = ex.Message });
+                return OperateResult.Failed(new OperateError()
+                {
+                    Code = "DbUpdateConcurrencyException",
+                    Description = ex.Message
+                });
             }
             return OperateResult.Success;
         }
@@ -167,9 +184,12 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             }
             catch (DbUpdateConcurrencyException ex)
             {
-                return OperateResult.Failed(new OperateError() { Code = "DbUpdateConcurrencyException", Description = ex.Message });
+                return OperateResult.Failed(new OperateError()
+                {
+                    Code = "DbUpdateConcurrencyException",
+                    Description = ex.Message
+                });
             }
         }
-
     }
 }
