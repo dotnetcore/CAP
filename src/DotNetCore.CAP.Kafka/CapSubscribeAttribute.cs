@@ -2,15 +2,21 @@
 
 namespace DotNetCore.CAP.Kafka
 {
-    public class KafkaTopicAttribute : TopicAttribute
+    public class CapSubscribeAttribute : TopicAttribute
     {
-        public KafkaTopicAttribute(string topicName)
+        public CapSubscribeAttribute(string topicName)
             : this(topicName, 0) { }
 
-        public KafkaTopicAttribute(string topicName, int partition)
+        /// <summary>
+        /// Not support
+        /// </summary>
+        public CapSubscribeAttribute(string topicName, int partition)
             : this(topicName, partition, 0) { }
 
-        public KafkaTopicAttribute(string topicName, int partition, long offset)
+        /// <summary>
+        /// Not support
+        /// </summary>
+        public CapSubscribeAttribute(string topicName, int partition, long offset)
             : base(topicName)
         {
             Offset = offset;

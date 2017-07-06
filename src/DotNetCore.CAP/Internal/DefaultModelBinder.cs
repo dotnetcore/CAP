@@ -3,7 +3,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions.ModelBinding;
-using Newtonsoft.Json;
+using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -17,8 +17,8 @@ namespace DotNetCore.CAP.Internal
             {
                 bindingContext.Model = CreateModel(bindingContext);
             }
-
-            bindingContext.Result = JsonConvert.DeserializeObject(bindingContext.Values, bindingContext.ModelType);
+            
+            bindingContext.Result = Helper.FromJson(bindingContext.Values, bindingContext.ModelType);
 
             return Task.CompletedTask;
         }

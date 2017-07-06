@@ -14,15 +14,7 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         /// <returns>
         /// <para>
         /// A <see cref="Task"/> which will complete when the model binding process completes.
-        /// </para>
-        /// <para>
-        /// If model binding was successful, the <see cref="ModelBindingContext.Result"/> should have
-        /// <see cref="ModelBindingResult.IsModelSet"/> set to <c>true</c>.
-        /// </para>
-        /// <para>
-        /// A model binder that completes successfully should set <see cref="ModelBindingContext.Result"/> to
-        /// a value returned from <see cref="ModelBindingResult.Success"/>.
-        /// </para>
+        /// </para> 
         /// </returns>
         Task BindModelAsync(ModelBindingContext bindingContext);
     }

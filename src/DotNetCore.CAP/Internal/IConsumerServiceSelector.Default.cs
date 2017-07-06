@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Internal
@@ -38,13 +39,26 @@ namespace DotNetCore.CAP.Internal
 
         public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(IServiceProvider provider)
         {
-            var consumerServices = provider.GetServices<IConsumerService>();
-
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
+
+            executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(provider));
+
+            executorDescriptorList.AddRange(FindConsumersFromControllerTypes(provider));
+
+            return executorDescriptorList;
+        }
+
+
+        private IReadOnlyList<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
+            IServiceProvider provider)
+        {
+            var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
+
+            var consumerServices = provider.GetServices<ICapSubscribe>();
             foreach (var service in consumerServices)
             {
                 var typeInfo = service.GetType().GetTypeInfo();
-                if (!typeof(IConsumerService).GetTypeInfo().IsAssignableFrom(typeInfo))
+                if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
                 {
                     continue;
                 }
@@ -56,6 +70,31 @@ namespace DotNetCore.CAP.Internal
 
                     executorDescriptorList.Add(InitDescriptor(topicAttr, method, typeInfo));
                 }
+            }
+            return executorDescriptorList;
+        }
+
+        private IReadOnlyList<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes(
+            IServiceProvider provider)
+        {
+            var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
+            // at cap startup time, find all Controller into the DI container,the type is object.
+            var controllers = provider.GetServices<object>();
+            foreach (var controller in controllers)
+            {
+                var typeInfo = controller.GetType().GetTypeInfo();
+                //double check
+                if (Helper.IsController(typeInfo))
+                {
+                    foreach (var method in typeInfo.DeclaredMethods)
+                    {
+                        var topicAttr = method.GetCustomAttribute<TopicAttribute>(true);
+                        if (topicAttr == null) continue;
+
+                        executorDescriptorList.Add(InitDescriptor(topicAttr, method, typeInfo));
+                    }
+                }
+                continue;
             }
 
             return executorDescriptorList;

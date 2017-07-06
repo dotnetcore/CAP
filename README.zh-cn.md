@@ -1,6 +1,7 @@
 # CAP
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
+[![NuGet](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
 CAP 是一个在分布式系统（SOA、MicroService）中实现最终一致性的库，它具有轻量级、易使用、高性能等特点。
@@ -15,32 +16,32 @@ CAP 具有消息持久化的功能，当你的服务进行重启或者宕机时它可以保证消息的可靠性。CA
 
 这是CAP集在ASP.NET Core 微服务架构中的一个示意图：
 
-![](http://images2015.cnblogs.com/blog/250417/201706/250417-20170630143600289-1065294295.png)
+![](http://images2015.cnblogs.com/blog/250417/201707/250417-20170705175827128-1203291469.png)
 
 > 图中实线部分代表用户代码，虚线部分代表CAP内部实现。
 
 ## Getting Started
 
-### NuGet  暂未发布
+### NuGet 
 
 你可以运行以下下命令在你的项目中安装 CAP。
 
 如果你的消息队列使用的是 Kafka 的话，你可以：
 
 ```
-PM> Install-Package DotNetCore.CAP.Kafka
+PM> Install-Package DotNetCore.CAP.Kafka -Pre
 ```
 
 如果你的消息队列使用的是 RabbitMQ 的话，你可以：
 
 ```
-PM> Install-Package DotNetCore.CAP.RabbitMQ
+PM> Install-Package DotNetCore.CAP.RabbitMQ -Pre
 ```
 
 CAP 默认提供了 Entity Framwork 作为数据库存储：
 
 ```
-PM> Install-Package DotNetCore.CAP.EntityFrameworkCore
+PM> Install-Package DotNetCore.CAP.EntityFrameworkCore -Pre
 ```
 
 ### Configuration
@@ -56,7 +57,7 @@ public void ConfigureServices(IServiceCollection services)
 
     services.AddCap()
             .AddEntityFrameworkStores<AppDbContext>()
-            .AddKafka(x => x.Servers = "localhost:9453");
+            .AddKafka(x => x.Servers = "localhost:9092");
 }
 
 public void Configure(IApplicationBuilder app)
@@ -99,9 +100,7 @@ public class PublishController : Controller
 
 **Action Method**
 
-在Action上添加 Attribute 来订阅相关消息。
-
-如果你使用的是 Kafak 则使用 `[KafkaTopic()]`, 如果是 RabbitMQ 则使用 `[RabbitMQTopic()]`
+在 Action 上添加 CapSubscribeAttribute 来订阅相关消息。
 
 ```cs
 public class PublishController : Controller
@@ -115,7 +114,7 @@ public class PublishController : Controller
 
 
 	[NoAction]
-	[KafkaTopic("xxx.services.account.check")]
+	[CapSubscribe("xxx.services.account.check")]
 	public async Task CheckReceivedMessage(Person person)
 	{
 		Console.WriteLine(person.Name);
@@ -128,7 +127,7 @@ public class PublishController : Controller
 
 **Service Method**
 
-如果你的订阅方法没有位于 Controller 中，则你订阅的类需要继承 `IConsumerService`：
+如果你的订阅方法没有位于 Controller 中，则你订阅的类需要继承 `ICapSubscribe`：
 
 ```cs
 
@@ -140,7 +139,7 @@ namespace xxx.Service
 	}
 
 
-	public class SubscriberService: ISubscriberService, IConsumerService
+	public class SubscriberService: ISubscriberService, ICapSubscribe
 	{
 		[KafkaTopic("xxx.services.account.check")]
 		public void CheckReceivedMessage(Person person)

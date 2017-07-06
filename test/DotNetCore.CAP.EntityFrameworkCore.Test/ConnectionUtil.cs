@@ -11,7 +11,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
         private const string MasterDatabaseName = "master";
         private const string DefaultDatabaseName = @"DotNetCore.CAP.EntityFrameworkCore.Test";
 
-        //private const string DefaultConnectionStringTemplate = @"Server=.\sqlexpress;Database={0};Trusted_Connection=True;";
         private const string DefaultConnectionStringTemplate = @"Server=192.168.2.206;Initial Catalog={0};User Id=sa;Password=123123;MultipleActiveResultSets=True";
 
         public static string GetDatabaseName()
@@ -26,10 +25,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
 
         public static string GetConnectionString()
         {
-            //if (Environment.GetEnvironmentVariable("ASPNETCore_Environment") == "Development")
-            //{
-            //    return "Server=192.168.2.206;Initial Catalog=Test2;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True";
-            //}
             return string.Format(GetConnectionStringTemplate(), GetDatabaseName());
         }
 

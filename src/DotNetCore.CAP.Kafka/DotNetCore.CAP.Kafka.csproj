@@ -12,11 +12,7 @@
     <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
-
-  <ItemGroup>
-    <None Include="CAP.KafkaOptions.cs" />
-  </ItemGroup>
-
+ 
   <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="0.9.5" />
   </ItemGroup>

@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace Sample.Kafka.Controllers
 {
     [Route("api/[controller]")]
-    public class ValuesController : Controller, IConsumerService
+    public class ValuesController : Controller, ICapSubscribe
     {
         private readonly ICapProducerService _producer;
 
@@ -24,7 +24,7 @@ namespace Sample.Kafka.Controllers
         }
         public string ServerPath => ((IHostingEnvironment)HttpContext.RequestServices.GetService(typeof(IHostingEnvironment))).ContentRootPath;
 
-        [KafkaTopic("zzwl.topic.finace.callBack", GroupOrExchange = "test")]
+        [CapSubscribe("zzwl.topic.finace.callBack", Group = "test")]
         public void KafkaTest(Person person)
         {
             Console.WriteLine(person.Name);
