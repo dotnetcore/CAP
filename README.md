@@ -1,7 +1,6 @@
 # CAP
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
-[![NuGet](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
 CAP is a library to achieve eventually consistent in distributed architectures system like SOA,MicroService. 	It is lightweight,easy to use and efficiently.
@@ -16,7 +15,7 @@ CAP has the function of Message Presistence, and it makes messages reliability w
 
 This is a diagram of the CAP working in the ASP.NET Core MicroService architecture:
 
-![](http://images2015.cnblogs.com/blog/250417/201706/250417-20170630143600289-1065294295.png)
+![](http://images2015.cnblogs.com/blog/250417/201707/250417-20170705175827128-1203291469.png)
 
 > The solid line in the figure represents the user code, and the dotted line represents the internal implementation of the CAP.
 
@@ -29,19 +28,19 @@ You can run the following command to install the CAP in your project.
 If your Message Queue is using Kafka, you can：
 
 ```
-PM> Install-Package DotNetCore.CAP.Kafka
+PM> Install-Package DotNetCore.CAP.Kafka -Pre
 ```
 
 or RabbitMQ：
 
 ```
-PM> Install-Package DotNetCore.CAP.RabbitMQ
+PM> Install-Package DotNetCore.CAP.RabbitMQ -Pre
 ```
 
 CAP provides EntityFramework as default database store extension ：
 
 ```
-PM> Install-Package DotNetCore.CAP.EntityFrameworkCore
+PM> Install-Package DotNetCore.CAP.EntityFrameworkCore -Pre
 ```
 
 ### Configuration
@@ -57,7 +56,7 @@ public void ConfigureServices(IServiceCollection services)
 
     services.AddCap()
             .AddEntityFrameworkStores<AppDbContext>()
-            .AddKafka(x => x.Servers = "localhost:9453");
+            .AddKafka(x => x.Servers = "localhost:9092");
 }
 
 public void Configure(IApplicationBuilder app)
@@ -100,9 +99,7 @@ public class PublishController : Controller
 
 **Action Method**
 
-Add Attribute on Action to subscribe message:
-
-If you are using Kafka the Attribute is `[KafkaTopic()]`, and RabbitMQ is  `[RabbitMQTopic()]`
+Add the Attribute `[CapSubscribe()]` on Action to subscribe message:
 
 ```cs
 public class PublishController : Controller
@@ -116,7 +113,7 @@ public class PublishController : Controller
 
 
 	[NoAction]
-	[KafkaTopic("xxx.services.account.check")]
+	[CapSubscribe("xxx.services.account.check")]
 	public async Task CheckReceivedMessage(Person person)
 	{
 		Console.WriteLine(person.Name);
@@ -129,7 +126,7 @@ public class PublishController : Controller
 
 **Service Method**
 
-If your subscribe method is not in the Controller,then your subscribe class need to Inheritance `IConsumerService`: 
+If your subscribe method is not in the Controller,then your subscribe class need to Inheritance `ICapSubscribe`: 
 
 ```cs
 
@@ -141,9 +138,9 @@ namespace xxx.Service
 	}
 
 
-	public class SubscriberService: ISubscriberService, IConsumerService
+	public class SubscriberService: ISubscriberService, ICapSubscribe
 	{
-		[KafkaTopic("xxx.services.account.check")]
+		[CapSubscribe("xxx.services.account.check")]
 		public void CheckReceivedMessage(Person person)
 		{
 			
