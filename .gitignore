@@ -30,3 +30,5 @@ project.lock.json
 .testPublish/
 obj/
 bin/
+/.idea/.idea.CAP
+/.idea/.idea.CAP
