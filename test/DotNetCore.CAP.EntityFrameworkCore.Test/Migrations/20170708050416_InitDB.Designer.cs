@@ -8,8 +8,8 @@ using DotNetCore.CAP.EntityFrameworkCore.Test;
 namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
 {
     [DbContext(typeof(TestDbContext))]
-    [Migration("20170629074320_InitCreate")]
-    partial class InitCreate
+    [Migration("20170708050416_InitDB")]
+    partial class InitDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,6 +25,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
                     b.Property<DateTime>("Added");
 
                     b.Property<string>("Content");
+
+                    b.Property<string>("Group");
 
                     b.Property<string>("KeyName");
 

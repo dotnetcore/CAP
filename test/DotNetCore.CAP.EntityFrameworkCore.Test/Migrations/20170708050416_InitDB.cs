@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
 {
-    public partial class InitCreate : Migration
+    public partial class InitDB : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,12 +15,16 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
                     Id = table.Column<string>(nullable: false),
                     Added = table.Column<DateTime>(nullable: false),
                     Content = table.Column<string>(nullable: true),
+                    Group = table.Column<string>(nullable: true),
                     KeyName = table.Column<string>(nullable: true),
                     LastRun = table.Column<DateTime>(nullable: false),
                     Retries = table.Column<int>(nullable: false),
                     StatusName = table.Column<string>(maxLength: 50, nullable: true)
                 },
-                constraints: table => { table.PrimaryKey("PK_CapReceivedMessages", x => x.Id); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CapReceivedMessages", x => x.Id);
+                });
 
             migrationBuilder.CreateTable(
                 name: "CapSentMessages",
@@ -34,7 +38,10 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test.Migrations
                     Retries = table.Column<int>(nullable: false),
                     StatusName = table.Column<string>(maxLength: 50, nullable: true)
                 },
-                constraints: table => { table.PrimaryKey("PK_CapSentMessages", x => x.Id); });
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CapSentMessages", x => x.Id);
+                });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
