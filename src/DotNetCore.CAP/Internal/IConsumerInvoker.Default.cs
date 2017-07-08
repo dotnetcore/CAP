@@ -9,11 +9,10 @@ namespace DotNetCore.CAP.Internal
 {
     public class DefaultConsumerInvoker : IConsumerInvoker
     {
-        protected readonly ILogger Logger;
-        protected readonly IServiceProvider ServiceProvider;
-        protected readonly ConsumerContext ConsumerContext;
-
+        private readonly ILogger _logger;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IModelBinder _modelBinder;
+        private readonly ConsumerContext _consumerContext;
         private readonly ObjectMethodExecutor _executor;
 
         public DefaultConsumerInvoker(ILogger logger,
@@ -22,24 +21,24 @@ namespace DotNetCore.CAP.Internal
             ConsumerContext consumerContext)
         {
             _modelBinder = modelBinder;
-            _executor = ObjectMethodExecutor.Create(ConsumerContext.ConsumerDescriptor.MethodInfo,
-                ConsumerContext.ConsumerDescriptor.ImplTypeInfo);
+            _serviceProvider = serviceProvider;
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
-            Logger = logger ?? throw new ArgumentNullException(nameof(logger));
-            ServiceProvider = serviceProvider;
-            ConsumerContext = consumerContext ?? throw new ArgumentNullException(nameof(consumerContext));
+            _consumerContext = consumerContext ?? throw new ArgumentNullException(nameof(consumerContext));
+            _executor = ObjectMethodExecutor.Create(_consumerContext.ConsumerDescriptor.MethodInfo,
+                _consumerContext.ConsumerDescriptor.ImplTypeInfo);
         }
 
         public Task InvokeAsync()
         {
-            using (Logger.BeginScope("consumer invoker begin"))
+            using (_logger.BeginScope("consumer invoker begin"))
             {
-                Logger.LogDebug("Executing consumer Topic: {0}", ConsumerContext.ConsumerDescriptor.MethodInfo.Name);
+                _logger.LogDebug("Executing consumer Topic: {0}", _consumerContext.ConsumerDescriptor.MethodInfo.Name);
 
-                var obj = ActivatorUtilities.GetServiceOrCreateInstance(ServiceProvider,
-                    ConsumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
+                var obj = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider,
+                    _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
 
-                var value = ConsumerContext.DeliverMessage.Content;
+                var value = _consumerContext.DeliverMessage.Content;
 
                 if (_executor.MethodParameters.Length > 0)
                 {

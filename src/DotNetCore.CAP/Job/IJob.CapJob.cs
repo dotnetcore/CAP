@@ -32,26 +32,25 @@ namespace DotNetCore.CAP.Job
 
         public async Task ExecuteAsync()
         {
-            var matchs = _selector.GetCandidatesMethods(_serviceProvider);
+            var groupedCandidates = _selector.GetCandidatesMethodsOfGroupNameGrouped(_serviceProvider);
             using (var scope = _serviceProvider.CreateScope())
             {
                 var provider = scope.ServiceProvider;
-                var messageStore = provider.GetService<ICapMessageStore>();
 
+                var messageStore = provider.GetService<ICapMessageStore>();
                 var nextReceivedMessage = await messageStore.GetNextReceivedMessageToBeExcuted();
-                if (nextReceivedMessage != null)
+                if (nextReceivedMessage != null && groupedCandidates.ContainsKey(nextReceivedMessage.Group))
                 {
                     try
                     {
-                        var executeDescriptor = matchs[nextReceivedMessage.KeyName];
-                        var consumerContext = new ConsumerContext(executeDescriptor, nextReceivedMessage);
-                        var invoker = _consumerInvokerFactory.CreateInvoker(consumerContext);
-
                         await messageStore.ChangeReceivedMessageStateAsync(nextReceivedMessage, StatusName.Processing);
-
+                        // If there are multiple consumers in the same group, we will take the first
+                        var executeDescriptor = groupedCandidates[nextReceivedMessage.Group][0];
+                        var consumerContext = new ConsumerContext(executeDescriptor, nextReceivedMessage.ToMessageContext());
+                        var invoker = _consumerInvokerFactory.CreateInvoker(consumerContext);
                         await invoker.InvokeAsync();
-
                         await messageStore.ChangeReceivedMessageStateAsync(nextReceivedMessage, StatusName.Succeeded);
+
                     }
                     catch (Exception ex)
                     {

@@ -23,7 +23,7 @@ namespace DotNetCore.CAP
         private readonly CapOptions _options;
         private readonly CancellationTokenSource _cts;
 
-        public event EventHandler<CapMessage> MessageReceieved;
+        public event EventHandler<MessageContext> MessageReceieved;
 
         private Task _compositeTask;
         private bool _disposed;
@@ -46,15 +46,14 @@ namespace DotNetCore.CAP
             _cts = new CancellationTokenSource();
         }
 
-        protected virtual void OnMessageReceieved(CapMessage message)
+        protected virtual void OnMessageReceieved(MessageContext message)
         {
             MessageReceieved?.Invoke(this, message);
         }
 
         public void Start()
         {
-            var matchs = _selector.GetCandidatesMethods(_serviceProvider);
-            var groupingMatchs = matchs.GroupBy(x => x.Value.Attribute.Group);
+            var groupingMatchs = _selector.GetCandidatesMethodsOfGroupNameGrouped(_serviceProvider);
 
             foreach (var matchGroup in groupingMatchs)
             {
@@ -64,9 +63,9 @@ namespace DotNetCore.CAP
                     {
                         client.MessageReceieved += OnMessageReceieved;
 
-                        foreach (var item in matchGroup)
+                        foreach (var item in matchGroup.Value)
                         {
-                            client.Subscribe(item.Key);
+                            client.Subscribe(item.Attribute.Name);
                         }
 
                         client.Listening(TimeSpan.FromSeconds(1));
@@ -76,7 +75,7 @@ namespace DotNetCore.CAP
             _compositeTask = Task.CompletedTask;
         }
 
-        public virtual void OnMessageReceieved(object sender, MessageBase message)
+        public virtual void OnMessageReceieved(object sender, MessageContext message)
         {
             _logger.EnqueuingReceivedMessage(message.KeyName, message.Content);
 
@@ -88,27 +87,24 @@ namespace DotNetCore.CAP
                 var capMessage = new CapReceivedMessage(message)
                 {
                     StatusName = StatusName.Enqueued,
-                    Added = DateTime.Now
                 };
                 messageStore.StoreReceivedMessageAsync(capMessage).Wait();
-
-                ConsumerExecutorDescriptor executeDescriptor = null;
-
                 try
                 {
-                    executeDescriptor = _selector.GetTopicExector(message.KeyName);
-
-                    var consumerContext = new ConsumerContext(executeDescriptor, message);
-
-                    var invoker = _consumerInvokerFactory.CreateInvoker(consumerContext);
-
-                    invoker.InvokeAsync();
-
-                    messageStore.ChangeReceivedMessageStateAsync(capMessage, StatusName.Succeeded).Wait();
+                    var executeDescriptorGroup = _selector.GetTopicExector(message.KeyName);
+                    if (executeDescriptorGroup.ContainsKey(message.Group))
+                    {
+                        messageStore.ChangeReceivedMessageStateAsync(capMessage, StatusName.Processing).Wait();
+                        // If there are multiple consumers in the same group, we will take the first
+                        var executeDescriptor = executeDescriptorGroup[message.Group][0];
+                        var consumerContext = new ConsumerContext(executeDescriptor, message);
+                        _consumerInvokerFactory.CreateInvoker(consumerContext).InvokeAsync();
+                        messageStore.ChangeReceivedMessageStateAsync(capMessage, StatusName.Succeeded).Wait();
+                    }
                 }
                 catch (Exception ex)
                 {
-                    _logger.ConsumerMethodExecutingFailed(executeDescriptor?.MethodInfo.Name, ex);
+                    _logger.ConsumerMethodExecutingFailed($"Group:{message.Group}, Topic:{message.KeyName}", ex);
                 }
             }
         }
@@ -126,7 +122,7 @@ namespace DotNetCore.CAP
 
             try
             {
-                _compositeTask.Wait((int) TimeSpan.FromSeconds(60).TotalMilliseconds);
+                _compositeTask.Wait((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
             }
             catch (AggregateException ex)
             {
