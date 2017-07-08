@@ -12,7 +12,7 @@ namespace DotNetCore.CAP.Kafka
         private readonly KafkaOptions _kafkaOptions;
         private Consumer<Null, string> _consumerClient;
 
-        public event EventHandler<MessageBase> MessageReceieved;
+        public event EventHandler<MessageContext> MessageReceieved;
 
         public IDeserializer<string> StringDeserializer { get; set; }
 
@@ -65,8 +65,9 @@ namespace DotNetCore.CAP.Kafka
 
         private void ConsumerClient_OnMessage(object sender, Message<Null, string> e)
         {
-            var message = new MessageBase
+            var message = new MessageContext
             {
+                Group = _groupId,
                 KeyName = e.Topic,
                 Content = e.Value
             };

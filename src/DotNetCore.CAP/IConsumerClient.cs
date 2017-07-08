@@ -14,6 +14,6 @@ namespace DotNetCore.CAP
 
         void Listening(TimeSpan timeout);
 
-        event EventHandler<MessageBase> MessageReceieved;
+        event EventHandler<MessageContext> MessageReceieved;
     }
 }

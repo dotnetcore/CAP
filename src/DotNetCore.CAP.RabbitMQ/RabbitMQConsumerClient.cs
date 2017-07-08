@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.RabbitMQ
         private IConnection _connection;
         private IModel _channel;
 
-        public event EventHandler<MessageBase> MessageReceieved;
+        public event EventHandler<MessageContext> MessageReceieved;
 
         public RabbitMQConsumerClient(string queueName, RabbitMQOptions options)
         {
@@ -77,8 +77,9 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
-            var message = new MessageBase
+            var message = new MessageContext
             {
+                Group = _queueName,
                 KeyName = e.RoutingKey,
                 Content = Encoding.UTF8.GetString(e.Body)
             };
