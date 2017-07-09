@@ -43,6 +43,7 @@ namespace DotNetCore.CAP.Kafka
             {
                 MainConfig.Add("bootstrap.servers", Servers);
             }
+            MainConfig["enable.auto.commit"] = "false";
             return MainConfig.AsEnumerable();
         }
     }

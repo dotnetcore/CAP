@@ -16,6 +16,7 @@ namespace DotNetCore.CAP.RabbitMQ
         private IConnectionFactory _connectionFactory;
         private IConnection _connection;
         private IModel _channel;
+        private ulong _deliveryTag;
 
         public event EventHandler<MessageContext> MessageReceieved;
 
@@ -52,7 +53,7 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnConsumerReceived;
-            _channel.BasicConsume(_queueName, true, consumer);
+            _channel.BasicConsume(_queueName, false, consumer);
             while (true)
             {
                 Task.Delay(timeout);
@@ -69,6 +70,11 @@ namespace DotNetCore.CAP.RabbitMQ
             _channel.QueueBind(_queueName, _exchageName, topic);
         }
 
+        public void Commit()
+        {
+            _channel.BasicAck(_deliveryTag, false);
+        }
+
         public void Dispose()
         {
             _channel.Dispose();
@@ -77,6 +83,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
+            _deliveryTag = e.DeliveryTag;
             var message = new MessageContext
             {
                 Group = _queueName,

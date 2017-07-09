@@ -46,6 +46,11 @@ namespace DotNetCore.CAP.Kafka
             }
         }
 
+        public void Commit()
+        {
+            _consumerClient.CommitAsync();
+        }
+
         public void Dispose()
         {
             _consumerClient.Dispose();
@@ -73,6 +78,7 @@ namespace DotNetCore.CAP.Kafka
             };
             MessageReceieved?.Invoke(sender, message);
         }
+
 
         #endregion private methods
     }

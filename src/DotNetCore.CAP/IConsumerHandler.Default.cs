@@ -23,7 +23,7 @@ namespace DotNetCore.CAP
         private readonly CapOptions _options;
         private readonly CancellationTokenSource _cts;
 
-        public event EventHandler<MessageContext> MessageReceieved;
+        private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
 
         private Task _compositeTask;
         private bool _disposed;
@@ -46,11 +46,6 @@ namespace DotNetCore.CAP
             _cts = new CancellationTokenSource();
         }
 
-        protected virtual void OnMessageReceieved(MessageContext message)
-        {
-            MessageReceieved?.Invoke(this, message);
-        }
-
         public void Start()
         {
             var groupingMatchs = _selector.GetCandidatesMethodsOfGroupNameGrouped(_serviceProvider);
@@ -61,52 +56,18 @@ namespace DotNetCore.CAP
                 {
                     using (var client = _consumerClientFactory.Create(matchGroup.Key))
                     {
-                        client.MessageReceieved += OnMessageReceieved;
+                        RegisterMessageProcessor(client);
 
                         foreach (var item in matchGroup.Value)
                         {
                             client.Subscribe(item.Attribute.Name);
                         }
 
-                        client.Listening(TimeSpan.FromSeconds(1));
+                        client.Listening(_pollingDelay);
                     }
                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
             }
             _compositeTask = Task.CompletedTask;
-        }
-
-        public virtual void OnMessageReceieved(object sender, MessageContext message)
-        {
-            _logger.EnqueuingReceivedMessage(message.KeyName, message.Content);
-
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var provider = scope.ServiceProvider;
-                var messageStore = provider.GetRequiredService<ICapMessageStore>();
-
-                var capMessage = new CapReceivedMessage(message)
-                {
-                    StatusName = StatusName.Enqueued,
-                };
-                messageStore.StoreReceivedMessageAsync(capMessage).Wait();
-                try
-                {
-                    var executeDescriptorGroup = _selector.GetTopicExector(message.KeyName);
-                    if (executeDescriptorGroup.ContainsKey(message.Group))
-                    {
-                        messageStore.ChangeReceivedMessageStateAsync(capMessage, StatusName.Processing).Wait();
-                        // If there are multiple consumers in the same group, we will take the first
-                        var executeDescriptor = executeDescriptorGroup[message.Group][0];
-                        var consumerContext = new ConsumerContext(executeDescriptor, message);
-                        _consumerInvokerFactory.CreateInvoker(consumerContext).InvokeAsync();
-                        messageStore.ChangeReceivedMessageStateAsync(capMessage, StatusName.Succeeded).Wait();
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.ConsumerMethodExecutingFailed($"Group:{message.Group}, Topic:{message.KeyName}", ex);
-                }
-            }
         }
 
         public void Dispose()
@@ -133,5 +94,61 @@ namespace DotNetCore.CAP
                 }
             }
         }
+
+        private void RegisterMessageProcessor(IConsumerClient client)
+        {
+            client.MessageReceieved += (sender, message) =>
+            {
+                _logger.EnqueuingReceivedMessage(message.KeyName, message.Content);
+
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var receviedMessage = StoreMessage(scope, message);
+                    client.Commit();
+                    ProcessMessage(scope, receviedMessage);
+                }
+            };
+        }
+
+        private CapReceivedMessage StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
+        {
+            var provider = serviceScope.ServiceProvider;
+            var messageStore = provider.GetRequiredService<ICapMessageStore>();
+            var receivedMessage = new CapReceivedMessage(messageContext)
+            {
+                StatusName = StatusName.Enqueued,
+            };
+            messageStore.StoreReceivedMessageAsync(receivedMessage).Wait();
+            return receivedMessage;
+        }
+
+        private void ProcessMessage(IServiceScope serviceScope, CapReceivedMessage receivedMessage)
+        {
+            var provider = serviceScope.ServiceProvider;
+            var messageStore = provider.GetRequiredService<ICapMessageStore>();
+            try
+            {
+                var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.KeyName);
+
+                if (executeDescriptorGroup.ContainsKey(receivedMessage.Group))
+                {
+                    messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Processing).Wait();
+
+                    // If there are multiple consumers in the same group, we will take the first
+                    var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
+                    var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
+
+                    _consumerInvokerFactory.CreateInvoker(consumerContext).InvokeAsync();
+
+                    messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Succeeded).Wait();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.KeyName}", ex);
+            }
+        }
+
+
     }
 }
