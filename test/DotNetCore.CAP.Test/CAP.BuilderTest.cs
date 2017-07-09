@@ -41,20 +41,20 @@ namespace DotNetCore.CAP.Test
             services.AddCap().AddProducerService<MyProducerService>();
 
             var thingy = services.BuildServiceProvider()
-                .GetRequiredService<ICapProducerService>() as MyProducerService;
+                .GetRequiredService<ICapPublisher>() as MyProducerService;
 
             Assert.NotNull(thingy);
         }
 
 
-        private class MyProducerService : ICapProducerService
+        private class MyProducerService : ICapPublisher
         {
-            public Task SendAsync(string topic, string content)
+            public Task PublishAsync(string topic, string content)
             {
                 throw new NotImplementedException();
             }
 
-            public Task SendAsync<T>(string topic, T contentObj)
+            public Task PublishAsync<T>(string topic, T contentObj)
             {
                 throw new NotImplementedException();
             }

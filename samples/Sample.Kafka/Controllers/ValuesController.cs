@@ -10,9 +10,9 @@ namespace Sample.Kafka.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller, ICapSubscribe
     {
-        private readonly ICapProducerService _producer;
+        private readonly ICapPublisher _producer;
 
-        public ValuesController(ICapProducerService producer)
+        public ValuesController(ICapPublisher producer)
         {
             _producer = producer;
         }
@@ -35,7 +35,7 @@ namespace Sample.Kafka.Controllers
         [Route("~/send")]
         public async Task<IActionResult> SendTopic()
         {
-            await _producer.SendAsync("zzwl.topic.finace.callBack", new Person { Name = "Test", Age = 11 });
+            await _producer.PublishAsync("zzwl.topic.finace.callBack", new Person { Name = "Test", Age = 11 });
             return Ok();
         }
 

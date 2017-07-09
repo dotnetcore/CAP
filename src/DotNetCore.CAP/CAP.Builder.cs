@@ -68,13 +68,13 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
-        /// Add an <see cref="ICapProducerService"/>.
+        /// Add an <see cref="ICapPublisher"/>.
         /// </summary>
         /// <typeparam name="T">The type of the service.</typeparam>
         public virtual CapBuilder AddProducerService<T>()
-            where T : class, ICapProducerService
+            where T : class, ICapPublisher
         {
-            return AddScoped(typeof(ICapProducerService), typeof(T));
+            return AddScoped(typeof(ICapPublisher), typeof(T));
         }
     }
 }

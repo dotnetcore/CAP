@@ -56,7 +56,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IJob, CapJob>();
             services.TryAddTransient<DefaultCronJobRegistry>();
 
-            services.TryAddScoped<ICapProducerService, DefaultProducerService>();
+            services.TryAddScoped<ICapPublisher, DefaultCapPublisher>();
 
             return new CapBuilder(services);
         }
