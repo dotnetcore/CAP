@@ -1,44 +1,48 @@
-# CAP ¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡[English](https://github.com/dotnetcore/CAP/blob/master/README.md)
+<p align="right">
+<a href="https://github.com/dotnetcore/CAP/blob/master/README.md">English</a>
+</p>
+
+# CAP ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
 [![NuGet](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
-CAP ÊÇÒ»¸öÔÚ·Ö²¼Ê½ÏµÍ³£¨SOA¡¢MicroService£©ÖĞÊµÏÖ×îÖÕÒ»ÖÂĞÔµÄ¿â£¬Ëü¾ßÓĞÇáÁ¿¼¶¡¢Ò×Ê¹ÓÃ¡¢¸ßĞÔÄÜµÈÌØµã¡£
+CAP æ˜¯ä¸€ä¸ªåœ¨åˆ†å¸ƒå¼ç³»ç»Ÿï¼ˆSOAã€MicroServiceï¼‰ä¸­å®ç°æœ€ç»ˆä¸€è‡´æ€§çš„åº“ï¼Œå®ƒå…·æœ‰è½»é‡çº§ã€æ˜“ä½¿ç”¨ã€é«˜æ€§èƒ½ç­‰ç‰¹ç‚¹ã€‚
 
-## Ô¤ÀÀ£¨OverView£©
+## é¢„è§ˆï¼ˆOverViewï¼‰
 
-CAP ÊÇÔÚÒ»¸ö ASP.NET Core ÏîÄ¿ÖĞÊ¹ÓÃµÄ¿â£¬µ±È»Ëû¿ÉÒÔÓÃÓÚ ASP.NET Core On .NET Framework ÖĞ¡£
+CAP æ˜¯åœ¨ä¸€ä¸ª ASP.NET Core é¡¹ç›®ä¸­ä½¿ç”¨çš„åº“ï¼Œå½“ç„¶ä»–å¯ä»¥ç”¨äº ASP.NET Core On .NET Framework ä¸­ã€‚
 
-Äã¿ÉÒÔ°Ñ CAP ¿´³ÉÊÇÒ»¸ö EventBus£¬ÒòÎªËü¾ßÓĞ EventBus µÄËùÓĞ¹¦ÄÜ£¬²¢ÇÒ CAP Ìá¹©ÁË¸ü¼Ó¼ò»¯µÄ·½Ê½À´´¦Àí EventBus ÖĞµÄ·¢²¼ºÍ¶©ÔÄ¡£
+ä½ å¯ä»¥æŠŠ CAP çœ‹æˆæ˜¯ä¸€ä¸ª EventBusï¼Œå› ä¸ºå®ƒå…·æœ‰ EventBus çš„æ‰€æœ‰åŠŸèƒ½ï¼Œå¹¶ä¸” CAP æä¾›äº†æ›´åŠ ç®€åŒ–çš„æ–¹å¼æ¥å¤„ç† EventBus ä¸­çš„å‘å¸ƒå’Œè®¢é˜…ã€‚
 
-CAP ¾ßÓĞÏûÏ¢³Ö¾Ã»¯µÄ¹¦ÄÜ£¬µ±ÄãµÄ·şÎñ½øĞĞÖØÆô»òÕßå´»úÊ±Ëü¿ÉÒÔ±£Ö¤ÏûÏ¢µÄ¿É¿¿ĞÔ¡£CAPÌá¹©ÁË»ùÓÚMicrosoft DI µÄ Publisher Service ·şÎñ£¬Ëü¿ÉÒÔºÍÄãµÄÒµÎñ·şÎñ½øĞĞÎŞ·ì½áºÏ£¬²¢ÇÒÖ§³ÖÇ¿Ò»ÖÂĞÔµÄÊÂÎñ¡£
+CAP å…·æœ‰æ¶ˆæ¯æŒä¹…åŒ–çš„åŠŸèƒ½ï¼Œå½“ä½ çš„æœåŠ¡è¿›è¡Œé‡å¯æˆ–è€…å®•æœºæ—¶å®ƒå¯ä»¥ä¿è¯æ¶ˆæ¯çš„å¯é æ€§ã€‚CAPæä¾›äº†åŸºäºMicrosoft DI çš„ Publisher Service æœåŠ¡ï¼Œå®ƒå¯ä»¥å’Œä½ çš„ä¸šåŠ¡æœåŠ¡è¿›è¡Œæ— ç¼ç»“åˆï¼Œå¹¶ä¸”æ”¯æŒå¼ºä¸€è‡´æ€§çš„äº‹åŠ¡ã€‚
 
-ÕâÊÇCAP¼¯ÔÚASP.NET Core Î¢·şÎñ¼Ü¹¹ÖĞµÄÒ»¸öÊ¾ÒâÍ¼£º
+è¿™æ˜¯CAPé›†åœ¨ASP.NET Core å¾®æœåŠ¡æ¶æ„ä¸­çš„ä¸€ä¸ªç¤ºæ„å›¾ï¼š
 
 ![](http://images2015.cnblogs.com/blog/250417/201707/250417-20170705175827128-1203291469.png)
 
-> Í¼ÖĞÊµÏß²¿·Ö´ú±íÓÃ»§´úÂë£¬ĞéÏß²¿·Ö´ú±íCAPÄÚ²¿ÊµÏÖ¡£
+> å›¾ä¸­å®çº¿éƒ¨åˆ†ä»£è¡¨ç”¨æˆ·ä»£ç ï¼Œè™šçº¿éƒ¨åˆ†ä»£è¡¨CAPå†…éƒ¨å®ç°ã€‚
 
 ## Getting Started
 
 ### NuGet 
 
-Äã¿ÉÒÔÔËĞĞÒÔÏÂÏÂÃüÁîÔÚÄãµÄÏîÄ¿ÖĞ°²×° CAP¡£
+ä½ å¯ä»¥è¿è¡Œä»¥ä¸‹ä¸‹å‘½ä»¤åœ¨ä½ çš„é¡¹ç›®ä¸­å®‰è£… CAPã€‚
 
-Èç¹ûÄãµÄÏûÏ¢¶ÓÁĞÊ¹ÓÃµÄÊÇ Kafka µÄ»°£¬Äã¿ÉÒÔ£º
+å¦‚æœä½ çš„æ¶ˆæ¯é˜Ÿåˆ—ä½¿ç”¨çš„æ˜¯ Kafka çš„è¯ï¼Œä½ å¯ä»¥ï¼š
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka -Pre
 ```
 
-Èç¹ûÄãµÄÏûÏ¢¶ÓÁĞÊ¹ÓÃµÄÊÇ RabbitMQ µÄ»°£¬Äã¿ÉÒÔ£º
+å¦‚æœä½ çš„æ¶ˆæ¯é˜Ÿåˆ—ä½¿ç”¨çš„æ˜¯ RabbitMQ çš„è¯ï¼Œä½ å¯ä»¥ï¼š
 
 ```
 PM> Install-Package DotNetCore.CAP.RabbitMQ -Pre
 ```
 
-CAP Ä¬ÈÏÌá¹©ÁË Entity Framwork ×÷ÎªÊı¾İ¿â´æ´¢£º
+CAP é»˜è®¤æä¾›äº† Entity Framwork ä½œä¸ºæ•°æ®åº“å­˜å‚¨ï¼š
 
 ```
 PM> Install-Package DotNetCore.CAP.EntityFrameworkCore -Pre
@@ -46,7 +50,7 @@ PM> Install-Package DotNetCore.CAP.EntityFrameworkCore -Pre
 
 ### Configuration
 
-Ê×ÏÈÅäÖÃCAPµ½ Startup.cs ÎÄ¼şÖĞ£¬ÈçÏÂ£º
+é¦–å…ˆé…ç½®CAPåˆ° Startup.cs æ–‡ä»¶ä¸­ï¼Œå¦‚ä¸‹ï¼š
 
 ```cs
 public void ConfigureServices(IServiceCollection services)
@@ -69,9 +73,9 @@ public void Configure(IApplicationBuilder app)
 
 ```
 
-### ·¢²¼
+### å‘å¸ƒ
 
-ÔÚ Controller ÖĞ×¢Èë `ICapPublisher` È»ºóÊ¹ÓÃ `ICapPublisher` ½øĞĞÏûÏ¢·¢ËÍ
+åœ¨ Controller ä¸­æ³¨å…¥ `ICapPublisher` ç„¶åä½¿ç”¨ `ICapPublisher` è¿›è¡Œæ¶ˆæ¯å‘é€
 
 ```cs
 public class PublishController : Controller
@@ -87,7 +91,7 @@ public class PublishController : Controller
 	[Route("~/checkAccount")]
 	public async Task<IActionResult> PublishMessage()
 	{
-		//Ö¸¶¨·¢ËÍµÄÏûÏ¢Í·ºÍÄÚÈİ
+		//æŒ‡å®šå‘é€çš„æ¶ˆæ¯å¤´å’Œå†…å®¹
 		await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
 		return Ok();
@@ -96,11 +100,11 @@ public class PublishController : Controller
 
 ```
 
-### ¶©ÔÄ
+### è®¢é˜…
 
 **Action Method**
 
-ÔÚ Action ÉÏÌí¼Ó CapSubscribeAttribute À´¶©ÔÄÏà¹ØÏûÏ¢¡£
+åœ¨ Action ä¸Šæ·»åŠ  CapSubscribeAttribute æ¥è®¢é˜…ç›¸å…³æ¶ˆæ¯ã€‚
 
 ```cs
 public class PublishController : Controller
@@ -127,7 +131,7 @@ public class PublishController : Controller
 
 **Service Method**
 
-Èç¹ûÄãµÄ¶©ÔÄ·½·¨Ã»ÓĞÎ»ÓÚ Controller ÖĞ£¬ÔòÄã¶©ÔÄµÄÀàĞèÒª¼Ì³Ğ `ICapSubscribe`£º
+å¦‚æœä½ çš„è®¢é˜…æ–¹æ³•æ²¡æœ‰ä½äº Controller ä¸­ï¼Œåˆ™ä½ è®¢é˜…çš„ç±»éœ€è¦ç»§æ‰¿ `ICapSubscribe`ï¼š
 
 ```cs
 
@@ -151,7 +155,7 @@ namespace xxx.Service
 
 ```
 
-È»ºóÔÚ Startup.cs ÖĞµÄ `ConfigureServices()` ÖĞ×¢ÈëÄãµÄ  `ISubscriberService` Àà
+ç„¶ååœ¨ Startup.cs ä¸­çš„ `ConfigureServices()` ä¸­æ³¨å…¥ä½ çš„  `ISubscriberService` ç±»
 
 ```cs
 public void ConfigureServices(IServiceCollection services)
@@ -160,9 +164,9 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-## ¹±Ï×
+## è´¡çŒ®
 
-¹±Ï×µÄ×î¼òµ¥µÄ·½·¨Ö®Ò»¾ÍÊÇÊÇ²ÎÓëÌÖÂÛºÍÌÖÂÛÎÊÌâ£¨issue£©¡£ÄãÒ²¿ÉÒÔÍ¨¹ıÌá½»µÄ Pull Request ´úÂë±ä¸ü×÷³ö¹±Ï×¡£
+è´¡çŒ®çš„æœ€ç®€å•çš„æ–¹æ³•ä¹‹ä¸€å°±æ˜¯æ˜¯å‚ä¸è®¨è®ºå’Œè®¨è®ºé—®é¢˜ï¼ˆissueï¼‰ã€‚ä½ ä¹Ÿå¯ä»¥é€šè¿‡æäº¤çš„ Pull Request ä»£ç å˜æ›´ä½œå‡ºè´¡çŒ®ã€‚
 
 ### License
 
