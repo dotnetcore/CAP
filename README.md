@@ -1,10 +1,8 @@
-<div style="float:right;display:inline;top:0;right:0;">
-<h1><a href="https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md">中文</a></h1>
-</div>
+<p align="right">
+    <a href="https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md">中文</a>
+</p>
 
 # CAP
-
-<h1 style="width:100%;display:block;"><div style="float:left;display:inline;">CAP</div><div style="position:relative;float:right;display:inline;"><a href="https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md">中文</a></div></h1>
 
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
