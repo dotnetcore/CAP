@@ -10,9 +10,9 @@ CAP ÊÇÒ»¸öÔÚ·Ö²¼Ê½ÏµÍ³£¨SOA¡¢MicroService£©ÖĞÊµÏÖ×îÖÕÒ»ÖÂĞÔµÄ¿â£¬Ëü¾ßÓĞÇáÁ¿¼¶¡¢Ò
 
 CAP ÊÇÔÚÒ»¸ö ASP.NET Core ÏîÄ¿ÖĞÊ¹ÓÃµÄ¿â£¬µ±È»Ëû¿ÉÒÔÓÃÓÚ ASP.NET Core On .NET Framework ÖĞ¡£
 
-Äã¿ÉÒÔ°Ñ CAP ¿´³ÉÊÇÒ»¸ö EventBus£¬ÒòÎªËü¾ßÓĞ EventBus µÄËùÓĞ¹¦ÄÜ£¬²¢ÇÒCAPÌá¹©ÁË¸ü¼Ó¼ò»¯µÄ·½Ê½À´´¦Àí EventBus ÖĞµÄ·¢²¼ºÍ¶©ÔÄ¡£
+Äã¿ÉÒÔ°Ñ CAP ¿´³ÉÊÇÒ»¸ö EventBus£¬ÒòÎªËü¾ßÓĞ EventBus µÄËùÓĞ¹¦ÄÜ£¬²¢ÇÒ CAP Ìá¹©ÁË¸ü¼Ó¼ò»¯µÄ·½Ê½À´´¦Àí EventBus ÖĞµÄ·¢²¼ºÍ¶©ÔÄ¡£
 
-CAP ¾ßÓĞÏûÏ¢³Ö¾Ã»¯µÄ¹¦ÄÜ£¬µ±ÄãµÄ·şÎñ½øĞĞÖØÆô»òÕßå´»úÊ±Ëü¿ÉÒÔ±£Ö¤ÏûÏ¢µÄ¿É¿¿ĞÔ¡£CAPÌá¹©ÁË»ùÓÚMicrosoft DI µÄ Producer Service ·şÎñ£¬Ëü¿ÉÒÔºÍÄãµÄÒµÎñ·şÎñ½øĞĞÎŞ·ì½áºÏ£¬²¢ÇÒÖ§³ÖÇ¿Ò»ÖÂĞÔµÄÊÂÎñ¡£
+CAP ¾ßÓĞÏûÏ¢³Ö¾Ã»¯µÄ¹¦ÄÜ£¬µ±ÄãµÄ·şÎñ½øĞĞÖØÆô»òÕßå´»úÊ±Ëü¿ÉÒÔ±£Ö¤ÏûÏ¢µÄ¿É¿¿ĞÔ¡£CAPÌá¹©ÁË»ùÓÚMicrosoft DI µÄ Publisher Service ·şÎñ£¬Ëü¿ÉÒÔºÍÄãµÄÒµÎñ·şÎñ½øĞĞÎŞ·ì½áºÏ£¬²¢ÇÒÖ§³ÖÇ¿Ò»ÖÂĞÔµÄÊÂÎñ¡£
 
 ÕâÊÇCAP¼¯ÔÚASP.NET Core Î¢·şÎñ¼Ü¹¹ÖĞµÄÒ»¸öÊ¾ÒâÍ¼£º
 
@@ -71,16 +71,16 @@ public void Configure(IApplicationBuilder app)
 
 ### ·¢²¼
 
-ÔÚ Controller ÖĞ×¢Èë `ICapProducerService` È»ºóÊ¹ÓÃ `ICapProducerService` ½øĞĞÏûÏ¢·¢ËÍ
+ÔÚ Controller ÖĞ×¢Èë `ICapPublisher` È»ºóÊ¹ÓÃ `ICapPublisher` ½øĞĞÏûÏ¢·¢ËÍ
 
 ```cs
 public class PublishController : Controller
 {
-	private readonly ICapProducerService _producer;
+	private readonly ICapPublisher _publisher;
 
-	public PublishController(ICapProducerService producer)
+	public PublishController(ICapPublisher publisher)
 	{
-		_producer = producer;
+		_publisher = publisher;
 	}
 
 
@@ -88,7 +88,7 @@ public class PublishController : Controller
 	public async Task<IActionResult> PublishMessage()
 	{
 		//Ö¸¶¨·¢ËÍµÄÏûÏ¢Í·ºÍÄÚÈİ
-		await _producer.SendAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
+		await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
 		return Ok();
 	}
@@ -105,11 +105,11 @@ public class PublishController : Controller
 ```cs
 public class PublishController : Controller
 {
-	private readonly ICapProducerService _producer;
+	private readonly ICapPublisher _publisher;
 
-	public PublishController(ICapProducerService producer)
+	public PublishController(ICapPublisher publisher)
 	{
-		_producer = producer;
+		_publisher = publisher;
 	}
 
 

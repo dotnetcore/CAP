@@ -1,18 +1,18 @@
-# CAP
+# CAP 　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md)
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
 [![NuGet](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
-CAP is a library to achieve eventually consistent in distributed architectures system like SOA,MicroService. 	It is lightweight,easy to use and efficiently.
+CAP is a .Net Standard library to achieve eventually consistent in distributed architectures system like SOA,MicroService. 	It is lightweight,easy to use and efficiently.
 
 ## OverView
 
-CAP is a library that used in an ASP.NET Core project,Of Course you can ues it in ASP.NET Core with .NET Framework.
+CAP is a library that used in an ASP.NET Core project, Of Course you can ues it in ASP.NET Core with .NET Framework.
 
 You can think of CAP as an EventBus because it has all the features of EventBus, and CAP provides a easier way to handle the publishing and subscribing than EventBus.
 
-CAP has the function of Message Presistence, and it makes messages reliability when your service is restarted or down. CAP provides a Producer Service based on Microsoft DI that integrates seamlessly with your business services and supports strong consistency transactions.
+CAP has the function of Message Presistence, and it makes messages reliability when your service is restarted or down. CAP provides a Publish Service based on Microsoft DI that integrates seamlessly with your business services and supports strong consistency transactions.
 
 This is a diagram of the CAP working in the ASP.NET Core MicroService architecture:
 
@@ -71,16 +71,16 @@ public void Configure(IApplicationBuilder app)
 
 ### Publish
 
-Inject `ICapProducerService` in your Controller, then use the `ICapProducerService` to send message
+Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send message
 
 ```cs
 public class PublishController : Controller
 {
-	private readonly ICapProducerService _producer;
+	private readonly ICapPublisher _publisher;
 
-	public PublishController(ICapProducerService producer)
+	public PublishController(ICapPublisher publisher)
 	{
-		_producer = producer;
+		_publisher = publisher;
 	}
 
 
@@ -88,7 +88,7 @@ public class PublishController : Controller
 	public async Task<IActionResult> PublishMessage()
 	{
 		//Specifies the message header and content to be sent
-		await _producer.SendAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
+		await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
 		return Ok();
 	}
@@ -105,11 +105,11 @@ Add the Attribute `[CapSubscribe()]` on Action to subscribe message:
 ```cs
 public class PublishController : Controller
 {
-	private readonly ICapProducerService _producer;
+	private readonly ICapPublisher _publisher;
 
-	public PublishController(ICapProducerService producer)
+	public PublishController(ICapPublisher publisher)
 	{
-		_producer = producer;
+		_publisher = publisher;
 	}
 
 
