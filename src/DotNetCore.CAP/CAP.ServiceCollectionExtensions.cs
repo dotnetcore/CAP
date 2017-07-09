@@ -23,9 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns>An <see cref="CapBuilder"/> for application services.</returns>
         public static CapBuilder AddCap(this IServiceCollection services)
         {
-            services.AddCap(x => new CapOptions());
-
-            return new CapBuilder(services);
+            return services.AddCap(x => new CapOptions());
         }
 
         /// <summary>
