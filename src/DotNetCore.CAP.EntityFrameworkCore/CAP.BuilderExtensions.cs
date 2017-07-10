@@ -1,4 +1,5 @@
-﻿using DotNetCore.CAP;
+﻿using System;
+using DotNetCore.CAP;
 using DotNetCore.CAP.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -19,7 +20,25 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
 
+            builder.Services.AddScoped<IStorage, EFStorage>();
+            builder.Services.AddScoped<IStorageConnection, EFStorageConnection<TContext>>();
+
             return builder;
         }
+         
+
+        public static CapBuilder AddEntityFrameworkStores<TContext>(this CapBuilder builder, Action<EFOptions> options)
+            where TContext : DbContext
+        {
+            builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
+
+            builder.Services.AddScoped<IStorage, EFStorage>();
+            builder.Services.AddScoped<IStorageConnection, EFStorageConnection<TContext>>();
+            builder.Services.Configure(options);
+
+            return builder;
+        }
+
+
     }
 }

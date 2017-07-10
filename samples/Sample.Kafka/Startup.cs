@@ -29,9 +29,7 @@ namespace Sample.Kafka
                     .AddEntityFrameworkStores<AppDbContext>()
                     .AddRabbitMQ(x =>
                     {
-                        x.HostName = "192.168.2.206";
-                        x.UserName = "admin";
-                        x.Password = "123123";
+                        x.HostName = "localhost";
                     });
             //.AddKafka(x => x.Servers = "");
             

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DotNetCore.CAP.Infrastructure
+namespace DotNetCore.CAP.Models
 {
     public class CapSentMessage 
     {
@@ -30,7 +30,7 @@ namespace DotNetCore.CAP.Infrastructure
 
         public DateTime Added { get; set; }
 
-        public DateTime LastRun { get; set; }
+        public DateTime? LastRun { get; set; }
 
         public int Retries { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DotNetCore.CAP.Infrastructure
+namespace DotNetCore.CAP.Models
 {
     public class CapReceivedMessage
     {

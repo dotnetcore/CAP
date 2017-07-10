@@ -33,9 +33,15 @@ namespace Sample.Kafka.Controllers
         }
 
         [Route("~/send")]
-        public async Task<IActionResult> SendTopic()
+        public async Task<IActionResult> SendTopic([FromServices] AppDbContext dbContext)
         {
-            await _producer.PublishAsync("zzwl.topic.finace.callBack", new Person { Name = "Test", Age = 11 });
+            using (var trans = dbContext.Database.BeginTransaction())
+            {
+                await _producer.PublishAsync("zzwl.topic.finace.callBack", new Person { Name = "Test", Age = 11 });
+
+                trans.Commit();
+            }
+
             return Ok();
         }
 
