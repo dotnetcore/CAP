@@ -4,64 +4,60 @@ using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
 {
-	public class EFStorageTransaction : IStorageTransaction, IDisposable
-	{
-		private EFStorageConnection _connection;
+    public class EFStorageTransaction
+        : IStorageTransaction, IDisposable
+    {
+        private EFStorageConnection _connection;
 
-		public EFStorageTransaction(EFStorageConnection connection)
-		{
-			_connection = connection;
-		}
-
-		public void UpdateJob(Job job)
-		{
-			if (job == null) throw new ArgumentNullException(nameof(job));
-
-			// NOOP. EF will detect changes.
-		}
-
-		public void EnqueueJob(Job job)
-		{
-			
-		}
-
-		public Task CommitAsync()
-		{
-			return _connection.Context.SaveChangesAsync();
-		}
-
-		public void Dispose()
-		{
-		}
+        public EFStorageTransaction(EFStorageConnection connection)
+        {
+            _connection = connection;
+        }
 
         public void UpdateMessage(CapSentMessage message)
         {
-            throw new NotImplementedException();
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
+            // NOOP. EF will detect changes.
         }
 
         public void UpdateMessage(CapReceivedMessage message)
         {
-            throw new NotImplementedException();
+            if (message == null) throw new ArgumentNullException(nameof(message));
+
+            // NOOP. EF will detect changes.
         }
 
         public void EnqueueMessage(CapSentMessage message)
         {
-            if (job == null) throw new ArgumentNullException(nameof(job));
+            if (message == null) throw new ArgumentNullException(nameof(message));
 
-            _connection.Context.Add(new JobQueue
+            _connection.Context.Add(new CapQueue
             {
-                JobId = job.Id
+                MessageId = message.Id,
+                Type = 0
             });
         }
 
         public void EnqueueMessage(CapReceivedMessage message)
         {
-            if (job == null) throw new ArgumentNullException(nameof(job));
+            if (message == null) throw new ArgumentNullException(nameof(message));
 
-            _connection.Context.Add(new JobQueue
+            _connection.Context.Add(new CapQueue
             {
-                JobId = job.Id
+                MessageId = message.Id,
+                Type = 1
             });
+        }
+
+
+        public Task CommitAsync()
+        {
+            return _connection.Context.SaveChangesAsync();
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

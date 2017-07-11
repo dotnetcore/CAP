@@ -4,7 +4,7 @@ namespace DotNetCore.CAP
 {
 	public interface IFetchedMessage : IDisposable
 	{
-		int MessageId { get; }
+		string MessageId { get; }
 
 		void RemoveFromQueue();
 

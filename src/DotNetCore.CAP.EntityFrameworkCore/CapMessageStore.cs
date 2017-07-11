@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace DotNetCore.CAP.EntityFrameworkCore

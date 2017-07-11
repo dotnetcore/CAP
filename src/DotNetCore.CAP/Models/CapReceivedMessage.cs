@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Models
 {
@@ -33,7 +34,7 @@ namespace DotNetCore.CAP.Models
 
         public DateTime Added { get; set; }
 
-        public DateTime LastRun { get; set; }
+        public DateTime? LastRun { get; set; }
 
         public int Retries { get; set; }
 

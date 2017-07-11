@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
 {

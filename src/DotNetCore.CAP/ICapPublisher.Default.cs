@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP

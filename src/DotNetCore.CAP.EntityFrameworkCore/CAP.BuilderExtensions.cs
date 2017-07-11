@@ -21,7 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
 
             builder.Services.AddScoped<IStorage, EFStorage>();
-            builder.Services.AddScoped<IStorageConnection, EFStorageConnection<TContext>>();
+            builder.Services.AddScoped<IStorageConnection, EFStorageConnection>();
 
             return builder;
         }
@@ -30,10 +30,11 @@ namespace Microsoft.Extensions.DependencyInjection
         public static CapBuilder AddEntityFrameworkStores<TContext>(this CapBuilder builder, Action<EFOptions> options)
             where TContext : DbContext
         {
+      
             builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
 
             builder.Services.AddScoped<IStorage, EFStorage>();
-            builder.Services.AddScoped<IStorageConnection, EFStorageConnection<TContext>>();
+            builder.Services.AddScoped<IStorageConnection, EFStorageConnection>();
             builder.Services.Configure(options);
 
             return builder;

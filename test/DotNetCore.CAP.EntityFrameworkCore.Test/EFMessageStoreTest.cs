@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
