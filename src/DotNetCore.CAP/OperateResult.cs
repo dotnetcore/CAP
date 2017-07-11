@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace DotNetCore.CAP
@@ -17,6 +18,8 @@ namespace DotNetCore.CAP
         /// Flag indicating whether if the operation succeeded or not.
         /// </summary>
         public bool Succeeded { get; set; }
+
+        public Exception Exception { get; set; }
 
         /// <summary>
         /// An <see cref="IEnumerable{T}"/> of <see cref="OperateError"/>s containing an errors
@@ -39,6 +42,17 @@ namespace DotNetCore.CAP
         public static OperateResult Failed(params OperateError[] errors)
         {
             var result = new OperateResult {Succeeded = false};
+            if (errors != null)
+            {
+                result._errors.AddRange(errors);
+            }
+            return result;
+        }
+
+        public static OperateResult Failed(Exception ex, params OperateError[] errors)
+        {
+            var result = new OperateResult { Succeeded = false };
+            result.Exception = ex;
             if (errors != null)
             {
                 result._errors.AddRange(errors);

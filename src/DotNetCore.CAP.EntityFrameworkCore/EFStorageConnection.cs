@@ -29,17 +29,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         public IStorageTransaction CreateTransaction()
         {
             return new EFStorageTransaction(this);
-        }
-
-        public Task StoreSentMessageAsync(CapSentMessage message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            message.LastRun = NormalizeDateTime(message.LastRun);
-
-            _context.Add(message);
-            return _context.SaveChangesAsync();
-        }
+        }   
 
         public Task<CapSentMessage> GetSentMessageAsync(string id)
         {

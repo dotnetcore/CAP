@@ -114,7 +114,7 @@ namespace DotNetCore.CAP
         private CapReceivedMessage StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
         {
             var provider = serviceScope.ServiceProvider;
-            var messageStore = provider.GetRequiredService<ICapMessageStore>();
+            var messageStore = provider.GetRequiredService<IStorageConnection>();
             var receivedMessage = new CapReceivedMessage(messageContext)
             {
                 StatusName = StatusName.Enqueued,
@@ -126,13 +126,17 @@ namespace DotNetCore.CAP
         private void ProcessMessage(IServiceScope serviceScope, CapReceivedMessage receivedMessage)
         {
             var provider = serviceScope.ServiceProvider;
-            var messageStore = provider.GetRequiredService<ICapMessageStore>();
+            var messageStore = provider.GetRequiredService<IStorageConnection>();
             try
             {
                 var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.KeyName);
 
                 if (executeDescriptorGroup.ContainsKey(receivedMessage.Group))
                 {
+                    messageStore.FetchNextReceivedMessageAsync
+
+
+
                     messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Processing).Wait();
 
                     // If there are multiple consumers in the same group, we will take the first

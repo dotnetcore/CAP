@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,8 +24,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         private DbSet<CapSentMessage> SentMessages => Context.Set<CapSentMessage>();
 
-        private DbSet<CapReceivedMessage> ReceivedMessages => Context.Set<CapReceivedMessage>();
-
         /// <summary>
         /// Creates the specified <paramref name="message"/> in the cap message store.
         /// </summary>
@@ -38,159 +35,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             Context.Add(message);
             await Context.SaveChangesAsync();
             return OperateResult.Success;
-        }
-
-        public async Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string status,
-            bool autoSaveChanges = true)
-        {
-            Context.Attach(message);
-            message.LastRun = DateTime.Now;
-            message.StatusName = status;
-            try
-            {
-                if (autoSaveChanges)
-                {
-                    await Context.SaveChangesAsync();
-                }
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                return OperateResult.Failed(
-                    new OperateError()
-                    {
-                        Code = "DbUpdateConcurrencyException",
-                        Description = ex.Message
-                    });
-            }
-            return OperateResult.Success;
-        }
-
-        /// <summary>
-        /// First Enqueued Message.
-        /// </summary>
-        public async Task<CapSentMessage> GetNextSentMessageToBeEnqueuedAsync()
-        {
-            return await SentMessages.FirstOrDefaultAsync(x => x.StatusName == StatusName.Enqueued);
-        }
-
-        /// <summary>
-        /// Updates a message in a store as an asynchronous operation.
-        /// </summary>
-        /// <param name="message">The message to update in the store.</param>
-        public async Task<OperateResult> UpdateSentMessageAsync(CapSentMessage message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            Context.Attach(message);
-            message.LastRun = DateTime.Now;
-            Context.Update(message);
-
-            try
-            {
-                await Context.SaveChangesAsync();
-                return OperateResult.Success;
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                return OperateResult.Failed(new OperateError()
-                {
-                    Code = "DbUpdateConcurrencyException",
-                    Description = ex.Message
-                });
-            }
-        }
-
-        /// <summary>
-        ///  Deletes the specified <paramref name="message"/> from the consistency message store.
-        /// </summary>
-        /// <param name="message">The message to delete.</param>
-        public async Task<OperateResult> RemoveSentMessageAsync(CapSentMessage message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            Context.Remove(message);
-            try
-            {
-                await Context.SaveChangesAsync();
-                return OperateResult.Success;
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                return OperateResult.Failed(new OperateError()
-                {
-                    Code = "DbUpdateConcurrencyException",
-                    Description = ex.Message
-                });
-            }
-        }
-
-        /// <summary>
-        /// Creates the specified <paramref name="message"/> in the consistency message store.
-        /// </summary>
-        /// <param name="message">The message to create.</param>
-        public async Task<OperateResult> StoreReceivedMessageAsync(CapReceivedMessage message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            Context.Add(message);
-            await Context.SaveChangesAsync();
-            return OperateResult.Success;
-        }
-
-        public async Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string status,
-            bool autoSaveChanges = true)
-        {
-            Context.Attach(message);
-            message.LastRun = DateTime.Now;
-            message.StatusName = status;
-            try
-            {
-                if (autoSaveChanges)
-                {
-                    await Context.SaveChangesAsync();
-                }
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                return OperateResult.Failed(new OperateError()
-                {
-                    Code = "DbUpdateConcurrencyException",
-                    Description = ex.Message
-                });
-            }
-            return OperateResult.Success;
-        }
-
-        public async Task<CapReceivedMessage> GetNextReceivedMessageToBeExcuted()
-        {
-            return await ReceivedMessages.FirstOrDefaultAsync(x => x.StatusName == StatusName.Enqueued);
-        }
-
-        /// <summary>
-        /// Updates the specified <paramref name="message"/> in the message store.
-        /// </summary>
-        /// <param name="message">The message to update.</param>
-        public async Task<OperateResult> UpdateReceivedMessageAsync(CapReceivedMessage message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            Context.Attach(message);
-            message.LastRun = DateTime.Now;
-            Context.Update(message);
-
-            try
-            {
-                await Context.SaveChangesAsync();
-                return OperateResult.Success;
-            }
-            catch (DbUpdateConcurrencyException ex)
-            {
-                return OperateResult.Failed(new OperateError()
-                {
-                    Code = "DbUpdateConcurrencyException",
-                    Description = ex.Message
-                });
-            }
         }
     }
 }

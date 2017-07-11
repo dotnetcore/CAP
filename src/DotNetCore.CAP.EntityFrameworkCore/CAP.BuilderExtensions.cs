@@ -19,7 +19,6 @@ namespace Microsoft.Extensions.DependencyInjection
             where TContext : DbContext
         {
             builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
-
             builder.Services.AddScoped<IStorage, EFStorage>();
             builder.Services.AddScoped<IStorageConnection, EFStorageConnection>();
 
@@ -27,15 +26,27 @@ namespace Microsoft.Extensions.DependencyInjection
         }
          
 
-        public static CapBuilder AddEntityFrameworkStores<TContext>(this CapBuilder builder, Action<EFOptions> options)
+        public static CapBuilder AddEntityFrameworkStores<TContext>(this CapBuilder builder, Action<EFOptions> actionOptions)
             where TContext : DbContext
         {
       
             builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
-
-            builder.Services.AddScoped<IStorage, EFStorage>();
+            builder.Services.AddSingleton<IStorage, EFStorage>();
             builder.Services.AddScoped<IStorageConnection, EFStorageConnection>();
-            builder.Services.Configure(options);
+            builder.Services.Configure(actionOptions);
+            
+            var efOptions = new EFOptions();
+            actionOptions(efOptions);
+
+            builder.Services.AddDbContext<CapDbContext>(options =>
+            {
+                options.UseSqlServer(efOptions.ConnectionString, sqlOpts =>
+                {
+                    sqlOpts.MigrationsHistoryTable(
+                        efOptions.MigrationsHistoryTableName,
+                        efOptions.MigrationsHistoryTableSchema ?? efOptions.Schema);
+                });
+            });
 
             return builder;
         }

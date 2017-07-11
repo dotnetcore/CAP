@@ -10,13 +10,7 @@ namespace DotNetCore.CAP
     public interface IStorageConnection : IDisposable
     {
 
-        //Sent messages
-
-        /// <summary>
-        /// Stores the message.
-        /// </summary>
-        /// <param name="message">The message to store.</param>
-        Task StoreSentMessageAsync(CapSentMessage message);
+        //Sent messages        
 
         /// <summary>
         /// Returns the message with the given id.
@@ -56,7 +50,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Returns the next message to be enqueued.
         /// </summary>
-        Task<CapSentMessage> GetNextReceviedMessageToBeEnqueuedAsync();
+        Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync();
          
         //-----------------------------------------
 
