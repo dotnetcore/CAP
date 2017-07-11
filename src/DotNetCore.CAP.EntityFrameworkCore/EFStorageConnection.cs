@@ -96,7 +96,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             throw new NotImplementedException();
         }
 
-        public Task<CapSentMessage> GetNextReceviedMessageToBeEnqueuedAsync()
+        public Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync()
         {
             throw new NotImplementedException();
         }
@@ -113,6 +113,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         public void Dispose()
         {
-        }
+        } 
     }
 }

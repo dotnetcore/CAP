@@ -7,6 +7,8 @@ namespace DotNetCore.CAP
     /// </summary>
     public interface IProcessingServer : IDisposable
     {
+        void Pulse();
+
         void Start();
     }
 }

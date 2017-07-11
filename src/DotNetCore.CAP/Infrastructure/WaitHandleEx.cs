@@ -7,6 +7,9 @@ namespace DotNetCore.CAP.Infrastructure
     public static class WaitHandleEx
     {
         public static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
+        public static readonly AutoResetEvent QueuePulseEvent = new AutoResetEvent(true);
+        public static readonly AutoResetEvent SentPulseEvent = new AutoResetEvent(true);
+        public static readonly AutoResetEvent ReceviedPulseEvent = new AutoResetEvent(true);
 
         public static Task WaitAnyAsync(WaitHandle handle1, WaitHandle handle2, TimeSpan timeout)
         {

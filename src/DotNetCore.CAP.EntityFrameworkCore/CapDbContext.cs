@@ -15,7 +15,9 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         /// <summary>
         /// Initializes a new instance of the <see cref="CapDbContext"/>.
         /// </summary>
-        public CapDbContext() { }
+        public CapDbContext() {
+            _efOptions = new EFOptions();
+        }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CapDbContext"/>.
@@ -65,5 +67,10 @@ namespace DotNetCore.CAP.EntityFrameworkCore
                 b.Property(p => p.StatusName).IsRequired().HasMaxLength(50);
             });
         }
+
+        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        //{
+        //    optionsBuilder.UseSqlServer("Server=DESKTOP-M9R8T31;Initial Catalog=WebApp1;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True");
+        //}
     }
 }

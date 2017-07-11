@@ -78,33 +78,34 @@ namespace DotNetCore.CAP.Kafka
 
         private async Task<bool> Step(ProcessingContext context)
         {
-            using (var scopedContext = context.CreateScope())
-            {
-                var provider = scopedContext.Provider;
-                var messageStore = provider.GetRequiredService<ICapMessageStore>();
-                var message = await messageStore.GetNextSentMessageToBeEnqueuedAsync();
-                if (message == null) return true;
-                try
-                {
-                    var sp = Stopwatch.StartNew();
-                    message.StatusName = StatusName.Processing;
-                    await messageStore.UpdateSentMessageAsync(message);
+            throw new NotImplementedException();
+        //    using (var scopedContext = context.CreateScope())
+        //    {
+        //        var provider = scopedContext.Provider;
+        //        var messageStore = provider.GetRequiredService<ICapMessageStore>();
+        //        var message = await messageStore.GetNextSentMessageToBeEnqueuedAsync();
+        //        if (message == null) return true;
+        //        try
+        //        {
+        //            var sp = Stopwatch.StartNew();
+        //            message.StatusName = StatusName.Processing;
+        //            await messageStore.UpdateSentMessageAsync(message);
 
-                    await ExecuteJobAsync(message.KeyName, message.Content);
+        //            await ExecuteJobAsync(message.KeyName, message.Content);
 
-                    sp.Stop();
+        //            sp.Stop();
 
-                    message.StatusName = StatusName.Succeeded;
-                    await messageStore.UpdateSentMessageAsync(message);
-                    _logger.JobExecuted(sp.Elapsed.TotalSeconds);
-                }
-                catch (Exception ex)
-                {
-                    _logger.ExceptionOccuredWhileExecutingJob(message.KeyName, ex);
-                    return false;
-                }
-            }
-            return true;
+        //            message.StatusName = StatusName.Succeeded;
+        //            await messageStore.UpdateSentMessageAsync(message);
+        //            _logger.JobExecuted(sp.Elapsed.TotalSeconds);
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            _logger.ExceptionOccuredWhileExecutingJob(message.KeyName, ex);
+        //            return false;
+        //        }
+        //    }
+        //    return true;
         }
 
         private Task ExecuteJobAsync(string topic, string content)

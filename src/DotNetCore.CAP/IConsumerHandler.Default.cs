@@ -106,7 +106,7 @@ namespace DotNetCore.CAP
                 {
                     var receviedMessage = StoreMessage(scope, message);
                     client.Commit();
-                    ProcessMessage(scope, receviedMessage);
+                   // ProcessMessage(scope, receviedMessage);
                 }
             };
         }
@@ -123,36 +123,36 @@ namespace DotNetCore.CAP
             return receivedMessage;
         }
 
-        private void ProcessMessage(IServiceScope serviceScope, CapReceivedMessage receivedMessage)
-        {
-            var provider = serviceScope.ServiceProvider;
-            var messageStore = provider.GetRequiredService<IStorageConnection>();
-            try
-            {
-                var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.KeyName);
+        //private void ProcessMessage(IServiceScope serviceScope, CapReceivedMessage receivedMessage)
+        //{
+        //    var provider = serviceScope.ServiceProvider;
+        //    var messageStore = provider.GetRequiredService<IStorageConnection>();
+        //    try
+        //    {
+        //        var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.KeyName);
 
-                if (executeDescriptorGroup.ContainsKey(receivedMessage.Group))
-                {
-                    messageStore.FetchNextReceivedMessageAsync
+        //        if (executeDescriptorGroup.ContainsKey(receivedMessage.Group))
+        //        {
+        //            messageStore.FetchNextReceivedMessageAsync
 
 
 
-                    messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Processing).Wait();
+        //            messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Processing).Wait();
 
-                    // If there are multiple consumers in the same group, we will take the first
-                    var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
-                    var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
+        //            // If there are multiple consumers in the same group, we will take the first
+        //            var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
+        //            var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
 
-                    _consumerInvokerFactory.CreateInvoker(consumerContext).InvokeAsync();
+        //            _consumerInvokerFactory.CreateInvoker(consumerContext).InvokeAsync();
 
-                    messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Succeeded).Wait();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.KeyName}", ex);
-            }
-        }
+        //            messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Succeeded).Wait();
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.KeyName}", ex);
+        //    }
+        //}
 
 
     }

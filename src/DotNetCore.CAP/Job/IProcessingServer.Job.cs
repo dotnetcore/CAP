@@ -17,7 +17,6 @@ namespace DotNetCore.CAP.Job
         private readonly IServiceProvider _provider;
         private readonly CancellationTokenSource _cts;
         private readonly CapOptions _options;
-        private readonly DefaultCronJobRegistry _defaultJobRegistry;
 
         private IJobProcessor[] _processors;
         private ProcessingContext _context;
@@ -28,13 +27,11 @@ namespace DotNetCore.CAP.Job
             ILogger<JobProcessingServer> logger,
             ILoggerFactory loggerFactory,
             IServiceProvider provider,
-            DefaultCronJobRegistry defaultJobRegistry,
             IOptions<CapOptions> options)
         {
             _logger = logger;
             _loggerFactory = loggerFactory;
             _provider = provider;
-            _defaultJobRegistry = defaultJobRegistry;
             _options = options.Value;
             _cts = new CancellationTokenSource();
         }
@@ -46,15 +43,37 @@ namespace DotNetCore.CAP.Job
             _processors = GetProcessors(processorCount);
             _logger.ServerStarting(processorCount, processorCount);
 
-            _context = new ProcessingContext(
-                _provider,
-                _defaultJobRegistry,
-                _cts.Token);
+            _context = new ProcessingContext(_provider, _cts.Token);
 
             var processorTasks = _processors
                 .Select(InfiniteRetry)
                 .Select(p => p.ProcessAsync(_context));
             _compositeTask = Task.WhenAll(processorTasks);
+        }
+
+        public void Pulse()
+        {
+            if (!AllProcessorsWaiting())
+            {
+                // Some processor is still executing jobs so no need to pulse.
+                return;
+            }
+
+            _logger.LogTrace("Pulsing the JobQueuer.");
+
+            WaitHandleEx.QueuePulseEvent.Set();
+        }
+
+        private bool AllProcessorsWaiting()
+        {
+            foreach (var processor in _processors)
+            {
+                if (!processor.Waiting)
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         public void Dispose()
@@ -69,7 +88,7 @@ namespace DotNetCore.CAP.Job
             _cts.Cancel();
             try
             {
-                _compositeTask.Wait((int) TimeSpan.FromSeconds(60).TotalMilliseconds);
+                _compositeTask.Wait((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
             }
             catch (AggregateException ex)
             {

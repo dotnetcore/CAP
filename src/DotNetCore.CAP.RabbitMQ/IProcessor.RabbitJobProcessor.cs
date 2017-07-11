@@ -23,7 +23,6 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly ILogger _logger;
 
         private readonly TimeSpan _pollingDelay;
-        internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
 
         public RabbitJobProcessor(
             IOptions<CapOptions> capOptions,
@@ -67,7 +66,7 @@ namespace DotNetCore.CAP.RabbitMQ
                     var token = GetTokenToWaitOn(context);
                 }
 
-                await WaitHandleEx.WaitAnyAsync(PulseEvent,
+                await WaitHandleEx.WaitAnyAsync(WaitHandleEx.SentPulseEvent,
                     context.CancellationToken.WaitHandle, _pollingDelay);
             }
             finally
@@ -87,7 +86,7 @@ namespace DotNetCore.CAP.RabbitMQ
             using (var scopedContext = context.CreateScope())
             {
                 var provider = scopedContext.Provider;
-                var messageStore = provider.GetRequiredService<ICapMessageStore>();
+                //var messageStore = provider.GetRequiredService<ICapMessageStore>();
                 var connection = provider.GetRequiredService<IStorageConnection>();
                 
                 if ((fetched = await connection.FetchNextSentMessageAsync()) != null)

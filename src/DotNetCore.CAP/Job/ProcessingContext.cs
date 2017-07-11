@@ -16,23 +16,18 @@ namespace DotNetCore.CAP.Job
         private ProcessingContext(ProcessingContext other)
         {
             Provider = other.Provider;
-            CronJobRegistry = other.CronJobRegistry;
             CancellationToken = other.CancellationToken;
         }
 
         public ProcessingContext(
             IServiceProvider provider,
-            CronJobRegistry cronJobRegistry,
             CancellationToken cancellationToken)
         {
             Provider = provider;
-            CronJobRegistry = cronJobRegistry;
             CancellationToken = cancellationToken;
         }
 
         public IServiceProvider Provider { get; private set; }
-
-        public CronJobRegistry CronJobRegistry { get; private set; }
 
         public CancellationToken CancellationToken { get; }
 
