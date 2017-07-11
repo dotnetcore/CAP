@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Sample.Kafka.Migrations
 {
-    public partial class InitCreate : Migration
+    public partial class InitilizeDB : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -15,6 +15,7 @@ namespace Sample.Kafka.Migrations
                     Id = table.Column<string>(nullable: false),
                     Added = table.Column<DateTime>(nullable: false),
                     Content = table.Column<string>(nullable: true),
+                    Group = table.Column<string>(nullable: true),
                     KeyName = table.Column<string>(nullable: true),
                     LastRun = table.Column<DateTime>(nullable: false),
                     Retries = table.Column<int>(nullable: false),

@@ -25,6 +25,8 @@ namespace Sample.Kafka.Migrations
 
                     b.Property<string>("Content");
 
+                    b.Property<string>("Group");
+
                     b.Property<string>("KeyName");
 
                     b.Property<DateTime>("LastRun");

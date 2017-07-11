@@ -8,8 +8,8 @@ using Sample.Kafka;
 namespace Sample.Kafka.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20170629074148_InitCreate")]
-    partial class InitCreate
+    [Migration("20170710102614_InitilizeDB")]
+    partial class InitilizeDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -25,6 +25,8 @@ namespace Sample.Kafka.Migrations
                     b.Property<DateTime>("Added");
 
                     b.Property<string>("Content");
+
+                    b.Property<string>("Group");
 
                     b.Property<string>("KeyName");
 
