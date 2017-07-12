@@ -18,7 +18,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static CapBuilder AddEntityFrameworkStores<TContext>(this CapBuilder builder)
             where TContext : DbContext
         {
-            builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
+            //builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
             builder.Services.AddScoped<IStorage, EFStorage>();
             builder.Services.AddScoped<IStorageConnection, EFStorageConnection>();
 
@@ -26,25 +26,26 @@ namespace Microsoft.Extensions.DependencyInjection
         }
          
 
-        public static CapBuilder AddEntityFrameworkStores<TContext>(this CapBuilder builder, Action<EFOptions> actionOptions)
+        public static CapBuilder AddEntityFrameworkStores<TContext>(this CapBuilder builder, Action<SqlServerOptions> actionOptions)
             where TContext : DbContext
         {
       
-            builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
+            //builder.Services.AddScoped<ICapMessageStore, CapMessageStore<TContext>>();
             builder.Services.AddSingleton<IStorage, EFStorage>();
-            builder.Services.AddScoped<IStorageConnection, EFStorageConnection>();
+            builder.Services.AddScoped<IStorageConnection, EFStorageConnection>();         
             builder.Services.Configure(actionOptions);
             
-            var efOptions = new EFOptions();
-            actionOptions(efOptions);
+            var sqlServerOptions = new SqlServerOptions();
+            actionOptions(sqlServerOptions);
+            builder.Services.AddSingleton(sqlServerOptions);
 
             builder.Services.AddDbContext<CapDbContext>(options =>
             {
-                options.UseSqlServer(efOptions.ConnectionString, sqlOpts =>
+                options.UseSqlServer(sqlServerOptions.ConnectionString, sqlOpts =>
                 {
                     sqlOpts.MigrationsHistoryTable(
-                        efOptions.MigrationsHistoryTableName,
-                        efOptions.MigrationsHistoryTableSchema ?? efOptions.Schema);
+                        sqlServerOptions.MigrationsHistoryTableName,
+                        sqlServerOptions.MigrationsHistoryTableSchema ?? sqlServerOptions.Schema);
                 });
             });
 

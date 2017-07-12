@@ -7,6 +7,7 @@ using DotNetCore.CAP.Abstractions.ModelBinding;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Job;
+using DotNetCore.CAP.Job.States;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -49,10 +50,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IProcessingServer, ConsumerHandler>();
             services.AddSingleton<IProcessingServer, JobProcessingServer>();
             services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
+            services.AddSingleton<IStateChanger, StateChanger>();
+            //Processors
+            services.AddTransient<JobQueuer>();
+            //services.AddTransient<>
 
-            services.TryAddTransient<IJobProcessor, CronJobProcessor>();
-            services.TryAddSingleton<IJob, CapJob>();
-            services.TryAddTransient<DefaultCronJobRegistry>();
+            //services.TryAddSingleton<IJob, CapJob>();
 
             services.TryAddScoped<ICapPublisher, DefaultCapPublisher>();
 

@@ -24,13 +24,17 @@ namespace Sample.Kafka
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<CapDbContext>();
+            services.AddDbContext<AppDbContext>();
 
             services.AddCap()
-                    .AddEntityFrameworkStores<CapDbContext>()
+                    .AddEntityFrameworkStores<AppDbContext>(x=> {
+                        x.ConnectionString = "Server=192.168.2.206;Initial Catalog=Test;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True";
+                    })
                     .AddRabbitMQ(x =>
                     {
-                        x.HostName = "localhost";
+                        x.HostName = "192.168.2.206";
+                        x.UserName = "admin";
+                        x.Password = "123123";
                     });
             //.AddKafka(x => x.Servers = "");
             

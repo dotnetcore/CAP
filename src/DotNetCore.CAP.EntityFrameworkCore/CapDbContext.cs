@@ -10,22 +10,19 @@ namespace DotNetCore.CAP.EntityFrameworkCore
     /// </summary>
     public class CapDbContext : DbContext
     {
-        private readonly EFOptions _efOptions;
-
+        private SqlServerOptions _sqlServerOptions;
         /// <summary>
         /// Initializes a new instance of the <see cref="CapDbContext"/>.
         /// </summary>
-        public CapDbContext() {
-            _efOptions = new EFOptions();
-        }
+        public CapDbContext() { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CapDbContext"/>.
         /// </summary>
         /// <param name="options">The options to be used by a <see cref="DbContext"/>.</param>
-        public CapDbContext(DbContextOptions<CapDbContext> options, EFOptions efOptions)
+        public CapDbContext(DbContextOptions<CapDbContext> options, SqlServerOptions sqlServerOptions)
             : base(options) {
-            _efOptions = efOptions;
+            _sqlServerOptions = sqlServerOptions;
         }
 
         /// <summary>
@@ -51,7 +48,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         /// </param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.HasDefaultSchema(_efOptions.Schema);
+            modelBuilder.HasDefaultSchema(_sqlServerOptions.Schema);
 
             modelBuilder.Entity<CapSentMessage>(b =>
             {
@@ -68,9 +65,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             });
         }
 
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    optionsBuilder.UseSqlServer("Server=DESKTOP-M9R8T31;Initial Catalog=WebApp1;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True");
-        //}
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+        }
     }
 }

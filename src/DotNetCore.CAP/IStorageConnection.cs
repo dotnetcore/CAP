@@ -21,7 +21,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Fetches the next message to be executed.
         /// </summary>
-        Task<IFetchedMessage> FetchNextSentMessageAsync();
+        Task<IFetchedMessage> FetchNextMessageAsync();
 
         /// <summary>
         /// Returns the next message to be enqueued.
@@ -42,10 +42,6 @@ namespace DotNetCore.CAP
         /// <param name="id">The message's id.</param>
         Task<CapReceivedMessage> GetReceivedMessageAsync(string id);
 
-        /// <summary>
-        /// Fetches the next message to be executed.
-        /// </summary>
-        Task<IFetchedMessage> FetchNextReceivedMessageAsync();
 
         /// <summary>
         /// Returns the next message to be enqueued.

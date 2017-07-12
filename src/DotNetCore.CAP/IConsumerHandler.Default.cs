@@ -123,6 +123,11 @@ namespace DotNetCore.CAP
             return receivedMessage;
         }
 
+        public void Pulse()
+        {
+            throw new NotImplementedException();
+        }
+
         //private void ProcessMessage(IServiceScope serviceScope, CapReceivedMessage receivedMessage)
         //{
         //    var provider = serviceScope.ServiceProvider;

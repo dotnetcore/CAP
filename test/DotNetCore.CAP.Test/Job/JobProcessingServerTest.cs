@@ -30,13 +30,13 @@ namespace DotNetCore.CAP.Test.Job
 
             var services = new ServiceCollection();
             services.AddTransient<JobProcessingServer>();
-            services.AddTransient<DefaultCronJobRegistry>();
+           // services.AddTransient<DefaultCronJobRegistry>();
             services.AddLogging();
             services.AddSingleton(_options);
             services.AddSingleton(_mockStorage.Object);
             _provider = services.BuildServiceProvider();
 
-            _context = new ProcessingContext(_provider, null, _cancellationTokenSource.Token);
+            _context = new ProcessingContext(_provider,  _cancellationTokenSource.Token);
         }
 
         //[Fact]

@@ -19,6 +19,7 @@ namespace DotNetCore.CAP.Job
         private readonly CapOptions _options;
 
         private IJobProcessor[] _processors;
+        private IMessageJobProcessor[] _messageProcessors;
         private ProcessingContext _context;
         private Task _compositeTask;
         private bool _disposed;
@@ -39,14 +40,14 @@ namespace DotNetCore.CAP.Job
         public void Start()
         {
             var processorCount = Environment.ProcessorCount;
-            //processorCount = 1;
+            processorCount = 1;
             _processors = GetProcessors(processorCount);
             _logger.ServerStarting(processorCount, processorCount);
 
             _context = new ProcessingContext(_provider, _cts.Token);
 
             var processorTasks = _processors
-                .Select(InfiniteRetry)
+                .Select(p => InfiniteRetry(p))
                 .Select(p => p.ProcessAsync(_context));
             _compositeTask = Task.WhenAll(processorTasks);
         }
@@ -66,7 +67,7 @@ namespace DotNetCore.CAP.Job
 
         private bool AllProcessorsWaiting()
         {
-            foreach (var processor in _processors)
+            foreach (var processor in _messageProcessors)
             {
                 if (!processor.Waiting)
                 {
@@ -110,20 +111,13 @@ namespace DotNetCore.CAP.Job
             var returnedProcessors = new List<IJobProcessor>();
             for (int i = 0; i < processorCount; i++)
             {
-                var processors = _provider.GetServices<IJobProcessor>();
-                foreach (var processor in processors)
-                {
-                    if (processor is CronJobProcessor)
-                    {
-                        if (i == 0) // only add first cronJob
-                            returnedProcessors.Add(processor);
-                    }
-                    else
-                    {
-                        returnedProcessors.Add(processor);
-                    }
-                }
+                var messageProcessors = _provider.GetServices<IMessageJobProcessor>();
+                _messageProcessors = messageProcessors.ToArray();
+                returnedProcessors.AddRange(messageProcessors);
             }
+
+            returnedProcessors.Add(_provider.GetService<JobQueuer>());
+            returnedProcessors.Add(_provider.GetService<IAdditionalProcessor>());
 
             return returnedProcessors.ToArray();
         }

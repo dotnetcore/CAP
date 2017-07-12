@@ -30,7 +30,14 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 				var context = provider.GetRequiredService<CapDbContext>();
 
 				_logger.LogDebug("Ensuring all migrations are applied to Jobs database.");
-				await context.Database.MigrateAsync(cancellationToken);
+                try
+                {
+                    await context.Database.MigrateAsync(cancellationToken);
+                }
+                catch (Exception ex)
+                {
+                    throw ex;
+                }
 			}
 		}
 	}

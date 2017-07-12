@@ -6,6 +6,8 @@ namespace DotNetCore.CAP
 	{
 		string MessageId { get; }
 
+        int Type { get; }
+
 		void RemoveFromQueue();
 
 		void Requeue();

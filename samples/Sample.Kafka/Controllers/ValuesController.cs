@@ -29,7 +29,7 @@ namespace Sample.Kafka.Controllers
         {
             Console.WriteLine(person.Name);
             Console.WriteLine(person.Age);
-            
+
         }
 
         [Route("~/send")]

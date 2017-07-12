@@ -14,7 +14,7 @@ using RabbitMQ.Client;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
-    public class RabbitJobProcessor : IJobProcessor
+    public class RabbitJobProcessor : IMessageJobProcessor
     {
         private readonly RabbitMQOptions _rabbitMqOptions;
         private readonly CancellationTokenSource _cts;
@@ -86,10 +86,9 @@ namespace DotNetCore.CAP.RabbitMQ
             using (var scopedContext = context.CreateScope())
             {
                 var provider = scopedContext.Provider;
-                //var messageStore = provider.GetRequiredService<ICapMessageStore>();
                 var connection = provider.GetRequiredService<IStorageConnection>();
                 
-                if ((fetched = await connection.FetchNextSentMessageAsync()) != null)
+                if ((fetched = await connection.FetchNextMessageAsync()) != null)
                 {
                     using (fetched)
                     {

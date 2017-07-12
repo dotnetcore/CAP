@@ -1,10 +1,13 @@
 using System;
 using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
@@ -12,11 +15,11 @@ namespace DotNetCore.CAP.EntityFrameworkCore
     public class EFStorageConnection : IStorageConnection
     {
         private readonly CapDbContext _context;
-        private readonly EFOptions _options;
+        private readonly SqlServerOptions _options;
 
         public EFStorageConnection(
             CapDbContext context,
-            IOptions<EFOptions> options)
+            IOptions<SqlServerOptions> options)
         {
             _context = context;
             _options = options.Value;
@@ -24,49 +27,39 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         public CapDbContext Context => _context;
 
-        public EFOptions Options => _options;
+        public SqlServerOptions Options => _options;
 
         public IStorageTransaction CreateTransaction()
         {
             return new EFStorageTransaction(this);
-        }   
+        }
 
         public Task<CapSentMessage> GetSentMessageAsync(string id)
         {
             return _context.CapSentMessages.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<IFetchedMessage> FetchNextSentMessageAsync()
+
+        public Task<IFetchedMessage> FetchNextMessageAsync()
         {
-            //            var sql = $@"
-            //DELETE TOP (1)
-            //FROM [{_options.Schema}].[{nameof(CapDbContext.CapSentMessages)}] WITH (readpast, updlock, rowlock)
-            //OUTPUT DELETED.Id";
+            var sql = $@"
+DELETE TOP (1)
+FROM [{_options.Schema}].[{nameof(CapDbContext.CapQueue)}] WITH (readpast, updlock, rowlock)
+OUTPUT DELETED.MessageId,DELETED.[Type];";
 
-            var queueFirst = await _context.CapQueue.FirstOrDefaultAsync();
-            if (queueFirst == null)
-                return null;
-
-            _context.CapQueue.Remove(queueFirst);
-
-            var connection = _context.Database.GetDbConnection();
-            var transaction = _context.Database.CurrentTransaction;
-            transaction = transaction ?? await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            return new EFFetchedMessage(queueFirst.MessageId, connection, transaction);
+            return FetchNextMessageCoreAsync(sql);
         }
 
-        public Task<CapSentMessage> GetNextSentMessageToBeEnqueuedAsync()
+
+        public async Task<CapSentMessage> GetNextSentMessageToBeEnqueuedAsync()
         {
-            //            var sql = $@"
-            //SELECT TOP (1) *
-            //FROM [{_options.Schema}].[{nameof(CapDbContext.CapSentMessages)}] WITH (readpast)
-            //WHERE (Due IS NULL OR Due < GETUTCDATE()) AND StateName = '{StatusName.Enqueued}'";
+            var sql = $@"
+SELECT TOP (1) *
+FROM [{_options.Schema}].[{nameof(CapDbContext.CapSentMessages)}] WITH (readpast)
+WHERE StateName = '{StatusName.Enqueued}'";
 
-            //            var connection = _context.GetDbConnection();
-
-            //            var message =  _context.CapSentMessages.FromSql(sql).FirstOrDefaultAsync();
-
-            var message = _context.CapSentMessages.Where(x => x.StatusName == StatusName.Enqueued).FirstOrDefaultAsync();
+            var connection = _context.GetDbConnection();
+            var message = (await connection.QueryAsync<CapSentMessage>(sql)).FirstOrDefault();
 
             if (message != null)
             {
@@ -76,11 +69,11 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             return message;
         }
 
+        // CapReceviedMessage
+
         public Task StoreReceivedMessageAsync(CapReceivedMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
-
-            message.LastRun = NormalizeDateTime(message.LastRun);
 
             _context.Add(message);
             return _context.SaveChangesAsync();
@@ -91,28 +84,59 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             return _context.CapReceivedMessages.FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public Task<IFetchedMessage> FetchNextReceivedMessageAsync()
+        public async Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync()
         {
-            throw new NotImplementedException();
-        }
+            var sql = $@"
+SELECT TOP (1) *
+FROM [{_options.Schema}].[{nameof(CapDbContext.CapReceivedMessages)}] WITH (readpast)
+WHERE StateName = '{StatusName.Enqueued}'";
 
-        public Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync()
-        {
-            throw new NotImplementedException();
-        }
+            var connection = _context.GetDbConnection();
+            var message = (await connection.QueryAsync<CapReceivedMessage>(sql)).FirstOrDefault();
 
-        private DateTime? NormalizeDateTime(DateTime? dateTime)
-        {
-            if (!dateTime.HasValue) return dateTime;
-            if (dateTime == DateTime.MinValue)
+            if (message != null)
             {
-                return new DateTime(1754, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+                _context.Attach(message);
             }
-            return dateTime;
+
+            return message;
         }
 
         public void Dispose()
         {
-        } 
+        }
+
+        private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
+        {
+            FetchedMessage fetchedJob = null;
+            var connection = _context.GetDbConnection();
+            var transaction = _context.Database.CurrentTransaction;
+            transaction = transaction ?? await _context.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+
+            try
+            {
+                fetchedJob =
+                    (await connection.QueryAsync<FetchedMessage>(sql, args, transaction.GetDbTransaction()))
+                    .FirstOrDefault();
+            }
+            catch (SqlException)
+            {
+                transaction.Dispose();
+                throw;
+            }
+
+            if (fetchedJob == null)
+            {
+                transaction.Rollback();
+                transaction.Dispose();
+                return null;
+            }
+
+            return new EFFetchedMessage(
+                fetchedJob.MessageId,
+                fetchedJob.Type,
+                connection,
+                transaction);
+        }
     }
 }

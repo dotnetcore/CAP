@@ -15,7 +15,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             builder.Services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
 
-            builder.Services.AddTransient<IJobProcessor, RabbitJobProcessor>();
+            builder.Services.AddTransient<IMessageJobProcessor, RabbitJobProcessor>();
 
             return builder;
         }

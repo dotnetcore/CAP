@@ -4,16 +4,10 @@ using System.Text;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
 {
-    public class EFOptions
+    public class SqlServerOptions
     {
         public const string DefaultSchema = "cap";
         public const string DefaultMigrationsHistoryTableName = "__EFMigrationsHistory";
-
-
-        public EFOptions()
-        {
-            ConnectionString = "Server=DESKTOP-M9R8T31;Initial Catalog=WebApp1;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True";
-        }
 
         /// <summary>
         /// Gets or sets the database's connection string that will be used to store database entities.
@@ -38,24 +32,4 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         /// </summary>
         public string MigrationsHistoryTableName { get; set; } = DefaultMigrationsHistoryTableName;
     }
-
-    //public static class CapOptionsExtensions
-    //{
-    //    public static EFOptions UseSqlServer(this CapOptions options, string connectionString)
-    //    {
-    //        return options.UseSqlServer(opts =>
-    //        {
-    //            opts.ConnectionString = connectionString;
-    //        });
-    //    }
-
-    //    public static EFOptions UseSqlServer(this CapOptions options, Action<SqlServerOptions> configure)
-    //    {
-    //        if (configure == null) throw new ArgumentNullException(nameof(configure));
-
-    //          (new EFOptions(configure));
-
-    //        return options;
-    //    }
-    //}
 }
