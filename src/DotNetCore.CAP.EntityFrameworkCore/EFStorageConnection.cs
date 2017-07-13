@@ -56,17 +56,24 @@ OUTPUT DELETED.MessageId,DELETED.[Type];";
             var sql = $@"
 SELECT TOP (1) *
 FROM [{_options.Schema}].[{nameof(CapDbContext.CapSentMessages)}] WITH (readpast)
-WHERE StateName = '{StatusName.Enqueued}'";
+WHERE StatusName = '{StatusName.Scheduled}'";
 
-            var connection = _context.GetDbConnection();
-            var message = (await connection.QueryAsync<CapSentMessage>(sql)).FirstOrDefault();
-
-            if (message != null)
+            try
             {
-                _context.Attach(message);
-            }
+                var connection = _context.GetDbConnection();
+                var message = (await connection.QueryAsync<CapSentMessage>(sql)).FirstOrDefault();
 
-            return message;
+                if (message != null)
+                {
+                    _context.Attach(message);
+                }
+
+                return message;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
 
         // CapReceviedMessage

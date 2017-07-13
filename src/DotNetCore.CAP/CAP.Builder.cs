@@ -47,27 +47,6 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
-        /// Add an <see cref="ICapMessageStore"/> .
-        /// </summary>
-        /// <typeparam name="T">The type for the <see cref="ICapMessageStore"/> to add. </typeparam>
-        /// <returns>The current <see cref="CapBuilder"/> instance.</returns>
-        public virtual CapBuilder AddMessageStore<T>()
-            where T : class, ICapMessageStore
-        {
-            return AddScoped(typeof(ICapMessageStore), typeof(T));
-        }
-
-        /// <summary>
-        /// Add an <see cref="IJob"/> for process <see cref="CapJob"/>.
-        /// </summary>
-        /// <typeparam name="T">The type of the job.</typeparam>
-        public virtual CapBuilder AddJobs<T>()
-            where T : class, IJob
-        {
-            return AddSingleton<IJob, T>();
-        }
-
-        /// <summary>
         /// Add an <see cref="ICapPublisher"/>.
         /// </summary>
         /// <typeparam name="T">The type of the service.</typeparam>

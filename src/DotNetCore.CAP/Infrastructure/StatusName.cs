@@ -9,6 +9,7 @@ namespace DotNetCore.CAP.Infrastructure
     /// </summary>
     public struct StatusName
     {
+        public const string Scheduled = nameof(Scheduled);
         public const string Enqueued = nameof(Enqueued);
         public const string Processing = nameof(Processing);
         public const string Succeeded = nameof(Succeeded);

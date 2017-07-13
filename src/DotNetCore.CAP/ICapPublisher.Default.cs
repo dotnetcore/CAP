@@ -11,14 +11,10 @@ namespace DotNetCore.CAP
     /// </summary>
     public class DefaultCapPublisher : ICapPublisher
     {
-        private readonly ICapMessageStore _store;
-        private readonly ILogger _logger;
+         private readonly ILogger _logger;
 
-        public DefaultCapPublisher(
-            ICapMessageStore store,
-            ILogger<DefaultCapPublisher> logger)
-        {
-            _store = store;
+        public DefaultCapPublisher( ILogger<DefaultCapPublisher> logger)
+        { 
             _logger = logger;
         }
 
@@ -50,11 +46,11 @@ namespace DotNetCore.CAP
                 StatusName = StatusName.Enqueued
             };
 
-            await _store.StoreSentMessageAsync(message);
+            //await _store.StoreSentMessageAsync(message);
 
-            WaitHandleEx.PulseEvent.Set();
+           // WaitHandleEx.PulseEvent.Set();
 
-            _logger.EnqueuingSentMessage(topic, content);
+           // _logger.EnqueuingSentMessage(topic, content);
         }
     }
 }

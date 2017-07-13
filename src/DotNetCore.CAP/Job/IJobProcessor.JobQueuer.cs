@@ -46,7 +46,8 @@ namespace DotNetCore.CAP.Job
 					(sentMessage = await connection.GetNextSentMessageToBeEnqueuedAsync()) != null)
 
                 {
-					var state = new EnqueuedState();
+                    System.Diagnostics.Debug.WriteLine("JobQueuer 执行 内部循环:  " + DateTime.Now);
+                    var state = new EnqueuedState();
 
 					using (var transaction = connection.CreateTransaction())
 					{
@@ -56,7 +57,8 @@ namespace DotNetCore.CAP.Job
 				}
 			}
 
-			context.ThrowIfStopping();
+            System.Diagnostics.Debug.WriteLine("JobQueuer 执行:  " + DateTime.Now);
+            context.ThrowIfStopping();
             
             WaitHandleEx.SentPulseEvent.Set();
 			await WaitHandleEx.WaitAnyAsync(WaitHandleEx.QueuePulseEvent,

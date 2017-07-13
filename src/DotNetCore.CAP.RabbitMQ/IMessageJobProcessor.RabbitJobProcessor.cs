@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.RabbitMQ
         public Task ProcessAsync(ProcessingContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-
+            System.Diagnostics.Debug.WriteLine("RabbitMQ Processor 执行:  " + DateTime.Now);
             context.ThrowIfStopping();
             return ProcessCoreAsync(context);
         }
@@ -64,10 +64,9 @@ namespace DotNetCore.CAP.RabbitMQ
                 if (!worked)
                 {
                     var token = GetTokenToWaitOn(context);
-                }
 
-                await WaitHandleEx.WaitAnyAsync(WaitHandleEx.SentPulseEvent,
-                    context.CancellationToken.WaitHandle, _pollingDelay);
+                    await WaitHandleEx.WaitAnyAsync(WaitHandleEx.SentPulseEvent, token.WaitHandle, _pollingDelay);
+                }
             }
             finally
             {
@@ -92,6 +91,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 {
                     using (fetched)
                     {
+
                         var message = await connection.GetSentMessageAsync(fetched.MessageId);
                         try
                         {

@@ -66,7 +66,7 @@ namespace DotNetCore.CAP
 
                         client.Listening(_pollingDelay);
                     }
-                }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+                }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
             _compositeTask = Task.CompletedTask;
         }
@@ -106,7 +106,7 @@ namespace DotNetCore.CAP
                 {
                     var receviedMessage = StoreMessage(scope, message);
                     client.Commit();
-                   // ProcessMessage(scope, receviedMessage);
+                    // ProcessMessage(scope, receviedMessage);
                 }
             };
         }

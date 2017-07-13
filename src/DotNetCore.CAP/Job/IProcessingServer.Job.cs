@@ -117,7 +117,7 @@ namespace DotNetCore.CAP.Job
             }
 
             returnedProcessors.Add(_provider.GetService<JobQueuer>());
-            returnedProcessors.Add(_provider.GetService<IAdditionalProcessor>());
+            //returnedProcessors.Add(_provider.GetService<IAdditionalProcessor>());
 
             return returnedProcessors.ToArray();
         }
