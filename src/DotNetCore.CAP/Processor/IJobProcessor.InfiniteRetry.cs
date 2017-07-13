@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP.Job
+namespace DotNetCore.CAP.Processor
 {
     public class InfiniteRetryProcessor : IJobProcessor
     {
@@ -24,7 +23,6 @@ namespace DotNetCore.CAP.Job
         {
             while (!context.IsStopping)
             {
-                Debug.WriteLine("InfiniteRetryProcessor在开线程：" + _inner.ToString() + "  :  " + DateTime.Now);
                 try
                 {
                     await _inner.ProcessAsync(context);
@@ -35,10 +33,7 @@ namespace DotNetCore.CAP.Job
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(
-                        1,
-                        ex,
-                        "Prcessor '{ProcessorName}' failed. Retrying...", _inner.ToString());
+                    _logger.LogWarning(1, ex, "Prcessor '{ProcessorName}' failed. Retrying...", _inner.ToString());
                 }
             }
         }

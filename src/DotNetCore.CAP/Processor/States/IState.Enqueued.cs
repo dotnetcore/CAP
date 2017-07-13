@@ -1,22 +1,24 @@
 ﻿using System;
 using DotNetCore.CAP.Models;
 
-namespace DotNetCore.CAP.Job.States
+namespace DotNetCore.CAP.Processor.States
 {
-    public class SucceededState : IState
+    public class EnqueuedState : IState
     {
-        public const string StateName = "Succeeded";
+        public const string StateName = "Enqueued";
 
-        public TimeSpan? ExpiresAfter => TimeSpan.FromHours(1);
+        public TimeSpan? ExpiresAfter => null;
 
         public string Name => StateName;
 
         public void Apply(CapSentMessage message, IStorageTransaction transaction)
         {
+            transaction.EnqueueMessage(message);
         }
 
         public void Apply(CapReceivedMessage message, IStorageTransaction transaction)
         {
+            transaction.EnqueueMessage(message);
         }
     }
 }

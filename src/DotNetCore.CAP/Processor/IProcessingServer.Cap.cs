@@ -3,14 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Job
+namespace DotNetCore.CAP.Processor
 {
-    public class JobProcessingServer : IProcessingServer, IDisposable
+    public class CapProcessingServer : IProcessingServer, IDisposable
     {
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
@@ -19,13 +18,13 @@ namespace DotNetCore.CAP.Job
         private readonly CapOptions _options;
 
         private IJobProcessor[] _processors;
-        private IMessageJobProcessor[] _messageProcessors;
+        private IList<IMessageJobProcessor> _messageProcessors;
         private ProcessingContext _context;
         private Task _compositeTask;
         private bool _disposed;
 
-        public JobProcessingServer(
-            ILogger<JobProcessingServer> logger,
+        public CapProcessingServer(
+            ILogger<CapProcessingServer> logger,
             ILoggerFactory loggerFactory,
             IServiceProvider provider,
             IOptions<CapOptions> options)
@@ -40,9 +39,8 @@ namespace DotNetCore.CAP.Job
         public void Start()
         {
             var processorCount = Environment.ProcessorCount;
-            processorCount = 1;
             _processors = GetProcessors(processorCount);
-            _logger.ServerStarting(processorCount, processorCount);
+            _logger.ServerStarting(processorCount, _processors.Length);
 
             _context = new ProcessingContext(_provider, _cts.Token);
 
@@ -62,19 +60,8 @@ namespace DotNetCore.CAP.Job
 
             _logger.LogTrace("Pulsing the JobQueuer.");
 
-            WaitHandleEx.QueuePulseEvent.Set();
-        }
-
-        private bool AllProcessorsWaiting()
-        {
-            foreach (var processor in _messageProcessors)
-            {
-                if (!processor.Waiting)
-                {
-                    return false;
-                }
-            }
-            return true;
+            PublishQueuer.PulseEvent.Set();
+            SubscribeQueuer.PulseEvent.Set();
         }
 
         public void Dispose()
@@ -101,6 +88,18 @@ namespace DotNetCore.CAP.Job
             }
         }
 
+        private bool AllProcessorsWaiting()
+        {
+            foreach (var processor in _messageProcessors)
+            {
+                if (!processor.Waiting)
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         private IJobProcessor InfiniteRetry(IJobProcessor inner)
         {
             return new InfiniteRetryProcessor(inner, _loggerFactory);
@@ -111,13 +110,15 @@ namespace DotNetCore.CAP.Job
             var returnedProcessors = new List<IJobProcessor>();
             for (int i = 0; i < processorCount; i++)
             {
-                var messageProcessors = _provider.GetServices<IMessageJobProcessor>();
-                _messageProcessors = messageProcessors.ToArray();
-                returnedProcessors.AddRange(messageProcessors);
+                var messageProcessors = _provider.GetService<IMessageJobProcessor>();
+                _messageProcessors.Add(messageProcessors);
             }
+            returnedProcessors.AddRange(_messageProcessors);
 
-            returnedProcessors.Add(_provider.GetService<JobQueuer>());
-            //returnedProcessors.Add(_provider.GetService<IAdditionalProcessor>());
+            returnedProcessors.Add(_provider.GetService<PublishQueuer>());
+            returnedProcessors.Add(_provider.GetService<SubscribeQueuer>());
+
+            returnedProcessors.Add(_provider.GetService<IAdditionalProcessor>());
 
             return returnedProcessors.ToArray();
         }

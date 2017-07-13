@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DotNetCore.CAP.Job
+namespace DotNetCore.CAP.Processor
 {
     public interface IMessageJobProcessor : IJobProcessor
     {

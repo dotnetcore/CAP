@@ -1,11 +1,11 @@
 ﻿using System;
 using DotNetCore.CAP.Models;
 
-namespace DotNetCore.CAP.Job.States
+namespace DotNetCore.CAP.Processor.States
 {
-    public class EnqueuedState : IState
+    public class ScheduledState : IState
     {
-        public const string StateName = "Enqueued";
+        public const string StateName = "Scheduled";
 
         public TimeSpan? ExpiresAfter => null;
 
@@ -13,12 +13,10 @@ namespace DotNetCore.CAP.Job.States
 
         public void Apply(CapSentMessage message, IStorageTransaction transaction)
         {
-            transaction.EnqueueMessage(message);
         }
 
         public void Apply(CapReceivedMessage message, IStorageTransaction transaction)
         {
-            transaction.EnqueueMessage(message);
         }
     }
 }

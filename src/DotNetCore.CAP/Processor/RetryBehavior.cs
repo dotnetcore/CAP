@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DotNetCore.CAP.Job
+namespace DotNetCore.CAP.Processor
 {
     public class RetryBehavior
     {

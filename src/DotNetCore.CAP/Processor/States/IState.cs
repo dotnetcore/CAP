@@ -1,7 +1,7 @@
 ﻿using System;
 using DotNetCore.CAP.Models;
 
-namespace DotNetCore.CAP.Job.States
+namespace DotNetCore.CAP.Processor.States
 {
     public interface IState
     {

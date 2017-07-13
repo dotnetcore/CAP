@@ -1,13 +1,13 @@
 ﻿using System;
 using DotNetCore.CAP.Models;
 
-namespace DotNetCore.CAP.Job.States
+namespace DotNetCore.CAP.Processor.States
 {
-    public class ScheduledState : IState
+    public class FailedState : IState
     {
-        public const string StateName = "Scheduled";
+        public const string StateName = "Failed";
 
-        public TimeSpan? ExpiresAfter => null;
+        public TimeSpan? ExpiresAfter => TimeSpan.FromDays(15);
 
         public string Name => StateName;
 

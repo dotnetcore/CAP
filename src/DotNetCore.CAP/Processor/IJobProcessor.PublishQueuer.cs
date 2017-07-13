@@ -2,15 +2,15 @@
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Job.States;
+using DotNetCore.CAP.Processor.States;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Job
+namespace DotNetCore.CAP.Processor
 {
-	public class JobQueuer : IJobProcessor
+	public class PublishQueuer : IJobProcessor
     {
 		private ILogger _logger;
 		private CapOptions _options;
@@ -18,8 +18,10 @@ namespace DotNetCore.CAP.Job
 		private IServiceProvider _provider;
 		private TimeSpan _pollingDelay;
 
-		public JobQueuer(
-			ILogger<JobQueuer> logger,
+        internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
+
+        public PublishQueuer(
+			ILogger<PublishQueuer> logger,
 			IOptions<CapOptions> options,
 			IStateChanger stateChanger,
 			IServiceProvider provider)
@@ -57,8 +59,9 @@ namespace DotNetCore.CAP.Job
 
             context.ThrowIfStopping();
             
-            WaitHandleEx.SentPulseEvent.Set();
-			await WaitHandleEx.WaitAnyAsync(WaitHandleEx.QueuePulseEvent,
+            DefaultMessageJobProcessor.PulseEvent.Set();
+
+            await WaitHandleEx.WaitAnyAsync(PulseEvent,
                 context.CancellationToken.WaitHandle, _pollingDelay);
 		}
 	}
