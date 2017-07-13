@@ -1,6 +1,5 @@
 ﻿using System;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Job;
 using DotNetCore.CAP.RabbitMQ;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -15,7 +14,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             builder.Services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
 
-            builder.Services.AddTransient<IMessageJobProcessor, RabbitJobProcessor>();
+            builder.Services.AddTransient<IQueueExecutor, PublishQueueExecutor>();
 
             return builder;
         }

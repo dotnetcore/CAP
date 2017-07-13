@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <None Include="IQueueExecutor.Subscibe.cs" />
-    <None Include="Job\IJobProcessor.MessageJob.Default.cs" />
+    <None Include="Processor\IProcessor.Message.Default.cs" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,5 @@
 ﻿using System;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Job;
 using DotNetCore.CAP.Kafka;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -24,7 +23,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             builder.Services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
 
-            builder.Services.AddTransient<IJobProcessor, KafkaJobProcessor>();
+            builder.Services.AddTransient<IQueueExecutor, PublishQueueExecutor>();
 
             return builder;
         }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Job;
+using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;

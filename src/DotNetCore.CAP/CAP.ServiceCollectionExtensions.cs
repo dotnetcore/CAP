@@ -6,8 +6,8 @@ using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Abstractions.ModelBinding;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Job;
-using DotNetCore.CAP.Job.States;
+using DotNetCore.CAP.Processor;
+using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -48,12 +48,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<MethodMatcherCache>();
 
             services.AddSingleton<IProcessingServer, ConsumerHandler>();
-            services.AddSingleton<IProcessingServer, JobProcessingServer>();
+            services.AddSingleton<IProcessingServer, CapProcessingServer>();
             services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
             services.AddSingleton<IStateChanger, StateChanger>();
+
             //Processors
-            services.AddTransient<JobQueuer>();
-            
+            services.AddTransient<PublishQueuer>();
+            services.AddTransient<SubscribeQueuer>();
+            services.AddTransient<IMessageProcessor, DefaultMessageProcessor>();          
+
+            //Executors
             services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
             services.AddSingleton<IQueueExecutor, SubscibeQueueExecutor>();
 

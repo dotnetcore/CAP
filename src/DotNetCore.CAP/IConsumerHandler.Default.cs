@@ -6,6 +6,7 @@ using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -106,7 +107,6 @@ namespace DotNetCore.CAP
                 {
                     var receviedMessage = StoreMessage(scope, message);
                     client.Commit();
-                    // ProcessMessage(scope, receviedMessage);
                 }
             };
         }
@@ -125,40 +125,7 @@ namespace DotNetCore.CAP
 
         public void Pulse()
         {
-            WaitHandleEx.ReceviedPulseEvent.Set();
+            SubscribeQueuer.PulseEvent.Set();
         }
-
-        //private void ProcessMessage(IServiceScope serviceScope, CapReceivedMessage receivedMessage)
-        //{
-        //    var provider = serviceScope.ServiceProvider;
-        //    var messageStore = provider.GetRequiredService<IStorageConnection>();
-        //    try
-        //    {
-        //        var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.KeyName);
-
-        //        if (executeDescriptorGroup.ContainsKey(receivedMessage.Group))
-        //        {
-        //            messageStore.FetchNextReceivedMessageAsync
-
-
-
-        //            messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Processing).Wait();
-
-        //            // If there are multiple consumers in the same group, we will take the first
-        //            var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
-        //            var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
-
-        //            _consumerInvokerFactory.CreateInvoker(consumerContext).InvokeAsync();
-
-        //            messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Succeeded).Wait();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.KeyName}", ex);
-        //    }
-        //}
-
-
     }
 }

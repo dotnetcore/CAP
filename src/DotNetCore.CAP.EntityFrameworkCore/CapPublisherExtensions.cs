@@ -7,6 +7,7 @@ using Dapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Processor;
 
 namespace DotNetCore.CAP
 {
@@ -25,9 +26,9 @@ namespace DotNetCore.CAP
                 StatusName = StatusName.Enqueued
             };
 
-            var sql = "INSERT INTO [cap].[CapSentMessages] ([Id],[Added],[Content],[KeyName],[LastRun],[Retries],[StatusName])VALUES(@Id,@Added,@Content,@KeyName,@LastRun,@Retries,@StatusName)";
+            var sql = "INSERT INTO [cap].[CapSentMessages] ([Id],[Added],[Content],[KeyName],[ExpiresAt],[Retries],[StatusName])VALUES(@Id,@Added,@Content,@KeyName,@ExpiresAt,@Retries,@StatusName)";
             await connection.ExecuteAsync(sql, transaction);
-            WaitHandleEx.QueuePulseEvent.Set();
+            PublishQueuer.PulseEvent.Set();
 
         }
 
@@ -40,9 +41,9 @@ namespace DotNetCore.CAP
                 StatusName = StatusName.Enqueued
             };
 
-            var sql = "INSERT INTO [cap].[CapSentMessages] ([Id],[Added],[Content],[KeyName],[LastRun],[Retries],[StatusName])VALUES(@Id,@Added,@Content,@KeyName,@LastRun,@Retries,@StatusName)";
+            var sql = "INSERT INTO [cap].[CapSentMessages] ([Id],[Added],[Content],[KeyName],[ExpiresAt],[Retries],[StatusName])VALUES(@Id,@Added,@Content,@KeyName,@ExpiresAt,@Retries,@StatusName)";
             await connection.ExecuteAsync(sql, transaction);
-            WaitHandleEx.QueuePulseEvent.Set();
+            PublishQueuer.PulseEvent.Set();
         }
     }
 }

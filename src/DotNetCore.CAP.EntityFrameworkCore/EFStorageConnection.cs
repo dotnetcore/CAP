@@ -58,22 +58,15 @@ SELECT TOP (1) *
 FROM [{_options.Schema}].[{nameof(CapDbContext.CapSentMessages)}] WITH (readpast)
 WHERE StatusName = '{StatusName.Scheduled}'";
 
-            try
-            {
-                var connection = _context.GetDbConnection();
-                var message = (await connection.QueryAsync<CapSentMessage>(sql)).FirstOrDefault();
+            var connection = _context.GetDbConnection();
+            var message = (await connection.QueryAsync<CapSentMessage>(sql)).FirstOrDefault();
 
-                if (message != null)
-                {
-                    _context.Attach(message);
-                }
-
-                return message;
-            }
-            catch (Exception ex)
+            if (message != null)
             {
-                throw;
+                _context.Attach(message);
             }
+
+            return message;
         }
 
         // CapReceviedMessage

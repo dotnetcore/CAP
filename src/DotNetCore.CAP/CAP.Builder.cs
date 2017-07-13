@@ -1,5 +1,4 @@
 ﻿using System;
-using DotNetCore.CAP.Job;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP

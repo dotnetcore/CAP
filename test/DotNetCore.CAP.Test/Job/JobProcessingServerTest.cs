@@ -4,7 +4,7 @@
 //using System.Threading;
 //using System.Threading.Tasks;
 //using DotNetCore.CAP.Infrastructure;
-//using DotNetCore.CAP.Job;
+//using DotNetCore.CAP.Processor;
 //using Microsoft.Extensions.DependencyInjection;
 //using Moq;
 //using Xunit;

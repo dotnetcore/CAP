@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Job;
-using DotNetCore.CAP.Job.States;
+using DotNetCore.CAP.Processor;
+using DotNetCore.CAP.Processor.States;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.Logging;
 
@@ -22,7 +22,7 @@ namespace DotNetCore.CAP
         private readonly ILogger _logger;
 
         private readonly MethodMatcherCache _selector;
-        private readonly CapOptions _options;
+        //private readonly CapOptions _options;
 
         public SubscibeQueueExecutor(
             IStateChanger stateChanger,
@@ -132,7 +132,7 @@ namespace DotNetCore.CAP
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             var retries = ++message.Retries;
             if (retries >= retryBehavior.RetryCount)
             {
@@ -140,7 +140,7 @@ namespace DotNetCore.CAP
             }
 
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
-            message.LastRun = due;
+            message.ExpiresAt = due;
             using (var transaction = connection.CreateTransaction())
             {
                 transaction.UpdateMessage(message);

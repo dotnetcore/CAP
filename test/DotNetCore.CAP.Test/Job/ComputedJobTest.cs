@@ -1,7 +1,7 @@
 ﻿//using System;
 //using System.Collections.Generic;
 //using System.Text;
-//using DotNetCore.CAP.Job;
+//using DotNetCore.CAP.Processor;
 //using Xunit;
 
 //namespace DotNetCore.CAP.Test.Job

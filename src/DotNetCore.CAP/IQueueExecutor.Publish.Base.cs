@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Job;
-using DotNetCore.CAP.Job.States;
+using DotNetCore.CAP.Processor;
+using DotNetCore.CAP.Processor.States;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.Logging;
 
@@ -93,7 +93,7 @@ namespace DotNetCore.CAP
             }
 
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
-            message.LastRun = due;
+            message.ExpiresAt = due;
             using (var transaction = connection.CreateTransaction())
             {
                 transaction.UpdateMessage(message);

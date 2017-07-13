@@ -34,7 +34,7 @@ namespace DotNetCore.CAP.Models
 
         public DateTime Added { get; set; }
 
-        public DateTime? LastRun { get; set; }
+        public DateTime? ExpiresAt { get; set; }
 
         public int Retries { get; set; }
 
