@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DotNetCore.CAP.Processor
 {
-    public interface IAdditionalProcessor : IJobProcessor
+    public interface IAdditionalProcessor : IProcessor
     {
 
     }

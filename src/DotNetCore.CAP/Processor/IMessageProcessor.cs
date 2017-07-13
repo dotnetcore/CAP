@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DotNetCore.CAP.Processor
 {
-    public interface IMessageJobProcessor : IJobProcessor
+    public interface IMessageProcessor : IProcessor
     {
         bool Waiting { get; }
     }

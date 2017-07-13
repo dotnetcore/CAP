@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class SubscribeQueuer : IJobProcessor
+    public class SubscribeQueuer : IProcessor
     {
         private ILogger _logger;
         private CapOptions _options;
@@ -59,7 +59,7 @@ namespace DotNetCore.CAP.Processor
 
             context.ThrowIfStopping();
 
-            DefaultMessageJobProcessor.PulseEvent.Set();
+            DefaultMessageProcessor.PulseEvent.Set();
 
             await WaitHandleEx.WaitAnyAsync(PulseEvent,
                 context.CancellationToken.WaitHandle, _pollingDelay);

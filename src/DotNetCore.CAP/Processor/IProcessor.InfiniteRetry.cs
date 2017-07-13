@@ -4,13 +4,13 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class InfiniteRetryProcessor : IJobProcessor
+    public class InfiniteRetryProcessor : IProcessor
     {
-        private readonly IJobProcessor _inner;
+        private readonly IProcessor _inner;
         private readonly ILogger _logger;
 
         public InfiniteRetryProcessor(
-            IJobProcessor inner,
+            IProcessor inner,
             ILoggerFactory loggerFactory)
         {
             _inner = inner;

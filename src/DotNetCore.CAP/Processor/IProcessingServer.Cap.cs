@@ -17,8 +17,8 @@ namespace DotNetCore.CAP.Processor
         private readonly CancellationTokenSource _cts;
         private readonly CapOptions _options;
 
-        private IJobProcessor[] _processors;
-        private IList<IMessageJobProcessor> _messageProcessors;
+        private IProcessor[] _processors;
+        private IList<IMessageProcessor> _messageProcessors;
         private ProcessingContext _context;
         private Task _compositeTask;
         private bool _disposed;
@@ -100,17 +100,17 @@ namespace DotNetCore.CAP.Processor
             return true;
         }
 
-        private IJobProcessor InfiniteRetry(IJobProcessor inner)
+        private IProcessor InfiniteRetry(IProcessor inner)
         {
             return new InfiniteRetryProcessor(inner, _loggerFactory);
         }
 
-        private IJobProcessor[] GetProcessors(int processorCount)
+        private IProcessor[] GetProcessors(int processorCount)
         {
-            var returnedProcessors = new List<IJobProcessor>();
+            var returnedProcessors = new List<IProcessor>();
             for (int i = 0; i < processorCount; i++)
             {
-                var messageProcessors = _provider.GetService<IMessageJobProcessor>();
+                var messageProcessors = _provider.GetService<IMessageProcessor>();
                 _messageProcessors.Add(messageProcessors);
             }
             returnedProcessors.AddRange(_messageProcessors);

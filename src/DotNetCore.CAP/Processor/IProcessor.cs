@@ -2,7 +2,7 @@
 
 namespace DotNetCore.CAP.Processor
 {
-    public interface IJobProcessor
+    public interface IProcessor
     {
         Task ProcessAsync(ProcessingContext context);
     }

@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-	public class PublishQueuer : IJobProcessor
+	public class PublishQueuer : IProcessor
     {
 		private ILogger _logger;
 		private CapOptions _options;
@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.Processor
 		private IServiceProvider _provider;
 		private TimeSpan _pollingDelay;
 
-        internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
+        public static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
 
         public PublishQueuer(
 			ILogger<PublishQueuer> logger,
@@ -59,7 +59,7 @@ namespace DotNetCore.CAP.Processor
 
             context.ThrowIfStopping();
             
-            DefaultMessageJobProcessor.PulseEvent.Set();
+            DefaultMessageProcessor.PulseEvent.Set();
 
             await WaitHandleEx.WaitAnyAsync(PulseEvent,
                 context.CancellationToken.WaitHandle, _pollingDelay);
