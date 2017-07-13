@@ -9,6 +9,6 @@
         /// <summary>
         /// 0 is CapSentMessage, 1 is CapReceviedMessage
         /// </summary>
-        public int Type { get; set; }
+        public MessageType Type { get; set; }
     }
 }

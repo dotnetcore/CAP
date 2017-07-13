@@ -53,9 +53,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IStateChanger, StateChanger>();
             //Processors
             services.AddTransient<JobQueuer>();
-            //services.AddTransient<>
+            
+            services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
+            services.AddSingleton<IQueueExecutor, SubscibeQueueExecutor>();
 
-            //services.TryAddSingleton<IJob, CapJob>();
 
             services.TryAddScoped<ICapPublisher, DefaultCapPublisher>();
 

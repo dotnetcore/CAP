@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
 {
@@ -8,6 +9,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore
     {
         public string MessageId { get; set; }
 
-        public int Type { get; set; }
+        public MessageType Type { get; set; }
     }
 }

@@ -37,7 +37,6 @@ namespace DotNetCore.CAP.Job
 			using (var scope = _provider.CreateScope())
 			{
                 CapSentMessage sentMessage;
-               // CapReceivedMessage receivedMessage;
 				var provider = scope.ServiceProvider;
 				var connection = provider.GetRequiredService<IStorageConnection>();
 
@@ -46,7 +45,6 @@ namespace DotNetCore.CAP.Job
 					(sentMessage = await connection.GetNextSentMessageToBeEnqueuedAsync()) != null)
 
                 {
-                    System.Diagnostics.Debug.WriteLine("JobQueuer 执行 内部循环:  " + DateTime.Now);
                     var state = new EnqueuedState();
 
 					using (var transaction = connection.CreateTransaction())
@@ -54,10 +52,9 @@ namespace DotNetCore.CAP.Job
 						_stateChanger.ChangeState(sentMessage, state, transaction);
 						await transaction.CommitAsync();
 					}
-				}
+				} 
 			}
 
-            System.Diagnostics.Debug.WriteLine("JobQueuer 执行:  " + DateTime.Now);
             context.ThrowIfStopping();
             
             WaitHandleEx.SentPulseEvent.Set();

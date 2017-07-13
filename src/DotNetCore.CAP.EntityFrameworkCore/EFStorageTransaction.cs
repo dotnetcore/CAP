@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             _connection.Context.Add(new CapQueue
             {
                 MessageId = message.Id,
-                Type = 1
+                Type =  MessageType.Subscribe
             });
         }
 

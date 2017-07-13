@@ -4,6 +4,7 @@ using System.Data;
 using System.Text;
 using System.Threading;
 using Dapper;
+using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
@@ -17,7 +18,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         private readonly object _lockObject = new object();
 
         public EFFetchedMessage(string messageId,
-            int type,
+            MessageType type,
             IDbConnection connection,
             IDbContextTransaction transaction)
         {
@@ -30,7 +31,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         public string MessageId { get; }
 
-        public int Type { get; }
+        public MessageType Type { get; }
 
         public void RemoveFromQueue()
         {

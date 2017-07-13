@@ -125,7 +125,7 @@ namespace DotNetCore.CAP
 
         public void Pulse()
         {
-            throw new NotImplementedException();
+            WaitHandleEx.ReceviedPulseEvent.Set();
         }
 
         //private void ProcessMessage(IServiceScope serviceScope, CapReceivedMessage receivedMessage)

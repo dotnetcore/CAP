@@ -18,6 +18,12 @@ namespace DotNetCore.CAP
         private static readonly Action<ILogger, string, Exception> _executingConsumerMethod;
         private static readonly Action<ILogger, string, Exception> _receivedMessageRetryExecuting;
 
+        private static Action<ILogger, Exception> _jobFailed;
+        private static Action<ILogger, Exception> _jobFailedWillRetry;
+        private static Action<ILogger, double, Exception> _jobExecuted;
+        private static Action<ILogger, int, Exception> _jobRetrying;
+        private static Action<ILogger, string, Exception> _exceptionOccuredWhileExecutingJob;
+
         static LoggerExtensions()
         {
             _serverStarting = LoggerMessage.Define<int, int>(
@@ -59,7 +65,57 @@ namespace DotNetCore.CAP
                 LogLevel.Error,
                 5,
                 "Received message topic method '{topicName}' failed to execute.");
+
+
+            _jobRetrying = LoggerMessage.Define<int>(
+                LogLevel.Debug,
+                3,
+                "Retrying a job: {Retries}...");
+
+            _jobExecuted = LoggerMessage.Define<double>(
+                LogLevel.Debug,
+                4,
+                "Job executed. Took: {Seconds} secs.");
+
+            _jobFailed = LoggerMessage.Define(
+            LogLevel.Warning,
+            1,
+            "Job failed to execute.");
+
+            _jobFailedWillRetry = LoggerMessage.Define(
+                LogLevel.Warning,
+                2,
+                "Job failed to execute. Will retry.");
+
+            _exceptionOccuredWhileExecutingJob = LoggerMessage.Define<string>(
+              LogLevel.Error,
+              6,
+              "An exception occured while trying to execute a job: '{JobId}'. " +
+              "Requeuing for another retry.");
         }
+
+        public static void JobFailed(this ILogger logger, Exception ex)
+        {
+            _jobFailed(logger, ex);
+        }
+
+        public static void JobFailedWillRetry(this ILogger logger, Exception ex)
+        {
+            _jobFailedWillRetry(logger, ex);
+        }
+
+
+        public static void JobRetrying(this ILogger logger, int retries)
+        {
+            _jobRetrying(logger, retries, null);
+        }
+
+
+        public static void JobExecuted(this ILogger logger, double seconds)
+        {
+            _jobExecuted(logger, seconds, null);
+        }
+
 
         public static void ConsumerMethodExecutingFailed(this ILogger logger, string methodName, Exception ex)
         {
@@ -99,6 +155,11 @@ namespace DotNetCore.CAP
         public static void ExpectedOperationCanceledException(this ILogger logger, Exception ex)
         {
             _expectedOperationCanceledException(logger, ex.Message, ex);
+        }
+
+        public static void ExceptionOccuredWhileExecutingJob(this ILogger logger, string jobId, Exception ex)
+        {
+            _exceptionOccuredWhileExecutingJob(logger, jobId, ex);
         }
     }
 }

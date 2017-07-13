@@ -1,4 +1,5 @@
 using System;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
 {
@@ -6,7 +7,7 @@ namespace DotNetCore.CAP
 	{
 		string MessageId { get; }
 
-        int Type { get; }
+        MessageType Type { get; }
 
 		void RemoveFromQueue();
 
