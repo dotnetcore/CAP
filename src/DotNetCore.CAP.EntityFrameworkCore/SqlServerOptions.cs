@@ -31,5 +31,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         /// Default is <see cref="DefaultMigrationsHistoryTableName"/>.
         /// </summary>
         public string MigrationsHistoryTableName { get; set; } = DefaultMigrationsHistoryTableName;
+
+        public Type DbContextType { get; set; }
     }
 }

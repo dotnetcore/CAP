@@ -32,7 +32,7 @@ namespace DotNetCore.CAP
 
         }
 
-        public static async Task Publish(this ICapPublisher publisher, string topic, string content, IDbConnection connection,IDbTransaction transaction)
+        public static async Task Publish(this ICapPublisher publisher, string topic, string content, IDbConnection connection, IDbTransaction transaction)
         {
             var message = new CapSentMessage
             {

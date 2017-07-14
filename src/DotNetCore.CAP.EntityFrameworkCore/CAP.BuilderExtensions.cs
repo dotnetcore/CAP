@@ -28,6 +28,7 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.Configure(actionOptions);
             
             var sqlServerOptions = new SqlServerOptions();
+            sqlServerOptions.DbContextType = typeof(TContext);
             actionOptions(sqlServerOptions);
             builder.Services.AddSingleton(sqlServerOptions);
 
@@ -44,6 +45,6 @@ namespace Microsoft.Extensions.DependencyInjection
             return builder;
         }
 
-
+         
     }
 }
