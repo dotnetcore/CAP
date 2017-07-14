@@ -35,9 +35,9 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Migrations
                     Id = table.Column<string>(nullable: false),
                     Added = table.Column<DateTime>(nullable: false),
                     Content = table.Column<string>(nullable: true),
+                    ExpiresAt = table.Column<DateTime>(nullable: true),
                     Group = table.Column<string>(nullable: true),
                     KeyName = table.Column<string>(nullable: true),
-                    LastRun = table.Column<DateTime>(nullable: true),
                     Retries = table.Column<int>(nullable: false),
                     StatusName = table.Column<string>(maxLength: 50, nullable: false)
                 },
@@ -54,8 +54,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Migrations
                     Id = table.Column<string>(nullable: false),
                     Added = table.Column<DateTime>(nullable: false),
                     Content = table.Column<string>(nullable: true),
+                    ExpiresAt = table.Column<DateTime>(nullable: true),
                     KeyName = table.Column<string>(nullable: true),
-                    LastRun = table.Column<DateTime>(nullable: true),
                     Retries = table.Column<int>(nullable: false),
                     StatusName = table.Column<string>(maxLength: 50, nullable: false)
                 },

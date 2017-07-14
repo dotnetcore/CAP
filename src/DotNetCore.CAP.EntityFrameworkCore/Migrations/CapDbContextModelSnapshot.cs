@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using DotNetCore.CAP.EntityFrameworkCore;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.EntityFrameworkCore.Migrations
 {
@@ -40,11 +41,11 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Migrations
 
                     b.Property<string>("Content");
 
+                    b.Property<DateTime?>("ExpiresAt");
+
                     b.Property<string>("Group");
 
                     b.Property<string>("KeyName");
-
-                    b.Property<DateTime?>("LastRun");
 
                     b.Property<int>("Retries");
 
@@ -68,9 +69,9 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Migrations
 
                     b.Property<string>("Content");
 
-                    b.Property<string>("KeyName");
+                    b.Property<DateTime?>("ExpiresAt");
 
-                    b.Property<DateTime?>("LastRun");
+                    b.Property<string>("KeyName");
 
                     b.Property<int>("Retries");
 

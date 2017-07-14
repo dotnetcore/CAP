@@ -4,11 +4,12 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using DotNetCore.CAP.EntityFrameworkCore;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.EntityFrameworkCore.Migrations
 {
     [DbContext(typeof(CapDbContext))]
-    [Migration("20170711154104_InitializeDB")]
+    [Migration("20170714102709_InitializeDB")]
     partial class InitializeDB
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -41,11 +42,11 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Migrations
 
                     b.Property<string>("Content");
 
+                    b.Property<DateTime?>("ExpiresAt");
+
                     b.Property<string>("Group");
 
                     b.Property<string>("KeyName");
-
-                    b.Property<DateTime?>("LastRun");
 
                     b.Property<int>("Retries");
 
@@ -69,9 +70,9 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Migrations
 
                     b.Property<string>("Content");
 
-                    b.Property<string>("KeyName");
+                    b.Property<DateTime?>("ExpiresAt");
 
-                    b.Property<DateTime?>("LastRun");
+                    b.Property<string>("KeyName");
 
                     b.Property<int>("Retries");
 
