@@ -8,7 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class DefaultMessageProcessor : IMessageProcessor
+    public class DefaultDispatcher : IDispatcher
     {
         private readonly IQueueExecutorFactory _queueExecutorFactory;
         private readonly IServiceProvider _provider;
@@ -19,11 +19,11 @@ namespace DotNetCore.CAP.Processor
 
         internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
 
-        public DefaultMessageProcessor(
+        public DefaultDispatcher(
                IServiceProvider provider,
                IQueueExecutorFactory queueExecutorFactory,
                IOptions<CapOptions> capOptions,
-               ILogger<DefaultMessageProcessor> logger)
+               ILogger<DefaultDispatcher> logger)
         {
             _logger = logger;
             _queueExecutorFactory = queueExecutorFactory;

@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.Processor
         private readonly CapOptions _options;
 
         private IProcessor[] _processors;
-        private IList<IMessageProcessor> _messageProcessors;
+        private IList<IDispatcher> _messageDispatchers;
         private ProcessingContext _context;
         private Task _compositeTask;
         private bool _disposed;
@@ -34,6 +34,7 @@ namespace DotNetCore.CAP.Processor
             _provider = provider;
             _options = options.Value;
             _cts = new CancellationTokenSource();
+            _messageDispatchers = new List<IDispatcher>();
         }
 
         public void Start()
@@ -90,7 +91,7 @@ namespace DotNetCore.CAP.Processor
 
         private bool AllProcessorsWaiting()
         {
-            foreach (var processor in _messageProcessors)
+            foreach (var processor in _messageDispatchers)
             {
                 if (!processor.Waiting)
                 {
@@ -110,10 +111,10 @@ namespace DotNetCore.CAP.Processor
             var returnedProcessors = new List<IProcessor>();
             for (int i = 0; i < processorCount; i++)
             {
-                var messageProcessors = _provider.GetService<IMessageProcessor>();
-                _messageProcessors.Add(messageProcessors);
+                var messageProcessors = _provider.GetService<IDispatcher>();
+                _messageDispatchers.Add(messageProcessors);
             }
-            returnedProcessors.AddRange(_messageProcessors);
+            returnedProcessors.AddRange(_messageDispatchers);
 
             returnedProcessors.Add(_provider.GetService<PublishQueuer>());
             returnedProcessors.Add(_provider.GetService<SubscribeQueuer>());

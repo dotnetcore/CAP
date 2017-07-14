@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         /// </param>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //_sqlServerOptions = new SqlServerOptions();
+            _sqlServerOptions = new SqlServerOptions();
             modelBuilder.HasDefaultSchema(_sqlServerOptions.Schema);
 
             modelBuilder.Entity<CapSentMessage>(b =>
@@ -67,7 +67,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-           // optionsBuilder.UseSqlServer("Server=192.168.2.206;Initial Catalog=Test;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True");
+          // optionsBuilder.UseSqlServer("Server=192.168.2.206;Initial Catalog=Test;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True");
+           optionsBuilder.UseSqlServer("Server=DESKTOP-M9R8T31;Initial Catalog=Test;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True");
         }
     }
 }

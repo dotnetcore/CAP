@@ -23,8 +23,10 @@ namespace Microsoft.Extensions.DependencyInjection
             builder.Services.AddSingleton<IStorage, EFStorage>();
             builder.Services.AddScoped<IStorageConnection, EFStorageConnection>();
 
-            builder.Services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
+            builder.Services.AddScoped<ICapPublisher, CapPublisher>();
 
+            builder.Services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
+            
             builder.Services.Configure(actionOptions);
             
             var sqlServerOptions = new SqlServerOptions();

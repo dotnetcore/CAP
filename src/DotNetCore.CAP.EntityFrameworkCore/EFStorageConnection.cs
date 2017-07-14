@@ -89,7 +89,7 @@ WHERE StatusName = '{StatusName.Scheduled}'";
             var sql = $@"
 SELECT TOP (1) *
 FROM [{_options.Schema}].[{nameof(CapDbContext.CapReceivedMessages)}] WITH (readpast)
-WHERE StateName = '{StatusName.Enqueued}'";
+WHERE StatusName = '{StatusName.Enqueued}'";
 
             var connection = _context.GetDbConnection();
             var message = (await connection.QueryAsync<CapReceivedMessage>(sql)).FirstOrDefault();

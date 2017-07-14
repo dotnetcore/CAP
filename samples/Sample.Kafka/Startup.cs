@@ -28,13 +28,14 @@ namespace Sample.Kafka
 
             services.AddCap()
                     .AddEntityFrameworkStores<AppDbContext>(x=> {
-                        x.ConnectionString = "Server=192.168.2.206;Initial Catalog=Test;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True";
+                        //x.ConnectionString = "Server=192.168.2.206;Initial Catalog=Test;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True";
+                        x.ConnectionString = "Server=DESKTOP-M9R8T31;Initial Catalog=Test;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True";
                     })
                     .AddRabbitMQ(x =>
                     {
-                        x.HostName = "192.168.2.206";
-                        x.UserName = "admin";
-                        x.Password = "123123";
+                        x.HostName = "localhost";
+                       // x.UserName = "admin";
+                       // x.Password = "123123";
                     });
             //.AddKafka(x => x.Servers = "");
             

@@ -55,14 +55,14 @@ namespace Microsoft.Extensions.DependencyInjection
             //Processors
             services.AddTransient<PublishQueuer>();
             services.AddTransient<SubscribeQueuer>();
-            services.AddTransient<IMessageProcessor, DefaultMessageProcessor>();          
+            services.AddTransient<IDispatcher, DefaultDispatcher>();          
 
             //Executors
             services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
             services.AddSingleton<IQueueExecutor, SubscibeQueueExecutor>();
 
 
-            services.TryAddScoped<ICapPublisher, DefaultCapPublisher>();
+           // services.TryAddScoped<ICapPublisher, DefaultCapPublisher>();
 
             return new CapBuilder(services);
         }

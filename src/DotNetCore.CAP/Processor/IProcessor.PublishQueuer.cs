@@ -59,7 +59,7 @@ namespace DotNetCore.CAP.Processor
 
             context.ThrowIfStopping();
             
-            DefaultMessageProcessor.PulseEvent.Set();
+            DefaultDispatcher.PulseEvent.Set();
 
             await WaitHandleEx.WaitAnyAsync(PulseEvent,
                 context.CancellationToken.WaitHandle, _pollingDelay);

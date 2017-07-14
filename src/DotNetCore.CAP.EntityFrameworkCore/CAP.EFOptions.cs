@@ -12,7 +12,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         public EFOptions()
         {
-            ConnectionString = "Server=DESKTOP-M9R8T31;Initial Catalog=WebApp1;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True";
+            ConnectionString = "Server=DESKTOP-M9R8T31;Initial Catalog=Test;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True";
         }
 
         /// <summary>
