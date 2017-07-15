@@ -1,5 +1,4 @@
-﻿using DotNetCore.CAP.EntityFrameworkCore;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -26,18 +25,11 @@ namespace Sample.Kafka
         {
             services.AddDbContext<AppDbContext>();
 
-            services.AddCap()
-                    .AddEntityFrameworkStores<AppDbContext>(x=> {
-                        //x.ConnectionString = "Server=192.168.2.206;Initial Catalog=Test;User Id=cmswuliu;Password=h7xY81agBn*Veiu3;MultipleActiveResultSets=True";
-                        x.ConnectionString = "Server=DESKTOP-M9R8T31;Initial Catalog=Test;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True";
-                    })
-                    .AddRabbitMQ(x =>
-                    {
-                        x.HostName = "localhost";
-                       // x.UserName = "admin";
-                       // x.Password = "123123";
-                    });
-            //.AddKafka(x => x.Servers = "");
+            services.AddCap(x=> {
+                x.UseEntityFramework<AppDbContext>();
+                x.UseSqlServer("Server=DESKTOP-M9R8T31;Initial Catalog=Test;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True");
+                x.UseRabbitMQ("localhost");
+            });
             
             // Add framework services.
             services.AddMvc();
