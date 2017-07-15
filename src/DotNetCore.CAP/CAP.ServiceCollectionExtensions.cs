@@ -18,16 +18,6 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds and configures the CAP services for the consitence.
-        /// </summary>
-        /// <param name="services">The services available in the application.</param>
-        /// <returns>An <see cref="CapBuilder"/> for application services.</returns>
-        public static CapBuilder AddCap(this IServiceCollection services)
-        {
-            return services.AddCap(x => new CapOptions());
-        }
-
-        /// <summary>
         /// Adds and configures the consistence services for the consitence.
         /// </summary>
         /// <param name="services">The services available in the application.</param>
@@ -37,6 +27,8 @@ namespace Microsoft.Extensions.DependencyInjection
             this IServiceCollection services,
             Action<CapOptions> setupAction)
         {
+            if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
+
             services.TryAddSingleton<CapMarkerService>();
             services.Configure(setupAction);
 
@@ -60,9 +52,12 @@ namespace Microsoft.Extensions.DependencyInjection
             //Executors
             services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
             services.AddSingleton<IQueueExecutor, SubscibeQueueExecutor>();
-
-
-           // services.TryAddScoped<ICapPublisher, DefaultCapPublisher>();
+            
+            //Options
+            var options = new CapOptions();
+            setupAction(options);
+            options.Extension?.AddServices(services);
+            services.AddSingleton(options);
 
             return new CapBuilder(services);
         }

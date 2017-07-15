@@ -1,4 +1,4 @@
-﻿namespace DotNetCore.CAP.RabbitMQ
+﻿namespace DotNetCore.CAP
 {
     public class RabbitMQOptions
     {

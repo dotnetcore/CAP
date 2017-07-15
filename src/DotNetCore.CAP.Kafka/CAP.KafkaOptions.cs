@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP
 {
     /// <summary>
     /// Provides programmatic configuration for the CAP kafka project.

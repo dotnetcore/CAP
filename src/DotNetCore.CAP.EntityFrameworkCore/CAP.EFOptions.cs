@@ -2,23 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace DotNetCore.CAP.EntityFrameworkCore
+namespace DotNetCore.CAP
 {
     public class EFOptions
     {
         public const string DefaultSchema = "cap";
         public const string DefaultMigrationsHistoryTableName = "__EFMigrationsHistory";
-
-
-        public EFOptions()
-        {
-            ConnectionString = "Server=DESKTOP-M9R8T31;Initial Catalog=Test;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True";
-        }
-
-        /// <summary>
-        /// Gets or sets the database's connection string that will be used to store database entities.
-        /// </summary>
-        public string ConnectionString { get; set; }
 
         /// <summary>
         /// Gets or sets the schema to use when creating database objects.
@@ -37,25 +26,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
         /// Default is <see cref="DefaultMigrationsHistoryTableName"/>.
         /// </summary>
         public string MigrationsHistoryTableName { get; set; } = DefaultMigrationsHistoryTableName;
+
+        public Type DbContextType { get; internal set; }
     }
-
-    //public static class CapOptionsExtensions
-    //{
-    //    public static EFOptions UseSqlServer(this CapOptions options, string connectionString)
-    //    {
-    //        return options.UseSqlServer(opts =>
-    //        {
-    //            opts.ConnectionString = connectionString;
-    //        });
-    //    }
-
-    //    public static EFOptions UseSqlServer(this CapOptions options, Action<SqlServerOptions> configure)
-    //    {
-    //        if (configure == null) throw new ArgumentNullException(nameof(configure));
-
-    //          (new EFOptions(configure));
-
-    //        return options;
-    //    }
-    //}
 }
