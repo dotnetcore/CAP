@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Infrastructure
 {
-    internal static class Helper
+    public static class Helper
     {
         private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private static JsonSerializerSettings _serializerSettings;
