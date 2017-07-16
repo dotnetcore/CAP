@@ -4,7 +4,7 @@ namespace DotNetCore.CAP.Processor.States
 {
     public class StateChanger : IStateChanger
     {
-        public void ChangeState(CapSentMessage message, IState state, IStorageTransaction transaction)
+        public void ChangeState(CapPublishedMessage message, IState state, IStorageTransaction transaction)
         {
             //var now = DateTime.UtcNow;
             //if (state.ExpiresAfter != null)

@@ -9,7 +9,7 @@ namespace DotNetCore.CAP.Processor.States
 
         string Name { get; }
 
-        void Apply(CapSentMessage message, IStorageTransaction transaction);
+        void Apply(CapPublishedMessage message, IStorageTransaction transaction);
 
         void Apply(CapReceivedMessage message, IStorageTransaction transaction);
     }

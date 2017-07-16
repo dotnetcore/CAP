@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.Processor.States
 
         public string Name => StateName;
 
-        public void Apply(CapSentMessage message, IStorageTransaction transaction)
+        public void Apply(CapPublishedMessage message, IStorageTransaction transaction)
         {
             transaction.EnqueueMessage(message);
         }

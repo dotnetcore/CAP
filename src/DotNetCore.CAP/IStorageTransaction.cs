@@ -6,11 +6,11 @@ namespace DotNetCore.CAP
 {
 	public interface IStorageTransaction : IDisposable
 	{
-		void UpdateMessage(CapSentMessage message);
+		void UpdateMessage(CapPublishedMessage message);
 
 		void UpdateMessage(CapReceivedMessage message);
 
-		void EnqueueMessage(CapSentMessage message);
+		void EnqueueMessage(CapPublishedMessage message);
 
 		void EnqueueMessage(CapReceivedMessage message);
 

@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
-using DotNetCore.CAP.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
@@ -28,8 +26,7 @@ namespace DotNetCore.CAP
         {
             using (fetched)
             {
-
-                var message = await connection.GetSentMessageAsync(fetched.MessageId);
+                var message = await connection.GetPublishedMessageAsync(fetched.MessageId);
                 try
                 {
                     var sp = Stopwatch.StartNew();
@@ -39,7 +36,7 @@ namespace DotNetCore.CAP
                     {
                         _logger.JobRetrying(message.Retries);
                     }
-                    var result = await PublishAsync(message.KeyName, message.Content);
+                    var result = await PublishAsync(message.Name, message.Content);
                     sp.Stop();
 
                     var newState = default(IState);
@@ -72,16 +69,15 @@ namespace DotNetCore.CAP
 
                     return OperateResult.Success;
                 }
-
                 catch (Exception ex)
                 {
-                    _logger.ExceptionOccuredWhileExecutingJob(message?.KeyName, ex);
+                    _logger.ExceptionOccuredWhileExecutingJob(message?.Name, ex);
                     return OperateResult.Failed(ex);
                 }
             }
         }
 
-        private async Task<bool> UpdateJobForRetryAsync(CapSentMessage message, IStorageConnection connection)
+        private async Task<bool> UpdateJobForRetryAsync(CapPublishedMessage message, IStorageConnection connection)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 

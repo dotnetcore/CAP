@@ -9,14 +9,13 @@ namespace DotNetCore.CAP
     /// </summary>
     public interface IStorageConnection : IDisposable
     {
-
-        //Sent messages        
+        //Sent messages
 
         /// <summary>
         /// Returns the message with the given id.
         /// </summary>
         /// <param name="id">The message's id.</param>
-        Task<CapSentMessage> GetSentMessageAsync(string id);
+        Task<CapPublishedMessage> GetPublishedMessageAsync(int id);
 
         /// <summary>
         /// Fetches the next message to be executed.
@@ -26,7 +25,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Returns the next message to be enqueued.
         /// </summary>
-        Task<CapSentMessage> GetNextSentMessageToBeEnqueuedAsync();
+        Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync();
 
         // Received messages
 
@@ -40,14 +39,13 @@ namespace DotNetCore.CAP
         /// Returns the message with the given id.
         /// </summary>
         /// <param name="id">The message's id.</param>
-        Task<CapReceivedMessage> GetReceivedMessageAsync(string id);
-
+        Task<CapReceivedMessage> GetReceivedMessageAsync(int id);
 
         /// <summary>
         /// Returns the next message to be enqueued.
         /// </summary>
         Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync();
-         
+
         //-----------------------------------------
 
         /// <summary>

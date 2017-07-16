@@ -3,29 +3,28 @@ using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Models
 {
-    public class CapSentMessage 
+    public class CapPublishedMessage 
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="CapSentMessage"/>.
+        /// Initializes a new instance of <see cref="CapPublishedMessage"/>.
         /// </summary>
         /// <remarks>
         /// The Id property is initialized to from a new GUID string value.
         /// </remarks>
-        public CapSentMessage()
+        public CapPublishedMessage()
         {
-            Id = Guid.NewGuid().ToString();
             Added = DateTime.Now;
         }
 
-        public CapSentMessage(MessageContext message)
+        public CapPublishedMessage(MessageContext message)
         {
-            KeyName = message.KeyName;
+            Name = message.Name;
             Content = message.Content;
         }
 
-        public string Id { get; set; } 
+        public int Id { get; set; } 
 
-        public string KeyName { get; set; }
+        public string Name { get; set; }
 
         public string Content { get; set; }
 
