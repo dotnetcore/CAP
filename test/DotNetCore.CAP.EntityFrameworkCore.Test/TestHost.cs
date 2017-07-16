@@ -29,7 +29,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
 
             var connectionString = ConnectionUtil.GetConnectionString();
             //services.AddSingleton(new SqlServerOptions { ConnectionString = connectionString });
-            services.AddDbContext<TestDbContext>(options => options.UseSqlServer(connectionString));
+            //services.AddDbContext<TestDbContext>(options => options.UseSqlServer(connectionString));
 
             _services = services;
         }
