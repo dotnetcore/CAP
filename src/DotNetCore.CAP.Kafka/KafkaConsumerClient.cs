@@ -73,7 +73,7 @@ namespace DotNetCore.CAP.Kafka
             var message = new MessageContext
             {
                 Group = _groupId,
-                KeyName = e.Topic,
+                Name = e.Topic,
                 Content = e.Value
             };
             MessageReceieved?.Invoke(sender, message);

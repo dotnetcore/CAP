@@ -87,7 +87,7 @@ namespace DotNetCore.CAP.RabbitMQ
             var message = new MessageContext
             {
                 Group = _queueName,
-                KeyName = e.RoutingKey,
+                Name = e.RoutingKey,
                 Content = Encoding.UTF8.GetString(e.Body)
             };
             MessageReceieved?.Invoke(sender, message);

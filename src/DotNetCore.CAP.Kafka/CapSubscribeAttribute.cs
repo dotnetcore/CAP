@@ -4,24 +4,24 @@ namespace DotNetCore.CAP.Kafka
 {
     public class CapSubscribeAttribute : TopicAttribute
     {
-        public CapSubscribeAttribute(string topicName)
-            : this(topicName, 0)
+        public CapSubscribeAttribute(string name)
+            : this(name, 0)
         {
         }
 
         /// <summary>
         /// Not support
         /// </summary>
-        public CapSubscribeAttribute(string topicName, int partition)
-            : this(topicName, partition, 0)
+        public CapSubscribeAttribute(string name, int partition)
+            : this(name, partition, 0)
         {
         }
 
         /// <summary>
         /// Not support
         /// </summary>
-        public CapSubscribeAttribute(string topicName, int partition, long offset)
-            : base(topicName)
+        public CapSubscribeAttribute(string name, int partition, long offset)
+            : base(name)
         {
             Offset = offset;
             Partition = partition;

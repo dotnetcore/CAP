@@ -4,7 +4,7 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     public class CapSubscribeAttribute : TopicAttribute
     {
-        public CapSubscribeAttribute(string routingKey) : base(routingKey)
+        public CapSubscribeAttribute(string name) : base(name)
         {
 
         }
