@@ -7,8 +7,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 {
     public class FetchedMessage
     {
-        public string MessageId { get; set; }
+        public int MessageId { get; set; }
 
-        public MessageType Type { get; set; }
+        public MessageType MessageType { get; set; }
     }
 }

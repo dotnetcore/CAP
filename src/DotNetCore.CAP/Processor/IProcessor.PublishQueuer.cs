@@ -38,13 +38,13 @@ namespace DotNetCore.CAP.Processor
 		{
 			using (var scope = _provider.CreateScope())
 			{
-                CapSentMessage sentMessage;
+                CapPublishedMessage sentMessage;
 				var provider = scope.ServiceProvider;
 				var connection = provider.GetRequiredService<IStorageConnection>();
 
 				while (
 					!context.IsStopping &&
-					(sentMessage = await connection.GetNextSentMessageToBeEnqueuedAsync()) != null)
+					(sentMessage = await connection.GetNextPublishedMessageToBeEnqueuedAsync()) != null)
 
                 {
                     var state = new EnqueuedState();

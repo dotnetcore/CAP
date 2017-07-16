@@ -13,22 +13,21 @@ namespace DotNetCore.CAP.Models
         /// </remarks>
         public CapReceivedMessage()
         {
-            Id = Guid.NewGuid().ToString();
             Added = DateTime.Now;
         }
 
         public CapReceivedMessage(MessageContext message) : this()
         {
             Group = message.Group;
-            KeyName = message.KeyName;
+            Name = message.Name;
             Content = message.Content;
         }
 
-        public string Id { get; set; }
+        public int Id { get; set; }
 
         public string Group { get; set; }
 
-        public string KeyName { get; set; }
+        public string Name { get; set; }
 
         public string Content { get; set; }
 
@@ -45,7 +44,7 @@ namespace DotNetCore.CAP.Models
             return new MessageContext
             {
                 Group = Group,
-                KeyName = KeyName,
+                Name = Name,
                 Content = Content
             };
         }

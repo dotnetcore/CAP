@@ -85,7 +85,7 @@ namespace DotNetCore.CAP.Processor
                 {
                     using (fetched)
                     {
-                        var queueExecutor = _queueExecutorFactory.GetInstance(fetched.Type);
+                        var queueExecutor = _queueExecutorFactory.GetInstance(fetched.MessageType);
                         await queueExecutor.ExecuteAsync(connection, fetched);
                     }
                 }

@@ -9,29 +9,29 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
 {
-    public class EFFetchedMessage : IFetchedMessage
+    public class SqlServerFetchedMessage : IFetchedMessage
     {
         private readonly IDbConnection _connection;
-        private readonly IDbContextTransaction _transaction;
+        private readonly IDbTransaction _transaction;
         private readonly Timer _timer;
         private static readonly TimeSpan KeepAliveInterval = TimeSpan.FromMinutes(1);
         private readonly object _lockObject = new object();
 
-        public EFFetchedMessage(string messageId,
+        public SqlServerFetchedMessage(int messageId,
             MessageType type,
             IDbConnection connection,
-            IDbContextTransaction transaction)
+            IDbTransaction transaction)
         {
             MessageId = messageId;
-            Type = type;
+            MessageType = type;
             _connection = connection;
             _transaction = transaction;
             _timer = new Timer(ExecuteKeepAliveQuery, null, KeepAliveInterval, KeepAliveInterval);
         }
 
-        public string MessageId { get; }
+        public int MessageId { get; }
 
-        public MessageType Type { get; }
+        public MessageType MessageType { get; }
 
         public void RemoveFromQueue()
         {
@@ -65,7 +65,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
             {
                 try
                 {
-                    _connection?.Execute("SELECT 1", _transaction.GetDbTransaction());
+                    _connection?.Execute("SELECT 1", _transaction);
                 }
                 catch
                 {

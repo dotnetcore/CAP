@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
-using DotNetCore.CAP.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
@@ -92,7 +89,7 @@ namespace DotNetCore.CAP
                 }
                 catch (Exception ex)
                 {
-                    _logger.ExceptionOccuredWhileExecutingJob(message?.KeyName, ex);
+                    _logger.ExceptionOccuredWhileExecutingJob(message?.Name, ex);
                     return OperateResult.Failed(ex);
                 }
             }
@@ -102,11 +99,11 @@ namespace DotNetCore.CAP
         {
             try
             {
-                var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.KeyName);
+                var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.Name);
 
                 if (!executeDescriptorGroup.ContainsKey(receivedMessage.Group))
                 {
-                    throw new SubscriberNotFoundException(receivedMessage.KeyName + " has not been found.");
+                    throw new SubscriberNotFoundException(receivedMessage.Name + " has not been found.");
                 }
 
                 // If there are multiple consumers in the same group, we will take the first
@@ -123,7 +120,7 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.KeyName}", ex);
+                _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.Name}", ex);
                 return OperateResult.Failed(ex);
             }
         }
@@ -148,6 +145,5 @@ namespace DotNetCore.CAP
             }
             return true;
         }
-
     }
 }

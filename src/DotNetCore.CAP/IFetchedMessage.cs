@@ -3,14 +3,14 @@ using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
 {
-	public interface IFetchedMessage : IDisposable
-	{
-		string MessageId { get; }
+    public interface IFetchedMessage : IDisposable
+    {
+        int MessageId { get; }
 
-        MessageType Type { get; }
+        MessageType MessageType { get; }
 
-		void RemoveFromQueue();
+        void RemoveFromQueue();
 
-		void Requeue();
-	}
+        void Requeue();
+    }
 }

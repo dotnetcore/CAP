@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.Text;
 using System.Threading.Tasks;
 using Dapper;
@@ -21,8 +22,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         private static readonly string[] Tables =
         {
-            nameof(CapDbContext.CapSentMessages),
-            nameof(CapDbContext.CapReceivedMessages),
+            "Published","Received"
         };
 
         public DefaultAdditionalProcessor(
@@ -44,18 +44,14 @@ namespace DotNetCore.CAP.EntityFrameworkCore
                 var removedCount = 0;
                 do
                 {
-                    using (var scope = _provider.CreateScope())
+                    using(var connection = new SqlConnection(_options.ConnectionString))
                     {
-                        var provider = scope.ServiceProvider;
-                        var jobsDbContext = provider.GetService<CapDbContext>();
-                        var connection = jobsDbContext.GetDbConnection();
-
                         removedCount = await connection.ExecuteAsync($@"
 DELETE TOP (@count)
 FROM [{_options.Schema}].[{table}] WITH (readpast)
 WHERE ExpiresAt < @now;", new { now = DateTime.Now, count = MaxBatch });
                     }
-
+                    
                     if (removedCount != 0)
                     {
                         await context.WaitAsync(_delay);

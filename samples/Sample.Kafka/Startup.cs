@@ -25,12 +25,13 @@ namespace Sample.Kafka
         {
             services.AddDbContext<AppDbContext>();
 
-            services.AddCap(x=> {
+            services.AddCap(x =>
+            {
                 x.UseEntityFramework<AppDbContext>();
                 x.UseSqlServer("Server=DESKTOP-M9R8T31;Initial Catalog=Test;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True");
                 x.UseRabbitMQ("localhost");
             });
-            
+
             // Add framework services.
             services.AddMvc();
         }

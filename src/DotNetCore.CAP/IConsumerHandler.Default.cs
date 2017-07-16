@@ -101,7 +101,7 @@ namespace DotNetCore.CAP
         {
             client.MessageReceieved += (sender, message) =>
             {
-                _logger.EnqueuingReceivedMessage(message.KeyName, message.Content);
+                _logger.EnqueuingReceivedMessage(message.Name, message.Content);
 
                 using (var scope = _serviceProvider.CreateScope())
                 {

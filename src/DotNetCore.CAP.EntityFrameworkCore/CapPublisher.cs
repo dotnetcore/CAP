@@ -80,14 +80,14 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         private async Task PublishWithTrans(string topic, string content, IDbConnection dbConnection, IDbTransaction dbTransaction)
         {
-            var message = new CapSentMessage
+            var message = new CapPublishedMessage
             {
-                KeyName = topic,
+                Name = topic,
                 Content = content,
                 StatusName = StatusName.Scheduled
             };
 
-            var sql = $"INSERT INTO {_options.Schema}.[{nameof(CapDbContext.CapSentMessages)}] ([Id],[Added],[Content],[KeyName],[ExpiresAt],[Retries],[StatusName])VALUES(@Id,@Added,@Content,@KeyName,@ExpiresAt,@Retries,@StatusName)";
+            var sql = $"INSERT INTO {_options.Schema}.[Published] ([Id],[Added],[Content],[KeyName],[ExpiresAt],[Retries],[StatusName])VALUES(@Id,@Added,@Content,@KeyName,@ExpiresAt,@Retries,@StatusName)";
             await dbConnection.ExecuteAsync(sql, message, transaction: dbTransaction);
 
             PublishQueuer.PulseEvent.Set();
