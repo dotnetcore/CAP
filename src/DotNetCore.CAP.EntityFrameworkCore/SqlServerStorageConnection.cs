@@ -6,7 +6,6 @@ using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
 {
@@ -14,9 +13,9 @@ namespace DotNetCore.CAP.EntityFrameworkCore
     {
         private readonly SqlServerOptions _options;
 
-        public SqlServerStorageConnection(IOptions<SqlServerOptions> options)
+        public SqlServerStorageConnection(SqlServerOptions options)
         {
-            _options = options.Value;
+            _options = options; 
         }
 
         public SqlServerOptions Options => _options;

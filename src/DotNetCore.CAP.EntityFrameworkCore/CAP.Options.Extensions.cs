@@ -40,6 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             var efOptions = new EFOptions { DbContextType = typeof(TContext) };
             configure(efOptions);
+
             options.RegisterExtension(new SqlServerCapOptionsExtension(configure));
 
             return options;
