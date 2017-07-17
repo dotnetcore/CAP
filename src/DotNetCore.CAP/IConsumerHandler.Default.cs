@@ -104,6 +104,7 @@ namespace DotNetCore.CAP
                     var receviedMessage = StoreMessage(scope, message);
                     client.Commit();
                 }
+                Pulse();
             };
         }
 
