@@ -1,6 +1,6 @@
 ﻿using DotNetCore.CAP.Models;
 
-namespace DotNetCore.CAP.EntityFrameworkCore
+namespace DotNetCore.CAP.SqlServer
 {
     public class FetchedMessage
     {

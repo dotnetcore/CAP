@@ -5,7 +5,7 @@ using Dapper;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP.EntityFrameworkCore
+namespace DotNetCore.CAP.SqlServer
 {
     public class DefaultAdditionalProcessor : IAdditionalProcessor
     {

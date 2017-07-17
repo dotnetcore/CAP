@@ -4,8 +4,8 @@
   
   <PropertyGroup>
     <TargetFramework>netstandard1.6</TargetFramework>
-    <AssemblyName>DotNetCore.CAP.EntityFrameworkCore</AssemblyName>
-    <PackageId>DotNetCore.CAP.EntityFrameworkCore</PackageId>
+    <AssemblyName>DotNetCore.CAP.SqlServer</AssemblyName>
+    <PackageId>DotNetCore.CAP.SqlServer</PackageId>
     <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -16,12 +16,7 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="1.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.2" />
-    <PackageReference Include="System.ComponentModel.TypeConverter" Version="4.3.0" />
-    
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.2" />
-    <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="1.1.2" /> 
   </ItemGroup>
 
   <ItemGroup>

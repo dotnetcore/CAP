@@ -1,6 +1,6 @@
 ﻿using System;
-using DotNetCore.CAP.EntityFrameworkCore;
 using DotNetCore.CAP.Processor;
+using DotNetCore.CAP.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

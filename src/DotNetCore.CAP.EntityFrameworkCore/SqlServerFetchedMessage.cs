@@ -4,7 +4,7 @@ using System.Threading;
 using Dapper;
 using DotNetCore.CAP.Models;
 
-namespace DotNetCore.CAP.EntityFrameworkCore
+namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerFetchedMessage : IFetchedMessage
     {

@@ -7,7 +7,7 @@ using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace DotNetCore.CAP.EntityFrameworkCore
+namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerStorageConnection : IStorageConnection
     {
@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         public SqlServerStorageConnection(SqlServerOptions options)
         {
-            _options = options; 
+            _options = options;
         }
 
         public SqlServerOptions Options => _options;

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Models;
 
-namespace DotNetCore.CAP.EntityFrameworkCore
+namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerStorageTransaction : IStorageTransaction, IDisposable
     {

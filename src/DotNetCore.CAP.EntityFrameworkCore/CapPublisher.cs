@@ -8,7 +8,7 @@ using DotNetCore.CAP.Processor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace DotNetCore.CAP.EntityFrameworkCore
+namespace DotNetCore.CAP.SqlServer
 {
     public class CapPublisher : ICapPublisher
     {

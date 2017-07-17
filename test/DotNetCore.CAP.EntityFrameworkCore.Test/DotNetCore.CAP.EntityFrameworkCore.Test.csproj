@@ -18,8 +18,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\DotNetCore.CAP.EntityFrameworkCore\DotNetCore.CAP.SqlServer.csproj" />
     <ProjectReference Include="..\..\src\DotNetCore.CAP\DotNetCore.CAP.csproj" />
-    <ProjectReference Include="..\..\src\DotNetCore.CAP.EntityFrameworkCore\DotNetCore.CAP.EntityFrameworkCore.csproj" />
   </ItemGroup>
 
   <ItemGroup>
