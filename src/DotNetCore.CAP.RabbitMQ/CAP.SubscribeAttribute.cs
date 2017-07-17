@@ -1,6 +1,7 @@
 ﻿using DotNetCore.CAP.Abstractions;
 
-namespace DotNetCore.CAP.RabbitMQ
+// ReSharper disable once CheckNamespace
+namespace DotNetCore.CAP
 {
     public class CapSubscribeAttribute : TopicAttribute
     {
