@@ -35,17 +35,6 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
-        /// Adds a singleton service of the type specified in serviceType with an implementation
-        /// </summary>
-        private CapBuilder AddSingleton<TService, TImplementation>()
-            where TService : class
-            where TImplementation : class, TService
-        {
-            Services.AddSingleton<TService, TImplementation>();
-            return this;
-        }
-
-        /// <summary>
         /// Add an <see cref="ICapPublisher"/>.
         /// </summary>
         /// <typeparam name="T">The type of the service.</typeparam>
