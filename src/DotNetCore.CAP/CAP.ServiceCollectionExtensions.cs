@@ -32,7 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<CapMarkerService>();
             services.Configure(setupAction);
 
-            AddConsumerServices(services);
+            AddSubscribeServices(services);
 
             services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
             services.TryAddSingleton<IModelBinder, DefaultModelBinder>();
@@ -65,7 +65,7 @@ namespace Microsoft.Extensions.DependencyInjection
             return new CapBuilder(services);
         }
 
-        private static void AddConsumerServices(IServiceCollection services)
+        private static void AddSubscribeServices(IServiceCollection services)
         {
             var consumerListenerServices = new Dictionary<Type, Type>();
             foreach (var rejectedServices in services)
