@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
 using DotNetCore.CAP.Infrastructure;
@@ -38,10 +39,11 @@ namespace DotNetCore.CAP.Kafka
             _consumerClient.Subscribe(topicName);
         }
 
-        public void Listening(TimeSpan timeout)
+        public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             while (true)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 _consumerClient.Poll(timeout);
             }
         }

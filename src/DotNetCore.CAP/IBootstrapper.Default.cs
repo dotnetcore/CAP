@@ -68,8 +68,6 @@ namespace DotNetCore.CAP
 
             if (_cts.IsCancellationRequested) return;
 
-            if (_cts.IsCancellationRequested) return;
-
             await BootstrapCoreAsync();
 
             if (_cts.IsCancellationRequested) return;

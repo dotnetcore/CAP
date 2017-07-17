@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP
@@ -12,7 +13,7 @@ namespace DotNetCore.CAP
 
         void Subscribe(string topic, int partition);
 
-        void Listening(TimeSpan timeout);
+        void Listening(TimeSpan timeout, CancellationToken cancellationToken);
 
         void Commit();
 

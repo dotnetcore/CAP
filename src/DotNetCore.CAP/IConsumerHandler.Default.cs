@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
@@ -18,12 +17,11 @@ namespace DotNetCore.CAP
         private readonly IServiceProvider _serviceProvider;
         private readonly IConsumerInvokerFactory _consumerInvokerFactory;
         private readonly IConsumerClientFactory _consumerClientFactory;
-        private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
 
+        private readonly CancellationTokenSource _cts;
         private readonly MethodMatcherCache _selector;
         private readonly CapOptions _options;
-        private readonly CancellationTokenSource _cts;
 
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
 
@@ -34,13 +32,12 @@ namespace DotNetCore.CAP
             IServiceProvider serviceProvider,
             IConsumerInvokerFactory consumerInvokerFactory,
             IConsumerClientFactory consumerClientFactory,
-            ILoggerFactory loggerFactory,
+            ILogger<ConsumerHandler> logger,
             MethodMatcherCache selector,
             IOptions<CapOptions> options)
         {
             _selector = selector;
-            _logger = loggerFactory.CreateLogger<ConsumerHandler>();
-            _loggerFactory = loggerFactory;
+            _logger = logger;
             _serviceProvider = serviceProvider;
             _consumerInvokerFactory = consumerInvokerFactory;
             _consumerClientFactory = consumerClientFactory;
@@ -65,7 +62,7 @@ namespace DotNetCore.CAP
                             client.Subscribe(item.Attribute.Name);
                         }
 
-                        client.Listening(_pollingDelay);
+                        client.Listening(_pollingDelay, _cts.Token);
                     }
                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
@@ -85,7 +82,7 @@ namespace DotNetCore.CAP
 
             try
             {
-                _compositeTask.Wait((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
+                _compositeTask.Wait(TimeSpan.FromSeconds(60));
             }
             catch (AggregateException ex)
             {
