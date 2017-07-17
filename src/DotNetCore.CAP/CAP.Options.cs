@@ -15,22 +15,11 @@ namespace DotNetCore.CAP
         /// </summary>
         public const int DefaultPollingDelay = 8;
 
-        /// <summary>
-        /// Default value for CAP job.
-        /// </summary>
-        public const string DefaultCronExp = "* * * * *";
-
         public CapOptions()
         {
-            CronExp = DefaultCronExp;
             PollingDelay = DefaultPollingDelay;
             Extensions = new List<ICapOptionsExtension>();
         }
-
-        /// <summary>
-        /// Corn expression for configuring retry cron job. Default is 1 min.
-        /// </summary>
-        public string CronExp { get; set; }
 
         /// <summary>
         /// Productor job polling delay time. Default is 8 sec.

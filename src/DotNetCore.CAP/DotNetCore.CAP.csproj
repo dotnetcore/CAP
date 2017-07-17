@@ -20,7 +20,6 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="1.1.1" />
-    <PackageReference Include="ncrontab" Version="3.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="System.Data.Common" Version="4.3.0" />
     <PackageReference Include="System.Threading.ThreadPool" Version="4.3.0" />
