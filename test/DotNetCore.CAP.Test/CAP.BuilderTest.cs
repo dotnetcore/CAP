@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Processor;
-using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using System.Data;
@@ -11,42 +8,42 @@ namespace DotNetCore.CAP.Test
 {
     public class CapBuilderTest
     {
-        //[Fact]
-        //public void CanOverrideMessageStore()
-        //{
-        //    var services = new ServiceCollection();
-        //    services.AddCap().AddMessageStore<MyMessageStore>();
 
-        //    var thingy = services.BuildServiceProvider()
-        //        .GetRequiredService<ICapMessageStore>() as MyMessageStore;
+        [Fact]
+        public void CanCreateInstanceAndGetService()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<ICapPublisher, MyProducerService>();
+            var builder = new CapBuilder(services);
+            Assert.NotNull(builder);
 
-        //    Assert.NotNull(thingy);
-        ////}
+            var count = builder.Services.Count;
+            Assert.Equal(1, count);
+        }
 
-        //[Fact]
-        //public void CanOverrideJobs()
-        //{
-        //    var services = new ServiceCollection();
-        //    services.AddCap().AddJobs<MyJobTest>();
+        [Fact]
+        public void CanAddCapService()
+        {
+            var services = new ServiceCollection();
+            services.AddCap(x => { });
+            var builder = services.BuildServiceProvider();
 
-        //    var thingy = services.BuildServiceProvider()
-        //        .GetRequiredService<IJob>() as MyJobTest;
+            var markService = builder.GetService<CapMarkerService>();
+            Assert.NotNull(markService);
+        }
 
-        //    Assert.NotNull(thingy);
-        //}
 
-        //[Fact]
-        //public void CanOverrideProducerService()
-        //{
-        //    var services = new ServiceCollection();
-        //    services.AddCap(x=> { });
+        [Fact]
+        public void CanOverridePublishService()
+        {
+            var services = new ServiceCollection();
+            services.AddCap(x => { }).AddProducerService<MyProducerService>();
 
-        //    var thingy = services.BuildServiceProvider()
-        //        .GetRequiredService<ICapPublisher>() as MyProducerService;
+            var thingy = services.BuildServiceProvider()
+                .GetRequiredService<ICapPublisher>() as MyProducerService;
 
-        //    Assert.NotNull(thingy);
-        //}
-
+            Assert.NotNull(thingy);
+        }
 
         private class MyProducerService : ICapPublisher
         {
@@ -69,6 +66,6 @@ namespace DotNetCore.CAP.Test
             {
                 throw new NotImplementedException();
             }
-        }  
+        }
     }
 }
