@@ -8,17 +8,21 @@ namespace DotNetCore.CAP.Test
 {
     public class CapBuilderTest
     {
-
         [Fact]
         public void CanCreateInstanceAndGetService()
         {
             var services = new ServiceCollection();
+
             services.AddSingleton<ICapPublisher, MyProducerService>();
             var builder = new CapBuilder(services);
             Assert.NotNull(builder);
 
             var count = builder.Services.Count;
             Assert.Equal(1, count);
+
+            var provider = services.BuildServiceProvider();
+            var capPublisher = provider.GetService<ICapPublisher>();
+            Assert.NotNull(capPublisher);
         }
 
         [Fact]
@@ -43,6 +47,16 @@ namespace DotNetCore.CAP.Test
                 .GetRequiredService<ICapPublisher>() as MyProducerService;
 
             Assert.NotNull(thingy);
+        }
+
+        [Fact]
+        public void CanResolveCapOptions()
+        {
+            var services = new ServiceCollection();
+            services.AddCap(x => { });
+            var builder = services.BuildServiceProvider();
+            var capOptions = builder.GetService<CapOptions>();
+            Assert.NotNull(capOptions);
         }
 
         private class MyProducerService : ICapPublisher

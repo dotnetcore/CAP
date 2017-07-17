@@ -2,7 +2,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetCore.CAP.EntityFrameworkCore.Test
+namespace DotNetCore.CAP.SqlServer.Test
 {
     public abstract class TestHost : IDisposable
     {
@@ -28,8 +28,9 @@ namespace DotNetCore.CAP.EntityFrameworkCore.Test
             services.AddLogging();
 
             var connectionString = ConnectionUtil.GetConnectionString();
-            //services.AddSingleton(new SqlServerOptions { ConnectionString = connectionString });
-            //services.AddDbContext<TestDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddSingleton(new SqlServerOptions { ConnectionString = connectionString });
+            services.AddSingleton<SqlServerStorage>();
+            services.AddDbContext<TestDbContext>(options => options.UseSqlServer(connectionString));
 
             _services = services;
         }

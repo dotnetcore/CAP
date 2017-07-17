@@ -1,7 +1,7 @@
 using System;
 using System.Data.SqlClient;
 
-namespace DotNetCore.CAP.EntityFrameworkCore.Test
+namespace DotNetCore.CAP.SqlServer.Test
 {
     public static class ConnectionUtil
     {
