@@ -20,6 +20,7 @@ namespace DotNetCore.CAP.SqlServer
             _schema = options.Schema;
 
             _dbConnection = new SqlConnection(options.ConnectionString);
+            _dbConnection.Open();
             _dbTransaction = _dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
         }
 
@@ -27,16 +28,16 @@ namespace DotNetCore.CAP.SqlServer
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var sql = $"UPDATE [{_schema}].[Published] SET [ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
-            _dbConnection.Execute(sql, message);
+            var sql = $"UPDATE [{_schema}].[Published] SET [Retries] = @Retries,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
+            _dbConnection.Execute(sql, message, _dbTransaction);
         }
 
         public void UpdateMessage(CapReceivedMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var sql = $"UPDATE [{_schema}].[Received] SET [ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
-            _dbConnection.Execute(sql, message);
+            var sql = $"UPDATE [{_schema}].[Received] SET [Retries] = @Retries,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
+            _dbConnection.Execute(sql, message, _dbTransaction);
         }
 
         public void EnqueueMessage(CapPublishedMessage message)
@@ -44,7 +45,7 @@ namespace DotNetCore.CAP.SqlServer
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             var sql = $"INSERT INTO [{_schema}].[Queue] values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue { MessageId = message.Id, MessageType = MessageType.Publish });
+            _dbConnection.Execute(sql, new CapQueue { MessageId = message.Id, MessageType = MessageType.Publish }, _dbTransaction);
         }
 
         public void EnqueueMessage(CapReceivedMessage message)
@@ -52,7 +53,7 @@ namespace DotNetCore.CAP.SqlServer
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             var sql = $"INSERT INTO [{_schema}].[Queue] values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue { MessageId = message.Id, MessageType = MessageType.Subscribe });
+            _dbConnection.Execute(sql, new CapQueue { MessageId = message.Id, MessageType = MessageType.Subscribe }, _dbTransaction);
         }
 
         public Task CommitAsync()

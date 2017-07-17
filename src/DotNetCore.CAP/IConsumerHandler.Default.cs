@@ -113,7 +113,7 @@ namespace DotNetCore.CAP
             var messageStore = provider.GetRequiredService<IStorageConnection>();
             var receivedMessage = new CapReceivedMessage(messageContext)
             {
-                StatusName = StatusName.Enqueued,
+                StatusName = StatusName.Scheduled,
             };
             messageStore.StoreReceivedMessageAsync(receivedMessage).Wait();
             return receivedMessage;

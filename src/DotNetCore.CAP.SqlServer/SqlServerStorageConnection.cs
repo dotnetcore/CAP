@@ -25,12 +25,13 @@ namespace DotNetCore.CAP.SqlServer
             return new SqlServerStorageTransaction(this);
         }
 
-        public Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
+        public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
         {
             var sql = $@"SELECT * FROM [{_options.Schema}].[Published] WITH (readpast) WHERE Id={id}";
+
             using (var connection = new SqlConnection(_options.ConnectionString))
             {
-                return connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
+                return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
         }
 
@@ -56,7 +57,7 @@ OUTPUT DELETED.MessageId,DELETED.[MessageType];";
 
         // CapReceviedMessage
 
-        public Task StoreReceivedMessageAsync(CapReceivedMessage message)
+        public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
@@ -66,16 +67,16 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             using (var connection = new SqlConnection(_options.ConnectionString))
             {
-                return connection.ExecuteAsync(sql, message);
+                await connection.ExecuteAsync(sql, message);
             }
         }
 
-        public Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
+        public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
         {
             var sql = $@"SELECT * FROM [{_options.Schema}].[Received] WITH (readpast) WHERE Id={id}";
             using (var connection = new SqlConnection(_options.ConnectionString))
             {
-                return connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
+                return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
 
@@ -94,26 +95,30 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
         private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
         {
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            //here don't use `using` to dispose 
+            var connection = new SqlConnection(_options.ConnectionString);
+            await connection.OpenAsync();
+            var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
+            FetchedMessage fetchedMessage = null;
+            try
             {
-                using (var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted))
-                {
-                    try
-                    {
-                        var fetched = await connection.QueryFirstOrDefaultAsync<FetchedMessage>(sql, args, transaction);
-
-                        if (fetched == null)
-                            return null;
-
-                        return new SqlServerFetchedMessage(fetched.MessageId, fetched.MessageType, connection, transaction);
-                    }
-                    catch (Exception)
-                    {
-                        transaction.Rollback();
-                        return null;
-                    }
-                }
+                fetchedMessage = await connection.QueryFirstOrDefaultAsync<FetchedMessage>(sql, args, transaction);
             }
+            catch (SqlException)
+            {
+                transaction.Dispose();
+                throw;
+            }
+
+            if (fetchedMessage == null)
+            {
+                transaction.Rollback();
+                transaction.Dispose();
+                connection.Dispose();
+                return null;
+            }
+
+            return new SqlServerFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection, transaction);
         }
     }
 }

@@ -24,56 +24,53 @@ namespace DotNetCore.CAP
 
         public async Task<OperateResult> ExecuteAsync(IStorageConnection connection, IFetchedMessage fetched)
         {
-            using (fetched)
+            var message = await connection.GetPublishedMessageAsync(fetched.MessageId);
+            try
             {
-                var message = await connection.GetPublishedMessageAsync(fetched.MessageId);
-                try
+                var sp = Stopwatch.StartNew();
+                await _stateChanger.ChangeStateAsync(message, new ProcessingState(), connection);
+
+                if (message.Retries > 0)
                 {
-                    var sp = Stopwatch.StartNew();
-                    await _stateChanger.ChangeStateAsync(message, new ProcessingState(), connection);
+                    _logger.JobRetrying(message.Retries);
+                }
+                var result = await PublishAsync(message.Name, message.Content);
+                sp.Stop();
 
-                    if (message.Retries > 0)
+                var newState = default(IState);
+                if (!result.Succeeded)
+                {
+                    var shouldRetry = await UpdateJobForRetryAsync(message, connection);
+                    if (shouldRetry)
                     {
-                        _logger.JobRetrying(message.Retries);
-                    }
-                    var result = await PublishAsync(message.Name, message.Content);
-                    sp.Stop();
-
-                    var newState = default(IState);
-                    if (!result.Succeeded)
-                    {
-                        var shouldRetry = await UpdateJobForRetryAsync(message, connection);
-                        if (shouldRetry)
-                        {
-                            newState = new ScheduledState();
-                            _logger.JobFailedWillRetry(result.Exception);
-                        }
-                        else
-                        {
-                            newState = new FailedState();
-                            _logger.JobFailed(result.Exception);
-                        }
+                        newState = new ScheduledState();
+                        _logger.JobFailedWillRetry(result.Exception);
                     }
                     else
                     {
-                        newState = new SucceededState();
+                        newState = new FailedState();
+                        _logger.JobFailed(result.Exception);
                     }
-                    await _stateChanger.ChangeStateAsync(message, newState, connection);
-
-                    fetched.RemoveFromQueue();
-
-                    if (result.Succeeded)
-                    {
-                        _logger.JobExecuted(sp.Elapsed.TotalSeconds);
-                    }
-
-                    return OperateResult.Success;
                 }
-                catch (Exception ex)
+                else
                 {
-                    _logger.ExceptionOccuredWhileExecutingJob(message?.Name, ex);
-                    return OperateResult.Failed(ex);
+                    newState = new SucceededState();
                 }
+                await _stateChanger.ChangeStateAsync(message, newState, connection);
+
+                fetched.RemoveFromQueue();
+
+                if (result.Succeeded)
+                {
+                    _logger.JobExecuted(sp.Elapsed.TotalSeconds);
+                }
+
+                return OperateResult.Success;
+            }
+            catch (Exception ex)
+            {
+                _logger.ExceptionOccuredWhileExecutingJob(message?.Name, ex);
+                return OperateResult.Failed(ex);
             }
         }
 
@@ -81,7 +78,7 @@ namespace DotNetCore.CAP
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
-            var now = DateTime.UtcNow;
+            var now = DateTime.Now;
             var retries = ++message.Retries;
             if (retries >= retryBehavior.RetryCount)
             {
