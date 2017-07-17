@@ -4,7 +4,11 @@ using System.Text;
 
 namespace DotNetCore.CAP.Infrastructure
 {
-    class WebHookProvider
+    public class WebHookProvider
     {
+        public WebHookProvider()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

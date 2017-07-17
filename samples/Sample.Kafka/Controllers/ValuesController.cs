@@ -29,9 +29,7 @@ namespace Sample.Kafka.Controllers
         [CapSubscribe("zzwl.topic.finace.callBack", Group = "test")]
         public void KafkaTest(Person person)
         {
-            Console.WriteLine(person.Name);
-            Console.WriteLine(person.Age);
-
+            Console.WriteLine(DateTime.Now);
         }
 
         [Route("~/send")]

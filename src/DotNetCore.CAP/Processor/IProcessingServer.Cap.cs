@@ -59,10 +59,9 @@ namespace DotNetCore.CAP.Processor
                 return;
             }
 
-            _logger.LogTrace("Pulsing the JobQueuer.");
+            _logger.LogTrace("Pulsing the Queuer.");
 
-            PublishQueuer.PulseEvent.Set();
-            SubscribeQueuer.PulseEvent.Set();
+            PublishQueuer.PulseEvent.Set();          
         }
 
         public void Dispose()
