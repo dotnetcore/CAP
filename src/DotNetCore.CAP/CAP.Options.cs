@@ -27,6 +27,11 @@ namespace DotNetCore.CAP
         public int PollingDelay { get; set; } = 8;
 
         /// <summary>
+        /// We’ll send a POST request to the URL below with details of any subscribed events.
+        /// </summary>
+        public WebHook WebHook { get; set; }
+
+        /// <summary>
 		/// Registers an extension that will be executed when building services.
 		/// </summary>
 		/// <param name="extension"></param>
@@ -37,5 +42,12 @@ namespace DotNetCore.CAP
 
             Extensions.Add(extension);
         }
+    }
+
+    public class WebHook
+    {
+        public string PayloadUrl { get; set; }
+
+        public string Secret { get; set; }
     }
 }
