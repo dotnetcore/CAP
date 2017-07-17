@@ -116,7 +116,8 @@ namespace DotNetCore.CAP
             }
             catch (SubscriberNotFoundException ex)
             {
-                throw ex;
+                _logger.LogError("Can not be found subscribe method of name: " + receivedMessage.Name);
+                return OperateResult.Failed(ex);
             }
             catch (Exception ex)
             {

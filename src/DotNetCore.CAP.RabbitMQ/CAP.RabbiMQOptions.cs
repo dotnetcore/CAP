@@ -1,4 +1,5 @@
-﻿namespace DotNetCore.CAP
+﻿// ReSharper disable once CheckNamespace
+namespace DotNetCore.CAP
 {
     public class RabbitMQOptions
     {
@@ -34,7 +35,7 @@
         public string HostName { get; set; } = "localhost";
 
         /// <summary> The topic exchange type. </summary>
-        internal string EXCHANGE_TYPE = "topic";
+        internal const string ExchangeType = "topic";
 
         /// <summary>
         /// Password to use when authenticating to the server.

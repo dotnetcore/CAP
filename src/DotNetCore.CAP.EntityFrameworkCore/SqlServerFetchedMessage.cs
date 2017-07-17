@@ -66,6 +66,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
                 }
                 catch
                 {
+                    // ignored
                 }
             }
         }

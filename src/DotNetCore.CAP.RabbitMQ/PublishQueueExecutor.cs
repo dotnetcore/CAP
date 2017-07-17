@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.RabbitMQ
     public class PublishQueueExecutor : BasePublishQueueExecutor
     {
         private readonly ILogger _logger;
-        private readonly RabbitMQOptions _rabbitMqOptions;
+        private readonly RabbitMQOptions _rabbitMQOptions;
 
         public PublishQueueExecutor(IStateChanger stateChanger,
             IOptions<RabbitMQOptions> options,
@@ -19,21 +19,21 @@ namespace DotNetCore.CAP.RabbitMQ
             : base(stateChanger, logger)
         {
             _logger = logger;
-            _rabbitMqOptions = options.Value;
+            _rabbitMQOptions = options.Value;
         }
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)
         {
             var factory = new ConnectionFactory()
             {
-                HostName = _rabbitMqOptions.HostName,
-                UserName = _rabbitMqOptions.UserName,
-                Port = _rabbitMqOptions.Port,
-                Password = _rabbitMqOptions.Password,
-                VirtualHost = _rabbitMqOptions.VirtualHost,
-                RequestedConnectionTimeout = _rabbitMqOptions.RequestedConnectionTimeout,
-                SocketReadTimeout = _rabbitMqOptions.SocketReadTimeout,
-                SocketWriteTimeout = _rabbitMqOptions.SocketWriteTimeout
+                HostName = _rabbitMQOptions.HostName,
+                UserName = _rabbitMQOptions.UserName,
+                Port = _rabbitMQOptions.Port,
+                Password = _rabbitMQOptions.Password,
+                VirtualHost = _rabbitMQOptions.VirtualHost,
+                RequestedConnectionTimeout = _rabbitMQOptions.RequestedConnectionTimeout,
+                SocketReadTimeout = _rabbitMQOptions.SocketReadTimeout,
+                SocketWriteTimeout = _rabbitMQOptions.SocketWriteTimeout
             };
 
             try
@@ -43,8 +43,8 @@ namespace DotNetCore.CAP.RabbitMQ
                 {
                     var body = Encoding.UTF8.GetBytes(content);
 
-                    channel.ExchangeDeclare(_rabbitMqOptions.TopicExchangeName, _rabbitMqOptions.EXCHANGE_TYPE);
-                    channel.BasicPublish(exchange: _rabbitMqOptions.TopicExchangeName,
+                    channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, RabbitMQOptions.ExchangeType);
+                    channel.BasicPublish(exchange: _rabbitMQOptions.TopicExchangeName,
                                          routingKey: keyName,
                                          basicProperties: null,
                                          body: body);

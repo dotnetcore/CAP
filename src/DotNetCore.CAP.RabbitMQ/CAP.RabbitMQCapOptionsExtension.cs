@@ -2,11 +2,12 @@
 using DotNetCore.CAP.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
 
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class RabbitMQCapOptionsExtension : ICapOptionsExtension
     {
-        private Action<RabbitMQOptions> _configure;
+        private readonly Action<RabbitMQOptions> _configure;
 
         public RabbitMQCapOptionsExtension(Action<RabbitMQOptions> configure)
         {

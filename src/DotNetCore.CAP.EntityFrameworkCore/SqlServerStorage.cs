@@ -11,8 +11,8 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 {
     public class SqlServerStorage : IStorage
     {
-        private IServiceProvider _provider;
-        private ILogger _logger;
+        private readonly IServiceProvider _provider;
+        private readonly ILogger _logger;
 
         public SqlServerStorage(
             IServiceProvider provider,
@@ -43,7 +43,7 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         protected virtual string CreateDbTablesScript(string schema)
         {
-            var batchSQL =
+            var batchSql =
 $@"
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}')
 BEGIN
@@ -96,7 +96,7 @@ CREATE TABLE [{schema}].[Published](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 END
 GO";
-            return batchSQL;
+            return batchSql;
         }
     }
 }

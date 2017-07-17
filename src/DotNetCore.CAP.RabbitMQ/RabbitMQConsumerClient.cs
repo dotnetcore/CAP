@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(exchange: _exchageName, type: _rabbitMQOptions.EXCHANGE_TYPE);
+            _channel.ExchangeDeclare(exchange: _exchageName, type: _rabbitMQOptions.ExchangeType);
             _channel.QueueDeclare(_queueName, exclusive: false);
         }
 

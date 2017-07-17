@@ -2,6 +2,7 @@
 using DotNetCore.CAP;
 using Microsoft.EntityFrameworkCore;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CapOptionsExtensions

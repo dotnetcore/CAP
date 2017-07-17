@@ -13,7 +13,7 @@ namespace DotNetCore.CAP
         private readonly IStateChanger _stateChanger;
         private readonly ILogger _logger;
 
-        public BasePublishQueueExecutor(IStateChanger stateChanger,
+        protected BasePublishQueueExecutor(IStateChanger stateChanger,
             ILogger<BasePublishQueueExecutor> logger)
         {
             _stateChanger = stateChanger;

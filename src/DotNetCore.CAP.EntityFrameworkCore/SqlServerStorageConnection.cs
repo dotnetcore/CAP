@@ -95,15 +95,13 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
         private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
         {
-            FetchedMessage fetched = null;
-
             using (var connection = new SqlConnection(_options.ConnectionString))
             {
                 using (var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted))
                 {
                     try
                     {
-                        fetched = await connection.QueryFirstOrDefaultAsync<FetchedMessage>(sql, args, transaction);
+                        var fetched = await connection.QueryFirstOrDefaultAsync<FetchedMessage>(sql, args, transaction);
 
                         if (fetched == null)
                             return null;

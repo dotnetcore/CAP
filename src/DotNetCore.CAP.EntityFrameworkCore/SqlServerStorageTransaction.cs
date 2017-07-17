@@ -9,20 +9,17 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 {
     public class SqlServerStorageTransaction : IStorageTransaction, IDisposable
     {
-        private readonly SqlServerStorageConnection _connection;
-        private readonly SqlServerOptions _options;
         private readonly string _schema;
 
-        private IDbTransaction _dbTransaction;
-        private IDbConnection _dbConnection;
+        private readonly IDbTransaction _dbTransaction;
+        private readonly IDbConnection _dbConnection;
 
         public SqlServerStorageTransaction(SqlServerStorageConnection connection)
         {
-            _connection = connection;
-            _options = _connection.Options;
-            _schema = _options.Schema;
+            var options = connection.Options;
+            _schema = options.Schema;
 
-            _dbConnection = new SqlConnection(_options.ConnectionString);
+            _dbConnection = new SqlConnection(options.ConnectionString);
             _dbTransaction = _dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
         }
 

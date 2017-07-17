@@ -3,11 +3,12 @@ using DotNetCore.CAP.EntityFrameworkCore;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
 
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class SqlServerCapOptionsExtension : ICapOptionsExtension
     {
-        private Action<SqlServerOptions> _configure;
+        private readonly Action<SqlServerOptions> _configure;
 
         public SqlServerCapOptionsExtension(Action<SqlServerOptions> configure)
         {
