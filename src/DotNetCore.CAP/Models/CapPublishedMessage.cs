@@ -3,7 +3,7 @@ using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Models
 {
-    public class CapPublishedMessage 
+    public class CapPublishedMessage
     {
         /// <summary>
         /// Initializes a new instance of <see cref="CapPublishedMessage"/>.
@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.Models
             Content = message.Content;
         }
 
-        public int Id { get; set; } 
+        public int Id { get; set; }
 
         public string Name { get; set; }
 

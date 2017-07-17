@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DotNetCore.CAP.Infrastructure
+﻿namespace DotNetCore.CAP.Infrastructure
 {
     /// <summary>
     /// The message status name.

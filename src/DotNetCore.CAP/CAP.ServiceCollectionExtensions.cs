@@ -47,12 +47,12 @@ namespace Microsoft.Extensions.DependencyInjection
             //Processors
             services.AddTransient<PublishQueuer>();
             services.AddTransient<SubscribeQueuer>();
-            services.AddTransient<IDispatcher, DefaultDispatcher>();          
+            services.AddTransient<IDispatcher, DefaultDispatcher>();
 
             //Executors
             services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
             services.AddSingleton<IQueueExecutor, SubscibeQueueExecutor>();
-            
+
             //Options
             var options = new CapOptions();
             setupAction(options);

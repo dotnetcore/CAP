@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Text;
 using System.Threading;
 using Dapper;
 using DotNetCore.CAP.Models;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
 {

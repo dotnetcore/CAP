@@ -43,7 +43,6 @@ namespace DotNetCore.CAP.EntityFrameworkCore
 
         protected virtual string CreateDbTablesScript(string schema)
         {
-
             var batchSQL =
 $@"
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}')
@@ -72,7 +71,7 @@ CREATE TABLE [{schema}].[Received](
 	[Added] [datetime2](7) NOT NULL,
     [ExpiresAt] [datetime2](7) NULL,
 	[StatusName] [nvarchar](50) NOT NULL,
- CONSTRAINT [PK_{schema}.Received] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_{schema}.Received] PRIMARY KEY CLUSTERED
 (
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
@@ -90,7 +89,7 @@ CREATE TABLE [{schema}].[Published](
 	[Added] [datetime2](7) NOT NULL,
     [ExpiresAt] [datetime2](7) NULL,
 	[StatusName] [nvarchar](50) NOT NULL,
- CONSTRAINT [PK_{schema}.Published] PRIMARY KEY CLUSTERED 
+ CONSTRAINT [PK_{schema}.Published] PRIMARY KEY CLUSTERED
 (
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]

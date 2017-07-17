@@ -72,7 +72,7 @@
         public int SocketWriteTimeout { get; set; } = DefaultConnectionTimeout;
 
         /// <summary>
-        /// The port to connect on. 
+        /// The port to connect on.
         /// </summary>
         public int Port { get; set; } = -1;
     }

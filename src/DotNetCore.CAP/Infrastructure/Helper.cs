@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.Infrastructure
         public static long ToTimestamp(DateTime value)
         {
             var elapsedTime = value - Epoch;
-            return (long) elapsedTime.TotalSeconds;
+            return (long)elapsedTime.TotalSeconds;
         }
 
         public static DateTime FromTimestamp(long value)

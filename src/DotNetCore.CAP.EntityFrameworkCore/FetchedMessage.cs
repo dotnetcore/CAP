@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DotNetCore.CAP.Models;
+﻿using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
 {

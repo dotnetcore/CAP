@@ -64,7 +64,6 @@ namespace DotNetCore.CAP.RabbitMQ
                         Description = ex.Message
                     }));
             }
-
         }
     }
 }

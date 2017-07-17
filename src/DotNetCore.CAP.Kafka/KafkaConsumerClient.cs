@@ -81,7 +81,6 @@ namespace DotNetCore.CAP.Kafka
             MessageReceieved?.Invoke(sender, message);
         }
 
-
         #endregion private methods
     }
 }

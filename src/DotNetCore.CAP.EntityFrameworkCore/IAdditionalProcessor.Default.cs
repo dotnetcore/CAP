@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
-using System.Text;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Processor;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.EntityFrameworkCore
@@ -44,14 +41,14 @@ namespace DotNetCore.CAP.EntityFrameworkCore
                 var removedCount = 0;
                 do
                 {
-                    using(var connection = new SqlConnection(_options.ConnectionString))
+                    using (var connection = new SqlConnection(_options.ConnectionString))
                     {
                         removedCount = await connection.ExecuteAsync($@"
 DELETE TOP (@count)
 FROM [{_options.Schema}].[{table}] WITH (readpast)
 WHERE ExpiresAt < @now;", new { now = DateTime.Now, count = MaxBatch });
                     }
-                    
+
                     if (removedCount != 0)
                     {
                         await context.WaitAsync(_delay);

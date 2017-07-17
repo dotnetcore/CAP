@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
@@ -66,7 +63,6 @@ namespace DotNetCore.CAP
                 5,
                 "Received message topic method '{topicName}' failed to execute.");
 
-
             _jobRetrying = LoggerMessage.Define<int>(
                 LogLevel.Debug,
                 3,
@@ -104,18 +100,15 @@ namespace DotNetCore.CAP
             _jobFailedWillRetry(logger, ex);
         }
 
-
         public static void JobRetrying(this ILogger logger, int retries)
         {
             _jobRetrying(logger, retries, null);
         }
 
-
         public static void JobExecuted(this ILogger logger, double seconds)
         {
             _jobExecuted(logger, seconds, null);
         }
-
 
         public static void ConsumerMethodExecutingFailed(this ILogger logger, string methodName, Exception ex)
         {

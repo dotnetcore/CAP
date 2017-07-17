@@ -35,7 +35,6 @@ namespace DotNetCore.CAP
         /// </summary>
         public int PollingDelay { get; set; } = 8;
 
-
         /// <summary>
 		/// Registers an extension that will be executed when building services.
 		/// </summary>

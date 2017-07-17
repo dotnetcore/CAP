@@ -1,6 +1,5 @@
 ﻿using System;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Kafka;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

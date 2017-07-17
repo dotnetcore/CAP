@@ -32,7 +32,7 @@ namespace DotNetCore.CAP
         /// Returns an <see cref="OperateResult"/> indicating a successful identity operation.
         /// </summary>
         /// <returns>An <see cref="OperateResult"/> indicating a successful operation.</returns>
-        public static OperateResult Success { get; } = new OperateResult {Succeeded = true};
+        public static OperateResult Success { get; } = new OperateResult { Succeeded = true };
 
         /// <summary>
         /// Creates an <see cref="OperateResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.
@@ -41,7 +41,7 @@ namespace DotNetCore.CAP
         /// <returns>An <see cref="OperateResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.</returns>
         public static OperateResult Failed(params OperateError[] errors)
         {
-            var result = new OperateResult {Succeeded = false};
+            var result = new OperateResult { Succeeded = false };
             if (errors != null)
             {
                 result._errors.AddRange(errors);

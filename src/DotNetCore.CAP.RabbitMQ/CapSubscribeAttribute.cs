@@ -6,7 +6,6 @@ namespace DotNetCore.CAP.RabbitMQ
     {
         public CapSubscribeAttribute(string name) : base(name)
         {
-
         }
     }
 }

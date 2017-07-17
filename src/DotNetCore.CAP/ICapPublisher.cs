@@ -1,5 +1,4 @@
-﻿using System;
-using System.Data;
+﻿using System.Data;
 using System.Threading.Tasks;
 
 namespace DotNetCore.CAP
@@ -21,7 +20,7 @@ namespace DotNetCore.CAP
         Task PublishAsync(string name, string content);
 
         /// <summary>
-        /// Publis a object message to specified topic.        
+        /// Publis a object message to specified topic.
         /// <para>
         ///  If you are using the EntityFramework, you need to configure the DbContextType first.
         ///  otherwise you need to use overloaded method with IDbConnection and IDbTransaction.

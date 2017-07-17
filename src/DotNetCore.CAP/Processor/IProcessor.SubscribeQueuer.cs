@@ -2,8 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Processor.States;
 using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
