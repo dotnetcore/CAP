@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace DotNetCore.CAP
 {
@@ -7,7 +8,7 @@ namespace DotNetCore.CAP
     /// </summary>
     public class CapOptions
     {
-        internal ICapOptionsExtension Extension { get; private set; }
+        internal IList<ICapOptionsExtension> Extensions { get; private set; }
 
         /// <summary>
         /// Default value for polling delay timeout, in seconds.
@@ -23,6 +24,7 @@ namespace DotNetCore.CAP
         {
             CronExp = DefaultCronExp;
             PollingDelay = DefaultPollingDelay;
+            Extensions = new List<ICapOptionsExtension>();
         }
 
         /// <summary>
@@ -41,7 +43,10 @@ namespace DotNetCore.CAP
 		/// <param name="extension"></param>
 		public void RegisterExtension(ICapOptionsExtension extension)
         {
-            Extension = extension ?? throw new ArgumentNullException(nameof(extension));
+            if (extension == null)
+                throw new ArgumentNullException(nameof(extension));
+
+            Extensions.Add(extension);
         }
     }
 }

@@ -53,10 +53,13 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
             services.AddSingleton<IQueueExecutor, SubscibeQueueExecutor>();
 
-            //Options
+            //Options and extension service
             var options = new CapOptions();
             setupAction(options);
-            options.Extension?.AddServices(services);
+            foreach (var serviceExtension in options.Extensions)
+            {
+                serviceExtension.AddServices(services);
+            }          
             services.AddSingleton(options);
 
             return new CapBuilder(services);
