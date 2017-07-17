@@ -1,6 +1,7 @@
 ﻿using System;
 using DotNetCore.CAP.EntityFrameworkCore;
 using DotNetCore.CAP.Processor;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
@@ -22,11 +23,23 @@ namespace DotNetCore.CAP
             services.AddScoped<ICapPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
-            services.Configure(_configure);
-
             var sqlServerOptions = new SqlServerOptions();
             _configure(sqlServerOptions);
+
+            var provider = TempBuildService(services);
+            var dbContextObj = provider.GetService(sqlServerOptions.DbContextType);
+            if (dbContextObj != null)
+            {
+                var dbContext = (DbContext)dbContextObj;
+                sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+            }
+            services.Configure(_configure);
             services.AddSingleton(sqlServerOptions);
+        }
+
+        private IServiceProvider TempBuildService(IServiceCollection services)
+        {
+            return services.BuildServiceProvider();
         }
     }
 }
