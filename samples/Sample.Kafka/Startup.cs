@@ -28,8 +28,8 @@ namespace Sample.Kafka
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseSqlServer("Server=DESKTOP-M9R8T31;Initial Catalog=Test;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True");
-                x.UseRabbitMQ("localhost");
+                //x.UseSqlServer("Server=DESKTOP-M9R8T31;Initial Catalog=Test;User Id=sa;Password=P@ssw0rd;MultipleActiveResultSets=True");
+                x.UseRabbitMQ(o => { o.HostName = "192.168.2.206"; o.UserName = "admin"; o.Password = "123123"; });
             });
 
             // Add framework services.

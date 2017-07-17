@@ -4,7 +4,6 @@ using DotNetCore.CAP;
 using DotNetCore.CAP.RabbitMQ;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
-using Dapper;
 
 namespace Sample.Kafka.Controllers
 {
