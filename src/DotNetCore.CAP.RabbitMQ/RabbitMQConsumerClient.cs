@@ -2,7 +2,6 @@
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 

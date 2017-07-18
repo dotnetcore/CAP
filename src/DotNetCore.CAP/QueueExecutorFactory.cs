@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
 

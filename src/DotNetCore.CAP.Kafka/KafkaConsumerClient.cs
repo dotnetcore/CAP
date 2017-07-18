@@ -3,7 +3,6 @@ using System.Text;
 using System.Threading;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
-using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Kafka
 {
