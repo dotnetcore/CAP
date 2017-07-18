@@ -1,4 +1,5 @@
 using System.Data;
+using System.Data.SqlClient;
 using System.Threading;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
@@ -29,9 +30,22 @@ namespace DotNetCore.CAP.SqlServer.Test
                 {
                     var storage = GetService<SqlServerStorage>();
                     var token = new CancellationTokenSource().Token;
+                    CreateDatabase();
                     storage.InitializeAsync(token).Wait();
                     _sqlObjectInstalled = true;
                 }
+            }
+        }
+
+        private void CreateDatabase()
+        {
+            var masterConn = ConnectionUtil.GetMasterConnectionString();
+            var databaseName = ConnectionUtil.GetDatabaseName();
+            using (var connection = ConnectionUtil.CreateConnection(masterConn))
+            {
+                connection.Execute($@"
+IF NOT EXISTS (SELECT * FROM sysdatabases WHERE name = N'{databaseName}')  
+CREATE DATABASE [{databaseName}];");
             }
         }
 

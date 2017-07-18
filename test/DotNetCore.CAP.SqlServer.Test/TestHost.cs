@@ -7,6 +7,7 @@ namespace DotNetCore.CAP.SqlServer.Test
     public abstract class TestHost : IDisposable
     {
         protected IServiceCollection _services;
+        protected string _connectionString;
         private IServiceProvider _provider;
         private IServiceProvider _scopedProvider;
 
@@ -27,10 +28,10 @@ namespace DotNetCore.CAP.SqlServer.Test
             services.AddOptions();
             services.AddLogging();
 
-            var connectionString = ConnectionUtil.GetConnectionString();
-            services.AddSingleton(new SqlServerOptions { ConnectionString = connectionString });
+            _connectionString = ConnectionUtil.GetConnectionString();
+            services.AddSingleton(new SqlServerOptions { ConnectionString = _connectionString });
             services.AddSingleton<SqlServerStorage>();
-            services.AddDbContext<TestDbContext>(options => options.UseSqlServer(connectionString));
+            services.AddDbContext<TestDbContext>(options => options.UseSqlServer(_connectionString));
 
             _services = services;
         }
