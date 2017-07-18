@@ -40,7 +40,7 @@ namespace DotNetCore.CAP
                 var newState = default(IState);
                 if (!result.Succeeded)
                 {
-                    var shouldRetry = await UpdateJobForRetryAsync(message, connection);
+                    var shouldRetry = await UpdateMessageForRetryAsync(message, connection);
                     if (shouldRetry)
                     {
                         newState = new ScheduledState();
@@ -74,7 +74,7 @@ namespace DotNetCore.CAP
             }
         }
 
-        private async Task<bool> UpdateJobForRetryAsync(CapPublishedMessage message, IStorageConnection connection)
+        private async Task<bool> UpdateMessageForRetryAsync(CapPublishedMessage message, IStorageConnection connection)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
