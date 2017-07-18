@@ -1,4 +1,4 @@
-﻿namespace DotNetCore.CAP.Infrastructure
+﻿namespace DotNetCore.CAP
 {
     public class MessageContext
     {

@@ -1,6 +1,6 @@
 ﻿using DotNetCore.CAP.Abstractions;
 
-namespace DotNetCore.CAP.Infrastructure
+namespace DotNetCore.CAP.Internal
 {
     public interface IConsumerInvokerFactory
     {
