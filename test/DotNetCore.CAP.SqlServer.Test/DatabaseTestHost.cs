@@ -17,7 +17,10 @@ namespace DotNetCore.CAP.SqlServer.Test
             {
                 if (!_sqlObjectInstalled)
                 {
-                    InitializeDatabase();
+                    lock (this)
+                    {
+                        InitializeDatabase();
+                    }
                 }
             }
         }
