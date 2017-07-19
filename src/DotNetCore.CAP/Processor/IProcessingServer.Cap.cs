@@ -110,15 +110,15 @@ namespace DotNetCore.CAP.Processor
             var returnedProcessors = new List<IProcessor>();
             for (int i = 0; i < processorCount; i++)
             {
-                var messageProcessors = _provider.GetService<IDispatcher>();
+                var messageProcessors = _provider.GetRequiredService<IDispatcher>();
                 _messageDispatchers.Add(messageProcessors);
             }
             returnedProcessors.AddRange(_messageDispatchers);
 
-            returnedProcessors.Add(_provider.GetService<PublishQueuer>());
-            returnedProcessors.Add(_provider.GetService<SubscribeQueuer>());
+            returnedProcessors.Add(_provider.GetRequiredService<PublishQueuer>());
+            returnedProcessors.Add(_provider.GetRequiredService<SubscribeQueuer>());
 
-            returnedProcessors.Add(_provider.GetService<IAdditionalProcessor>());
+            returnedProcessors.Add(_provider.GetRequiredService<IAdditionalProcessor>());
 
             return returnedProcessors.ToArray();
         }
