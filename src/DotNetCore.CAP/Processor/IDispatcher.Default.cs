@@ -48,8 +48,6 @@ namespace DotNetCore.CAP.Processor
         {
             try
             {
-                _logger.LogInformation("BaseMessageJobProcessor processing ...");
-
                 var worked = await Step(context);
 
                 context.ThrowIfStopping();
