@@ -6,7 +6,8 @@ using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Abstractions.ModelBinding;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Job;
+using DotNetCore.CAP.Processor;
+using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection
@@ -17,16 +18,6 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds and configures the CAP services for the consitence.
-        /// </summary>
-        /// <param name="services">The services available in the application.</param>
-        /// <returns>An <see cref="CapBuilder"/> for application services.</returns>
-        public static CapBuilder AddCap(this IServiceCollection services)
-        {
-            return services.AddCap(x => new CapOptions());
-        }
-
-        /// <summary>
         /// Adds and configures the consistence services for the consitence.
         /// </summary>
         /// <param name="services">The services available in the application.</param>
@@ -36,10 +27,12 @@ namespace Microsoft.Extensions.DependencyInjection
             this IServiceCollection services,
             Action<CapOptions> setupAction)
         {
+            if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
+
             services.TryAddSingleton<CapMarkerService>();
             services.Configure(setupAction);
 
-            AddConsumerServices(services);
+            AddSubscribeServices(services);
 
             services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
             services.TryAddSingleton<IModelBinder, DefaultModelBinder>();
@@ -47,19 +40,32 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<MethodMatcherCache>();
 
             services.AddSingleton<IProcessingServer, ConsumerHandler>();
-            services.AddSingleton<IProcessingServer, JobProcessingServer>();
+            services.AddSingleton<IProcessingServer, CapProcessingServer>();
             services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
+            services.AddSingleton<IStateChanger, StateChanger>();
 
-            services.TryAddTransient<IJobProcessor, CronJobProcessor>();
-            services.TryAddSingleton<IJob, CapJob>();
-            services.TryAddTransient<DefaultCronJobRegistry>();
+            //Processors
+            services.AddTransient<PublishQueuer>();
+            services.AddTransient<SubscribeQueuer>();
+            services.AddTransient<IDispatcher, DefaultDispatcher>();
 
-            services.TryAddScoped<ICapPublisher, DefaultCapPublisher>();
+            //Executors
+            services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
+            services.AddSingleton<IQueueExecutor, SubscibeQueueExecutor>();
+
+            //Options and extension service
+            var options = new CapOptions();
+            setupAction(options);
+            foreach (var serviceExtension in options.Extensions)
+            {
+                serviceExtension.AddServices(services);
+            }          
+            services.AddSingleton(options);
 
             return new CapBuilder(services);
         }
 
-        private static void AddConsumerServices(IServiceCollection services)
+        private static void AddSubscribeServices(IServiceCollection services)
         {
             var consumerListenerServices = new Dictionary<Type, Type>();
             foreach (var rejectedServices in services)

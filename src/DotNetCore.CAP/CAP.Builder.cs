@@ -1,5 +1,4 @@
 ﻿using System;
-using DotNetCore.CAP.Job;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP
@@ -33,38 +32,6 @@ namespace DotNetCore.CAP
         {
             Services.AddScoped(serviceType, concreteType);
             return this;
-        }
-
-        /// <summary>
-        /// Adds a singleton service of the type specified in serviceType with an implementation
-        /// </summary>
-        private CapBuilder AddSingleton<TService, TImplementation>()
-            where TService : class
-            where TImplementation : class, TService
-        {
-            Services.AddSingleton<TService, TImplementation>();
-            return this;
-        }
-
-        /// <summary>
-        /// Add an <see cref="ICapMessageStore"/> .
-        /// </summary>
-        /// <typeparam name="T">The type for the <see cref="ICapMessageStore"/> to add. </typeparam>
-        /// <returns>The current <see cref="CapBuilder"/> instance.</returns>
-        public virtual CapBuilder AddMessageStore<T>()
-            where T : class, ICapMessageStore
-        {
-            return AddScoped(typeof(ICapMessageStore), typeof(T));
-        }
-
-        /// <summary>
-        /// Add an <see cref="IJob"/> for process <see cref="CapJob"/>.
-        /// </summary>
-        /// <typeparam name="T">The type of the job.</typeparam>
-        public virtual CapBuilder AddJobs<T>()
-            where T : class, IJob
-        {
-            return AddSingleton<IJob, T>();
         }
 
         /// <summary>

@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -16,12 +16,11 @@ namespace DotNetCore.CAP
         private readonly IServiceProvider _serviceProvider;
         private readonly IConsumerInvokerFactory _consumerInvokerFactory;
         private readonly IConsumerClientFactory _consumerClientFactory;
-        private readonly ILoggerFactory _loggerFactory;
         private readonly ILogger _logger;
 
+        private readonly CancellationTokenSource _cts;
         private readonly MethodMatcherCache _selector;
         private readonly CapOptions _options;
-        private readonly CancellationTokenSource _cts;
 
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
 
@@ -32,13 +31,12 @@ namespace DotNetCore.CAP
             IServiceProvider serviceProvider,
             IConsumerInvokerFactory consumerInvokerFactory,
             IConsumerClientFactory consumerClientFactory,
-            ILoggerFactory loggerFactory,
+            ILogger<ConsumerHandler> logger,
             MethodMatcherCache selector,
             IOptions<CapOptions> options)
         {
             _selector = selector;
-            _logger = loggerFactory.CreateLogger<ConsumerHandler>();
-            _loggerFactory = loggerFactory;
+            _logger = logger;
             _serviceProvider = serviceProvider;
             _consumerInvokerFactory = consumerInvokerFactory;
             _consumerClientFactory = consumerClientFactory;
@@ -63,9 +61,9 @@ namespace DotNetCore.CAP
                             client.Subscribe(item.Attribute.Name);
                         }
 
-                        client.Listening(_pollingDelay);
+                        client.Listening(_pollingDelay, _cts.Token);
                     }
-                }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+                }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
             _compositeTask = Task.CompletedTask;
         }
@@ -83,7 +81,7 @@ namespace DotNetCore.CAP
 
             try
             {
-                _compositeTask.Wait((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
+                _compositeTask.Wait(TimeSpan.FromSeconds(60));
             }
             catch (AggregateException ex)
             {
@@ -99,56 +97,32 @@ namespace DotNetCore.CAP
         {
             client.MessageReceieved += (sender, message) =>
             {
-                _logger.EnqueuingReceivedMessage(message.KeyName, message.Content);
+                _logger.EnqueuingReceivedMessage(message.Name, message.Content);
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     var receviedMessage = StoreMessage(scope, message);
                     client.Commit();
-                    ProcessMessage(scope, receviedMessage);
                 }
+                Pulse();
             };
         }
 
         private CapReceivedMessage StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
         {
             var provider = serviceScope.ServiceProvider;
-            var messageStore = provider.GetRequiredService<ICapMessageStore>();
+            var messageStore = provider.GetRequiredService<IStorageConnection>();
             var receivedMessage = new CapReceivedMessage(messageContext)
             {
-                StatusName = StatusName.Enqueued,
+                StatusName = StatusName.Scheduled,
             };
             messageStore.StoreReceivedMessageAsync(receivedMessage).Wait();
             return receivedMessage;
         }
 
-        private void ProcessMessage(IServiceScope serviceScope, CapReceivedMessage receivedMessage)
+        public void Pulse()
         {
-            var provider = serviceScope.ServiceProvider;
-            var messageStore = provider.GetRequiredService<ICapMessageStore>();
-            try
-            {
-                var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.KeyName);
-
-                if (executeDescriptorGroup.ContainsKey(receivedMessage.Group))
-                {
-                    messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Processing).Wait();
-
-                    // If there are multiple consumers in the same group, we will take the first
-                    var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
-                    var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
-
-                    _consumerInvokerFactory.CreateInvoker(consumerContext).InvokeAsync();
-
-                    messageStore.ChangeReceivedMessageStateAsync(receivedMessage, StatusName.Succeeded).Wait();
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.KeyName}", ex);
-            }
+            SubscribeQueuer.PulseEvent.Set();
         }
-
-
     }
 }

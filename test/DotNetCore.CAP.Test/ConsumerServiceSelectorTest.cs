@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.Test
             services.AddScoped<IFooTest, CandidatesFooTest>();
             services.AddScoped<IBarTest, CandidatesBarTest>();
             services.AddLogging();
-            services.AddCap();
+            services.AddCap(x=> { });
             _provider = services.BuildServiceProvider();
         }
 

@@ -1,44 +1,47 @@
 ﻿using System;
-using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Job;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
+using System.Data;
 
 namespace DotNetCore.CAP.Test
 {
     public class CapBuilderTest
     {
         [Fact]
-        public void CanOverrideMessageStore()
+        public void CanCreateInstanceAndGetService()
         {
             var services = new ServiceCollection();
-            services.AddCap().AddMessageStore<MyMessageStore>();
 
-            var thingy = services.BuildServiceProvider()
-                .GetRequiredService<ICapMessageStore>() as MyMessageStore;
+            services.AddSingleton<ICapPublisher, MyProducerService>();
+            var builder = new CapBuilder(services);
+            Assert.NotNull(builder);
 
-            Assert.NotNull(thingy);
+            var count = builder.Services.Count;
+            Assert.Equal(1, count);
+
+            var provider = services.BuildServiceProvider();
+            var capPublisher = provider.GetService<ICapPublisher>();
+            Assert.NotNull(capPublisher);
         }
 
         [Fact]
-        public void CanOverrideJobs()
+        public void CanAddCapService()
         {
             var services = new ServiceCollection();
-            services.AddCap().AddJobs<MyJobTest>();
+            services.AddCap(x => { });
+            var builder = services.BuildServiceProvider();
 
-            var thingy = services.BuildServiceProvider()
-                .GetRequiredService<IJob>() as MyJobTest;
-
-            Assert.NotNull(thingy);
+            var markService = builder.GetService<CapMarkerService>();
+            Assert.NotNull(markService);
         }
 
+
         [Fact]
-        public void CanOverrideProducerService()
+        public void CanOverridePublishService()
         {
             var services = new ServiceCollection();
-            services.AddCap().AddProducerService<MyProducerService>();
+            services.AddCap(x => { }).AddProducerService<MyProducerService>();
 
             var thingy = services.BuildServiceProvider()
                 .GetRequiredService<ICapPublisher>() as MyProducerService;
@@ -46,6 +49,15 @@ namespace DotNetCore.CAP.Test
             Assert.NotNull(thingy);
         }
 
+        [Fact]
+        public void CanResolveCapOptions()
+        {
+            var services = new ServiceCollection();
+            services.AddCap(x => { });
+            var builder = services.BuildServiceProvider();
+            var capOptions = builder.GetService<CapOptions>();
+            Assert.NotNull(capOptions);
+        }
 
         private class MyProducerService : ICapPublisher
         {
@@ -58,62 +70,13 @@ namespace DotNetCore.CAP.Test
             {
                 throw new NotImplementedException();
             }
-        }
 
-
-        private class MyJobTest : IJob
-        {
-            public Task ExecuteAsync()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        private class MyMessageStore : ICapMessageStore
-        {
-            public Task<OperateResult> ChangeReceivedMessageStateAsync(CapReceivedMessage message, string statusName,
-                bool autoSaveChanges = true)
+            public Task PublishAsync(string topic, string content, IDbConnection dbConnection)
             {
                 throw new NotImplementedException();
             }
 
-            public Task<OperateResult> ChangeSentMessageStateAsync(CapSentMessage message, string statusName,
-                bool autoSaveChanges = true)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<CapReceivedMessage> GetNextReceivedMessageToBeExcuted()
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<CapSentMessage> GetNextSentMessageToBeEnqueuedAsync()
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<OperateResult> RemoveSentMessageAsync(CapSentMessage message)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<OperateResult> StoreReceivedMessageAsync(CapReceivedMessage message)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<OperateResult> StoreSentMessageAsync(CapSentMessage message)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<OperateResult> UpdateReceivedMessageAsync(CapReceivedMessage message)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task<OperateResult> UpdateSentMessageAsync(CapSentMessage message)
+            public Task PublishAsync(string topic, string content, IDbConnection dbConnection, IDbTransaction dbTransaction)
             {
                 throw new NotImplementedException();
             }

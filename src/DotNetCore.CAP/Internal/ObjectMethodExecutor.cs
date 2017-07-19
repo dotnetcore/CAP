@@ -130,7 +130,7 @@ namespace DotNetCore.CAP.Internal
 
         private static ConsumerMethodExecutor WrapVoidAction(VoidActionExecutor executor)
         {
-            return delegate(object target, object[] parameters)
+            return delegate (object target, object[] parameters)
             {
                 executor(target, parameters);
                 return null;
@@ -192,7 +192,7 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         private static async Task<object> CastToObject<T>(Task<T> task)
         {
-            return (object) await task;
+            return (object)await task;
         }
 
         private static Type GetTaskInnerTypeOrNull(Type type)
@@ -279,7 +279,7 @@ namespace DotNetCore.CAP.Internal
 
         private static Task<object> Convert<T>(object taskAsObject)
         {
-            var task = (Task<T>) taskAsObject;
+            var task = (Task<T>)taskAsObject;
             return CastToObject<T>(task);
         }
 

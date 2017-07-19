@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Kafka;
+using DotNetCore.CAP.RabbitMQ;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 
@@ -11,10 +11,12 @@ namespace Sample.Kafka.Controllers
     public class ValuesController : Controller, ICapSubscribe
     {
         private readonly ICapPublisher _producer;
+        private readonly AppDbContext _dbContext ;
 
-        public ValuesController(ICapPublisher producer)
+        public ValuesController(ICapPublisher producer, AppDbContext dbContext)
         {
             _producer = producer;
+            _dbContext = dbContext;
         }
 
         [Route("/")]
@@ -27,15 +29,19 @@ namespace Sample.Kafka.Controllers
         [CapSubscribe("zzwl.topic.finace.callBack", Group = "test")]
         public void KafkaTest(Person person)
         {
-            Console.WriteLine(person.Name);
-            Console.WriteLine(person.Age);
-            
+            Console.WriteLine(DateTime.Now);
         }
 
         [Route("~/send")]
         public async Task<IActionResult> SendTopic()
         {
-            await _producer.PublishAsync("zzwl.topic.finace.callBack", new Person { Name = "Test", Age = 11 });
+            using (var trans = _dbContext.Database.BeginTransaction())
+            {
+                await _producer.PublishAsync("zzwl.topic.finace.callBack","");
+
+                trans.Commit();
+            }
+
             return Ok();
         }
 

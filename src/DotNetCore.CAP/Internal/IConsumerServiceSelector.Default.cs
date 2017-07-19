@@ -44,7 +44,6 @@ namespace DotNetCore.CAP.Internal
             return executorDescriptorList;
         }
 
-
         private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
             IServiceProvider provider)
         {

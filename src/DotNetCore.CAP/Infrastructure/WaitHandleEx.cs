@@ -6,8 +6,6 @@ namespace DotNetCore.CAP.Infrastructure
 {
     public static class WaitHandleEx
     {
-        public static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
-
         public static Task WaitAnyAsync(WaitHandle handle1, WaitHandle handle2, TimeSpan timeout)
         {
             var t1 = handle1.WaitOneAsync(timeout);
@@ -23,7 +21,7 @@ namespace DotNetCore.CAP.Infrastructure
                 var tcs = new TaskCompletionSource<bool>();
                 registeredHandle = ThreadPool.RegisterWaitForSingleObject(
                     handle,
-                    (state, timedOut) => ((TaskCompletionSource<bool>) state).TrySetResult(!timedOut),
+                    (state, timedOut) => ((TaskCompletionSource<bool>)state).TrySetResult(!timedOut),
                     tcs,
                     timeout,
                     true);

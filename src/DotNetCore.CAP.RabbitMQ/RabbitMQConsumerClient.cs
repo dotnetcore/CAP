@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -45,18 +45,18 @@ namespace DotNetCore.CAP.RabbitMQ
 
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(exchange: _exchageName, type: _rabbitMQOptions.EXCHANGE_TYPE);
+            _channel.ExchangeDeclare(exchange: _exchageName, type: RabbitMQOptions.ExchangeType);
             _channel.QueueDeclare(_queueName, exclusive: false);
         }
 
-        public void Listening(TimeSpan timeout)
+        public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnConsumerReceived;
             _channel.BasicConsume(_queueName, false, consumer);
             while (true)
             {
-                Task.Delay(timeout);
+                Task.Delay(timeout, cancellationToken).Wait();
             }
         }
 
@@ -87,7 +87,7 @@ namespace DotNetCore.CAP.RabbitMQ
             var message = new MessageContext
             {
                 Group = _queueName,
-                KeyName = e.RoutingKey,
+                Name = e.RoutingKey,
                 Content = Encoding.UTF8.GetString(e.Body)
             };
             MessageReceieved?.Invoke(sender, message);

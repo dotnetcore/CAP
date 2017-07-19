@@ -2,7 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace DotNetCore.CAP.Kafka
+// ReSharper disable once CheckNamespace
+namespace DotNetCore.CAP
 {
     /// <summary>
     /// Provides programmatic configuration for the CAP kafka project.
@@ -32,9 +33,9 @@ namespace DotNetCore.CAP.Kafka
 
         internal IEnumerable<KeyValuePair<string, object>> AsRdkafkaConfig()
         {
-            if (MainConfig.ContainsKey("bootstrap.servers")) 
+            if (MainConfig.ContainsKey("bootstrap.servers"))
                 return MainConfig.AsEnumerable();
-            
+
             if (string.IsNullOrEmpty(Servers))
             {
                 throw new ArgumentNullException(nameof(Servers));

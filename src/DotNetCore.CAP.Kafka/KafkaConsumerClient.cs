@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Text;
+using System.Threading;
 using Confluent.Kafka;
 using Confluent.Kafka.Serialization;
-using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Kafka
 {
@@ -38,10 +38,11 @@ namespace DotNetCore.CAP.Kafka
             _consumerClient.Subscribe(topicName);
         }
 
-        public void Listening(TimeSpan timeout)
+        public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             while (true)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 _consumerClient.Poll(timeout);
             }
         }
@@ -73,12 +74,11 @@ namespace DotNetCore.CAP.Kafka
             var message = new MessageContext
             {
                 Group = _groupId,
-                KeyName = e.Topic,
+                Name = e.Topic,
                 Content = e.Value
             };
             MessageReceieved?.Invoke(sender, message);
         }
-
 
         #endregion private methods
     }

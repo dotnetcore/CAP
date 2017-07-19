@@ -1,4 +1,5 @@
-﻿namespace DotNetCore.CAP.RabbitMQ
+﻿// ReSharper disable once CheckNamespace
+namespace DotNetCore.CAP
 {
     public class RabbitMQOptions
     {
@@ -34,7 +35,7 @@
         public string HostName { get; set; } = "localhost";
 
         /// <summary> The topic exchange type. </summary>
-        internal string EXCHANGE_TYPE = "topic";
+        internal const string ExchangeType = "topic";
 
         /// <summary>
         /// Password to use when authenticating to the server.
@@ -72,7 +73,7 @@
         public int SocketWriteTimeout { get; set; } = DefaultConnectionTimeout;
 
         /// <summary>
-        /// The port to connect on. 
+        /// The port to connect on.
         /// </summary>
         public int Port { get; set; } = -1;
     }

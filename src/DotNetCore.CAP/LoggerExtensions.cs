@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using DotNetCore.CAP.Job;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
@@ -13,15 +10,16 @@ namespace DotNetCore.CAP
         private static readonly Action<ILogger, Exception> _serverShuttingDown;
         private static readonly Action<ILogger, string, Exception> _expectedOperationCanceledException;
 
-        private static readonly Action<ILogger, Exception> _cronJobsNotFound;
-        private static readonly Action<ILogger, int, Exception> _cronJobsScheduling;
-        private static readonly Action<ILogger, string, double, Exception> _cronJobExecuted;
-        private static readonly Action<ILogger, string, Exception> _cronJobFailed;
-
         private static readonly Action<ILogger, string, string, Exception> _enqueuingSentMessage;
         private static readonly Action<ILogger, string, string, Exception> _enqueuingReceivdeMessage;
         private static readonly Action<ILogger, string, Exception> _executingConsumerMethod;
         private static readonly Action<ILogger, string, Exception> _receivedMessageRetryExecuting;
+
+        private static Action<ILogger, Exception> _jobFailed;
+        private static Action<ILogger, Exception> _jobFailedWillRetry;
+        private static Action<ILogger, double, Exception> _jobExecuted;
+        private static Action<ILogger, int, Exception> _jobRetrying;
+        private static Action<ILogger, string, Exception> _exceptionOccuredWhileExecutingJob;
 
         static LoggerExtensions()
         {
@@ -45,26 +43,6 @@ namespace DotNetCore.CAP
                 3,
                 "Expected an OperationCanceledException, but found '{ExceptionMessage}'.");
 
-            _cronJobsNotFound = LoggerMessage.Define(
-                LogLevel.Debug,
-                1,
-                "No cron jobs found to schedule, cancelling processing of cron jobs.");
-
-            _cronJobsScheduling = LoggerMessage.Define<int>(
-                LogLevel.Debug,
-                2,
-                "Found {JobCount} cron job(s) to schedule.");
-
-            _cronJobExecuted = LoggerMessage.Define<string, double>(
-                LogLevel.Debug,
-                3,
-                "Cron job '{JobName}' executed succesfully. Took: {Seconds} secs.");
-
-            _cronJobFailed = LoggerMessage.Define<string>(
-                LogLevel.Warning,
-                4,
-                "Cron job '{jobName}' failed to execute.");
-
             _enqueuingSentMessage = LoggerMessage.Define<string, string>(
                 LogLevel.Debug,
                 2,
@@ -84,6 +62,52 @@ namespace DotNetCore.CAP
                 LogLevel.Error,
                 5,
                 "Received message topic method '{topicName}' failed to execute.");
+
+            _jobRetrying = LoggerMessage.Define<int>(
+                LogLevel.Debug,
+                3,
+                "Retrying a job: {Retries}...");
+
+            _jobExecuted = LoggerMessage.Define<double>(
+                LogLevel.Debug,
+                4,
+                "Job executed. Took: {Seconds} secs.");
+
+            _jobFailed = LoggerMessage.Define(
+            LogLevel.Warning,
+            1,
+            "Job failed to execute.");
+
+            _jobFailedWillRetry = LoggerMessage.Define(
+                LogLevel.Warning,
+                2,
+                "Job failed to execute. Will retry.");
+
+            _exceptionOccuredWhileExecutingJob = LoggerMessage.Define<string>(
+              LogLevel.Error,
+              6,
+              "An exception occured while trying to execute a job: '{JobId}'. " +
+              "Requeuing for another retry.");
+        }
+
+        public static void JobFailed(this ILogger logger, Exception ex)
+        {
+            _jobFailed(logger, ex);
+        }
+
+        public static void JobFailedWillRetry(this ILogger logger, Exception ex)
+        {
+            _jobFailedWillRetry(logger, ex);
+        }
+
+        public static void JobRetrying(this ILogger logger, int retries)
+        {
+            _jobRetrying(logger, retries, null);
+        }
+
+        public static void JobExecuted(this ILogger logger, double seconds)
+        {
+            _jobExecuted(logger, seconds, null);
         }
 
         public static void ConsumerMethodExecutingFailed(this ILogger logger, string methodName, Exception ex)
@@ -126,24 +150,9 @@ namespace DotNetCore.CAP
             _expectedOperationCanceledException(logger, ex.Message, ex);
         }
 
-        public static void CronJobsNotFound(this ILogger logger)
+        public static void ExceptionOccuredWhileExecutingJob(this ILogger logger, string jobId, Exception ex)
         {
-            _cronJobsNotFound(logger, null);
-        }
-
-        public static void CronJobsScheduling(this ILogger logger, IEnumerable<CronJob> jobs)
-        {
-            _cronJobsScheduling(logger, jobs.Count(), null);
-        }
-
-        public static void CronJobExecuted(this ILogger logger, string name, double seconds)
-        {
-            _cronJobExecuted(logger, name, seconds, null);
-        }
-
-        public static void CronJobFailed(this ILogger logger, string name, Exception ex)
-        {
-            _cronJobFailed(logger, name, ex);
+            _exceptionOccuredWhileExecutingJob(logger, jobId, ex);
         }
     }
 }

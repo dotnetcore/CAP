@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         /// <returns>
         /// <para>
         /// A <see cref="Task"/> which will complete when the model binding process completes.
-        /// </para> 
+        /// </para>
         /// </returns>
         Task BindModelAsync(ModelBindingContext bindingContext);
     }

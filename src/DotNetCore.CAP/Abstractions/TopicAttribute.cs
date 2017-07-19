@@ -8,9 +8,9 @@ namespace DotNetCore.CAP.Abstractions
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
     public abstract class TopicAttribute : Attribute
     {
-        protected TopicAttribute(string topicName)
+        protected TopicAttribute(string name)
         {
-            Name = topicName;
+            Name = name;
         }
 
         /// <summary>

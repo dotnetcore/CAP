@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Linq;
 using DotNetCore.CAP.Abstractions;
 
 namespace DotNetCore.CAP.Internal
@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.Internal
 
         /// <summary>
         ///  Get a dictionary of specify topic candidates.
-        ///  The Key is Group name, the value is specify topic candidates. 
+        ///  The Key is Group name, the value is specify topic candidates.
         /// </summary>
         /// <param name="topicName">message topic name</param>
         public IDictionary<string, IList<ConsumerExecutorDescriptor>> GetTopicExector(string topicName)

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,7 +23,7 @@ namespace DotNetCore.CAP
         public DefaultBootstrapper(
             ILogger<DefaultBootstrapper> logger,
             IOptions<CapOptions> options,
-            ICapMessageStore storage,
+            IStorage storage,
             IApplicationLifetime appLifetime,
             IServiceProvider provider)
         {
@@ -52,7 +51,7 @@ namespace DotNetCore.CAP
 
         protected CapOptions Options { get; }
 
-        protected ICapMessageStore Storage { get; }
+        protected IStorage Storage { get; }
 
         protected IEnumerable<IProcessingServer> Servers { get; }
 
@@ -65,7 +64,7 @@ namespace DotNetCore.CAP
 
         private async Task BootstrapTaskAsync()
         {
-            if (_cts.IsCancellationRequested) return;
+            await Storage.InitializeAsync(_cts.Token);
 
             if (_cts.IsCancellationRequested) return;
 
@@ -98,7 +97,7 @@ namespace DotNetCore.CAP
                     item.Dispose();
                 }
             });
-            return Task.FromResult(0);
+            return Task.CompletedTask;
         }
     }
 }

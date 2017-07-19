@@ -4,9 +4,9 @@ using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Infrastructure
 {
-    internal static class Helper
+    public static class Helper
     {
-        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local);
         private static JsonSerializerSettings _serializerSettings;
 
         public static void SetSerializerSettings(JsonSerializerSettings setting)
@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.Infrastructure
         public static long ToTimestamp(DateTime value)
         {
             var elapsedTime = value - Epoch;
-            return (long) elapsedTime.TotalSeconds;
+            return (long)elapsedTime.TotalSeconds;
         }
 
         public static DateTime FromTimestamp(long value)

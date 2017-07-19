@@ -6,6 +6,7 @@
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
 [![NuGet](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
+[![Member Project Of .NET China Foundation](https://github.com/dotnetcore/Home/raw/master/icons/member-project-of-netchina.png)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
 CAP 是一个在分布式系统（SOA、MicroService）中实现最终一致性的库，它具有轻量级、易使用、高性能等特点。
@@ -30,6 +31,10 @@ CAP 具有消息持久化的功能，当你的服务进行重启或者宕机时�
 
 你可以运行以下下命令在你的项目中安装 CAP。
 
+```
+PM> Install-Package DotNetCore.CAP -Pre
+```
+
 如果你的消息队列使用的是 Kafka 的话，你可以：
 
 ```
@@ -42,10 +47,10 @@ PM> Install-Package DotNetCore.CAP.Kafka -Pre
 PM> Install-Package DotNetCore.CAP.RabbitMQ -Pre
 ```
 
-CAP 默认提供了 Entity Framwork 作为数据库存储：
+CAP 默认提供了 Sql Server 的扩展作为数据库存储（MySql的正在开发中）：
 
 ```
-PM> Install-Package DotNetCore.CAP.EntityFrameworkCore -Pre
+PM> Install-Package DotNetCore.CAP.SqlServer -Pre
 ```
 
 ### Configuration
@@ -57,11 +62,23 @@ public void ConfigureServices(IServiceCollection services)
 {
 	......
 
-    services.AddDbContext<AppDbContext>();
+	services.AddDbContext<AppDbContext>();
 
-    services.AddCap()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddKafka(x => x.Servers = "localhost:9092");
+	services.AddCap(x =>
+	{
+		// 如果你的 SqlServer 使用的 EF 进行数据操作，你需要添加如下配置：
+		// 注意: 你不需要再次配置 x.UseSqlServer(""")
+		x.UseEntityFramework<AppDbContext>();
+		
+		// 如果你使用的Dapper，你需要添加如下配置：
+		x.UseSqlServer("数据库连接字符串");
+
+		// 如果你使用的 RabbitMQ 作为MQ，你需要添加如下配置：
+		x.UseRabbitMQ("localhost");
+
+		//如果你使用的 Kafka 作为MQ，你需要添加如下配置：
+		x.UseKafka("localhost");
+	});
 }
 
 public void Configure(IApplicationBuilder app)
@@ -94,6 +111,18 @@ public class PublishController : Controller
 		//指定发送的消息头和内容
 		await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
+		return Ok();
+	}
+
+	[Route("~/checkAccountWithTrans")]
+	public async Task<IActionResult> PublishMessageWithTransaction([FromServices]AppDbContext dbContext)
+	{
+		 using (var trans = dbContext.Database.BeginTransaction())
+		 {
+			await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
+
+			trans.Commit();
+		 }
 		return Ok();
 	}
 }
