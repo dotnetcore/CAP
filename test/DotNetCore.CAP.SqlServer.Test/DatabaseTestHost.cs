@@ -1,5 +1,4 @@
 using System.Data;
-using System.Data.SqlClient;
 using System.Threading;
 using Dapper;
 using Microsoft.EntityFrameworkCore;
@@ -9,11 +8,18 @@ namespace DotNetCore.CAP.SqlServer.Test
     public abstract class DatabaseTestHost : TestHost
     {
         private static bool _sqlObjectInstalled;
+        public static object _lock = new object();
 
         protected override void PostBuildServices()
         {
             base.PostBuildServices();
-            InitializeDatabase();
+            lock (_lock)
+            {
+                if (!_sqlObjectInstalled)
+                {
+                    InitializeDatabase();
+                }
+            }
         }
 
         public override void Dispose()
@@ -24,16 +30,13 @@ namespace DotNetCore.CAP.SqlServer.Test
 
         private void InitializeDatabase()
         {
-            if (!_sqlObjectInstalled)
+            using (CreateScope())
             {
-                using (CreateScope())
-                {
-                    var storage = GetService<SqlServerStorage>();
-                    var token = new CancellationTokenSource().Token;
-                    CreateDatabase();
-                    storage.InitializeAsync(token).Wait();
-                    _sqlObjectInstalled = true;
-                }
+                var storage = GetService<SqlServerStorage>();
+                var token = new CancellationTokenSource().Token;
+                CreateDatabase();
+                storage.InitializeAsync(token).Wait();
+                _sqlObjectInstalled = true;
             }
         }
 
@@ -44,7 +47,7 @@ namespace DotNetCore.CAP.SqlServer.Test
             using (var connection = ConnectionUtil.CreateConnection(masterConn))
             {
                 connection.Execute($@"
-IF NOT EXISTS (SELECT * FROM sysdatabases WHERE name = N'{databaseName}')  
+IF NOT EXISTS (SELECT * FROM sysdatabases WHERE name = N'{databaseName}')
 CREATE DATABASE [{databaseName}];");
             }
         }
