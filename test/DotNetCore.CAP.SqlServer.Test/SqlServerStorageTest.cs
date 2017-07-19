@@ -28,7 +28,7 @@ SELECT 'False'";
             using (var connection = ConnectionUtil.CreateConnection())
             {
                 var sql = @"
-IF OBJECT_ID(N'[CAP].[Published]',N'U') IS NOT NULL
+IF OBJECT_ID(N'[Cap].[Published]',N'U') IS NOT NULL
 SELECT 'True'
 ELSE
 SELECT 'False'";
@@ -43,7 +43,7 @@ SELECT 'False'";
             using (var connection = ConnectionUtil.CreateConnection())
             {
                 var sql = @"
-IF OBJECT_ID(N'[CAP].[Queue]',N'U') IS NOT NULL
+IF OBJECT_ID(N'[Cap].[Queue]',N'U') IS NOT NULL
 SELECT 'True'
 ELSE
 SELECT 'False'";
@@ -58,7 +58,7 @@ SELECT 'False'";
             using (var connection = ConnectionUtil.CreateConnection())
             {
                 var sql = @"
-IF OBJECT_ID(N'[CAP].[Received]',N'U') IS NOT NULL
+IF OBJECT_ID(N'[Cap].[Received]',N'U') IS NOT NULL
 SELECT 'True'
 ELSE
 SELECT 'False'";

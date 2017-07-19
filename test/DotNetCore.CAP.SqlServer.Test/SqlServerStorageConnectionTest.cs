@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
@@ -19,7 +20,7 @@ namespace DotNetCore.CAP.SqlServer.Test
         }
 
         [Fact]
-        public async void GetPublishedMessageAsync_Test()
+        public async Task GetPublishedMessageAsync_Test()
         {
             var sql = "INSERT INTO [Cap].[Published]([Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) OUTPUT INSERTED.Id VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             var publishMessage = new CapPublishedMessage
@@ -40,7 +41,7 @@ namespace DotNetCore.CAP.SqlServer.Test
         }
 
         [Fact]
-        public async void FetchNextMessageAsync_Test()
+        public async Task FetchNextMessageAsync_Test()
         {
             var sql = "INSERT INTO [Cap].[Queue]([MessageId],[MessageType]) VALUES(@MessageId,@MessageType);";
             var queue = new CapQueue
@@ -60,7 +61,7 @@ namespace DotNetCore.CAP.SqlServer.Test
         }
 
         [Fact]
-        public async void StoreReceivedMessageAsync_Test()
+        public async Task StoreReceivedMessageAsync_Test()
         {
             var receivedMessage = new CapReceivedMessage
             {
@@ -83,7 +84,7 @@ namespace DotNetCore.CAP.SqlServer.Test
         }
 
         [Fact]
-        public async void GetReceivedMessageAsync_Test()
+        public async Task GetReceivedMessageAsync_Test()
         {
 
             var sql = $@"
@@ -111,7 +112,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         }
 
         [Fact]
-        public async void GetNextReceviedMessageToBeEnqueuedAsync_Test()
+        public async Task GetNextReceviedMessageToBeEnqueuedAsync_Test()
         {
             var receivedMessage = new CapReceivedMessage
             {
