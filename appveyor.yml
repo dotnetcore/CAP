@@ -15,7 +15,7 @@ artifacts:
 deploy:
   provider: NuGet
   on:
-    appveyor_repo_tag: false
+    appveyor_repo_tag: true
   api_key:
     secure: U62rpGTEqztrUO4ncscm4XSaAoCSmWwT/rOWO/2JJS44psJvl0QpjRL0o0ughMoY
   skip_symbols: true
