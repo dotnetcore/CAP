@@ -3,6 +3,7 @@ using Dapper;
 
 namespace DotNetCore.CAP.SqlServer.Test
 {
+    [Collection("sqlserver")]
     public class SqlServerStorageTest : DatabaseTestHost
     {
         [Fact]
