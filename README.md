@@ -6,8 +6,12 @@
 
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/develop.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
+<<<<<<< HEAD
+[![NuGet](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
+=======
 [![NuGet](https://img.shields.io/nuget/v/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
 [![NuGet Preview](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg?label=nuget-pre)](https://www.nuget.org/packages/DotNetCore.CAP/)
+>>>>>>> a03f4952e254e013d8d9c724e5a2ab27775b1841
 [![Member Project Of .NET China Foundation](https://github.com/dotnetcore/Home/raw/master/icons/member-project-of-netchina.png)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
@@ -29,9 +33,13 @@ This is a diagram of the CAP working in the ASP.NET Core MicroService architectu
 
 ## Getting Started
 
-### NuGet (Coming soon)
+### NuGet
 
 You can run the following command to install the CAP in your project.
+
+```
+PM> Install-Package DotNetCore.CAP -Pre
+```
 
 If your Message Queue is using Kafka, you can：
 
@@ -39,16 +47,16 @@ If your Message Queue is using Kafka, you can：
 PM> Install-Package DotNetCore.CAP.Kafka -Pre
 ```
 
-or RabbitMQ：
+If your Message Queue is using RabbitMQ, you can：
 
 ```
 PM> Install-Package DotNetCore.CAP.RabbitMQ -Pre
 ```
 
-CAP provides EntityFramework as default database store extension ：
+CAP provides EntityFramework as default database store extension (The MySQL version is under development)：
 
 ```
-PM> Install-Package DotNetCore.CAP.EntityFrameworkCore -Pre
+PM> Install-Package DotNetCore.CAP.SqlServer -Pre
 ```
 
 ### Configuration
@@ -60,11 +68,23 @@ public void ConfigureServices(IServiceCollection services)
 {
 	......
 
-    services.AddDbContext<AppDbContext>();
+	services.AddDbContext<AppDbContext>();
 
-    services.AddCap()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddKafka(x => x.Servers = "localhost:9092");
+	services.AddCap(x =>
+	{
+		// If your SqlServer is using EF for data operations, you need to add the following configuration：
+		// Notice: You don't need to config x.UseSqlServer(""") again!
+		x.UseEntityFramework<AppDbContext>();
+		
+		// If you are using Dapper,you need to add the config：
+		x.UseSqlServer("Your ConnectionStrings");
+
+		// If your Message Queue is using RabbitMQ you need to add the config：
+		x.UseRabbitMQ("localhost");
+
+		// If your Message Queue is using Kafka you need to add the config：
+		x.UseKafka("localhost");
+	});
 }
 
 public void Configure(IApplicationBuilder app)
@@ -94,9 +114,21 @@ public class PublishController : Controller
 	[Route("~/checkAccount")]
 	public async Task<IActionResult> PublishMessage()
 	{
-		//Specifies the message header and content to be sent
+		// Specifies the message header and content to be sent
 		await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
+		return Ok();
+	}
+
+	[Route("~/checkAccountWithTrans")]
+	public async Task<IActionResult> PublishMessageWithTransaction([FromServices]AppDbContext dbContext)
+	{
+		 using (var trans = dbContext.Database.BeginTransaction())
+		 {
+			await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
+
+			trans.Commit();
+		 }
 		return Ok();
 	}
 }
@@ -148,7 +180,7 @@ namespace xxx.Service
 
 	public class SubscriberService: ISubscriberService, ICapSubscribe
 	{
-		[CapSubscribe("xxx.services.account.check")]
+		[KafkaTopic("xxx.services.account.check")]
 		public void CheckReceivedMessage(Person person)
 		{
 			
