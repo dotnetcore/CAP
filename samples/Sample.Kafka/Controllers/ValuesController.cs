@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
-using DotNetCore.CAP.RabbitMQ;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 
