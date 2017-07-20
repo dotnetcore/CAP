@@ -175,7 +175,7 @@ namespace xxx.Service
 
 	public class SubscriberService: ISubscriberService, ICapSubscribe
 	{
-		[KafkaTopic("xxx.services.account.check")]
+		[CapSubscribe("xxx.services.account.check")]
 		public void CheckReceivedMessage(Person person)
 		{
 			

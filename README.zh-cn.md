@@ -33,25 +33,25 @@ CAP 具有消息持久化的功能，当你的服务进行重启或者宕机时�
 你可以运行以下下命令在你的项目中安装 CAP。
 
 ```
-PM> Install-Package DotNetCore.CAP -Pre
+PM> Install-Package DotNetCore.CAP
 ```
 
 如果你的消息队列使用的是 Kafka 的话，你可以：
 
 ```
-PM> Install-Package DotNetCore.CAP.Kafka -Pre
+PM> Install-Package DotNetCore.CAP.Kafka
 ```
 
 如果你的消息队列使用的是 RabbitMQ 的话，你可以：
 
 ```
-PM> Install-Package DotNetCore.CAP.RabbitMQ -Pre
+PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
 CAP 默认提供了 Sql Server 的扩展作为数据库存储（MySql的正在开发中）：
 
 ```
-PM> Install-Package DotNetCore.CAP.SqlServer -Pre
+PM> Install-Package DotNetCore.CAP.SqlServer
 ```
 
 ### Configuration
@@ -175,7 +175,7 @@ namespace xxx.Service
 
 	public class SubscriberService: ISubscriberService, ICapSubscribe
 	{
-		[KafkaTopic("xxx.services.account.check")]
+		[CapSubscribe("xxx.services.account.check")]
 		public void CheckReceivedMessage(Person person)
 		{
 			
