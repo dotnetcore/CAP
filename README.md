@@ -33,25 +33,25 @@ This is a diagram of the CAP working in the ASP.NET Core MicroService architectu
 You can run the following command to install the CAP in your project.
 
 ```
-PM> Install-Package DotNetCore.CAP -Pre
+PM> Install-Package DotNetCore.CAP
 ```
 
 If your Message Queue is using Kafka, you can：
 
 ```
-PM> Install-Package DotNetCore.CAP.Kafka -Pre
+PM> Install-Package DotNetCore.CAP.Kafka
 ```
 
 If your Message Queue is using RabbitMQ, you can：
 
 ```
-PM> Install-Package DotNetCore.CAP.RabbitMQ -Pre
+PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
 CAP provides EntityFramework as default database store extension (The MySQL version is under development)：
 
 ```
-PM> Install-Package DotNetCore.CAP.SqlServer -Pre
+PM> Install-Package DotNetCore.CAP.SqlServer
 ```
 
 ### Configuration
