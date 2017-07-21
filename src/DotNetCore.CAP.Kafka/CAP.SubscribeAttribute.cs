@@ -6,35 +6,35 @@ namespace DotNetCore.CAP
     public class CapSubscribeAttribute : TopicAttribute
     {
         public CapSubscribeAttribute(string name)
-            : this(name, 0)
-        {
-        }
-
-        /// <summary>
-        /// Not support
-        /// </summary>
-        public CapSubscribeAttribute(string name, int partition)
-            : this(name, partition, 0)
-        {
-        }
-
-        /// <summary>
-        /// Not support
-        /// </summary>
-        public CapSubscribeAttribute(string name, int partition, long offset)
             : base(name)
         {
-            Offset = offset;
-            Partition = partition;
         }
 
-        public int Partition { get; }
+        ///// <summary>
+        ///// Not support
+        ///// </summary>
+        //public CapSubscribeAttribute(string name, int partition)
+        //    : this(name, partition, 0)
+        //{
+        //}
 
-        public long Offset { get; }
+        ///// <summary>
+        ///// Not support
+        ///// </summary>
+        //public CapSubscribeAttribute(string name, int partition, long offset)
+        //    : base(name)
+        //{
+        //    Offset = offset;
+        //    Partition = partition;
+        //}
 
-        public bool IsPartition => Partition == 0;
+        //public int Partition { get; }
 
-        public bool IsOffset => Offset == 0;
+        //public long Offset { get; }
+
+        //public bool IsPartition => Partition == 0;
+
+        //public bool IsOffset => Offset == 0;
 
         public override string ToString()
         {
