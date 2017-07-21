@@ -8,13 +8,13 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static CapOptions UseKafka(this CapOptions options, string bootstrapServers)
         {
-            return options.UseRabbitMQ(opt =>
+            return options.UseKafka(opt =>
             {
                 opt.Servers = bootstrapServers;
             });
         }
 
-        public static CapOptions UseRabbitMQ(this CapOptions options, Action<KafkaOptions> configure)
+        public static CapOptions UseKafka(this CapOptions options, Action<KafkaOptions> configure)
         {
             if (configure == null) throw new ArgumentNullException(nameof(configure));
 
