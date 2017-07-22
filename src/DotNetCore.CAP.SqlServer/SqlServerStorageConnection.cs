@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -55,6 +56,16 @@ OUTPUT DELETED.MessageId,DELETED.[MessageType];";
             }
         }
 
+        public async Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages()
+        {
+            var sql = $"SELECT * FROM [{_options.Schema}].[Published] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
+
+            using (var connection = new SqlConnection(_options.ConnectionString))
+            {
+                return await connection.QueryAsync<CapPublishedMessage>(sql);
+            }
+        }
+
         // CapReceviedMessage
 
         public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
@@ -86,6 +97,15 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             using (var connection = new SqlConnection(_options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
+            }
+        }
+
+        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages()
+        {
+            var sql = $"SELECT TOP (1) * FROM [{_options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
+            using (var connection = new SqlConnection(_options.ConnectionString))
+            {
+                return await connection.QueryAsync<CapReceivedMessage>(sql);
             }
         }
 

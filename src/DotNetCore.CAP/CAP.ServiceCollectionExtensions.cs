@@ -47,6 +47,7 @@ namespace Microsoft.Extensions.DependencyInjection
             //Processors
             services.AddTransient<PublishQueuer>();
             services.AddTransient<SubscribeQueuer>();
+            services.AddTransient<FailedJobProcessor>();
             services.AddTransient<IDispatcher, DefaultDispatcher>();
 
             //Executors
