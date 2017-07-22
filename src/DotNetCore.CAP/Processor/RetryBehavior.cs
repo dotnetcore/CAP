@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Processor
 
         static RetryBehavior()
         {
-            DefaultRetryCount = 25;
+            DefaultRetryCount = 15;
             DefaultRetryInThunk = retries =>
                 (int)Math.Round(Math.Pow(retries - 1, 4) + 15 + (_random.Next(30) * (retries)));
 
