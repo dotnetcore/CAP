@@ -13,10 +13,12 @@ namespace Sample.RabbitMQ.MySql
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<AppDbContext>();
+
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ("localhost");
+                x.UseKafka("localhost:9092");
             });
 
             services.AddMvc();
