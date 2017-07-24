@@ -26,6 +26,7 @@ namespace DotNetCore.CAP.MySql
             {
                 await connection.ExecuteAsync(sql);
             }
+
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
 

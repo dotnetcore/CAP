@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
@@ -41,7 +42,7 @@ namespace DotNetCore.CAP.MySql
                 var removedCount = 0;
                 do
                 {
-                    using (var connection = new SqlConnection(_options.ConnectionString))
+                    using (var connection = new MySqlConnection(_options.ConnectionString))
                     {
                         removedCount = await connection.ExecuteAsync($@"DELETE FROM `{table}` WHERE ExpiresAt < @now limit @count;",
                         new { now = DateTime.Now, count = MaxBatch });
