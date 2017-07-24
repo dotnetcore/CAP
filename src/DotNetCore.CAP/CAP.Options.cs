@@ -22,14 +22,19 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
-        /// Productor job polling delay time. Default is 8 sec.
+        /// Productor job polling delay time. Default is 5 sec.
         /// </summary>
-        public int PollingDelay { get; set; } = 8;
+        public int PollingDelay { get; set; } = 5;
+
+        /// <summary>
+        /// Failed messages polling delay time. Default is 2 min.
+        /// </summary>
+        public TimeSpan FailedMessageWaitingInterval = TimeSpan.FromMinutes(2);
 
         /// <summary>
         /// We’ll send a POST request to the URL below with details of any subscribed events.
         /// </summary>
-        public WebHook WebHook { get; set; }
+        public WebHook WebHook => throw new NotSupportedException();
 
         /// <summary>
 		/// Registers an extension that will be executed when building services.

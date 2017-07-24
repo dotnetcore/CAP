@@ -1,12 +1,9 @@
-<p align="right">
-<a href="https://github.com/dotnetcore/CAP/blob/master/README.md">English</a>
-</p>
-
-# CAP 　　　　　　　　　　　　　　　　　　　　　　
-[![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
+# CAP 　　　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/CAP/blob/develop/README.md)
+[![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/develop.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
-[![NuGet](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
-[![Member Project Of .NET China Foundation](https://github.com/dotnetcore/Home/raw/master/icons/member-project-of-netchina.png)](https://github.com/dotnetcore)
+[![NuGet](https://img.shields.io/nuget/v/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
+[![NuGet Preview](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg?label=nuget-pre)](https://www.nuget.org/packages/DotNetCore.CAP/)
+[![Member project of .NET China Foundation](https://img.shields.io/badge/member_project_of-.NET_CHINA-red.svg?style=flat&colorB=9E20C8)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
 CAP 是一个在分布式系统（SOA、MicroService）中实现最终一致性的库，它具有轻量级、易使用、高性能等特点。
@@ -32,25 +29,25 @@ CAP 具有消息持久化的功能，当你的服务进行重启或者宕机时�
 你可以运行以下下命令在你的项目中安装 CAP。
 
 ```
-PM> Install-Package DotNetCore.CAP -Pre
+PM> Install-Package DotNetCore.CAP
 ```
 
 如果你的消息队列使用的是 Kafka 的话，你可以：
 
 ```
-PM> Install-Package DotNetCore.CAP.Kafka -Pre
+PM> Install-Package DotNetCore.CAP.Kafka
 ```
 
 如果你的消息队列使用的是 RabbitMQ 的话，你可以：
 
 ```
-PM> Install-Package DotNetCore.CAP.RabbitMQ -Pre
+PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
 CAP 默认提供了 Sql Server 的扩展作为数据库存储（MySql的正在开发中）：
 
 ```
-PM> Install-Package DotNetCore.CAP.SqlServer -Pre
+PM> Install-Package DotNetCore.CAP.SqlServer
 ```
 
 ### Configuration
@@ -174,7 +171,7 @@ namespace xxx.Service
 
 	public class SubscriberService: ISubscriberService, ICapSubscribe
 	{
-		[KafkaTopic("xxx.services.account.check")]
+		[CapSubscribe("xxx.services.account.check")]
 		public void CheckReceivedMessage(Person person)
 		{
 			

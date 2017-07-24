@@ -117,6 +117,7 @@ namespace DotNetCore.CAP.Processor
 
             returnedProcessors.Add(_provider.GetRequiredService<PublishQueuer>());
             returnedProcessors.Add(_provider.GetRequiredService<SubscribeQueuer>());
+            returnedProcessors.Add(_provider.GetRequiredService<FailedJobProcessor>());
 
             returnedProcessors.Add(_provider.GetRequiredService<IAdditionalProcessor>());
 

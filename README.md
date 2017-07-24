@@ -1,12 +1,9 @@
-<p align="right">
-    <a href="https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md">中文</a>
-</p>
-
-# CAP
-
-[![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
+# CAP 　　　　　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/CAP/blob/develop/README.zh-cn.md)
+[![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/develop.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
-[![NuGet](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
+[![NuGet](https://img.shields.io/nuget/v/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
+[![NuGet Preview](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg?label=nuget-pre)](https://www.nuget.org/packages/DotNetCore.CAP/)
+[![Member project of .NET China Foundation](https://img.shields.io/badge/member_project_of-.NET_CHINA-red.svg?style=flat&colorB=9E20C8)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
 CAP is a .Net Standard library to achieve eventually consistent in distributed architectures system like SOA,MicroService. 	It is lightweight,easy to use and efficiently.
@@ -17,7 +14,7 @@ CAP is a library that used in an ASP.NET Core project, Of Course you can ues it 
 
 You can think of CAP as an EventBus because it has all the features of EventBus, and CAP provides a easier way to handle the publishing and subscribing than EventBus.
 
-CAP has the function of Message Presistence, and it makes messages reliability when your service is restarted or down. CAP provides a Publish Service based on Microsoft DI that integrates seamlessly with your business services and supports strong consistency transactions.
+CAP has the function of Message Persistence, and it makes messages reliability when your service is restarted or down. CAP provides a Publish Service based on Microsoft DI that integrates seamlessly with your business services and supports strong consistency transactions.
 
 This is a diagram of the CAP working in the ASP.NET Core MicroService architecture:
 
@@ -27,26 +24,30 @@ This is a diagram of the CAP working in the ASP.NET Core MicroService architectu
 
 ## Getting Started
 
-### NuGet (Coming soon)
+### NuGet
 
 You can run the following command to install the CAP in your project.
+
+```
+PM> Install-Package DotNetCore.CAP
+```
 
 If your Message Queue is using Kafka, you can：
 
 ```
-PM> Install-Package DotNetCore.CAP.Kafka -Pre
+PM> Install-Package DotNetCore.CAP.Kafka
 ```
 
-or RabbitMQ：
+If your Message Queue is using RabbitMQ, you can：
 
 ```
-PM> Install-Package DotNetCore.CAP.RabbitMQ -Pre
+PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP provides EntityFramework as default database store extension ：
+CAP provides EntityFramework as default database store extension (The MySQL version is under development)：
 
 ```
-PM> Install-Package DotNetCore.CAP.EntityFrameworkCore -Pre
+PM> Install-Package DotNetCore.CAP.SqlServer
 ```
 
 ### Configuration
@@ -58,11 +59,23 @@ public void ConfigureServices(IServiceCollection services)
 {
 	......
 
-    services.AddDbContext<AppDbContext>();
+	services.AddDbContext<AppDbContext>();
 
-    services.AddCap()
-            .AddEntityFrameworkStores<AppDbContext>()
-            .AddKafka(x => x.Servers = "localhost:9092");
+	services.AddCap(x =>
+	{
+		// If your SqlServer is using EF for data operations, you need to add the following configuration：
+		// Notice: You don't need to config x.UseSqlServer(""") again!
+		x.UseEntityFramework<AppDbContext>();
+		
+		// If you are using Dapper,you need to add the config：
+		x.UseSqlServer("Your ConnectionStrings");
+
+		// If your Message Queue is using RabbitMQ you need to add the config：
+		x.UseRabbitMQ("localhost");
+
+		// If your Message Queue is using Kafka you need to add the config：
+		x.UseKafka("localhost");
+	});
 }
 
 public void Configure(IApplicationBuilder app)
@@ -92,9 +105,21 @@ public class PublishController : Controller
 	[Route("~/checkAccount")]
 	public async Task<IActionResult> PublishMessage()
 	{
-		//Specifies the message header and content to be sent
+		// Specifies the message header and content to be sent
 		await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
+		return Ok();
+	}
+
+	[Route("~/checkAccountWithTrans")]
+	public async Task<IActionResult> PublishMessageWithTransaction([FromServices]AppDbContext dbContext)
+	{
+		 using (var trans = dbContext.Database.BeginTransaction())
+		 {
+			await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
+
+			trans.Commit();
+		 }
 		return Ok();
 	}
 }

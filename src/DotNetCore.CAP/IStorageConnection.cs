@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Models;
 
@@ -27,6 +28,11 @@ namespace DotNetCore.CAP
         /// </summary>
         Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync();
 
+        /// <summary>
+        /// Returns executed failed messages.
+        /// </summary>
+        Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages();
+
         // Received messages
 
         /// <summary>
@@ -46,6 +52,10 @@ namespace DotNetCore.CAP
         /// </summary>
         Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync();
 
+        /// <summary>
+        /// Returns executed failed message.
+        /// </summary>
+        Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages();
         //-----------------------------------------
 
         /// <summary>

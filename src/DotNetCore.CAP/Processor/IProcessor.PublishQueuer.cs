@@ -12,11 +12,11 @@ namespace DotNetCore.CAP.Processor
 {
     public class PublishQueuer : IProcessor
     {
-        private ILogger _logger;
-        private CapOptions _options;
-        private IStateChanger _stateChanger;
-        private IServiceProvider _provider;
-        private TimeSpan _pollingDelay;
+        private readonly ILogger _logger;
+        private readonly CapOptions _options;
+        private readonly IStateChanger _stateChanger;
+        private readonly IServiceProvider _provider;
+        private readonly TimeSpan _pollingDelay;
 
         public static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
 
