@@ -47,6 +47,7 @@ namespace DotNetCore.CAP.MySql
             //DELETE FROM [{_prefix}].[Queue] LIMIT 1;
             //COMMIT;
 
+            //TODO :  here maybe have a dirty read
             var sql = $@"
 SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` LIMIT 1;
 DELETE FROM `{_prefix}.queue` LIMIT 1;";
