@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Sample.Kafka.Controllers
@@ -9,46 +9,39 @@ namespace Sample.Kafka.Controllers
     [Route("api/[controller]")]
     public class ValuesController : Controller, ICapSubscribe
     {
-        private readonly ICapPublisher _producer;
-        private readonly AppDbContext _dbContext ;
+        private readonly ICapPublisher _capBus;
+        private readonly AppDbContext _dbContext;
 
         public ValuesController(ICapPublisher producer, AppDbContext dbContext)
         {
-            _producer = producer;
+            _capBus = producer;
             _dbContext = dbContext;
         }
 
-        [Route("/")]
-        public IActionResult Index()
+        [Route("~/publish")]
+        public IActionResult PublishMessage()
         {
+            _capBus.Publish("sample.rabbitmq.mysql", "");
             return Ok();
         }
-        public string ServerPath => ((IHostingEnvironment)HttpContext.RequestServices.GetService(typeof(IHostingEnvironment))).ContentRootPath;
 
-        [CapSubscribe("zzwl.topic.finace.callBack", Group = "test")]
-        public void KafkaTest(Person person)
+        [Route("~/publishWithTrans")]
+        public async Task<IActionResult> PublishMessageWithTransaction()
         {
-            Console.WriteLine(DateTime.Now);
-        }
-
-        [Route("~/send")]
-        public async Task<IActionResult> SendTopic()
-        {
-            using (var trans = _dbContext.Database.BeginTransaction())
+            using (var trans = await _dbContext.Database.BeginTransactionAsync())
             {
-                await _producer.PublishAsync("zzwl.topic.finace.callBack","");
-
+                await _capBus.PublishAsync("sample.rabbitmq.mysql", "");
                 trans.Commit();
             }
-
             return Ok();
         }
 
-        public class Person
+        [NonAction]
+        [CapSubscribe("sample.kafka.sqlserver", Group = "test")]
+        public void KafkaTest()
         {
-            public string Name { get; set; }
-
-            public int Age { get; set; }
+            Console.WriteLine("[sample.kafka.sqlserver] message received");
+            Debug.WriteLine("[sample.kafka.sqlserver] message received");
         }
     }
 }
