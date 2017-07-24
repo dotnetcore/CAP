@@ -44,6 +44,8 @@ namespace DotNetCore.CAP
             {
                 MainConfig.Add("bootstrap.servers", Servers);
             }
+            MainConfig["queue.buffering.max.ms"] = "10";
+            MainConfig["socket.blocking.max.ms"] = "10";
             MainConfig["enable.auto.commit"] = "false";
             return MainConfig.AsEnumerable();
         }
