@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace DotNetCore.CAP.SqlServer
 {
@@ -102,7 +101,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
         public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages()
         {
-            var sql = $"SELECT TOP (1) * FROM [{_options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
+            var sql = $"SELECT * FROM [{_options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
             using (var connection = new SqlConnection(_options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
