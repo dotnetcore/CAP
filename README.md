@@ -14,7 +14,7 @@ CAP is a library that used in an ASP.NET Core project, Of Course you can ues it 
 
 You can think of CAP as an EventBus because it has all the features of EventBus, and CAP provides a easier way to handle the publishing and subscribing than EventBus.
 
-CAP has the function of Message Presistence, and it makes messages reliability when your service is restarted or down. CAP provides a Publish Service based on Microsoft DI that integrates seamlessly with your business services and supports strong consistency transactions.
+CAP has the function of Message Persistence, and it makes messages reliability when your service is restarted or down. CAP provides a Publish Service based on Microsoft DI that integrates seamlessly with your business services and supports strong consistency transactions.
 
 This is a diagram of the CAP working in the ASP.NET Core MicroService architecture:
 
