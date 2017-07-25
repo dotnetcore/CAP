@@ -39,17 +39,16 @@ namespace DotNetCore.CAP.MySql
 
         public Task<IFetchedMessage> FetchNextMessageAsync()
         {
-            //Last execute statement :
+            //Last execute statement(FOR UPDATE to fix dirty read) :
 
             //SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
             //START TRANSACTION;
-            //SELECT MessageId,MessageType FROM [{_prefix}].[Queue] LIMIT 1;
-            //DELETE FROM [{_prefix}].[Queue] LIMIT 1;
+            //SELECT MessageId,MessageType FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
+            //DELETE FROM `{_prefix}.queue` LIMIT 1;
             //COMMIT;
-
-            //TODO :  here maybe have a dirty read
+             
             var sql = $@"
-SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` LIMIT 1;
+SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
 DELETE FROM `{_prefix}.queue` LIMIT 1;";
 
             return FetchNextMessageCoreAsync(sql);
