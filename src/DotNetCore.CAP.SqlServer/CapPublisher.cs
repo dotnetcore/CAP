@@ -73,7 +73,7 @@ namespace DotNetCore.CAP.SqlServer
         public void Publish(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
         {
             CheckIsAdoNet(name);
-            PrePareConnection(dbConnection, ref dbTransaction);
+            PrepareConnection(dbConnection, ref dbTransaction);
 
             PublishWithTrans(name, content, dbConnection, dbTransaction);
         }
@@ -81,7 +81,7 @@ namespace DotNetCore.CAP.SqlServer
         public Task PublishAsync(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
         {
             CheckIsAdoNet(name);
-            PrePareConnection(dbConnection, ref dbTransaction);
+            PrepareConnection(dbConnection, ref dbTransaction);
 
             return PublishWithTransAsync(name, content, dbConnection, dbTransaction);
         }
@@ -89,7 +89,7 @@ namespace DotNetCore.CAP.SqlServer
         public void Publish<T>(string name, T contentObj, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
         {
             CheckIsAdoNet(name);
-            PrePareConnection(dbConnection, ref dbTransaction);
+            PrepareConnection(dbConnection, ref dbTransaction);
 
             var content = Helper.ToJson(contentObj);
 
@@ -99,7 +99,7 @@ namespace DotNetCore.CAP.SqlServer
         public Task PublishAsync<T>(string name, T contentObj, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
         {
             CheckIsAdoNet(name);
-            PrePareConnection(dbConnection, ref dbTransaction);
+            PrepareConnection(dbConnection, ref dbTransaction);
 
             var content = Helper.ToJson(contentObj);
 
@@ -108,7 +108,7 @@ namespace DotNetCore.CAP.SqlServer
 
         #region private methods
 
-        private void PrePareConnection(IDbConnection dbConnection, ref IDbTransaction dbTransaction)
+        private void PrepareConnection(IDbConnection dbConnection, ref IDbTransaction dbTransaction)
         {
             if (dbConnection == null)
                 throw new ArgumentNullException(nameof(dbConnection));

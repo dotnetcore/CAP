@@ -23,17 +23,17 @@ namespace DotNetCore.CAP
             services.AddScoped<ICapPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
-            var sqlServerOptions = new MySqlOptions();
-            _configure(sqlServerOptions);
+            var mysqlOptions = new MySqlOptions();
+            _configure(mysqlOptions);
 
-            if (sqlServerOptions.DbContextType != null)
+            if (mysqlOptions.DbContextType != null)
             {
                 var provider = TempBuildService(services);
-                var dbContextObj = provider.GetService(sqlServerOptions.DbContextType);
+                var dbContextObj = provider.GetService(mysqlOptions.DbContextType);
                 var dbContext = (DbContext)dbContextObj;
-                sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
             }
-            services.AddSingleton(sqlServerOptions);
+            services.AddSingleton(mysqlOptions);
         }
 
         private IServiceProvider TempBuildService(IServiceCollection services)

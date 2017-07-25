@@ -21,11 +21,11 @@ namespace DotNetCore.CAP.MySql
         public DefaultAdditionalProcessor(
             IServiceProvider provider,
             ILogger<DefaultAdditionalProcessor> logger,
-            MySqlOptions sqlServerOptions)
+            MySqlOptions mysqlOptions)
         {
             _logger = logger;
             _provider = provider;
-            _options = sqlServerOptions;
+            _options = mysqlOptions;
         }
 
         public async Task ProcessAsync(ProcessingContext context)
