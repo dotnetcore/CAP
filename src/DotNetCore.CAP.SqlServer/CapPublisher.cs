@@ -73,12 +73,7 @@ namespace DotNetCore.CAP.SqlServer
         public void Publish(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
         {
             CheckIsAdoNet(name);
-
-            if (dbConnection == null)
-                throw new ArgumentNullException(nameof(dbConnection));
-
-            dbTransaction = dbTransaction ?? dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
-            IsCapOpenedTrans = true;
+            PrePareConnection(dbConnection, ref dbTransaction);
 
             PublishWithTrans(name, content, dbConnection, dbTransaction);
         }
@@ -86,12 +81,7 @@ namespace DotNetCore.CAP.SqlServer
         public Task PublishAsync(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
         {
             CheckIsAdoNet(name);
-
-            if (dbConnection == null)
-                throw new ArgumentNullException(nameof(dbConnection));
-
-            dbTransaction = dbTransaction ?? dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
-            IsCapOpenedTrans = true;
+            PrePareConnection(dbConnection, ref dbTransaction);
 
             return PublishWithTransAsync(name, content, dbConnection, dbTransaction);
         }
@@ -99,13 +89,9 @@ namespace DotNetCore.CAP.SqlServer
         public void Publish<T>(string name, T contentObj, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
         {
             CheckIsAdoNet(name);
-
-            if (dbConnection == null)
-                throw new ArgumentNullException(nameof(dbConnection));
+            PrePareConnection(dbConnection, ref dbTransaction);
 
             var content = Helper.ToJson(contentObj);
-
-            dbTransaction = dbTransaction ?? dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
 
             PublishWithTrans(name, content, dbConnection, dbTransaction);
         }
@@ -113,18 +99,29 @@ namespace DotNetCore.CAP.SqlServer
         public Task PublishAsync<T>(string name, T contentObj, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
         {
             CheckIsAdoNet(name);
-
-            if (dbConnection == null)
-                throw new ArgumentNullException(nameof(dbConnection));
+            PrePareConnection(dbConnection, ref dbTransaction);
 
             var content = Helper.ToJson(contentObj);
-
-            dbTransaction = dbTransaction ?? dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
 
             return PublishWithTransAsync(name, content, dbConnection, dbTransaction);
         }
 
         #region private methods
+
+        private void PrePareConnection(IDbConnection dbConnection, ref IDbTransaction dbTransaction)
+        {
+            if (dbConnection == null)
+                throw new ArgumentNullException(nameof(dbConnection));
+
+            if (dbConnection.State != ConnectionState.Open)
+                dbConnection.Open();
+
+            if (dbTransaction == null)
+            {
+                IsCapOpenedTrans = true;
+                dbTransaction = dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
+            }
+        }
 
         private void CheckIsUsingEF(string name)
         {
@@ -145,8 +142,11 @@ namespace DotNetCore.CAP.SqlServer
         {
             var connection = _dbContext.Database.GetDbConnection();
             var transaction = _dbContext.Database.CurrentTransaction;
-            IsCapOpenedTrans = transaction == null;
-            transaction = transaction ?? await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            if (transaction == null)
+            {
+                IsCapOpenedTrans = true;
+                transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+            }
             var dbTransaction = transaction.GetDbTransaction();
             await PublishWithTransAsync(name, content, connection, dbTransaction);
         }
@@ -155,8 +155,11 @@ namespace DotNetCore.CAP.SqlServer
         {
             var connection = _dbContext.Database.GetDbConnection();
             var transaction = _dbContext.Database.CurrentTransaction;
-            IsCapOpenedTrans = transaction == null;
-            transaction = transaction ?? _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+            if (transaction == null)
+            {
+                IsCapOpenedTrans = true;
+                transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+            }
             var dbTransaction = transaction.GetDbTransaction();
             PublishWithTrans(name, content, connection, dbTransaction);
         }
