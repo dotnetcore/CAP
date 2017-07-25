@@ -26,14 +26,13 @@ namespace DotNetCore.CAP
             var sqlServerOptions = new SqlServerOptions();
             _configure(sqlServerOptions);
 
-            var provider = TempBuildService(services);
-            var dbContextObj = provider.GetService(sqlServerOptions.DbContextType);
-            if (dbContextObj != null)
+            if (sqlServerOptions.DbContextType != null)
             {
+                var provider = TempBuildService(services);
+                var dbContextObj = provider.GetService(sqlServerOptions.DbContextType);
                 var dbContext = (DbContext)dbContextObj;
                 sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
             }
-            services.Configure(_configure);
             services.AddSingleton(sqlServerOptions);
         }
 
