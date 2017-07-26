@@ -35,7 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
             AddSubscribeServices(services);
 
             services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
-            services.TryAddSingleton<IModelBinder, DefaultModelBinder>();
+            services.TryAddSingleton<IModelBinderFactory, ModelBinderFactory>();
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();
 

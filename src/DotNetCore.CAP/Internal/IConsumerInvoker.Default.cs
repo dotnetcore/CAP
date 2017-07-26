@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Abstractions.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -11,16 +10,16 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IModelBinder _modelBinder;
+        private readonly IModelBinderFactory _modelBinderFactory;
         private readonly ConsumerContext _consumerContext;
         private readonly ObjectMethodExecutor _executor;
 
         public DefaultConsumerInvoker(ILogger logger,
             IServiceProvider serviceProvider,
-            IModelBinder modelBinder,
+            IModelBinderFactory modelBinderFactory,
             ConsumerContext consumerContext)
         {
-            _modelBinder = modelBinder;
+            _modelBinderFactory = modelBinderFactory;
             _serviceProvider = serviceProvider;
             _logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
@@ -29,7 +28,7 @@ namespace DotNetCore.CAP.Internal
                 _consumerContext.ConsumerDescriptor.ImplTypeInfo);
         }
 
-        public Task InvokeAsync()
+        public async Task InvokeAsync()
         {
             using (_logger.BeginScope("consumer invoker begin"))
             {
@@ -43,18 +42,21 @@ namespace DotNetCore.CAP.Internal
                 if (_executor.MethodParameters.Length > 0)
                 {
                     var firstParameter = _executor.MethodParameters[0];
-
-                    var bindingContext = ModelBindingContext.CreateBindingContext(value,
-                        firstParameter.Name, firstParameter.ParameterType);
-
-                    _modelBinder.BindModelAsync(bindingContext);
-                    _executor.Execute(obj, bindingContext.Result);
+                    var binder = _modelBinderFactory.CreateBinder(firstParameter);
+                    var result = await binder.BindModelAsync(value);
+                    if (result.IsSuccess)
+                    {
+                        _executor.Execute(obj, result.Model);
+                    }
+                    else
+                    {
+                        _logger.LogWarning($"Parameters:{firstParameter.Name} bind failed!");
+                    }
                 }
                 else
                 {
                     _executor.Execute(obj);
                 }
-                return Task.CompletedTask;
             }
         }
     }
