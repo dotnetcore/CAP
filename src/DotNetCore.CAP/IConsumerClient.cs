@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading;
-using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP
 {
@@ -17,6 +16,8 @@ namespace DotNetCore.CAP
 
         void Commit();
 
-        event EventHandler<MessageContext> MessageReceieved;
+        event EventHandler<MessageContext> OnMessageReceieved;
+
+        event EventHandler<string> OnError;
     }
 }

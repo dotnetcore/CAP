@@ -12,7 +12,9 @@ namespace DotNetCore.CAP.Kafka
         private readonly KafkaOptions _kafkaOptions;
         private Consumer<Null, string> _consumerClient;
 
-        public event EventHandler<MessageContext> MessageReceieved;
+        public event EventHandler<MessageContext> OnMessageReceieved;
+
+        public event EventHandler<string> OnError;
 
         public IDeserializer<string> StringDeserializer { get; set; }
 
@@ -67,6 +69,7 @@ namespace DotNetCore.CAP.Kafka
             _consumerClient = new Consumer<Null, string>(config, null, StringDeserializer);
 
             _consumerClient.OnMessage += ConsumerClient_OnMessage;
+            _consumerClient.OnError += ConsumerClient_OnError;
         }
 
         private void ConsumerClient_OnMessage(object sender, Message<Null, string> e)
@@ -77,7 +80,12 @@ namespace DotNetCore.CAP.Kafka
                 Name = e.Topic,
                 Content = e.Value
             };
-            MessageReceieved?.Invoke(sender, message);
+            OnMessageReceieved?.Invoke(sender, message);
+        }
+
+        private void ConsumerClient_OnError(object sender, Error e)
+        {
+            OnError?.Invoke(sender, e.Reason);
         }
 
         #endregion private methods

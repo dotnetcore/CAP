@@ -95,7 +95,7 @@ namespace DotNetCore.CAP
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
-            client.MessageReceieved += (sender, message) =>
+            client.OnMessageReceieved += (sender, message) =>
             {
                 _logger.EnqueuingReceivedMessage(message.Name, message.Content);
 
@@ -105,6 +105,11 @@ namespace DotNetCore.CAP
                     client.Commit();
                 }
                 Pulse();
+            };
+
+            client.OnError += (sender, reason) =>
+            {
+                _logger.LogError(reason);
             };
         }
 

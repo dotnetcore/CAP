@@ -18,7 +18,8 @@ namespace DotNetCore.CAP.RabbitMQ
         private IModel _channel;
         private ulong _deliveryTag;
 
-        public event EventHandler<MessageContext> MessageReceieved;
+        public event EventHandler<MessageContext> OnMessageReceieved;
+        public event EventHandler<string> OnError;
 
         public RabbitMQConsumerClient(string queueName, RabbitMQOptions options)
         {
@@ -53,6 +54,7 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnConsumerReceived;
+            consumer.Shutdown += OnConsumerShutdown;
             _channel.BasicConsume(_queueName, false, consumer);
             while (true)
             {
@@ -90,7 +92,12 @@ namespace DotNetCore.CAP.RabbitMQ
                 Name = e.RoutingKey,
                 Content = Encoding.UTF8.GetString(e.Body)
             };
-            MessageReceieved?.Invoke(sender, message);
+            OnMessageReceieved?.Invoke(sender, message);
+        }
+
+        private void OnConsumerShutdown(object sender, ShutdownEventArgs e)
+        {
+            OnError?.Invoke(sender, e.Cause?.ToString());
         }
     }
 }
