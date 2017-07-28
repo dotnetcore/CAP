@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions.ModelBinding;
 
@@ -24,41 +25,55 @@ namespace DotNetCore.CAP.Internal
             {
                 throw new ArgumentNullException(nameof(content));
             }
-             
+
             var parameterType = _parameterInfo.ParameterType;
 
-            object model;
-            if (parameterType == typeof(string))
+            try
             {
-                if (string.IsNullOrWhiteSpace(content))
+                object model;
+                if (parameterType == typeof(string))
                 {
+                    if (string.IsNullOrWhiteSpace(content))
+                    {
+                        model = null;
+                    }
+                    else
+                    {
+                        model = content;
+                    }
+                }
+                else if (string.IsNullOrWhiteSpace(content))
+                {
+                    // Other than the StringConverter, converters Trim() the value then throw if the result is empty.
                     model = null;
                 }
                 else
                 {
-                    model = content;
+                    model = _typeConverter.ConvertFrom(
+                         context: null,
+                         culture: CultureInfo.CurrentCulture,
+                         value: content);
+                }
+
+                if (model == null && !IsReferenceOrNullableType(parameterType))
+                {
+                    return Task.FromResult(ModelBindingResult.Failed());
+                }
+                else
+                {
+                    return Task.FromResult(ModelBindingResult.Success(model));
                 }
             }
-            else if (string.IsNullOrWhiteSpace(content))
+            catch (Exception exception)
             {
-                // Other than the StringConverter, converters Trim() the value then throw if the result is empty.
-                model = null;
-            }
-            else
-            {
-                model = _typeConverter.ConvertFrom(
-                    context: null,
-                    culture: CultureInfo.CurrentCulture,
-                    value: content);
-            }
-             
-            if (model == null && !IsReferenceOrNullableType(parameterType))
-            {
-                return Task.FromResult(ModelBindingResult.Failed());
-            }
-            else
-            {
-                return Task.FromResult(ModelBindingResult.Success(model));
+                var isFormatException = exception is FormatException;
+                if (!isFormatException && exception.InnerException != null)
+                {
+                    // TypeConverter throws System.Exception wrapping the FormatException,
+                    // so we capture the inner exception.
+                    exception = ExceptionDispatchInfo.Capture(exception.InnerException).SourceException;
+                }
+                throw exception;
             }
         }
 
