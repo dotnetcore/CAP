@@ -9,28 +9,6 @@ namespace DotNetCore.CAP
     public interface ICapPublisher
     {
         /// <summary>
-        /// (EntityFramework) Asynchronous publish a message.
-        /// <para>
-        ///  If you are using the EntityFramework, you need to configure the DbContextType first.
-        ///  otherwise you need to use overloaded method with IDbConnection and IDbTransaction.
-        /// </para>
-        /// </summary>
-        /// <param name="name">the topic name or exchange router key.</param>
-        /// <param name="content">message body content.</param>
-        Task PublishAsync(string name, string content);
-
-        /// <summary>
-        /// (EntityFramework) Publish a message.
-        /// <para>
-        ///  If you are using the EntityFramework, you need to configure the DbContextType first.
-        ///  otherwise you need to use overloaded method with IDbConnection and IDbTransaction.
-        /// </para>
-        /// </summary>
-        /// <param name="name">the topic name or exchange router key.</param>
-        /// <param name="content">message body content.</param>
-        void Publish(string name, string content);
-
-        /// <summary>
         /// (EntityFramework) Asynchronous publish a object message.
         /// <para>
         ///  If you are using the EntityFramework, you need to configure the DbContextType first.
@@ -53,24 +31,6 @@ namespace DotNetCore.CAP
         /// <param name="name">the topic name or exchange router key.</param>
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
         void Publish<T>(string name, T contentObj);
-
-        /// <summary>
-        /// (ado.net) Asynchronous publish a message.
-        /// </summary>
-        /// <param name="name">the topic name or exchange router key.</param>
-        /// <param name="content">message body content</param>
-        /// <param name="dbConnection">the connection of <see cref="IDbConnection"/></param>
-        /// <param name="dbTransaction">the transaction of <see cref="IDbTransaction"/></param>
-        Task PublishAsync(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction = null);
-
-        /// <summary>
-        /// (ado.net) Publish a message.
-        /// </summary>
-        /// <param name="name">the topic name or exchange router key.</param>
-        /// <param name="content">message body content.</param>
-        /// <param name="dbConnection">the connection of <see cref="IDbConnection"/></param>
-        /// <param name="dbTransaction">the transaction of <see cref="IDbTransaction"/></param>
-        void Publish(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction = null);
 
         /// <summary>
         /// (ado.net) Asynchronous publish a object message.
