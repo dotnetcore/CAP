@@ -26,7 +26,6 @@ namespace DotNetCore.CAP.Internal
             catch (Exception)
             {
                 return Task.FromResult(ModelBindingResult.Failed());
-
             }
         }
     }

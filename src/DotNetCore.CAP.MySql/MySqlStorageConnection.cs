@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.MySql
             //SELECT MessageId,MessageType FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
             //DELETE FROM `{_prefix}.queue` LIMIT 1;
             //COMMIT;
-             
+
             var sql = $@"
 SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
 DELETE FROM `{_prefix}.queue` LIMIT 1;";
@@ -123,7 +123,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
         private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
         {
-            //here don't use `using` to dispose 
+            //here don't use `using` to dispose
             var connection = new MySqlConnection(_options.ConnectionString);
             await connection.OpenAsync();
             var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);

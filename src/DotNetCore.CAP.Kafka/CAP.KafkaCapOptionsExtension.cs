@@ -21,7 +21,7 @@ namespace DotNetCore.CAP
             var kafkaOptions = new KafkaOptions();
             _configure(kafkaOptions);
             services.AddSingleton(kafkaOptions);
-            
+
             services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
             services.AddTransient<IQueueExecutor, PublishQueueExecutor>();
         }

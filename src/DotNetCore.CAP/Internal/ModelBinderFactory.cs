@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using DotNetCore.CAP.Abstractions.ModelBinding;
+using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -40,9 +40,7 @@ namespace DotNetCore.CAP.Internal
             {
                 return binder;
             }
-            var type = parameterInfo.ParameterType;
-            var isComplexType = !TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string));
-            if (!isComplexType)
+            if (!Helper.IsComplexType(parameterInfo.ParameterType))
             {
                 binder = new SimpleTypeModelBinder(parameterInfo);
             }

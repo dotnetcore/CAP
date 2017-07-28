@@ -35,22 +35,28 @@ namespace DotNetCore.CAP.Internal
                 _logger.LogDebug("Executing consumer Topic: {0}", _consumerContext.ConsumerDescriptor.MethodInfo.Name);
 
                 var obj = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider,
-                    _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
+               _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
 
                 var value = _consumerContext.DeliverMessage.Content;
-
                 if (_executor.MethodParameters.Length > 0)
                 {
                     var firstParameter = _executor.MethodParameters[0];
-                    var binder = _modelBinderFactory.CreateBinder(firstParameter);
-                    var result = await binder.BindModelAsync(value);
-                    if (result.IsSuccess)
+                    try
                     {
-                        _executor.Execute(obj, result.Model);
+                        var binder = _modelBinderFactory.CreateBinder(firstParameter);
+                        var result = await binder.BindModelAsync(value);
+                        if (result.IsSuccess)
+                        {
+                            _executor.Execute(obj, result.Model);
+                        }
+                        else
+                        {
+                            _logger.LogWarning($"Parameters:{firstParameter.Name} bind failed!");
+                        }
                     }
-                    else
+                    catch (FormatException ex)
                     {
-                        _logger.LogWarning($"Parameters:{firstParameter.Name} bind failed!");
+                        _logger.ModelBinderFormattingException(_executor.MethodInfo?.Name, firstParameter.Name, value, ex);
                     }
                 }
                 else

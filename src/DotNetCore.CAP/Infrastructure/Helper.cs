@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 using Newtonsoft.Json;
 
@@ -67,6 +68,11 @@ namespace DotNetCore.CAP.Infrastructure
 
             return !typeInfo.ContainsGenericParameters
                    && typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase);
+        }
+
+        public static bool IsComplexType(Type type)
+        {
+            return !TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string));
         }
     }
 }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using DotNetCore.CAP.Internal;
 
 namespace DotNetCore.CAP.Abstractions.ModelBinding
 {
@@ -51,6 +49,57 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
             {
                 return $"Failed";
             }
-        } 
+        }
+
+        public override bool Equals(object obj)
+        {
+            var other = obj as ModelBindingResult?;
+            if (other == null)
+            {
+                return false;
+            }
+            else
+            {
+                return Equals(other.Value);
+            }
+        }
+
+        public override int GetHashCode()
+        {
+            var hashCodeCombiner = HashCodeCombiner.Start();
+            hashCodeCombiner.Add(IsSuccess);
+            hashCodeCombiner.Add(Model);
+
+            return hashCodeCombiner.CombinedHash;
+        }
+
+        public bool Equals(ModelBindingResult other)
+        {
+            return
+                IsSuccess == other.IsSuccess &&
+                object.Equals(Model, other.Model);
+        }
+
+        /// <summary>
+        /// Compares <see cref="ModelBindingResult"/> objects for equality.
+        /// </summary>
+        /// <param name="x">A <see cref="ModelBindingResult"/>.</param>
+        /// <param name="y">A <see cref="ModelBindingResult"/>.</param>
+        /// <returns><c>true</c> if the objects are equal, otherwise <c>false</c>.</returns>
+        public static bool operator ==(ModelBindingResult x, ModelBindingResult y)
+        {
+            return x.Equals(y);
+        }
+
+        /// <summary>
+        /// Compares <see cref="ModelBindingResult"/> objects for inequality.
+        /// </summary>
+        /// <param name="x">A <see cref="ModelBindingResult"/>.</param>
+        /// <param name="y">A <see cref="ModelBindingResult"/>.</param>
+        /// <returns><c>true</c> if the objects are not equal, otherwise <c>false</c>.</returns>
+        public static bool operator !=(ModelBindingResult x, ModelBindingResult y)
+        {
+            return !x.Equals(y);
+        }
     }
 }

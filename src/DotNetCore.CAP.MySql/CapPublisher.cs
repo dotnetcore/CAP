@@ -38,25 +38,11 @@ namespace DotNetCore.CAP.MySql
             }
         }
 
-        public void Publish(string name, string content)
-        {
-            CheckIsUsingEF(name);
-
-            PublishCore(name, content);
-        }
-
-        public Task PublishAsync(string name, string content)
-        {
-            CheckIsUsingEF(name);
-
-            return PublishCoreAsync(name, content);
-        }
-
         public void Publish<T>(string name, T contentObj)
         {
             CheckIsUsingEF(name);
 
-            var content = Helper.ToJson(contentObj);
+            var content = Serialize(contentObj);
 
             PublishCore(name, content);
         }
@@ -65,27 +51,9 @@ namespace DotNetCore.CAP.MySql
         {
             CheckIsUsingEF(name);
 
-            var content = Helper.ToJson(contentObj);
+            var content = Serialize(contentObj);
 
             return PublishCoreAsync(name, content);
-        }
-
-        public void Publish(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
-        {
-            CheckIsAdoNet(name);
-
-            PrepareConnection(dbConnection, ref dbTransaction);
-
-            PublishWithTrans(name, content, dbConnection, dbTransaction);
-        }
-
-        public Task PublishAsync(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
-        {
-            CheckIsAdoNet(name);
-
-            PrepareConnection(dbConnection, ref dbTransaction);
-
-            return PublishWithTransAsync(name, content, dbConnection, dbTransaction);
         }
 
         public void Publish<T>(string name, T contentObj, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
@@ -94,7 +62,7 @@ namespace DotNetCore.CAP.MySql
 
             PrepareConnection(dbConnection, ref dbTransaction);
 
-            var content = Helper.ToJson(contentObj);
+            var content = Serialize(contentObj);
 
             PublishWithTrans(name, content, dbConnection, dbTransaction);
         }
@@ -105,12 +73,26 @@ namespace DotNetCore.CAP.MySql
 
             PrepareConnection(dbConnection, ref dbTransaction);
 
-            var content = Helper.ToJson(contentObj);
+            var content = Serialize(contentObj);
 
             return PublishWithTransAsync(name, content, dbConnection, dbTransaction);
         }
 
         #region private methods
+
+        private string Serialize<T>(T obj)
+        {
+            string content = string.Empty;
+            if (Helper.IsComplexType(typeof(T)))
+            {
+                content = Helper.ToJson(obj);
+            }
+            else
+            {
+                content = obj?.ToString();
+            }
+            return content;
+        }
 
         private void PrepareConnection(IDbConnection dbConnection, ref IDbTransaction dbTransaction)
         {

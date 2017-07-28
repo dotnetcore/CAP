@@ -56,6 +56,7 @@ namespace DotNetCore.CAP
         /// Returns executed failed message.
         /// </summary>
         Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages();
+
         //-----------------------------------------
 
         /// <summary>

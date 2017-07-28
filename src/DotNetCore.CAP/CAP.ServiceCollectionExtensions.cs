@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Abstractions.ModelBinding;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor;
@@ -60,7 +59,7 @@ namespace Microsoft.Extensions.DependencyInjection
             foreach (var serviceExtension in options.Extensions)
             {
                 serviceExtension.AddServices(services);
-            }          
+            }
             services.AddSingleton(options);
 
             return new CapBuilder(services);

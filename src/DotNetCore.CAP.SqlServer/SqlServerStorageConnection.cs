@@ -114,7 +114,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
         private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
         {
-            //here don't use `using` to dispose 
+            //here don't use `using` to dispose
             var connection = new SqlConnection(_options.ConnectionString);
             await connection.OpenAsync();
             var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);

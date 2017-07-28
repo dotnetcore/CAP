@@ -1,7 +1,5 @@
 ﻿using System;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Abstractions.ModelBinding;
-using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
