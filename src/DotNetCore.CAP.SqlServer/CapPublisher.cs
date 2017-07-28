@@ -55,7 +55,7 @@ namespace DotNetCore.CAP.SqlServer
 
             return PublishCoreAsync(name, content);
         }
- 
+
         public void Publish<T>(string name, T contentObj, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
         {
             CheckIsAdoNet(name);

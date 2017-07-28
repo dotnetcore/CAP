@@ -2,7 +2,6 @@
 using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
-using Confluent.Kafka.Serialization;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

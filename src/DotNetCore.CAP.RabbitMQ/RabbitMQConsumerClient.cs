@@ -19,6 +19,7 @@ namespace DotNetCore.CAP.RabbitMQ
         private ulong _deliveryTag;
 
         public event EventHandler<MessageContext> OnMessageReceieved;
+
         public event EventHandler<string> OnError;
 
         public RabbitMQConsumerClient(string queueName, RabbitMQOptions options)

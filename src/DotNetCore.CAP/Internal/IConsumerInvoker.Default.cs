@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.Internal
                     catch (FormatException ex)
                     {
                         _logger.ModelBinderFormattingException(_executor.MethodInfo?.Name, firstParameter.Name, value, ex);
-                    } 
+                    }
                 }
                 else
                 {
