@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
-    public class SqlServerCapOptionsExtension : ICapOptionsExtension
+    internal class SqlServerCapOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<SqlServerOptions> _configure;
 

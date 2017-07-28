@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
-    public class KafkaCapOptionsExtension : ICapOptionsExtension
+    internal sealed class KafkaCapOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<KafkaOptions> _configure;
 
@@ -16,10 +16,8 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.Configure(_configure);
-
             var kafkaOptions = new KafkaOptions();
-            _configure(kafkaOptions);
+            _configure?.Invoke(kafkaOptions);
             services.AddSingleton(kafkaOptions);
 
             services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();

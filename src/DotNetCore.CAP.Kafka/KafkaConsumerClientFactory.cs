@@ -3,13 +3,13 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
-    public class KafkaConsumerClientFactory : IConsumerClientFactory
+    internal sealed class KafkaConsumerClientFactory : IConsumerClientFactory
     {
         private readonly KafkaOptions _kafkaOptions;
 
-        public KafkaConsumerClientFactory(IOptions<KafkaOptions> kafkaOptions)
+        public KafkaConsumerClientFactory(KafkaOptions kafkaOptions)
         {
-            _kafkaOptions = kafkaOptions?.Value ?? throw new ArgumentNullException(nameof(kafkaOptions));
+            _kafkaOptions = kafkaOptions;
         }
 
         public IConsumerClient Create(string groupId)

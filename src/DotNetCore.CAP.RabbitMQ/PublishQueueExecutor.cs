@@ -8,18 +8,18 @@ using RabbitMQ.Client;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
-    public class PublishQueueExecutor : BasePublishQueueExecutor
+    internal sealed class PublishQueueExecutor : BasePublishQueueExecutor
     {
         private readonly ILogger _logger;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
         public PublishQueueExecutor(IStateChanger stateChanger,
-            IOptions<RabbitMQOptions> options,
+            RabbitMQOptions options,
             ILogger<PublishQueueExecutor> logger)
             : base(stateChanger, logger)
         {
             _logger = logger;
-            _rabbitMQOptions = options.Value;
+            _rabbitMQOptions = options;
         }
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)

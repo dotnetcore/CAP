@@ -6,7 +6,7 @@ using Confluent.Kafka.Serialization;
 
 namespace DotNetCore.CAP.Kafka
 {
-    public class KafkaConsumerClient : IConsumerClient
+    internal sealed class KafkaConsumerClient : IConsumerClient
     {
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;

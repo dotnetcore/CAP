@@ -7,7 +7,7 @@ using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class DefaultAdditionalProcessor : IAdditionalProcessor
+    internal class DefaultAdditionalProcessor : IAdditionalProcessor
     {
         private readonly IServiceProvider _provider;
         private readonly ILogger _logger;

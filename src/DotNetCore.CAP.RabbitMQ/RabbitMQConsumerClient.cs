@@ -7,7 +7,7 @@ using RabbitMQ.Client.Events;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
-    public class RabbitMQConsumerClient : IConsumerClient
+    internal sealed class RabbitMQConsumerClient : IConsumerClient
     {
         private readonly string _exchageName;
         private readonly string _queueName;

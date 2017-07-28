@@ -2,7 +2,7 @@
 
 namespace DotNetCore.CAP.MySql
 {
-    public class FetchedMessage
+    internal class FetchedMessage
     {
         public int MessageId { get; set; }
 

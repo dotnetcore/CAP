@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
-    public class MySqlCapOptionsExtension : ICapOptionsExtension
+    internal class MySqlCapOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<MySqlOptions> _configure;
 

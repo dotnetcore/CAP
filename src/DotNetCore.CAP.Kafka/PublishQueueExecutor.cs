@@ -4,22 +4,21 @@ using System.Threading.Tasks;
 using Confluent.Kafka;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
-    public class PublishQueueExecutor : BasePublishQueueExecutor
+    internal class PublishQueueExecutor : BasePublishQueueExecutor
     {
         private readonly ILogger _logger;
         private readonly KafkaOptions _kafkaOptions;
 
         public PublishQueueExecutor(IStateChanger stateChanger,
-            IOptions<KafkaOptions> options,
+            KafkaOptions options,
             ILogger<PublishQueueExecutor> logger)
             : base(stateChanger, logger)
         {
             _logger = logger;
-            _kafkaOptions = options.Value;
+            _kafkaOptions = options;
         }
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)
