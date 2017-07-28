@@ -21,7 +21,7 @@ namespace DotNetCore.CAP.Kafka
         public KafkaConsumerClient(string groupId, KafkaOptions options)
         {
             _groupId = groupId;
-            _kafkaOptions = options;
+            _kafkaOptions = options ?? throw new ArgumentNullException(nameof(options));
             StringDeserializer = new StringDeserializer(Encoding.UTF8);
         }
 
@@ -65,7 +65,7 @@ namespace DotNetCore.CAP.Kafka
         {
             _kafkaOptions.MainConfig.Add("group.id", _groupId);
 
-            var config = _kafkaOptions.AsRdkafkaConfig();
+            var config = _kafkaOptions.AskafkaConfig();
             _consumerClient = new Consumer<Null, string>(config, null, StringDeserializer);
 
             _consumerClient.OnMessage += ConsumerClient_OnMessage;
@@ -80,6 +80,7 @@ namespace DotNetCore.CAP.Kafka
                 Name = e.Topic,
                 Content = e.Value
             };
+
             OnMessageReceieved?.Invoke(sender, message);
         }
 
