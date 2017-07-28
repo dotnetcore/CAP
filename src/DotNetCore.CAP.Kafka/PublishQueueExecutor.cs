@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Kafka
         {
             try
             {
-                var config = _kafkaOptions.AsRdkafkaConfig();
+                var config = _kafkaOptions.AskafkaConfig();
                 var contentBytes = Encoding.UTF8.GetBytes(content);
                 using (var producer = new Producer(config))
                 {

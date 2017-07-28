@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
@@ -8,7 +9,7 @@ namespace DotNetCore.CAP.Kafka
 
         public KafkaConsumerClientFactory(IOptions<KafkaOptions> kafkaOptions)
         {
-            _kafkaOptions = kafkaOptions.Value;
+            _kafkaOptions = kafkaOptions?.Value ?? throw new ArgumentNullException(nameof(kafkaOptions));
         }
 
         public IConsumerClient Create(string groupId)
