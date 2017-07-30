@@ -121,7 +121,7 @@ namespace DotNetCore.CAP
             {
                 StatusName = StatusName.Scheduled,
             };
-            messageStore.StoreReceivedMessageAsync(receivedMessage).Wait();
+            messageStore.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
             return receivedMessage;
         }
 

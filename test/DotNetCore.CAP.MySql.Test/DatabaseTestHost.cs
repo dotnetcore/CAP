@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.MySql.Test
                 var storage = GetService<MySqlStorage>();
                 var token = new CancellationTokenSource().Token;
                 CreateDatabase();
-                storage.InitializeAsync(token).Wait();
+                storage.InitializeAsync(token).GetAwaiter().GetResult();
                 _sqlObjectInstalled = true;
             }
         }

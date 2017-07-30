@@ -59,7 +59,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _channel.BasicConsume(_queueName, false, consumer);
             while (true)
             {
-                Task.Delay(timeout, cancellationToken).Wait();
+                Task.Delay(timeout, cancellationToken).GetAwaiter().GetResult();
             }
         }
 
