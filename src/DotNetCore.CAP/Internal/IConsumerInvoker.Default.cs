@@ -51,7 +51,7 @@ namespace DotNetCore.CAP.Internal
                         }
                         else
                         {
-                            _logger.LogWarning($"Parameters:{firstParameter.Name} bind failed!");
+                            _logger.LogWarning($"Parameters:{firstParameter.Name} bind failed! the content is:" + value);
                         }
                     }
                     catch (FormatException ex)
