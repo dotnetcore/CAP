@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -51,6 +52,16 @@ namespace DotNetCore.CAP.RabbitMQ
             _channel.QueueDeclare(_queueName, exclusive: false);
         }
 
+        public void Subscribe(IEnumerable<string> topics)
+        {
+            if (topics == null) throw new ArgumentNullException(nameof(topics));
+
+            foreach (var topic in topics)
+            {
+                _channel.QueueBind(_queueName, _exchageName, topic);
+            }
+        }
+
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             var consumer = new EventingBasicConsumer(_channel);
@@ -61,16 +72,6 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 Task.Delay(timeout, cancellationToken).GetAwaiter().GetResult();
             }
-        }
-
-        public void Subscribe(string topic)
-        {
-            _channel.QueueBind(_queueName, _exchageName, topic);
-        }
-
-        public void Subscribe(string topic, int partition)
-        {
-            _channel.QueueBind(_queueName, _exchageName, topic);
         }
 
         public void Commit()
