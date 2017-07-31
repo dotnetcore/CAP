@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Confluent.Kafka;
@@ -25,19 +26,18 @@ namespace DotNetCore.CAP.Kafka
             StringDeserializer = new StringDeserializer(Encoding.UTF8);
         }
 
-        public void Subscribe(string topic)
+        public void Subscribe(IEnumerable<string> topics)
         {
-            Subscribe(topic, 0);
-        }
+            if (topics == null)
+                throw new ArgumentNullException(nameof(topics));
 
-        public void Subscribe(string topicName, int partition)
-        {
             if (_consumerClient == null)
             {
                 InitKafkaClient();
             }
-            _consumerClient.Assignment.Add(new TopicPartition(topicName, partition));
-            _consumerClient.Subscribe(topicName);
+
+            //_consumerClient.Assign(topics.Select(x=> new TopicPartition(x, 0)));
+            _consumerClient.Subscribe(topics);
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)

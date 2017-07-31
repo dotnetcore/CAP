@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
@@ -56,10 +57,7 @@ namespace DotNetCore.CAP
                     {
                         RegisterMessageProcessor(client);
 
-                        foreach (var item in matchGroup.Value)
-                        {
-                            client.Subscribe(item.Attribute.Name);
-                        }
+                        client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
 
                         client.Listening(_pollingDelay, _cts.Token);
                     }
