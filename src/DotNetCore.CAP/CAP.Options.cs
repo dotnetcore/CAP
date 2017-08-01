@@ -13,28 +13,39 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Default value for polling delay timeout, in seconds.
         /// </summary>
-        public const int DefaultPollingDelay = 8;
+        public const int DefaultPollingDelay = 15;
+
+        /// <summary>
+        /// Default processor count to process messages of cap.queue.
+        /// </summary>
+        public const int DefaultQueueProcessorCount = 2;
 
         public CapOptions()
         {
             PollingDelay = DefaultPollingDelay;
+            QueueProcessorCount = DefaultQueueProcessorCount;
             Extensions = new List<ICapOptionsExtension>();
         }
 
         /// <summary>
-        /// Productor job polling delay time. Default is 5 sec.
+        /// Productor job polling delay time. Default is 15 sec.
         /// </summary>
-        public int PollingDelay { get; set; } = 5;
+        public int PollingDelay { get; set; }
 
         /// <summary>
-        /// Failed messages polling delay time. Default is 2 min.
+        /// Gets or sets the messages queue (Cap.Queue table) processor count.
         /// </summary>
-        public TimeSpan FailedMessageWaitingInterval = TimeSpan.FromMinutes(2);
+        public int QueueProcessorCount { get; set; }
 
         /// <summary>
-        /// We’ll send a POST request to the URL below with details of any subscribed events.
+        /// Failed messages polling delay time. Default is 3 min.
         /// </summary>
-        public WebHook WebHook => throw new NotSupportedException();
+        public TimeSpan FailedMessageWaitingInterval = TimeSpan.FromMinutes(3);
+
+        /// <summary>
+        /// We’ll invoke this call-back with message type,name,content when requeue failed message.
+        /// </summary>
+        public Action<Models.MessageType, string, string> FailedCallback { get; set; } 
 
         /// <summary>
 		/// Registers an extension that will be executed when building services.
@@ -47,12 +58,5 @@ namespace DotNetCore.CAP
 
             Extensions.Add(extension);
         }
-    }
-
-    public class WebHook
-    {
-        public string PayloadUrl { get; set; }
-
-        public string Secret { get; set; }
     }
 }
