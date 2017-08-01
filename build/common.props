@@ -14,7 +14,7 @@
     <PackageIconUrl>https://avatars2.githubusercontent.com/u/19404084</PackageIconUrl>
 		<PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
 		<PackageLicenseUrl>https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt</PackageLicenseUrl>
-    <PackageTags>aspnetcore;cap;consistency</PackageTags>
+    <PackageTags>eventbus;rabbitmq;kafka;cap;transaction;</PackageTags>
     <Description>EventBus and eventually consistency in distributed architectures.</Description>
 	</PropertyGroup>
 
