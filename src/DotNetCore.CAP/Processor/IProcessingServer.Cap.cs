@@ -39,8 +39,9 @@ namespace DotNetCore.CAP.Processor
 
         public void Start()
         {
-            var processorCount = Environment.ProcessorCount;
+            var processorCount = _options.QueueProcessorCount;
             _processors = GetProcessors(processorCount);
+
             _logger.ServerStarting(processorCount, _processors.Length);
 
             _context = new ProcessingContext(_provider, _cts.Token);
