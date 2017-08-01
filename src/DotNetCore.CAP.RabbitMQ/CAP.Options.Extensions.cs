@@ -4,7 +4,7 @@ using DotNetCore.CAP;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
 {
-    internal static class CapOptionsExtensions
+    public static class CapOptionsExtensions
     {
         public static CapOptions UseRabbitMQ(this CapOptions options, string hostName)
         {
