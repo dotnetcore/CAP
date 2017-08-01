@@ -15,7 +15,7 @@
 		<PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
 		<PackageLicenseUrl>https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt</PackageLicenseUrl>
     <PackageTags>aspnetcore;cap;consistency</PackageTags>
-    <Description>Eventually consistency in distributed architectures.</Description>
+    <Description>EventBus and eventually consistency in distributed architectures.</Description>
 	</PropertyGroup>
 
 </Project>
