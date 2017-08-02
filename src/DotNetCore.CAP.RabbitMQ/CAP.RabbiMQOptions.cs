@@ -1,4 +1,6 @@
-﻿// ReSharper disable once CheckNamespace
+﻿using System;
+
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class RabbitMQOptions
@@ -76,5 +78,10 @@ namespace DotNetCore.CAP
         /// The port to connect on.
         /// </summary>
         public int Port { get; set; } = -1;
+
+        /// <summary>
+        /// Gets or sets queue message automatic deletion time. Default 10 days.
+        /// </summary>
+        public TimeSpan XMessageTTL { get; set; } = TimeSpan.FromDays(10);
     }
 }
