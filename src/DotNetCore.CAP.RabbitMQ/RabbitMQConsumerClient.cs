@@ -48,12 +48,18 @@ namespace DotNetCore.CAP.RabbitMQ
 
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(exchange: _exchageName, type: RabbitMQOptions.ExchangeType);
+
+            _channel.ExchangeDeclare(
+                exchange: _exchageName,
+                type: RabbitMQOptions.ExchangeType,
+                durable: true);
+
+            var arguments = new Dictionary<string, object> { { "x-message-ttl", (int)_rabbitMQOptions.XMessageTTL.TotalMilliseconds } };
             _channel.QueueDeclare(_queueName,
                 durable: true,
                 exclusive: false,
                 autoDelete: false,
-                arguments: new Dictionary<string, object> { { "message-ttl", _rabbitMQOptions.XMessageTTL.TotalMilliseconds } });
+                arguments: arguments);
         }
 
         public void Subscribe(IEnumerable<string> topics)

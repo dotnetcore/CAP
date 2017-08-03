@@ -43,7 +43,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 {
                     var body = Encoding.UTF8.GetBytes(content);
 
-                    channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, RabbitMQOptions.ExchangeType);
+                    channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, RabbitMQOptions.ExchangeType, durable: true);
                     channel.BasicPublish(exchange: _rabbitMQOptions.TopicExchangeName,
                                          routingKey: keyName,
                                          basicProperties: null,
