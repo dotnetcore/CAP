@@ -29,9 +29,9 @@ namespace DotNetCore.CAP
         public const string DefaultVHost = "/";
 
         /// <summary>
-        /// Default exchange name (value: "cap").
+        /// Default exchange name (value: "cap.default.topic").
         /// </summary>
-        public const string DefaultExchangeName = "cap";
+        public const string DefaultExchangeName = "cap.default.topic";
 
         /// <summary>The host to connect to.</summary>
         public string HostName { get; set; } = "localhost";
