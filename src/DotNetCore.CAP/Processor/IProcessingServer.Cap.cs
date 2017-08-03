@@ -77,7 +77,7 @@ namespace DotNetCore.CAP.Processor
             _cts.Cancel();
             try
             {
-                _compositeTask.Wait((int)TimeSpan.FromSeconds(60).TotalMilliseconds);
+                _compositeTask.Wait((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
             }
             catch (AggregateException ex)
             {
