@@ -40,18 +40,18 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Failed messages polling delay time. Default is 3 min.
         /// </summary>
-        public TimeSpan FailedMessageWaitingInterval = TimeSpan.FromMinutes(3);
+        public int FailedMessageWaitingInterval { get; set; } = (int)TimeSpan.FromMinutes(3).TotalSeconds;
 
         /// <summary>
         /// We’ll invoke this call-back with message type,name,content when requeue failed message.
         /// </summary>
-        public Action<Models.MessageType, string, string> FailedCallback { get; set; } 
+        public Action<Models.MessageType, string, string> FailedCallback { get; set; }
 
         /// <summary>
-		/// Registers an extension that will be executed when building services.
-		/// </summary>
-		/// <param name="extension"></param>
-		public void RegisterExtension(ICapOptionsExtension extension)
+        /// Registers an extension that will be executed when building services.
+        /// </summary>
+        /// <param name="extension"></param>
+        public void RegisterExtension(ICapOptionsExtension extension)
         {
             if (extension == null)
                 throw new ArgumentNullException(nameof(extension));

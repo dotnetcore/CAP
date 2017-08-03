@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Processor
             _logger = logger;
             _provider = provider;
             _stateChanger = stateChanger;
-            _waitingInterval = _options.FailedMessageWaitingInterval;
+            _waitingInterval = TimeSpan.FromSeconds(_options.FailedMessageWaitingInterval);
         }
 
         public async Task ProcessAsync(ProcessingContext context)

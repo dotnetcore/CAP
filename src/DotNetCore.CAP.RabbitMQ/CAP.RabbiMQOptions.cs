@@ -33,11 +33,11 @@ namespace DotNetCore.CAP
         /// </summary>
         public const string DefaultExchangeName = "cap.default.topic";
 
+        /// <summary> The topic exchange type. </summary>
+        public const string ExchangeType = "topic";
+
         /// <summary>The host to connect to.</summary>
         public string HostName { get; set; } = "localhost";
-
-        /// <summary> The topic exchange type. </summary>
-        internal const string ExchangeType = "topic";
 
         /// <summary>
         /// Password to use when authenticating to the server.
@@ -80,8 +80,8 @@ namespace DotNetCore.CAP
         public int Port { get; set; } = -1;
 
         /// <summary>
-        /// Gets or sets queue message automatic deletion time. Default 10 days.
+        /// Gets or sets queue message automatic deletion time (in milliseconds). Default 864000000 ms (10 days).
         /// </summary>
-        public TimeSpan XMessageTTL { get; set; } = TimeSpan.FromDays(10);
+        public int QueueMessageExpires { get; set; } = 864000000;
     }
 }

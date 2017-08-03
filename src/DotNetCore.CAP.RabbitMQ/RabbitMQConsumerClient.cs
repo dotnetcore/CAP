@@ -54,7 +54,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 type: RabbitMQOptions.ExchangeType,
                 durable: true);
 
-            var arguments = new Dictionary<string, object> { { "x-message-ttl", (int)_rabbitMQOptions.XMessageTTL.TotalMilliseconds } };
+            var arguments = new Dictionary<string, object> { { "x-message-ttl", (int)_rabbitMQOptions.QueueMessageExpires } };
             _channel.QueueDeclare(_queueName,
                 durable: true,
                 exclusive: false,
