@@ -40,7 +40,7 @@ namespace DotNetCore.CAP
                 _cts.Cancel();
                 try
                 {
-                    _bootstrappingTask?.Wait();
+                    _bootstrappingTask?.GetAwaiter().GetResult();
                 }
                 catch (OperationCanceledException ex)
                 {

@@ -1,4 +1,6 @@
-﻿// ReSharper disable once CheckNamespace
+﻿using System;
+
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class RabbitMQOptions
@@ -27,15 +29,15 @@ namespace DotNetCore.CAP
         public const string DefaultVHost = "/";
 
         /// <summary>
-        /// Default exchange name (value: "cap").
+        /// Default exchange name (value: "cap.default.topic").
         /// </summary>
-        public const string DefaultExchangeName = "cap";
+        public const string DefaultExchangeName = "cap.default.topic";
+
+        /// <summary> The topic exchange type. </summary>
+        public const string ExchangeType = "topic";
 
         /// <summary>The host to connect to.</summary>
         public string HostName { get; set; } = "localhost";
-
-        /// <summary> The topic exchange type. </summary>
-        internal const string ExchangeType = "topic";
 
         /// <summary>
         /// Password to use when authenticating to the server.
@@ -76,5 +78,10 @@ namespace DotNetCore.CAP
         /// The port to connect on.
         /// </summary>
         public int Port { get; set; } = -1;
+
+        /// <summary>
+        /// Gets or sets queue message automatic deletion time (in milliseconds). Default 864000000 ms (10 days).
+        /// </summary>
+        public int QueueMessageExpires { get; set; } = 864000000;
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
-using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP
 {
@@ -9,14 +9,14 @@ namespace DotNetCore.CAP
     /// </summary>
     public interface IConsumerClient : IDisposable
     {
-        void Subscribe(string topic);
-
-        void Subscribe(string topic, int partition);
+        void Subscribe(IEnumerable<string> topics);
 
         void Listening(TimeSpan timeout, CancellationToken cancellationToken);
 
         void Commit();
 
-        event EventHandler<MessageContext> MessageReceieved;
+        event EventHandler<MessageContext> OnMessageReceieved;
+
+        event EventHandler<string> OnError;
     }
 }

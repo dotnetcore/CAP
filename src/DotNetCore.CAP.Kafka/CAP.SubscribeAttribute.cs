@@ -3,6 +3,9 @@
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
+    /// <summary>
+    /// An attribute for subscribe Kafka messages.
+    /// </summary>
     public class CapSubscribeAttribute : TopicAttribute
     {
         public CapSubscribeAttribute(string name)

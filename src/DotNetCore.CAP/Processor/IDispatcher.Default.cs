@@ -49,7 +49,7 @@ namespace DotNetCore.CAP.Processor
             try
             {
                 var worked = await Step(context);
-
+                
                 context.ThrowIfStopping();
 
                 Waiting = true;

@@ -18,8 +18,8 @@ namespace DotNetCore.CAP
         {
             var queueExectors = _serviceProvider.GetServices<IQueueExecutor>();
 
-            return messageType == MessageType.Publish 
-                ? queueExectors.FirstOrDefault(x => x is BasePublishQueueExecutor) 
+            return messageType == MessageType.Publish
+                ? queueExectors.FirstOrDefault(x => x is BasePublishQueueExecutor)
                 : queueExectors.FirstOrDefault(x => !(x is BasePublishQueueExecutor));
         }
     }

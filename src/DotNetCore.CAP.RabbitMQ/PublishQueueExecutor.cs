@@ -8,18 +8,18 @@ using RabbitMQ.Client;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
-    public class PublishQueueExecutor : BasePublishQueueExecutor
+    internal sealed class PublishQueueExecutor : BasePublishQueueExecutor
     {
         private readonly ILogger _logger;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
         public PublishQueueExecutor(IStateChanger stateChanger,
-            IOptions<RabbitMQOptions> options,
+            RabbitMQOptions options,
             ILogger<PublishQueueExecutor> logger)
             : base(stateChanger, logger)
         {
             _logger = logger;
-            _rabbitMQOptions = options.Value;
+            _rabbitMQOptions = options;
         }
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)
@@ -43,7 +43,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 {
                     var body = Encoding.UTF8.GetBytes(content);
 
-                    channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, RabbitMQOptions.ExchangeType);
+                    channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, RabbitMQOptions.ExchangeType, durable: true);
                     channel.BasicPublish(exchange: _rabbitMQOptions.TopicExchangeName,
                                          routingKey: keyName,
                                          basicProperties: null,

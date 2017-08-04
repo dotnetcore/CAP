@@ -1,14 +1,15 @@
-﻿using Microsoft.Extensions.Options;
+﻿using System;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
-    public class KafkaConsumerClientFactory : IConsumerClientFactory
+    internal sealed class KafkaConsumerClientFactory : IConsumerClientFactory
     {
         private readonly KafkaOptions _kafkaOptions;
 
-        public KafkaConsumerClientFactory(IOptions<KafkaOptions> kafkaOptions)
+        public KafkaConsumerClientFactory(KafkaOptions kafkaOptions)
         {
-            _kafkaOptions = kafkaOptions.Value;
+            _kafkaOptions = kafkaOptions;
         }
 
         public IConsumerClient Create(string groupId)

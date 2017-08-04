@@ -58,13 +58,7 @@ namespace DotNetCore.CAP.Internal
                     continue;
                 }
 
-                foreach (var method in typeInfo.DeclaredMethods)
-                {
-                    var topicAttr = method.GetCustomAttribute<TopicAttribute>(true);
-                    if (topicAttr == null) continue;
-
-                    executorDescriptorList.Add(InitDescriptor(topicAttr, method, typeInfo));
-                }
+                executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
             }
             return executorDescriptorList;
         }
@@ -82,16 +76,25 @@ namespace DotNetCore.CAP.Internal
                 //double check
                 if (!Helper.IsController(typeInfo)) continue;
 
-                foreach (var method in typeInfo.DeclaredMethods)
-                {
-                    var topicAttr = method.GetCustomAttribute<TopicAttribute>(true);
-                    if (topicAttr == null) continue;
-
-                    executorDescriptorList.Add(InitDescriptor(topicAttr, method, typeInfo));
-                }
+                executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
             }
 
             return executorDescriptorList;
+        }
+
+        private static IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo)
+        {
+            foreach (var method in typeInfo.DeclaredMethods)
+            {
+                var topicAttrs = method.GetCustomAttributes<TopicAttribute>(true);
+
+                if (topicAttrs.Count() == 0) continue;
+
+                foreach (var attr in topicAttrs)
+                {
+                    yield return InitDescriptor(attr, method, typeInfo);
+                }
+            }
         }
 
         private static ConsumerExecutorDescriptor InitDescriptor(

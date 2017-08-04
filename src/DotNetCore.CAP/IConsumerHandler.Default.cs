@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
@@ -56,10 +57,7 @@ namespace DotNetCore.CAP
                     {
                         RegisterMessageProcessor(client);
 
-                        foreach (var item in matchGroup.Value)
-                        {
-                            client.Subscribe(item.Attribute.Name);
-                        }
+                        client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
 
                         client.Listening(_pollingDelay, _cts.Token);
                     }
@@ -95,7 +93,7 @@ namespace DotNetCore.CAP
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
-            client.MessageReceieved += (sender, message) =>
+            client.OnMessageReceieved += (sender, message) =>
             {
                 _logger.EnqueuingReceivedMessage(message.Name, message.Content);
 
@@ -105,6 +103,11 @@ namespace DotNetCore.CAP
                     client.Commit();
                 }
                 Pulse();
+            };
+
+            client.OnError += (sender, reason) =>
+            {
+                _logger.LogError(reason);
             };
         }
 
@@ -116,7 +119,7 @@ namespace DotNetCore.CAP
             {
                 StatusName = StatusName.Scheduled,
             };
-            messageStore.StoreReceivedMessageAsync(receivedMessage).Wait();
+            messageStore.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
             return receivedMessage;
         }
 

@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.SqlServer.Test
                 var storage = GetService<SqlServerStorage>();
                 var token = new CancellationTokenSource().Token;
                 CreateDatabase();
-                storage.InitializeAsync(token).Wait();
+                storage.InitializeAsync(token).GetAwaiter().GetResult();
                 _sqlObjectInstalled = true;
             }
         }

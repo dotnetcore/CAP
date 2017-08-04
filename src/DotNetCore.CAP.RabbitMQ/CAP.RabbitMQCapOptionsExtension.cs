@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
-    public class RabbitMQCapOptionsExtension : ICapOptionsExtension
+    internal sealed class RabbitMQCapOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<RabbitMQOptions> _configure;
 
@@ -16,12 +16,9 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.Configure(_configure);
-
-            var rabbitMQOptions = new RabbitMQOptions();
-            _configure(rabbitMQOptions);
-
-            services.AddSingleton(rabbitMQOptions);
+            var options = new RabbitMQOptions();
+            _configure?.Invoke(options);
+            services.AddSingleton(options);
 
             services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
             services.AddTransient<IQueueExecutor, PublishQueueExecutor>();

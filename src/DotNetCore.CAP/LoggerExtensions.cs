@@ -14,6 +14,7 @@ namespace DotNetCore.CAP
         private static readonly Action<ILogger, string, string, Exception> _enqueuingReceivdeMessage;
         private static readonly Action<ILogger, string, Exception> _executingConsumerMethod;
         private static readonly Action<ILogger, string, Exception> _receivedMessageRetryExecuting;
+        private static readonly Action<ILogger, string, string, string, Exception> _modelBinderFormattingException;
 
         private static Action<ILogger, Exception> _jobFailed;
         private static Action<ILogger, Exception> _jobFailedWillRetry;
@@ -46,12 +47,12 @@ namespace DotNetCore.CAP
             _enqueuingSentMessage = LoggerMessage.Define<string, string>(
                 LogLevel.Debug,
                 2,
-                "Enqueuing a topic to the sent message store. NameKey: {NameKey}. Content: {Content}");
+                "Enqueuing a topic to the sent message store. NameKey: '{NameKey}' Content: '{Content}'.");
 
             _enqueuingReceivdeMessage = LoggerMessage.Define<string, string>(
                 LogLevel.Debug,
                 2,
-                "Enqueuing a topic to the received message store. NameKey: {NameKey}. Content: {Content}");
+                "Enqueuing a topic to the received message store. NameKey: '{NameKey}. Content: '{Content}'.");
 
             _executingConsumerMethod = LoggerMessage.Define<string>(
                 LogLevel.Error,
@@ -62,6 +63,12 @@ namespace DotNetCore.CAP
                 LogLevel.Error,
                 5,
                 "Received message topic method '{topicName}' failed to execute.");
+
+            _modelBinderFormattingException = LoggerMessage.Define<string, string, string>(
+                LogLevel.Error,
+                5,
+                "When call subscribe method, a parameter format conversion exception occurs. MethodName:'{MethodName}' ParameterName:'{ParameterName}' Content:'{Content}'."
+                );
 
             _jobRetrying = LoggerMessage.Define<int>(
                 LogLevel.Debug,
@@ -153,6 +160,11 @@ namespace DotNetCore.CAP
         public static void ExceptionOccuredWhileExecutingJob(this ILogger logger, string jobId, Exception ex)
         {
             _exceptionOccuredWhileExecutingJob(logger, jobId, ex);
+        }
+
+        public static void ModelBinderFormattingException(this ILogger logger, string methodName, string parameterName, string content, Exception ex)
+        {
+            _modelBinderFormattingException(logger, methodName, parameterName, content, ex);
         }
     }
 }

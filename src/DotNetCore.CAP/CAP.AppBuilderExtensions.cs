@@ -25,7 +25,7 @@ namespace Microsoft.AspNetCore.Builder
 
             if (marker == null)
             {
-                throw new InvalidOperationException("Add Consistency must be called on the service collection.");
+                throw new InvalidOperationException("Add Cap must be called on the service collection.");
             }
 
             var provider = app.ApplicationServices;

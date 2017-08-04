@@ -21,30 +21,34 @@ namespace DotNetCore.CAP
         /// Topic configuration parameters are specified via the "default.topic.config" sub-dictionary config parameter.
         /// </para>
         /// </summary>
-        public IDictionary<string, object> MainConfig { get; private set; }
+        public readonly IDictionary<string, object> MainConfig;
 
         /// <summary>
-        /// The `bootstrap.servers` item config of `MainConfig`.
+        /// The `bootstrap.servers` item config of <see cref="MainConfig"/>.
         /// <para>
         /// Initial list of brokers as a CSV list of broker host or host:port.
         /// </para>
         /// </summary>
         public string Servers { get; set; }
 
-        internal IEnumerable<KeyValuePair<string, object>> AsRdkafkaConfig()
+        internal IEnumerable<KeyValuePair<string, object>> AskafkaConfig()
         {
             if (MainConfig.ContainsKey("bootstrap.servers"))
+            {
                 return MainConfig.AsEnumerable();
+            }
 
-            if (string.IsNullOrEmpty(Servers))
+            if (string.IsNullOrWhiteSpace(Servers))
             {
                 throw new ArgumentNullException(nameof(Servers));
             }
-            else
-            {
-                MainConfig.Add("bootstrap.servers", Servers);
-            }
+            
+            MainConfig.Add("bootstrap.servers", Servers);
+
+            MainConfig["queue.buffering.max.ms"] = "10";
+            MainConfig["socket.blocking.max.ms"] = "10";
             MainConfig["enable.auto.commit"] = "false";
+
             return MainConfig.AsEnumerable();
         }
     }

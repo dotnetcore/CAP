@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,7 +8,7 @@ using RabbitMQ.Client.Events;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
-    public class RabbitMQConsumerClient : IConsumerClient
+    internal sealed class RabbitMQConsumerClient : IConsumerClient
     {
         private readonly string _exchageName;
         private readonly string _queueName;
@@ -18,7 +19,9 @@ namespace DotNetCore.CAP.RabbitMQ
         private IModel _channel;
         private ulong _deliveryTag;
 
-        public event EventHandler<MessageContext> MessageReceieved;
+        public event EventHandler<MessageContext> OnMessageReceieved;
+
+        public event EventHandler<string> OnError;
 
         public RabbitMQConsumerClient(string queueName, RabbitMQOptions options)
         {
@@ -45,29 +48,40 @@ namespace DotNetCore.CAP.RabbitMQ
 
             _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
-            _channel.ExchangeDeclare(exchange: _exchageName, type: RabbitMQOptions.ExchangeType);
-            _channel.QueueDeclare(_queueName, exclusive: false);
+
+            _channel.ExchangeDeclare(
+                exchange: _exchageName,
+                type: RabbitMQOptions.ExchangeType,
+                durable: true);
+
+            var arguments = new Dictionary<string, object> { { "x-message-ttl", (int)_rabbitMQOptions.QueueMessageExpires } };
+            _channel.QueueDeclare(_queueName,
+                durable: true,
+                exclusive: false,
+                autoDelete: false,
+                arguments: arguments);
+        }
+
+        public void Subscribe(IEnumerable<string> topics)
+        {
+            if (topics == null) throw new ArgumentNullException(nameof(topics));
+
+            foreach (var topic in topics)
+            {
+                _channel.QueueBind(_queueName, _exchageName, topic);
+            }
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnConsumerReceived;
+            consumer.Shutdown += OnConsumerShutdown;
             _channel.BasicConsume(_queueName, false, consumer);
             while (true)
             {
-                Task.Delay(timeout, cancellationToken).Wait();
+                Task.Delay(timeout, cancellationToken).GetAwaiter().GetResult();
             }
-        }
-
-        public void Subscribe(string topic)
-        {
-            _channel.QueueBind(_queueName, _exchageName, topic);
-        }
-
-        public void Subscribe(string topic, int partition)
-        {
-            _channel.QueueBind(_queueName, _exchageName, topic);
         }
 
         public void Commit()
@@ -90,7 +104,12 @@ namespace DotNetCore.CAP.RabbitMQ
                 Name = e.RoutingKey,
                 Content = Encoding.UTF8.GetString(e.Body)
             };
-            MessageReceieved?.Invoke(sender, message);
+            OnMessageReceieved?.Invoke(sender, message);
+        }
+
+        private void OnConsumerShutdown(object sender, ShutdownEventArgs e)
+        {
+            OnError?.Invoke(sender, e.Cause?.ToString());
         }
     }
 }
