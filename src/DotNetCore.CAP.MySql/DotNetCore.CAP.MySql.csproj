@@ -17,7 +17,7 @@
     <PackageReference Include="Dapper" Version="1.50.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="1.1.2" />
-    <PackageReference Include="MySqlConnector" Version="0.23.0" />
+    <PackageReference Include="MySqlConnector" Version="0.24.0" />
   </ItemGroup>
 
   <ItemGroup>
