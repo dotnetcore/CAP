@@ -3,14 +3,9 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <TargetFrameworks>netstandard1.6;</TargetFrameworks>
     <AssemblyName>DotNetCore.CAP.Kafka</AssemblyName>
-    <PackageId>DotNetCore.CAP.Kafka</PackageId>
-    <PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <PackageTags>$(PackageTags);Kafka</PackageTags>
   </PropertyGroup>
  
   <ItemGroup>
