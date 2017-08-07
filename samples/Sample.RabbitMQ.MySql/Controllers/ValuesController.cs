@@ -23,7 +23,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [Route("~/publish")]
         public IActionResult PublishMessage()
         {
-            _capBus.Publish("sample.kafka.sqlserver", "");
+            _capBus.Publish("sample.rabbitmq.mysql", "");
 
             return Ok();
         }
@@ -33,7 +33,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         {
             using (var trans = await _dbContext.Database.BeginTransactionAsync())
             {
-                await _capBus.PublishAsync("sample.kafka.sqlserver", "");
+                await _capBus.PublishAsync("sample.rabbitmq.mysql", "");
                 trans.Commit();
             }
             return Ok();
