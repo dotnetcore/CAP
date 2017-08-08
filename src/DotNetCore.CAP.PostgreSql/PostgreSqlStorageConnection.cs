@@ -37,10 +37,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         public Task<IFetchedMessage> FetchNextMessageAsync()
         {
-            var sql = $@"
-SELECT ""MessageId"",""MessageType"" FROM ""{_options.Schema}"".""queue"" LIMIT 1 FOR UPDATE;
-DELETE FROM ""{_options.Schema}"".""queue"" LIMIT 1;";
-            
+            var sql = $@"DELETE FROM ""{_options.Schema}"".""queue"" WHERE ""MessageId"" = (SELECT ""MessageId"" FROM ""{_options.Schema}"".""queue"" LIMIT 1) RETURNING *;";
             return FetchNextMessageCoreAsync(sql);
         }
 
