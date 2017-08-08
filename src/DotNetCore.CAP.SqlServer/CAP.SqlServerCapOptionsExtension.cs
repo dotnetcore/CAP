@@ -36,9 +36,17 @@ namespace DotNetCore.CAP
             services.AddSingleton(sqlServerOptions);
         }
 
+#if NETSTANDARD1_6
         private IServiceProvider TempBuildService(IServiceCollection services)
         {
             return services.BuildServiceProvider();
         }
+#else
+        private ServiceProvider TempBuildService(IServiceCollection services)
+        {
+            return services.BuildServiceProvider();
+        }
+#endif
+
     }
 }
