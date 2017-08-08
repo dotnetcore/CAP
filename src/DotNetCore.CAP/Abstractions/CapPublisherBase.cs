@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Abstractions
 
         protected bool IsUsingEF { get; set; }
 
-        protected IServiceProvider ServiceProvider { get; }
+        protected IServiceProvider ServiceProvider { get; set; }
          
         public void Publish<T>(string name, T contentObj)
         {

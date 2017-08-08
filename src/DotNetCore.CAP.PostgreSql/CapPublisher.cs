@@ -20,6 +20,7 @@ namespace DotNetCore.CAP.PostgreSql
             ILogger<CapPublisher> logger,
             PostgreSqlOptions options)
         {
+            ServiceProvider = provider;
             _options = options;
             _logger = logger;
 
