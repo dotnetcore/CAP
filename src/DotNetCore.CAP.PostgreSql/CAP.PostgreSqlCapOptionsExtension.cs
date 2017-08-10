@@ -47,6 +47,5 @@ namespace DotNetCore.CAP
             return services.BuildServiceProvider();
         }
 #endif
-
     }
 }

@@ -7,7 +7,7 @@ using Npgsql;
 
 namespace DotNetCore.CAP.PostgreSql
 {
-    public class DefaultAdditionalProcessor : IAdditionalProcessor
+    internal class DefaultAdditionalProcessor : IAdditionalProcessor
     {
         private readonly IServiceProvider _provider;
         private readonly ILogger _logger;
