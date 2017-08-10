@@ -33,42 +33,28 @@ namespace DotNetCore.CAP.PostgreSql
 
         protected override void PrepareConnectionForEF()
         {
-            _dbConnection = _dbContext.Database.GetDbConnection();
+            DbConnection = _dbContext.Database.GetDbConnection();
             var transaction = _dbContext.Database.CurrentTransaction;
             if (transaction == null)
             {
                 IsCapOpenedTrans = true;
                 transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
             }
-            _dbTranasaction = transaction.GetDbTransaction();
+            DbTranasaction = transaction.GetDbTransaction();
         }
 
         protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
         {
             dbConnection.Execute(PrepareSql(), message, dbTransaction);
 
-            _logger.LogDebug("Message has been persisted in the database. name:" + message.ToString());
-
-            if (IsCapOpenedTrans)
-            {
-                dbTransaction.Commit();
-                dbTransaction.Dispose();
-                dbConnection.Dispose();
-            }
+            _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
         protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
         {
             await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
 
-            _logger.LogDebug("Message has been persisted in the database. name:" + message.ToString());
-
-            if (IsCapOpenedTrans)
-            {
-                dbTransaction.Commit();
-                dbTransaction.Dispose();
-                dbConnection.Dispose();
-            }
+            _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
         private string PrepareSql()
