@@ -1,5 +1,5 @@
 version: '{build}'
-os: Visual Studio 2015
+os: Visual Studio 2017
 environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
