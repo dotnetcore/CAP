@@ -3,7 +3,7 @@
   <Import Project="..\..\build\common.props" />
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;</TargetFrameworks>
     <AssemblyName>DotNetCore.CAP.RabbitMQ</AssemblyName>
     <PackageTags>$(PackageTags);RabbitMQ</PackageTags>
   </PropertyGroup>

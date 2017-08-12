@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.Test
             fixture.ChangeState(message, state, mockTransaction.Object);
 
             // Assert
-            Assert.Equal(message.StatusName, "s");
+            Assert.Equal("s", message.StatusName);
             Assert.Null(message.ExpiresAt);
             Mock.Get(state).Verify(s => s.Apply(message, mockTransaction.Object), Times.Once);
             mockTransaction.Verify(t => t.UpdateMessage(message), Times.Once);
@@ -48,7 +48,7 @@ namespace DotNetCore.CAP.Test
             fixture.ChangeState(message, state, mockTransaction.Object);
 
             // Assert
-            Assert.Equal(message.StatusName, "s");
+            Assert.Equal("s", message.StatusName);
             Assert.NotNull(message.ExpiresAt);
             mockTransaction.Verify(t => t.UpdateMessage(message), Times.Once);
             mockTransaction.Verify(t => t.CommitAsync(), Times.Never);

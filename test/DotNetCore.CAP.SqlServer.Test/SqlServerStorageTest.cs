@@ -19,7 +19,7 @@ SELECT 'True'
 ELSE
 SELECT 'False'";
                 var result = connection.QueryFirst<bool>(sql);
-                Assert.Equal(true, result);
+                Assert.True(result);
             }
         }
 
@@ -34,7 +34,7 @@ SELECT 'True'
 ELSE
 SELECT 'False'";
                 var result = connection.QueryFirst<bool>(sql);
-                Assert.Equal(true, result);
+                Assert.True(result);
             }
         }
 
@@ -49,7 +49,7 @@ SELECT 'True'
 ELSE
 SELECT 'False'";
                 var result = connection.QueryFirst<bool>(sql);
-                Assert.Equal(true, result);
+                Assert.True(result);
             }
         }
 
@@ -64,7 +64,7 @@ SELECT 'True'
 ELSE
 SELECT 'False'";
                 var result = connection.QueryFirst<bool>(sql);
-                Assert.Equal(true, result);
+                Assert.True(result);
             }
         }
     }

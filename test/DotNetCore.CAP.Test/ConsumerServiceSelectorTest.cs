@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.Test
 
             Assert.NotNull(bestCandidates);
             Assert.NotNull(bestCandidates.MethodInfo);
-            Assert.Equal(bestCandidates.MethodInfo.ReturnType, typeof(Task));
+            Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
         }
     }
 

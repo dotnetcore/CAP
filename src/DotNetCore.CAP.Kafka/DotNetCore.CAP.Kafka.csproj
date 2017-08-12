@@ -3,10 +3,15 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;</TargetFrameworks>
     <AssemblyName>DotNetCore.CAP.Kafka</AssemblyName>
     <PackageTags>$(PackageTags);Kafka</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="C:\Users\yangxiaodong\.nuget\packages\librdkafka.redist\0.11.0\build\net\..\..\runtimes\win7-x64\native\**" />
+    <Content Remove="C:\Users\yangxiaodong\.nuget\packages\librdkafka.redist\0.11.0\build\net\..\..\runtimes\win7-x86\native\**" />
+  </ItemGroup>
  
   <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="0.11.0" />
