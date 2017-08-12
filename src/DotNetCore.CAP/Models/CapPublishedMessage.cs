@@ -34,5 +34,10 @@ namespace DotNetCore.CAP.Models
         public int Retries { get; set; }
 
         public string StatusName { get; set; }
+
+        public override string ToString()
+        {
+            return "name:" + Name + ", content:" + Content;
+        }
     }
 }
