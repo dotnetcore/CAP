@@ -19,6 +19,7 @@ Configuration: {Build.Configuration}
 
 	public static string CreateStamp()
 	{
-		return DateTime.Now.ToString("yyMMddHM");
+		var seconds = (long)(DateTime.UtcNow - new DateTime(2017, 1, 1)).TotalSeconds;
+		return seconds.ToString();
 	}
 }
