@@ -18,7 +18,7 @@ namespace Sample.RabbitMQ.MySql
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseKafka("localhost:9092");
+                x.UseRabbitMQ("localhost");
             });
 
             services.AddMvc();
