@@ -10,10 +10,10 @@
     <webrepUrl>https://github.com/dotnetcore/dotnetcore.github.io</webrepUrl>
     <docfxPath>"$(WorkDir)docfx.json"</docfxPath>    
     <templatePath>"$(WorkDir)_exported_templates\default"</templatePath>
-    <sitePath>"$(WorkDir)\_site"</sitePath>
+    <sitePath>"$(WorkDir)_site"</sitePath>
     <sourcePath>$(WorkDir)</sourcePath>
     <pubsitePath>"$(webDir)$(webName)"</pubsitePath> 
-    <pdfresourcePath>"$(WorkDir)\pdfresource"</pdfresourcePath>
+    <pdfresourcePath>"$(WorkDir)pdfresource"</pdfresourcePath>
     <SubDirName>cap</SubDirName>   
     <ProjectDir>$(webDir)$(webName)\$(SubDirName)\</ProjectDir>  
   </PropertyGroup>
