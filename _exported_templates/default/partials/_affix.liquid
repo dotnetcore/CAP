@@ -1,0 +1,27 @@
+{% comment -%}Copyright (c) Microsoft. All rights reserved. Licensed under the MIT license. See LICENSE file in the project root for full license information.{% endcomment -%}
+<div class="hidden-sm col-md-2" role="complementary">
+  <div class="sideaffix">
+    {%- if not _disableContribution -%}
+    <div class="contribution">
+      <ul class="nav">
+        {%- if docurl -%}
+        <li>
+          <a href="{{docurl}}" class="contribution-link">{{__global.improveThisDoc}}</a>
+        </li>
+        {%- endif -%}
+        {%- if sourceurl -%}
+        <li>
+          <a href="{{sourceurl}}" class="contribution-link">{{__global.viewSource}}</a>
+        </li>
+        {%- endif -%}
+		                                <li>
+                                    <div style="margin-left: 10px; margin-top: 3px; margin-bottom: 3px;" class="bdsharebuttonbox"><a href="#" class="bds_more" data-cmd="more">分享到：</a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a></div>
+                                </li>
+      </ul>
+    </div>
+    {%- endif -%}
+    <nav class="bs-docs-sidebar hidden-print hidden-xs hidden-sm affix" id="affix">
+    <!-- <p><a class="back-to-top" href="#top">返回顶部</a><p> -->
+    </nav>
+  </div>
+</div>

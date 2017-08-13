@@ -1,0 +1,48 @@
+{
+  "build": {
+    "content": [
+      {
+        "files": [
+          "document/**.md",
+          "document/**/toc.yml",
+          "toc.yml",
+          "*.md"
+        ],
+        "exclude": [
+          "**/bin/**",
+          "**/obj/**",
+          "_site/**"
+        ]
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "document/images/**"
+        ],
+        "exclude": [
+          "**/bin/**",
+          "**/obj/**",
+          "_site/**"
+        ]
+      }
+    ],
+    "overwrite": [
+      {
+        "files": [
+        ],
+        "exclude": [
+          "**/bin/**",
+          "**/obj/**",
+          "_site/**"
+        ]
+      }
+    ],
+    "dest": "_site",
+    "globalMetadata": {
+      "_appTitle": "CAP 中文文档"
+    },
+    "postProcessors": [],
+    "noLangKeyword": false
+  }
+}
