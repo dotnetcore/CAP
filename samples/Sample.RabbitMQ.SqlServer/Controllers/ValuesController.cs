@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Sample.Kafka.Controllers
+namespace Sample.RabbitMQ.SqlServer.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller, ICapSubscribe
@@ -22,6 +22,7 @@ namespace Sample.Kafka.Controllers
         public IActionResult PublishMessage()
         {
             _capBus.Publish("sample.rabbitmq.mysql", "");
+
             return Ok();
         }
 
@@ -31,13 +32,15 @@ namespace Sample.Kafka.Controllers
             using (var trans = await _dbContext.Database.BeginTransactionAsync())
             {
                 await _capBus.PublishAsync("sample.rabbitmq.mysql", "");
+
                 trans.Commit();
             }
             return Ok();
         }
 
         [NonAction]
-        [CapSubscribe("sample.kafka.sqlserver", Group = "test")]
+        [CapSubscribe("sample.kafka.sqlserver3")]
+        [CapSubscribe("sample.kafka.sqlserver4")]
         public void KafkaTest()
         {
             Console.WriteLine("[sample.kafka.sqlserver] message received");
