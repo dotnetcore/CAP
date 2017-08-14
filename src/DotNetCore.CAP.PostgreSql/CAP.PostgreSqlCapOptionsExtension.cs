@@ -28,24 +28,17 @@ namespace DotNetCore.CAP
 
             if (postgreSqlOptions.DbContextType != null)
             {
-                var provider = TempBuildService(services);
-                var dbContextObj = provider.GetService(postgreSqlOptions.DbContextType);
-                var dbContext = (DbContext)dbContextObj;
-                postgreSqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                services.AddSingleton(x =>
+                {
+                    var dbContext = (DbContext)x.GetService(postgreSqlOptions.DbContextType);
+                    postgreSqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                    return postgreSqlOptions;
+                });
             }
-            services.AddSingleton(postgreSqlOptions);
+            else
+            {
+                services.AddSingleton(postgreSqlOptions);
+            }
         }
-
-#if NETSTANDARD1_6
-        private IServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
-        }
-#else
-        private ServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
-        }
-#endif
     }
 }
