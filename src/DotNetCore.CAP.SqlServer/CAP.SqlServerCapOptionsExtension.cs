@@ -24,29 +24,22 @@ namespace DotNetCore.CAP
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
             var sqlServerOptions = new SqlServerOptions();
+
             _configure(sqlServerOptions);
 
             if (sqlServerOptions.DbContextType != null)
             {
-                var provider = TempBuildService(services);
-                var dbContextObj = provider.GetService(sqlServerOptions.DbContextType);
-                var dbContext = (DbContext)dbContextObj;
-                sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                services.AddSingleton(x =>
+                {
+                    var dbContext = (DbContext)x.GetService(sqlServerOptions.DbContextType);
+                    sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                    return sqlServerOptions;
+                });
             }
-            services.AddSingleton(sqlServerOptions);
+            else
+            {
+                services.AddSingleton(sqlServerOptions);
+            }
         }
-
-#if NETSTANDARD1_6
-        private IServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
-        }
-#else
-        private ServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
-        }
-#endif
-
     }
 }
