@@ -8,7 +8,8 @@ using System.Threading;
 
 namespace DotNetCore.CAP
 {
-    /// <summary>Represents an ObjectId
+    /// <summary>
+    /// Represents an ObjectId
     /// </summary>
     [Serializable]
     public struct ObjectId : IComparable<ObjectId>, IEquatable<ObjectId>
