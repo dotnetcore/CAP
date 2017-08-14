@@ -12,9 +12,10 @@ namespace DotNetCore.CAP.Abstractions
         protected IDbConnection DbConnection { get; set; }
         protected IDbTransaction DbTranasaction { get; set; }
         protected bool IsCapOpenedTrans { get; set; }
+        protected bool IsCapOpenedConn { get; set; }
         protected bool IsUsingEF { get; set; }
         protected IServiceProvider ServiceProvider { get; set; }
-         
+
         public void Publish<T>(string name, T contentObj)
         {
             CheckIsUsingEF(name);
@@ -83,7 +84,10 @@ namespace DotNetCore.CAP.Abstractions
                 throw new ArgumentNullException(nameof(dbConnection));
 
             if (dbConnection.State != ConnectionState.Open)
+            {
+                IsCapOpenedConn = true;
                 dbConnection.Open();
+            }
 
             if (dbTransaction == null)
             {
@@ -122,8 +126,13 @@ namespace DotNetCore.CAP.Abstractions
             {
                 dbTransaction.Commit();
                 dbTransaction.Dispose();
+            }
+
+            if (IsCapOpenedConn)
+            {
                 dbConnection.Dispose();
             }
+
             PublishQueuer.PulseEvent.Set();
         }
 
@@ -142,8 +151,12 @@ namespace DotNetCore.CAP.Abstractions
             {
                 dbTransaction.Commit();
                 dbTransaction.Dispose();
+            }
+            if (IsCapOpenedConn)
+            {
                 dbConnection.Dispose();
             }
+
             PublishQueuer.PulseEvent.Set();
         }
 
