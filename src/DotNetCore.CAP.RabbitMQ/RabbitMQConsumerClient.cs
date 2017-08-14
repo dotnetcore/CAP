@@ -14,7 +14,6 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
-        private IConnectionFactory _connectionFactory;
         private IConnection _connection;
         private IModel _channel;
         private ulong _deliveryTag;
@@ -23,9 +22,12 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public event EventHandler<string> OnError;
 
-        public RabbitMQConsumerClient(string queueName, RabbitMQOptions options)
+        public RabbitMQConsumerClient(string queueName,
+             IConnection connection,
+             RabbitMQOptions options)
         {
             _queueName = queueName;
+            _connection = connection;
             _rabbitMQOptions = options;
             _exchageName = options.TopicExchangeName;
 
@@ -34,19 +36,6 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void InitClient()
         {
-            _connectionFactory = new ConnectionFactory()
-            {
-                HostName = _rabbitMQOptions.HostName,
-                UserName = _rabbitMQOptions.UserName,
-                Port = _rabbitMQOptions.Port,
-                Password = _rabbitMQOptions.Password,
-                VirtualHost = _rabbitMQOptions.VirtualHost,
-                RequestedConnectionTimeout = _rabbitMQOptions.RequestedConnectionTimeout,
-                SocketReadTimeout = _rabbitMQOptions.SocketReadTimeout,
-                SocketWriteTimeout = _rabbitMQOptions.SocketWriteTimeout
-            };
-
-            _connection = _connectionFactory.CreateConnection();
             _channel = _connection.CreateModel();
 
             _channel.ExchangeDeclare(
