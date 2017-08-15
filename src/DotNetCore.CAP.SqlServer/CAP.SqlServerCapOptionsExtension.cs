@@ -21,6 +21,7 @@ namespace DotNetCore.CAP
             services.AddSingleton<IStorage, SqlServerStorage>();
             services.AddScoped<IStorageConnection, SqlServerStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
+            services.AddTransient<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
             var sqlServerOptions = new SqlServerOptions();
