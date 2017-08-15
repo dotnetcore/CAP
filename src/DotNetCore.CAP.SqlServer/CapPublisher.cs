@@ -58,14 +58,15 @@ namespace DotNetCore.CAP.SqlServer
         protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
         {
             await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
+
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
-        public Task PublishAsync(string name, object contentObj)
+        public async Task PublishAsync(CapPublishedMessage message)
         {
             using (var conn = new SqlConnection(_options.ConnectionString))
             {
-               return conn.ExecuteAsync(PrepareSql(), contentObj);
+               await conn.ExecuteAsync(PrepareSql(), message);
             } 
         }
 
