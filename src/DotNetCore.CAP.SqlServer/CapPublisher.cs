@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Abstractions;
@@ -34,13 +35,17 @@ namespace DotNetCore.CAP.SqlServer
         protected override void PrepareConnectionForEF()
         {
             DbConnection = _dbContext.Database.GetDbConnection();
-            var transaction = _dbContext.Database.CurrentTransaction;
-            if (transaction == null)
+            var dbContextTransaction = _dbContext.Database.CurrentTransaction;
+            var dbTrans = dbContextTransaction?.GetDbTransaction();
+            //DbTransaction is dispose in original  
+            if (dbTrans?.Connection == null)
             {
                 IsCapOpenedTrans = true;
-                transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+                dbContextTransaction?.Dispose();
+                dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+                dbTrans = dbContextTransaction.GetDbTransaction();
             }
-            DbTranasaction = transaction.GetDbTransaction();
+            DbTranasaction = dbTrans;
         }
 
         protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
@@ -53,7 +58,6 @@ namespace DotNetCore.CAP.SqlServer
         protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
         {
             await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
-
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 

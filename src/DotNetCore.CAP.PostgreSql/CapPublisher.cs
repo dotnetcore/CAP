@@ -34,13 +34,17 @@ namespace DotNetCore.CAP.PostgreSql
         protected override void PrepareConnectionForEF()
         {
             DbConnection = _dbContext.Database.GetDbConnection();
-            var transaction = _dbContext.Database.CurrentTransaction;
-            if (transaction == null)
+            var dbContextTransaction = _dbContext.Database.CurrentTransaction;
+            var dbTrans = dbContextTransaction?.GetDbTransaction();
+            //DbTransaction is dispose in original  
+            if (dbTrans?.Connection == null)
             {
                 IsCapOpenedTrans = true;
-                transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+                dbContextTransaction?.Dispose();
+                dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+                dbTrans = dbContextTransaction.GetDbTransaction();
             }
-            DbTranasaction = transaction.GetDbTransaction();
+            DbTranasaction = dbTrans;
         }
 
         protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
