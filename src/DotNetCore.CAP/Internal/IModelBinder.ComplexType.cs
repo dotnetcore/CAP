@@ -3,6 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions.ModelBinding;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -20,7 +21,11 @@ namespace DotNetCore.CAP.Internal
             try
             {
                 var type = _parameterInfo.ParameterType;
-                var value = Helper.FromJson(content, type);
+
+                var message = Helper.FromJson<Message>(content);
+
+                var value = Helper.FromJson(message.Content.ToString(), type);
+
                 return Task.FromResult(ModelBindingResult.Success(value));
             }
             catch (Exception)

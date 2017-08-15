@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.SqlServer
 {
-    public class CapPublisher : CapPublisherBase
+    public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
         private readonly ILogger _logger;
         private readonly SqlServerOptions _options;
@@ -61,13 +61,20 @@ namespace DotNetCore.CAP.SqlServer
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
+        public Task PublishAsync(string name, object contentObj)
+        {
+            using (var conn = new SqlConnection(_options.ConnectionString))
+            {
+               return conn.ExecuteAsync(PrepareSql(), contentObj);
+            } 
+        }
+
         #region private methods
 
         private string PrepareSql()
         {
             return $"INSERT INTO {_options.Schema}.[Published] ([Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName)";
         }
-
 
         #endregion private methods
     }
