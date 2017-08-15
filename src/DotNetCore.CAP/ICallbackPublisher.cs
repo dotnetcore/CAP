@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
 {
     public interface ICallbackPublisher
     {
-        Task PublishAsync(string name, object obj);
+        Task PublishAsync(CapPublishedMessage obj);
     }
 }
