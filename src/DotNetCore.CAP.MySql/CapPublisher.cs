@@ -7,10 +7,11 @@ using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class CapPublisher : CapPublisherBase
+    public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
         private readonly ILogger _logger;
         private readonly MySqlOptions _options;
@@ -61,14 +62,19 @@ namespace DotNetCore.CAP.MySql
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
+        public async Task PublishAsync(CapPublishedMessage message)
+        {
+            using (var conn = new MySqlConnection(_options.ConnectionString))
+            {
+                await conn.ExecuteAsync(PrepareSql(), message);
+            }
+        }
         #region private methods     
 
         private string PrepareSql()
         {
             return $"INSERT INTO `{_options.TableNamePrefix}.published` (`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName)";
         }
-
-
 
         #endregion private methods
     }
