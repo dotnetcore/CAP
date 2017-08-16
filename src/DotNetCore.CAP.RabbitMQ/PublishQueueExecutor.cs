@@ -13,11 +13,13 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly IConnection _connection;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
-        public PublishQueueExecutor(IStateChanger stateChanger,
+        public PublishQueueExecutor(
+            CapOptions options,
+            IStateChanger stateChanger,
             IConnection connection,
             RabbitMQOptions rabbitMQOptions,
             ILogger<PublishQueueExecutor> logger)
-            : base(stateChanger, logger)
+            : base(options, stateChanger, logger)
         {
             _logger = logger;
             _connection = connection;

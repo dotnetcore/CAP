@@ -12,13 +12,15 @@ namespace DotNetCore.CAP.Kafka
         private readonly ILogger _logger;
         private readonly KafkaOptions _kafkaOptions;
 
-        public PublishQueueExecutor(IStateChanger stateChanger,
-            KafkaOptions options,
+        public PublishQueueExecutor(
+            CapOptions options,
+            IStateChanger stateChanger,
+            KafkaOptions kafkaOptions,
             ILogger<PublishQueueExecutor> logger)
-            : base(stateChanger, logger)
+            : base(options, stateChanger, logger)
         {
             _logger = logger;
-            _kafkaOptions = options;
+            _kafkaOptions = kafkaOptions;
         }
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)

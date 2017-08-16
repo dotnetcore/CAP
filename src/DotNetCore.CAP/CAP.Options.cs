@@ -20,27 +20,48 @@ namespace DotNetCore.CAP
         /// </summary>
         public const int DefaultQueueProcessorCount = 2;
 
+        /// <summary>
+        /// Default successed message expriation timespan, in seconds.
+        /// </summary>
+        public const int DefaultSuccessMessageExpirationTimeSpan = 3600;
+
+        /// <summary>
+        /// Failed message retry waiting interval.
+        /// </summary>
+        public const int DefaultFailedMessageWaitingInterval = 180;
+
         public CapOptions()
         {
             PollingDelay = DefaultPollingDelay;
             QueueProcessorCount = DefaultQueueProcessorCount;
+            SuccessedMessageExpiredTimeSpan = DefaultSuccessMessageExpirationTimeSpan;
+            FailedMessageWaitingInterval = DefaultFailedMessageWaitingInterval;
             Extensions = new List<ICapOptionsExtension>();
         }
 
         /// <summary>
-        /// Productor job polling delay time. Default is 15 sec.
+        /// Productor job polling delay time. 
+        /// Default is 15 sec.
         /// </summary>
         public int PollingDelay { get; set; }
 
         /// <summary>
         /// Gets or sets the messages queue (Cap.Queue table) processor count.
+        /// Default is 2 processor.
         /// </summary>
         public int QueueProcessorCount { get; set; }
 
         /// <summary>
-        /// Failed messages polling delay time. Default is 3 min.
+        /// Sent or received successed message due timespan, then the message will be deleted at due time. 
+        /// Dafault is 3600 seconds.
         /// </summary>
-        public int FailedMessageWaitingInterval { get; set; } = (int)TimeSpan.FromMinutes(3).TotalSeconds;
+        public int SuccessedMessageExpiredTimeSpan { get; set; }
+
+        /// <summary>
+        /// Failed messages polling delay time.
+        /// Default is 180 seconds.
+        /// </summary>
+        public int FailedMessageWaitingInterval { get; set; }
 
         /// <summary>
         /// We’ll invoke this call-back with message type,name,content when requeue failed message.
