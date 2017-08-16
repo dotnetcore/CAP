@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         private const int MaxBatch = 1000;
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
-        private readonly TimeSpan _waitingInterval = TimeSpan.FromHours(2);
+        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
         private static readonly string[] Tables =
         {
