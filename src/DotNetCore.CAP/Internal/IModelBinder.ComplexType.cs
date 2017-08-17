@@ -22,9 +22,7 @@ namespace DotNetCore.CAP.Internal
             {
                 var type = _parameterInfo.ParameterType;
 
-                var message = Helper.FromJson<Message>(content);
-
-                var value = Helper.FromJson(message.Content.ToString(), type);
+                var value = Helper.FromJson(content, type);
 
                 return Task.FromResult(ModelBindingResult.Success(value));
             }
