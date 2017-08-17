@@ -78,7 +78,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             foreach (var service in consumerListenerServices)
             {
-                services.AddSingleton(service.Key, service.Value);
+                services.AddTransient(service.Key, service.Value);
             }
 
             var types = Assembly.GetEntryAssembly().ExportedTypes;
@@ -86,7 +86,7 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 if (Helper.IsController(type.GetTypeInfo()))
                 {
-                    services.AddSingleton(typeof(object), type);
+                    services.AddTransient(typeof(object), type);
                 }
             }
         }
