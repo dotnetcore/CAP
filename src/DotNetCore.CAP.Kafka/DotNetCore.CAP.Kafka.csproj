@@ -8,11 +8,11 @@
     <PackageTags>$(PackageTags);Kafka</PackageTags>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\yangxiaodong\.nuget\packages\librdkafka.redist\0.11.0\build\net\..\..\runtimes\win7-x64\native\**" />
-    <Content Remove="C:\Users\yangxiaodong\.nuget\packages\librdkafka.redist\0.11.0\build\net\..\..\runtimes\win7-x86\native\**" />
-  </ItemGroup>
- 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningsAsErrors>NU1605</WarningsAsErrors>
+    <NoWarn>NU1701</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="0.11.0" />
   </ItemGroup>
