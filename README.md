@@ -44,10 +44,13 @@ If your Message Queue is using RabbitMQ, you can：
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP provides EntityFramework as default database store extension (The MySQL version is under development)：
+CAP supported SqlServer, MySql, PostgreSql as message store extension：
 
 ```
+//Select a database provider you are using
 PM> Install-Package DotNetCore.CAP.SqlServer
+PM> Install-Package DotNetCore.CAP.MySql
+PM> Install-Package DotNetCore.CAP.PostgreSql
 ```
 
 ### Configuration
@@ -69,6 +72,8 @@ public void ConfigureServices(IServiceCollection services)
 		
 		// If you are using Dapper,you need to add the config：
 		x.UseSqlServer("Your ConnectionStrings");
+		//x.UseMySql("Your ConnectionStrings");
+		//x.UsePostgreSql("Your ConnectionStrings");
 
 		// If your Message Queue is using RabbitMQ you need to add the config：
 		x.UseRabbitMQ("localhost");
