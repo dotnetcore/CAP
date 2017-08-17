@@ -64,12 +64,12 @@ public void ConfigureServices(IServiceCollection services)
 
 	services.AddDbContext<AppDbContext>();
 
-    services.AddCap(x =>
+	services.AddCap(x =>
 	{
 		// If your SqlServer is using EF for data operations, you need to add the following configuration：
 		// Notice: You don't need to config x.UseSqlServer(""") again!
 		x.UseEntityFramework<AppDbContext>();
-		
+
 		// If you are using Dapper,you need to add the config：
 		x.UseSqlServer("Your ConnectionStrings");
 		//x.UseMySql("Your ConnectionStrings");
@@ -87,7 +87,7 @@ public void Configure(IApplicationBuilder app)
 {
 	.....
 
-    app.UseCap();
+	app.UseCap();
 }
 
 ```
@@ -119,12 +119,12 @@ public class PublishController : Controller
 	[Route("~/checkAccountWithTrans")]
 	public async Task<IActionResult> PublishMessageWithTransaction([FromServices]AppDbContext dbContext)
 	{
-		 using (var trans = dbContext.Database.BeginTransaction())
-		 {
+		using (var trans = dbContext.Database.BeginTransaction())
+		{
 			await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
 			trans.Commit();
-		 }
+		}
 		return Ok();
 	}
 }
@@ -179,7 +179,7 @@ namespace xxx.Service
 		[CapSubscribe("xxx.services.account.check")]
 		public void CheckReceivedMessage(Person person)
 		{
-			
+
 		}
 	}
 }
