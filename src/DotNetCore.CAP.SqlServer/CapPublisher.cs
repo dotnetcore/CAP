@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.SqlServer
             DbConnection = _dbContext.Database.GetDbConnection();
             var dbContextTransaction = _dbContext.Database.CurrentTransaction;
             var dbTrans = dbContextTransaction?.GetDbTransaction();
-            //DbTransaction is dispose in original  
+            //DbTransaction is dispose in original
             if (dbTrans?.Connection == null)
             {
                 IsCapOpenedTrans = true;
@@ -66,8 +66,8 @@ namespace DotNetCore.CAP.SqlServer
         {
             using (var conn = new SqlConnection(_options.ConnectionString))
             {
-               await conn.ExecuteAsync(PrepareSql(), message);
-            } 
+                await conn.ExecuteAsync(PrepareSql(), message);
+            }
         }
 
         #region private methods

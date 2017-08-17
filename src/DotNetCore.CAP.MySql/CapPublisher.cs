@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.MySql
             DbConnection = _dbContext.Database.GetDbConnection();
             var dbContextTransaction = _dbContext.Database.CurrentTransaction;
             var dbTrans = dbContextTransaction?.GetDbTransaction();
-            //DbTransaction is dispose in original  
+            //DbTransaction is dispose in original
             if (dbTrans?.Connection == null)
             {
                 IsCapOpenedTrans = true;
@@ -58,7 +58,7 @@ namespace DotNetCore.CAP.MySql
         protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
         {
             await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
-    
+
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
@@ -69,7 +69,8 @@ namespace DotNetCore.CAP.MySql
                 await conn.ExecuteAsync(PrepareSql(), message);
             }
         }
-        #region private methods     
+
+        #region private methods
 
         private string PrepareSql()
         {

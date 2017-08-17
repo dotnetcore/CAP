@@ -34,7 +34,7 @@ namespace DotNetCore.CAP
                     var dbContext = (DbContext)x.GetService(mysqlOptions.DbContextType);
                     mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                     return mysqlOptions;
-                });               
+                });
             }
             else
             {

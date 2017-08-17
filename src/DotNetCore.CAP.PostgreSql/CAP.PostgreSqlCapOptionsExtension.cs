@@ -1,6 +1,6 @@
 ﻿using System;
-using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.PostgreSql;
+using DotNetCore.CAP.Processor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 

@@ -2,8 +2,8 @@
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
-using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.PostgreSql
             if (_options.DbContextType != null)
             {
                 IsUsingEF = true;
-                _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);           
+                _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
             }
         }
 
@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.PostgreSql
             DbConnection = _dbContext.Database.GetDbConnection();
             var dbContextTransaction = _dbContext.Database.CurrentTransaction;
             var dbTrans = dbContextTransaction?.GetDbTransaction();
-            //DbTransaction is dispose in original  
+            //DbTransaction is dispose in original
             if (dbTrans?.Connection == null)
             {
                 IsCapOpenedTrans = true;
@@ -75,8 +75,8 @@ namespace DotNetCore.CAP.PostgreSql
         private string PrepareSql()
         {
             return $"INSERT INTO \"{_options.Schema}\".\"published\" (\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName)";
-        } 
+        }
 
-        #endregion
+        #endregion private methods
     }
 }

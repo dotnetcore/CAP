@@ -3,7 +3,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions.ModelBinding;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.Internal
 {

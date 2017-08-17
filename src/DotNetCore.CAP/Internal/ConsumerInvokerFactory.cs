@@ -23,7 +23,7 @@ namespace DotNetCore.CAP.Internal
 
         public IConsumerInvoker CreateInvoker(ConsumerContext consumerContext)
         {
-            using(var scope = _serviceProvider.CreateScope())
+            using (var scope = _serviceProvider.CreateScope())
             {
                 var context = new ConsumerInvokerContext(consumerContext)
                 {

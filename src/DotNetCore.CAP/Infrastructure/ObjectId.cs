@@ -16,12 +16,14 @@ namespace DotNetCore.CAP
     {
         // private static fields
         private static readonly DateTime __unixEpoch;
+
         private static readonly long __dateTimeMaxValueMillisecondsSinceEpoch;
         private static readonly long __dateTimeMinValueMillisecondsSinceEpoch;
         private static ObjectId __emptyInstance = default(ObjectId);
         private static int __staticMachine;
         private static short __staticPid;
         private static int __staticIncrement; // high byte will be masked out when generating new ObjectId
+
         private static uint[] _lookup32 = Enumerable.Range(0, 256).Select(i =>
         {
             string s = i.ToString("x2");
@@ -32,6 +34,7 @@ namespace DotNetCore.CAP
         // the extra two bytes are not visible to anyone outside of this class and they buy us considerable simplification
         // an additional advantage of this representation is that it will serialize to JSON without any 64 bit overflow problems
         private int _timestamp;
+
         private int _machine;
         private short _pid;
         private int _increment;
@@ -475,6 +478,7 @@ namespace DotNetCore.CAP
 
             return arr;
         }
+
         /// <summary>
         /// Converts a byte array to a hex string.
         /// </summary>
@@ -495,6 +499,7 @@ namespace DotNetCore.CAP
             }
             return new string(result);
         }
+
         /// <summary>
         /// Converts a DateTime to number of milliseconds since Unix epoch.
         /// </summary>
@@ -505,6 +510,7 @@ namespace DotNetCore.CAP
             var utcDateTime = ToUniversalTime(dateTime);
             return (utcDateTime - __unixEpoch).Ticks / 10000;
         }
+
         /// <summary>
         /// Converts a DateTime to UTC (with special handling for MinValue and MaxValue).
         /// </summary>
