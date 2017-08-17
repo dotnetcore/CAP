@@ -46,10 +46,13 @@ PM> Install-Package DotNetCore.CAP.Kafka
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP 默认提供了 Sql Server 的扩展作为数据库存储（MySql的正在开发中）：
+CAP 提供了 Sql Server, MySql, PostgreSQL 的扩展作为数据库存储：
 
 ```
+// 按需选择安装你正在使用的数据库
 PM> Install-Package DotNetCore.CAP.SqlServer
+PM> Install-Package DotNetCore.CAP.MySql
+PM> Install-Package DotNetCore.CAP.PostgreSql
 ```
 
 ### Configuration
