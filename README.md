@@ -64,7 +64,7 @@ public void ConfigureServices(IServiceCollection services)
 
 	services.AddDbContext<AppDbContext>();
 
-	services.AddCap(x =>
+    services.AddCap(x =>
 	{
 		// If your SqlServer is using EF for data operations, you need to add the following configuration：
 		// Notice: You don't need to config x.UseSqlServer(""") again!
