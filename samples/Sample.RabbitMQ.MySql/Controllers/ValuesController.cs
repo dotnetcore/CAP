@@ -43,18 +43,17 @@ namespace Sample.RabbitMQ.MySql.Controllers
             using (var trans = await _dbContext.Database.BeginTransactionAsync())
             {
                 await _capBus.PublishAsync("sample.kafka.sqlserver", "");
-                
+
                 trans.Commit();
             }
             return Ok();
         }
-        
+
         [NonAction]
         [CapSubscribe("sample.rabbitmq.mysql")]
-        public void ReceiveMessage()
+        public void ReceiveMessage(DateTime time)
         {
-            Console.WriteLine("[sample.rabbitmq.mysql] message received");
-            Debug.WriteLine("[sample.rabbitmq.mysql] message received");
+            Console.WriteLine("[sample.rabbitmq.mysql] message received: "+ DateTime.Now.ToString() +" , sent time: " + time.ToString());
         }
     }
 }
