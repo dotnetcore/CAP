@@ -67,13 +67,15 @@ namespace Microsoft.Extensions.DependencyInjection
 
         private static void AddSubscribeServices(IServiceCollection services)
         {
-            var consumerListenerServices = new Dictionary<Type, Type>();
+            var consumerListenerServices = new List<KeyValuePair<Type, Type>>();
             foreach (var rejectedServices in services)
             {
                 if (rejectedServices.ImplementationType != null
                     && typeof(ICapSubscribe).IsAssignableFrom(rejectedServices.ImplementationType))
-
-                    consumerListenerServices.Add(typeof(ICapSubscribe), rejectedServices.ImplementationType);
+                {
+                    consumerListenerServices.Add(new KeyValuePair<Type, Type>(typeof(ICapSubscribe),
+                        rejectedServices.ImplementationType));
+                }
             }
 
             foreach (var service in consumerListenerServices)
