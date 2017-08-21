@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.Test
 {
@@ -35,6 +36,17 @@ namespace DotNetCore.CAP.Test
         public void ComplexTypeParam(ComplexType complexType)
         {
 
+        }
+
+        public void ThrowException()
+        {
+            throw new Exception();
+        }
+
+        public async Task<int> AsyncMethod()
+        {
+            await Task.FromResult(3);
+            throw new Exception();
         }
     }
 
