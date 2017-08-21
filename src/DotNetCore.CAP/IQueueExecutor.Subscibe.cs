@@ -64,7 +64,7 @@ namespace DotNetCore.CAP
                 }
                 else
                 {
-                    newState = new SucceededState(_options.SuccessedMessageExpiredTimeSpan);
+                    newState = new SucceededState(_options.SuccessedMessageExpiredAfter);
                 }
                 await _stateChanger.ChangeStateAsync(message, newState, connection);
 

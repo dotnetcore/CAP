@@ -23,7 +23,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Default successed message expriation timespan, in seconds.
         /// </summary>
-        public const int DefaultSuccessMessageExpirationTimeSpan = 3600;
+        public const int DefaultSuccessMessageExpirationAfter = 3600;
 
         /// <summary>
         /// Failed message retry waiting interval.
@@ -34,7 +34,7 @@ namespace DotNetCore.CAP
         {
             PollingDelay = DefaultPollingDelay;
             QueueProcessorCount = DefaultQueueProcessorCount;
-            SuccessedMessageExpiredTimeSpan = DefaultSuccessMessageExpirationTimeSpan;
+            SuccessedMessageExpiredAfter = DefaultSuccessMessageExpirationAfter;
             FailedMessageWaitingInterval = DefaultFailedMessageWaitingInterval;
             Extensions = new List<ICapOptionsExtension>();
         }
@@ -52,10 +52,10 @@ namespace DotNetCore.CAP
         public int QueueProcessorCount { get; set; }
 
         /// <summary>
-        /// Sent or received successed message due timespan, then the message will be deleted at due time. 
+        /// Sent or received successed message after timespan of due, then the message will be deleted at due time. 
         /// Dafault is 3600 seconds.
         /// </summary>
-        public int SuccessedMessageExpiredTimeSpan { get; set; }
+        public int SuccessedMessageExpiredAfter { get; set; }
 
         /// <summary>
         /// Failed messages polling delay time.
