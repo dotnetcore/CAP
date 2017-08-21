@@ -25,8 +25,8 @@ namespace DotNetCore.CAP.Test
         [InlineData(nameof(Sample.UriParam))]
         public void CreateSimpleTypeBinderTest(string methodName)
         {
-            var datetimeMethod = typeof(Sample).GetRuntimeMethods().Single(x => x.Name == methodName);
-            var binder = _factory.CreateBinder(datetimeMethod.GetParameters()[0]);
+            var methodInfo = typeof(Sample).GetRuntimeMethods().Single(x => x.Name == methodName);
+            var binder = _factory.CreateBinder(methodInfo.GetParameters()[0]);
             Assert.NotNull(binder);
             Assert.True(binder is SimpleTypeModelBinder);
             Assert.False(binder is ComplexTypeModelBinder);
@@ -36,8 +36,8 @@ namespace DotNetCore.CAP.Test
         [InlineData(nameof(Sample.ComplexTypeParam))]
         public void CreateComplexTypeBinderTest(string methodName)
         {
-            var datetimeMethod = typeof(Sample).GetRuntimeMethods().Single(x => x.Name == methodName);
-            var binder = _factory.CreateBinder(datetimeMethod.GetParameters()[0]);
+            var methodInfo = typeof(Sample).GetRuntimeMethods().Single(x => x.Name == methodName);
+            var binder = _factory.CreateBinder(methodInfo.GetParameters()[0]);
             Assert.NotNull(binder);
             Assert.False(binder is SimpleTypeModelBinder);
             Assert.True(binder is ComplexTypeModelBinder);
