@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using Microsoft.Extensions.Internal;
 
 namespace DotNetCore.CAP.Internal
 {
     public class ConsumerMethodExecutor
     {
-        public static object[] PrepareArguments(
+        internal static object[] PrepareArguments(
             IDictionary<string, object> actionParameters,
             ObjectMethodExecutor actionMethodExecutor)
         {
