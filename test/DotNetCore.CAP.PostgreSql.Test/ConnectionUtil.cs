@@ -8,11 +8,11 @@ namespace DotNetCore.CAP.PostgreSql.Test
         private const string DatabaseVariable = "Cap_PostgreSql_DatabaseName";
         private const string ConnectionStringTemplateVariable = "Cap_PostgreSql_ConnectionStringTemplate";
 
-        private const string MasterDatabaseName = "master";
+        private const string MasterDatabaseName = "postgres";
         private const string DefaultDatabaseName = @"DotNetCore.CAP.PostgreSql.Test";
 
         private const string DefaultConnectionStringTemplate =
-            @"Server=192.168.2.206;Initial Catalog={0};User Id=sa;Password=123123;MultipleActiveResultSets=True";
+            @"Server=localhost;Database={0};UserId=postgres;Password=123123;";
 
         public static string GetDatabaseName()
         {

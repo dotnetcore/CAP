@@ -21,7 +21,7 @@ namespace DotNetCore.CAP.PostgreSql.Test
         [Fact]
         public async Task GetPublishedMessageAsync_Test()
         {
-            var sql = @"INSERT INTO ""Cap"".""Published""(""Name"",""Content"",""Retries"",""Added"",""ExpiresAt"",""StatusName"") VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT @@IDENTITY;";
+            var sql = @"INSERT INTO ""cap"".""published""(""Name"",""Content"",""Retries"",""Added"",""ExpiresAt"",""StatusName"") VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING ""Id"";";
             var publishMessage = new CapPublishedMessage
             {
                 Name = "PostgreSqlStorageConnectionTest",
@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.PostgreSql.Test
         [Fact]
         public async Task FetchNextMessageAsync_Test()
         {
-            var sql = @"INSERT INTO ""Cap"".""Queue""(""MessageId"",""MessageType"") VALUES(@MessageId,@MessageType);";
+            var sql = @"INSERT INTO ""cap"".""queue""(""MessageId"",""MessageType"") VALUES(@MessageId,@MessageType);";
             var queue = new CapQueue
             {
                 MessageId = 3333,
@@ -87,8 +87,8 @@ namespace DotNetCore.CAP.PostgreSql.Test
         {
 
             var sql = $@"
-        INSERT INTO ""Cap"".""Received""(""Name"",""Group"",""Content"",""Retries"",""Added"",""ExpiresAt"",""StatusName"") OUTPUT INSERTED.Id
-        VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+        INSERT INTO ""cap"".""received""(""Name"",""Group"",""Content"",""Retries"",""Added"",""ExpiresAt"",""StatusName"")
+        VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING ""Id"";";
             var receivedMessage = new CapReceivedMessage
             {
                 Name = "PostgreSqlStorageConnectionTest",

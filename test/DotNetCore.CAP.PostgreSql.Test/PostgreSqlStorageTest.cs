@@ -3,67 +3,44 @@ using Dapper;
 
 namespace DotNetCore.CAP.PostgreSql.Test
 {
-    //[Collection("postgresql")]
+    [Collection("postgresql")]
     public class SqlServerStorageTest : DatabaseTestHost
     {
         private readonly string _dbName;
         private readonly string _masterDbConnectionString;
+        private readonly string _dbConnectionString;
 
         public SqlServerStorageTest()
         {
             _dbName = ConnectionUtil.GetDatabaseName();
             _masterDbConnectionString = ConnectionUtil.GetMasterConnectionString();
+            _dbConnectionString = ConnectionUtil.GetConnectionString();
         }
 
-        //[Fact]
+        [Fact]
         public void Database_IsExists()
         {
             using (var connection = ConnectionUtil.CreateConnection(_masterDbConnectionString))
             {
                 var databaseName = ConnectionUtil.GetDatabaseName();
-                var sql = $@"SELECT SCHEMA_NAME FROM SCHEMATA WHERE SCHEMA_NAME = '{databaseName}'";
+                var sql = $@"select * from pg_database where datname = '{databaseName}'";
                 var result = connection.QueryFirstOrDefault<string>(sql);
                 Assert.NotNull(result);
                 Assert.True(databaseName.Equals(result, System.StringComparison.CurrentCultureIgnoreCase));
             }
         }
 
-        //[Fact]
-        public void DatabaseTable_Published_IsExists()
+        [Theory]
+        [InlineData("cap.published")]
+        [InlineData("cap.queue")]
+        [InlineData("cap.received")]
+        public void DatabaseTable_IsExists(string tableName)
         {
-            var tableName = "cap.published";
-            using (var connection = ConnectionUtil.CreateConnection(_masterDbConnectionString))
+            using (var connection = ConnectionUtil.CreateConnection(_dbConnectionString))
             {
-                var sql = $"SELECT TABLE_NAME FROM `TABLES` WHERE TABLE_SCHEMA='{_dbName}' AND TABLE_NAME = '{tableName}'";
-                var result = connection.QueryFirstOrDefault<string>(sql);
-                Assert.NotNull(result);
-                Assert.Equal(tableName, result);
-            }
-        }
-
-        //[Fact]
-        public void DatabaseTable_Queue_IsExists()
-        {
-            var tableName = "cap.queue";
-            using (var connection = ConnectionUtil.CreateConnection(_masterDbConnectionString))
-            {
-                var sql = $"SELECT TABLE_NAME FROM `TABLES` WHERE TABLE_SCHEMA='{_dbName}' AND TABLE_NAME = '{tableName}'";
-                var result = connection.QueryFirstOrDefault<string>(sql);
-                Assert.NotNull(result);
-                Assert.Equal(tableName, result);
-            }
-        }
-
-        //[Fact]
-        public void DatabaseTable_Received_IsExists()
-        {
-            var tableName = "cap.received";
-            using (var connection = ConnectionUtil.CreateConnection(_masterDbConnectionString))
-            {
-                var sql = $"SELECT TABLE_NAME FROM `TABLES` WHERE TABLE_SCHEMA='{_dbName}' AND TABLE_NAME = '{tableName}'";
-                var result = connection.QueryFirstOrDefault<string>(sql);
-                Assert.NotNull(result);
-                Assert.Equal(tableName, result);
+                var sql = $"SELECT to_regclass('{tableName}') is not null;";
+                var result = connection.QueryFirstOrDefault<bool>(sql);       
+                Assert.True(result);
             }
         }
     }

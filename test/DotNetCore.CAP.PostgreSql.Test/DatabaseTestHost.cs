@@ -48,31 +48,21 @@ namespace DotNetCore.CAP.PostgreSql.Test
             using (var connection = ConnectionUtil.CreateConnection(masterConn))
             {
                 connection.Execute($@"
-IF NOT EXISTS (SELECT * FROM sysdatabases WHERE name = N'{databaseName}')
-CREATE DATABASE [{databaseName}];");
+DROP DATABASE IF EXISTS ""{databaseName}"";
+CREATE DATABASE ""{databaseName}"";");
             }
         }
 
         private void DeleteAllData()
         {
             var conn = ConnectionUtil.GetConnectionString();
-            using (var connection = new SqlConnection(conn))
-            {
-                var commands = new[] {
-                    "DISABLE TRIGGER ALL ON ?",
-                    "ALTER TABLE ? NOCHECK CONSTRAINT ALL",
-                    "DELETE FROM ?",
-                    "ALTER TABLE ? CHECK CONSTRAINT ALL",
-                    "ENABLE TRIGGER ALL ON ?"
-                };
 
-                foreach (var command in commands)
-                {
-                    connection.Execute(
-                        "sp_MSforeachtable",
-                        new { command1 = command },
-                        commandType: CommandType.StoredProcedure);
-                }
+            using (var connection = ConnectionUtil.CreateConnection(conn))
+            {
+                connection.Execute($@"
+TRUNCATE TABLE ""cap"".""published"";
+TRUNCATE TABLE ""cap"".""received"";
+TRUNCATE TABLE ""cap"".""queue"";");
             }
         }
     }
