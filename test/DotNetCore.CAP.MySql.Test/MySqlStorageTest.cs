@@ -29,36 +29,12 @@ namespace DotNetCore.CAP.MySql.Test
             }
         }
 
-        [Fact]
-        public void DatabaseTable_Published_IsExists()
+        [Theory]
+        [InlineData("cap.published")]
+        [InlineData("cap.queue")]
+        [InlineData("cap.received")]
+        public void DatabaseTable_IsExists(string tableName)
         {
-            var tableName = "cap.published";
-            using (var connection = ConnectionUtil.CreateConnection(_masterDbConnectionString))
-            {
-                var sql = $"SELECT TABLE_NAME FROM `TABLES` WHERE TABLE_SCHEMA='{_dbName}' AND TABLE_NAME = '{tableName}'";
-                var result = connection.QueryFirstOrDefault<string>(sql);
-                Assert.NotNull(result);
-                Assert.Equal(tableName, result);
-            }
-        }
-
-        [Fact]
-        public void DatabaseTable_Queue_IsExists()
-        {
-            var tableName = "cap.queue";
-            using (var connection = ConnectionUtil.CreateConnection(_masterDbConnectionString))
-            {
-                var sql = $"SELECT TABLE_NAME FROM `TABLES` WHERE TABLE_SCHEMA='{_dbName}' AND TABLE_NAME = '{tableName}'";
-                var result = connection.QueryFirstOrDefault<string>(sql);
-                Assert.NotNull(result);
-                Assert.Equal(tableName, result);
-            }
-        }
-
-        [Fact]
-        public void DatabaseTable_Received_IsExists()
-        {
-            var tableName = "cap.received";
             using (var connection = ConnectionUtil.CreateConnection(_masterDbConnectionString))
             {
                 var sql = $"SELECT TABLE_NAME FROM `TABLES` WHERE TABLE_SCHEMA='{_dbName}' AND TABLE_NAME = '{tableName}'";

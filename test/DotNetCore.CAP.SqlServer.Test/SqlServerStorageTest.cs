@@ -23,49 +23,22 @@ SELECT 'False'";
             }
         }
 
-        [Fact]
-        public void DatabaseTable_Published_IsExists()
+        [Theory]
+        [InlineData("[Cap].[Published]")]
+        [InlineData("[Cap].[Queue]")]
+        [InlineData("[Cap].[Received]")]
+        public void DatabaseTable_IsExists(string tableName)
         {
             using (var connection = ConnectionUtil.CreateConnection())
             {
-                var sql = @"
-IF OBJECT_ID(N'[Cap].[Published]',N'U') IS NOT NULL
+                var sql = $@"
+IF OBJECT_ID(N'{tableName}',N'U') IS NOT NULL
 SELECT 'True'
 ELSE
 SELECT 'False'";
                 var result = connection.QueryFirst<bool>(sql);
                 Assert.True(result);
             }
-        }
-
-        [Fact]
-        public void DatabaseTable_Queue_IsExists()
-        {
-            using (var connection = ConnectionUtil.CreateConnection())
-            {
-                var sql = @"
-IF OBJECT_ID(N'[Cap].[Queue]',N'U') IS NOT NULL
-SELECT 'True'
-ELSE
-SELECT 'False'";
-                var result = connection.QueryFirst<bool>(sql);
-                Assert.True(result);
-            }
-        }
-
-        [Fact]
-        public void DatabaseTable_Received_IsExists()
-        {
-            using (var connection = ConnectionUtil.CreateConnection())
-            {
-                var sql = @"
-IF OBJECT_ID(N'[Cap].[Received]',N'U') IS NOT NULL
-SELECT 'True'
-ELSE
-SELECT 'False'";
-                var result = connection.QueryFirst<bool>(sql);
-                Assert.True(result);
-            }
-        }
+        } 
     }
 }
