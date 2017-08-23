@@ -1,5 +1,5 @@
-﻿using Xunit;
-using Dapper;
+﻿using Dapper;
+using Xunit;
 
 namespace DotNetCore.CAP.SqlServer.Test
 {
@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.SqlServer.Test
             {
                 var databaseName = ConnectionUtil.GetDatabaseName();
                 var sql = $@"
-IF EXISTS (SELECT * FROM sysdatabases WHERE name = N'{databaseName}')  
+IF EXISTS (SELECT * FROM sysdatabases WHERE name = N'{databaseName}')
 SELECT 'True'
 ELSE
 SELECT 'False'";
@@ -39,6 +39,6 @@ SELECT 'False'";
                 var result = connection.QueryFirst<bool>(sql);
                 Assert.True(result);
             }
-        } 
+        }
     }
 }

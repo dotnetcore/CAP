@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.Test
 {
     public class ConsumerInvokerFactoryTest
     {
-        IConsumerInvokerFactory consumerInvokerFactory;
+        private IConsumerInvokerFactory consumerInvokerFactory;
 
         public ConsumerInvokerFactoryTest()
         {
@@ -67,6 +67,6 @@ namespace DotNetCore.CAP.Test
             {
                 await invoker.InvokeAsync();
             });
-        }  
+        }
     }
 }

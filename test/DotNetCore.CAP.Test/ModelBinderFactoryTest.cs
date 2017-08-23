@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using DotNetCore.CAP.Internal;
 using Xunit;
@@ -10,7 +7,7 @@ namespace DotNetCore.CAP.Test
 {
     public class ModelBinderFactoryTest
     {
-        IModelBinderFactory _factory;
+        private IModelBinderFactory _factory;
 
         public ModelBinderFactoryTest()
         {
@@ -42,6 +39,5 @@ namespace DotNetCore.CAP.Test
             Assert.False(binder is SimpleTypeModelBinder);
             Assert.True(binder is ComplexTypeModelBinder);
         }
-
     }
 }

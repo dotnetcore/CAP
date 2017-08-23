@@ -1,5 +1,4 @@
 using System;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.MySql.Test

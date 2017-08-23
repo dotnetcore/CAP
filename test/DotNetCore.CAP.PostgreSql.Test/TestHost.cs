@@ -29,7 +29,7 @@ namespace DotNetCore.CAP.PostgreSql.Test
 
             _connectionString = ConnectionUtil.GetConnectionString();
             services.AddSingleton(new PostgreSqlOptions { ConnectionString = _connectionString });
-            services.AddSingleton<PostgreSqlStorage>();      
+            services.AddSingleton<PostgreSqlStorage>();
 
             _services = services;
         }

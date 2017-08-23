@@ -1,41 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.Test
 {
     public class Sample
     {
-
         public void DateTimeParam(DateTime dateTime)
         {
-
         }
 
         public void StringParam(string @string)
         {
-
         }
 
         public void GuidParam(Guid guid)
         {
-
         }
 
         public void UriParam(Uri uri)
         {
-
         }
 
         public void IntegerParam(int @int)
         {
-
         }
 
         public void ComplexTypeParam(ComplexType complexType)
         {
-
         }
 
         public void ThrowException()

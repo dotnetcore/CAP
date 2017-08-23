@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Data;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
-using System.Data;
 
 namespace DotNetCore.CAP.Test
 {
@@ -35,7 +35,6 @@ namespace DotNetCore.CAP.Test
             var markService = builder.GetService<CapMarkerService>();
             Assert.NotNull(markService);
         }
-
 
         [Fact]
         public void CanOverridePublishService()

@@ -1,5 +1,5 @@
-﻿using Xunit;
-using Dapper;
+﻿using Dapper;
+using Xunit;
 
 namespace DotNetCore.CAP.MySql.Test
 {
@@ -8,7 +8,6 @@ namespace DotNetCore.CAP.MySql.Test
     {
         private readonly string _dbName;
         private readonly string _masterDbConnectionString;
-
 
         public MySqlStorageTest()
         {

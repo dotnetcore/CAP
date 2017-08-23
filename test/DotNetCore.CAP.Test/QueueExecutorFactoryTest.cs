@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -41,8 +39,5 @@ namespace DotNetCore.CAP.Test
             var publishExecutor = queueExecutorFactory.GetInstance(Models.MessageType.Publish);
             Assert.Null(publishExecutor);
         }
-
-
-
     }
 }

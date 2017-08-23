@@ -1,5 +1,5 @@
-﻿using Xunit;
-using Dapper;
+﻿using Dapper;
+using Xunit;
 
 namespace DotNetCore.CAP.PostgreSql.Test
 {
@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.PostgreSql.Test
             using (var connection = ConnectionUtil.CreateConnection(_dbConnectionString))
             {
                 var sql = $"SELECT to_regclass('{tableName}') is not null;";
-                var result = connection.QueryFirstOrDefault<bool>(sql);       
+                var result = connection.QueryFirstOrDefault<bool>(sql);
                 Assert.True(result);
             }
         }
