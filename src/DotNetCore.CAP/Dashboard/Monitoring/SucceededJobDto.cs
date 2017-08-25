@@ -1,7 +1,7 @@
 ﻿using System;
-using Hangfire.Common;
+using DotNetCore.CAP.Models;
 
-namespace Hangfire.Storage.Monitoring
+namespace DotNetCore.CAP.Dashboard.Monitoring
 {
     public class SucceededJobDto
     {
@@ -10,7 +10,7 @@ namespace Hangfire.Storage.Monitoring
             InSucceededState = true;
         }
 
-        public Job Job { get; set; }
+        public Message Message { get; set; }
         public object Result { get; set; }
         public long? TotalDuration { get; set; }
         public DateTime? SucceededAt { get; set; }

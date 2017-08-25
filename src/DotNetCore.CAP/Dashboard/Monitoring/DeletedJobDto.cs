@@ -1,7 +1,7 @@
 ﻿using System;
-using Hangfire.Common;
+using DotNetCore.CAP.Models;
 
-namespace Hangfire.Storage.Monitoring
+namespace DotNetCore.CAP.Dashboard.Monitoring
 {
     public class DeletedJobDto
     {
@@ -10,7 +10,7 @@ namespace Hangfire.Storage.Monitoring
             InDeletedState = true;
         }
 
-        public Job Job { get; set; }
+        public Message Message { get; set; }
         public DateTime? DeletedAt { get; set; }
         public bool InDeletedState { get; set; }
     }
