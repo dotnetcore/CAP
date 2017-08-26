@@ -63,5 +63,15 @@ namespace DotNetCore.CAP
         /// Creates and returns an <see cref="IStorageTransaction"/>.
         /// </summary>
         IStorageTransaction CreateTransaction();
+
+
+        //-------------------------------------------
+        long GetSetCount(string key);
+
+        List<string> GetRangeFromSet(string key, int startingFrom, int endingAt);
+
+        MessageData GetJobData( string jobId);
+
+        StateData GetStateData(string jobId);
     }
 }

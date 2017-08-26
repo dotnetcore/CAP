@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Globalization;
 using System.Reflection;
 using Newtonsoft.Json;
 
@@ -47,6 +48,22 @@ namespace DotNetCore.CAP.Infrastructure
         public static DateTime FromTimestamp(long value)
         {
             return Epoch.AddSeconds(value);
+        }
+
+        public static string SerializeDateTime(DateTime value)
+        {
+            return value.ToString("o", CultureInfo.InvariantCulture);
+        }
+
+        public static DateTime DeserializeDateTime(string value)
+        {
+            long timestamp;
+            if (long.TryParse(value, out timestamp))
+            {
+                return FromTimestamp(timestamp);
+            }
+
+            return DateTime.Parse(value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind);
         }
 
         public static bool IsController(TypeInfo typeInfo)
