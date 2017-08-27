@@ -2,12 +2,14 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Sample.RabbitMQ.SqlServer.Controllers
 {
     public class Person
     {
+        public int Id { get; set; }
         public string Name { get; set; }
         public int Age { get; set; }
 
@@ -33,12 +35,14 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
         [Route("~/publish")]
         public IActionResult PublishMessage()
         {
-            using(var trans = _dbContext.Database.BeginTransaction())
-            {
-                //_capBus.Publish("sample.rabbitmq.mysql22222", DateTime.Now);
-                _capBus.Publish("sample.rabbitmq.mysql33333", new Person { Name = "宜兴", Age = 11 });
-                trans.Commit();
-            }
+            var person = new Person { Name = "宜兴", Age = 11 };
+
+            _dbContext.Persons.Add(person);
+            _dbContext.SaveChanges();
+            throw new Exception();
+            //_capBus.Publish("sample.rabbitmq.mysql22222", DateTime.Now);
+            _capBus.Publish("sample.rabbitmq.mysql33333", person);
+
             return Ok();
         }
 
@@ -48,7 +52,7 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
             using (var trans = await _dbContext.Database.BeginTransactionAsync())
             {
                 await _capBus.PublishAsync("sample.rabbitmq.mysql", "");
-                 
+
                 trans.Commit();
             }
             return Ok();

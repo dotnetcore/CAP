@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Sample.RabbitMQ.SqlServer.Services;
+using Sample.RabbitMQ.SqlServer.Services.Impl;
 
 namespace Sample.RabbitMQ.SqlServer
 {
@@ -11,14 +13,13 @@ namespace Sample.RabbitMQ.SqlServer
         {
             services.AddDbContext<AppDbContext>();
 
+            services.AddTransient<IOrderService, OrderService>();
+            services.AddTransient<ICmsService, CmsService>();
+
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ(y=> {
-                    y.HostName = "192.168.2.206";
-                    y.UserName = "admin";
-                    y.Password = "123123";
-                });
+                x.UseRabbitMQ("localhost");
             });
 
             services.AddMvc();
