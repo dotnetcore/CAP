@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using DotNetCore.CAP.Dashboard;
 using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 
@@ -15,6 +16,16 @@ namespace DotNetCore.CAP.MySql
         {
             _options = options;
             _logger = logger;
+        }
+
+        public IStorageConnection GetConnection()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IMonitoringApi GetMonitoringApi()
+        {
+            throw new System.NotImplementedException();
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
