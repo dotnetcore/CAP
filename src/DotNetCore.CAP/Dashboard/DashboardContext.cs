@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -23,5 +24,23 @@ namespace DotNetCore.CAP.Dashboard
 
         public DashboardRequest Request { get; protected set; }
         public DashboardResponse Response { get; protected set; }
+    }
+
+    public sealed class CapDashboardContext : DashboardContext
+    {
+        public CapDashboardContext(
+            IStorage storage,
+            DashboardOptions options,
+            HttpContext httpContext)
+            : base(storage, options)
+        {
+            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
+
+            HttpContext = httpContext;
+            Request = new CapDashboardRequest(httpContext);
+            Response = new CapDashboardResponse(httpContext);
+        }
+
+        public HttpContext HttpContext { get; }
     }
 }
