@@ -1,3 +1,5 @@
+using System;
+using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +13,7 @@ namespace DotNetCore.CAP.SqlServer
     {
         private readonly SqlServerOptions _options;
         private readonly ILogger _logger;
+        private readonly IDbConnection _existingConnection;
 
         public SqlServerStorage(ILogger<SqlServerStorage> logger, SqlServerOptions options)
         {
@@ -20,12 +23,12 @@ namespace DotNetCore.CAP.SqlServer
 
         public IStorageConnection GetConnection()
         {
-            throw new System.NotImplementedException();
+            return new SqlServerStorageConnection(_options);
         }
 
         public IMonitoringApi GetMonitoringApi()
         {
-            throw new System.NotImplementedException();
+            return new SqlServerMonitoringApi(this, _options);
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -94,5 +97,46 @@ CREATE TABLE [{schema}].[Published](
 END;";
             return batchSql;
         }
+
+        internal T UseConnection<T>(Func<IDbConnection, T> func)
+        {
+            IDbConnection connection = null;
+
+            try
+            {
+                connection = CreateAndOpenConnection();
+                return func(connection);
+            }
+            finally
+            {
+                ReleaseConnection(connection);
+            }
+        }
+
+        internal IDbConnection CreateAndOpenConnection()
+        {
+            var connection = _existingConnection ?? new SqlConnection(_options.ConnectionString);
+
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+
+            return connection;
+        }
+
+        internal bool IsExistingConnection(IDbConnection connection)
+        {
+            return connection != null && ReferenceEquals(connection, _existingConnection);
+        }
+
+        internal void ReleaseConnection(IDbConnection connection)
+        {
+            if (connection != null && !IsExistingConnection(connection))
+            {
+                connection.Dispose();
+            }
+        }
+
     }
 }

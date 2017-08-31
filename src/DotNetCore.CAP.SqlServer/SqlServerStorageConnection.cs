@@ -140,24 +140,26 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             return new SqlServerFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection, transaction);
         }
 
+        // ------------------------------------------
+
         public long GetSetCount(string key)
         {
-            throw new NotImplementedException();
+            return 11;
         }
 
         public List<string> GetRangeFromSet(string key, int startingFrom, int endingAt)
         {
-            throw new NotImplementedException();
+            return new List<string> { "11", "22", "33" };
         }
 
         public MessageData GetJobData(string jobId)
         {
-            throw new NotImplementedException();
+            return new MessageData();
         }
 
         public StateData GetStateData(string jobId)
         {
-            throw new NotImplementedException();
+            return new StateData();
         }
     }
 }
