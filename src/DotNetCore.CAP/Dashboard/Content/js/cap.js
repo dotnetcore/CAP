@@ -1,11 +1,11 @@
-(function (hangfire) {
-    hangfire.config = {
-        pollInterval: $("#hangfireConfig").data("pollinterval"),
-        pollUrl: $("#hangfireConfig").data("pollurl"),
+(function (cap) {
+    cap.config = {
+        pollInterval: $("#capConfig").data("pollinterval"),
+        pollUrl: $("#capConfig").data("pollurl"),
         locale: document.documentElement.lang
     };
 
-    hangfire.Metrics = (function() {
+    cap.Metrics = (function() {
         function Metrics() {
             this._metrics = {};
         }
@@ -92,7 +92,7 @@
         graph.render();
     }
 
-    hangfire.RealtimeGraph = (function() {
+    cap.RealtimeGraph = (function() {
         function RealtimeGraph(element, succeeded, failed, succeededStr, failedStr) {
             this._succeeded = succeeded;
             this._failed = failed;
@@ -130,7 +130,7 @@
         return RealtimeGraph;
     })();
 
-    hangfire.HistoryGraph = (function() {
+    cap.HistoryGraph = (function() {
         function HistoryGraph(element, succeeded, failed, succeededStr, failedStr) {
             this._initGraph(element, {
                 renderer: 'area',
@@ -153,7 +153,7 @@
         return HistoryGraph;
     })();
 
-    hangfire.StatisticsPoller = (function() {
+    cap.StatisticsPoller = (function() {
         function StatisticsPoller(metricsCallback, statisticsUrl, pollInterval) {
             this._metricsCallback = metricsCallback;
             this._listeners = [];
@@ -201,12 +201,12 @@
         return StatisticsPoller;
     })();
 
-    hangfire.Page = (function() {
+    cap.Page = (function() {
         function Page(config) {
-            this._metrics = new Hangfire.Metrics();
+            this._metrics = new Cap.Metrics();
 
             var self = this;
-            this._poller = new Hangfire.StatisticsPoller(
+            this._poller = new Cap.StatisticsPoller(
                 function () { return self._metrics.getNames(); },
                 config.pollUrl,
                 config.pollInterval);
@@ -227,7 +227,7 @@
 
                 var succeededStr = $(realtimeElement).data('succeeded-string');
                 var failedStr = $(realtimeElement).data('failed-string');
-                var realtimeGraph = new Hangfire.RealtimeGraph(realtimeElement, succeeded, failed, succeededStr, failedStr);
+                var realtimeGraph = new Cap.RealtimeGraph(realtimeElement, succeeded, failed, succeededStr, failedStr);
 
                 this._poller.addListener(function (data) {
                     realtimeGraph.appendHistory(data);
@@ -264,7 +264,7 @@
                 var succeededStr = $(historyElement).data('succeeded-string');
                 var failedStr = $(historyElement).data('failed-string');
 
-                var historyGraph = new Hangfire.HistoryGraph(historyElement, succeeded, failed, succeededStr, failedStr);
+                var historyGraph = new Cap.HistoryGraph(historyElement, succeeded, failed, succeededStr, failedStr);
 
                 $(window).resize(function () {
                     historyGraph.update();
@@ -483,8 +483,8 @@
 
         return Page;
     })();
-})(window.Hangfire = window.Hangfire || {});
+})(window.Cap = window.Cap || {});
 
 $(function () {
-    Hangfire.page = new Hangfire.Page(Hangfire.config);
+    Cap.page = new Cap.Page(Cap.config);
 });
