@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
 using Microsoft.AspNetCore.Http;
@@ -17,15 +15,10 @@ namespace DotNetCore.CAP
 
         public DashboardMiddleware(RequestDelegate next, DashboardOptions options, IStorage storage, RouteCollection routes)
         {
-            if (next == null) throw new ArgumentNullException(nameof(next));
-            if (storage == null) throw new ArgumentNullException(nameof(storage));
-            if (options == null) throw new ArgumentNullException(nameof(options));
-            if (routes == null) throw new ArgumentNullException(nameof(routes));
-
-            _next = next;
-            _options = options;
-            _storage = storage;
-            _routes = routes;
+            _next = next ?? throw new ArgumentNullException(nameof(next));
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _storage = storage ?? throw new ArgumentNullException(nameof(storage));
+            _routes = routes ?? throw new ArgumentNullException(nameof(routes));
         }
 
         public Task Invoke(HttpContext httpContext)
@@ -38,7 +31,6 @@ namespace DotNetCore.CAP
                 return _next.Invoke(httpContext);
             }
 
-            // ReSharper disable once LoopCanBeConvertedToQuery
             foreach (var filter in _options.Authorization)
             {
                 if (!filter.Authorize(context))

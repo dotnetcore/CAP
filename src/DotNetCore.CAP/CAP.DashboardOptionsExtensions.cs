@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP
 {
+    using DotNetCore.CAP.Dashboard;
+    using Microsoft.Extensions.DependencyInjection;
+
     internal sealed class DashboardOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<DashboardOptions> _options;
@@ -19,17 +21,22 @@ namespace DotNetCore.CAP
             var dashboardOptions = new DashboardOptions();
             _options?.Invoke(dashboardOptions);
             services.AddSingleton(dashboardOptions);
+            services.AddSingleton(DashboardRoutes.Routes);
         }
     }
+}
 
+namespace Microsoft.Extensions.DependencyInjection
+{
+    using DotNetCore.CAP;
 
     public static class CapOptionsExtensions
     {
-        /// <summary>
-        /// Configuration to use kafka in CAP.
-        /// </summary>
-        /// <param name="options">Provides programmatic configuration for the kafka .</param>
-        /// <returns></returns>
+        public static CapOptions UseDashboard(this CapOptions capOptions)
+        {
+            return capOptions.UseDashboard(opt => {});
+        }
+
         public static CapOptions UseDashboard(this CapOptions capOptions, Action<DashboardOptions> options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
@@ -39,5 +46,4 @@ namespace DotNetCore.CAP
             return capOptions;
         }
     }
-
 }

@@ -49,7 +49,7 @@ namespace Microsoft.AspNetCore.Builder
                 throw new InvalidOperationException("Add Cap must be called on the service collection.");
             }
 
-            app.Map(new PathString(pathMatch), x => x.UseMiddleware<DashboardMiddleware>(storage, options, routes));
+            app.Map(new PathString(pathMatch), x => x.UseMiddleware<DashboardMiddleware>());
 
             return app;
         }

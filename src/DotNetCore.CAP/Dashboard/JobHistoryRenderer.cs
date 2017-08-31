@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.Dashboard
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static JobHistoryRenderer()
         {
-            Register(SucceededState.StateName, SucceededRenderer);
+            Register(SuccessedState.StateName, SucceededRenderer);
             Register(FailedState.StateName, FailedRenderer);
             Register(ProcessingState.StateName, ProcessingRenderer);
             Register(EnqueuedState.StateName, EnqueuedRenderer);
@@ -29,7 +29,7 @@ namespace DotNetCore.CAP.Dashboard
             //Register(AwaitingState.StateName, AwaitingRenderer);
 
             BackgroundStateColors.Add(EnqueuedState.StateName, "#F5F5F5");
-            BackgroundStateColors.Add(SucceededState.StateName, "#EDF7ED");
+            BackgroundStateColors.Add(SuccessedState.StateName, "#EDF7ED");
             BackgroundStateColors.Add(FailedState.StateName, "#FAEBEA");
             BackgroundStateColors.Add(ProcessingState.StateName, "#FCEFDC");
             BackgroundStateColors.Add(ScheduledState.StateName, "#E0F3F8");
@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.Dashboard
             //BackgroundStateColors.Add(AwaitingState.StateName, "#F5F5F5");
 
             ForegroundStateColors.Add(EnqueuedState.StateName, "#999");
-            ForegroundStateColors.Add(SucceededState.StateName, "#5cb85c");
+            ForegroundStateColors.Add(SuccessedState.StateName, "#5cb85c");
             ForegroundStateColors.Add(FailedState.StateName, "#d9534f");
             ForegroundStateColors.Add(ProcessingState.StateName, "#f0ad4e");
             ForegroundStateColors.Add(ScheduledState.StateName, "#5bc0de");

@@ -89,7 +89,7 @@ WriteLiteral("\">\r\n<head>\r\n    <title>");
             
             #line default
             #line hidden
-WriteLiteral(" - Hangfire</title>\r\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\r\n " +
+WriteLiteral(" - CAP</title>\r\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\r\n " +
 "   <meta charset=\"utf-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width" +
 ", initial-scale=1.0\">\r\n");
 
@@ -136,7 +136,7 @@ WriteLiteral(@""">
             
             #line default
             #line hidden
-WriteLiteral("\">Hangfire Dashboard</a>\r\n                    </div>\r\n                    <div cl" +
+WriteLiteral("\">CAP Dashboard</a>\r\n                    </div>\r\n                    <div cl" +
 "ass=\"collapse navbar-collapse\">\r\n                        ");
 
 
@@ -211,7 +211,7 @@ WriteLiteral(@"
             <div class=""container"">
                 <ul class=""list-inline credit"">
                     <li>
-                        <a href=""http://hangfire.io/"" target=""_blank"">Hangfire ");
+                        <a href=""https://github.com/dotnetcore/cap/"" target=""_blank"">CAP ");
 
 
             

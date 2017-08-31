@@ -9,7 +9,7 @@
 <!DOCTYPE html>
 <html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
 <head>
-    <title>@Title - Hangfire</title>
+    <title>@Title - CAP</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -29,7 +29,7 @@
                             <span class="icon-bar"></span>
                             <span class="icon-bar"></span>
                         </button>
-                        <a class="navbar-brand" href="@Url.Home()">Hangfire Dashboard</a>
+                        <a class="navbar-brand" href="@Url.Home()">CAP Dashboard</a>
                     </div>
                     <div class="collapse navbar-collapse">
                         @Html.RenderPartial(new Navigation())
@@ -58,7 +58,7 @@
             <div class="container">
                 <ul class="list-inline credit">
                     <li>
-                        <a href="http://hangfire.io/" target="_blank">Hangfire @($"{version.Major}.{version.Minor}.{version.Build}")
+                        <a href="https://github.com/dotnetcore/cap/" target="_blank">Hangfire @($"{version.Major}.{version.Minor}.{version.Build}")
                         </a>
                     </li>
                     <li>@Storage</li>
@@ -68,7 +68,7 @@
             </div>
         </div>
         
-        <div id="hangfireConfig"
+        <div id="capConfig"
              data-pollinterval="@StatsPollingInterval"
              data-pollurl="@(Url.To("/stats"))">
         </div>
