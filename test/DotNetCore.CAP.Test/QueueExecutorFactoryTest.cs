@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -39,10 +37,7 @@ namespace DotNetCore.CAP.Test
             Assert.NotNull(queueExecutorFactory);
 
             var publishExecutor = queueExecutorFactory.GetInstance(Models.MessageType.Publish);
-            Assert.Equal(null, publishExecutor);
+            Assert.Null(publishExecutor);
         }
-
-
-
     }
 }

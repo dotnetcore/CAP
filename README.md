@@ -44,10 +44,13 @@ If your Message Queue is using RabbitMQ, you can：
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP provides EntityFramework as default database store extension (The MySQL version is under development)：
+CAP supported SqlServer, MySql, PostgreSql as message store extension：
 
 ```
+//Select a database provider you are using
 PM> Install-Package DotNetCore.CAP.SqlServer
+PM> Install-Package DotNetCore.CAP.MySql
+PM> Install-Package DotNetCore.CAP.PostgreSql
 ```
 
 ### Configuration
@@ -66,9 +69,11 @@ public void ConfigureServices(IServiceCollection services)
 		// If your SqlServer is using EF for data operations, you need to add the following configuration：
 		// Notice: You don't need to config x.UseSqlServer(""") again!
 		x.UseEntityFramework<AppDbContext>();
-		
+
 		// If you are using Dapper,you need to add the config：
 		x.UseSqlServer("Your ConnectionStrings");
+		//x.UseMySql("Your ConnectionStrings");
+		//x.UsePostgreSql("Your ConnectionStrings");
 
 		// If your Message Queue is using RabbitMQ you need to add the config：
 		x.UseRabbitMQ("localhost");
@@ -82,7 +87,7 @@ public void Configure(IApplicationBuilder app)
 {
 	.....
 
-    app.UseCap();
+	app.UseCap();
 }
 
 ```
@@ -114,12 +119,12 @@ public class PublishController : Controller
 	[Route("~/checkAccountWithTrans")]
 	public async Task<IActionResult> PublishMessageWithTransaction([FromServices]AppDbContext dbContext)
 	{
-		 using (var trans = dbContext.Database.BeginTransaction())
-		 {
+		using (var trans = dbContext.Database.BeginTransaction())
+		{
 			await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
 			trans.Commit();
-		 }
+		}
 		return Ok();
 	}
 }
@@ -174,7 +179,7 @@ namespace xxx.Service
 		[CapSubscribe("xxx.services.account.check")]
 		public void CheckReceivedMessage(Person person)
 		{
-			
+
 		}
 	}
 }

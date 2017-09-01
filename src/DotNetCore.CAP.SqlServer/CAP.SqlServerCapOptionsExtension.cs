@@ -21,24 +21,26 @@ namespace DotNetCore.CAP
             services.AddSingleton<IStorage, SqlServerStorage>();
             services.AddScoped<IStorageConnection, SqlServerStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
+            services.AddTransient<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
             var sqlServerOptions = new SqlServerOptions();
+
             _configure(sqlServerOptions);
 
             if (sqlServerOptions.DbContextType != null)
             {
-                var provider = TempBuildService(services);
-                var dbContextObj = provider.GetService(sqlServerOptions.DbContextType);
-                var dbContext = (DbContext)dbContextObj;
-                sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                services.AddSingleton(x =>
+                {
+                    var dbContext = (DbContext)x.GetService(sqlServerOptions.DbContextType);
+                    sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                    return sqlServerOptions;
+                });
             }
-            services.AddSingleton(sqlServerOptions);
-        }
-
-        private IServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
+            else
+            {
+                services.AddSingleton(sqlServerOptions);
+            }
         }
     }
 }

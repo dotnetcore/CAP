@@ -72,7 +72,26 @@ namespace DotNetCore.CAP.Infrastructure
 
         public static bool IsComplexType(Type type)
         {
-            return !TypeDescriptor.GetConverter(type).CanConvertFrom(typeof(string));
+            return !CanConvertFromString(type);
+        }
+
+        private static bool CanConvertFromString(Type destinationType)
+        {
+            destinationType = Nullable.GetUnderlyingType(destinationType) ?? destinationType;
+            return IsSimpleType(destinationType) ||
+                   TypeDescriptor.GetConverter(destinationType).CanConvertFrom(typeof(string));
+        }
+
+        private static bool IsSimpleType(Type type)
+        {
+            return type.GetTypeInfo().IsPrimitive ||
+                type.Equals(typeof(decimal)) ||
+                type.Equals(typeof(string)) ||
+                type.Equals(typeof(DateTime)) ||
+                type.Equals(typeof(Guid)) ||
+                type.Equals(typeof(DateTimeOffset)) ||
+                type.Equals(typeof(TimeSpan)) ||
+                type.Equals(typeof(Uri));
         }
     }
 }

@@ -85,7 +85,6 @@ namespace DotNetCore.CAP.SqlServer.Test
         [Fact]
         public async Task GetReceivedMessageAsync_Test()
         {
-
             var sql = $@"
         INSERT INTO [Cap].[Received]([Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) OUTPUT INSERTED.Id
         VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
@@ -129,6 +128,5 @@ namespace DotNetCore.CAP.SqlServer.Test
             Assert.Equal("SqlServerStorageConnectionTest", message.Name);
             Assert.Equal("mygroup", message.Group);
         }
-
     }
 }

@@ -47,5 +47,10 @@ namespace DotNetCore.CAP.Models
                 Content = Content
             };
         }
+
+        public override string ToString()
+        {
+            return "name:" + Name + ", content:" + Content;
+        }
     }
 }

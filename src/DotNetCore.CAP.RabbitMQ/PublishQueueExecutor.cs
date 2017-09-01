@@ -3,7 +3,6 @@ using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 
 namespace DotNetCore.CAP.RabbitMQ
@@ -11,35 +10,27 @@ namespace DotNetCore.CAP.RabbitMQ
     internal sealed class PublishQueueExecutor : BasePublishQueueExecutor
     {
         private readonly ILogger _logger;
+        private readonly IConnection _connection;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
-        public PublishQueueExecutor(IStateChanger stateChanger,
-            RabbitMQOptions options,
+        public PublishQueueExecutor(
+            CapOptions options,
+            IStateChanger stateChanger,
+            IConnection connection,
+            RabbitMQOptions rabbitMQOptions,
             ILogger<PublishQueueExecutor> logger)
-            : base(stateChanger, logger)
+            : base(options, stateChanger, logger)
         {
             _logger = logger;
-            _rabbitMQOptions = options;
+            _connection = connection;
+            _rabbitMQOptions = rabbitMQOptions;
         }
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)
         {
-            var factory = new ConnectionFactory()
-            {
-                HostName = _rabbitMQOptions.HostName,
-                UserName = _rabbitMQOptions.UserName,
-                Port = _rabbitMQOptions.Port,
-                Password = _rabbitMQOptions.Password,
-                VirtualHost = _rabbitMQOptions.VirtualHost,
-                RequestedConnectionTimeout = _rabbitMQOptions.RequestedConnectionTimeout,
-                SocketReadTimeout = _rabbitMQOptions.SocketReadTimeout,
-                SocketWriteTimeout = _rabbitMQOptions.SocketWriteTimeout
-            };
-
             try
             {
-                using (var connection = factory.CreateConnection())
-                using (var channel = connection.CreateModel())
+                using (var channel = _connection.CreateModel())
                 {
                     var body = Encoding.UTF8.GetBytes(content);
 

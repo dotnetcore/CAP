@@ -2,10 +2,6 @@
 
 	<Import Project="version.props" />
 
-	<PropertyGroup Label="Build">
-		<TargetFrameworks>netstandard1.6</TargetFrameworks>
-	</PropertyGroup>
-
 	<PropertyGroup Label="Package">
 		<Product>CAP</Product>
 		<Authors>savorboard;dotnetcore</Authors>
@@ -14,7 +10,7 @@
     <PackageIconUrl>https://avatars2.githubusercontent.com/u/19404084</PackageIconUrl>
 		<PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
 		<PackageLicenseUrl>https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt</PackageLicenseUrl>
-    <PackageTags>eventbus;rabbitmq;kafka;cap;transaction;</PackageTags>
+    <PackageTags>CAP;EventBus;Distributed Transaction</PackageTags>
     <Description>EventBus and eventually consistency in distributed architectures.</Description>
 	</PropertyGroup>
 

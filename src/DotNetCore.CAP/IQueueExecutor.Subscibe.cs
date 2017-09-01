@@ -15,16 +15,18 @@ namespace DotNetCore.CAP
         private readonly IConsumerInvokerFactory _consumerInvokerFactory;
         private readonly IStateChanger _stateChanger;
         private readonly ILogger _logger;
-
+        private readonly CapOptions _options;
         private readonly MethodMatcherCache _selector;
 
         public SubscibeQueueExecutor(
             IStateChanger stateChanger,
             MethodMatcherCache selector,
+            CapOptions options,
             IConsumerInvokerFactory consumerInvokerFactory,
             ILogger<BasePublishQueueExecutor> logger)
         {
             _selector = selector;
+            _options = options;
             _consumerInvokerFactory = consumerInvokerFactory;
             _stateChanger = stateChanger;
             _logger = logger;
@@ -62,7 +64,7 @@ namespace DotNetCore.CAP
                 }
                 else
                 {
-                    newState = new SucceededState();
+                    newState = new SucceededState(_options.SuccessedMessageExpiredAfter);
                 }
                 await _stateChanger.ChangeStateAsync(message, newState, connection);
 

@@ -8,6 +8,8 @@
 
 CAP 是一个在分布式系统（SOA、MicroService）中实现最终一致性的库，它具有轻量级、易使用、高性能等特点。
 
+你可以在这里[CAP Wiki](https://github.com/dotnetcore/CAP/wiki)看到更多详细资料。
+
 ## 预览（OverView）
 
 CAP 是在一个 ASP.NET Core 项目中使用的库，当然他可以用于 ASP.NET Core On .NET Framework 中。
@@ -44,10 +46,13 @@ PM> Install-Package DotNetCore.CAP.Kafka
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP 默认提供了 Sql Server 的扩展作为数据库存储（MySql的正在开发中）：
+CAP 提供了 Sql Server, MySql, PostgreSQL 的扩展作为数据库存储：
 
 ```
+// 按需选择安装你正在使用的数据库
 PM> Install-Package DotNetCore.CAP.SqlServer
+PM> Install-Package DotNetCore.CAP.MySql
+PM> Install-Package DotNetCore.CAP.PostgreSql
 ```
 
 ### Configuration

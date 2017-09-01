@@ -2,34 +2,28 @@
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
-using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class CapPublisher : ICapPublisher
+    public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
         private readonly ILogger _logger;
         private readonly MySqlOptions _options;
         private readonly DbContext _dbContext;
-
-        protected bool IsCapOpenedTrans { get; set; }
-
-        protected bool IsUsingEF { get; }
-
-        protected IServiceProvider ServiceProvider { get; }
 
         public CapPublisher(IServiceProvider provider,
             ILogger<CapPublisher> logger,
             MySqlOptions options)
         {
             ServiceProvider = provider;
-            _logger = logger;
             _options = options;
+            _logger = logger;
 
             if (_options.DbContextType != null)
             {
@@ -38,160 +32,45 @@ namespace DotNetCore.CAP.MySql
             }
         }
 
-        public void Publish<T>(string name, T contentObj)
+        protected override void PrepareConnectionForEF()
         {
-            CheckIsUsingEF(name);
-
-            var content = Serialize(contentObj);
-
-            PublishCore(name, content);
+            DbConnection = _dbContext.Database.GetDbConnection();
+            var dbContextTransaction = _dbContext.Database.CurrentTransaction;
+            var dbTrans = dbContextTransaction?.GetDbTransaction();
+            //DbTransaction is dispose in original
+            if (dbTrans?.Connection == null)
+            {
+                IsCapOpenedTrans = true;
+                dbContextTransaction?.Dispose();
+                dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+                dbTrans = dbContextTransaction.GetDbTransaction();
+            }
+            DbTranasaction = dbTrans;
         }
 
-        public Task PublishAsync<T>(string name, T contentObj)
+        protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
         {
-            CheckIsUsingEF(name);
+            dbConnection.Execute(PrepareSql(), message, dbTransaction);
 
-            var content = Serialize(contentObj);
-
-            return PublishCoreAsync(name, content);
+            _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
-        public void Publish<T>(string name, T contentObj, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
+        protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
         {
-            CheckIsAdoNet(name);
+            await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
 
-            PrepareConnection(dbConnection, ref dbTransaction);
-
-            var content = Serialize(contentObj);
-
-            PublishWithTrans(name, content, dbConnection, dbTransaction);
+            _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
-        public Task PublishAsync<T>(string name, T contentObj, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
+        public async Task PublishAsync(CapPublishedMessage message)
         {
-            CheckIsAdoNet(name);
-
-            PrepareConnection(dbConnection, ref dbTransaction);
-
-            var content = Serialize(contentObj);
-
-            return PublishWithTransAsync(name, content, dbConnection, dbTransaction);
+            using (var conn = new MySqlConnection(_options.ConnectionString))
+            {
+                await conn.ExecuteAsync(PrepareSql(), message);
+            }
         }
 
         #region private methods
-
-        private string Serialize<T>(T obj)
-        {
-            string content = string.Empty;
-            if (Helper.IsComplexType(typeof(T)))
-            {
-                content = Helper.ToJson(obj);
-            }
-            else
-            {
-                content = obj?.ToString();
-            }
-            return content;
-        }
-
-        private void PrepareConnection(IDbConnection dbConnection, ref IDbTransaction dbTransaction)
-        {
-            if (dbConnection == null)
-                throw new ArgumentNullException(nameof(dbConnection));
-
-            if (dbConnection.State != ConnectionState.Open)
-                dbConnection.Open();
-
-            if (dbTransaction == null)
-            {
-                IsCapOpenedTrans = true;
-                dbTransaction = dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
-            }
-        }
-
-        private void CheckIsUsingEF(string name)
-        {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            if (!IsUsingEF)
-                throw new InvalidOperationException("If you are using the EntityFramework, you need to configure the DbContextType first." +
-                  " otherwise you need to use overloaded method with IDbConnection and IDbTransaction.");
-        }
-
-        private void CheckIsAdoNet(string name)
-        {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            if (IsUsingEF)
-                throw new InvalidOperationException("If you are using the EntityFramework, you do not need to use this overloaded.");
-        }
-
-        private async Task PublishCoreAsync(string name, string content)
-        {
-            var connection = _dbContext.Database.GetDbConnection();
-            var transaction = _dbContext.Database.CurrentTransaction;
-            if (transaction == null)
-            {
-                IsCapOpenedTrans = true;
-                transaction = await _dbContext.Database.BeginTransactionAsync(IsolationLevel.ReadCommitted);
-            }
-            var dbTransaction = transaction.GetDbTransaction();
-            await PublishWithTransAsync(name, content, connection, dbTransaction);
-        }
-
-        private void PublishCore(string name, string content)
-        {
-            var connection = _dbContext.Database.GetDbConnection();
-            var transaction = _dbContext.Database.CurrentTransaction;
-            if (transaction == null)
-            {
-                IsCapOpenedTrans = true;
-                transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
-            }
-            var dbTransaction = transaction.GetDbTransaction();
-            PublishWithTrans(name, content, connection, dbTransaction);
-        }
-
-        private async Task PublishWithTransAsync(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction)
-        {
-            var message = new CapPublishedMessage
-            {
-                Name = name,
-                Content = content,
-                StatusName = StatusName.Scheduled
-            };
-            await dbConnection.ExecuteAsync(PrepareSql(), message, transaction: dbTransaction);
-
-            _logger.LogInformation("Message has been persisted in the database. name:" + name);
-
-            if (IsCapOpenedTrans)
-            {
-                dbTransaction.Commit();
-                dbTransaction.Dispose();
-                dbConnection.Dispose();
-            }
-
-            PublishQueuer.PulseEvent.Set();
-        }
-
-        private void PublishWithTrans(string name, string content, IDbConnection dbConnection, IDbTransaction dbTransaction)
-        {
-            var message = new CapPublishedMessage
-            {
-                Name = name,
-                Content = content,
-                StatusName = StatusName.Scheduled
-            };
-            var count = dbConnection.Execute(PrepareSql(), message, transaction: dbTransaction);
-
-            _logger.LogInformation("Message has been persisted in the database. name:" + name);
-
-            if (IsCapOpenedTrans)
-            {
-                dbTransaction.Commit();
-                dbTransaction.Dispose();
-                dbConnection.Dispose();
-            }
-            PublishQueuer.PulseEvent.Set();
-        }
 
         private string PrepareSql()
         {

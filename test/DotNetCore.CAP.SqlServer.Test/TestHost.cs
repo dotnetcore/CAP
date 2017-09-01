@@ -1,5 +1,4 @@
 using System;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.SqlServer.Test
@@ -31,7 +30,6 @@ namespace DotNetCore.CAP.SqlServer.Test
             _connectionString = ConnectionUtil.GetConnectionString();
             services.AddSingleton(new SqlServerOptions { ConnectionString = _connectionString });
             services.AddSingleton<SqlServerStorage>();
-            services.AddDbContext<TestDbContext>(options => options.UseSqlServer(_connectionString));
 
             _services = services;
         }

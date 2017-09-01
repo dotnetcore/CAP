@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -20,7 +17,7 @@ namespace DotNetCore.CAP.Test
             services.AddScoped<IFooTest, CandidatesFooTest>();
             services.AddScoped<IBarTest, CandidatesBarTest>();
             services.AddLogging();
-            services.AddCap(x=> { });
+            services.AddCap(x => { });
             _provider = services.BuildServiceProvider();
         }
 
@@ -42,7 +39,7 @@ namespace DotNetCore.CAP.Test
 
             Assert.NotNull(bestCandidates);
             Assert.NotNull(bestCandidates.MethodInfo);
-            Assert.Equal(bestCandidates.MethodInfo.ReturnType, typeof(Task));
+            Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
         }
     }
 

@@ -20,7 +20,9 @@ namespace DotNetCore.CAP.Internal
             try
             {
                 var type = _parameterInfo.ParameterType;
+
                 var value = Helper.FromJson(content, type);
+
                 return Task.FromResult(ModelBindingResult.Success(value));
             }
             catch (Exception)

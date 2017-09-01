@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
-using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Moq;
@@ -64,12 +60,12 @@ namespace DotNetCore.CAP.Test
         public async Task ProcessAsync()
         {
             // Arrange
-            var job = new CapPublishedMessage {
-
+            var job = new CapPublishedMessage
+            {
             };
 
-            var mockFetchedJob = Mock.Get(Mock.Of<IFetchedMessage>(fj =>  fj.MessageId == 42 && fj.MessageType == MessageType.Publish ));
-           
+            var mockFetchedJob = Mock.Get(Mock.Of<IFetchedMessage>(fj => fj.MessageId == 42 && fj.MessageType == MessageType.Publish));
+
             _mockStorageConnection
                 .Setup(m => m.FetchNextMessageAsync())
                 .ReturnsAsync(mockFetchedJob.Object).Verifiable();
@@ -84,7 +80,7 @@ namespace DotNetCore.CAP.Test
             await fixture.ProcessAsync(_context);
 
             // Assert
-            _mockStorageConnection.VerifyAll();           
+            _mockStorageConnection.VerifyAll();
         }
 
         private DefaultDispatcher Create()

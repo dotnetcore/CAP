@@ -1,7 +1,4 @@
-﻿using System;
-using Microsoft.Extensions.Options;
-
-namespace DotNetCore.CAP.Kafka
+﻿namespace DotNetCore.CAP.Kafka
 {
     internal sealed class KafkaConsumerClientFactory : IConsumerClientFactory
     {
