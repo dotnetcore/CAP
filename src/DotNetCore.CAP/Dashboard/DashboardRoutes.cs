@@ -74,10 +74,10 @@ namespace DotNetCore.CAP.Dashboard
 
             #region Razor pages and commands
 
-            //Routes.AddRazorPage("/jobs/enqueued", x => new QueuesPage());
+            Routes.AddRazorPage("/jobs/enqueued", x => new QueuesPage());
             //Routes.AddRazorPage(
             //    "/jobs/enqueued/fetched/(?<Queue>.+)",
-            //    x => new FetchedJobsPage(x.Groups["Queue"].Value));
+            //     x => new FetchedJobsPage(x.Groups["Queue"].Value));
 
             //Routes.AddClientBatchCommand("/jobs/enqueued/delete", (client, jobId) => client.ChangeState(jobId, CreateDeletedState()));
             //Routes.AddClientBatchCommand("/jobs/enqueued/requeue", (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState()));

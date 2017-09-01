@@ -23,22 +23,22 @@ namespace DotNetCore.CAP.Dashboard
             _page = page;
         }
 
-        //public NonEscapedString Breadcrumbs(string title, IDictionary<string, string> items)
-        //{
-        //    if (items == null) throw new ArgumentNullException(nameof(items));
-        //    return RenderPartial(new Breadcrumbs(title, items));
-        //}
+        public NonEscapedString Breadcrumbs(string title, IDictionary<string, string> items)
+        {
+            if (items == null) throw new ArgumentNullException(nameof(items));
+            return RenderPartial(new Breadcrumbs(title, items));
+        }
 
-        //public NonEscapedString JobsSidebar()
-        //{
-        //    return RenderPartial(new SidebarMenu(JobsSidebarMenu.Items));
-        //}
+        public NonEscapedString JobsSidebar()
+        {
+            return RenderPartial(new SidebarMenu(JobsSidebarMenu.Items));
+        }
 
-        //public NonEscapedString SidebarMenu(IEnumerable<Func<RazorPage, MenuItem>> items)
-        //{
-        //    if (items == null) throw new ArgumentNullException(nameof(items));
-        //    return RenderPartial(new SidebarMenu(items));
-        //}
+        public NonEscapedString SidebarMenu(IEnumerable<Func<RazorPage, MenuItem>> items)
+        {
+            if (items == null) throw new ArgumentNullException(nameof(items));
+            return RenderPartial(new SidebarMenu(items));
+        }
 
         public NonEscapedString BlockMetric(DashboardMetric metric)
         {
