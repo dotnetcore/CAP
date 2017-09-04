@@ -443,8 +443,11 @@
   <data name="JobsSidebarMenu_Succeeded" xml:space="preserve">
     <value>完成</value>
   </data>
-  <data name="NavigationMenu_Jobs" xml:space="preserve">
-    <value>作业</value>
+  <data name="NavigationMenu_Published" xml:space="preserve">
+    <value>发出的</value>
+  </data>
+  <data name="NavigationMenu_Received" xml:space="preserve">
+    <value>接收的</value>
   </data>
   <data name="NavigationMenu_RecurringJobs" xml:space="preserve">
     <value>周期性作业</value>

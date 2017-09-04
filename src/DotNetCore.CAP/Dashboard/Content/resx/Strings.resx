@@ -445,8 +445,11 @@
   <data name="JobsSidebarMenu_Succeeded" xml:space="preserve">
     <value>Succeeded</value>
   </data>
-  <data name="NavigationMenu_Jobs" xml:space="preserve">
-    <value>Jobs</value>
+  <data name="NavigationMenu_Published" xml:space="preserve">
+    <value>Published</value>
+  </data>
+  <data name="NavigationMenu_Received" xml:space="preserve">
+    <value>Received</value>
   </data>
   <data name="NavigationMenu_RecurringJobs" xml:space="preserve">
     <value>Recurring Jobs</value>
