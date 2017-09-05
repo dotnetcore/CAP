@@ -1252,7 +1252,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
         /// </summary>
         public static string SucceededMessagesPage_Title {
             get {
-                return ResourceManager.GetString("SucceededJobsPage_Title", resourceCulture);
+                return ResourceManager.GetString("SucceededMessagesPage_Title", resourceCulture);
             }
         }
     }
