@@ -82,15 +82,6 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 services.AddTransient(service.Key, service.Value);
             }
-
-            var types = Assembly.GetEntryAssembly().ExportedTypes;
-            foreach (var type in types)
-            {
-                if (Helper.IsController(type.GetTypeInfo()))
-                {
-                    services.AddTransient(typeof(object), type);
-                }
-            }
         }
     }
 }

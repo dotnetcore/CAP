@@ -67,17 +67,16 @@ namespace DotNetCore.CAP.Internal
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
-            // at cap startup time, find all Controller into the DI container,the type is object.
-            var controllers = provider.GetServices<object>();
-            foreach (var controller in controllers)
+
+            var types = Assembly.GetEntryAssembly().ExportedTypes;
+            foreach (var type in types)
             {
-                var typeInfo = controller.GetType().GetTypeInfo();
-
-                //double check
-                if (!Helper.IsController(typeInfo)) continue;
-
-                executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
-            }
+                var typeInfo = type.GetTypeInfo();
+                if (Helper.IsController(typeInfo))
+                {
+                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                }
+            }            
 
             return executorDescriptorList;
         }
