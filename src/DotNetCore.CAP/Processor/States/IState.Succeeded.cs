@@ -3,20 +3,20 @@ using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.Processor.States
 {
-    public class SuccessedState : IState
+    public class SucceededState : IState
     {
-        public const string StateName = "Successed";
+        public const string StateName = "Succeeded";
 
         public TimeSpan? ExpiresAfter { get; private set; }
 
         public string Name => StateName;
 
-        public SuccessedState()
+        public SucceededState()
         {
             ExpiresAfter = TimeSpan.FromHours(1);
         }
 
-        public SuccessedState(int ExpireAfterSeconds)
+        public SucceededState(int ExpireAfterSeconds)
         {
             ExpiresAfter = TimeSpan.FromSeconds(ExpireAfterSeconds);
         }
