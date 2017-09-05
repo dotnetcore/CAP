@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using Dapper;
 using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
+using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.SqlServer
 {
@@ -23,132 +23,53 @@ namespace DotNetCore.CAP.SqlServer
             _storage = storage as SqlServerStorage;
         }
 
-        public JobList<DeletedJobDto> DeletedJobs(int from, int count)
+        public IDictionary<DateTime, int> FailedByDatesCount()
         {
-            return new JobList<DeletedJobDto>(new Dictionary<string, DeletedJobDto>());
-        }
-
-        public long DeletedListCount()
-        {
-            return 11;
-        }
-
-        public long EnqueuedCount(string queue)
-        {
-            return 11;
-        }
-
-        public JobList<EnqueuedJobDto> EnqueuedJobs(string queue, int from, int perPage)
-        {
-            return new JobList<EnqueuedJobDto>(new Dictionary<string, EnqueuedJobDto>());
-        }
-
-        public IDictionary<DateTime, long> FailedByDatesCount()
-        {
-            return new Dictionary<DateTime, long>();
-        }
-
-        public long FailedCount()
-        {
-            return 11;
-        }
-
-        public JobList<FailedJobDto> FailedJobs(int from, int count)
-        {
-            return new JobList<FailedJobDto>(new Dictionary<string, FailedJobDto>());
-        }
-
-        public long FetchedCount(string queue)
-        {
-            return 11;
-        }
-
-        public JobList<FetchedJobDto> FetchedJobs(string queue, int from, int perPage)
-        {
-            return new JobList<FetchedJobDto>(new Dictionary<string, FetchedJobDto>());
+            return new Dictionary<DateTime, int>();
         }
 
         public StatisticsDto GetStatistics()
         {
             string sql = String.Format(@"
 set transaction isolation level read committed;
-select count(Id) from [{0}].Published with (nolock) where StatusName = N'Enqueued';
+select count(Id) from [{0}].Published with (nolock) where StatusName = N'Succeeded';
+select count(Id) from [{0}].Received with (nolock) where StatusName = N'Succeeded';
 select count(Id) from [{0}].Published with (nolock) where StatusName = N'Failed';
+select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
 select count(Id) from [{0}].Published with (nolock) where StatusName = N'Processing';
-select count(Id) from [{0}].Published with (nolock) where StatusName = N'Scheduled';
-select 11;
-select count(Id) from [{0}].Published with (nolock) where StatusName = N'Successed';
-select count(Id) from [{0}].Published with (nolock) where StatusName = N'Deleted';
-select 14;
-                ", _options.Schema);
+select count(Id) from [{0}].Received with (nolock) where StatusName = N'Processing';",
+_options.Schema);
 
             var statistics = UseConnection(connection =>
             {
                 var stats = new StatisticsDto();
                 using (var multi = connection.QueryMultiple(sql))
                 {
-                    stats.Enqueued = multi.ReadSingle<int>();
-                    stats.Failed = multi.ReadSingle<int>();
-                    stats.Processing = multi.ReadSingle<int>();
-                    stats.Scheduled = multi.ReadSingle<int>();
+                    stats.PublishedSucceeded = multi.ReadSingle<int>();
+                    stats.ReceivedSucceeded = multi.ReadSingle<int>();
 
-                    stats.Servers = multi.ReadSingle<int>();
+                    stats.PublishedFailed = multi.ReadSingle<int>();
+                    stats.ReceivedFailed = multi.ReadSingle<int>();
 
-                    stats.Succeeded = multi.ReadSingleOrDefault<long?>() ?? 0;
-                    stats.Deleted = multi.ReadSingleOrDefault<long?>() ?? 0;
-
-                    stats.Recurring = multi.ReadSingle<int>();
+                    stats.PublishedProcessing = multi.ReadSingle<int>();
+                    stats.ReceivedProcessing = multi.ReadSingle<int>();
                 }
                 return stats;
             });
-
-            //statistics.Queues = _storage.QueueProviders
-            //    .SelectMany(x => x.GetJobQueueMonitoringApi().GetQueues())
-            //    .Count();
-            statistics.Queues = 3;
+            statistics.Servers = 1;
             return statistics;
         }
 
-        public IDictionary<DateTime, long> HourlyFailedJobs()
+        public IDictionary<DateTime, int> HourlyFailedJobs()
         {
             return UseConnection(connection =>
                 GetHourlyTimelineStats(connection, "failed"));
         }
 
-        public IDictionary<DateTime, long> HourlySucceededJobs()
+        public IDictionary<DateTime, int> HourlySucceededJobs()
         {
             return UseConnection(connection =>
                  GetHourlyTimelineStats(connection, "succeeded"));
-        }
-
-        public JobDetailsDto JobDetails(string jobId)
-        {
-            return new JobDetailsDto();
-        }
-
-        public long ProcessingCount()
-        {
-            return 11;
-        }
-
-        public JobList<ProcessingJobDto> ProcessingJobs(int from, int count)
-        {
-            return new JobList<ProcessingJobDto>(new Dictionary<string, ProcessingJobDto>());
-        }
-
-        public IList<QueueWithTopEnqueuedJobsDto> Queues()
-        {
-            return new List<QueueWithTopEnqueuedJobsDto>();
-        }
-
-        public long ScheduledCount()
-        {
-            return 0;
-        }
-
-        public JobList<ScheduledJobDto> ScheduledJobs(int from, int count)
-        {
-            return new JobList<ScheduledJobDto>(new Dictionary<string, ScheduledJobDto>());
         }
 
         public IList<ServerDto> Servers()
@@ -156,19 +77,96 @@ select 14;
             return new List<ServerDto>();
         }
 
-        public IDictionary<DateTime, long> SucceededByDatesCount()
+        public IDictionary<DateTime, int> SucceededByDatesCount()
         {
-            return new Dictionary<DateTime, long>();
+            return new Dictionary<DateTime, int>();
         }
 
-        public JobList<SucceededJobDto> SucceededJobs(int from, int count)
+        public IList<MessageDto> Messages(MessageQueryDto queryDto)
         {
-            return new JobList<SucceededJobDto>(new Dictionary<string, SucceededJobDto>());
+            var tableName = queryDto.MessageType == Models.MessageType.Publish ? "Published" : "Received";
+            var where = string.Empty;
+            if (!string.IsNullOrEmpty(queryDto.StatusName))
+            {
+                where += " and statusname=@StatusName";
+            }
+            if (!string.IsNullOrEmpty(queryDto.Name))
+            {
+                where += " and name=@Name";
+            }
+            if (!string.IsNullOrEmpty(queryDto.Content))
+            {
+                where += " and content like '%@Content%'";
+            }
+
+            var sqlQuery = $"select * from [{_options.Schema}].{tableName} where 1=1 {where} order by Added desc offset @Offset rows fetch next @Limit rows only";
+
+            return UseConnection(conn =>
+            {
+                return conn.Query<MessageDto>(sqlQuery, new
+                {
+                    StatusName = queryDto.StatusName,
+                    Name = queryDto.Name,
+                    Content = queryDto.Content,
+                    Offset = queryDto.CurrentPage * queryDto.PageSize,
+                    Limit = queryDto.PageSize,
+                }).ToList();
+            });
         }
 
-        public long SucceededListCount()
+        public int PublishedFailedCount()
         {
-            return 11;
+            return UseConnection(conn =>
+            {
+                return GetNumberOfMessage(conn, "Published", StatusName.Failed);
+            });
+        }
+
+        public int PublishedProcessingCount()
+        {
+            return UseConnection(conn =>
+            {
+                return GetNumberOfMessage(conn, "Published", StatusName.Processing);
+            });
+        }
+
+        public int PublishedSucceededCount()
+        {
+            return UseConnection(conn =>
+            {
+                return GetNumberOfMessage(conn, "Published", StatusName.Succeeded);
+            });
+        }
+
+        public int ReceivedFailedCount()
+        {
+            return UseConnection(conn =>
+            {
+                return GetNumberOfMessage(conn, "Received", StatusName.Failed);
+            });
+        }
+
+        public int ReceivedProcessingCount()
+        {
+            return UseConnection(conn =>
+            {
+                return GetNumberOfMessage(conn, "Received", StatusName.Processing);
+            });
+        }
+
+        public int ReceivedSucceededCount()
+        {
+            return UseConnection(conn =>
+            {
+                return GetNumberOfMessage(conn, "Received", StatusName.Succeeded);
+            });
+        }
+
+        private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
+        {
+            var sqlQuery = $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName = @state";
+            var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
+            return count;
         }
 
         private T UseConnection<T>(Func<IDbConnection, T> action)
@@ -176,7 +174,7 @@ select 14;
             return _storage.UseConnection(action);
         }
 
-        private Dictionary<DateTime, long> GetHourlyTimelineStats(IDbConnection connection, string type)
+        private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string type)
         {
             var endDate = DateTime.UtcNow;
             var dates = new List<DateTime>();
@@ -191,7 +189,7 @@ select 14;
             return GetTimelineStats(connection, keyMaps);
         }
 
-        private Dictionary<DateTime, long> GetTimelineStats(IDbConnection connection, string type)
+        private Dictionary<DateTime, int> GetTimelineStats(IDbConnection connection, string type)
         {
             var endDate = DateTime.UtcNow.Date;
             var dates = new List<DateTime>();
@@ -206,7 +204,7 @@ select 14;
             return GetTimelineStats(connection, keyMaps);
         }
 
-        private Dictionary<DateTime, long> GetTimelineStats(
+        private Dictionary<DateTime, int> GetTimelineStats(
            IDbConnection connection,
            IDictionary<string, DateTime> keyMaps)
         {
@@ -217,14 +215,14 @@ where [Key] in @keys";
             var valuesMap = connection.Query(
                 sqlQuery,
                 new { keys = keyMaps.Keys })
-                .ToDictionary(x => (string)x.Key, x => (long)x.Count);
+                .ToDictionary(x => (string)x.Key, x => (int)x.Count);
 
             foreach (var key in keyMaps.Keys)
             {
                 if (!valuesMap.ContainsKey(key)) valuesMap.Add(key, 0);
             }
 
-            var result = new Dictionary<DateTime, long>();
+            var result = new Dictionary<DateTime, int>();
             for (var i = 0; i < keyMaps.Count; i++)
             {
                 var value = valuesMap[keyMaps.ElementAt(i).Key];
