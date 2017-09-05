@@ -23,7 +23,11 @@ namespace DotNetCore.CAP
             services.AddScoped<ICapPublisher, CapPublisher>();
             services.AddTransient<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
+            AddSqlServerOptions(services);
+        }
 
+        private void AddSqlServerOptions(IServiceCollection services)
+        {
             var sqlServerOptions = new SqlServerOptions();
 
             _configure(sqlServerOptions);
@@ -32,9 +36,13 @@ namespace DotNetCore.CAP
             {
                 services.AddSingleton(x =>
                 {
-                    var dbContext = (DbContext)x.GetService(sqlServerOptions.DbContextType);
-                    sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
-                    return sqlServerOptions;
+                    using (var scope = x.CreateScope())
+                    {
+                        var provider = scope.ServiceProvider;
+                        var dbContext = (DbContext)provider.GetService(sqlServerOptions.DbContextType);
+                        sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                        return sqlServerOptions;
+                    }
                 });
             }
             else
