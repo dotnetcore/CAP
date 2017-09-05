@@ -19,7 +19,13 @@ namespace Sample.RabbitMQ.SqlServer
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ("localhost");
+                x.UseRabbitMQ(xx =>
+                {
+                    xx.HostName = "192.168.2.206";
+                    xx.UserName = "admin";
+                    xx.Password = "123123";
+                });
+                x.UseDashboard();
             });
 
             services.AddMvc();
@@ -33,6 +39,8 @@ namespace Sample.RabbitMQ.SqlServer
             app.UseMvc();
 
             app.UseCap();
+
+            app.UseCapDashboard();
         }
     }
 }
