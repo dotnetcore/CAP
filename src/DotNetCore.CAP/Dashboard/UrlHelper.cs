@@ -31,9 +31,14 @@ namespace DotNetCore.CAP.Dashboard
             return To("/jobs/details/" + jobId);
         }
 
-        public string LinkToQueues()
+        public string LinkToPublished()
         {
-            return To("/jobs/enqueued");
+            return To("/published/succeeded");
+        }
+
+        public string LinkToReceived()
+        {
+            return To("/received/succeeded");
         }
 
         public string Queue(string queue)

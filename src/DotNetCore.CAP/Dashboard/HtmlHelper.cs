@@ -29,9 +29,16 @@ namespace DotNetCore.CAP.Dashboard
             return RenderPartial(new Breadcrumbs(title, items));
         }
 
-        public NonEscapedString JobsSidebar()
+        public NonEscapedString JobsSidebar(MessageType type)
         {
-            return RenderPartial(new SidebarMenu(JobsSidebarMenu.Items));
+            if (type == MessageType.Publish)
+            {
+                return SidebarMenu(MessagesSidebarMenu.PublishedItems);
+            }
+            else
+            {
+                return SidebarMenu(MessagesSidebarMenu.ReceivedItems);
+            }
         }
 
         public NonEscapedString SidebarMenu(IEnumerable<Func<RazorPage, MenuItem>> items)
@@ -52,17 +59,17 @@ namespace DotNetCore.CAP.Dashboard
             return RenderPartial(new InlineMetric(metric));
         }
 
-        //public NonEscapedString Paginator(Pager pager)
-        //{
-        //    if (pager == null) throw new ArgumentNullException(nameof(pager));
-        //    return RenderPartial(new Paginator(pager));
-        //}
+        public NonEscapedString Paginator(Pager pager)
+        {
+            if (pager == null) throw new ArgumentNullException(nameof(pager));
+            return RenderPartial(new Paginator(pager));
+        }
 
-        //public NonEscapedString PerPageSelector(Pager pager)
-        //{
-        //    if (pager == null) throw new ArgumentNullException(nameof(pager));
-        //    return RenderPartial(new PerPageSelector(pager));
-        //}
+        public NonEscapedString PerPageSelector(Pager pager)
+        {
+            if (pager == null) throw new ArgumentNullException(nameof(pager));
+            return RenderPartial(new PerPageSelector(pager));
+        }
 
         public NonEscapedString RenderPartial(RazorPage partialPage)
         {

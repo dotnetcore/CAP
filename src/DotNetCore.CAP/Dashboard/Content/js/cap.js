@@ -112,8 +112,8 @@
         RealtimeGraph.prototype = Object.create(BaseGraph.prototype);
 
         RealtimeGraph.prototype.appendHistory = function (statistics) {
-            var newSucceeded = parseInt(statistics["succeeded:count"].intValue);
-            var newFailed = parseInt(statistics["failed:count"].intValue);
+            var newSucceeded = parseInt(statistics["published_succeeded:count"].intValue);
+            var newFailed = parseInt(statistics["published_failed:count"].intValue);
 
             if (this._succeeded !== null && this._failed !== null) {
                 var succeeded = newSucceeded - this._succeeded;

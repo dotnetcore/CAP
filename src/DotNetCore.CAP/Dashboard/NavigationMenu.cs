@@ -10,13 +10,23 @@ namespace DotNetCore.CAP.Dashboard
 
         static NavigationMenu()
         {
-            Items.Add(page => new MenuItem(Strings.NavigationMenu_Jobs, page.Url.LinkToQueues())
+            Items.Add(page => new MenuItem(Strings.NavigationMenu_Published, page.Url.LinkToPublished())
             {
-                Active = page.RequestPath.StartsWith("/jobs"),
+                Active = page.RequestPath.StartsWith("/published"),
                 Metrics = new []
                 {
-                    DashboardMetrics.EnqueuedCountOrNull,
-                    DashboardMetrics.FailedCountOrNull
+                    DashboardMetrics.PublishedSucceededCount,
+                    DashboardMetrics.PublishedFailedCountOrNull
+                }
+            });
+
+            Items.Add(page => new MenuItem(Strings.NavigationMenu_Received, page.Url.LinkToReceived())
+            {
+                Active = page.RequestPath.StartsWith("/received"),
+                Metrics = new[]
+                {
+                    DashboardMetrics.ReceivedSucceededCount,
+                    DashboardMetrics.ReceivedFailedCountOrNull
                 }
             });
 
@@ -24,12 +34,6 @@ namespace DotNetCore.CAP.Dashboard
             {
                 Active = page.RequestPath.StartsWith("/retries"),
                 Metric = DashboardMetrics.RetriesCount
-            });
-
-            Items.Add(page => new MenuItem(Strings.NavigationMenu_RecurringJobs, page.Url.To("/recurring"))
-            {
-                Active = page.RequestPath.StartsWith("/recurring"),
-                Metric = DashboardMetrics.RecurringJobCount
             });
 
             Items.Add(page => new MenuItem(Strings.NavigationMenu_Servers, page.Url.To("/servers"))

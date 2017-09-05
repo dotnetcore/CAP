@@ -73,8 +73,8 @@ WriteLiteral("\r\n");
             #line 9 "..\..\Dashboard\Pages\HomePage.cshtml"
   
     Layout = new LayoutPage(Strings.HomePage_Title);
-    IDictionary<DateTime, long> succeeded = null;
-    IDictionary<DateTime, long> failed = null;
+    IDictionary<DateTime, int> succeeded = null;
+    IDictionary<DateTime, int> failed = null;
 
     var period = Query("period") ?? "day";
 
@@ -172,7 +172,7 @@ WriteLiteral("</h3>\r\n        <div id=\"realtimeGraph\" data-succeeded=\"");
 
             
             #line 44 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                           Write(Statistics.Succeeded);
+                                           Write(Statistics.PublishedSucceeded);
 
             
             #line default
@@ -182,7 +182,7 @@ WriteLiteral("\" data-failed=\"");
 
             
             #line 44 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                                                               Write(Statistics.Failed);
+                                                                                        Write(Statistics.PublishedFailed);
 
             
             #line default
@@ -209,8 +209,8 @@ WriteLiteral("\"\r\n             data-failed-string=\"");
             #line hidden
 WriteLiteral(@"""></div>
         <div style=""display: none;"">
-            <span data-metric=""succeeded:count""></span>
-            <span data-metric=""failed:count""></span>
+            <span data-metric=""published_succeeded:count""></span>
+            <span data-metric=""published_failed:count""></span>
         </div>
 
         <h3>

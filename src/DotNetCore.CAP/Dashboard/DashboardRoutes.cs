@@ -74,7 +74,7 @@ namespace DotNetCore.CAP.Dashboard
 
             #region Razor pages and commands
 
-            Routes.AddRazorPage("/jobs/enqueued", x => new QueuesPage());
+            //Routes.AddRazorPage("/jobs/enqueued", x => new QueuesPage());
             //Routes.AddRazorPage(
             //    "/jobs/enqueued/fetched/(?<Queue>.+)",
             //     x => new FetchedJobsPage(x.Groups["Queue"].Value));
@@ -105,7 +105,13 @@ namespace DotNetCore.CAP.Dashboard
             //    "/jobs/scheduled/delete",
             //    (client, jobId) => client.ChangeState(jobId, CreateDeletedState(), ScheduledState.StateName));
 
-            //Routes.AddRazorPage("/jobs/succeeded", x => new SucceededJobs());
+            Routes.AddRazorPage(
+                "/published/(?<StatusName>.+)", 
+                 x => new PublishedPage(x.Groups["StatusName"].Value));
+
+            Routes.AddRazorPage(
+               "/received/(?<StatusName>.+)",
+                x => new ReceivedPage(x.Groups["StatusName"].Value));
             //Routes.AddClientBatchCommand(
             //    "/jobs/succeeded/requeue",
             //    (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState(), SucceededState.StateName));

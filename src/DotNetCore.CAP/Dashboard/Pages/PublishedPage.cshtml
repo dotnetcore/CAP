@@ -1,0 +1,122 @@
+﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
+@using System
+@using DotNetCore.CAP.Models;
+@using DotNetCore.CAP.Dashboard
+@using DotNetCore.CAP.Dashboard.Pages
+@using DotNetCore.CAP.Dashboard.Monitoring
+@using DotNetCore.CAP.Dashboard.Resources
+@inherits RazorPage
+@{
+    Layout = new LayoutPage(Strings.SucceededMessagesPage_Title);
+
+    int from, perPage;
+
+    int.TryParse(Query("from"), out from);
+    int.TryParse(Query("count"), out perPage);
+    string name = Query("name");
+    string content = Query("content");
+
+    var monitor = Storage.GetMonitoringApi();
+    var pager = new Pager(from, perPage, GetTotal(monitor));
+    var total = 0;
+    var queryDto = new MessageQueryDto
+    {
+        MessageType = MessageType.Publish,
+        Name = name,
+        Content = content,
+        StatusName = StatusName,
+        CurrentPage =  pager.CurrentPage - 1,
+        PageSize = pager.RecordsPerPage
+    };
+    var succeededMessages = monitor.Messages(queryDto);
+}
+
+<div class="row">
+    <div class="col-md-3">
+        @Html.JobsSidebar(MessageType.Publish)
+    </div>
+    <div class="col-md-9">
+        <h1 class="page-header">@Strings.SucceededMessagesPage_Title</h1>
+
+        @if (succeededMessages.Count == 0)
+        {
+            <div class="alert alert-info">
+                @Strings.SucceededJobsPage_NoJobs
+            </div>
+        }
+        else
+        {
+            <div class="js-jobs-list">
+                <div class="btn-toolbar btn-toolbar-top">
+                    <form class="row">
+                        <span class="col-md-3">
+                            <input type="text" class="form-control" name="name" value="@Query("name")" placeholder="消息名称" />
+                        </span>
+                        <div class="col-md-5">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="content" value="@Query("content")" placeholder="消息内容" />
+                                <span class="input-group-btn">
+                                    <button class="btn btn-info">查找</button>
+                                </span>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="btn-toolbar btn-toolbar-top">
+                    <button class="js-jobs-list-command btn btn-sm btn-primary"
+                            data-url="@Url.To("/published/requeue")"
+                            data-loading-text="@Strings.Common_Enqueueing"
+                            disabled="disabled">
+                        <span class="glyphicon glyphicon-repeat"></span>
+                        @Strings.Common_RequeueJobs
+                    </button>
+
+                    @Html.PerPageSelector(pager)
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th style="width:60px;">
+                                    <input type="checkbox" class="js-jobs-list-select-all" />
+                                </th>
+                                <th>名称</th>
+                                <th>内容</th>
+                                <th class="min-width">重试次数</th>
+                                <th class="min-width align-right">过期时间</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var message in succeededMessages)
+                            {
+                                <tr class="js-jobs-list-row hover">
+                                    <td>
+                                        <input type="checkbox" class="js-jobs-list-checkbox" name="jobs[]" value="@message.Id" />
+                                    </td>
+                                    <td class="word-break">
+                                        @message.Name
+                                    </td>
+                                    <td>
+                                        @message.Content
+                                    </td>
+                                    <td>
+                                        @message.Retries
+                                    </td>
+                                    <td class="align-right">
+                                        @if (message.ExpiresAt.HasValue)
+                                        {
+                                            @Html.RelativeTime(message.ExpiresAt.Value)
+                                        }
+                                    </td>
+
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+                @Html.Paginator(pager)
+            </div>
+        }
+    </div>
+</div>
