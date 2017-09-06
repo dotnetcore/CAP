@@ -9,10 +9,10 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly IConnection _connection;
 
 
-        public RabbitMQConsumerClientFactory(RabbitMQOptions rabbitMQOptions, IConnection connection)
+        public RabbitMQConsumerClientFactory(RabbitMQOptions rabbitMQOptions, ConnectionPool pool)
         {
             _rabbitMQOptions = rabbitMQOptions;
-            _connection = connection;
+            _connection = pool.Rent();
         }
 
         public IConsumerClient Create(string groupId)

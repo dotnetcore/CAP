@@ -10,19 +10,19 @@ namespace DotNetCore.CAP.RabbitMQ
     internal sealed class PublishQueueExecutor : BasePublishQueueExecutor
     {
         private readonly ILogger _logger;
-        private readonly IConnection _connection;
+        private readonly ConnectionPool _connectionPool;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
         public PublishQueueExecutor(
             CapOptions options,
             IStateChanger stateChanger,
-            IConnection connection,
+            ConnectionPool connectionPool,
             RabbitMQOptions rabbitMQOptions,
             ILogger<PublishQueueExecutor> logger)
             : base(options, stateChanger, logger)
         {
             _logger = logger;
-            _connection = connection;
+            _connectionPool = connectionPool;
             _rabbitMQOptions = rabbitMQOptions;
         }
 
@@ -30,7 +30,8 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             try
             {
-                using (var channel = _connection.CreateModel())
+                var connection = _connectionPool.Rent();
+                using (var channel = connection.CreateModel())
                 {
                     var body = Encoding.UTF8.GetBytes(content);
 
