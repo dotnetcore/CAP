@@ -84,7 +84,6 @@ WriteLiteral("\r\n");
 
     var monitor = Storage.GetMonitoringApi();
     var pager = new Pager(from, perPage, GetTotal(monitor));
-    var total = 0;
     var queryDto = new MessageQueryDto
     {
         MessageType = MessageType.Publish,
@@ -104,7 +103,7 @@ WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-3\">\r\n       
 
 
             
-            #line 36 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 35 "..\..\Dashboard\Pages\PublishedPage.cshtml"
    Write(Html.JobsSidebar(MessageType.Publish));
 
             
@@ -114,7 +113,7 @@ WriteLiteral("\r\n    </div>\r\n    <div class=\"col-md-9\">\r\n        <h1 clas
 
 
             
-            #line 39 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 38 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                            Write(Strings.SucceededMessagesPage_Title);
 
             
@@ -124,7 +123,7 @@ WriteLiteral("</h1>\r\n\r\n");
 
 
             
-            #line 41 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 40 "..\..\Dashboard\Pages\PublishedPage.cshtml"
          if (succeededMessages.Count == 0)
         {
 
@@ -135,7 +134,7 @@ WriteLiteral("            <div class=\"alert alert-info\">\r\n                ")
 
 
             
-            #line 44 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 43 "..\..\Dashboard\Pages\PublishedPage.cshtml"
            Write(Strings.SucceededJobsPage_NoJobs);
 
             
@@ -145,7 +144,7 @@ WriteLiteral("\r\n            </div>\r\n");
 
 
             
-            #line 46 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 45 "..\..\Dashboard\Pages\PublishedPage.cshtml"
         }
         else
         {
@@ -161,7 +160,7 @@ WriteLiteral(@"            <div class=""js-jobs-list"">
 
 
             
-            #line 53 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 52 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                                                                   Write(Query("name"));
 
             
@@ -174,7 +173,7 @@ WriteLiteral("\" placeholder=\"消息名称\" />\r\n                        </sp
 
 
             
-            #line 57 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 56 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                                                                          Write(Query("content"));
 
             
@@ -194,8 +193,8 @@ WriteLiteral(@""" placeholder=""消息内容"" />
 
 
             
-            #line 67 "..\..\Dashboard\Pages\PublishedPage.cshtml"
-                                 Write(Url.To("/jobs/succeeded/requeue"));
+            #line 66 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                 Write(Url.To("/published/requeue"));
 
             
             #line default
@@ -204,7 +203,7 @@ WriteLiteral("\"\r\n                            data-loading-text=\"");
 
 
             
-            #line 68 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 67 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                           Write(Strings.Common_Enqueueing);
 
             
@@ -215,7 +214,7 @@ WriteLiteral("\"\r\n                            disabled=\"disabled\">\r\n      
 
 
             
-            #line 71 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 70 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                    Write(Strings.Common_RequeueJobs);
 
             
@@ -225,7 +224,7 @@ WriteLiteral("\r\n                    </button>\r\n\r\n                    ");
 
 
             
-            #line 74 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 73 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                Write(Html.PerPageSelector(pager));
 
             
@@ -252,7 +251,7 @@ WriteLiteral(@"
 
 
             
-            #line 91 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 90 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                              foreach (var message in succeededMessages)
                             {
 
@@ -265,7 +264,7 @@ WriteLiteral("                                <tr class=\"js-jobs-list-row hover
 
 
             
-            #line 95 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 94 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                                                                                              Write(message.Id);
 
             
@@ -276,7 +275,7 @@ WriteLiteral("\" />\r\n                                    </td>\r\n            
 
 
             
-            #line 98 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 97 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                    Write(message.Name);
 
             
@@ -287,7 +286,7 @@ WriteLiteral("\r\n                                    </td>\r\n                 
 
 
             
-            #line 101 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 100 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                    Write(message.Content);
 
             
@@ -298,7 +297,7 @@ WriteLiteral("\r\n                                    </td>\r\n                 
 
 
             
-            #line 104 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 103 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                    Write(message.Retries);
 
             
@@ -309,7 +308,7 @@ WriteLiteral("\r\n                                    </td>\r\n                 
 
 
             
-            #line 107 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 106 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                          if (message.ExpiresAt.HasValue)
                                         {
                                             
@@ -317,14 +316,14 @@ WriteLiteral("\r\n                                    </td>\r\n                 
             #line default
             #line hidden
             
-            #line 109 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 108 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                        Write(Html.RelativeTime(message.ExpiresAt.Value));
 
             
             #line default
             #line hidden
             
-            #line 109 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 108 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                                                                                        
                                         }
 
@@ -336,7 +335,7 @@ WriteLiteral("                                    </td>\r\n\r\n                 
 
 
             
-            #line 114 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 113 "..\..\Dashboard\Pages\PublishedPage.cshtml"
                             }
 
             
@@ -347,7 +346,7 @@ WriteLiteral("                        </tbody>\r\n                    </table>\r
 
 
             
-            #line 118 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 117 "..\..\Dashboard\Pages\PublishedPage.cshtml"
            Write(Html.Paginator(pager));
 
             
@@ -357,7 +356,7 @@ WriteLiteral("\r\n            </div>\r\n");
 
 
             
-            #line 120 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 119 "..\..\Dashboard\Pages\PublishedPage.cshtml"
         }
 
             

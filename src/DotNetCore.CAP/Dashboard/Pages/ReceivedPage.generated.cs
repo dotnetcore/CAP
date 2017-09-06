@@ -84,7 +84,6 @@ WriteLiteral("\r\n");
 
     var monitor = Storage.GetMonitoringApi();
     var pager = new Pager(from, perPage, GetTotal(monitor));
-    var total = 0;
     var queryDto = new MessageQueryDto
     {
         MessageType = MessageType.Subscribe,
@@ -104,7 +103,7 @@ WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-3\">\r\n       
 
 
             
-            #line 36 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 35 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
    Write(Html.JobsSidebar(MessageType.Subscribe));
 
             
@@ -114,7 +113,7 @@ WriteLiteral("\r\n    </div>\r\n    <div class=\"col-md-9\">\r\n        <h1 clas
 
 
             
-            #line 39 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 38 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                            Write(Strings.SucceededMessagesPage_Title);
 
             
@@ -124,7 +123,7 @@ WriteLiteral("</h1>\r\n\r\n");
 
 
             
-            #line 41 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 40 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
          if (succeededMessages.Count == 0)
         {
 
@@ -135,7 +134,7 @@ WriteLiteral("            <div class=\"alert alert-info\">\r\n                ")
 
 
             
-            #line 44 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 43 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
            Write(Strings.SucceededJobsPage_NoJobs);
 
             
@@ -145,7 +144,7 @@ WriteLiteral("\r\n            </div>\r\n");
 
 
             
-            #line 46 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 45 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
         }
         else
         {
@@ -161,7 +160,7 @@ WriteLiteral(@"            <div class=""js-jobs-list"">
 
 
             
-            #line 53 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 52 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                                                                   Write(Query("name"));
 
             
@@ -174,7 +173,7 @@ WriteLiteral("\" placeholder=\"消息名称\" />\r\n                        </sp
 
 
             
-            #line 57 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 56 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                                                                          Write(Query("content"));
 
             
@@ -194,7 +193,7 @@ WriteLiteral(@""" placeholder=""消息内容"" />
 
 
             
-            #line 67 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 66 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                  Write(Url.To("/received/requeue"));
 
             
@@ -204,7 +203,7 @@ WriteLiteral("\"\r\n                            data-loading-text=\"");
 
 
             
-            #line 68 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 67 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                           Write(Strings.Common_Enqueueing);
 
             
@@ -215,7 +214,7 @@ WriteLiteral("\"\r\n                            disabled=\"disabled\">\r\n      
 
 
             
-            #line 71 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 70 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                    Write(Strings.Common_RequeueJobs);
 
             
@@ -225,7 +224,7 @@ WriteLiteral("\r\n                    </button>\r\n\r\n                    ");
 
 
             
-            #line 74 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 73 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                Write(Html.PerPageSelector(pager));
 
             
@@ -252,7 +251,7 @@ WriteLiteral(@"
 
 
             
-            #line 91 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 90 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                              foreach (var message in succeededMessages)
                             {
 
@@ -265,7 +264,7 @@ WriteLiteral("                                <tr class=\"js-jobs-list-row hover
 
 
             
-            #line 95 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 94 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                                                                                              Write(message.Id);
 
             
@@ -276,7 +275,7 @@ WriteLiteral("\" />\r\n                                    </td>\r\n            
 
 
             
-            #line 98 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 97 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                    Write(message.Name);
 
             
@@ -287,7 +286,7 @@ WriteLiteral("\r\n                                    </td>\r\n                 
 
 
             
-            #line 101 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 100 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                    Write(message.Content);
 
             
@@ -298,7 +297,7 @@ WriteLiteral("\r\n                                    </td>\r\n                 
 
 
             
-            #line 104 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 103 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                    Write(message.Retries);
 
             
@@ -309,7 +308,7 @@ WriteLiteral("\r\n                                    </td>\r\n                 
 
 
             
-            #line 107 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 106 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                          if (message.ExpiresAt.HasValue)
                                         {
                                             
@@ -317,14 +316,14 @@ WriteLiteral("\r\n                                    </td>\r\n                 
             #line default
             #line hidden
             
-            #line 109 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 108 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                        Write(Html.RelativeTime(message.ExpiresAt.Value));
 
             
             #line default
             #line hidden
             
-            #line 109 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 108 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                                                                                        
                                         }
 
@@ -336,7 +335,7 @@ WriteLiteral("                                    </td>\r\n                     
 
 
             
-            #line 113 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 112 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
                             }
 
             
@@ -347,7 +346,7 @@ WriteLiteral("                        </tbody>\r\n                    </table>\r
 
 
             
-            #line 117 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 116 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
            Write(Html.Paginator(pager));
 
             
@@ -357,7 +356,7 @@ WriteLiteral("\r\n            </div>\r\n");
 
 
             
-            #line 119 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+            #line 118 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
         }
 
             

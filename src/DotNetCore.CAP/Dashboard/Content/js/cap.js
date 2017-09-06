@@ -203,10 +203,10 @@
 
     cap.Page = (function() {
         function Page(config) {
-            this._metrics = new Cap.Metrics();
+            this._metrics = new cap.Metrics();
 
             var self = this;
-            this._poller = new Cap.StatisticsPoller(
+            this._poller = new cap.StatisticsPoller(
                 function () { return self._metrics.getNames(); },
                 config.pollUrl,
                 config.pollInterval);

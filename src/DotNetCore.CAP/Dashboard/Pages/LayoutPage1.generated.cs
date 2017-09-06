@@ -89,9 +89,9 @@ WriteLiteral("\">\r\n<head>\r\n    <title>");
             
             #line default
             #line hidden
-WriteLiteral(" - CAP</title>\r\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\r\n " +
-"   <meta charset=\"utf-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width" +
-", initial-scale=1.0\">\r\n");
+WriteLiteral(" - CAP</title>\r\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\r\n    <m" +
+"eta charset=\"utf-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, ini" +
+"tial-scale=1.0\">\r\n");
 
 
             
@@ -136,8 +136,8 @@ WriteLiteral(@""">
             
             #line default
             #line hidden
-WriteLiteral("\">CAP Dashboard</a>\r\n                    </div>\r\n                    <div cl" +
-"ass=\"collapse navbar-collapse\">\r\n                        ");
+WriteLiteral("\">CAP Dashboard</a>\r\n                    </div>\r\n                    <div class=\"" +
+"collapse navbar-collapse\">\r\n                        ");
 
 
             
@@ -216,7 +216,7 @@ WriteLiteral(@"
 
             
             #line 61 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                                                                           Write($"{version.Major}.{version.Minor}.{version.Build}");
+                                                                                          Write($"{version.Major}.{version.Minor}.{version.Build}");
 
             
             #line default
@@ -263,7 +263,7 @@ WriteLiteral("</li>\r\n                    <li>");
             #line default
             #line hidden
 WriteLiteral("</li>\r\n                </ul>\r\n            </div>\r\n        </div>\r\n        \r\n     " +
-"   <div id=\"hangfireConfig\"\r\n             data-pollinterval=\"");
+"   <div id=\"capConfig\"\r\n             data-pollinterval=\"");
 
 
             

@@ -83,7 +83,7 @@ namespace DotNetCore.CAP.Dashboard
         //----------------------------------------------------
 
         public static readonly DashboardMetric PublishedFailedCountOrNull = new DashboardMetric(
-            "publish_failed:count-or-null",
+            "published_failed:count-or-null",
             "Metrics_FailedJobs",
             page => page.Statistics.PublishedFailed > 0
                 ? new Metric(page.Statistics.PublishedFailed.ToString("N0"))
@@ -109,7 +109,7 @@ namespace DotNetCore.CAP.Dashboard
         //----------------------------------------------------
 
         public static readonly DashboardMetric PublishedProcessingCount = new DashboardMetric(
-            "publish_processing:count",
+            "published_processing:count",
             "Metrics_ProcessingJobs",
             page => new Metric(page.Statistics.PublishedProcessing.ToString("N0"))
             {
@@ -126,7 +126,7 @@ namespace DotNetCore.CAP.Dashboard
 
         //----------------------------------------------------
         public static readonly DashboardMetric PublishedSucceededCount = new DashboardMetric(
-            "publish_succeeded:count",
+            "published_succeeded:count",
             "Metrics_SucceededJobs",
             page => new Metric(page.Statistics.PublishedSucceeded.ToString("N0"))
             {
@@ -145,7 +145,7 @@ namespace DotNetCore.CAP.Dashboard
         //----------------------------------------------------
 
         public static readonly DashboardMetric PublishedFailedCount = new DashboardMetric(
-            "publish_failed:count",
+            "published_failed:count",
             "Metrics_FailedJobs",
             page => new Metric(page.Statistics.PublishedFailed.ToString("N0"))
             {

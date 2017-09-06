@@ -18,7 +18,6 @@
 
     var monitor = Storage.GetMonitoringApi();
     var pager = new Pager(from, perPage, GetTotal(monitor));
-    var total = 0;
     var queryDto = new MessageQueryDto
     {
         MessageType = MessageType.Publish,
