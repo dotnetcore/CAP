@@ -10,6 +10,7 @@
   
   <ItemGroup>
     <None Remove="Dashboard\Content\css\bootstrap.min.css" />
+    <None Remove="Dashboard\Content\css\jsonview.min.css" />
     <None Remove="Dashboard\Content\css\rickshaw.min.css" />
     <None Remove="Dashboard\Content\fonts\glyphicons-halflings-regular.eot" />
     <None Remove="Dashboard\Content\fonts\glyphicons-halflings-regular.svg" />
@@ -20,6 +21,7 @@
     <None Remove="Dashboard\Content\js\d3.layout.min.js" />
     <None Remove="Dashboard\Content\js\d3.min.js" />
     <None Remove="Dashboard\Content\js\jquery-2.1.4.min.js" />
+    <None Remove="Dashboard\Content\js\jsonview.min.js" />
     <None Remove="Dashboard\Content\js\moment-with-locales.min.js" />
     <None Remove="Dashboard\Content\js\moment.min.js" />
     <None Remove="Dashboard\Content\js\rickshaw.min.js" />
@@ -28,6 +30,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Dashboard\Content\css\bootstrap.min.css" />
     <EmbeddedResource Include="Dashboard\Content\css\cap.css" />
+    <EmbeddedResource Include="Dashboard\Content\css\jsonview.min.css" />
     <EmbeddedResource Include="Dashboard\Content\css\rickshaw.min.css" />
     <EmbeddedResource Include="Dashboard\Content\fonts\glyphicons-halflings-regular.eot" />
     <EmbeddedResource Include="Dashboard\Content\fonts\glyphicons-halflings-regular.svg" />
@@ -39,6 +42,7 @@
     <EmbeddedResource Include="Dashboard\Content\js\d3.min.js" />
     <EmbeddedResource Include="Dashboard\Content\js\cap.js" />
     <EmbeddedResource Include="Dashboard\Content\js\jquery-2.1.4.min.js" />
+    <EmbeddedResource Include="Dashboard\Content\js\jsonview.min.js" />
     <EmbeddedResource Include="Dashboard\Content\js\moment-with-locales.min.js" />
     <EmbeddedResource Include="Dashboard\Content\js\moment.min.js" />
     <EmbeddedResource Include="Dashboard\Content\js\rickshaw.min.js" />
