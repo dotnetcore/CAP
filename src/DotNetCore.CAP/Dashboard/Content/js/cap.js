@@ -5,12 +5,12 @@
         locale: document.documentElement.lang
     };
 
-    cap.Metrics = (function() {
+    cap.Metrics = (function () {
         function Metrics() {
             this._metrics = {};
         }
 
-        Metrics.prototype.addElement = function(name, element) {
+        Metrics.prototype.addElement = function (name, element) {
             if (!(name in this._metrics)) {
                 this._metrics[name] = [];
             }
@@ -18,7 +18,7 @@
             this._metrics[name].push(element);
         };
 
-        Metrics.prototype.getElements = function(name) {
+        Metrics.prototype.getElements = function (name) {
             if (!(name in this._metrics)) {
                 return [];
             }
@@ -26,7 +26,7 @@
             return this._metrics[name];
         };
 
-        Metrics.prototype.getNames = function() {
+        Metrics.prototype.getNames = function () {
             var result = [];
             var metrics = this._metrics;
 
@@ -77,11 +77,11 @@
 
         if (xSettings) {
             this._xAxis = new Rickshaw.Graph.Axis.Time($.extend({
-              graph: graph,
-              timeFixture: new Rickshaw.Fixtures.Time.Local()
+                graph: graph,
+                timeFixture: new Rickshaw.Fixtures.Time.Local()
             }, xSettings));
         }
-        
+
         if (ySettings) {
             this._yAxis = new Rickshaw.Graph.Axis.Y($.extend({
                 graph: graph,
@@ -92,7 +92,7 @@
         graph.render();
     }
 
-    cap.RealtimeGraph = (function() {
+    cap.RealtimeGraph = (function () {
         function RealtimeGraph(element, succeeded, failed, succeededStr, failedStr) {
             this._succeeded = succeeded;
             this._failed = failed;
@@ -100,8 +100,16 @@
             this._initGraph(element, {
                 renderer: 'bar',
                 series: new Rickshaw.Series.FixedDuration([
-                        { name: failedStr, color: '#d9534f' },
-                        { name: succeededStr, color: '#5cb85c' }
+                    {
+                        name: failedStr,
+                        //color: '#d9534f'
+                        color: 'red'
+                    },
+                    {
+                        name: succeededStr,
+                        //color: '#5cb85c'
+                        color: '#cb513a'
+                    }
                 ],
                     undefined,
                     { timeInterval: 2000, maxDataPoints: 100 }
@@ -122,7 +130,7 @@
                 this._graph.series.addData({ failed: failed, succeeded: succeeded });
                 this._graph.render();
             }
-            
+
             this._succeeded = newSucceeded;
             this._failed = newFailed;
         };
@@ -130,17 +138,19 @@
         return RealtimeGraph;
     })();
 
-    cap.HistoryGraph = (function() {
+    cap.HistoryGraph = (function () {
         function HistoryGraph(element, succeeded, failed, succeededStr, failedStr) {
             this._initGraph(element, {
                 renderer: 'area',
                 series: [
                     {
                         color: '#d9534f',
+                        //color: 'red',
                         data: failed,
                         name: failedStr
                     }, {
                         color: '#6ACD65',
+                        //color: 'blue',
                         data: succeeded,
                         name: succeededStr
                     }
@@ -153,7 +163,7 @@
         return HistoryGraph;
     })();
 
-    cap.StatisticsPoller = (function() {
+    cap.StatisticsPoller = (function () {
         function StatisticsPoller(metricsCallback, statisticsUrl, pollInterval) {
             this._metricsCallback = metricsCallback;
             this._listeners = [];
@@ -165,9 +175,9 @@
         StatisticsPoller.prototype.start = function () {
             var self = this;
 
-            var intervalFunc = function() {
+            var intervalFunc = function () {
                 try {
-                    $.post(self._statisticsUrl, { metrics: self._metricsCallback() }, function(data) {
+                    $.post(self._statisticsUrl, { metrics: self._metricsCallback() }, function (data) {
                         self._notifyListeners(data);
                     });
                 } catch (e) {
@@ -178,21 +188,21 @@
             this._intervalId = setInterval(intervalFunc, this._pollInterval);
         };
 
-        StatisticsPoller.prototype.stop = function() {
+        StatisticsPoller.prototype.stop = function () {
             if (this._intervalId !== null) {
                 clearInterval(this._intervalId);
                 this._intervalId = null;
             }
         };
 
-        StatisticsPoller.prototype.addListener = function(listener) {
+        StatisticsPoller.prototype.addListener = function (listener) {
             this._listeners.push(listener);
         };
 
-        StatisticsPoller.prototype._notifyListeners = function(statistics) {
+        StatisticsPoller.prototype._notifyListeners = function (statistics) {
             var length = this._listeners.length;
             var i;
-            
+
             for (i = 0; i < length; i++) {
                 this._listeners[i](statistics);
             }
@@ -201,7 +211,7 @@
         return StatisticsPoller;
     })();
 
-    cap.Page = (function() {
+    cap.Page = (function () {
         function Page(config) {
             this._metrics = new cap.Metrics();
 
@@ -219,7 +229,7 @@
             this._poller.start();
         };
 
-        Page.prototype._createRealtimeGraph = function(elementId) {
+        Page.prototype._createRealtimeGraph = function (elementId) {
             var realtimeElement = document.getElementById(elementId);
             if (realtimeElement) {
                 var succeeded = parseInt($(realtimeElement).data('succeeded'));
@@ -233,7 +243,7 @@
                     realtimeGraph.appendHistory(data);
                 });
 
-                $(window).resize(function() {
+                $(window).resize(function () {
                     realtimeGraph.update();
                 });
 
@@ -243,7 +253,7 @@
             return null;
         };
 
-        Page.prototype._createHistoryGraph = function(elementId) {
+        Page.prototype._createHistoryGraph = function (elementId) {
             var historyElement = document.getElementById(elementId);
             if (historyElement) {
                 var createSeries = function (obj) {
@@ -348,11 +358,11 @@
 
                 if (!confirmText || confirm(confirmText)) {
                     $this.prop('disabled');
-                    var loadingDelay = setTimeout(function() {
+                    var loadingDelay = setTimeout(function () {
                         $this.button('loading');
                     }, 100);
 
-                    $.post($this.data('ajax'), function() {
+                    $.post($this.data('ajax'), function () {
                         clearTimeout(loadingDelay);
                         window.location.reload();
                     });
@@ -369,20 +379,20 @@
                     $expander.text('Less details...');
                 }
 
-				$expandable.slideToggle(
-					150, 
-					function() {
-					    if (!$expandable.is(':visible')) {
-					        $expander.text('More details...');
-					    }
-					});
+                $expandable.slideToggle(
+                    150,
+                    function () {
+                        if (!$expandable.is(':visible')) {
+                            $expander.text('More details...');
+                        }
+                    });
                 e.preventDefault();
             });
 
             $('.js-jobs-list').each(function () {
                 var container = this;
 
-                var selectRow = function(row, isSelected) {
+                var selectRow = function (row, isSelected) {
                     var $checkbox = $('.js-jobs-list-checkbox', row);
                     if ($checkbox.length > 0) {
                         $checkbox.prop('checked', isSelected);
@@ -390,7 +400,7 @@
                     }
                 };
 
-                var toggleRowSelection = function(row) {
+                var toggleRowSelection = function (row) {
                     var $checkbox = $('.js-jobs-list-checkbox', row);
                     if ($checkbox.length > 0) {
                         var isSelected = $checkbox.is(':checked');
@@ -402,13 +412,13 @@
                     $('.js-jobs-list-select-all', container)
                         .prop('checked', state === 'all-selected')
                         .prop('indeterminate', state === 'some-selected');
-                    
+
                     $('.js-jobs-list-command', container)
                         .prop('disabled', state === 'none-selected');
                 };
 
-                var updateListState = function() {
-                    var selectedRows = $('.js-jobs-list-checkbox', container).map(function() {
+                var updateListState = function () {
+                    var selectedRows = $('.js-jobs-list-checkbox', container).map(function () {
                         return $(this).prop('checked');
                     }).get();
 
@@ -427,7 +437,7 @@
                     setListState(state);
                 };
 
-                $(this).on('click', '.js-jobs-list-checkbox', function(e) {
+                $(this).on('click', '.js-jobs-list-checkbox', function (e) {
                     selectRow(
                         $(this).closest('.js-jobs-list-row').first(),
                         $(this).is(':checked'));
@@ -444,21 +454,21 @@
                     updateListState();
                 });
 
-                $(this).on('click', '.js-jobs-list-select-all', function() {
+                $(this).on('click', '.js-jobs-list-select-all', function () {
                     var selectRows = $(this).is(':checked');
 
-                    $('.js-jobs-list-row', container).each(function() {
+                    $('.js-jobs-list-row', container).each(function () {
                         selectRow(this, selectRows);
                     });
 
                     updateListState();
                 });
 
-                $(this).on('click', '.js-jobs-list-command', function(e) {
+                $(this).on('click', '.js-jobs-list-command', function (e) {
                     var $this = $(this);
                     var confirmText = $this.data('confirm');
 
-                    var jobs = $("input[name='jobs[]']:checked", container).map(function() {
+                    var jobs = $("input[name='jobs[]']:checked", container).map(function () {
                         return $(this).val();
                     }).get();
 
