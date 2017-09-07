@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
-        private IConnection _connection;
+        private ConnectionPool _connectionPool;
         private IModel _channel;
         private ulong _deliveryTag;
 
@@ -23,11 +23,11 @@ namespace DotNetCore.CAP.RabbitMQ
         public event EventHandler<string> OnError;
 
         public RabbitMQConsumerClient(string queueName,
-             IConnection connection,
+             ConnectionPool connectionPool,
              RabbitMQOptions options)
         {
             _queueName = queueName;
-            _connection = connection;
+            _connectionPool = connectionPool;
             _rabbitMQOptions = options;
             _exchageName = options.TopicExchangeName;
 
@@ -36,7 +36,9 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void InitClient()
         {
-            _channel = _connection.CreateModel();
+            var connection = _connectionPool.Rent();
+
+            _channel = connection.CreateModel();
 
             _channel.ExchangeDeclare(
                 exchange: _exchageName,
@@ -49,6 +51,8 @@ namespace DotNetCore.CAP.RabbitMQ
                 exclusive: false,
                 autoDelete: false,
                 arguments: arguments);
+
+            _connectionPool.Return(connection);
         }
 
         public void Subscribe(IEnumerable<string> topics)
@@ -81,7 +85,6 @@ namespace DotNetCore.CAP.RabbitMQ
         public void Dispose()
         {
             _channel.Dispose();
-            _connection.Dispose();
         }
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
