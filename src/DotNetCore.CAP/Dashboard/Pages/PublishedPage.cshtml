@@ -24,7 +24,7 @@
         Name = name,
         Content = content,
         StatusName = StatusName,
-        CurrentPage =  pager.CurrentPage - 1,
+        CurrentPage = pager.CurrentPage - 1,
         PageSize = pager.RecordsPerPage
     };
     var succeededMessages = monitor.Messages(queryDto);
@@ -80,6 +80,7 @@
                                 <th style="width:60px;">
                                     <input type="checkbox" class="js-jobs-list-select-all" />
                                 </th>
+                                <th>编号</th>
                                 <th>名称</th>
                                 <th>内容</th>
                                 <th class="min-width">重试次数</th>
@@ -94,10 +95,10 @@
                                         <input type="checkbox" class="js-jobs-list-checkbox" name="jobs[]" value="@message.Id" />
                                     </td>
                                     <td class="word-break">
-                                        @message.Name
+                                        <a href="javascript:;" data-id="@message.Id" class="openModal">@message.Id</a>
                                     </td>
                                     <td>
-                                        @message.Content
+                                        @message.Name
                                     </td>
                                     <td>
                                         @message.Retries
@@ -116,6 +117,63 @@
                 </div>
                 @Html.Paginator(pager)
             </div>
+
+            <div>
+                <div class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title">Modal title</h4>
+                            </div>
+                            <div id="jsonContent" style="max-height:500px;overflow-y:auto;" class="modal-body">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-sm btn-primary" id="formatBtn" onclick="">格式化</button>
+                                <button type="button" class="btn btn-sm btn-primary" id="rawBtn" onclick="">原生</button>
+                                <button type="button" class="btn btn-sm btn-primary" id="expandBtn" onclick="">展开</button>
+                                <button type="button" class="btn btn-sm btn-primary" id="collapseBtn" onclick="">收缩</button>
+                            </div>
+                        </div><!-- /.modal-content -->
+                    </div><!-- /.modal-dialog -->
+                </div><!-- /.modal -->
+            </div>
         }
     </div>
 </div>
+
+<script>
+    (function () {
+
+        var json = null;
+
+        $(".openModal").click(function () {
+            var id = $(this).data("id");
+            $.ajax({
+                url: @Url("/published/message/")+id,
+                dataType: "json",
+                success: function (data) {
+                    json = data;
+                    $("#formatBtn").click();
+                    $(".modal").modal("show");
+                }
+            });
+        });
+
+        $("#formatBtn").click(function () {
+            $('#jsonContent').JSONView(json);
+        });
+
+        $("#rawBtn").click(function () {
+            $('#jsonContent').text(JSON.stringify(json));
+        });
+
+        $("#expandBtn").click(function () {
+            $('#jsonContent').JSONView('expand');
+        });
+
+        $("#collapseBtn").click(function () {
+            $('#jsonContent').JSONView('collapse');
+        });
+    })();
+</script>

@@ -8,20 +8,22 @@ namespace DotNetCore.CAP.Dashboard
     {
         private static readonly string[] Javascripts =
         {
-            "jquery-2.1.4.min.js", 
+            "jquery-2.1.4.min.js",
             "bootstrap.min.js",
             "moment.min.js",
             "moment-with-locales.min.js",
-            "d3.min.js", 
-            "d3.layout.min.js", 
-            "rickshaw.min.js", 
+            "d3.min.js",
+            "d3.layout.min.js",
+            "rickshaw.min.js",
+            "jsonview.min.js",
             "cap.js"
         };
 
         private static readonly string[] Stylesheets =
         {
-            "bootstrap.min.css", 
-            "rickshaw.min.css", 
+            "bootstrap.min.css",
+            "rickshaw.min.css",
+            "jsonview.min.css",
             "cap.css"
         };
 
@@ -30,7 +32,7 @@ namespace DotNetCore.CAP.Dashboard
             Routes = new RouteCollection();
             Routes.AddRazorPage("/", x => new HomePage());
             Routes.Add("/stats", new JsonStats());
-            
+
             #region Embedded static content
 
             Routes.Add("/js[0-9]+", new CombinedResourceDispatcher(
@@ -74,6 +76,14 @@ namespace DotNetCore.CAP.Dashboard
 
             #region Razor pages and commands
 
+
+            Routes.AddJsonResult("/publishd/message/(?<Id>.+)", x =>
+            {
+                var id = int.Parse(x.UriMatch.Groups["Id"].Value);
+                var message = x.Storage.GetConnection().GetPublishedMessageAsync(id).GetAwaiter().GetResult();
+                return message;
+            });
+
             //Routes.AddRazorPage("/jobs/enqueued", x => new QueuesPage());
             //Routes.AddRazorPage(
             //    "/jobs/enqueued/fetched/(?<Queue>.+)",
@@ -106,15 +116,16 @@ namespace DotNetCore.CAP.Dashboard
             //    (client, jobId) => client.ChangeState(jobId, CreateDeletedState(), ScheduledState.StateName));
 
             Routes.AddRazorPage(
-                "/published/(?<StatusName>.+)", 
+                "/published/(?<StatusName>.+)",
                  x => new PublishedPage(x.Groups["StatusName"].Value));
+
+            //Routes.AddPublishBatchCommand(
+            //   "/published/succeeded/requeue",
+            //   (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState(), SucceededState.StateName));
 
             Routes.AddRazorPage(
                "/received/(?<StatusName>.+)",
                 x => new ReceivedPage(x.Groups["StatusName"].Value));
-            //Routes.AddClientBatchCommand(
-            //    "/jobs/succeeded/requeue",
-            //    (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState(), SucceededState.StateName));
 
             //Routes.AddRazorPage("/jobs/failed", x => new FailedJobsPage());
 
@@ -175,7 +186,7 @@ namespace DotNetCore.CAP.Dashboard
 
         internal static string GetContentFolderNamespace(string contentFolder)
         {
-            return $"{typeof (DashboardRoutes).Namespace}.Content.{contentFolder}";
+            return $"{typeof(DashboardRoutes).Namespace}.Content.{contentFolder}";
         }
 
         internal static string GetContentResourceName(string contentFolder, string resourceName)
@@ -195,7 +206,7 @@ namespace DotNetCore.CAP.Dashboard
 
         private static Assembly GetExecutingAssembly()
         {
-            return typeof (DashboardRoutes).GetTypeInfo().Assembly;
+            return typeof(DashboardRoutes).GetTypeInfo().Assembly;
         }
     }
 }
