@@ -90,7 +90,7 @@ WriteLiteral("\r\n");
         Name = name,
         Content = content,
         StatusName = StatusName,
-        CurrentPage =  pager.CurrentPage - 1,
+        CurrentPage = pager.CurrentPage - 1,
         PageSize = pager.RecordsPerPage
     };
     var succeededMessages = monitor.Messages(queryDto);
@@ -114,7 +114,7 @@ WriteLiteral("\r\n    </div>\r\n    <div class=\"col-md-9\">\r\n        <h1 clas
 
             
             #line 38 "..\..\Dashboard\Pages\PublishedPage.cshtml"
-                           Write(Strings.SucceededMessagesPage_Title);
+                           Write(Strings.PublishedPage_Title);
 
             
             #line default
@@ -130,17 +130,8 @@ WriteLiteral("</h1>\r\n\r\n");
             
             #line default
             #line hidden
-WriteLiteral("            <div class=\"alert alert-info\">\r\n                ");
-
-
-            
-            #line 43 "..\..\Dashboard\Pages\PublishedPage.cshtml"
-           Write(Strings.SucceededJobsPage_NoJobs);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n            </div>\r\n");
+WriteLiteral("            <div class=\"alert alert-info\">\r\n                没有消息\r\n            </d" +
+"iv>\r\n");
 
 
             
@@ -166,10 +157,19 @@ WriteLiteral(@"            <div class=""js-jobs-list"">
             
             #line default
             #line hidden
-WriteLiteral("\" placeholder=\"消息名称\" />\r\n                        </span>\r\n                       " +
-" <div class=\"col-md-5\">\r\n                            <div class=\"input-group\">\r\n" +
-"                                <input type=\"text\" class=\"form-control\" name=\"co" +
-"ntent\" value=\"");
+WriteLiteral("\" placeholder=\"");
+
+
+            
+            #line 52 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                                                                               Write(Strings.MessagesPage_Query_MessageName);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" />\r\n                        </span>\r\n                        <div class=\"col-md" +
+"-5\">\r\n                            <div class=\"input-group\">\r\n                   " +
+"             <input type=\"text\" class=\"form-control\" name=\"content\" value=\"");
 
 
             
@@ -179,9 +179,28 @@ WriteLiteral("\" placeholder=\"消息名称\" />\r\n                        </sp
             
             #line default
             #line hidden
-WriteLiteral(@""" placeholder=""消息内容"" />
-                                <span class=""input-group-btn"">
-                                    <button class=""btn btn-info"">查找</button>
+WriteLiteral("\" placeholder=\"");
+
+
+            
+            #line 56 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                                                                                         Write(Strings.MessagesPage_Query_MessageBody);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\" />\r\n                                <span class=\"input-group-btn\">\r\n           " +
+"                         <button class=\"btn btn-info\">");
+
+
+            
+            #line 58 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                            Write(Strings.MessagesPage_Query_Button);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(@"</button>
                                 </span>
                             </div>
                         </div>
@@ -240,14 +259,48 @@ WriteLiteral(@"
                                 <th style=""width:60px;"">
                                     <input type=""checkbox"" class=""js-jobs-list-select-all"" />
                                 </th>
-                                <th>名称</th>
-                                <th>内容</th>
-                                <th class=""min-width"">重试次数</th>
-                                <th class=""min-width align-right"">过期时间</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-");
+                                <th>");
+
+
+            
+            #line 83 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                               Write(Strings.MessagesPage_Table_Code);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                                <th>");
+
+
+            
+            #line 84 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                               Write(Strings.MessagesPage_Table_Name);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                                <th class=\"min-width\">");
+
+
+            
+            #line 85 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                 Write(Strings.MessagesPage_Table_Retries);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                                <th class=\"align-right\">");
+
+
+            
+            #line 86 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                   Write(Strings.MessagesPage_Table_ExpiresAt);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                            </tr>\r\n                        </thead>\r\n     " +
+"                   <tbody>\r\n");
 
 
             
@@ -260,34 +313,45 @@ WriteLiteral(@"
             #line hidden
 WriteLiteral("                                <tr class=\"js-jobs-list-row hover\">\r\n            " +
 "                        <td>\r\n                                        <input typ" +
-"e=\"checkbox\" class=\"js-jobs-list-checkbox\" name=\"jobs[]\" value=\"");
+"e=\"checkbox\" class=\"js-jobs-list-checkbox\" name=\"messages[]\" value=\"");
 
 
             
             #line 94 "..\..\Dashboard\Pages\PublishedPage.cshtml"
-                                                                                                             Write(message.Id);
+                                                                                                                 Write(message.Id);
 
             
             #line default
             #line hidden
 WriteLiteral("\" />\r\n                                    </td>\r\n                                " +
-"    <td class=\"word-break\">\r\n                                        ");
+"    <td class=\"word-break\">\r\n                                        <a href=\"ja" +
+"vascript:;\" data-url=\'");
 
 
             
             #line 97 "..\..\Dashboard\Pages\PublishedPage.cshtml"
-                                   Write(message.Name);
+                                                                     Write(Url.To("/published/message/")+message.Id);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                                    </td>\r\n                                    " +
-"<td>\r\n                                        ");
+WriteLiteral("\' class=\"openModal\">#");
+
+
+            
+            #line 97 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                                                                                                    Write(message.Id);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</a>\r\n                                    </td>\r\n                                " +
+"    <td>\r\n                                        ");
 
 
             
             #line 100 "..\..\Dashboard\Pages\PublishedPage.cshtml"
-                                   Write(message.Content);
+                                   Write(message.Name);
 
             
             #line default
@@ -368,24 +432,61 @@ WriteLiteral(@"            <div>
                         <div class=""modal-content"">
                             <div class=""modal-header"">
                                 <button type=""button"" class=""close"" data-dismiss=""modal"" aria-label=""Close""><span aria-hidden=""true"">&times;</span></button>
-                                <h4 class=""modal-title"">Modal title</h4>
+                                <h4 class=""modal-title"">Message Content</h4>
                             </div>
-                            <div class=""modal-body"">
-                                <p>One fine body&hellip;</p>
+                            <div id=""jsonContent"" style=""max-height:500px;overflow-y:auto;"" class=""modal-body"">
                             </div>
                             <div class=""modal-footer"">
-                                <button type=""button"" class=""btn btn-default"" data-dismiss=""modal"">Close</button>
-                                <button type=""button"" class=""btn btn-primary"">Save changes</button>
-                            </div>
-                        </div><!-- /.modal-content -->
-                    </div><!-- /.modal-dialog -->
-                </div><!-- /.modal -->
-            </div>
-");
+                                <button type=""button"" class=""btn btn-sm btn-primary"" id=""formatBtn"" onclick="""">");
 
 
             
-            #line 139 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+            #line 131 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                                                                          Write(Strings.MessagesPage_Modal_Format);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</button>\r\n                                <button type=\"button\" class=\"btn btn-s" +
+"m btn-primary\" id=\"rawBtn\" onclick=\"\">");
+
+
+            
+            #line 132 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                                                                       Write(Strings.MessagesPage_Modal_Raw);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</button>\r\n                                <button type=\"button\" class=\"btn btn-s" +
+"m btn-primary\" id=\"expandBtn\" onclick=\"\">");
+
+
+            
+            #line 133 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                                                                          Write(Strings.MessagesPage_Modal_Expand);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</button>\r\n                                <button type=\"button\" class=\"btn btn-s" +
+"m btn-primary\" id=\"collapseBtn\" onclick=\"\">");
+
+
+            
+            #line 134 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+                                                                                                            Write(Strings.MessagesPage_Model_Collaspse);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</button>\r\n                            </div>\r\n                        </div><!--" +
+" /.modal-content -->\r\n                    </div><!-- /.modal-dialog -->\r\n       " +
+"         </div><!-- /.modal -->\r\n            </div>\r\n");
+
+
+            
+            #line 140 "..\..\Dashboard\Pages\PublishedPage.cshtml"
         }
 
             

@@ -35,12 +35,12 @@
         @Html.JobsSidebar(MessageType.Publish)
     </div>
     <div class="col-md-9">
-        <h1 class="page-header">@Strings.SucceededMessagesPage_Title</h1>
+        <h1 class="page-header">@Strings.PublishedPage_Title</h1>
 
         @if (succeededMessages.Count == 0)
         {
             <div class="alert alert-info">
-                @Strings.SucceededJobsPage_NoJobs
+                @Strings.PublishedPage_NoMessages
             </div>
         }
         else
@@ -49,13 +49,13 @@
                 <div class="btn-toolbar btn-toolbar-top">
                     <form class="row">
                         <span class="col-md-3">
-                            <input type="text" class="form-control" name="name" value="@Query("name")" placeholder="消息名称" />
+                            <input type="text" class="form-control" name="name" value="@Query("name")" placeholder="@Strings.MessagesPage_Query_MessageName" />
                         </span>
                         <div class="col-md-5">
                             <div class="input-group">
-                                <input type="text" class="form-control" name="content" value="@Query("content")" placeholder="消息内容" />
+                                <input type="text" class="form-control" name="content" value="@Query("content")" placeholder="@Strings.MessagesPage_Query_MessageBody" />
                                 <span class="input-group-btn">
-                                    <button class="btn btn-info">查找</button>
+                                    <button class="btn btn-info">@Strings.MessagesPage_Query_Button</button>
                                 </span>
                             </div>
                         </div>
@@ -80,11 +80,10 @@
                                 <th style="width:60px;">
                                     <input type="checkbox" class="js-jobs-list-select-all" />
                                 </th>
-                                <th>编号</th>
-                                <th>名称</th>
-                                <th>内容</th>
-                                <th class="min-width">重试次数</th>
-                                <th class="min-width align-right">过期时间</th>
+                                <th>@Strings.MessagesPage_Table_Code</th>
+                                <th>@Strings.MessagesPage_Table_Name</th>
+                                <th class="min-width">@Strings.MessagesPage_Table_Retries</th>
+                                <th class="align-right">@Strings.MessagesPage_Table_ExpiresAt</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -92,10 +91,10 @@
                             {
                                 <tr class="js-jobs-list-row hover">
                                     <td>
-                                        <input type="checkbox" class="js-jobs-list-checkbox" name="jobs[]" value="@message.Id" />
+                                        <input type="checkbox" class="js-jobs-list-checkbox" name="messages[]" value="@message.Id" />
                                     </td>
                                     <td class="word-break">
-                                        <a href="javascript:;" data-id="@message.Id" class="openModal">@message.Id</a>
+                                        <a href="javascript:;" data-url='@(Url.To("/published/message/")+message.Id)' class="openModal">#@message.Id</a>
                                     </td>
                                     <td>
                                         @message.Name
@@ -124,15 +123,15 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                <h4 class="modal-title">Modal title</h4>
+                                <h4 class="modal-title">Message Content</h4>
                             </div>
                             <div id="jsonContent" style="max-height:500px;overflow-y:auto;" class="modal-body">
                             </div>
                             <div class="modal-footer">
-                                <button type="button" class="btn btn-sm btn-primary" id="formatBtn" onclick="">格式化</button>
-                                <button type="button" class="btn btn-sm btn-primary" id="rawBtn" onclick="">原生</button>
-                                <button type="button" class="btn btn-sm btn-primary" id="expandBtn" onclick="">展开</button>
-                                <button type="button" class="btn btn-sm btn-primary" id="collapseBtn" onclick="">收缩</button>
+                                <button type="button" class="btn btn-sm btn-primary" id="formatBtn" onclick="">@Strings.MessagesPage_Modal_Format</button>
+                                <button type="button" class="btn btn-sm btn-primary" id="rawBtn" onclick="">@Strings.MessagesPage_Modal_Raw</button>
+                                <button type="button" class="btn btn-sm btn-primary" id="expandBtn" onclick="">@Strings.MessagesPage_Modal_Expand</button>
+                                <button type="button" class="btn btn-sm btn-primary" id="collapseBtn" onclick="">@Strings.MessagesPage_Model_Collaspse</button>
                             </div>
                         </div><!-- /.modal-content -->
                     </div><!-- /.modal-dialog -->
@@ -141,39 +140,3 @@
         }
     </div>
 </div>
-
-<script>
-    (function () {
-
-        var json = null;
-
-        $(".openModal").click(function () {
-            var id = $(this).data("id");
-            $.ajax({
-                url: @Url("/published/message/")+id,
-                dataType: "json",
-                success: function (data) {
-                    json = data;
-                    $("#formatBtn").click();
-                    $(".modal").modal("show");
-                }
-            });
-        });
-
-        $("#formatBtn").click(function () {
-            $('#jsonContent').JSONView(json);
-        });
-
-        $("#rawBtn").click(function () {
-            $('#jsonContent').text(JSON.stringify(json));
-        });
-
-        $("#expandBtn").click(function () {
-            $('#jsonContent').JSONView('expand');
-        });
-
-        $("#collapseBtn").click(function () {
-            $('#jsonContent').JSONView('collapse');
-        });
-    })();
-</script>

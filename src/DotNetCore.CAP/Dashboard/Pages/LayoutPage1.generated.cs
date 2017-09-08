@@ -216,7 +216,7 @@ WriteLiteral(@"
 
             
             #line 61 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                                                                                          Write($"{version.Major}.{version.Minor}.{version.Build}");
+                                                                                     Write($"{version.Major}.{version.Minor}.{version.Build}");
 
             
             #line default
