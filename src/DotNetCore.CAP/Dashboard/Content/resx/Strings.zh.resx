@@ -221,9 +221,6 @@
   <data name="HomePage_Title" xml:space="preserve">
     <value>仪表盘</value>
   </data>
-  <data name="JobDetailsPage_State" xml:space="preserve">
-    <value>状态</value>
-  </data>
   <data name="LayoutPage_Back" xml:space="preserve">
     <value>返回应用</value>
   </data>
@@ -314,25 +311,16 @@
   <data name="ServersPage_Title" xml:space="preserve">
     <value>服务器</value>
   </data>
-  <data name="SucceededMessagesPage_Title" xml:space="preserve">
-    <value>已发送消息</value>
+  <data name="PublishedMessagesPage_Title" xml:space="preserve">
+    <value>发送出的消息</value>
   </data>
-  <data name="JobsSidebarMenu_Awaiting" xml:space="preserve">
-    <value>等待中</value>
-  </data>
-  <data name="JobsSidebarMenu_Deleted" xml:space="preserve">
-    <value>删除</value>
-  </data>
-  <data name="JobsSidebarMenu_Failed" xml:space="preserve">
+  <data name="SidebarMenu_Failed" xml:space="preserve">
     <value>失败</value>
   </data>
-  <data name="JobsSidebarMenu_Processing" xml:space="preserve">
+  <data name="SidebarMenu_Processing" xml:space="preserve">
     <value>执行中</value>
   </data>
-  <data name="JobsSidebarMenu_Scheduled" xml:space="preserve">
-    <value>计划</value>
-  </data>
-  <data name="JobsSidebarMenu_Succeeded" xml:space="preserve">
+  <data name="SidebarMenu_Succeeded" xml:space="preserve">
     <value>完成</value>
   </data>
   <data name="NavigationMenu_Published" xml:space="preserve">
@@ -358,9 +346,6 @@
   </data>
   <data name="Common_NoState" xml:space="preserve">
     <value>No state</value>
-  </data>
-  <data name="JobsSidebarMenu_Enqueued" xml:space="preserve">
-    <value>Enqueued</value>
   </data>
   <data name="Metrics_ActiveConnections" xml:space="preserve">
     <value>Active Connections</value>
@@ -449,10 +434,22 @@
   <data name="MessagesPage_Table_Retries" xml:space="preserve">
     <value>重试次数</value>
   </data>
-  <data name="PublishedPage_NoMessages" xml:space="preserve">
+  <data name="MesssagesPage_NoMessages" xml:space="preserve">
     <value>没有消息</value>
   </data>
   <data name="PublishedPage_Title" xml:space="preserve">
     <value>已发送消息</value>
+  </data>
+  <data name="MessagesPage_Query_MessageGroup" xml:space="preserve">
+    <value>消息分组</value>
+  </data>
+  <data name="MessagesPage_Table_Group" xml:space="preserve">
+    <value>分组</value>
+  </data>
+  <data name="ReceivedMessagesPage_Title" xml:space="preserve">
+    <value>接收的消息</value>
+  </data>
+  <data name="ReceivedPage_Title" xml:space="preserve">
+    <value>已接收消息</value>
   </data>
 </root>

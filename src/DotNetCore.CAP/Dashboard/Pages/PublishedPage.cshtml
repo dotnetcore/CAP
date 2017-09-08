@@ -7,7 +7,7 @@
 @using DotNetCore.CAP.Dashboard.Resources
 @inherits RazorPage
 @{
-    Layout = new LayoutPage(Strings.SucceededMessagesPage_Title);
+    Layout = new LayoutPage(Strings.PublishedMessagesPage_Title);
 
     int from, perPage;
 
@@ -40,7 +40,7 @@
         @if (succeededMessages.Count == 0)
         {
             <div class="alert alert-info">
-                @Strings.PublishedPage_NoMessages
+                @Strings.MessagesPage_NoMessages
             </div>
         }
         else

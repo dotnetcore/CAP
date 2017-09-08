@@ -468,7 +468,7 @@
                     var $this = $(this);
                     var confirmText = $this.data('confirm');
 
-                    var jobs = $("input[name='jobs[]']:checked", container).map(function () {
+                    var jobs = $("input[name='messages[]']:checked", container).map(function () {
                         return $(this).val();
                     }).get();
 
@@ -478,7 +478,7 @@
                             $this.button('loading');
                         }, 100);
 
-                        $.post($this.data('url'), { 'jobs[]': jobs }, function () {
+                        $.post($this.data('url'), { 'messages[]': jobs }, function () {
                             clearTimeout(loadingDelay);
                             window.location.reload();
                         });
@@ -498,3 +498,37 @@
 $(function () {
     Cap.page = new Cap.Page(Cap.config);
 });
+
+(function () {
+
+    var json = null;
+
+    $(".openModal").click(function () {
+        var url = $(this).data("url");
+        $.ajax({
+            url: url,
+            dataType: "json",
+            success: function (data) {
+                json = data;
+                $("#formatBtn").click();
+                $(".modal").modal("show");
+            }
+        });
+    });
+
+    $("#formatBtn").click(function () {
+        $('#jsonContent').JSONView(json);
+    });
+
+    $("#rawBtn").click(function () {
+        $('#jsonContent').text(JSON.stringify(json));
+    });
+
+    $("#expandBtn").click(function () {
+        $('#jsonContent').JSONView('expand');
+    });
+
+    $("#collapseBtn").click(function () {
+        $('#jsonContent').JSONView('collapse');
+    });
+})();

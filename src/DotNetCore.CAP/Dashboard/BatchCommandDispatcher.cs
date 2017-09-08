@@ -6,25 +6,26 @@ namespace DotNetCore.CAP.Dashboard
 {
     internal class BatchCommandDispatcher : IDashboardDispatcher
     {
-        private readonly Action<DashboardContext, string> _command;
+        private readonly Action<DashboardContext, int> _command;
 
-        public BatchCommandDispatcher(Action<DashboardContext, string> command)
+        public BatchCommandDispatcher(Action<DashboardContext, int> command)
         {
             _command = command;
         }
 
         public async Task Dispatch(DashboardContext context)
         {
-            var jobIds = await context.Request.GetFormValuesAsync("jobs[]");
-            if (jobIds.Count == 0)
+            var messageIds = await context.Request.GetFormValuesAsync("messages[]");
+            if (messageIds.Count == 0)
             {
                 context.Response.StatusCode = 422;
                 return;
             }
 
-            foreach (var jobId in jobIds)
+            foreach (var messageId in messageIds)
             {
-                _command(context, jobId);
+                var id = int.Parse(messageId);
+                _command(context, id);
             }
 
             context.Response.StatusCode = (int)HttpStatusCode.NoContent;

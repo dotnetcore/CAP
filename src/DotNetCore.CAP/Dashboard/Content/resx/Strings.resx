@@ -293,25 +293,16 @@
   <data name="ServersPage_Title" xml:space="preserve">
     <value>Servers</value>
   </data>
-  <data name="SucceededMessagesPage_Title" xml:space="preserve">
-    <value>Succeeded Messages</value>
+  <data name="PublishedMessagesPage_Title" xml:space="preserve">
+    <value>Published Messages</value>
   </data>
-  <data name="JobsSidebarMenu_Awaiting" xml:space="preserve">
-    <value>Awaiting</value>
-  </data>
-  <data name="JobsSidebarMenu_Deleted" xml:space="preserve">
-    <value>Deleted</value>
-  </data>
-  <data name="JobsSidebarMenu_Failed" xml:space="preserve">
+  <data name="SidebarMenu_Failed" xml:space="preserve">
     <value>Failed</value>
   </data>
-  <data name="JobsSidebarMenu_Processing" xml:space="preserve">
+  <data name="SidebarMenu_Processing" xml:space="preserve">
     <value>Processing</value>
   </data>
-  <data name="JobsSidebarMenu_Scheduled" xml:space="preserve">
-    <value>Scheduled</value>
-  </data>
-  <data name="JobsSidebarMenu_Succeeded" xml:space="preserve">
+  <data name="SidebarMenu_Succeeded" xml:space="preserve">
     <value>Succeeded</value>
   </data>
   <data name="NavigationMenu_Published" xml:space="preserve">
@@ -337,9 +328,6 @@
   </data>
   <data name="Common_NoState" xml:space="preserve">
     <value>No state</value>
-  </data>
-  <data name="JobsSidebarMenu_Enqueued" xml:space="preserve">
-    <value>Enqueued</value>
   </data>
   <data name="Metrics_ActiveConnections" xml:space="preserve">
     <value>Active Connections</value>
@@ -428,10 +416,22 @@
   <data name="MessagesPage_Table_Retries" xml:space="preserve">
     <value>Retries</value>
   </data>
-  <data name="PublishedPage_NoMessages" xml:space="preserve">
+  <data name="MessagesPage_NoMessages" xml:space="preserve">
     <value>No published messages found.</value>
   </data>
   <data name="PublishedPage_Title" xml:space="preserve">
     <value>Published Jobs</value>
+  </data>
+  <data name="MessagesPage_Query_MessageGroup" xml:space="preserve">
+    <value>Message group</value>
+  </data>
+  <data name="MessagesPage_Table_Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="ReceivedMessagesPage_Title" xml:space="preserve">
+    <value>Received Messages</value>
+  </data>
+  <data name="ReceivedPage_Title" xml:space="preserve">
+    <value>Received Messages</value>
   </data>
 </root>

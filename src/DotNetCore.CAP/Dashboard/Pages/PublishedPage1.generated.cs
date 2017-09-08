@@ -73,7 +73,7 @@ WriteLiteral("\r\n");
             
             #line 9 "..\..\Dashboard\Pages\PublishedPage.cshtml"
   
-    Layout = new LayoutPage(Strings.SucceededMessagesPage_Title);
+    Layout = new LayoutPage(Strings.PublishedMessagesPage_Title);
 
     int from, perPage;
 
@@ -130,8 +130,17 @@ WriteLiteral("</h1>\r\n\r\n");
             
             #line default
             #line hidden
-WriteLiteral("            <div class=\"alert alert-info\">\r\n                没有消息\r\n            </d" +
-"iv>\r\n");
+WriteLiteral("            <div class=\"alert alert-info\">\r\n                ");
+
+
+            
+            #line 43 "..\..\Dashboard\Pages\PublishedPage.cshtml"
+           Write(Strings.MessagesPage_NoMessages);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            </div>\r\n");
 
 
             

@@ -77,13 +77,18 @@ namespace DotNetCore.CAP.Dashboard
             #region Razor pages and commands
 
 
-            Routes.AddJsonResult("/publishd/message/(?<Id>.+)", x =>
+            Routes.AddJsonResult("/published/message/(?<Id>.+)", x =>
             {
                 var id = int.Parse(x.UriMatch.Groups["Id"].Value);
                 var message = x.Storage.GetConnection().GetPublishedMessageAsync(id).GetAwaiter().GetResult();
-                return message;
+                return message.Content;
             });
-
+            Routes.AddJsonResult("/received/message/(?<Id>.+)", x =>
+            {
+                var id = int.Parse(x.UriMatch.Groups["Id"].Value);
+                var message = x.Storage.GetConnection().GetReceivedMessageAsync(id).GetAwaiter().GetResult();
+                return message.Content;
+            });
             //Routes.AddRazorPage("/jobs/enqueued", x => new QueuesPage());
             //Routes.AddRazorPage(
             //    "/jobs/enqueued/fetched/(?<Queue>.+)",
@@ -115,14 +120,16 @@ namespace DotNetCore.CAP.Dashboard
             //    "/jobs/scheduled/delete",
             //    (client, jobId) => client.ChangeState(jobId, CreateDeletedState(), ScheduledState.StateName));
 
+            Routes.AddPublishBatchCommand(
+               "/published/requeue",
+               (client, messageId) => client.Storage.GetConnection().ChangePublishedState(messageId, new ScheduledState()));
+            Routes.AddPublishBatchCommand(
+               "/received/requeue",
+               (client, messageId) => client.Storage.GetConnection().ChangeReceivedState(messageId, new ScheduledState()));
+
             Routes.AddRazorPage(
                 "/published/(?<StatusName>.+)",
                  x => new PublishedPage(x.Groups["StatusName"].Value));
-
-            //Routes.AddPublishBatchCommand(
-            //   "/published/succeeded/requeue",
-            //   (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState(), SucceededState.StateName));
-
             Routes.AddRazorPage(
                "/received/(?<StatusName>.+)",
                 x => new ReceivedPage(x.Groups["StatusName"].Value));

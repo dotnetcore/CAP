@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Processor.States;
 
 namespace DotNetCore.CAP
 {
@@ -64,8 +65,11 @@ namespace DotNetCore.CAP
         /// </summary>
         IStorageTransaction CreateTransaction();
 
-
         //-------------------------------------------
+
+        bool ChangePublishedState(int messageId, IState state);
+        bool ChangeReceivedState(int messageId, IState state);
+
         long GetSetCount(string key);
 
         List<string> GetRangeFromSet(string key, int startingFrom, int endingAt);

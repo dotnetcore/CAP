@@ -432,69 +432,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Awaiting.
-        /// </summary>
-        public static string JobsSidebarMenu_Awaiting {
-            get {
-                return ResourceManager.GetString("JobsSidebarMenu_Awaiting", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Deleted.
-        /// </summary>
-        public static string JobsSidebarMenu_Deleted {
-            get {
-                return ResourceManager.GetString("JobsSidebarMenu_Deleted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enqueued.
-        /// </summary>
-        public static string JobsSidebarMenu_Enqueued {
-            get {
-                return ResourceManager.GetString("JobsSidebarMenu_Enqueued", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Failed.
-        /// </summary>
-        public static string JobsSidebarMenu_Failed {
-            get {
-                return ResourceManager.GetString("JobsSidebarMenu_Failed", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Processing.
-        /// </summary>
-        public static string JobsSidebarMenu_Processing {
-            get {
-                return ResourceManager.GetString("JobsSidebarMenu_Processing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Scheduled.
-        /// </summary>
-        public static string JobsSidebarMenu_Scheduled {
-            get {
-                return ResourceManager.GetString("JobsSidebarMenu_Scheduled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Succeeded.
-        /// </summary>
-        public static string JobsSidebarMenu_Succeeded {
-            get {
-                return ResourceManager.GetString("JobsSidebarMenu_Succeeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Back to site.
         /// </summary>
         public static string LayoutPage_Back {
@@ -558,6 +495,15 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No published messages found..
+        /// </summary>
+        public static string MessagesPage_NoMessages {
+            get {
+                return ResourceManager.GetString("MessagesPage_NoMessages", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Query.
         /// </summary>
         public static string MessagesPage_Query_Button {
@@ -572,6 +518,15 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string MessagesPage_Query_MessageBody {
             get {
                 return ResourceManager.GetString("MessagesPage_Query_MessageBody", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message group.
+        /// </summary>
+        public static string MessagesPage_Query_MessageGroup {
+            get {
+                return ResourceManager.GetString("MessagesPage_Query_MessageGroup", resourceCulture);
             }
         }
         
@@ -599,6 +554,15 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string MessagesPage_Table_ExpiresAt {
             get {
                 return ResourceManager.GetString("MessagesPage_Table_ExpiresAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Group.
+        /// </summary>
+        public static string MessagesPage_Table_Group {
+            get {
+                return ResourceManager.GetString("MessagesPage_Table_Group", resourceCulture);
             }
         }
         
@@ -864,11 +828,11 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No published messages found..
+        ///   Looks up a localized string similar to Published Messages.
         /// </summary>
-        public static string PublishedPage_NoMessages {
+        public static string PublishedMessagesPage_Title {
             get {
-                return ResourceManager.GetString("PublishedPage_NoMessages", resourceCulture);
+                return ResourceManager.GetString("PublishedMessagesPage_Title", resourceCulture);
             }
         }
         
@@ -878,6 +842,24 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string PublishedPage_Title {
             get {
                 return ResourceManager.GetString("PublishedPage_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Received Messages.
+        /// </summary>
+        public static string ReceivedMessagesPage_Title {
+            get {
+                return ResourceManager.GetString("ReceivedMessagesPage_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Received Messages.
+        /// </summary>
+        public static string ReceivedPage_Title {
+            get {
+                return ResourceManager.GetString("ReceivedPage_Title", resourceCulture);
             }
         }
         
@@ -981,11 +963,29 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Succeeded Messages.
+        ///   Looks up a localized string similar to Failed.
         /// </summary>
-        public static string SucceededMessagesPage_Title {
+        public static string SidebarMenu_Failed {
             get {
-                return ResourceManager.GetString("SucceededMessagesPage_Title", resourceCulture);
+                return ResourceManager.GetString("SidebarMenu_Failed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Processing.
+        /// </summary>
+        public static string SidebarMenu_Processing {
+            get {
+                return ResourceManager.GetString("SidebarMenu_Processing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Succeeded.
+        /// </summary>
+        public static string SidebarMenu_Succeeded {
+            get {
+                return ResourceManager.GetString("SidebarMenu_Succeeded", resourceCulture);
             }
         }
     }

@@ -14,19 +14,19 @@ namespace DotNetCore.CAP.Dashboard
 
         static MessagesSidebarMenu()
         {
-            PublishedItems.Add(page => new MenuItem(Strings.MessagesSidebarMenu_Succeeded, page.Url.To("/published/succeeded"))
+            PublishedItems.Add(page => new MenuItem(Strings.SidebarMenu_Succeeded, page.Url.To("/published/succeeded"))
             {
                 Active = page.RequestPath.StartsWith("/published/succeeded"),
                 Metric = DashboardMetrics.PublishedSucceededCount
             });
 
-            PublishedItems.Add(page => new MenuItem(Strings.MessagesSidebarMenu_Processing, page.Url.To("/published/processing"))
+            PublishedItems.Add(page => new MenuItem(Strings.SidebarMenu_Processing, page.Url.To("/published/processing"))
             {
                 Active = page.RequestPath.StartsWith("/published/processing"),
                 Metric = DashboardMetrics.PublishedProcessingCount
             });
 
-            PublishedItems.Add(page => new MenuItem(Strings.MessagesSidebarMenu_Failed, page.Url.To("/published/failed"))
+            PublishedItems.Add(page => new MenuItem(Strings.SidebarMenu_Failed, page.Url.To("/published/failed"))
             {
                 Active = page.RequestPath.StartsWith("/published/failed"),
                 Metric = DashboardMetrics.PublishedFailedCount
@@ -34,19 +34,19 @@ namespace DotNetCore.CAP.Dashboard
  
             //=======================================ReceivedItems=============================
 
-            ReceivedItems.Add(page => new MenuItem(Strings.MessagesSidebarMenu_Succeeded, page.Url.To("/received/succeeded"))
+            ReceivedItems.Add(page => new MenuItem(Strings.SidebarMenu_Succeeded, page.Url.To("/received/succeeded"))
             {
                 Active = page.RequestPath.StartsWith("/received/succeeded"),
                 Metric = DashboardMetrics.ReceivedSucceededCount
             });
 
-            ReceivedItems.Add(page => new MenuItem(Strings.MessagesSidebarMenu_Processing, page.Url.To("/received/processing"))
+            ReceivedItems.Add(page => new MenuItem(Strings.SidebarMenu_Processing, page.Url.To("/received/processing"))
             {
                 Active = page.RequestPath.StartsWith("/received/processing"),
                 Metric = DashboardMetrics.ReceivedProcessingCount
             });
 
-            ReceivedItems.Add(page => new MenuItem(Strings.MessagesSidebarMenu_Failed, page.Url.To("/received/failed"))
+            ReceivedItems.Add(page => new MenuItem(Strings.SidebarMenu_Failed, page.Url.To("/received/failed"))
             {
                 Active = page.RequestPath.StartsWith("/received/failed"),
                 Metric = DashboardMetrics.ReceivedFailedCount
