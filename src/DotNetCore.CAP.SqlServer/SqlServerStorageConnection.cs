@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Processor.States;
 
 namespace DotNetCore.CAP.SqlServer
 {
@@ -65,6 +66,16 @@ OUTPUT DELETED.MessageId,DELETED.[MessageType];";
             }
         }
 
+        public bool ChangePublishedState(int messageId, IState state)
+        {
+            var sql = $"UPDATE [{_options.Schema}].[Published] SET Retries=Retries+1,StatusName = '{state.Name}' WHERE Id={messageId}";
+
+            using (var connection = new SqlConnection(_options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
         // CapReceviedMessage
 
         public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
@@ -105,6 +116,16 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             using (var connection = new SqlConnection(_options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
+            }
+        }
+
+        public bool ChangeReceivedState(int messageId, IState state)
+        {
+            var sql = $"UPDATE [{_options.Schema}].[Received] SET Retries=Retries+1,StatusName = '{state.Name}' WHERE Id={messageId}";
+
+            using (var connection = new SqlConnection(_options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
             }
         }
 
@@ -161,5 +182,6 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         {
             return new StateData();
         }
+
     }
 }

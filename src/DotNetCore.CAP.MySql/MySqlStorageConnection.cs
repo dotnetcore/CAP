@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Processor.States;
 using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
@@ -117,6 +118,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             }
         }
 
+
         public void Dispose()
         {
         }
@@ -165,6 +167,16 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         }
 
         public StateData GetStateData(string jobId)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ChangePublishedState(int messageId, IState state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ChangeReceivedState(int messageId, IState state)
         {
             throw new NotImplementedException();
         }

@@ -94,6 +94,10 @@ _options.Schema);
             {
                 where += " and name=@Name";
             }
+            if (!string.IsNullOrEmpty(queryDto.Name))
+            {
+                where += " and group=@Group";
+            }
             if (!string.IsNullOrEmpty(queryDto.Content))
             {
                 where += " and content like '%@Content%'";
@@ -106,6 +110,7 @@ _options.Schema);
                 return conn.Query<MessageDto>(sqlQuery, new
                 {
                     StatusName = queryDto.StatusName,
+                    Group = queryDto.Group,
                     Name = queryDto.Name,
                     Content = queryDto.Content,
                     Offset = queryDto.CurrentPage * queryDto.PageSize,
