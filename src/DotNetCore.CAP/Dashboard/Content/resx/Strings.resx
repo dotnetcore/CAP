@@ -117,24 +117,6 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="AwaitingJobsPage_ContinuationsWarning_Text" xml:space="preserve">
-    <value>Don't worry, continuations are working as expected. But your current job storage does not support some queries required to show this page. Please try to update your storage or wait until the full command set is implemented.</value>
-  </data>
-  <data name="AwaitingJobsPage_ContinuationsWarning_Title" xml:space="preserve">
-    <value>Continuations are working, but this page can't be displayed</value>
-  </data>
-  <data name="AwaitingJobsPage_NoJobs" xml:space="preserve">
-    <value>No jobs found in awaiting state.</value>
-  </data>
-  <data name="AwaitingJobsPage_Table_Options" xml:space="preserve">
-    <value>Options</value>
-  </data>
-  <data name="AwaitingJobsPage_Table_Parent" xml:space="preserve">
-    <value>Parent</value>
-  </data>
-  <data name="AwaitingJobsPage_Title" xml:space="preserve">
-    <value>Awaiting Jobs</value>
-  </data>
   <data name="Common_Created" xml:space="preserve">
     <value>Created</value>
   </data>
@@ -204,15 +186,6 @@
   <data name="Common_Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
-  <data name="DeletedJobsPage_NoJobs" xml:space="preserve">
-    <value>No deleted jobs found.</value>
-  </data>
-  <data name="DeletedJobsPage_Table_Deleted" xml:space="preserve">
-    <value>Deleted</value>
-  </data>
-  <data name="DeletedJobsPage_Title" xml:space="preserve">
-    <value>Deleted Jobs</value>
-  </data>
   <data name="EnqueuedJobsPage_NoJobs" xml:space="preserve">
     <value>The queue is empty.</value>
   </data>
@@ -248,41 +221,6 @@
   <data name="HomePage_Title" xml:space="preserve">
     <value>Dashboard</value>
   </data>
-  <data name="JobDetailsPage_Created" xml:space="preserve">
-    <value>Created</value>
-  </data>
-  <data name="JobDetailsPage_DeleteConfirm" xml:space="preserve">
-    <value>Do you really want to delete this job?</value>
-  </data>
-  <data name="JobDetailsPage_State" xml:space="preserve">
-    <value>State</value>
-  </data>
-  <data name="JobDetailsPage_JobAbortedNotActive_Warning_Html" xml:space="preserve">
-    <value>&lt;strong&gt;The job was aborted&lt;/strong&gt; – it is processed by server
-                        &lt;code&gt;{0}&lt;/code&gt; which is not in the 
-                        &lt;a href="{1}"&gt;active servers&lt;/a&gt; list for now.
-                        It will be retried automatically after invisibility timeout, but you can
-                        also re-queue or delete it manually.</value>
-  </data>
-  <data name="JobDetailsPage_JobAbortedWithHeartbeat_Warning_Html" xml:space="preserve">
-    <value>&lt;strong&gt;Looks like the job was aborted&lt;/strong&gt; – it is processed by server
-                        &lt;code&gt;{0}&lt;/code&gt;, which reported its heartbeat more than 1 minute ago.
-                        It will be retried automatically after invisibility timeout, but you can
-                        also re-queue or delete it manually.</value>
-  </data>
-  <data name="JobDetailsPage_JobExpired" xml:space="preserve">
-    <value>Background job '{0}' has expired or could not be found on the server.</value>
-  </data>
-  <data name="JobDetailsPage_JobFinished_Warning_Html" xml:space="preserve">
-    <value>&lt;strong&gt;The job is finished&lt;/strong&gt;.
-                    It will be removed automatically &lt;em&gt;&lt;abbr data-moment="{0}"&gt;{1}&lt;/abbr&gt;&lt;/em&gt;.</value>
-  </data>
-  <data name="JobDetailsPage_JobId" xml:space="preserve">
-    <value>Job ID</value>
-  </data>
-  <data name="JobDetailsPage_Requeue" xml:space="preserve">
-    <value>Requeue</value>
-  </data>
   <data name="LayoutPage_Back" xml:space="preserve">
     <value>Back to site</value>
   </data>
@@ -316,51 +254,6 @@
   <data name="ProcessingJobsPage_Title" xml:space="preserve">
     <value>Processing Jobs</value>
   </data>
-  <data name="QueuesPage_NoJobs" xml:space="preserve">
-    <value>No jobs queued.</value>
-  </data>
-  <data name="QueuesPage_NoQueues" xml:space="preserve">
-    <value>No queued jobs found. Try to enqueue a job.</value>
-  </data>
-  <data name="QueuesPage_Table_Length" xml:space="preserve">
-    <value>Length</value>
-  </data>
-  <data name="QueuesPage_Table_NextsJobs" xml:space="preserve">
-    <value>Next jobs</value>
-  </data>
-  <data name="QueuesPage_Table_Queue" xml:space="preserve">
-    <value>Queue</value>
-  </data>
-  <data name="QueuesPage_Title" xml:space="preserve">
-    <value>Queues</value>
-  </data>
-  <data name="RecurringJobsPage_Canceled" xml:space="preserve">
-    <value>Canceled</value>
-  </data>
-  <data name="RecurringJobsPage_NoJobs" xml:space="preserve">
-    <value>No recurring jobs found.</value>
-  </data>
-  <data name="RecurringJobsPage_Table_Cron" xml:space="preserve">
-    <value>Cron</value>
-  </data>
-  <data name="RecurringJobsPage_Table_LastExecution" xml:space="preserve">
-    <value>Last execution</value>
-  </data>
-  <data name="RecurringJobsPage_Table_NextExecution" xml:space="preserve">
-    <value>Next execution</value>
-  </data>
-  <data name="RecurringJobsPage_Table_TimeZone" xml:space="preserve">
-    <value>Time zone</value>
-  </data>
-  <data name="RecurringJobsPage_Title" xml:space="preserve">
-    <value>Recurring jobs</value>
-  </data>
-  <data name="RecurringJobsPage_Triggering" xml:space="preserve">
-    <value>Triggering...</value>
-  </data>
-  <data name="RecurringJobsPage_TriggerNow" xml:space="preserve">
-    <value>Trigger now</value>
-  </data>
   <data name="RetriesPage_NoJobs" xml:space="preserve">
     <value>All is OK – you have no retries.</value>
   </data>
@@ -378,21 +271,6 @@
             Please go to the &lt;a href="{0}"&gt;Scheduled jobs&lt;/a&gt; page to see all the
             scheduled jobs including retries.
         &lt;/p&gt;</value>
-  </data>
-  <data name="ScheduledJobsPage_EnqueueNow" xml:space="preserve">
-    <value>Enqueue now</value>
-  </data>
-  <data name="ScheduledJobsPage_NoJobs" xml:space="preserve">
-    <value>There are no scheduled jobs.</value>
-  </data>
-  <data name="ScheduledJobsPage_Table_Enqueue" xml:space="preserve">
-    <value>Enqueue</value>
-  </data>
-  <data name="ScheduledJobsPage_Table_Scheduled" xml:space="preserve">
-    <value>Scheduled</value>
-  </data>
-  <data name="ScheduledJobsPage_Title" xml:space="preserve">
-    <value>Scheduled Jobs</value>
   </data>
   <data name="ServersPage_NoServers" xml:space="preserve">
     <value>There are no active servers. Background tasks will not be processed.</value>
@@ -414,15 +292,6 @@
   </data>
   <data name="ServersPage_Title" xml:space="preserve">
     <value>Servers</value>
-  </data>
-  <data name="SucceededJobsPage_NoJobs" xml:space="preserve">
-    <value>No succeeded jobs found.</value>
-  </data>
-  <data name="SucceededJobsPage_Table_Succeeded" xml:space="preserve">
-    <value>Succeeded</value>
-  </data>
-  <data name="SucceededJobsPage_Table_TotalDuration" xml:space="preserve">
-    <value>Total Duration</value>
   </data>
   <data name="SucceededMessagesPage_Title" xml:space="preserve">
     <value>Succeeded Messages</value>
@@ -525,5 +394,44 @@
   </data>
   <data name="HomePage_GraphHover_Succeeded" xml:space="preserve">
     <value>Succeeded</value>
+  </data>
+  <data name="MessagesPage_Modal_Expand" xml:space="preserve">
+    <value>Expand</value>
+  </data>
+  <data name="MessagesPage_Modal_Format" xml:space="preserve">
+    <value>Format</value>
+  </data>
+  <data name="MessagesPage_Modal_Raw" xml:space="preserve">
+    <value>Raw</value>
+  </data>
+  <data name="MessagesPage_Model_Collaspse" xml:space="preserve">
+    <value>Collaspse</value>
+  </data>
+  <data name="MessagesPage_Query_Button" xml:space="preserve">
+    <value>Query</value>
+  </data>
+  <data name="MessagesPage_Query_MessageBody" xml:space="preserve">
+    <value>Message body</value>
+  </data>
+  <data name="MessagesPage_Query_MessageName" xml:space="preserve">
+    <value>Message name</value>
+  </data>
+  <data name="MessagesPage_Table_Code" xml:space="preserve">
+    <value>Code</value>
+  </data>
+  <data name="MessagesPage_Table_ExpiresAt" xml:space="preserve">
+    <value>Expries At</value>
+  </data>
+  <data name="MessagesPage_Table_Name" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="MessagesPage_Table_Retries" xml:space="preserve">
+    <value>Retries</value>
+  </data>
+  <data name="PublishedPage_NoMessages" xml:space="preserve">
+    <value>No published messages found.</value>
+  </data>
+  <data name="PublishedPage_Title" xml:space="preserve">
+    <value>Published Jobs</value>
   </data>
 </root>

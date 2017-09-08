@@ -8,10 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-using System.Reflection;
-
-namespace DotNetCore.CAP.Dashboard.Resources
-{
+namespace DotNetCore.CAP.Dashboard.Resources {
     using System;
     
     
@@ -22,7 +19,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     public class Strings {
@@ -42,7 +39,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
         public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
-                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetCore.CAP.Dashboard.Content.resx.Strings", typeof(Strings).GetTypeInfo().Assembly);
+                    global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("DotNetCore.CAP.Dashboard.Content.resx.Strings", typeof(Strings).Assembly);
                     resourceMan = temp;
                 }
                 return resourceMan;
@@ -60,60 +57,6 @@ namespace DotNetCore.CAP.Dashboard.Resources
             }
             set {
                 resourceCulture = value;
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Don&apos;t worry, continuations are working as expected. But your current job storage does not support some queries required to show this page. Please try to update your storage or wait until the full command set is implemented..
-        /// </summary>
-        public static string AwaitingJobsPage_ContinuationsWarning_Text {
-            get {
-                return ResourceManager.GetString("AwaitingJobsPage_ContinuationsWarning_Text", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Continuations are working, but this page can&apos;t be displayed.
-        /// </summary>
-        public static string AwaitingJobsPage_ContinuationsWarning_Title {
-            get {
-                return ResourceManager.GetString("AwaitingJobsPage_ContinuationsWarning_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No jobs found in awaiting state..
-        /// </summary>
-        public static string AwaitingJobsPage_NoJobs {
-            get {
-                return ResourceManager.GetString("AwaitingJobsPage_NoJobs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Options.
-        /// </summary>
-        public static string AwaitingJobsPage_Table_Options {
-            get {
-                return ResourceManager.GetString("AwaitingJobsPage_Table_Options", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Parent.
-        /// </summary>
-        public static string AwaitingJobsPage_Table_Parent {
-            get {
-                return ResourceManager.GetString("AwaitingJobsPage_Table_Parent", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Awaiting Jobs.
-        /// </summary>
-        public static string AwaitingJobsPage_Title {
-            get {
-                return ResourceManager.GetString("AwaitingJobsPage_Title", resourceCulture);
             }
         }
         
@@ -370,33 +313,6 @@ namespace DotNetCore.CAP.Dashboard.Resources
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No deleted jobs found..
-        /// </summary>
-        public static string DeletedJobsPage_NoJobs {
-            get {
-                return ResourceManager.GetString("DeletedJobsPage_NoJobs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Deleted.
-        /// </summary>
-        public static string DeletedJobsPage_Table_Deleted {
-            get {
-                return ResourceManager.GetString("DeletedJobsPage_Table_Deleted", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Deleted Jobs.
-        /// </summary>
-        public static string DeletedJobsPage_Title {
-            get {
-                return ResourceManager.GetString("DeletedJobsPage_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to The queue is empty..
         /// </summary>
         public static string EnqueuedJobsPage_NoJobs {
@@ -516,98 +432,9 @@ namespace DotNetCore.CAP.Dashboard.Resources
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Created.
-        /// </summary>
-        public static string JobDetailsPage_Created {
-            get {
-                return ResourceManager.GetString("JobDetailsPage_Created", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Do you really want to delete this job?.
-        /// </summary>
-        public static string JobDetailsPage_DeleteConfirm {
-            get {
-                return ResourceManager.GetString("JobDetailsPage_DeleteConfirm", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;strong&gt;The job was aborted&lt;/strong&gt; – it is processed by server
-        ///                        &lt;code&gt;{0}&lt;/code&gt; which is not in the 
-        ///                        &lt;a href=&quot;{1}&quot;&gt;active servers&lt;/a&gt; list for now.
-        ///                        It will be retried automatically after invisibility timeout, but you can
-        ///                        also re-queue or delete it manually..
-        /// </summary>
-        public static string JobDetailsPage_JobAbortedNotActive_Warning_Html {
-            get {
-                return ResourceManager.GetString("JobDetailsPage_JobAbortedNotActive_Warning_Html", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;strong&gt;Looks like the job was aborted&lt;/strong&gt; – it is processed by server
-        ///                        &lt;code&gt;{0}&lt;/code&gt;, which reported its heartbeat more than 1 minute ago.
-        ///                        It will be retried automatically after invisibility timeout, but you can
-        ///                        also re-queue or delete it manually..
-        /// </summary>
-        public static string JobDetailsPage_JobAbortedWithHeartbeat_Warning_Html {
-            get {
-                return ResourceManager.GetString("JobDetailsPage_JobAbortedWithHeartbeat_Warning_Html", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Background job &apos;{0}&apos; has expired or could not be found on the server..
-        /// </summary>
-        public static string JobDetailsPage_JobExpired {
-            get {
-                return ResourceManager.GetString("JobDetailsPage_JobExpired", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to &lt;strong&gt;The job is finished&lt;/strong&gt;.
-        ///                    It will be removed automatically &lt;em&gt;&lt;abbr data-moment=&quot;{0}&quot;&gt;{1}&lt;/abbr&gt;&lt;/em&gt;..
-        /// </summary>
-        public static string JobDetailsPage_JobFinished_Warning_Html {
-            get {
-                return ResourceManager.GetString("JobDetailsPage_JobFinished_Warning_Html", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Job ID.
-        /// </summary>
-        public static string JobDetailsPage_JobId {
-            get {
-                return ResourceManager.GetString("JobDetailsPage_JobId", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Requeue.
-        /// </summary>
-        public static string JobDetailsPage_Requeue {
-            get {
-                return ResourceManager.GetString("JobDetailsPage_Requeue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to State.
-        /// </summary>
-        public static string JobDetailsPage_State {
-            get {
-                return ResourceManager.GetString("JobDetailsPage_State", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Awaiting.
         /// </summary>
-        public static string MessagesSidebarMenu_Awaiting {
+        public static string JobsSidebarMenu_Awaiting {
             get {
                 return ResourceManager.GetString("JobsSidebarMenu_Awaiting", resourceCulture);
             }
@@ -616,7 +443,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
         /// <summary>
         ///   Looks up a localized string similar to Deleted.
         /// </summary>
-        public static string MessagesSidebarMenu_Deleted {
+        public static string JobsSidebarMenu_Deleted {
             get {
                 return ResourceManager.GetString("JobsSidebarMenu_Deleted", resourceCulture);
             }
@@ -625,7 +452,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
         /// <summary>
         ///   Looks up a localized string similar to Enqueued.
         /// </summary>
-        public static string MessagesSidebarMenu_Enqueued {
+        public static string JobsSidebarMenu_Enqueued {
             get {
                 return ResourceManager.GetString("JobsSidebarMenu_Enqueued", resourceCulture);
             }
@@ -634,7 +461,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
         /// <summary>
         ///   Looks up a localized string similar to Failed.
         /// </summary>
-        public static string MessagesSidebarMenu_Failed {
+        public static string JobsSidebarMenu_Failed {
             get {
                 return ResourceManager.GetString("JobsSidebarMenu_Failed", resourceCulture);
             }
@@ -643,7 +470,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
         /// <summary>
         ///   Looks up a localized string similar to Processing.
         /// </summary>
-        public static string MessagesSidebarMenu_Processing {
+        public static string JobsSidebarMenu_Processing {
             get {
                 return ResourceManager.GetString("JobsSidebarMenu_Processing", resourceCulture);
             }
@@ -652,7 +479,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
         /// <summary>
         ///   Looks up a localized string similar to Scheduled.
         /// </summary>
-        public static string MessagesSidebarMenu_Scheduled {
+        public static string JobsSidebarMenu_Scheduled {
             get {
                 return ResourceManager.GetString("JobsSidebarMenu_Scheduled", resourceCulture);
             }
@@ -661,7 +488,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
         /// <summary>
         ///   Looks up a localized string similar to Succeeded.
         /// </summary>
-        public static string MessagesSidebarMenu_Succeeded {
+        public static string JobsSidebarMenu_Succeeded {
             get {
                 return ResourceManager.GetString("JobsSidebarMenu_Succeeded", resourceCulture);
             }
@@ -691,6 +518,105 @@ namespace DotNetCore.CAP.Dashboard.Resources
         public static string LayoutPage_Footer_Time {
             get {
                 return ResourceManager.GetString("LayoutPage_Footer_Time", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expand.
+        /// </summary>
+        public static string MessagesPage_Modal_Expand {
+            get {
+                return ResourceManager.GetString("MessagesPage_Modal_Expand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Format.
+        /// </summary>
+        public static string MessagesPage_Modal_Format {
+            get {
+                return ResourceManager.GetString("MessagesPage_Modal_Format", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Raw.
+        /// </summary>
+        public static string MessagesPage_Modal_Raw {
+            get {
+                return ResourceManager.GetString("MessagesPage_Modal_Raw", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Collaspse.
+        /// </summary>
+        public static string MessagesPage_Model_Collaspse {
+            get {
+                return ResourceManager.GetString("MessagesPage_Model_Collaspse", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Query.
+        /// </summary>
+        public static string MessagesPage_Query_Button {
+            get {
+                return ResourceManager.GetString("MessagesPage_Query_Button", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message body.
+        /// </summary>
+        public static string MessagesPage_Query_MessageBody {
+            get {
+                return ResourceManager.GetString("MessagesPage_Query_MessageBody", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message name.
+        /// </summary>
+        public static string MessagesPage_Query_MessageName {
+            get {
+                return ResourceManager.GetString("MessagesPage_Query_MessageName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Code.
+        /// </summary>
+        public static string MessagesPage_Table_Code {
+            get {
+                return ResourceManager.GetString("MessagesPage_Table_Code", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Expries At.
+        /// </summary>
+        public static string MessagesPage_Table_ExpiresAt {
+            get {
+                return ResourceManager.GetString("MessagesPage_Table_ExpiresAt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string MessagesPage_Table_Name {
+            get {
+                return ResourceManager.GetString("MessagesPage_Table_Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Retries.
+        /// </summary>
+        public static string MessagesPage_Table_Retries {
+            get {
+                return ResourceManager.GetString("MessagesPage_Table_Retries", resourceCulture);
             }
         }
         
@@ -821,27 +747,23 @@ namespace DotNetCore.CAP.Dashboard.Resources
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Jobs.
+        ///   Looks up a localized string similar to Published.
         /// </summary>
-        public static string NavigationMenu_Published
-        {
+        public static string NavigationMenu_Published {
             get {
                 return ResourceManager.GetString("NavigationMenu_Published", resourceCulture);
             }
         }
-
-
+        
         /// <summary>
-        ///   Looks up a localized string similar to Jobs.
+        ///   Looks up a localized string similar to Received.
         /// </summary>
-        public static string NavigationMenu_Received
-        {
-            get
-            {
+        public static string NavigationMenu_Received {
+            get {
                 return ResourceManager.GetString("NavigationMenu_Received", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to Recurring Jobs.
         /// </summary>
@@ -942,137 +864,20 @@ namespace DotNetCore.CAP.Dashboard.Resources
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No jobs queued..
+        ///   Looks up a localized string similar to No published messages found..
         /// </summary>
-        public static string QueuesPage_NoJobs {
+        public static string PublishedPage_NoMessages {
             get {
-                return ResourceManager.GetString("QueuesPage_NoJobs", resourceCulture);
+                return ResourceManager.GetString("PublishedPage_NoMessages", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No queued jobs found. Try to enqueue a job..
+        ///   Looks up a localized string similar to Published Jobs.
         /// </summary>
-        public static string QueuesPage_NoQueues {
+        public static string PublishedPage_Title {
             get {
-                return ResourceManager.GetString("QueuesPage_NoQueues", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Length.
-        /// </summary>
-        public static string QueuesPage_Table_Length {
-            get {
-                return ResourceManager.GetString("QueuesPage_Table_Length", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Nexts jobs.
-        /// </summary>
-        public static string QueuesPage_Table_NextsJobs {
-            get {
-                return ResourceManager.GetString("QueuesPage_Table_NextsJobs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Queue.
-        /// </summary>
-        public static string QueuesPage_Table_Queue {
-            get {
-                return ResourceManager.GetString("QueuesPage_Table_Queue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Queues.
-        /// </summary>
-        public static string QueuesPage_Title {
-            get {
-                return ResourceManager.GetString("QueuesPage_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Canceled.
-        /// </summary>
-        public static string RecurringJobsPage_Canceled {
-            get {
-                return ResourceManager.GetString("RecurringJobsPage_Canceled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No recurring jobs found..
-        /// </summary>
-        public static string RecurringJobsPage_NoJobs {
-            get {
-                return ResourceManager.GetString("RecurringJobsPage_NoJobs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Cron.
-        /// </summary>
-        public static string RecurringJobsPage_Table_Cron {
-            get {
-                return ResourceManager.GetString("RecurringJobsPage_Table_Cron", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Last execution.
-        /// </summary>
-        public static string RecurringJobsPage_Table_LastExecution {
-            get {
-                return ResourceManager.GetString("RecurringJobsPage_Table_LastExecution", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Next execution.
-        /// </summary>
-        public static string RecurringJobsPage_Table_NextExecution {
-            get {
-                return ResourceManager.GetString("RecurringJobsPage_Table_NextExecution", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Time zone.
-        /// </summary>
-        public static string RecurringJobsPage_Table_TimeZone {
-            get {
-                return ResourceManager.GetString("RecurringJobsPage_Table_TimeZone", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Recurring jobs.
-        /// </summary>
-        public static string RecurringJobsPage_Title {
-            get {
-                return ResourceManager.GetString("RecurringJobsPage_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Triggering....
-        /// </summary>
-        public static string RecurringJobsPage_Triggering {
-            get {
-                return ResourceManager.GetString("RecurringJobsPage_Triggering", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Trigger now.
-        /// </summary>
-        public static string RecurringJobsPage_TriggerNow {
-            get {
-                return ResourceManager.GetString("RecurringJobsPage_TriggerNow", resourceCulture);
+                return ResourceManager.GetString("PublishedPage_Title", resourceCulture);
             }
         }
         
@@ -1109,51 +914,6 @@ namespace DotNetCore.CAP.Dashboard.Resources
         public static string RetriesPage_Warning_Html {
             get {
                 return ResourceManager.GetString("RetriesPage_Warning_Html", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enqueue now.
-        /// </summary>
-        public static string ScheduledJobsPage_EnqueueNow {
-            get {
-                return ResourceManager.GetString("ScheduledJobsPage_EnqueueNow", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There are no scheduled jobs..
-        /// </summary>
-        public static string ScheduledJobsPage_NoJobs {
-            get {
-                return ResourceManager.GetString("ScheduledJobsPage_NoJobs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enqueue.
-        /// </summary>
-        public static string ScheduledJobsPage_Table_Enqueue {
-            get {
-                return ResourceManager.GetString("ScheduledJobsPage_Table_Enqueue", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Scheduled.
-        /// </summary>
-        public static string ScheduledJobsPage_Table_Scheduled {
-            get {
-                return ResourceManager.GetString("ScheduledJobsPage_Table_Scheduled", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Scheduled Jobs.
-        /// </summary>
-        public static string ScheduledJobsPage_Title {
-            get {
-                return ResourceManager.GetString("ScheduledJobsPage_Title", resourceCulture);
             }
         }
         
@@ -1221,34 +981,7 @@ namespace DotNetCore.CAP.Dashboard.Resources
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No succeeded jobs found..
-        /// </summary>
-        public static string SucceededJobsPage_NoJobs {
-            get {
-                return ResourceManager.GetString("SucceededJobsPage_NoJobs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Succeeded.
-        /// </summary>
-        public static string SucceededJobsPage_Table_Succeeded {
-            get {
-                return ResourceManager.GetString("SucceededJobsPage_Table_Succeeded", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Total Duration.
-        /// </summary>
-        public static string SucceededJobsPage_Table_TotalDuration {
-            get {
-                return ResourceManager.GetString("SucceededJobsPage_Table_TotalDuration", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Succeeded Jobs.
+        ///   Looks up a localized string similar to Succeeded Messages.
         /// </summary>
         public static string SucceededMessagesPage_Title {
             get {
