@@ -8,7 +8,7 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     public class ConnectionPool : IConnectionPool, IDisposable
     {
-        private const int DefaultPoolSize = 32;
+        private const int DefaultPoolSize = 15;
 
         private readonly ConcurrentQueue<IConnection> _pool = new ConcurrentQueue<IConnection>();
 

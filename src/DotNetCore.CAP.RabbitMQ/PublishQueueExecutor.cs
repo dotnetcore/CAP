@@ -28,9 +28,10 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)
         {
+            var connection = _connectionPool.Rent();
+
             try
             {
-                var connection = _connectionPool.Rent();
                 using (var channel = connection.CreateModel())
                 {
                     var body = Encoding.UTF8.GetBytes(content);
@@ -55,6 +56,10 @@ namespace DotNetCore.CAP.RabbitMQ
                         Code = ex.HResult.ToString(),
                         Description = ex.Message
                     }));
+            }
+            finally
+            {
+                _connectionPool.Return(connection);
             }
         }
     }
