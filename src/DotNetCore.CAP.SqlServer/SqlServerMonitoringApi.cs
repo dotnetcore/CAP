@@ -94,7 +94,7 @@ _options.Schema);
             {
                 where += " and name=@Name";
             }
-            if (!string.IsNullOrEmpty(queryDto.Name))
+            if (!string.IsNullOrEmpty(queryDto.Group))
             {
                 where += " and group=@Group";
             }
