@@ -144,15 +144,6 @@
   <data name="Common_Id" xml:space="preserve">
     <value>Id</value>
   </data>
-  <data name="Common_Job" xml:space="preserve">
-    <value>Job</value>
-  </data>
-  <data name="Common_JobExpired" xml:space="preserve">
-    <value>Job expired.</value>
-  </data>
-  <data name="Common_JobStateChanged_Text" xml:space="preserve">
-    <value>Job's state has been changed while fetching data.</value>
-  </data>
   <data name="Common_LessDetails" xml:space="preserve">
     <value>Less details...</value>
   </data>
@@ -192,26 +183,6 @@
   <data name="EnqueuedJobsPage_Title" xml:space="preserve">
     <value>Enqueued jobs</value>
   </data>
-  <data name="FailedJobsPage_FailedJobsNotExpire_Warning_Html" xml:space="preserve">
-    <value>&lt;strong&gt;Failed jobs do not become expired&lt;/strong&gt; to allow you to re-queue them without any
-                time pressure. You should re-queue or delete them manually, or apply &lt;code&gt;AutomaticRetry(OnAttemptsExceeded = AttemptsExceededAction.Delete)&lt;/code&gt;
-                attribute to delete them automatically.</value>
-  </data>
-  <data name="FailedJobsPage_NoJobs" xml:space="preserve">
-    <value>You have no failed jobs at the moment.</value>
-  </data>
-  <data name="FailedJobsPage_Table_Failed" xml:space="preserve">
-    <value>Failed</value>
-  </data>
-  <data name="FailedJobsPage_Title" xml:space="preserve">
-    <value>Failed Jobs</value>
-  </data>
-  <data name="FetchedJobsPage_NoJobs" xml:space="preserve">
-    <value>The queue is empty.</value>
-  </data>
-  <data name="FetchedJobsPage_Title" xml:space="preserve">
-    <value>Fetched jobs</value>
-  </data>
   <data name="HomePage_HistoryGraph" xml:space="preserve">
     <value>History graph</value>
   </data>
@@ -241,36 +212,6 @@
   </data>
   <data name="PerPageSelector_ItemsPerPage" xml:space="preserve">
     <value>Items per page</value>
-  </data>
-  <data name="ProcessingJobsPage_Aborted" xml:space="preserve">
-    <value>Looks like the job was aborted</value>
-  </data>
-  <data name="ProcessingJobsPage_NoJobs" xml:space="preserve">
-    <value>No jobs are being processed right now.</value>
-  </data>
-  <data name="ProcessingJobsPage_Table_Started" xml:space="preserve">
-    <value>Started</value>
-  </data>
-  <data name="ProcessingJobsPage_Title" xml:space="preserve">
-    <value>Processing Jobs</value>
-  </data>
-  <data name="RetriesPage_NoJobs" xml:space="preserve">
-    <value>All is OK – you have no retries.</value>
-  </data>
-  <data name="RetriesPage_Title" xml:space="preserve">
-    <value>Retries</value>
-  </data>
-  <data name="RetriesPage_Warning_Html" xml:space="preserve">
-    <value>&lt;h4&gt;Retries are working, but this page can't be displayed&lt;/h4&gt;
-        &lt;p&gt;
-            Don't worry, retries are working as expected. Your current job storage does not support
-            some queries required to show this page. Please try to update your storage or wait until
-            the full command set is implemented.
-        &lt;/p&gt;
-        &lt;p&gt;
-            Please go to the &lt;a href="{0}"&gt;Scheduled jobs&lt;/a&gt; page to see all the
-            scheduled jobs including retries.
-        &lt;/p&gt;</value>
   </data>
   <data name="ServersPage_NoServers" xml:space="preserve">
     <value>There are no active servers. Background tasks will not be processed.</value>
@@ -332,26 +273,11 @@
   <data name="Metrics_DeletedJobs" xml:space="preserve">
     <value>Deleted Jobs</value>
   </data>
-  <data name="Metrics_FailedJobs" xml:space="preserve">
-    <value>Failed Jobs</value>
-  </data>
-  <data name="Metrics_ProcessingJobs" xml:space="preserve">
-    <value>Processing Jobs</value>
-  </data>
-  <data name="Metrics_RecurringJobs" xml:space="preserve">
-    <value>Recurring Jobs</value>
-  </data>
   <data name="Metrics_Retries" xml:space="preserve">
     <value>Retries</value>
   </data>
-  <data name="Metrics_ScheduledJobs" xml:space="preserve">
-    <value>Scheduled Jobs</value>
-  </data>
   <data name="Metrics_Servers" xml:space="preserve">
     <value>Servers</value>
-  </data>
-  <data name="Metrics_SucceededJobs" xml:space="preserve">
-    <value>Succeeded Jobs</value>
   </data>
   <data name="Metrics_TotalConnections" xml:space="preserve">
     <value>Total Connections</value>
@@ -433,5 +359,14 @@
   </data>
   <data name="SubscribersPage_Title" xml:space="preserve">
     <value>Subscribers</value>
+  </data>
+  <data name="Common_Group" xml:space="preserve">
+    <value>Group</value>
+  </data>
+  <data name="Common_Method" xml:space="preserve">
+    <value>Method</value>
+  </data>
+  <data name="Common_Name" xml:space="preserve">
+    <value>Name</value>
   </data>
 </root>

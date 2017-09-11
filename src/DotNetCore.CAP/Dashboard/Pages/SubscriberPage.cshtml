@@ -13,11 +13,12 @@
 
 <div class="row">
     <div class="col-md-12">
-        <h1 class="page-header">订阅列表</h1>
+        <h1 class="page-header">@Strings.SubscribersPage_Title</h1>
 
         @if (subscribers.Count == 0)
         {
             <div class="alert alert-warning">
+
                 @Strings.ServersPage_NoServers
             </div>
         }
@@ -27,9 +28,9 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th width="20%">分组</th>
+                            <th width="20%">@Strings.Common_Group</th>
                             <th>
-                                <table class="table subscribe-table margin-bottom-zero"><tr><td width="40%">名称</td><td>方法</td></tr></table>
+                                <table class="table subscribe-table margin-bottom-zero"><tr><td width="40%">@Strings.Common_Name</td><td>@Strings.Common_Method</td></tr></table>
                             </th>
                         </tr>
                     </thead>

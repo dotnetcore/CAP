@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using DotNetCore.CAP.Dashboard.Resources;
+using DotNetCore.CAP.Internal;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -63,20 +65,12 @@ namespace DotNetCore.CAP.Dashboard
             page =>
             {
                 long retryCount;
-                using (var connection = page.Storage.GetConnection())
-                {
-                    var storageConnection = connection as IStorageConnection;
-                    if (storageConnection == null)
-                    {
-                        return null;
-                    }
-
-                    retryCount =1111;
-                }
+                var methodCache = page.RequestServices.GetService<MethodMatcherCache>();
+                retryCount = methodCache.GetCandidatesMethodsOfGroupNameGrouped().Sum(x => x.Value.Count);
 
                 return new Metric(retryCount.ToString("N0"))
                 {
-                    Style = retryCount > 0 ? MetricStyle.Warning : MetricStyle.Default
+                    Style = retryCount > 0 ? MetricStyle.Default : MetricStyle.Warning
                 };
             });
 

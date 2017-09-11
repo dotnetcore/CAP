@@ -144,15 +144,6 @@
   <data name="Common_Id" xml:space="preserve">
     <value>编号</value>
   </data>
-  <data name="Common_Job" xml:space="preserve">
-    <value>作业</value>
-  </data>
-  <data name="Common_JobExpired" xml:space="preserve">
-    <value>作业过期.</value>
-  </data>
-  <data name="Common_JobStateChanged_Text" xml:space="preserve">
-    <value>作业状态已经发生变化</value>
-  </data>
   <data name="Common_LessDetails" xml:space="preserve">
     <value>收起...</value>
   </data>
@@ -192,26 +183,6 @@
   <data name="EnqueuedJobsPage_Title" xml:space="preserve">
     <value>队列作业</value>
   </data>
-  <data name="FailedJobsPage_FailedJobsNotExpire_Warning_Html" xml:space="preserve">
-    <value>&lt;strong&gt;Failed jobs do not become expired&lt;/strong&gt; to allow you to re-queue them without any
-                time pressure. You should re-queue or delete them manually, or apply &lt;code&gt;AutomaticRetry(OnAttemptsExceeded = AttemptsExceededAction.Delete)&lt;/code&gt;
-                attribute to delete them automatically.</value>
-  </data>
-  <data name="FailedJobsPage_NoJobs" xml:space="preserve">
-    <value>没有失败的作业</value>
-  </data>
-  <data name="FailedJobsPage_Table_Failed" xml:space="preserve">
-    <value>失败</value>
-  </data>
-  <data name="FailedJobsPage_Title" xml:space="preserve">
-    <value>失败的作业</value>
-  </data>
-  <data name="FetchedJobsPage_NoJobs" xml:space="preserve">
-    <value>没有任何作业</value>
-  </data>
-  <data name="FetchedJobsPage_Title" xml:space="preserve">
-    <value>Fetched jobs</value>
-  </data>
   <data name="HomePage_HistoryGraph" xml:space="preserve">
     <value>历史图表走势</value>
   </data>
@@ -242,18 +213,6 @@
   <data name="PerPageSelector_ItemsPerPage" xml:space="preserve">
     <value>每页条数</value>
   </data>
-  <data name="ProcessingJobsPage_Aborted" xml:space="preserve">
-    <value>作业疑似终止</value>
-  </data>
-  <data name="ProcessingJobsPage_NoJobs" xml:space="preserve">
-    <value>没有立即执行的作业</value>
-  </data>
-  <data name="ProcessingJobsPage_Table_Started" xml:space="preserve">
-    <value>执行</value>
-  </data>
-  <data name="ProcessingJobsPage_Title" xml:space="preserve">
-    <value>执行中作业</value>
-  </data>
   <data name="QueuesPage_NoJobs" xml:space="preserve">
     <value>没有作业</value>
   </data>
@@ -271,24 +230,6 @@
   </data>
   <data name="QueuesPage_Title" xml:space="preserve">
     <value>队列</value>
-  </data>
-  <data name="RetriesPage_NoJobs" xml:space="preserve">
-    <value>没有重试的作业</value>
-  </data>
-  <data name="RetriesPage_Title" xml:space="preserve">
-    <value>重试</value>
-  </data>
-  <data name="RetriesPage_Warning_Html" xml:space="preserve">
-    <value>&lt;h4&gt;Retries are working, but this page can't be displayed&lt;/h4&gt;
-        &lt;p&gt;
-            Don't worry, retries are working as expected. Your current job storage does not support
-            some queries required to show this page. Please try to update your storage or wait until
-            the full command set is implemented.
-        &lt;/p&gt;
-        &lt;p&gt;
-            Please go to the &lt;a href="{0}"&gt;Scheduled jobs&lt;/a&gt; page to see all the
-            scheduled jobs including retries.
-        &lt;/p&gt;</value>
   </data>
   <data name="ServersPage_NoServers" xml:space="preserve">
     <value>没有活动服务器。后台作业将不会被执行。</value>
@@ -350,26 +291,11 @@
   <data name="Metrics_DeletedJobs" xml:space="preserve">
     <value>删除</value>
   </data>
-  <data name="Metrics_FailedJobs" xml:space="preserve">
-    <value>失败</value>
-  </data>
   <data name="Metrics_ProcessingJobs" xml:space="preserve">
     <value>执行中</value>
   </data>
-  <data name="Metrics_RecurringJobs" xml:space="preserve">
-    <value>定时</value>
-  </data>
-  <data name="Metrics_Retries" xml:space="preserve">
-    <value>重试</value>
-  </data>
-  <data name="Metrics_ScheduledJobs" xml:space="preserve">
-    <value>计划</value>
-  </data>
   <data name="Metrics_Servers" xml:space="preserve">
     <value>服务器</value>
-  </data>
-  <data name="Metrics_SucceededJobs" xml:space="preserve">
-    <value>成功的作业</value>
   </data>
   <data name="Metrics_TotalConnections" xml:space="preserve">
     <value>总连接数</value>
@@ -451,5 +377,14 @@
   </data>
   <data name="SubscribersPage_Title" xml:space="preserve">
     <value>订阅的消息</value>
+  </data>
+  <data name="Common_Group" xml:space="preserve">
+    <value>分组</value>
+  </data>
+  <data name="Common_Method" xml:space="preserve">
+    <value>方法</value>
+  </data>
+  <data name="Common_Name" xml:space="preserve">
+    <value>名称</value>
   </data>
 </root>
