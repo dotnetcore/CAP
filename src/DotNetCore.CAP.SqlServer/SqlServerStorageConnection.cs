@@ -163,25 +163,9 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
         // ------------------------------------------
 
-        public long GetSetCount(string key)
-        {
-            return 11;
-        }
-
         public List<string> GetRangeFromSet(string key, int startingFrom, int endingAt)
         {
             return new List<string> { "11", "22", "33" };
         }
-
-        public MessageData GetJobData(string jobId)
-        {
-            return new MessageData();
-        }
-
-        public StateData GetStateData(string jobId)
-        {
-            return new StateData();
-        }
-
     }
 }

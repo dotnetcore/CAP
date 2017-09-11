@@ -13,7 +13,7 @@ namespace DotNetCore.CAP.SqlServer
     {
         private readonly SqlServerOptions _options;
         private readonly ILogger _logger;
-        private readonly IDbConnection _existingConnection;
+        private readonly IDbConnection _existingConnection = null;
 
         public SqlServerStorage(ILogger<SqlServerStorage> logger, SqlServerOptions options)
         {

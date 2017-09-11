@@ -151,22 +151,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection, transaction);
         }
 
-        public long GetSetCount(string key)
-        {
-            throw new NotImplementedException();
-        }
-
         public List<string> GetRangeFromSet(string key, int startingFrom, int endingAt)
-        {
-            throw new NotImplementedException();
-        }
-
-        public MessageData GetJobData(string jobId)
-        {
-            throw new NotImplementedException();
-        }
-
-        public StateData GetStateData(string jobId)
         {
             throw new NotImplementedException();
         }

@@ -70,12 +70,7 @@ namespace DotNetCore.CAP
         bool ChangePublishedState(int messageId, IState state);
         bool ChangeReceivedState(int messageId, IState state);
 
-        long GetSetCount(string key);
-
         List<string> GetRangeFromSet(string key, int startingFrom, int endingAt);
 
-        MessageData GetJobData( string jobId);
-
-        StateData GetStateData(string jobId);
     }
 }

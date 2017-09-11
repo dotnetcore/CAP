@@ -72,9 +72,10 @@ _options.Schema);
                  GetHourlyTimelineStats(connection, "succeeded"));
         }
 
-        public IList<ServerDto> Servers()
+        public IList<SubscriberDto> Subscribers()
         {
-            return new List<ServerDto>();
+           // MethodMatcherCache
+            return new List<SubscriberDto>();
         }
 
         public IDictionary<DateTime, int> SucceededByDatesCount()
