@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.Test
         public void CanFindAllConsumerService()
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
-            var candidates = selector.SelectCandidates(_provider);
+            var candidates = selector.SelectCandidates();
 
             Assert.Equal(2, candidates.Count);
         }
@@ -34,7 +34,7 @@ namespace DotNetCore.CAP.Test
         public void CanFindSpecifiedTopic()
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
-            var candidates = selector.SelectCandidates(_provider);
+            var candidates = selector.SelectCandidates();
             var bestCandidates = selector.SelectBestCandidate("Candidates.Foo", candidates);
 
             Assert.NotNull(bestCandidates);

@@ -11,10 +11,9 @@ namespace DotNetCore.CAP.Abstractions
         /// <summary>
         /// Selects a set of <see cref="ConsumerExecutorDescriptor"/> candidates for the current message associated with
         /// <paramref name="provider"/>.
-        /// </summary>
-        /// <param name="provider"> <see cref="IServiceProvider"/>.</param>
+        /// </summary>       
         /// <returns>A set of <see cref="ConsumerExecutorDescriptor"/> candidates or <c>null</c>.</returns>
-        IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(IServiceProvider provider);
+        IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates();
 
         /// <summary>
         /// Selects the best <see cref="ConsumerExecutorDescriptor"/> candidate from <paramref name="candidates"/> for the
