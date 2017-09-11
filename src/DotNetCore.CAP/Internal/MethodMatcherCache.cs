@@ -22,12 +22,11 @@ namespace DotNetCore.CAP.Internal
         /// Get a dictionary of candidates.In the dictionary,
         /// the Key is the CAPSubscribeAttribute Group, the Value for the current Group of candidates
         /// </summary>
-        /// <param name="provider"><see cref="IServiceProvider"/></param>
-        public ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>> GetCandidatesMethodsOfGroupNameGrouped(IServiceProvider provider)
+        public ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>> GetCandidatesMethodsOfGroupNameGrouped()
         {
             if (Entries.Count != 0) return Entries;
 
-            var executorCollection = _selector.SelectCandidates(provider);
+            var executorCollection = _selector.SelectCandidates();
 
             var groupedCandidates = executorCollection.GroupBy(x => x.Attribute.Group);
 
