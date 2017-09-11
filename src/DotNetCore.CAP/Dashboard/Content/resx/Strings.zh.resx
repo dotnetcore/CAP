@@ -329,11 +329,8 @@
   <data name="NavigationMenu_Received" xml:space="preserve">
     <value>接收的</value>
   </data>
-  <data name="NavigationMenu_RecurringJobs" xml:space="preserve">
-    <value>周期性作业</value>
-  </data>
-  <data name="NavigationMenu_Retries" xml:space="preserve">
-    <value>重试</value>
+  <data name="NavigationMenu_Subscribers" xml:space="preserve">
+    <value>订阅列表</value>
   </data>
   <data name="NavigationMenu_Servers" xml:space="preserve">
     <value>服务器</value>

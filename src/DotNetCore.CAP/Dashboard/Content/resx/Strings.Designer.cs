@@ -729,29 +729,20 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Recurring Jobs.
-        /// </summary>
-        public static string NavigationMenu_RecurringJobs {
-            get {
-                return ResourceManager.GetString("NavigationMenu_RecurringJobs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Retries.
-        /// </summary>
-        public static string NavigationMenu_Retries {
-            get {
-                return ResourceManager.GetString("NavigationMenu_Retries", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Servers.
         /// </summary>
         public static string NavigationMenu_Servers {
             get {
                 return ResourceManager.GetString("NavigationMenu_Servers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subscribers.
+        /// </summary>
+        public static string NavigationMenu_Subscribers {
+            get {
+                return ResourceManager.GetString("NavigationMenu_Subscribers", resourceCulture);
             }
         }
         
