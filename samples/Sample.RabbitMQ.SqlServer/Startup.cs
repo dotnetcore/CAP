@@ -13,7 +13,7 @@ namespace Sample.RabbitMQ.SqlServer
         {
             services.AddDbContext<AppDbContext>();
 
-            services.AddTransient<IOrderService, OrderService>();
+            services.AddScoped<IOrderService, OrderService>();
             services.AddTransient<ICmsService, CmsService>();
 
             services.AddCap(x =>

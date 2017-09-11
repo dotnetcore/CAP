@@ -8,9 +8,10 @@ namespace Sample.RabbitMQ.SqlServer.Services.Impl
 {
     public class OrderService : IOrderService, ICapSubscribe
     {
+        [CapSubscribe("sample.rabbitmq.sqlserver.order.check")]
         public void Check()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("out");
         }
     }
 }

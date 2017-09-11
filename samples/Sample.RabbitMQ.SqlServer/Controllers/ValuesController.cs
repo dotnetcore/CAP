@@ -35,9 +35,16 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
         [Route("~/publish")]
         public IActionResult PublishMessage()
         {
-         
-           _capBus.Publish("sample.rabbitmq.mysql22222", DateTime.Now);
-           // _capBus.Publish("sample.rabbitmq.mysql33333", person);
+
+            _capBus.Publish("sample.rabbitmq.sqlserver.order.check", DateTime.Now);
+
+            //var person = new Person
+            //{
+            //    Name = "杨晓东",
+            //    Age = 11,
+            //    Id = 23
+            //};
+            //_capBus.Publish("sample.rabbitmq.mysql33333", person);
 
             return Ok();
         }
