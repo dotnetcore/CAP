@@ -18,12 +18,16 @@ namespace DotNetCore.CAP.Dashboard
         }
 
         public IStorage Storage { get; }
+
         public DashboardOptions Options { get; }
 
         public Match UriMatch { get; set; }
 
         public DashboardRequest Request { get; protected set; }
+
         public DashboardResponse Response { get; protected set; }
+
+        public IServiceProvider RequestServices { get; protected set; }
     }
 
     public sealed class CapDashboardContext : DashboardContext
@@ -39,6 +43,7 @@ namespace DotNetCore.CAP.Dashboard
             HttpContext = httpContext;
             Request = new CapDashboardRequest(httpContext);
             Response = new CapDashboardResponse(httpContext);
+            RequestServices = httpContext.RequestServices;
         }
 
         public HttpContext HttpContext { get; }

@@ -7,6 +7,6 @@ namespace DotNetCore.CAP.Dashboard
 {
     public interface IDashboardDispatcher
     {
-        Task Dispatch( DashboardContext context);
+        Task Dispatch(DashboardContext context);
     }
 }

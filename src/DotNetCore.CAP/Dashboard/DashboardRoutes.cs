@@ -133,7 +133,7 @@ namespace DotNetCore.CAP.Dashboard
             Routes.AddRazorPage(
                "/received/(?<StatusName>.+)",
                 x => new ReceivedPage(x.Groups["StatusName"].Value));
-
+            Routes.AddRazorPage("/subscribers", x => new SubscriberPage());
             //Routes.AddRazorPage("/jobs/failed", x => new FailedJobsPage());
 
             //Routes.AddClientBatchCommand(

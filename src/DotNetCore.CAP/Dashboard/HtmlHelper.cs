@@ -218,6 +218,73 @@ namespace DotNetCore.CAP.Dashboard
                 $"<span class=\"labe label-defult text-uppercase\" title=\"{serverId}\">{shortenedId}</span>");
         }
 
+        public NonEscapedString MethodEscaped(MethodInfo method)
+        {
+            var outputString = string.Empty;
+
+            var @public = "<span style=\"color:blue\">public </span>";
+
+            var key = Hignlight(method.ReturnType);
+
+            var name = method.Name;
+
+            string paramType = null;
+            string paramName = null;
+            string paramString = string.Empty;
+
+            var @params = method.GetParameters();
+            if (@params.Length == 1)
+            {
+                var firstParam = @params[0];
+                var firstParamType = firstParam.ParameterType;
+                paramType = Hignlight(firstParamType);
+                paramName = firstParam.Name;
+            }
+
+            if (paramType == null)
+            {
+                paramString = "(){ }";
+            }
+            else
+            {
+                paramString = $"({paramType} {paramName}){{ }}";
+            }
+
+
+            outputString = @public + key + name + paramString;
+            return new NonEscapedString(outputString);
+        }
+
+        public string Hignlight(Type type)
+        {
+            if(type.Name == "Void")
+            {
+                return HighligthKey(type.Name.ToLower());
+            }
+            if (Helper.IsComplexType(type))
+            {
+                return HighligthClass(type.Name);
+            }
+            if (type.IsPrimitive || type.Equals(typeof(string)) || type.Equals(typeof(decimal)))
+            {
+                return HighligthKey(type.Name.ToLower());
+            }
+            else
+            {
+                return HighligthClass(type.Name);
+            }
+        }
+
+        private string HighligthClass(string key)
+        {
+            return $"<span style=\"color:#07c1be\">{key} </span>";
+        }
+
+        private string HighligthKey(string key)
+        {
+            return $"<span style=\"color:blue\">{key} </span>";
+        }
+
         //private static readonly StackTraceHtmlFragments StackTraceHtmlFragments = new StackTraceHtmlFragments
         //{
         //    BeforeFrame         = "<span class='st-frame'>"                            , AfterFrame         = "</span>",

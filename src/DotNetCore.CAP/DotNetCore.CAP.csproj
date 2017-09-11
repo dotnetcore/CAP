@@ -123,6 +123,9 @@
     <Compile Update="Dashboard\Pages\HomePage.cs">
       <DependentUpon>HomePage.cshtml</DependentUpon>
     </Compile>
+   <Compile Update="Dashboard\Pages\SubscriberPage.generated.cs">
+      <DependentUpon>SubscriberPage.cshtml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Dashboard\Content\resx\Strings.resx">

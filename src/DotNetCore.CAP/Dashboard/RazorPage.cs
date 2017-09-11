@@ -41,6 +41,8 @@ namespace DotNetCore.CAP.Dashboard
         internal DashboardRequest Request { private get; set; }
         internal DashboardResponse Response { private get; set; }
 
+        internal IServiceProvider RequestServices { get; private set; }
+
         public string RequestPath => Request.Path;
 
         /// <exclude />
@@ -65,6 +67,7 @@ namespace DotNetCore.CAP.Dashboard
             AppPath = parentPage.AppPath;
             StatsPollingInterval = parentPage.StatsPollingInterval;
             Url = parentPage.Url;
+            RequestServices = parentPage.RequestServices;
 
             GenerationTime = parentPage.GenerationTime;
             _statisticsLazy = parentPage._statisticsLazy;
@@ -74,6 +77,7 @@ namespace DotNetCore.CAP.Dashboard
         {
             Request = context.Request;
             Response = context.Response;
+            RequestServices = context.RequestServices;
 
             Storage = context.Storage;
             AppPath = context.Options.AppPath;

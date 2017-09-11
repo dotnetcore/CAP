@@ -1,15 +1,14 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
-@using System
-@using System.Linq
+@using DotNetCore.CAP.Internal
 @using DotNetCore.CAP.Dashboard
 @using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Resources
 @inherits RazorPage
 @{
-    Layout = new LayoutPage(Strings.ServersPage_Title);
+    Layout = new LayoutPage(Strings.SubscribersPage_Title);
 
-    var monitor = Storage.GetMonitoringApi();
-    var subscribers = monitor.Subscribers();
+    var cache = RequestServices.GetService(typeof(MethodMatcherCache)) as MethodMatcherCache;
+    var subscribers = cache.GetCandidatesMethodsOfGroupNameGrouped();
 }
 
 <div class="row">
@@ -28,16 +27,30 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>名称</th>
-                            <th>方法</th>
+                            <th width="20%">分组</th>
+                            <th>
+                                <table class="table subscribe-table margin-bottom-zero"><tr><td width="40%">名称</td><td>方法</td></tr></table>
+                            </th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var subscriber in subscribers)
                         {
                             <tr>
-                                <td>@subscriber.Name</td>
-                                <td>@subscriber.Method</td>
+                                <td style="vertical-align:middle;font-weight:bold;">@subscriber.Key</td>
+                                <td>
+                                    <table class="table subscribe-table table-condensed margin-bottom-zero">
+                                        @foreach (var column in subscriber.Value)
+                                        {
+                                            <tr>
+                                                <td width="40%">@column.Attribute.Name</td>
+                                                <td><span style="color:#00bcd4">@column.ImplTypeInfo.Name</span>： 
+                                                 @Html.MethodEscaped(column.MethodInfo)
+                                                </td>
+                                            </tr>
+                                        }
+                                    </table>
+                                </td>
                             </tr>
                         }
                     </tbody>
