@@ -12,7 +12,7 @@ namespace DotNetCore.CAP.Dashboard
         static DashboardMetrics()
         {
             AddMetric(ServerCount);
-            AddMetric(RetriesCount);
+            AddMetric(SubscriberCount);
 
             AddMetric(PublishedFailedCountOrNull);
             AddMetric(ReceivedFailedCountOrNull);
@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.Dashboard
                     : null
             });
 
-        public static readonly DashboardMetric RetriesCount = new DashboardMetric(
+        public static readonly DashboardMetric SubscriberCount = new DashboardMetric(
             "retries:count",
              "Metrics_Retries",
             page =>
@@ -71,7 +71,7 @@ namespace DotNetCore.CAP.Dashboard
                         return null;
                     }
 
-                    retryCount = storageConnection.GetSetCount("retries");
+                    retryCount =1111;
                 }
 
                 return new Metric(retryCount.ToString("N0"))

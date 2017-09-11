@@ -6,7 +6,7 @@ namespace DotNetCore.CAP.Dashboard
 {
     public interface IMonitoringApi
     {
-        IList<ServerDto> Servers();
+        IList<SubscriberDto> Subscribers();
 
         StatisticsDto GetStatistics(); 
         

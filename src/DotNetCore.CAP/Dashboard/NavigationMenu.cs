@@ -30,10 +30,10 @@ namespace DotNetCore.CAP.Dashboard
                 }
             });
 
-            Items.Add(page => new MenuItem(Strings.NavigationMenu_Retries, page.Url.To("/retries"))
+            Items.Add(page => new MenuItem(Strings.NavigationMenu_Subscribers, page.Url.To("/subscribers"))
             {
-                Active = page.RequestPath.StartsWith("/retries"),
-                Metric = DashboardMetrics.RetriesCount
+                Active = page.RequestPath.StartsWith("/subscribers"),
+                Metric = DashboardMetrics.SubscriberCount
             });
 
             Items.Add(page => new MenuItem(Strings.NavigationMenu_Servers, page.Url.To("/servers"))

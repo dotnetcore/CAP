@@ -1,0 +1,48 @@
+﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
+@using System
+@using System.Linq
+@using DotNetCore.CAP.Dashboard
+@using DotNetCore.CAP.Dashboard.Pages
+@using DotNetCore.CAP.Dashboard.Resources
+@inherits RazorPage
+@{
+    Layout = new LayoutPage(Strings.ServersPage_Title);
+
+    var monitor = Storage.GetMonitoringApi();
+    var subscribers = monitor.Subscribers();
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="page-header">订阅列表</h1>
+
+        @if (subscribers.Count == 0)
+        {
+            <div class="alert alert-warning">
+                @Strings.ServersPage_NoServers
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>方法</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var subscriber in subscribers)
+                        {
+                            <tr>
+                                <td>@subscriber.Name</td>
+                                <td>@subscriber.Method</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
