@@ -71,13 +71,7 @@ _options.Schema);
             return UseConnection(connection =>
                  GetHourlyTimelineStats(connection, "succeeded"));
         }
-
-        public IList<SubscriberDto> Subscribers()
-        {
-           // MethodMatcherCache
-            return new List<SubscriberDto>();
-        }
-
+         
         public IDictionary<DateTime, int> SucceededByDatesCount()
         {
             return new Dictionary<DateTime, int>();
