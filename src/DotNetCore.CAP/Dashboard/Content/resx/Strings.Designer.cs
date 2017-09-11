@@ -979,5 +979,14 @@ namespace DotNetCore.CAP.Dashboard.Resources {
                 return ResourceManager.GetString("SidebarMenu_Succeeded", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Subscribers.
+        /// </summary>
+        public static string SubscribersPage_Title {
+            get {
+                return ResourceManager.GetString("SubscribersPage_Title", resourceCulture);
+            }
+        }
     }
 }

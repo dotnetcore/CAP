@@ -2,8 +2,8 @@
 -------------------------------------------------- */
 
 html, body {
-  height: 100%;
-  /* The html and body elements cannot have any padding or margin. */
+    height: 100%;
+    /* The html and body elements cannot have any padding or margin. */
 }
 
 body {
@@ -13,18 +13,18 @@ body {
 
 /* Wrapper for page content to push down footer */
 #wrap {
-  min-height: 100%;
-  height: auto !important;
-  height: 100%;
-  /* Negative indent footer by its height */
-  margin: 0 auto -60px;
-  /* Pad bottom by footer height */
-  padding: 0 0 60px;
+    min-height: 100%;
+    height: auto !important;
+    height: 100%;
+    /* Negative indent footer by its height */
+    margin: 0 auto -60px;
+    /* Pad bottom by footer height */
+    padding: 0 0 60px;
 }
 
 /* Set the fixed height of the footer here */
 #footer {
-  background-color: #f5f5f5;
+    background-color: #f5f5f5;
 }
 
 
@@ -32,7 +32,7 @@ body {
 -------------------------------------------------- */
 
 .container .credit {
-  margin: 20px 0;
+    margin: 20px 0;
 }
 
 .page-header {
@@ -48,11 +48,11 @@ body {
     color: #fff;
 }
 
-.btn-death:hover {
-    background-color: #666;
-    border-color: #555;
-    color: #fff;
-}
+    .btn-death:hover {
+        background-color: #666;
+        border-color: #555;
+        color: #fff;
+    }
 
 .list-group .list-group-item .glyphicon {
     margin-right: 3px;
@@ -82,8 +82,8 @@ body {
 }
 
 a:hover .label-hover {
-    background-color: #2a6496!important;
-    color: #fff!important;
+    background-color: #2a6496 !important;
+    color: #fff !important;
 }
 
 .expander {
@@ -108,16 +108,16 @@ a:hover .label-hover {
     text-align: right;
 }
 
-.table>tbody>tr.hover:hover>td, .table>tbody>tr.hover:hover>th {
+.table > tbody > tr.hover:hover > td, .table > tbody > tr.hover:hover > th {
     background-color: #f9f9f9;
 }
 
-.table>tbody>tr.highlight>td, .table>tbody>tr.highlight>th {
+.table > tbody > tr.highlight > td, .table > tbody > tr.highlight > th {
     background-color: #fcf8e3;
     border-color: #fbeed5;
 }
 
-.table>tbody>tr.highlight:hover>td, .table>tbody>tr.highlight:hover>th {
+.table > tbody > tr.highlight:hover > td, .table > tbody > tr.highlight:hover > th {
     background-color: #f6f2dd;
     border-color: #f5e8ce;
 }
@@ -138,10 +138,10 @@ a:hover .label-hover {
     color: #777;
 }
 
-#stats a.list-group-item:hover,
-#stats a.list-group-item:focus {
-    color: #333;
-}
+    #stats a.list-group-item:hover,
+    #stats a.list-group-item:focus {
+        color: #333;
+    }
 
 #stats .list-group-item.active,
 #stats .list-group-item.active:hover,
@@ -162,18 +162,18 @@ a:hover .label-hover {
     color: #999;
 }
 
-.obsolete-data pre, .obsolete-data .label {
-    background-color: #f5f5f5;
-}
+    .obsolete-data pre, .obsolete-data .label {
+        background-color: #f5f5f5;
+    }
 
-.obsolete-data .glyphicon-question-sign {
-    font-size: 80%;
-    color: #999;
-}
+    .obsolete-data .glyphicon-question-sign {
+        font-size: 80%;
+        color: #999;
+    }
 
 .stack-trace {
     padding: 10px;
-    border: none;   
+    border: none;
 }
 
 .st-type {
@@ -209,9 +209,9 @@ a:hover .label-hover {
     color: #428bca;
 }
 
-.paginator .btn.active {
-    color: #333;
-}
+    .paginator .btn.active {
+        color: #333;
+    }
 
 /* Job Snippet styles */
 
@@ -225,82 +225,82 @@ a:hover .label-hover {
     background-color: #f5f5f5;
 }
 
-.job-snippet > * {
-    display: table-cell;
-    vertical-align: top;
-}
+    .job-snippet > * {
+        display: table-cell;
+        vertical-align: top;
+    }
 
 .job-snippet-code {
     vertical-align: top;
 }
 
-.job-snippet-code pre {
-    border: none;
-    margin: 0;
-    background: inherit;
-    padding: 0;
-    -ms-border-radius: 0;
-    border-radius: 0;
-    font-size: 14px;
-}
+    .job-snippet-code pre {
+        border: none;
+        margin: 0;
+        background: inherit;
+        padding: 0;
+        -ms-border-radius: 0;
+        border-radius: 0;
+        font-size: 14px;
+    }
 
-.job-snippet-code code {
-    display: block; 
-    color: black;
-}
+    .job-snippet-code code {
+        display: block;
+        color: black;
+    }
 
-.job-snippet-code pre .comment {
-    color: rgb(0, 128, 0);
-}
+    .job-snippet-code pre .comment {
+        color: rgb(0, 128, 0);
+    }
 
-.job-snippet-code pre .keyword {
-    color: rgb(0, 0, 255);
-}
+    .job-snippet-code pre .keyword {
+        color: rgb(0, 0, 255);
+    }
 
-.job-snippet-code pre .string {
-    color: rgb(163, 21, 21);
-}
+    .job-snippet-code pre .string {
+        color: rgb(163, 21, 21);
+    }
 
-.job-snippet-code pre .type {
-    color: rgb(43, 145, 175);
-}
+    .job-snippet-code pre .type {
+        color: rgb(43, 145, 175);
+    }
 
-.job-snippet-code pre .xmldoc {
-    color: rgb(128, 128, 128);
-}
+    .job-snippet-code pre .xmldoc {
+        color: rgb(128, 128, 128);
+    }
 
 .job-snippet-properties {
     max-width: 200px;
     padding-left: 5px;
 }
 
-.job-snippet-properties dl {
-    margin: 0;
-}
+    .job-snippet-properties dl {
+        margin: 0;
+    }
 
-.job-snippet-properties dl dt {
-    color: #999;
-    text-shadow: 0 1px white;
-    font-weight: normal;
-}
+        .job-snippet-properties dl dt {
+            color: #999;
+            text-shadow: 0 1px white;
+            font-weight: normal;
+        }
 
-.job-snippet-properties dl dd {
-    margin-left: 0;
-    margin-bottom: 5px;
-}
+        .job-snippet-properties dl dd {
+            margin-left: 0;
+            margin-bottom: 5px;
+        }
 
-.job-snippet-properties pre {
-    background-color: white;
-    -webkit-box-shadow: none;
-    -ms-box-shadow: none;
-    padding: 2px 4px;
-    border: none;
-    margin: 0;
-}
+    .job-snippet-properties pre {
+        background-color: white;
+        -webkit-box-shadow: none;
+        -ms-box-shadow: none;
+        padding: 2px 4px;
+        border: none;
+        margin: 0;
+    }
 
-.job-snippet-properties code {
-    color: black;
-}
+    .job-snippet-properties code {
+        color: black;
+    }
 
 .state-card {
     position: relative;
@@ -316,9 +316,9 @@ a:hover .label-hover {
     margin-bottom: 0;
 }
 
-.state-card-title .pull-right {
-    margin-top: 3px;
-}
+    .state-card-title .pull-right {
+        margin-top: 3px;
+    }
 
 .state-card-text {
     margin-top: 5px;
@@ -337,27 +337,27 @@ a:hover .label-hover {
     background-color: #f5f5f5;
 }
 
-.state-card-body dl {
-    margin-top: 5px;
-    margin-bottom: 0;
-}
+    .state-card-body dl {
+        margin-top: 5px;
+        margin-bottom: 0;
+    }
 
-.state-card-body pre {
-    white-space: pre-wrap;       /* CSS 3 */
-    word-wrap: break-word;       /* Internet Explorer 5.5+ */
-    background: transparent;
-    padding: 0;
-}
+    .state-card-body pre {
+        white-space: pre-wrap; /* CSS 3 */
+        word-wrap: break-word; /* Internet Explorer 5.5+ */
+        background: transparent;
+        padding: 0;
+    }
 
-.state-card-body .stack-trace {
-    background-color: transparent;
-    padding: 0 20px;
-    margin-bottom: 0px;
-}
+    .state-card-body .stack-trace {
+        background-color: transparent;
+        padding: 0 20px;
+        margin-bottom: 0px;
+    }
 
-.state-card-body .exception-type {
-    margin-top: 0;
-}
+    .state-card-body .exception-type {
+        margin-top: 0;
+    }
 
 /* Job History styles */
 
@@ -366,9 +366,9 @@ a:hover .label-hover {
     opacity: 0.8;
 }
 
-.job-history.job-history-current {
-    opacity: 1.0;
-}
+    .job-history.job-history-current {
+        opacity: 1.0;
+    }
 
 .job-history-heading {
     padding: 5px 10px;
@@ -410,7 +410,7 @@ a:hover .label-hover {
 }
 
 a.job-method {
-    color: inherit;    
+    color: inherit;
 }
 
 .list-group .glyphicon {
@@ -436,19 +436,19 @@ span.metric {
     transition: color .1s ease-out, background .1s ease-out, border .1s ease-out;
 }
 
-span.metric.highlighted {
-    font-weight: bold;
-    color: #fff!important;
-}
+    span.metric.highlighted {
+        font-weight: bold;
+        color: #fff !important;
+    }
 
 span.metric-default {
     color: #777;
     border-color: #777;
 }
 
-span.metric-default.highlighted {
-    background-color: #777;
-}
+    span.metric-default.highlighted {
+        background-color: #777;
+    }
 
 div.metric {
     border: solid 1px transparent;
@@ -459,20 +459,20 @@ div.metric {
     transition: color .1s ease-out, background .1s ease-out, border .1s ease-out;
 }
 
-div.metric .metric-body {
-    padding: 15px 15px 0;
-    font-size: 26px;
-    text-align: center;
-}
+    div.metric .metric-body {
+        padding: 15px 15px 0;
+        font-size: 26px;
+        text-align: center;
+    }
 
-div.metric .metric-description {
-    padding: 0 15px 15px;
-    text-align: center;
-}
+    div.metric .metric-description {
+        padding: 0 15px 15px;
+        text-align: center;
+    }
 
-div.metric.metric-default {
-    border-color: #ddd;
-}
+    div.metric.metric-default {
+        border-color: #ddd;
+    }
 
 div.metric-info,
 span.metric-info {
@@ -480,9 +480,9 @@ span.metric-info {
     border-color: #5bc0de;
 }
 
-span.metric-info.highlighted {
-    background-color: #5bc0de;
-}
+    span.metric-info.highlighted {
+        background-color: #5bc0de;
+    }
 
 div.metric-warning,
 span.metric-warning {
@@ -490,9 +490,9 @@ span.metric-warning {
     border-color: #f0ad4e;
 }
 
-span.metric-warning.highlighted {
-    background-color: #f0ad4e;
-}
+    span.metric-warning.highlighted {
+        background-color: #f0ad4e;
+    }
 
 div.metric-success,
 span.metric-success {
@@ -500,9 +500,9 @@ span.metric-success {
     border-color: #5cb85c;
 }
 
-span.metric-success.highlighted {
-    background-color: #5cb85c;
-}
+    span.metric-success.highlighted {
+        background-color: #5cb85c;
+    }
 
 div.metric-danger,
 span.metric-danger {
@@ -510,9 +510,9 @@ span.metric-danger {
     border-color: #d9534f;
 }
 
-span.metric-danger.highlighted {
-    background-color: #d9534f;
-}
+    span.metric-danger.highlighted {
+        background-color: #d9534f;
+    }
 
 span.metric-null,
 div.metric-null {
@@ -530,4 +530,16 @@ div.metric-null {
     #stats {
         width: 262.5px;
     }
+}
+
+table.margin-bottom-zero {
+    margin-bottom: 0px;
+}
+
+.subscribe-table td {
+    border-top: none !important;
+}
+
+.subscribe-table tr + tr td {
+    border-top: 1px solid #ddd !important;
 }
