@@ -70,7 +70,17 @@ WriteLiteral("\r\n");
             #line default
             #line hidden
 WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <h1 class=\"page-header\"" +
-">订阅列表</h1>\r\n\r\n");
+">");
+
+
+            
+            #line 16 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+                           Write(Strings.SubscribersPage_Title);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</h1>\r\n\r\n");
 
 
             
@@ -81,11 +91,11 @@ WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n      
             
             #line default
             #line hidden
-WriteLiteral("            <div class=\"alert alert-warning\">\r\n                ");
+WriteLiteral("            <div class=\"alert alert-warning\">\r\n\r\n                ");
 
 
             
-            #line 21 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 22 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
            Write(Strings.ServersPage_NoServers);
 
             
@@ -95,7 +105,7 @@ WriteLiteral("\r\n            </div>\r\n");
 
 
             
-            #line 23 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 24 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
         }
         else
         {
@@ -103,22 +113,45 @@ WriteLiteral("\r\n            </div>\r\n");
             
             #line default
             #line hidden
-WriteLiteral(@"            <div class=""table-responsive"">
-                <table class=""table"">
-                    <thead>
-                        <tr>
-                            <th width=""20%"">分组</th>
-                            <th>
-                                <table class=""table subscribe-table margin-bottom-zero""><tr><td width=""40%"">名称</td><td>方法</td></tr></table>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-");
+WriteLiteral("            <div class=\"table-responsive\">\r\n                <table class=\"table\">" +
+"\r\n                    <thead>\r\n                        <tr>\r\n                   " +
+"         <th width=\"20%\">");
 
 
             
-            #line 37 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 31 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+                                       Write(Strings.Common_Group);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                            <th>\r\n                                <table c" +
+"lass=\"table subscribe-table margin-bottom-zero\"><tr><td width=\"40%\">");
+
+
+            
+            #line 33 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+                                                                                                       Write(Strings.Common_Name);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</td><td>");
+
+
+            
+            #line 33 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+                                                                                                                                    Write(Strings.Common_Method);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</td></tr></table>\r\n                            </th>\r\n                        </" +
+"tr>\r\n                    </thead>\r\n                    <tbody>\r\n");
+
+
+            
+            #line 38 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                          foreach (var subscriber in subscribers)
                         {
 
@@ -130,7 +163,7 @@ WriteLiteral("                            <tr>\r\n                              
 
 
             
-            #line 40 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 41 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                                                                Write(subscriber.Key);
 
             
@@ -141,7 +174,7 @@ WriteLiteral("</td>\r\n                                <td>\r\n                 
 
 
             
-            #line 43 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 44 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                          foreach (var column in subscriber.Value)
                                         {
 
@@ -153,7 +186,7 @@ WriteLiteral("                                            <tr>\r\n              
 
 
             
-            #line 46 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 47 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                                            Write(column.Attribute.Name);
 
             
@@ -164,7 +197,7 @@ WriteLiteral("</td>\r\n                                                <td><span
 
 
             
-            #line 47 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 48 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                                                            Write(column.ImplTypeInfo.Name);
 
             
@@ -174,7 +207,7 @@ WriteLiteral("</span>： \r\n                                                 ")
 
 
             
-            #line 48 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 49 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                             Write(Html.MethodEscaped(column.MethodInfo));
 
             
@@ -185,7 +218,7 @@ WriteLiteral("\r\n                                                </td>\r\n     
 
 
             
-            #line 51 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 52 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                         }
 
             
@@ -196,7 +229,7 @@ WriteLiteral("                                    </table>\r\n                  
 
 
             
-            #line 55 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 56 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                         }
 
             
@@ -206,7 +239,7 @@ WriteLiteral("                    </tbody>\r\n                </table>\r\n      
 
 
             
-            #line 59 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 60 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
         }
 
             
