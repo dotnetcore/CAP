@@ -18,41 +18,41 @@
         @if (subscribers.Count == 0)
         {
             <div class="alert alert-warning">
-
                 @Strings.ServersPage_NoServers
             </div>
         }
         else
         {
             <div class="table-responsive">
-                <table class="table">
+                <table class="table subscribe-table">
                     <thead>
                         <tr>
                             <th width="20%">@Strings.Common_Group</th>
-                            <th>
-                                <table class="table subscribe-table margin-bottom-zero"><tr><td width="40%">@Strings.Common_Name</td><td>@Strings.Common_Method</td></tr></table>
+                            <th width="40%">
+                                @Strings.Common_Name
                             </th>
+                            <th>@Strings.Common_Method</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var subscriber in subscribers)
                         {
-                            <tr>
-                                <td style="vertical-align:middle;font-weight:bold;">@subscriber.Key</td>
-                                <td>
-                                    <table class="table subscribe-table table-condensed margin-bottom-zero">
-                                        @foreach (var column in subscriber.Value)
-                                        {
-                                            <tr>
-                                                <td width="40%">@column.Attribute.Name</td>
-                                                <td><span style="color:#00bcd4">@column.ImplTypeInfo.Name</span>： 
-                                                 @Html.MethodEscaped(column.MethodInfo)
-                                                </td>
-                                            </tr>
-                                        }
-                                    </table>
-                                </td>
-                            </tr>
+                            var i = 0;
+                            @foreach (var column in subscriber.Value)
+                            {
+                                <tr>
+                                    @if (i == 0)
+                                    {
+                                        <td rowspan="@subscriber.Value.Count">@subscriber.Key</td>
+                                    }
+                                    <td>@column.Attribute.Name</td>
+                                    <td>
+                                        <span style="color:#00bcd4">@column.ImplTypeInfo.Name</span>：
+                                        @Html.MethodEscaped(column.MethodInfo)
+                                    </td>
+                                </tr>
+                                i++;
+                            }
                         }
                     </tbody>
                 </table>

@@ -532,14 +532,10 @@ div.metric-null {
     }
 }
 
-table.margin-bottom-zero {
-    margin-bottom: 0px;
-}
-
 .subscribe-table td {
-    border-top: none !important;
+    vertical-align:middle !important;
 }
 
-.subscribe-table tr + tr td {
-    border-top: 1px solid #ddd !important;
+.subscribe-table td[rowspan]{
+    font-weight:bold;
 }
