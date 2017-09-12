@@ -48,19 +48,23 @@ namespace DotNetCore.CAP.Internal
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
-
-            var consumerServices = provider.GetServices<ICapSubscribe>();
-            foreach (var service in consumerServices)
+            
+            using (var scoped = provider.CreateScope())
             {
-                var typeInfo = service.GetType().GetTypeInfo();
-                if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
+                var scopedProvider = scoped.ServiceProvider;
+                var consumerServices = scopedProvider.GetServices<ICapSubscribe>();
+                foreach (var service in consumerServices)
                 {
-                    continue;
-                }
+                    var typeInfo = service.GetType().GetTypeInfo();
+                    if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
+                    {
+                        continue;
+                    }
 
-                executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                }
+                return executorDescriptorList;
             }
-            return executorDescriptorList;
         }
 
         private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes(
@@ -76,7 +80,7 @@ namespace DotNetCore.CAP.Internal
                 {
                     executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
                 }
-            }            
+            }
 
             return executorDescriptorList;
         }
