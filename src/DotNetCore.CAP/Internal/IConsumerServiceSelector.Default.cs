@@ -33,13 +33,13 @@ namespace DotNetCore.CAP.Internal
             return executeDescriptor.FirstOrDefault(x => x.Attribute.Name == key);
         }
 
-        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(IServiceProvider provider)
+        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates()
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
-            executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(provider));
+            executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(_serviceProvider));
 
-            executorDescriptorList.AddRange(FindConsumersFromControllerTypes(provider));
+            executorDescriptorList.AddRange(FindConsumersFromControllerTypes(_serviceProvider));
 
             return executorDescriptorList;
         }
