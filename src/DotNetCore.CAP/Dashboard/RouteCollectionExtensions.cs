@@ -19,7 +19,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public static void AddCommand(
              this RouteCollection routes,
-             string pathTemplate,
+             string pathTemplate,   
               Func<DashboardContext, bool> command)
         {
             if (routes == null) throw new ArgumentNullException(nameof(routes));
@@ -63,34 +63,6 @@ namespace DotNetCore.CAP.Dashboard
             if (command == null) throw new ArgumentNullException(nameof(command));
 
             routes.Add(pathTemplate, new BatchCommandDispatcher(command));
-        }
-
-        //public static void AddClientBatchCommand(
-        //    this RouteCollection routes,
-        //    string pathTemplate,
-        //    [NotNull] Action<IBackgroundJobClient, string> command)
-        //{
-        //    if (command == null) throw new ArgumentNullException(nameof(command));
-
-        //    routes.AddBatchCommand(pathTemplate, (context, jobId) =>
-        //    {
-        //        var client = new BackgroundJobClient(context.Storage);
-        //        command(client, jobId);
-        //    });
-        //}
-
-        //public static void AddRecurringBatchCommand(
-        //    this RouteCollection routes,
-        //    string pathTemplate,
-        //    Action<RecurringJobManager, string> command)
-        //{
-        //    if (command == null) throw new ArgumentNullException(nameof(command));
-
-        //    routes.AddBatchCommand(pathTemplate, (context, jobId) =>
-        //    {
-        //        var manager = new RecurringJobManager(context.Storage);
-        //        command(manager, jobId);
-        //    });
-        //}
+        } 
     }
 }

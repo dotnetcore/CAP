@@ -387,4 +387,7 @@
   <data name="Common_Name" xml:space="preserve">
     <value>名称</value>
   </data>
+  <data name="MessagesPage_NoMessages" xml:space="preserve">
+    <value>没有消息</value>
+  </data>
 </root>

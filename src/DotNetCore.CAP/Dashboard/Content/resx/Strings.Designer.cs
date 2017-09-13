@@ -439,7 +439,7 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to No published messages found..
+        ///   Looks up a localized string similar to No messages found..
         /// </summary>
         public static string MessagesPage_NoMessages {
             get {
