@@ -1,4 +1,4 @@
-/* Sticky footer styles
+ /* Sticky footer styles
 -------------------------------------------------- */
 
 html, body {
@@ -247,6 +247,7 @@ a:hover .label-hover {
     .job-snippet-code code {
         display: block;
         color: black;
+        background-color:#f5f5f5;
     }
 
     .job-snippet-code pre .comment {
