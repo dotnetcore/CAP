@@ -25,24 +25,18 @@ namespace DotNetCore.CAP.Dashboard
             Register(ProcessingState.StateName, ProcessingRenderer);
             Register(EnqueuedState.StateName, EnqueuedRenderer);
             Register(ScheduledState.StateName, ScheduledRenderer);
-            //Register(DeletedState.StateName, NullRenderer);
-            //Register(AwaitingState.StateName, AwaitingRenderer);
 
             BackgroundStateColors.Add(EnqueuedState.StateName, "#F5F5F5");
             BackgroundStateColors.Add(SucceededState.StateName, "#EDF7ED");
             BackgroundStateColors.Add(FailedState.StateName, "#FAEBEA");
             BackgroundStateColors.Add(ProcessingState.StateName, "#FCEFDC");
             BackgroundStateColors.Add(ScheduledState.StateName, "#E0F3F8");
-            //BackgroundStateColors.Add(DeletedState.StateName, "#ddd");
-            //BackgroundStateColors.Add(AwaitingState.StateName, "#F5F5F5");
 
             ForegroundStateColors.Add(EnqueuedState.StateName, "#999");
             ForegroundStateColors.Add(SucceededState.StateName, "#5cb85c");
             ForegroundStateColors.Add(FailedState.StateName, "#d9534f");
             ForegroundStateColors.Add(ProcessingState.StateName, "#f0ad4e");
             ForegroundStateColors.Add(ScheduledState.StateName, "#5bc0de");
-            //ForegroundStateColors.Add(DeletedState.StateName, "#777");
-            //ForegroundStateColors.Add(AwaitingState.StateName, "#999");
         }
 
         public static void AddBackgroundStateColor(string stateName, string color)
