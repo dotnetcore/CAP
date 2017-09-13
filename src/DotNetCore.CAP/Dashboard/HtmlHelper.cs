@@ -10,6 +10,7 @@ using DotNetCore.CAP.Dashboard.Resources;
 using DotNetCore.CAP.Dashboard.Pages;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Internal;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -222,11 +223,24 @@ namespace DotNetCore.CAP.Dashboard
         {
             var outputString = string.Empty;
 
-            var @public = "<span style=\"color:blue\">public </span>";
+            var @public = WrapKeyword("public");
+            var @async = string.Empty;
+            var @return = string.Empty;
 
-            var key = Hignlight(method.ReturnType);
+            var isAwaitable = CoercedAwaitableInfo.IsTypeAwaitable(method.ReturnType, out var coercedAwaitableInfo);
+            if (isAwaitable)
+            {
+                @async = WrapKeyword("async");
+                var asyncResultType = coercedAwaitableInfo.AwaitableInfo.ResultType;
 
-            var name = method.Name;
+                @return = WrapType("Task") + WrapIdentifier("<") + WrapType(asyncResultType) + WrapIdentifier(">");
+            }
+            else
+            {
+                @return = WrapType(method.ReturnType);
+            }
+
+            var @name = method.Name;
 
             string paramType = null;
             string paramName = null;
@@ -237,52 +251,72 @@ namespace DotNetCore.CAP.Dashboard
             {
                 var firstParam = @params[0];
                 var firstParamType = firstParam.ParameterType;
-                paramType = Hignlight(firstParamType);
+                paramType = WrapType(firstParamType);
                 paramName = firstParam.Name;
             }
 
             if (paramType == null)
             {
-                paramString = "(){ }";
+                paramString = "();";
             }
             else
             {
-                paramString = $"({paramType} {paramName}){{ }}";
+                paramString = $"({paramType} {paramName});";
             }
 
+            outputString = @public + " " + (string.IsNullOrEmpty(@async) ? "" : @async + " ") + @return + " " + @name + paramString;
 
-            outputString = @public + key + name + paramString;
             return new NonEscapedString(outputString);
         }
 
-        public string Hignlight(Type type)
+        private string WrapType(Type type)
         {
-            if(type.Name == "Void")
+            if (type == null)
             {
-                return HighligthKey(type.Name.ToLower());
+                return string.Empty;
+            }
+
+            if (type.Name == "Void")
+            {
+                return WrapKeyword(type.Name.ToLower());
             }
             if (Helper.IsComplexType(type))
             {
-                return HighligthClass(type.Name);
+                return WrapType(type.Name);
             }
             if (type.IsPrimitive || type.Equals(typeof(string)) || type.Equals(typeof(decimal)))
             {
-                return HighligthKey(type.Name.ToLower());
+                return WrapKeyword(type.Name.ToLower());
             }
             else
             {
-                return HighligthClass(type.Name);
+                return WrapType(type.Name);
             }
         }
 
-        private string HighligthClass(string key)
+        private string WrapIdentifier(string value)
         {
-            return $"<span style=\"color:#07c1be\">{key} </span>";
+            return value;
         }
 
-        private string HighligthKey(string key)
+        private string WrapKeyword(string value)
         {
-            return $"<span style=\"color:blue\">{key} </span>";
+            return Span("keyword", value);
+        }
+
+        private string WrapType(string value)
+        {
+            return Span("type", value);
+        }
+
+        private string WrapString(string value)
+        {
+            return Span("string", value);
+        }
+
+        private string Span(string @class, string value)
+        {
+            return $"<span class=\"{@class}\">{value}</span>";
         }
 
         //private static readonly StackTraceHtmlFragments StackTraceHtmlFragments = new StackTraceHtmlFragments

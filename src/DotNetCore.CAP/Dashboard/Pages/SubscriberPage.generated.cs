@@ -229,23 +229,26 @@ WriteLiteral("</td>\r\n                                    <td>\r\n             
             
             #line default
             #line hidden
-WriteLiteral("</span>：\r\n                                        ");
+WriteLiteral("</span>：\r\n                                        <div class=\"job-snippet-code\">\r" +
+"\n                                            <code>\r\n                           " +
+"                     <pre>");
 
 
             
-            #line 51 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
-                                   Write(Html.MethodEscaped(column.MethodInfo));
+            #line 53 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+                                                Write(Html.MethodEscaped(column.MethodInfo));
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n                                    </td>\r\n                                </tr" +
-">\r\n");
+WriteLiteral("</pre>\r\n                                            </code>\r\n                    " +
+"                    </div>\r\n                                    </td>\r\n         " +
+"                       </tr>\r\n");
 
 
 
             
-            #line 54 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 58 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                 i++;
                             }
                         }
@@ -257,7 +260,7 @@ WriteLiteral("                    </tbody>\r\n                </table>\r\n      
 
 
             
-            #line 60 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 64 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
         }
 
             

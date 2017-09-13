@@ -48,7 +48,11 @@
                                     <td>@column.Attribute.Name</td>
                                     <td>
                                         <span style="color:#00bcd4">@column.ImplTypeInfo.Name</span>：
-                                        @Html.MethodEscaped(column.MethodInfo)
+                                        <div class="job-snippet-code">
+                                            <code>
+                                                <pre>@Html.MethodEscaped(column.MethodInfo)</pre>
+                                            </code>
+                                        </div>
                                     </td>
                                 </tr>
                                 i++;
