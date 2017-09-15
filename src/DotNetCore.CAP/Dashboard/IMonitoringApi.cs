@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using DotNetCore.CAP.Dashboard.Monitoring;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -22,12 +23,8 @@ namespace DotNetCore.CAP.Dashboard
 
         int ReceivedSucceededCount();
 
-        IDictionary<DateTime, int> SucceededByDatesCount();
+        IDictionary<DateTime, int> HourlySucceededJobs(MessageType type);
 
-        IDictionary<DateTime, int> FailedByDatesCount();
-
-        IDictionary<DateTime, int> HourlySucceededJobs();
-
-        IDictionary<DateTime, int> HourlyFailedJobs();
+        IDictionary<DateTime, int> HourlyFailedJobs(MessageType type);
     }
 }

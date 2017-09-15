@@ -61,6 +61,7 @@
     };
 
     BaseGraph.prototype._initGraph = function (element, settings, xSettings, ySettings) {
+        console.log(1);
         var graph = this._graph = new Rickshaw.Graph($.extend({
             element: element,
             width: $(element).innerWidth(),
@@ -93,22 +94,40 @@
     }
 
     cap.RealtimeGraph = (function () {
-        function RealtimeGraph(element, succeeded, failed, succeededStr, failedStr) {
-            this._succeeded = succeeded;
-            this._failed = failed;
+        function RealtimeGraph(element,
+            pubSucceeded, pubFailed, pubSucceededStr, pubFailedStr,
+            recSucceeded, recFailed, recSucceededStr, recFailedStr
+        ) {
+            this._pubSucceeded = pubSucceeded;
+            this._pubSucceededStr = pubSucceededStr;
+
+            this._pubFailed = pubFailed;
+            this._pubFailedStr = pubFailedStr;
+
+            this._recSucceeded = recSucceeded;
+            this._recSucceededStr = recSucceededStr;
+
+            this._recFailed = recFailed;
+            this._recFailedStr = recFailedStr;
 
             this._initGraph(element, {
                 renderer: 'bar',
                 series: new Rickshaw.Series.FixedDuration([
                     {
-                        name: failedStr,
-                        //color: '#d9534f'
-                        color: 'red'
+                        name: pubFailedStr,
+                        color: '#d9534f'
                     },
                     {
-                        name: succeededStr,
-                        //color: '#5cb85c'
-                        color: '#cb513a'
+                        name: pubSucceededStr,
+                        color: '#6ACD65'
+                    },
+                    {
+                        name: recFailedStr,
+                        color: '#9c27b0'
+                    },
+                    {
+                        name: recSucceededStr,
+                        color: '#cddc39'
                     }
                 ],
                     undefined,
@@ -120,39 +139,63 @@
         RealtimeGraph.prototype = Object.create(BaseGraph.prototype);
 
         RealtimeGraph.prototype.appendHistory = function (statistics) {
-            var newSucceeded = parseInt(statistics["published_succeeded:count"].intValue);
-            var newFailed = parseInt(statistics["published_failed:count"].intValue);
+            var newPubSucceeded = parseInt(statistics["published_succeeded:count"].intValue);
+            var newPubFailed = parseInt(statistics["published_failed:count"].intValue);
 
-            if (this._succeeded !== null && this._failed !== null) {
-                var succeeded = newSucceeded - this._succeeded;
-                var failed = newFailed - this._failed;
+            var newRecSucceeded = parseInt(statistics["received_succeeded:count"].intValue);
+            var newRecFailed = parseInt(statistics["received_failed:count"].intValue);
 
-                this._graph.series.addData({ failed: failed, succeeded: succeeded });
+            if (this._pubSucceeded !== null && this._pubFailed !== null &&
+                this._recSucceeded !== null && this._recFailed !== null
+            ) {
+                var pubSucceeded = newPubSucceeded - this._pubSucceeded;
+                var pubFailed = newPubFailed - this._pubFailed;
+
+                var recSucceeded = newRecSucceeded - this._recSucceeded;
+                var recFailed = newRecFailed - this._recFailed;
+
+                var dataObj = {};
+                dataObj[this._pubFailedStr] = pubFailed;
+                dataObj[this._pubSucceededStr] = pubSucceeded;
+                dataObj[this._recFailedStr] = recFailed;
+                dataObj[this._recSucceededStr] = recSucceeded;
+
+                this._graph.series.addData(dataObj);
                 this._graph.render();
             }
 
-            this._succeeded = newSucceeded;
-            this._failed = newFailed;
+            this._pubSucceeded = newPubSucceeded;
+            this._pubFailed = newPubFailed;
+
+            this._recSucceeded = newRecSucceeded;
+            this._recFailed = newRecFailed;
         };
 
         return RealtimeGraph;
     })();
 
     cap.HistoryGraph = (function () {
-        function HistoryGraph(element, succeeded, failed, succeededStr, failedStr) {
+        function HistoryGraph(element, pubSucceeded, pubFailed, pubSucceededStr, pubFailedStr,
+            recSucceeded, recFailed, recSucceededStr, recFailedStr) {
             this._initGraph(element, {
                 renderer: 'area',
                 series: [
                     {
                         color: '#d9534f',
-                        //color: 'red',
-                        data: failed,
-                        name: failedStr
+                        data: pubFailed,
+                        name: pubFailedStr
                     }, {
                         color: '#6ACD65',
-                        //color: 'blue',
-                        data: succeeded,
-                        name: succeededStr
+                        data: pubSucceeded,
+                        name: pubSucceededStr
+                    }, {
+                        color: '#9c27b0',
+                        data: recFailed,
+                        name: recFailedStr
+                    }, {
+                        color: '#cddc39',
+                        data: recSucceeded,
+                        name: recSucceededStr
                     }
                 ]
             }, {}, { ticksTreatment: 'glow' });
@@ -232,12 +275,26 @@
         Page.prototype._createRealtimeGraph = function (elementId) {
             var realtimeElement = document.getElementById(elementId);
             if (realtimeElement) {
-                var succeeded = parseInt($(realtimeElement).data('succeeded'));
-                var failed = parseInt($(realtimeElement).data('failed'));
+                var pubSucceeded = parseInt($(realtimeElement).data('published-succeeded'));
+                var pubFailed = parseInt($(realtimeElement).data('published-failed'));
+                var pubSucceededStr = $(realtimeElement).data('published-succeeded-string');
+                var pubFailedStr = $(realtimeElement).data('published-failed-string');
 
-                var succeededStr = $(realtimeElement).data('succeeded-string');
-                var failedStr = $(realtimeElement).data('failed-string');
-                var realtimeGraph = new Cap.RealtimeGraph(realtimeElement, succeeded, failed, succeededStr, failedStr);
+                var recSucceeded = parseInt($(realtimeElement).data('received-succeeded'));
+                var recFailed = parseInt($(realtimeElement).data('received-failed'));
+                var recSucceededStr = $(realtimeElement).data('received-succeeded-string');
+                var recFailedStr = $(realtimeElement).data('received-failed-string');
+
+                var realtimeGraph = new Cap.RealtimeGraph(realtimeElement,
+                    pubSucceeded,
+                    pubFailed,
+                    pubSucceededStr,
+                    pubFailedStr,
+                    recSucceeded,
+                    recFailed,
+                    recSucceededStr,
+                    recFailedStr
+                );
 
                 this._poller.addListener(function (data) {
                     realtimeGraph.appendHistory(data);
@@ -268,13 +325,26 @@
                     return series;
                 };
 
-                var succeeded = createSeries($(historyElement).data("succeeded"));
-                var failed = createSeries($(historyElement).data("failed"));
+                var publishedSucceeded = createSeries($(historyElement).data("published-succeeded"));
+                var publishedFailed = createSeries($(historyElement).data("published-failed"));
+                var publishedSucceededStr = $(historyElement).data('published-succeeded-string');
+                var publishedFailedStr = $(historyElement).data('published-failed-string');
 
-                var succeededStr = $(historyElement).data('succeeded-string');
-                var failedStr = $(historyElement).data('failed-string');
+                var receivedSucceeded = createSeries($(historyElement).data("received-succeeded"));
+                var receivedFailed = createSeries($(historyElement).data("received-failed"));
+                var receivedSucceededStr = $(historyElement).data('received-succeeded-string');
+                var receivedFailedStr = $(historyElement).data('received-failed-string');
 
-                var historyGraph = new Cap.HistoryGraph(historyElement, succeeded, failed, succeededStr, failedStr);
+                var historyGraph = new Cap.HistoryGraph(historyElement,
+                    publishedSucceeded,
+                    publishedFailed,
+                    publishedSucceededStr,
+                    publishedFailedStr,
+                    receivedSucceeded,
+                    receivedFailed,
+                    receivedSucceededStr,
+                    receivedFailedStr,
+                );
 
                 $(window).resize(function () {
                     historyGraph.update();

@@ -1,6 +1,7 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
 @using System
 @using System.Collections.Generic
+@using  DotNetCore.CAP.Models;
 @using DotNetCore.CAP.Dashboard
 @using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Resources
@@ -8,22 +9,13 @@
 @inherits RazorPage
 @{
     Layout = new LayoutPage(Strings.HomePage_Title);
-    IDictionary<DateTime, int> succeeded = null;
-    IDictionary<DateTime, int> failed = null;
-
-    var period = Query("period") ?? "day";
 
     var monitor = Storage.GetMonitoringApi();
-    if ("week".Equals(period, StringComparison.OrdinalIgnoreCase))
-    {
-        succeeded = monitor.SucceededByDatesCount();
-        failed = monitor.FailedByDatesCount();
-    }
-    else if ("day".Equals(period, StringComparison.OrdinalIgnoreCase))
-    {
-        succeeded = monitor.HourlySucceededJobs();
-        failed = monitor.HourlyFailedJobs();
-    }
+    IDictionary<DateTime, int> publishedSucceeded = monitor.HourlySucceededJobs(MessageType.Publish);
+    IDictionary<DateTime, int> publishedFailed = monitor.HourlyFailedJobs(MessageType.Publish);
+
+    IDictionary<DateTime, int> receivedSucceeded = monitor.HourlySucceededJobs(MessageType.Subscribe);
+    IDictionary<DateTime, int> receivedFailed = monitor.HourlyFailedJobs(MessageType.Subscribe);
 }
 
 <div class="row">
@@ -41,30 +33,35 @@
             </div>
         }
         <h3>@Strings.HomePage_RealtimeGraph</h3>
-        <div id="realtimeGraph" data-succeeded="@Statistics.PublishedSucceeded" data-failed="@Statistics.PublishedFailed"
-             data-succeeded-string="@Strings.HomePage_GraphHover_Succeeded"
-             data-failed-string="@Strings.HomePage_GraphHover_Failed"></div>
+        <div id="realtimeGraph"
+             data-published-succeeded="@Statistics.PublishedSucceeded"
+             data-published-failed="@Statistics.PublishedFailed"
+             data-published-succeeded-string="@Strings.HomePage_GraphHover_Succeeded"
+             data-published-failed-string="@Strings.HomePage_GraphHover_Failed"
+             data-received-succeeded="@Statistics.ReceivedSucceeded"
+             data-received-failed="@Statistics.ReceivedFailed"
+             data-received-succeeded-string="接收成功"
+             data-received-failed-string="处理失败"></div>
         <div style="display: none;">
             <span data-metric="published_succeeded:count"></span>
             <span data-metric="published_failed:count"></span>
+            <span data-metric="received_succeeded:count"></span>
+            <span data-metric="received_failed:count"></span>
         </div>
 
         <h3>
-            <div class="btn-group pull-right" style="margin-top: 2px;">
-                <a href="?period=day" class="btn btn-sm btn-default @("day".Equals(period, StringComparison.OrdinalIgnoreCase) ? "active" : null)">@Strings.Common_PeriodDay</a>
-                <a href="?period=week" class="btn btn-sm btn-default @("week".Equals(period, StringComparison.OrdinalIgnoreCase) ? "active" : null)">@Strings.Common_PeriodWeek</a>
-            </div>
             @Strings.HomePage_HistoryGraph
         </h3>
 
-        @if (succeeded != null && failed != null)
-        {
-            <div id="historyGraph"
-                 data-succeeded="@JsonConvert.SerializeObject(succeeded)"
-                 data-failed="@JsonConvert.SerializeObject(failed)"
-                 data-succeeded-string="@Strings.HomePage_GraphHover_Succeeded"
-                 data-failed-string="@Strings.HomePage_GraphHover_Failed">
-            </div>
-        }
+        <div id="historyGraph"
+             data-published-succeeded="@JsonConvert.SerializeObject(publishedSucceeded)"
+             data-published-failed="@JsonConvert.SerializeObject(publishedFailed)"
+             data-published-succeeded-string="@Strings.HomePage_GraphHover_Succeeded"
+             data-published-failed-string="@Strings.HomePage_GraphHover_Failed"
+             data-received-succeeded="@JsonConvert.SerializeObject(receivedSucceeded)"
+             data-received-failed="@JsonConvert.SerializeObject(receivedFailed)"
+             data-received-succeeded-string="接收成功"
+             data-received-failed-string="处理失败">         
+        </div>
     </div>
 </div>

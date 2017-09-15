@@ -27,24 +27,30 @@ namespace DotNetCore.CAP.Dashboard.Pages
     using System.Text;
     
     #line 4 "..\..\Dashboard\Pages\HomePage.cshtml"
-    using DotNetCore.CAP.Dashboard;
+    using  DotNetCore.CAP.Models;
     
     #line default
     #line hidden
     
     #line 5 "..\..\Dashboard\Pages\HomePage.cshtml"
-    using DotNetCore.CAP.Dashboard.Pages;
+    using DotNetCore.CAP.Dashboard;
     
     #line default
     #line hidden
     
     #line 6 "..\..\Dashboard\Pages\HomePage.cshtml"
-    using DotNetCore.CAP.Dashboard.Resources;
+    using DotNetCore.CAP.Dashboard.Pages;
     
     #line default
     #line hidden
     
     #line 7 "..\..\Dashboard\Pages\HomePage.cshtml"
+    using DotNetCore.CAP.Dashboard.Resources;
+    
+    #line default
+    #line hidden
+    
+    #line 8 "..\..\Dashboard\Pages\HomePage.cshtml"
     using Newtonsoft.Json;
     
     #line default
@@ -69,26 +75,18 @@ WriteLiteral("\r\n");
 
 
 
+
             
-            #line 9 "..\..\Dashboard\Pages\HomePage.cshtml"
+            #line 10 "..\..\Dashboard\Pages\HomePage.cshtml"
   
     Layout = new LayoutPage(Strings.HomePage_Title);
-    IDictionary<DateTime, int> succeeded = null;
-    IDictionary<DateTime, int> failed = null;
-
-    var period = Query("period") ?? "day";
 
     var monitor = Storage.GetMonitoringApi();
-    if ("week".Equals(period, StringComparison.OrdinalIgnoreCase))
-    {
-        succeeded = monitor.SucceededByDatesCount();
-        failed = monitor.FailedByDatesCount();
-    }
-    else if ("day".Equals(period, StringComparison.OrdinalIgnoreCase))
-    {
-        succeeded = monitor.HourlySucceededJobs();
-        failed = monitor.HourlyFailedJobs();
-    }
+    IDictionary<DateTime, int> publishedSucceeded = monitor.HourlySucceededJobs(MessageType.Publish);
+    IDictionary<DateTime, int> publishedFailed = monitor.HourlyFailedJobs(MessageType.Publish);
+
+    IDictionary<DateTime, int> receivedSucceeded = monitor.HourlySucceededJobs(MessageType.Subscribe);
+    IDictionary<DateTime, int> receivedFailed = monitor.HourlyFailedJobs(MessageType.Subscribe);
 
 
             
@@ -99,7 +97,7 @@ WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n      
 
 
             
-            #line 31 "..\..\Dashboard\Pages\HomePage.cshtml"
+            #line 23 "..\..\Dashboard\Pages\HomePage.cshtml"
                            Write(Strings.HomePage_Title);
 
             
@@ -109,7 +107,7 @@ WriteLiteral("</h1>\r\n");
 
 
             
-            #line 32 "..\..\Dashboard\Pages\HomePage.cshtml"
+            #line 24 "..\..\Dashboard\Pages\HomePage.cshtml"
          if (Metrics.Count > 0)
         {
 
@@ -120,7 +118,7 @@ WriteLiteral("            <div class=\"row\">\r\n");
 
 
             
-            #line 35 "..\..\Dashboard\Pages\HomePage.cshtml"
+            #line 27 "..\..\Dashboard\Pages\HomePage.cshtml"
                  foreach (var metric in Metrics)
                 {
 
@@ -131,7 +129,7 @@ WriteLiteral("                    <div class=\"col-md-2\">\r\n                  
 
 
             
-            #line 38 "..\..\Dashboard\Pages\HomePage.cshtml"
+            #line 30 "..\..\Dashboard\Pages\HomePage.cshtml"
                    Write(Html.BlockMetric(metric));
 
             
@@ -141,7 +139,7 @@ WriteLiteral("\r\n                    </div>\r\n");
 
 
             
-            #line 40 "..\..\Dashboard\Pages\HomePage.cshtml"
+            #line 32 "..\..\Dashboard\Pages\HomePage.cshtml"
                 }
 
             
@@ -151,7 +149,7 @@ WriteLiteral("            </div>\r\n");
 
 
             
-            #line 42 "..\..\Dashboard\Pages\HomePage.cshtml"
+            #line 34 "..\..\Dashboard\Pages\HomePage.cshtml"
         }
 
             
@@ -161,172 +159,156 @@ WriteLiteral("        <h3>");
 
 
             
-            #line 43 "..\..\Dashboard\Pages\HomePage.cshtml"
+            #line 35 "..\..\Dashboard\Pages\HomePage.cshtml"
        Write(Strings.HomePage_RealtimeGraph);
 
             
             #line default
             #line hidden
-WriteLiteral("</h3>\r\n        <div id=\"realtimeGraph\" data-succeeded=\"");
+WriteLiteral("</h3>\r\n        <div id=\"realtimeGraph\"\r\n             data-published-succeeded=\"");
 
 
             
-            #line 44 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                           Write(Statistics.PublishedSucceeded);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\" data-failed=\"");
-
-
-            
-            #line 44 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                                                                        Write(Statistics.PublishedFailed);
+            #line 37 "..\..\Dashboard\Pages\HomePage.cshtml"
+                                  Write(Statistics.PublishedSucceeded);
 
             
             #line default
             #line hidden
-WriteLiteral("\"\r\n             data-succeeded-string=\"");
+WriteLiteral("\"\r\n             data-published-failed=\"");
 
 
             
-            #line 45 "..\..\Dashboard\Pages\HomePage.cshtml"
-                               Write(Strings.HomePage_GraphHover_Succeeded);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"\r\n             data-failed-string=\"");
-
-
-            
-            #line 46 "..\..\Dashboard\Pages\HomePage.cshtml"
-                            Write(Strings.HomePage_GraphHover_Failed);
+            #line 38 "..\..\Dashboard\Pages\HomePage.cshtml"
+                               Write(Statistics.PublishedFailed);
 
             
             #line default
             #line hidden
-WriteLiteral(@"""></div>
+WriteLiteral("\"\r\n             data-published-succeeded-string=\"");
+
+
+            
+            #line 39 "..\..\Dashboard\Pages\HomePage.cshtml"
+                                         Write(Strings.HomePage_GraphHover_Succeeded);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"\r\n             data-published-failed-string=\"");
+
+
+            
+            #line 40 "..\..\Dashboard\Pages\HomePage.cshtml"
+                                      Write(Strings.HomePage_GraphHover_Failed);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"\r\n             data-received-succeeded=\"");
+
+
+            
+            #line 41 "..\..\Dashboard\Pages\HomePage.cshtml"
+                                 Write(Statistics.ReceivedSucceeded);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"\r\n             data-received-failed=\"");
+
+
+            
+            #line 42 "..\..\Dashboard\Pages\HomePage.cshtml"
+                              Write(Statistics.ReceivedFailed);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(@"""
+             data-received-succeeded-string=""接收成功""
+             data-received-failed-string=""处理失败""></div>
         <div style=""display: none;"">
             <span data-metric=""published_succeeded:count""></span>
             <span data-metric=""published_failed:count""></span>
+            <span data-metric=""received_succeeded:count""></span>
+            <span data-metric=""received_failed:count""></span>
         </div>
 
         <h3>
-            <div class=""btn-group pull-right"" style=""margin-top: 2px;"">
-                <a href=""?period=day"" class=""btn btn-sm btn-default ");
+            ");
 
 
             
-            #line 54 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                                                Write("day".Equals(period, StringComparison.OrdinalIgnoreCase) ? "active" : null);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\">");
-
-
-            
-            #line 54 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                                                                                                                              Write(Strings.Common_PeriodDay);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</a>\r\n                <a href=\"?period=week\" class=\"btn btn-sm btn-default ");
-
-
-            
-            #line 55 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                                                 Write("week".Equals(period, StringComparison.OrdinalIgnoreCase) ? "active" : null);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\">");
-
-
-            
-            #line 55 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                                                                                                                                Write(Strings.Common_PeriodWeek);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</a>\r\n            </div>\r\n            ");
-
-
-            
-            #line 57 "..\..\Dashboard\Pages\HomePage.cshtml"
+            #line 53 "..\..\Dashboard\Pages\HomePage.cshtml"
        Write(Strings.HomePage_HistoryGraph);
 
             
             #line default
             #line hidden
-WriteLiteral("\r\n        </h3>\r\n\r\n");
+WriteLiteral("\r\n        </h3>\r\n\r\n        <div id=\"historyGraph\"\r\n             data-published-su" +
+"cceeded=\"");
+
+
+            
+            #line 57 "..\..\Dashboard\Pages\HomePage.cshtml"
+                                  Write(JsonConvert.SerializeObject(publishedSucceeded));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"\r\n             data-published-failed=\"");
+
+
+            
+            #line 58 "..\..\Dashboard\Pages\HomePage.cshtml"
+                               Write(JsonConvert.SerializeObject(publishedFailed));
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"\r\n             data-published-succeeded-string=\"");
+
+
+            
+            #line 59 "..\..\Dashboard\Pages\HomePage.cshtml"
+                                         Write(Strings.HomePage_GraphHover_Succeeded);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("\"\r\n             data-published-failed-string=\"");
 
 
             
             #line 60 "..\..\Dashboard\Pages\HomePage.cshtml"
-         if (succeeded != null && failed != null)
-        {
+                                      Write(Strings.HomePage_GraphHover_Failed);
 
             
             #line default
             #line hidden
-WriteLiteral("            <div id=\"historyGraph\"\r\n                 data-succeeded=\"");
+WriteLiteral("\"\r\n             data-received-succeeded=\"");
 
 
             
-            #line 63 "..\..\Dashboard\Pages\HomePage.cshtml"
-                            Write(JsonConvert.SerializeObject(succeeded));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"\r\n                 data-failed=\"");
-
-
-            
-            #line 64 "..\..\Dashboard\Pages\HomePage.cshtml"
-                         Write(JsonConvert.SerializeObject(failed));
+            #line 61 "..\..\Dashboard\Pages\HomePage.cshtml"
+                                 Write(JsonConvert.SerializeObject(receivedSucceeded));
 
             
             #line default
             #line hidden
-WriteLiteral("\"\r\n                 data-succeeded-string=\"");
+WriteLiteral("\"\r\n             data-received-failed=\"");
 
 
             
-            #line 65 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                   Write(Strings.HomePage_GraphHover_Succeeded);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"\r\n                 data-failed-string=\"");
-
-
-            
-            #line 66 "..\..\Dashboard\Pages\HomePage.cshtml"
-                                Write(Strings.HomePage_GraphHover_Failed);
+            #line 62 "..\..\Dashboard\Pages\HomePage.cshtml"
+                              Write(JsonConvert.SerializeObject(receivedFailed));
 
             
             #line default
             #line hidden
-WriteLiteral("\">\r\n            </div>\r\n");
-
-
-            
-            #line 68 "..\..\Dashboard\Pages\HomePage.cshtml"
-        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    </div>\r\n</div>");
+WriteLiteral("\"\r\n             data-received-succeeded-string=\"接收成功\"\r\n             data-received" +
+"-failed-string=\"处理失败\">         \r\n        </div>\r\n    </div>\r\n</div>");
 
 
         }

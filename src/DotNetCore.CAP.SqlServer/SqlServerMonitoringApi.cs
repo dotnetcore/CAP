@@ -6,6 +6,7 @@ using Dapper;
 using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor.States;
 
 namespace DotNetCore.CAP.SqlServer
@@ -58,25 +59,18 @@ _options.Schema);
             return statistics;
         }
 
-        public IDictionary<DateTime, int> HourlyFailedJobs()
+        public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
+            var tableName = type == MessageType.Publish ? "Published" : "Received";
             return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, "Published", FailedState.StateName));
+                GetHourlyTimelineStats(connection, tableName, FailedState.StateName));
         }
 
-        public IDictionary<DateTime, int> HourlySucceededJobs()
+        public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
+            var tableName = type == MessageType.Publish ? "Published" : "Received";
             return UseConnection(connection =>
-                 GetHourlyTimelineStats(connection, "Published", SucceededState.StateName));
-        }
-
-        public IDictionary<DateTime, int> SucceededByDatesCount()
-        {
-            return new Dictionary<DateTime, int>();
-        }
-        public IDictionary<DateTime, int> FailedByDatesCount()
-        {
-            return new Dictionary<DateTime, int>();
+                 GetHourlyTimelineStats(connection, tableName, SucceededState.StateName));
         }
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
@@ -190,21 +184,6 @@ _options.Schema);
 
             return GetTimelineStats(connection, tableName, statusName, keyMaps);
         }
-
-        //private Dictionary<DateTime, int> GetTimelineStats(IDbConnection connection, string type)
-        //{
-        //    var endDate = DateTime.UtcNow.Date;
-        //    var dates = new List<DateTime>();
-        //    for (var i = 0; i < 7; i++)
-        //    {
-        //        dates.Add(endDate);
-        //        endDate = endDate.AddDays(-1);
-        //    }
-
-        //    var keyMaps = dates.ToDictionary(x => $"stats:{type}:{x.ToString("yyyy-MM-dd")}", x => x);
-
-        //    return GetTimelineStats(connection, keyMaps);
-        //}
 
         private Dictionary<DateTime, int> GetTimelineStats(
            IDbConnection connection,
