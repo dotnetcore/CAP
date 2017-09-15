@@ -6,6 +6,7 @@ using Dapper;
 using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Processor.States;
 
 namespace DotNetCore.CAP.SqlServer
 {
@@ -23,10 +24,7 @@ namespace DotNetCore.CAP.SqlServer
             _storage = storage as SqlServerStorage;
         }
 
-        public IDictionary<DateTime, int> FailedByDatesCount()
-        {
-            return new Dictionary<DateTime, int>();
-        }
+
 
         public StatisticsDto GetStatistics()
         {
@@ -63,16 +61,20 @@ _options.Schema);
         public IDictionary<DateTime, int> HourlyFailedJobs()
         {
             return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, "failed"));
+                GetHourlyTimelineStats(connection, "Published", FailedState.StateName));
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs()
         {
             return UseConnection(connection =>
-                 GetHourlyTimelineStats(connection, "succeeded"));
+                 GetHourlyTimelineStats(connection, "Published", SucceededState.StateName));
         }
-         
+
         public IDictionary<DateTime, int> SucceededByDatesCount()
+        {
+            return new Dictionary<DateTime, int>();
+        }
+        public IDictionary<DateTime, int> FailedByDatesCount()
         {
             return new Dictionary<DateTime, int>();
         }
@@ -174,9 +176,9 @@ _options.Schema);
             return _storage.UseConnection(action);
         }
 
-        private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string type)
+        private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string tableName, string statusName)
         {
-            var endDate = DateTime.UtcNow;
+            var endDate = DateTime.Now;
             var dates = new List<DateTime>();
             for (var i = 0; i < 24; i++)
             {
@@ -184,37 +186,46 @@ _options.Schema);
                 endDate = endDate.AddHours(-1);
             }
 
-            var keyMaps = dates.ToDictionary(x => $"stats:{type}:{x.ToString("yyyy-MM-dd-HH")}", x => x);
+            var keyMaps = dates.ToDictionary(x => x.ToString("yyyy-MM-dd-HH"), x => x);
 
-            return GetTimelineStats(connection, keyMaps);
+            return GetTimelineStats(connection, tableName, statusName, keyMaps);
         }
 
-        private Dictionary<DateTime, int> GetTimelineStats(IDbConnection connection, string type)
-        {
-            var endDate = DateTime.UtcNow.Date;
-            var dates = new List<DateTime>();
-            for (var i = 0; i < 7; i++)
-            {
-                dates.Add(endDate);
-                endDate = endDate.AddDays(-1);
-            }
+        //private Dictionary<DateTime, int> GetTimelineStats(IDbConnection connection, string type)
+        //{
+        //    var endDate = DateTime.UtcNow.Date;
+        //    var dates = new List<DateTime>();
+        //    for (var i = 0; i < 7; i++)
+        //    {
+        //        dates.Add(endDate);
+        //        endDate = endDate.AddDays(-1);
+        //    }
 
-            var keyMaps = dates.ToDictionary(x => $"stats:{type}:{x.ToString("yyyy-MM-dd")}", x => x);
+        //    var keyMaps = dates.ToDictionary(x => $"stats:{type}:{x.ToString("yyyy-MM-dd")}", x => x);
 
-            return GetTimelineStats(connection, keyMaps);
-        }
+        //    return GetTimelineStats(connection, keyMaps);
+        //}
 
         private Dictionary<DateTime, int> GetTimelineStats(
            IDbConnection connection,
+           string tableName,
+           string statusName,
            IDictionary<string, DateTime> keyMaps)
         {
             string sqlQuery =
-$@"select [Key], [Value] as [Count] from [{_options.Schema}].AggregatedCounter with (nolock)
-where [Key] in @keys";
+$@"
+with aggr as (
+    select FORMAT(Added,'yyyy-MM-dd-HH') as [Key],
+        count(id) [Count]
+    from  [{_options.Schema}].{tableName}
+    where StatusName = @statusName
+    group by FORMAT(Added,'yyyy-MM-dd-HH')
+)
+select [Key], [Count] from aggr with (nolock) where [Key] in @keys;";
 
             var valuesMap = connection.Query(
                 sqlQuery,
-                new { keys = keyMaps.Keys })
+                new { keys = keyMaps.Keys, statusName = statusName })
                 .ToDictionary(x => (string)x.Key, x => (int)x.Count);
 
             foreach (var key in keyMaps.Keys)
