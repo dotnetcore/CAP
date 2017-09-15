@@ -135,7 +135,6 @@ namespace DotNetCore.CAP.Dashboard
                IntValue = page.Statistics.ReceivedSucceeded
            });
 
-
         //----------------------------------------------------
 
         public static readonly DashboardMetric PublishedFailedCount = new DashboardMetric(
@@ -147,6 +146,7 @@ namespace DotNetCore.CAP.Dashboard
                 Style = page.Statistics.PublishedFailed > 0 ? MetricStyle.Danger : MetricStyle.Default,
                 Highlighted = page.Statistics.PublishedFailed > 0
             });
+
         public static readonly DashboardMetric ReceivedFailedCount = new DashboardMetric(
            "received_failed:count",
            "Metrics_FailedJobs",

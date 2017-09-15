@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.Dashboard
                 Active = page.RequestPath.StartsWith("/published/failed"),
                 Metric = DashboardMetrics.PublishedFailedCount
             });
- 
+
             //=======================================ReceivedItems=============================
 
             ReceivedItems.Add(page => new MenuItem(Strings.SidebarMenu_Succeeded, page.Url.To("/received/succeeded"))
@@ -51,7 +51,6 @@ namespace DotNetCore.CAP.Dashboard
                 Active = page.RequestPath.StartsWith("/received/failed"),
                 Metric = DashboardMetrics.ReceivedFailedCount
             });
-
         }
     }
 }

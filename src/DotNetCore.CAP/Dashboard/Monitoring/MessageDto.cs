@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace DotNetCore.CAP.Dashboard.Monitoring
 {
     public class MessageDto

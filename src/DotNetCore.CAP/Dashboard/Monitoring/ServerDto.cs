@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace DotNetCore.CAP.Dashboard.Monitoring
+﻿namespace DotNetCore.CAP.Dashboard.Monitoring
 {
     public class SubscriberDto
     {

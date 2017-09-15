@@ -21,7 +21,7 @@ namespace DotNetCore.CAP.Dashboard
         public IEnumerable<DashboardMetric> GetAllMetrics()
         {
             var metrics = new List<DashboardMetric> { Metric };
-            
+
             if (Metrics != null)
             {
                 metrics.AddRange(Metrics);

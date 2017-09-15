@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using DotNetCore.CAP.Models;
+﻿using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.Dashboard.Monitoring
 {
@@ -15,7 +12,7 @@ namespace DotNetCore.CAP.Dashboard.Monitoring
         public string Content { get; set; }
 
         public string StatusName { get; set; }
-    
+
         public int CurrentPage { get; set; }
 
         public int PageSize { get; set; }

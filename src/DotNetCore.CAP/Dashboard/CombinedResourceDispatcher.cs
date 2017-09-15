@@ -9,9 +9,9 @@ namespace DotNetCore.CAP.Dashboard
         private readonly string[] _resourceNames;
 
         public CombinedResourceDispatcher(
-            string contentType, 
-            Assembly assembly, 
-            string baseNamespace, 
+            string contentType,
+            Assembly assembly,
+            string baseNamespace,
             params string[] resourceNames) : base(contentType, assembly, null)
         {
             _assembly = assembly;

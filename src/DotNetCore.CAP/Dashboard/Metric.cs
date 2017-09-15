@@ -1,5 +1,4 @@
-﻿
-namespace DotNetCore.CAP.Dashboard
+﻿namespace DotNetCore.CAP.Dashboard
 {
     public class Metric
     {
@@ -31,11 +30,11 @@ namespace DotNetCore.CAP.Dashboard
             switch (style)
             {
                 case MetricStyle.Default: return "metric-default";
-                case MetricStyle.Info:    return "metric-info";
+                case MetricStyle.Info: return "metric-info";
                 case MetricStyle.Success: return "metric-success";
                 case MetricStyle.Warning: return "metric-warning";
-                case MetricStyle.Danger:  return "metric-danger";
-                default:                  return "metric-null";
+                case MetricStyle.Danger: return "metric-danger";
+                default: return "metric-null";
             }
         }
     }

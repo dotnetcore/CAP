@@ -13,7 +13,7 @@ namespace DotNetCore.CAP.Dashboard
             Items.Add(page => new MenuItem(Strings.NavigationMenu_Published, page.Url.LinkToPublished())
             {
                 Active = page.RequestPath.StartsWith("/published"),
-                Metrics = new []
+                Metrics = new[]
                 {
                     DashboardMetrics.PublishedSucceededCount,
                     DashboardMetrics.PublishedFailedCountOrNull

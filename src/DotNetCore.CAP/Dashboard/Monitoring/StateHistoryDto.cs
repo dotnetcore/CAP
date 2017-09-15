@@ -8,6 +8,6 @@ namespace DotNetCore.CAP.Dashboard.Monitoring
         public string StateName { get; set; }
         public string Reason { get; set; }
         public DateTime CreatedAt { get; set; }
-        public IDictionary<string, string> Data { get; set; } 
+        public IDictionary<string, string> Data { get; set; }
     }
 }

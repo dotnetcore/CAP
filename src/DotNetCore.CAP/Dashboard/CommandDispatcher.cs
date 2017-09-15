@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public Task Dispatch(DashboardContext context)
         {
-            var request = context.Request; 
+            var request = context.Request;
             var response = context.Response;
 
             if (!"POST".Equals(request.Method, StringComparison.OrdinalIgnoreCase))

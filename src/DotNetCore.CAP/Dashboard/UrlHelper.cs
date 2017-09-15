@@ -1,14 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace DotNetCore.CAP.Dashboard
 {
     public class UrlHelper
     {
-
         private readonly DashboardContext _context;
 
-        public UrlHelper( DashboardContext context)
+        public UrlHelper(DashboardContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             _context = context;

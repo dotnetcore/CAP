@@ -72,10 +72,9 @@ namespace DotNetCore.CAP.Dashboard
                 GetExecutingAssembly(),
                 GetContentResourceName("fonts", "glyphicons-halflings-regular.woff2")));
 
-            #endregion
+            #endregion Embedded static content
 
             #region Razor pages and commands
-
 
             Routes.AddJsonResult("/published/message/(?<Id>.+)", x =>
             {
@@ -103,7 +102,7 @@ namespace DotNetCore.CAP.Dashboard
 
             //Routes.AddRazorPage("/jobs/processing", x => new ProcessingJobsPage());
             //Routes.AddClientBatchCommand(
-            //    "/jobs/processing/delete", 
+            //    "/jobs/processing/delete",
             //    (client, jobId) => client.ChangeState(jobId, CreateDeletedState(), ProcessingState.StateName));
 
             //Routes.AddClientBatchCommand(
@@ -113,7 +112,7 @@ namespace DotNetCore.CAP.Dashboard
             //Routes.AddRazorPage("/jobs/scheduled", x => new ScheduledJobsPage());
 
             //Routes.AddClientBatchCommand(
-            //    "/jobs/scheduled/enqueue", 
+            //    "/jobs/scheduled/enqueue",
             //    (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState(), ScheduledState.StateName));
 
             //Routes.AddClientBatchCommand(
@@ -176,17 +175,17 @@ namespace DotNetCore.CAP.Dashboard
 
             //Routes.AddRazorPage("/recurring", x => new RecurringJobsPage());
             //Routes.AddRecurringBatchCommand(
-            //    "/recurring/remove", 
+            //    "/recurring/remove",
             //    (manager, jobId) => manager.RemoveIfExists(jobId));
 
             //Routes.AddRecurringBatchCommand(
-            //    "/recurring/trigger", 
+            //    "/recurring/trigger",
             //    (manager, jobId) => manager.Trigger(jobId));
 
             //Routes.AddRazorPage("/servers", x => new ServersPage());
             //Routes.AddRazorPage("/retries", x => new RetriesPage());
 
-            #endregion
+            #endregion Razor pages and commands
         }
 
         public static RouteCollection Routes { get; }

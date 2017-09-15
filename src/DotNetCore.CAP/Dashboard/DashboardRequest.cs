@@ -15,6 +15,7 @@ namespace DotNetCore.CAP.Dashboard
         public abstract string RemoteIpAddress { get; }
 
         public abstract string GetQuery(string key);
+
         public abstract Task<IList<string>> GetFormValuesAsync(string key);
     }
 
@@ -25,7 +26,7 @@ namespace DotNetCore.CAP.Dashboard
         public CapDashboardRequest(HttpContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            _context = context;            
+            _context = context;
         }
 
         public override string Method => _context.Request.Method;
@@ -33,7 +34,9 @@ namespace DotNetCore.CAP.Dashboard
         public override string PathBase => _context.Request.PathBase.Value;
         public override string LocalIpAddress => _context.Connection.LocalIpAddress.ToString();
         public override string RemoteIpAddress => _context.Connection.RemoteIpAddress.ToString();
+
         public override string GetQuery(string key) => _context.Request.Query[key];
+
         public override async Task<IList<string>> GetFormValuesAsync(string key)
         {
             var form = await _context.Request.ReadFormAsync();

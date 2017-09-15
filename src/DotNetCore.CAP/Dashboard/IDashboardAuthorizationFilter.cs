@@ -2,6 +2,6 @@
 {
     public interface IDashboardAuthorizationFilter
     {
-        bool Authorize( DashboardContext context);
+        bool Authorize(DashboardContext context);
     }
 }

@@ -5,7 +5,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
 {
     partial class SidebarMenu
     {
-        public SidebarMenu( IEnumerable<Func<RazorPage, MenuItem>> items)
+        public SidebarMenu(IEnumerable<Func<RazorPage, MenuItem>> items)
         {
             if (items == null) throw new ArgumentNullException(nameof(items));
             Items = items;

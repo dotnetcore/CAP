@@ -66,7 +66,7 @@ namespace DotNetCore.CAP.Dashboard
             AddPrevious(pagerItems);
 
             // first page
-            if (_startPageIndex > 1) 
+            if (_startPageIndex > 1)
                 pagerItems.Add(new Item(1, false, ItemType.Page));
 
             // more page before numeric page buttons

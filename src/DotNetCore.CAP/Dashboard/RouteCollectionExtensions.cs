@@ -19,7 +19,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public static void AddCommand(
              this RouteCollection routes,
-             string pathTemplate,   
+             string pathTemplate,
               Func<DashboardContext, bool> command)
         {
             if (routes == null) throw new ArgumentNullException(nameof(routes));
@@ -63,6 +63,6 @@ namespace DotNetCore.CAP.Dashboard
             if (command == null) throw new ArgumentNullException(nameof(command));
 
             routes.Add(pathTemplate, new BatchCommandDispatcher(command));
-        } 
+        }
     }
 }

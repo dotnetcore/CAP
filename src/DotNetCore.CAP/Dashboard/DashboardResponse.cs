@@ -14,6 +14,7 @@ namespace DotNetCore.CAP.Dashboard
         public abstract Stream Body { get; }
 
         public abstract void SetExpire(DateTimeOffset? value);
+
         public abstract Task WriteAsync(string text);
     }
 
@@ -21,7 +22,7 @@ namespace DotNetCore.CAP.Dashboard
     {
         private readonly HttpContext _context;
 
-        public CapDashboardResponse( HttpContext context)
+        public CapDashboardResponse(HttpContext context)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             _context = context;

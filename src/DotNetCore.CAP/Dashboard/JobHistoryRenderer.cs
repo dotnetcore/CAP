@@ -14,6 +14,7 @@ namespace DotNetCore.CAP.Dashboard
 
         private static readonly IDictionary<string, string> BackgroundStateColors
             = new Dictionary<string, string>();
+
         private static readonly IDictionary<string, string> ForegroundStateColors
             = new Dictionary<string, string>();
 
@@ -143,7 +144,6 @@ namespace DotNetCore.CAP.Dashboard
 
                 itemsAdded = true;
             }
-
 
             if (stateData.ContainsKey("Result") && !String.IsNullOrWhiteSpace(stateData["Result"]))
             {

@@ -2,12 +2,11 @@
 using System.Diagnostics;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard.Monitoring;
 
 namespace DotNetCore.CAP.Dashboard
 {
-    public abstract class RazorPage 
+    public abstract class RazorPage
     {
         private Lazy<StatisticsDto> _statisticsLazy;
 
@@ -116,15 +115,15 @@ namespace DotNetCore.CAP.Dashboard
         private string TransformText(string body)
         {
             _body = body;
-            
+
             Execute();
-            
+
             if (Layout != null)
             {
                 Layout.Assign(this);
                 return Layout.TransformText(_content.ToString());
             }
-            
+
             return _content.ToString();
         }
 

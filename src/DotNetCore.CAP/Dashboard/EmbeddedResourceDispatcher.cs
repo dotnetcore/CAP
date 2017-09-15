@@ -12,12 +12,12 @@ namespace DotNetCore.CAP.Dashboard
 
         public EmbeddedResourceDispatcher(
              string contentType,
-             Assembly assembly, 
+             Assembly assembly,
             string resourceName)
         {
             if (contentType == null) throw new ArgumentNullException(nameof(contentType));
             if (assembly == null) throw new ArgumentNullException(nameof(assembly));
-            
+
             _assembly = assembly;
             _resourceName = resourceName;
             _contentType = contentType;
