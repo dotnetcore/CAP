@@ -29,7 +29,7 @@ namespace DotNetCore.CAP.Dashboard
             return RenderPartial(new Breadcrumbs(title, items));
         }
 
-        public NonEscapedString JobsSidebar(MessageType type)
+        public NonEscapedString MessagesSidebar(MessageType type)
         {
             if (type == MessageType.Publish)
             {
@@ -82,24 +82,6 @@ namespace DotNetCore.CAP.Dashboard
             return new NonEscapedString(value);
         }
 
-        public NonEscapedString JobId(string jobId, bool shorten = true)
-        {
-            Guid guid;
-            return new NonEscapedString(Guid.TryParse(jobId, out guid)
-                ? (shorten ? jobId.Substring(0, 8) + "…" : jobId)
-                : $"#{jobId}");
-        }
-
-        public string JobName(Message job)
-        {
-            if (job == null)
-            {
-                return Strings.Common_CannotFindTargetMethod;
-            }
-
-            return job.ToString();
-        }
-
         public NonEscapedString StateLabel(string stateName)
         {
             if (String.IsNullOrWhiteSpace(stateName))
@@ -108,16 +90,6 @@ namespace DotNetCore.CAP.Dashboard
             }
 
             return Raw($"<span class=\"label label-default\" style=\"background-color: {JobHistoryRenderer.GetForegroundStateColor(stateName)};\">{stateName}</span>");
-        }
-
-        public NonEscapedString JobIdLink(string jobId)
-        {
-            return Raw($"<a href=\"{_page.Url.JobDetails(jobId)}\">{JobId(jobId)}</a>");
-        }
-
-        public NonEscapedString JobNameLink(string jobId, Message job)
-        {
-            return Raw($"<a class=\"job-method\" href=\"{_page.Url.JobDetails(jobId)}\">{HtmlEncode(JobName(job))}</a>");
         }
 
         public NonEscapedString RelativeTime(DateTime value)
@@ -317,18 +289,6 @@ namespace DotNetCore.CAP.Dashboard
         {
             return $"<span class=\"{@class}\">{value}</span>";
         }
-
-        //private static readonly StackTraceHtmlFragments StackTraceHtmlFragments = new StackTraceHtmlFragments
-        //{
-        //    BeforeFrame         = "<span class='st-frame'>"                            , AfterFrame         = "</span>",
-        //    BeforeType          = "<span class='st-type'>"                             , AfterType          = "</span>",
-        //    BeforeMethod        = "<span class='st-method'>"                           , AfterMethod        = "</span>",
-        //    BeforeParameters    = "<span class='st-params'>"                           , AfterParameters    = "</span>",
-        //    BeforeParameterType = "<span class='st-param'><span class='st-param-type'>", AfterParameterType = "</span>",
-        //    BeforeParameterName = "<span class='st-param-name'>"                       , AfterParameterName = "</span></span>",
-        //    BeforeFile          = "<span class='st-file'>"                             , AfterFile          = "</span>",
-        //    BeforeLine          = "<span class='st-line'>"                             , AfterLine          = "</span>",
-        //};
 
         public NonEscapedString StackTrace(string stackTrace)
         {

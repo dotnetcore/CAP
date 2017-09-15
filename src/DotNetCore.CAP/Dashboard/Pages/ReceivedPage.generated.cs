@@ -106,7 +106,7 @@ WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-3\">\r\n       
 
             
             #line 37 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-   Write(Html.JobsSidebar(MessageType.Subscribe));
+   Write(Html.MessagesSidebar(MessageType.Subscribe));
 
             
             #line default

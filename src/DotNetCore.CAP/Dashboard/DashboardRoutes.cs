@@ -87,37 +87,7 @@ namespace DotNetCore.CAP.Dashboard
                 var id = int.Parse(x.UriMatch.Groups["Id"].Value);
                 var message = x.Storage.GetConnection().GetReceivedMessageAsync(id).GetAwaiter().GetResult();
                 return message.Content;
-            });
-            //Routes.AddRazorPage("/jobs/enqueued", x => new QueuesPage());
-            //Routes.AddRazorPage(
-            //    "/jobs/enqueued/fetched/(?<Queue>.+)",
-            //     x => new FetchedJobsPage(x.Groups["Queue"].Value));
-
-            //Routes.AddClientBatchCommand("/jobs/enqueued/delete", (client, jobId) => client.ChangeState(jobId, CreateDeletedState()));
-            //Routes.AddClientBatchCommand("/jobs/enqueued/requeue", (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState()));
-
-            //Routes.AddRazorPage(
-            //    "/jobs/enqueued/(?<Queue>.+)",
-            //    x => new EnqueuedJobsPage(x.Groups["Queue"].Value));
-
-            //Routes.AddRazorPage("/jobs/processing", x => new ProcessingJobsPage());
-            //Routes.AddClientBatchCommand(
-            //    "/jobs/processing/delete",
-            //    (client, jobId) => client.ChangeState(jobId, CreateDeletedState(), ProcessingState.StateName));
-
-            //Routes.AddClientBatchCommand(
-            //    "/jobs/processing/requeue",
-            //    (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState(), ProcessingState.StateName));
-
-            //Routes.AddRazorPage("/jobs/scheduled", x => new ScheduledJobsPage());
-
-            //Routes.AddClientBatchCommand(
-            //    "/jobs/scheduled/enqueue",
-            //    (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState(), ScheduledState.StateName));
-
-            //Routes.AddClientBatchCommand(
-            //    "/jobs/scheduled/delete",
-            //    (client, jobId) => client.ChangeState(jobId, CreateDeletedState(), ScheduledState.StateName));
+            });           
 
             Routes.AddPublishBatchCommand(
                "/published/requeue",
@@ -132,55 +102,7 @@ namespace DotNetCore.CAP.Dashboard
             Routes.AddRazorPage(
                "/received/(?<StatusName>.+)",
                 x => new ReceivedPage(x.Groups["StatusName"].Value));
-            Routes.AddRazorPage("/subscribers", x => new SubscriberPage());
-            //Routes.AddRazorPage("/jobs/failed", x => new FailedJobsPage());
-
-            //Routes.AddClientBatchCommand(
-            //    "/jobs/failed/requeue",
-            //    (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState(), FailedState.StateName));
-
-            //Routes.AddClientBatchCommand(
-            //    "/jobs/failed/delete",
-            //    (client, jobId) => client.ChangeState(jobId, CreateDeletedState(), FailedState.StateName));
-
-            //Routes.AddRazorPage("/jobs/deleted", x => new DeletedJobsPage());
-
-            //Routes.AddClientBatchCommand(
-            //    "/jobs/deleted/requeue",
-            //    (client, jobId) => client.ChangeState(jobId, CreateEnqueuedState(), DeletedState.StateName));
-
-            //Routes.AddRazorPage("/jobs/awaiting", x => new AwaitingJobsPage());
-            //Routes.AddClientBatchCommand("/jobs/awaiting/enqueue", (client, jobId) => client.ChangeState(
-            //    jobId, CreateEnqueuedState(), AwaitingState.StateName));
-            //Routes.AddClientBatchCommand("/jobs/awaiting/delete", (client, jobId) => client.ChangeState(
-            //    jobId, CreateDeletedState(), AwaitingState.StateName));
-
-            //Routes.AddCommand(
-            //    "/jobs/actions/requeue/(?<JobId>.+)",
-            //    context =>
-            //    {
-            //        var client = new BackgroundJobClient(context.Storage);
-            //        return client.ChangeState(context.UriMatch.Groups["JobId"].Value, CreateEnqueuedState());
-            //    });
-
-            //Routes.AddCommand(
-            //    "/jobs/actions/delete/(?<JobId>.+)",
-            //    context =>
-            //    {
-            //        var client = new BackgroundJobClient(context.Storage);
-            //        return client.ChangeState(context.UriMatch.Groups["JobId"].Value, CreateDeletedState());
-            //    });
-
-            //Routes.AddRazorPage("/jobs/details/(?<JobId>.+)", x => new JobDetailsPage(x.Groups["JobId"].Value));
-
-            //Routes.AddRazorPage("/recurring", x => new RecurringJobsPage());
-            //Routes.AddRecurringBatchCommand(
-            //    "/recurring/remove",
-            //    (manager, jobId) => manager.RemoveIfExists(jobId));
-
-            //Routes.AddRecurringBatchCommand(
-            //    "/recurring/trigger",
-            //    (manager, jobId) => manager.Trigger(jobId));
+            Routes.AddRazorPage("/subscribers", x => new SubscriberPage());           
 
             //Routes.AddRazorPage("/servers", x => new ServersPage());
             //Routes.AddRazorPage("/retries", x => new RetriesPage());
@@ -200,14 +122,9 @@ namespace DotNetCore.CAP.Dashboard
             return $"{GetContentFolderNamespace(contentFolder)}.{resourceName}";
         }
 
-        //private static DeletedState CreateDeletedState()
-        //{
-        //    return new DeletedState { Reason = "Triggered via Dashboard UI" };
-        //}
-
         private static EnqueuedState CreateEnqueuedState()
         {
-            return new EnqueuedState();// { Reason = "Triggered via Dashboard UI" };
+            return new EnqueuedState();
         }
 
         private static Assembly GetExecutingAssembly()

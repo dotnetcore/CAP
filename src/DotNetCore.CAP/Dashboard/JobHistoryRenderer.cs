@@ -24,8 +24,6 @@ namespace DotNetCore.CAP.Dashboard
             Register(SucceededState.StateName, SucceededRenderer);
             Register(FailedState.StateName, FailedRenderer);
             Register(ProcessingState.StateName, ProcessingRenderer);
-            Register(EnqueuedState.StateName, EnqueuedRenderer);
-            Register(ScheduledState.StateName, ScheduledRenderer);
 
             BackgroundStateColors.Add(EnqueuedState.StateName, "#F5F5F5");
             BackgroundStateColors.Add(SucceededState.StateName, "#EDF7ED");
@@ -198,50 +196,6 @@ namespace DotNetCore.CAP.Dashboard
             {
                 builder.Append("<dt>Worker:</dt>");
                 builder.Append($"<dd>#{stateData["WorkerNumber"]}</dd>");
-            }
-
-            builder.Append("</dl>");
-
-            return new NonEscapedString(builder.ToString());
-        }
-
-        private static NonEscapedString EnqueuedRenderer(HtmlHelper helper, IDictionary<string, string> stateData)
-        {
-            return new NonEscapedString(
-                $"<dl class=\"dl-horizontal\"><dt>Queue:</dt><dd>{helper.QueueLabel(stateData["Queue"])}</dd></dl>");
-        }
-
-        private static NonEscapedString ScheduledRenderer(HtmlHelper helper, IDictionary<string, string> stateData)
-        {
-            var enqueueAt = Helper.DeserializeDateTime(stateData["EnqueueAt"]);
-
-            return new NonEscapedString(
-                $"<dl class=\"dl-horizontal\"><dt>Enqueue at:</dt><dd data-moment=\"{Helper.ToTimestamp(enqueueAt)}\">{enqueueAt}</dd></dl>");
-        }
-
-        private static NonEscapedString AwaitingRenderer(HtmlHelper helper, IDictionary<string, string> stateData)
-        {
-            var builder = new StringBuilder();
-
-            builder.Append("<dl class=\"dl-horizontal\">");
-
-            if (stateData.ContainsKey("ParentId"))
-            {
-                builder.Append($"<dt>Parent</dt><dd>{helper.JobIdLink(stateData["ParentId"])}</dd>");
-            }
-
-            if (stateData.ContainsKey("NextState"))
-            {
-                var nextState = JsonConvert.DeserializeObject<IState>(
-                    stateData["NextState"],
-                    new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.All });
-
-                builder.Append($"<dt>Next State</dt><dd>{helper.StateLabel(nextState.Name)}</dd>");
-            }
-
-            if (stateData.ContainsKey("Options"))
-            {
-                builder.Append($"<dt>Options</dt><dd><code>{helper.HtmlEncode(stateData["Options"])}</code></dd>");
             }
 
             builder.Append("</dl>");

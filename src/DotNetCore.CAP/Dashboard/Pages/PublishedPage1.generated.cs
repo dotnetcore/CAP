@@ -104,7 +104,7 @@ WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-3\">\r\n       
 
             
             #line 35 "..\..\Dashboard\Pages\PublishedPage.cshtml"
-   Write(Html.JobsSidebar(MessageType.Publish));
+   Write(Html.MessagesSidebar(MessageType.Publish));
 
             
             #line default
