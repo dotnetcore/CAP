@@ -540,3 +540,11 @@ div.metric-null {
 .subscribe-table td[rowspan]{
     font-weight:bold;
 }
+
+#legend {
+    background: #f1efef;
+    position: absolute;
+    top: 110px;
+    right: 20px;
+    color: #000;
+}
