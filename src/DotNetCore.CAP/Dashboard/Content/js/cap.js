@@ -61,7 +61,7 @@
     };
 
     BaseGraph.prototype._initGraph = function (element, settings, xSettings, ySettings) {
-        console.log(1);
+
         var graph = this._graph = new Rickshaw.Graph($.extend({
             element: element,
             width: $(element).innerWidth(),
@@ -81,6 +81,11 @@
                 graph: graph,
                 timeFixture: new Rickshaw.Fixtures.Time.Local()
             }, xSettings));
+
+            var legend = new Rickshaw.Graph.Legend({
+                element: document.querySelector('#legend'),
+                graph: graph
+            });
         }
 
         if (ySettings) {
@@ -114,20 +119,17 @@
                 renderer: 'bar',
                 series: new Rickshaw.Series.FixedDuration([
                     {
-                        name: pubFailedStr,
-                        color: '#d9534f'
-                    },
-                    {
                         name: pubSucceededStr,
-                        color: '#6ACD65'
-                    },
-                    {
-                        name: recFailedStr,
-                        color: '#9c27b0'
-                    },
-                    {
+                        color: '#33cc33'
+                    },{
                         name: recSucceededStr,
-                        color: '#cddc39'
+                        color: '#3333cc'
+                    },{
+                        name: pubFailedStr,
+                        color: '#ff3300'
+                    },{
+                        name: recFailedStr,
+                        color: '#ff3399'
                     }
                 ],
                     undefined,
@@ -180,23 +182,23 @@
             this._initGraph(element, {
                 renderer: 'area',
                 series: [
-                    {
-                        color: '#d9534f',
-                        data: pubFailed,
-                        name: pubFailedStr
-                    }, {
-                        color: '#6ACD65',
+                   {
+                        color: '#33cc33',
                         data: pubSucceeded,
                         name: pubSucceededStr
-                    }, {
-                        color: '#9c27b0',
-                        data: recFailed,
-                        name: recFailedStr
-                    }, {
-                        color: '#cddc39',
+                    },{
+                        color: '#3333cc',
                         data: recSucceeded,
                         name: recSucceededStr
-                    }
+                   },{
+                       color: '#ff3300',
+                       data: pubFailed,
+                       name: pubFailedStr
+                   }, {
+                       color: '#ff3399',
+                       data: recFailed,
+                       name: recFailedStr
+                   }
                 ]
             }, {}, { ticksTreatment: 'glow' });
         }
