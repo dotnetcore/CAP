@@ -1,7 +1,7 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
 @using System
 @using System.Collections.Generic
-@using  DotNetCore.CAP.Models;
+@using DotNetCore.CAP.Models;
 @using DotNetCore.CAP.Dashboard
 @using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Resources
@@ -36,19 +36,19 @@
         <div id="realtimeGraph"
              data-published-succeeded="@Statistics.PublishedSucceeded"
              data-published-failed="@Statistics.PublishedFailed"
-             data-published-succeeded-string="@Strings.HomePage_GraphHover_Succeeded"
-             data-published-failed-string="@Strings.HomePage_GraphHover_Failed"
+             data-published-succeeded-string="@Strings.HomePage_GraphHover_PSucceeded"
+             data-published-failed-string="@Strings.HomePage_GraphHover_PFailed"
              data-received-succeeded="@Statistics.ReceivedSucceeded"
              data-received-failed="@Statistics.ReceivedFailed"
-             data-received-succeeded-string="接收成功"
-             data-received-failed-string="处理失败"></div>
+             data-received-succeeded-string="@Strings.HomePage_GraphHover_RSucceeded"
+             data-received-failed-string="@Strings.HomePage_GraphHover_RFailed"></div>
         <div style="display: none;">
             <span data-metric="published_succeeded:count"></span>
             <span data-metric="published_failed:count"></span>
             <span data-metric="received_succeeded:count"></span>
             <span data-metric="received_failed:count"></span>
         </div>
-
+        <div id="legend"></div>
         <h3>
             @Strings.HomePage_HistoryGraph
         </h3>
@@ -56,12 +56,12 @@
         <div id="historyGraph"
              data-published-succeeded="@JsonConvert.SerializeObject(publishedSucceeded)"
              data-published-failed="@JsonConvert.SerializeObject(publishedFailed)"
-             data-published-succeeded-string="@Strings.HomePage_GraphHover_Succeeded"
-             data-published-failed-string="@Strings.HomePage_GraphHover_Failed"
+             data-published-succeeded-string="@Strings.HomePage_GraphHover_PSucceeded"
+             data-published-failed-string="@Strings.HomePage_GraphHover_PFailed"
              data-received-succeeded="@JsonConvert.SerializeObject(receivedSucceeded)"
              data-received-failed="@JsonConvert.SerializeObject(receivedFailed)"
-             data-received-succeeded-string="接收成功"
-             data-received-failed-string="处理失败">         
+             data-received-succeeded-string="@Strings.HomePage_GraphHover_RSucceeded"
+             data-received-failed-string="@Strings.HomePage_GraphHover_RFailed">         
         </div>
     </div>
 </div>

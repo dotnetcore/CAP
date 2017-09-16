@@ -134,4 +134,9 @@
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
   </ItemGroup>
+  <ItemGroup>
+    <None Update="Dashboard\Pages\HomePage.cshtml">
+      <Generator>RazorGenerator</Generator>
+    </None>
+  </ItemGroup>
 </Project>
