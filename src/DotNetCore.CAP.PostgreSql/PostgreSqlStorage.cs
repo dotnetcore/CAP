@@ -1,6 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using DotNetCore.CAP.Dashboard;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
@@ -16,6 +17,16 @@ namespace DotNetCore.CAP.PostgreSql
         {
             _options = options;
             _logger = logger;
+        }
+
+        public IStorageConnection GetConnection()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public IMonitoringApi GetMonitoringApi()
+        {
+            throw new System.NotImplementedException();
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)

@@ -24,7 +24,7 @@ namespace Sample.RabbitMQ.SqlServer
 
         //host.Run();
         public static void Main(string[] args)
-        {
+        { 
             BuildWebHost(args).Run();
         }
 

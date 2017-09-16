@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Processor.States;
 using Npgsql;
 
 namespace DotNetCore.CAP.PostgreSql
@@ -132,6 +133,21 @@ namespace DotNetCore.CAP.PostgreSql
             }
 
             return new PostgreSqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection, transaction);
+        }
+
+        public List<string> GetRangeFromSet(string key, int startingFrom, int endingAt)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ChangePublishedState(int messageId, IState state)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool ChangeReceivedState(int messageId, IState state)
+        {
+            throw new NotImplementedException();
         }
     }
 }

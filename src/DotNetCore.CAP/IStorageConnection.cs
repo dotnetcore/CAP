@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Processor.States;
 
 namespace DotNetCore.CAP
 {
@@ -63,5 +64,13 @@ namespace DotNetCore.CAP
         /// Creates and returns an <see cref="IStorageTransaction"/>.
         /// </summary>
         IStorageTransaction CreateTransaction();
+
+        //-------------------------------------------
+
+        bool ChangePublishedState(int messageId, IState state);
+        bool ChangeReceivedState(int messageId, IState state);
+
+        List<string> GetRangeFromSet(string key, int startingFrom, int endingAt);
+
     }
 }

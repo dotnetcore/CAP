@@ -1,5 +1,6 @@
 ﻿using System;
 using DotNetCore.CAP;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Builder
@@ -31,6 +32,25 @@ namespace Microsoft.AspNetCore.Builder
             var provider = app.ApplicationServices;
             var bootstrapper = provider.GetRequiredService<IBootstrapper>();
             bootstrapper.BootstrapAsync();
+            return app;
+        }
+
+        public static IApplicationBuilder UseCapDashboard(
+             this IApplicationBuilder app,
+             string pathMatch = "/cap")
+        {
+            if (app == null) throw new ArgumentNullException(nameof(app));
+            if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
+
+            var marker = app.ApplicationServices.GetService<CapMarkerService>();
+
+            if (marker == null)
+            {
+                throw new InvalidOperationException("Add Cap must be called on the service collection.");
+            }
+
+            app.Map(new PathString(pathMatch), x => x.UseMiddleware<DashboardMiddleware>());
+
             return app;
         }
     }
