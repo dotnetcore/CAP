@@ -300,11 +300,11 @@
   <data name="Metrics_FailedCountOrNull" xml:space="preserve">
     <value>{0} failed job(s) found. Retry or delete them manually.</value>
   </data>
-  <data name="HomePage_GraphHover_Failed" xml:space="preserve">
-    <value>Failed</value>
+  <data name="HomePage_GraphHover_PFailed" xml:space="preserve">
+    <value>Publish Failed</value>
   </data>
-  <data name="HomePage_GraphHover_Succeeded" xml:space="preserve">
-    <value>Succeeded</value>
+  <data name="HomePage_GraphHover_PSucceeded" xml:space="preserve">
+    <value>Publish Succeeded</value>
   </data>
   <data name="MessagesPage_Modal_Expand" xml:space="preserve">
     <value>Expand</value>
@@ -368,5 +368,11 @@
   </data>
   <data name="Common_Name" xml:space="preserve">
     <value>Name</value>
+  </data>
+  <data name="HomePage_GraphHover_RFailed" xml:space="preserve">
+    <value>Consumption Failed</value>
+  </data>
+  <data name="HomePage_GraphHover_RSucceeded" xml:space="preserve">
+    <value>Consumption Succeeded</value>
   </data>
 </root>

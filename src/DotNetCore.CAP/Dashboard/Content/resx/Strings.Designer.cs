@@ -331,20 +331,38 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Failed.
+        ///   Looks up a localized string similar to Publish Failed.
         /// </summary>
-        public static string HomePage_GraphHover_Failed {
+        public static string HomePage_GraphHover_PFailed {
             get {
-                return ResourceManager.GetString("HomePage_GraphHover_Failed", resourceCulture);
+                return ResourceManager.GetString("HomePage_GraphHover_PFailed", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Succeeded.
+        ///   Looks up a localized string similar to Publish Succeeded.
         /// </summary>
-        public static string HomePage_GraphHover_Succeeded {
+        public static string HomePage_GraphHover_PSucceeded {
             get {
-                return ResourceManager.GetString("HomePage_GraphHover_Succeeded", resourceCulture);
+                return ResourceManager.GetString("HomePage_GraphHover_PSucceeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Consumption Failed.
+        /// </summary>
+        public static string HomePage_GraphHover_RFailed {
+            get {
+                return ResourceManager.GetString("HomePage_GraphHover_RFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Consumption Succeeded.
+        /// </summary>
+        public static string HomePage_GraphHover_RSucceeded {
+            get {
+                return ResourceManager.GetString("HomePage_GraphHover_RSucceeded", resourceCulture);
             }
         }
         

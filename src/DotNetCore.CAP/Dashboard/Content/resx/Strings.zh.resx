@@ -318,11 +318,11 @@
   <data name="Metrics_FailedCountOrNull" xml:space="preserve">
     <value>{0} failed job(s) found. Retry or delete them manually.</value>
   </data>
-  <data name="HomePage_GraphHover_Failed" xml:space="preserve">
-    <value>失败</value>
+  <data name="HomePage_GraphHover_PFailed" xml:space="preserve">
+    <value>发送失败</value>
   </data>
-  <data name="HomePage_GraphHover_Succeeded" xml:space="preserve">
-    <value>完成</value>
+  <data name="HomePage_GraphHover_PSucceeded" xml:space="preserve">
+    <value>发送成功</value>
   </data>
   <data name="MessagesPage_Modal_Expand" xml:space="preserve">
     <value>展开</value>
@@ -389,5 +389,11 @@
   </data>
   <data name="MessagesPage_NoMessages" xml:space="preserve">
     <value>没有消息</value>
+  </data>
+  <data name="HomePage_GraphHover_RFailed" xml:space="preserve">
+    <value>消费失败</value>
+  </data>
+  <data name="HomePage_GraphHover_RSucceeded" xml:space="preserve">
+    <value>消费成功</value>
   </data>
 </root>
