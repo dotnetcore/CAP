@@ -24,7 +24,8 @@ namespace DotNetCore.CAP.Internal
         {
             var context = new ConsumerInvokerContext(consumerContext)
             {
-                Result = new DefaultConsumerInvoker(_logger, _serviceProvider, _modelBinderFactory, consumerContext)
+                Result = new DefaultConsumerInvoker(_logger, _serviceProvider,
+                        _modelBinderFactory, consumerContext)
             };
 
             return context.Result;

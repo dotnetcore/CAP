@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Abstractions;
@@ -10,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.SqlServer
 {
-    public class CapPublisher : CapPublisherBase
+    public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
         private readonly ILogger _logger;
         private readonly SqlServerOptions _options;
@@ -34,13 +35,17 @@ namespace DotNetCore.CAP.SqlServer
         protected override void PrepareConnectionForEF()
         {
             DbConnection = _dbContext.Database.GetDbConnection();
-            var transaction = _dbContext.Database.CurrentTransaction;
-            if (transaction == null)
+            var dbContextTransaction = _dbContext.Database.CurrentTransaction;
+            var dbTrans = dbContextTransaction?.GetDbTransaction();
+            //DbTransaction is dispose in original
+            if (dbTrans?.Connection == null)
             {
                 IsCapOpenedTrans = true;
-                transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+                dbContextTransaction?.Dispose();
+                dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+                dbTrans = dbContextTransaction.GetDbTransaction();
             }
-            DbTranasaction = transaction.GetDbTransaction();
+            DbTranasaction = dbTrans;
         }
 
         protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
@@ -57,13 +62,20 @@ namespace DotNetCore.CAP.SqlServer
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
+        public async Task PublishAsync(CapPublishedMessage message)
+        {
+            using (var conn = new SqlConnection(_options.ConnectionString))
+            {
+                await conn.ExecuteAsync(PrepareSql(), message);
+            }
+        }
+
         #region private methods
 
         private string PrepareSql()
         {
             return $"INSERT INTO {_options.Schema}.[Published] ([Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName)";
         }
-
 
         #endregion private methods
     }

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
@@ -21,48 +24,105 @@ namespace DotNetCore.CAP.Internal
         {
             _modelBinderFactory = modelBinderFactory;
             _serviceProvider = serviceProvider;
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _logger = logger;
+            _consumerContext = consumerContext;
 
-            _consumerContext = consumerContext ?? throw new ArgumentNullException(nameof(consumerContext));
             _executor = ObjectMethodExecutor.Create(_consumerContext.ConsumerDescriptor.MethodInfo,
                 _consumerContext.ConsumerDescriptor.ImplTypeInfo);
         }
 
         public async Task InvokeAsync()
         {
-            using (_logger.BeginScope("consumer invoker begin"))
+            _logger.LogDebug("Executing consumer Topic: {0}", _consumerContext.ConsumerDescriptor.MethodInfo.Name);
+
+            using (var scope = _serviceProvider.CreateScope())
             {
-                _logger.LogDebug("Executing consumer Topic: {0}", _consumerContext.ConsumerDescriptor.MethodInfo.Name);
+                var provider = scope.ServiceProvider;
+                var serviceType = _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType();
+                var obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, serviceType);
 
-                var obj = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider,
-               _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
+                var jsonConent = _consumerContext.DeliverMessage.Content;
+                var message = Helper.FromJson<Message>(jsonConent);
 
-                var value = _consumerContext.DeliverMessage.Content;
+                object result = null;
                 if (_executor.MethodParameters.Length > 0)
                 {
-                    var firstParameter = _executor.MethodParameters[0];
-                    try
+                    result = await ExecuteWithParameterAsync(obj, message.Content.ToString());
+                }
+                else
+                {
+                    result = await ExecuteAsync(obj);
+                }
+
+                if (!string.IsNullOrEmpty(message.CallbackName))
+                {
+                    await SentCallbackMessage(message.Id, message.CallbackName, result);
+                }
+            }
+        }
+
+        private async Task<object> ExecuteAsync(object @class)
+        {
+            if (_executor.IsMethodAsync)
+            {
+                return await _executor.ExecuteAsync(@class);
+            }
+            else
+            {
+                return _executor.Execute(@class);
+            }
+        }
+
+        private async Task<object> ExecuteWithParameterAsync(object @class, string parameterString)
+        {
+            var firstParameter = _executor.MethodParameters[0];
+            try
+            {
+                var binder = _modelBinderFactory.CreateBinder(firstParameter);
+                var bindResult = await binder.BindModelAsync(parameterString);
+                if (bindResult.IsSuccess)
+                {
+                    if (_executor.IsMethodAsync)
                     {
-                        var binder = _modelBinderFactory.CreateBinder(firstParameter);
-                        var result = await binder.BindModelAsync(value);
-                        if (result.IsSuccess)
-                        {
-                            _executor.Execute(obj, result.Model);
-                        }
-                        else
-                        {
-                            _logger.LogWarning($"Parameters:{firstParameter.Name} bind failed! the content is:" + value);
-                        }
+                        return await _executor.ExecuteAsync(@class, bindResult.Model);
                     }
-                    catch (FormatException ex)
+                    else
                     {
-                        _logger.ModelBinderFormattingException(_executor.MethodInfo?.Name, firstParameter.Name, value, ex);
+                        return _executor.Execute(@class, bindResult.Model);
                     }
                 }
                 else
                 {
-                    _executor.Execute(obj);
+                    throw new MethodBindException($"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameterString} ");
                 }
+            }
+            catch (FormatException ex)
+            {
+                _logger.ModelBinderFormattingException(_executor.MethodInfo?.Name, firstParameter.Name, parameterString, ex);
+                return null;
+            }
+        }
+
+        private async Task SentCallbackMessage(string messageId, string topicName, object bodyObj)
+        {
+            var callbackMessage = new Message
+            {
+                Id = messageId,
+                Content = bodyObj
+            };
+
+            using (var scope = _serviceProvider.CreateScope())
+            {
+                var provider = scope.ServiceProvider;
+                var publisher = provider.GetRequiredService<ICallbackPublisher>();
+
+                var publishedMessage = new CapPublishedMessage
+                {
+                    Name = topicName,
+                    Content = Helper.ToJson(callbackMessage),
+                    StatusName = StatusName.Scheduled
+                };
+                await publisher.PublishAsync(publishedMessage);
             }
         }
     }

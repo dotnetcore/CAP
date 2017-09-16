@@ -10,12 +10,16 @@ namespace DotNetCore.CAP
 {
     public abstract class BasePublishQueueExecutor : IQueueExecutor
     {
+        private readonly CapOptions _options;
         private readonly IStateChanger _stateChanger;
         private readonly ILogger _logger;
 
-        protected BasePublishQueueExecutor(IStateChanger stateChanger,
+        protected BasePublishQueueExecutor(
+            CapOptions options,
+            IStateChanger stateChanger,
             ILogger<BasePublishQueueExecutor> logger)
         {
+            _options = options;
             _stateChanger = stateChanger;
             _logger = logger;
         }
@@ -54,7 +58,7 @@ namespace DotNetCore.CAP
                 }
                 else
                 {
-                    newState = new SucceededState();
+                    newState = new SucceededState(_options.SuccessedMessageExpiredAfter);
                 }
                 await _stateChanger.ChangeStateAsync(message, newState, connection);
 

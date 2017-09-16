@@ -7,10 +7,11 @@ using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class CapPublisher : CapPublisherBase
+    public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
         private readonly ILogger _logger;
         private readonly MySqlOptions _options;
@@ -34,13 +35,17 @@ namespace DotNetCore.CAP.MySql
         protected override void PrepareConnectionForEF()
         {
             DbConnection = _dbContext.Database.GetDbConnection();
-            var transaction = _dbContext.Database.CurrentTransaction;
-            if (transaction == null)
+            var dbContextTransaction = _dbContext.Database.CurrentTransaction;
+            var dbTrans = dbContextTransaction?.GetDbTransaction();
+            //DbTransaction is dispose in original
+            if (dbTrans?.Connection == null)
             {
                 IsCapOpenedTrans = true;
-                transaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+                dbContextTransaction?.Dispose();
+                dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
+                dbTrans = dbContextTransaction.GetDbTransaction();
             }
-            DbTranasaction = transaction.GetDbTransaction();
+            DbTranasaction = dbTrans;
         }
 
         protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
@@ -53,18 +58,24 @@ namespace DotNetCore.CAP.MySql
         protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
         {
             await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
-    
+
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
         }
 
-        #region private methods     
+        public async Task PublishAsync(CapPublishedMessage message)
+        {
+            using (var conn = new MySqlConnection(_options.ConnectionString))
+            {
+                await conn.ExecuteAsync(PrepareSql(), message);
+            }
+        }
+
+        #region private methods
 
         private string PrepareSql()
         {
             return $"INSERT INTO `{_options.TableNamePrefix}.published` (`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName)";
         }
-
-
 
         #endregion private methods
     }

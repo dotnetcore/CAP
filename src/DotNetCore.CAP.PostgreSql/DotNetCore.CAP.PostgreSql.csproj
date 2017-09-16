@@ -3,19 +3,15 @@
   <Import Project="..\..\build\common.props" />
   
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;netstandard2.0;</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>DotNetCore.CAP.PostgreSql</AssemblyName>
     <PackageTags>$(PackageTags);PostgreSQL</PackageTags>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard1.6|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="1.1.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="1.1.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.0.0" />
     <PackageReference Include="Npgsql" Version="3.2.5" /> 
   </ItemGroup>
 

@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         private const int MaxBatch = 1000;
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
-        private readonly TimeSpan _waitingInterval = TimeSpan.FromHours(2);
+        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
         private static readonly string[] Tables =
         {
@@ -44,7 +44,7 @@ namespace DotNetCore.CAP.PostgreSql
                     using (var connection = new NpgsqlConnection(_options.ConnectionString))
                     {
                         removedCount = await connection.ExecuteAsync($"DELETE FROM \"{_options.Schema}\".\"{table}\" WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM \"{_options.Schema}\".\"{table}\" LIMIT @count);",
-                            new { now = DateTime.Now, count = MaxBatch });                        
+                            new { now = DateTime.Now, count = MaxBatch });
                     }
 
                     if (removedCount != 0)

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using DotNetCore.CAP.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -22,7 +20,6 @@ namespace DotNetCore.CAP.Test
         [Fact]
         public void CanFindControllers()
         {
-            
         }
 
         [Fact]
@@ -36,7 +33,6 @@ namespace DotNetCore.CAP.Test
 
     public class HomeController
     {
-
     }
 
     public interface ITestService { }
@@ -46,7 +42,6 @@ namespace DotNetCore.CAP.Test
         [CapSubscribe("test")]
         public void Index()
         {
-
         }
     }
 

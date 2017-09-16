@@ -3,11 +3,16 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard1.6;</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>DotNetCore.CAP.Kafka</AssemblyName>
     <PackageTags>$(PackageTags);Kafka</PackageTags>
   </PropertyGroup>
- 
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <WarningsAsErrors>NU1605</WarningsAsErrors>
+    <NoWarn>NU1701</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Confluent.Kafka" Version="0.11.0" />
   </ItemGroup>

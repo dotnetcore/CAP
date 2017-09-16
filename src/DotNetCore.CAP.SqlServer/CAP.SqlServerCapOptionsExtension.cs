@@ -19,34 +19,36 @@ namespace DotNetCore.CAP
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<IStorage, SqlServerStorage>();
-            services.AddScoped<IStorageConnection, SqlServerStorageConnection>();
-            services.AddScoped<ICapPublisher, CapPublisher>();
+            services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
+            services.AddTransient<ICapPublisher, CapPublisher>();
+            services.AddTransient<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
+            AddSqlServerOptions(services);
+        }
 
+        private void AddSqlServerOptions(IServiceCollection services)
+        {
             var sqlServerOptions = new SqlServerOptions();
+
             _configure(sqlServerOptions);
 
             if (sqlServerOptions.DbContextType != null)
             {
-                var provider = TempBuildService(services);
-                var dbContextObj = provider.GetService(sqlServerOptions.DbContextType);
-                var dbContext = (DbContext)dbContextObj;
-                sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                services.AddSingleton(x =>
+                {
+                    using (var scope = x.CreateScope())
+                    {
+                        var provider = scope.ServiceProvider;
+                        var dbContext = (DbContext)provider.GetService(sqlServerOptions.DbContextType);
+                        sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                        return sqlServerOptions;
+                    }
+                });
             }
-            services.AddSingleton(sqlServerOptions);
+            else
+            {
+                services.AddSingleton(sqlServerOptions);
+            }
         }
-
-#if NETSTANDARD1_6
-        private IServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
-        }
-#else
-        private ServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
-        }
-#endif
-
     }
 }

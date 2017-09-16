@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Sample.Kafka
+namespace Sample.RabbitMQ.SqlServer
 {
     public class Startup
     {
@@ -14,7 +14,11 @@ namespace Sample.Kafka
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseKafka("localhost:9092");
+                x.UseRabbitMQ(y=> {
+                    y.HostName = "192.168.2.206";
+                    y.UserName = "admin";
+                    y.Password = "123123";
+                });
             });
 
             services.AddMvc();

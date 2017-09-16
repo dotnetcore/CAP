@@ -21,6 +21,7 @@ namespace DotNetCore.CAP
             services.AddSingleton<IStorage, MySqlStorage>();
             services.AddScoped<IStorageConnection, MySqlStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
+            services.AddTransient<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
             var mysqlOptions = new MySqlOptions();
@@ -28,24 +29,17 @@ namespace DotNetCore.CAP
 
             if (mysqlOptions.DbContextType != null)
             {
-                var provider = TempBuildService(services);
-                var dbContextObj = provider.GetService(mysqlOptions.DbContextType);
-                var dbContext = (DbContext)dbContextObj;
-                mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                services.AddSingleton(x =>
+                {
+                    var dbContext = (DbContext)x.GetService(mysqlOptions.DbContextType);
+                    mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                    return mysqlOptions;
+                });
             }
-            services.AddSingleton(mysqlOptions);
+            else
+            {
+                services.AddSingleton(mysqlOptions);
+            }
         }
-
-#if NETSTANDARD1_6
-        private IServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
-        }
-#else
-        private ServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
-        }
-#endif
     }
 }

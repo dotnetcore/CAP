@@ -85,7 +85,6 @@ namespace DotNetCore.CAP.MySql.Test
         [Fact]
         public async Task GetReceivedMessageAsync_Test()
         {
-
             var sql = $@"
         INSERT INTO `cap.received`(`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
         VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT @@IDENTITY;";
@@ -129,6 +128,5 @@ namespace DotNetCore.CAP.MySql.Test
             Assert.Equal("MySqlStorageConnectionTest", message.Name);
             Assert.Equal("mygroup", message.Group);
         }
-
     }
 }

@@ -14,8 +14,7 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
-        private IConnectionFactory _connectionFactory;
-        private IConnection _connection;
+        private ConnectionPool _connectionPool;
         private IModel _channel;
         private ulong _deliveryTag;
 
@@ -23,9 +22,12 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public event EventHandler<string> OnError;
 
-        public RabbitMQConsumerClient(string queueName, RabbitMQOptions options)
+        public RabbitMQConsumerClient(string queueName,
+             ConnectionPool connectionPool,
+             RabbitMQOptions options)
         {
             _queueName = queueName;
+            _connectionPool = connectionPool;
             _rabbitMQOptions = options;
             _exchageName = options.TopicExchangeName;
 
@@ -34,20 +36,9 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void InitClient()
         {
-            _connectionFactory = new ConnectionFactory()
-            {
-                HostName = _rabbitMQOptions.HostName,
-                UserName = _rabbitMQOptions.UserName,
-                Port = _rabbitMQOptions.Port,
-                Password = _rabbitMQOptions.Password,
-                VirtualHost = _rabbitMQOptions.VirtualHost,
-                RequestedConnectionTimeout = _rabbitMQOptions.RequestedConnectionTimeout,
-                SocketReadTimeout = _rabbitMQOptions.SocketReadTimeout,
-                SocketWriteTimeout = _rabbitMQOptions.SocketWriteTimeout
-            };
+            var connection = _connectionPool.Rent();
 
-            _connection = _connectionFactory.CreateConnection();
-            _channel = _connection.CreateModel();
+            _channel = connection.CreateModel();
 
             _channel.ExchangeDeclare(
                 exchange: _exchageName,
@@ -60,6 +51,8 @@ namespace DotNetCore.CAP.RabbitMQ
                 exclusive: false,
                 autoDelete: false,
                 arguments: arguments);
+
+            _connectionPool.Return(connection);
         }
 
         public void Subscribe(IEnumerable<string> topics)
@@ -92,7 +85,6 @@ namespace DotNetCore.CAP.RabbitMQ
         public void Dispose()
         {
             _channel.Dispose();
-            _connection.Dispose();
         }
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)

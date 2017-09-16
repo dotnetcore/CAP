@@ -42,7 +42,7 @@ namespace DotNetCore.CAP
             {
                 throw new ArgumentNullException(nameof(Servers));
             }
-            
+
             MainConfig.Add("bootstrap.servers", Servers);
 
             MainConfig["queue.buffering.max.ms"] = "10";

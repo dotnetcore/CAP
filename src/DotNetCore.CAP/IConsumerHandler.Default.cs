@@ -47,7 +47,7 @@ namespace DotNetCore.CAP
 
         public void Start()
         {
-            var groupingMatchs = _selector.GetCandidatesMethodsOfGroupNameGrouped(_serviceProvider);
+            var groupingMatchs = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
             foreach (var matchGroup in groupingMatchs)
             {
