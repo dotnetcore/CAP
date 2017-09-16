@@ -33,13 +33,13 @@ namespace DotNetCore.CAP.Internal
             return executeDescriptor.FirstOrDefault(x => x.Attribute.Name == key);
         }
 
-        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(IServiceProvider provider)
+        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates()
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
-            executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(provider));
+            executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(_serviceProvider));
 
-            executorDescriptorList.AddRange(FindConsumersFromControllerTypes(provider));
+            executorDescriptorList.AddRange(FindConsumersFromControllerTypes(_serviceProvider));
 
             return executorDescriptorList;
         }
@@ -48,35 +48,38 @@ namespace DotNetCore.CAP.Internal
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
-
-            var consumerServices = provider.GetServices<ICapSubscribe>();
-            foreach (var service in consumerServices)
+            
+            using (var scoped = provider.CreateScope())
             {
-                var typeInfo = service.GetType().GetTypeInfo();
-                if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
+                var scopedProvider = scoped.ServiceProvider;
+                var consumerServices = scopedProvider.GetServices<ICapSubscribe>();
+                foreach (var service in consumerServices)
                 {
-                    continue;
-                }
+                    var typeInfo = service.GetType().GetTypeInfo();
+                    if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
+                    {
+                        continue;
+                    }
 
-                executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                }
+                return executorDescriptorList;
             }
-            return executorDescriptorList;
         }
 
         private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes(
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
-            // at cap startup time, find all Controller into the DI container,the type is object.
-            var controllers = provider.GetServices<object>();
-            foreach (var controller in controllers)
+
+            var types = Assembly.GetEntryAssembly().ExportedTypes;
+            foreach (var type in types)
             {
-                var typeInfo = controller.GetType().GetTypeInfo();
-
-                //double check
-                if (!Helper.IsController(typeInfo)) continue;
-
-                executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                var typeInfo = type.GetTypeInfo();
+                if (Helper.IsController(typeInfo))
+                {
+                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                }
             }
 
             return executorDescriptorList;

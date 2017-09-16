@@ -25,14 +25,13 @@ namespace DotNetCore.CAP
             IOptions<CapOptions> options,
             IStorage storage,
             IApplicationLifetime appLifetime,
-            IServiceProvider provider)
+            IEnumerable<IProcessingServer> servers)
         {
             _logger = logger;
             _appLifetime = appLifetime;
             Options = options.Value;
             Storage = storage;
-            Provider = provider;
-            Servers = Provider.GetServices<IProcessingServer>();
+            Servers = servers;
 
             _cts = new CancellationTokenSource();
             _ctsRegistration = appLifetime.ApplicationStopping.Register(() =>
@@ -54,8 +53,6 @@ namespace DotNetCore.CAP
         protected IStorage Storage { get; }
 
         protected IEnumerable<IProcessingServer> Servers { get; }
-
-        public IServiceProvider Provider { get; private set; }
 
         public Task BootstrapAsync()
         {

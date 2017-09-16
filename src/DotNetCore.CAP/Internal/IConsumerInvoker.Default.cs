@@ -35,25 +35,29 @@ namespace DotNetCore.CAP.Internal
         {
             _logger.LogDebug("Executing consumer Topic: {0}", _consumerContext.ConsumerDescriptor.MethodInfo.Name);
 
-            var obj = ActivatorUtilities.GetServiceOrCreateInstance(_serviceProvider,
-                    _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType());
-
-            var jsonConent = _consumerContext.DeliverMessage.Content;
-            var message = Helper.FromJson<Message>(jsonConent);
-
-            object result = null;
-            if (_executor.MethodParameters.Length > 0)
+            using (var scope = _serviceProvider.CreateScope())
             {
-                result = await ExecuteWithParameterAsync(obj, message.Content.ToString());
-            }
-            else
-            {
-                result = await ExecuteAsync(obj);
-            }
+                var provider = scope.ServiceProvider;
+                var serviceType = _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType();
+                var obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, serviceType);
 
-            if (!string.IsNullOrEmpty(message.CallbackName))
-            {
-                await SentCallbackMessage(message.Id, message.CallbackName, result);
+                var jsonConent = _consumerContext.DeliverMessage.Content;
+                var message = Helper.FromJson<Message>(jsonConent);
+
+                object result = null;
+                if (_executor.MethodParameters.Length > 0)
+                {
+                    result = await ExecuteWithParameterAsync(obj, message.Content.ToString());
+                }
+                else
+                {
+                    result = await ExecuteAsync(obj);
+                }
+
+                if (!string.IsNullOrEmpty(message.CallbackName))
+                {
+                    await SentCallbackMessage(message.Id, message.CallbackName, result);
+                }
             }
         }
 

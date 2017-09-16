@@ -10,27 +10,29 @@ namespace DotNetCore.CAP.RabbitMQ
     internal sealed class PublishQueueExecutor : BasePublishQueueExecutor
     {
         private readonly ILogger _logger;
-        private readonly IConnection _connection;
+        private readonly ConnectionPool _connectionPool;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
         public PublishQueueExecutor(
             CapOptions options,
             IStateChanger stateChanger,
-            IConnection connection,
+            ConnectionPool connectionPool,
             RabbitMQOptions rabbitMQOptions,
             ILogger<PublishQueueExecutor> logger)
             : base(options, stateChanger, logger)
         {
             _logger = logger;
-            _connection = connection;
+            _connectionPool = connectionPool;
             _rabbitMQOptions = rabbitMQOptions;
         }
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)
         {
+            var connection = _connectionPool.Rent();
+
             try
             {
-                using (var channel = _connection.CreateModel())
+                using (var channel = connection.CreateModel())
                 {
                     var body = Encoding.UTF8.GetBytes(content);
 
@@ -54,6 +56,10 @@ namespace DotNetCore.CAP.RabbitMQ
                         Code = ex.HResult.ToString(),
                         Description = ex.Message
                     }));
+            }
+            finally
+            {
+                _connectionPool.Return(connection);
             }
         }
     }
