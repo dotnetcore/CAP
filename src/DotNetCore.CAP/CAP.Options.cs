@@ -23,7 +23,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Default succeeded message expriation timespan, in seconds.
         /// </summary>
-        public const int DefaultSucceedMessageExpirationAfter = 3600;
+        public const int DefaultSucceedMessageExpirationAfter = 24 * 3600;
 
         /// <summary>
         /// Failed message retry waiting interval.
@@ -53,7 +53,7 @@ namespace DotNetCore.CAP
 
         /// <summary>
         /// Sent or received succeed message after timespan of due, then the message will be deleted at due time. 
-        /// Dafault is 3600 seconds.
+        /// Dafault is 24*3600 seconds.
         /// </summary>
         public int SucceedMessageExpiredAfter { get; set; }
 
