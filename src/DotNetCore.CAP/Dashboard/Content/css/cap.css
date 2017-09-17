@@ -1,4 +1,4 @@
- /* Sticky footer styles
+/* Sticky footer styles
 -------------------------------------------------- */
 
 html, body {
@@ -247,7 +247,7 @@ a:hover .label-hover {
     .job-snippet-code code {
         display: block;
         color: black;
-        background-color:#f5f5f5;
+        background-color: #f5f5f5;
     }
 
     .job-snippet-code pre .comment {
@@ -534,15 +534,15 @@ div.metric-null {
 }
 
 .subscribe-table td {
-    vertical-align:middle !important;
+    vertical-align: middle !important;
 }
 
-.subscribe-table td[rowspan]{
-    font-weight:bold;
-}
+    .subscribe-table td[rowspan] {
+        font-weight: bold;
+    }
 
 #legend {
-    background: #f1efef;
+    background: rgba(173, 169, 169, 0.13);
     position: absolute;
     top: 110px;
     right: 20px;
