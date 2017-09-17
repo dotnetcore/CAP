@@ -184,7 +184,7 @@
     <value>Enqueued jobs</value>
   </data>
   <data name="HomePage_HistoryGraph" xml:space="preserve">
-    <value>History graph</value>
+    <value>24h graph</value>
   </data>
   <data name="HomePage_RealtimeGraph" xml:space="preserve">
     <value>Realtime graph</value>

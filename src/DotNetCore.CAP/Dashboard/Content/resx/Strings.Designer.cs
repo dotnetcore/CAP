@@ -367,7 +367,7 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to History graph.
+        ///   Looks up a localized string similar to 24h graph.
         /// </summary>
         public static string HomePage_HistoryGraph {
             get {

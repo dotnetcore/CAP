@@ -184,10 +184,10 @@
     <value>队列作业</value>
   </data>
   <data name="HomePage_HistoryGraph" xml:space="preserve">
-    <value>历史图表走势</value>
+    <value>当日走势</value>
   </data>
   <data name="HomePage_RealtimeGraph" xml:space="preserve">
-    <value>实时图表走势</value>
+    <value>实时走势</value>
   </data>
   <data name="HomePage_Title" xml:space="preserve">
     <value>仪表盘</value>
