@@ -1,0 +1,46 @@
+﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
+@using DotNetCore.CAP.Dashboard
+@using DotNetCore.CAP.Dashboard.Pages
+@using DotNetCore.CAP.Dashboard.Resources
+@inherits RazorPage
+@{
+    Layout = new LayoutPage(Strings.NodePage_Title);
+}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="page-header">@Strings.NodePage_Title</h1>
+
+        @if (Nodes == null || Nodes.Count==0)
+        {
+            <div class="alert alert-warning">
+                @Strings.NodePage_NoNodes
+            </div>
+        }
+        else
+        { 
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th width="20%">节点名称</th>
+                            <th width="20%">IP地址</th>
+                            <th>Tags</th>
+                            <th width="20%">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var node in Nodes)
+                        {
+                            <tr>
+                                <td>@node.Name</td>
+                                <td>@node.Address</td>
+
+                                <td><a class="btn">切换到</a></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

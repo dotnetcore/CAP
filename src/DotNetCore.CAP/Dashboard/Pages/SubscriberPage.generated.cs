@@ -96,7 +96,7 @@ WriteLiteral("            <div class=\"alert alert-warning\">\r\n               
 
             
             #line 21 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
-           Write(Strings.ServersPage_NoServers);
+           Write(Strings.SubscribersPage_NoSubscribers);
 
             
             #line default
