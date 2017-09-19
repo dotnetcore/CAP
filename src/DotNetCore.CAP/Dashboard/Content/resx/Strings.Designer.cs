@@ -664,6 +664,24 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to There are no config distributed node discory. .
+        /// </summary>
+        public static string NodePage_NoNodes {
+            get {
+                return ResourceManager.GetString("NodePage_NoNodes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Nodes.
+        /// </summary>
+        public static string NodePage_Title {
+            get {
+                return ResourceManager.GetString("NodePage_Title", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Next.
         /// </summary>
         public static string Paginator_Next {
@@ -732,15 +750,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string ReceivedPage_Title {
             get {
                 return ResourceManager.GetString("ReceivedPage_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to There are no active servers. Background tasks will not be processed..
-        /// </summary>
-        public static string ServersPage_NoServers {
-            get {
-                return ResourceManager.GetString("ServersPage_NoServers", resourceCulture);
             }
         }
         
@@ -822,6 +831,15 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string SidebarMenu_Succeeded {
             get {
                 return ResourceManager.GetString("SidebarMenu_Succeeded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no config CAP subscribers..
+        /// </summary>
+        public static string SubscribersPage_NoSubscribers {
+            get {
+                return ResourceManager.GetString("SubscribersPage_NoSubscribers", resourceCulture);
             }
         }
         

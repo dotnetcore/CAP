@@ -396,4 +396,13 @@
   <data name="HomePage_GraphHover_RSucceeded" xml:space="preserve">
     <value>消费成功</value>
   </data>
+  <data name="NodePage_NoNodes" xml:space="preserve">
+    <value>你需要配置分布式节点发现功能。</value>
+  </data>
+  <data name="NodePage_Title" xml:space="preserve">
+    <value>节点列表</value>
+  </data>
+  <data name="SubscribersPage_NoSubscribers" xml:space="preserve">
+    <value>没有配置CAP订阅者</value>
+  </data>
 </root>

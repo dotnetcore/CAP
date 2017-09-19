@@ -213,8 +213,8 @@
   <data name="PerPageSelector_ItemsPerPage" xml:space="preserve">
     <value>Items per page</value>
   </data>
-  <data name="ServersPage_NoServers" xml:space="preserve">
-    <value>There are no active servers. Background tasks will not be processed.</value>
+  <data name="NodePage_NoNodes" xml:space="preserve">
+    <value>There are no config distributed node discory. </value>
   </data>
   <data name="ServersPage_Table_Heartbeat" xml:space="preserve">
     <value>Heartbeat</value>
@@ -374,5 +374,11 @@
   </data>
   <data name="HomePage_GraphHover_RSucceeded" xml:space="preserve">
     <value>Consumption Succeeded</value>
+  </data>
+  <data name="NodePage_Title" xml:space="preserve">
+    <value>Nodes</value>
+  </data>
+  <data name="SubscribersPage_NoSubscribers" xml:space="preserve">
+    <value>There are no config CAP subscribers.</value>
   </data>
 </root>
