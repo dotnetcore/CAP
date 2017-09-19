@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using DotNetCore.CAP.Dashboard;
+using DotNetCore.CAP.NodeDiscovery;
 
 namespace DotNetCore.CAP
 {
@@ -18,6 +19,8 @@ namespace DotNetCore.CAP
         /// The path for the Back To Site link. Set to <see langword="null" /> in order to hide the Back To Site link.
         /// </summary>
         public string AppPath { get; set; }
+
+        public NodeConfiguration Discovery { get; set; }
 
         public IEnumerable<IDashboardAuthorizationFilter> Authorization { get; set; }
 

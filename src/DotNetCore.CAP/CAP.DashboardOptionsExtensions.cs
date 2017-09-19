@@ -5,6 +5,7 @@ using System.Text;
 namespace DotNetCore.CAP
 {
     using DotNetCore.CAP.Dashboard;
+    using DotNetCore.CAP.NodeDiscovery;
     using Microsoft.Extensions.DependencyInjection;
 
     internal sealed class DashboardOptionsExtension : ICapOptionsExtension
@@ -20,8 +21,10 @@ namespace DotNetCore.CAP
         {
             var dashboardOptions = new DashboardOptions();
             _options?.Invoke(dashboardOptions);
-            services.AddSingleton(dashboardOptions);
+            services.AddSingleton(dashboardOptions); 
             services.AddSingleton(DashboardRoutes.Routes);
+            services.AddSingleton<IDiscoveryProviderFactory, DiscoveryProviderFactory>();
+            services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
         }
     }
 }

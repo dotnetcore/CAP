@@ -44,6 +44,7 @@
     <EmbeddedResource Include="Dashboard\Content\js\rickshaw.min.js" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Consul" Version="0.7.2.3" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.0.0" />
@@ -126,6 +127,9 @@
    <Compile Update="Dashboard\Pages\SubscriberPage.generated.cs">
       <DependentUpon>SubscriberPage.cshtml</DependentUpon>
     </Compile>
+    <Compile Update="Dashboard\Pages\NodePage*.cs">
+      <DependentUpon>NodePage.cshtml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Update="Dashboard\Content\resx\Strings.resx">
@@ -138,5 +142,8 @@
     <None Update="Dashboard\Pages\HomePage.cshtml">
       <Generator>RazorGenerator</Generator>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Dashboard\Consul\" />
   </ItemGroup>
 </Project>
