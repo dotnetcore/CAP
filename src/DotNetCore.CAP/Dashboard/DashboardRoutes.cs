@@ -102,10 +102,11 @@ namespace DotNetCore.CAP.Dashboard
             Routes.AddRazorPage(
                "/received/(?<StatusName>.+)",
                 x => new ReceivedPage(x.Groups["StatusName"].Value));
-            Routes.AddRazorPage("/subscribers", x => new SubscriberPage());           
 
-            //Routes.AddRazorPage("/servers", x => new ServersPage());
-            //Routes.AddRazorPage("/retries", x => new RetriesPage());
+            Routes.AddRazorPage("/subscribers", x => new SubscriberPage());         
+
+            Routes.AddRazorPage("/nodes", x => new NodePage());
+  
 
             #endregion Razor pages and commands
         }

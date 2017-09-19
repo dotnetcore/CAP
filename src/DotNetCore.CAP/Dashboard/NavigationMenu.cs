@@ -36,9 +36,9 @@ namespace DotNetCore.CAP.Dashboard
                 Metric = DashboardMetrics.SubscriberCount
             });
 
-            Items.Add(page => new MenuItem(Strings.NavigationMenu_Servers, page.Url.To("/servers"))
+            Items.Add(page => new MenuItem(Strings.NavigationMenu_Servers, page.Url.To("/nodes"))
             {
-                Active = page.RequestPath.Equals("/servers"),
+                Active = page.RequestPath.Equals("/nodes"),
                 Metric = DashboardMetrics.ServerCount
             });
         }
