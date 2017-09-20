@@ -61,7 +61,7 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
             return Ok();
         }
 
-        [CapSubscribe("sample.rabbitmq.mysql33333")]
+        [CapSubscribe("sample.rabbitmq.mysql33333",Group ="Test.Group")]
         public void KafkaTest22(Person person)
         {
             var aa = _dbContext.Database;

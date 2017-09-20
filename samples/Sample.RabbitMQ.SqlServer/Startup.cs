@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sample.RabbitMQ.SqlServer.Services;
@@ -19,8 +20,21 @@ namespace Sample.RabbitMQ.SqlServer
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ("localhost");
+                x.UseRabbitMQ(z =>
+                {
+                    z.HostName = "192.168.2.206";
+                    z.UserName = "admin";
+                    z.Password = "123123";
+                });
                 x.UseDashboard();
+                x.UseDiscovery(d =>
+                {
+                    d.DiscoveryServerHostName = "localhost";
+                    d.DiscoveryServerProt = 8500;
+                    d.CurrentNodeHostName = "localhost";
+                    d.CurrentNodePort = 5800;
+                    d.NodeName = "CAP一号节点";
+                });
             });
 
             services.AddMvc();

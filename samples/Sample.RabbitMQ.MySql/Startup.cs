@@ -23,6 +23,15 @@ namespace Sample.RabbitMQ.MySql
                     y.UserName = "admin";
                     y.Password = "123123";
                 });
+                x.UseDashboard();
+                x.UseDiscovery(d =>
+                {
+                    d.DiscoveryServerHostName = "localhost";
+                    d.DiscoveryServerProt = 8500;
+                    d.CurrentNodeHostName = "localhost";
+                    d.CurrentNodePort = 5800;
+                    d.NodeName = "CAP 1号节点";
+                });
             });
 
             services.AddMvc();
@@ -36,6 +45,7 @@ namespace Sample.RabbitMQ.MySql
             app.UseMvc();
 
             app.UseCap();
+            app.UseCapDashboard();
         }
     }
 }
