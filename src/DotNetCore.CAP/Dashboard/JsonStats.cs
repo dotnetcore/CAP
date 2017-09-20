@@ -42,4 +42,13 @@ namespace DotNetCore.CAP.Dashboard
             }
         }
     }
+
+    internal class OkStats : IDashboardDispatcher
+    {
+        public Task Dispatch(DashboardContext context)
+        {
+            context.Response.StatusCode = 200;
+            return Task.CompletedTask;
+        }
+    }
 }
