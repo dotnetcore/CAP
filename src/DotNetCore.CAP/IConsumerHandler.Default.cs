@@ -79,7 +79,7 @@ namespace DotNetCore.CAP
 
             try
             {
-                _compositeTask.Wait(TimeSpan.FromSeconds(60));
+                _compositeTask.Wait(TimeSpan.FromSeconds(10));
             }
             catch (AggregateException ex)
             {

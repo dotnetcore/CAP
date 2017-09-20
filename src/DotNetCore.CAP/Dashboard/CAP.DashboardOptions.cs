@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using DotNetCore.CAP.Dashboard;
-using DotNetCore.CAP.NodeDiscovery;
 
 namespace DotNetCore.CAP
 {
@@ -20,8 +19,6 @@ namespace DotNetCore.CAP
         /// </summary>
         public string AppPath { get; set; }
 
-        public NodeConfiguration Discovery { get; set; }
-
         public IEnumerable<IDashboardAuthorizationFilter> Authorization { get; set; }
 
         /// <summary>
@@ -29,4 +26,5 @@ namespace DotNetCore.CAP
         /// </summary>
         public int StatsPollingInterval { get; set; }
     }
+
 }

@@ -32,6 +32,7 @@ namespace DotNetCore.CAP.Dashboard
             Routes = new RouteCollection();
             Routes.AddRazorPage("/", x => new HomePage());
             Routes.Add("/stats", new JsonStats());
+            Routes.Add("/health",new OkStats());
 
             #region Embedded static content
 

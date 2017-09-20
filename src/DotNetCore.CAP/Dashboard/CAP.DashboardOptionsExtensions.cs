@@ -22,9 +22,7 @@ namespace DotNetCore.CAP
             var dashboardOptions = new DashboardOptions();
             _options?.Invoke(dashboardOptions);
             services.AddSingleton(dashboardOptions); 
-            services.AddSingleton(DashboardRoutes.Routes);
-            services.AddSingleton<IDiscoveryProviderFactory, DiscoveryProviderFactory>();
-            services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
+            services.AddSingleton(DashboardRoutes.Routes);          
         }
     }
 }
