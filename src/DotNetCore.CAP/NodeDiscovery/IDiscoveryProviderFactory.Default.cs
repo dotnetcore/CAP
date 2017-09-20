@@ -6,14 +6,14 @@ namespace DotNetCore.CAP.NodeDiscovery
 {
     class DiscoveryProviderFactory : IDiscoveryProviderFactory
     {
-        public INodeDiscoveryProvider Get(NodeConfiguration configuration)
+        public INodeDiscoveryProvider Create(DiscoveryOptions options)
         {
-            if (configuration == null)
+            if (options == null)
             {
-                return null;
+                throw new ArgumentNullException(nameof(options));
             }
 
-            return new ConsulNodeDiscoveryProvider(configuration.ServerHostName, configuration.ServerProt);
+            return new ConsulNodeDiscoveryProvider(options);
         }
     }
 }

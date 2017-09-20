@@ -7,63 +7,62 @@ using Consul;
 
 namespace DotNetCore.CAP.NodeDiscovery
 {
-    class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider
+    class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider, IDisposable
     {
-        private readonly string _hostName;
-        private readonly int _port;
+        private ConsulClient _consul;
+        private readonly DiscoveryOptions _options;
 
-        private readonly ConsulClient _consul;
-
-        public ConsulNodeDiscoveryProvider(string hostName, int port)
+        public ConsulNodeDiscoveryProvider(DiscoveryOptions options)
         {
-            _hostName = hostName;
-            _port = port;
+            _options = options;
 
+            InitClient();
+        }
+
+        public void InitClient()
+        {
             _consul = new ConsulClient(config =>
             {
-                config.Address = new Uri($"http://{_hostName}:{_port}");
+                config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerProt}");
             });
         }
 
         public async Task<IList<Node>> GetNodes()
         {
-            var members = await _consul.Agent.Members(false);
+            var services = await _consul.Agent.Services();
 
-            var nodes = members.Response.Select(x => new Node
+            var nodes = services.Response.Select(x => new Node
             {
-                Address = x.Addr,
-                Name = x.Name
+                Name = x.Key,
+                Address = x.Value.Address,
+                Port = x.Value.Port,
+                Tags = string.Join(", ", x.Value.Tags)
             });
 
             return nodes.ToList();
         }
 
-        public Task RegisterNode(string address, int port)
+        public Task RegisterNode()
         {
-            //CatalogRegistration registration = new CatalogRegistration();
-            //registration.Node = "CAP";
-            //registration.Address = "192.168.2.55";
-            //registration.Service = new AgentService
-            //{
-            //    Port = 5000,
-            //    Service = "CAP.Test.Service"
-            //};
-            //return _consul.Catalog.Register(registration);
-
             return _consul.Agent.ServiceRegister(new AgentServiceRegistration
             {
-                Name = "CAP",
-                Port = port,
-                Address = address,
+                Name = _options.NodeName,
+                Address = _options.CurrentNodeHostName,
+                Port = _options.CurrentNodePort,
                 Tags = new string[] { "CAP", "Client", "Dashboard" },
                 Check = new AgentServiceCheck
                 {
                     DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30),
                     Interval = TimeSpan.FromSeconds(10),
                     Status = HealthStatus.Passing,
-                    HTTP = "/CAP"
+                    HTTP = $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/health"
                 }
             });
+        }
+
+        public void Dispose()
+        {
+            _consul.Dispose();
         }
     }
 }

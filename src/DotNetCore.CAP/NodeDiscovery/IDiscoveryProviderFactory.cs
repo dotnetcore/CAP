@@ -6,6 +6,6 @@ namespace DotNetCore.CAP.NodeDiscovery
 {
     interface IDiscoveryProviderFactory
     {
-        INodeDiscoveryProvider Get(NodeConfiguration configuration);
+        INodeDiscoveryProvider Create(DiscoveryOptions options);
     }
 }

@@ -6,11 +6,12 @@ namespace DotNetCore.CAP.NodeDiscovery
 {
     class Node
     {
-
         public string Name { get; set; }
 
         public string Address { get; set; }
 
+        public int Port { get; set; }
 
+        public string Tags { get; set; }
     }
 }

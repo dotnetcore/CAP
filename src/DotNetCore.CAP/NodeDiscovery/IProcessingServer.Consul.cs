@@ -6,11 +6,11 @@ namespace DotNetCore.CAP.NodeDiscovery
 {
     class ConsulProcessingNodeServer : IProcessingServer
     {
-        private readonly DashboardOptions dashboardOptions;
+        private readonly DiscoveryOptions dashboardOptions;
         private readonly IDiscoveryProviderFactory discoveryProviderFactory;
 
         public ConsulProcessingNodeServer(
-            DashboardOptions dashboardOptions,
+            DiscoveryOptions dashboardOptions,
             IDiscoveryProviderFactory discoveryProviderFactory)
         {
             this.dashboardOptions = dashboardOptions;
@@ -19,16 +19,14 @@ namespace DotNetCore.CAP.NodeDiscovery
 
         public void Start()
         {
-            if (dashboardOptions.Discovery != null)
-            {
-                var discoveryProvider = discoveryProviderFactory.Get(dashboardOptions.Discovery);
-                discoveryProvider.RegisterNode("192.168.2.55", dashboardOptions.Discovery.CurrentPort);
-            }
+            var discoveryProvider = discoveryProviderFactory.Create(dashboardOptions);
+
+            discoveryProvider.RegisterNode();
         }
 
         public void Pulse()
         {
-
+            //ignore
         }
 
         public void Dispose()

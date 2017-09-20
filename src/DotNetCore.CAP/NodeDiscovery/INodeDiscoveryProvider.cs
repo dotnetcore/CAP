@@ -9,6 +9,6 @@ namespace DotNetCore.CAP.NodeDiscovery
     {
         Task<IList<Node>> GetNodes();
 
-        Task RegisterNode(string address, int port);
+        Task RegisterNode();
     }
 }
