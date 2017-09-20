@@ -63,7 +63,7 @@ namespace DotNetCore.CAP.Kafka
 
         private void InitKafkaClient()
         {
-            _kafkaOptions.MainConfig.Add("group.id", _groupId);
+            _kafkaOptions.MainConfig["group.id"] = _groupId;
 
             var config = _kafkaOptions.AskafkaConfig();
             _consumerClient = new Consumer<Null, string>(config, null, StringDeserializer);

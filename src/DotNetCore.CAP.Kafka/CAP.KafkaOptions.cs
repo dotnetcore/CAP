@@ -10,6 +10,9 @@ namespace DotNetCore.CAP
     /// </summary>
     public class KafkaOptions
     {
+        private IEnumerable<KeyValuePair<string, object>> _kafkaConfig;
+
+
         public KafkaOptions()
         {
             MainConfig = new Dictionary<string, object>();
@@ -33,23 +36,21 @@ namespace DotNetCore.CAP
 
         internal IEnumerable<KeyValuePair<string, object>> AskafkaConfig()
         {
-            if (MainConfig.ContainsKey("bootstrap.servers"))
+            if (_kafkaConfig == null)
             {
-                return MainConfig.AsEnumerable();
+                if (string.IsNullOrWhiteSpace(Servers))
+                {
+                    throw new ArgumentNullException(nameof(Servers));
+                }
+
+                MainConfig["bootstrap.servers"] = Servers;
+                MainConfig["queue.buffering.max.ms"] = "10";
+                MainConfig["socket.blocking.max.ms"] = "10";
+                MainConfig["enable.auto.commit"] = "false";
+
+                _kafkaConfig = MainConfig.AsEnumerable();
             }
-
-            if (string.IsNullOrWhiteSpace(Servers))
-            {
-                throw new ArgumentNullException(nameof(Servers));
-            }
-
-            MainConfig.Add("bootstrap.servers", Servers);
-
-            MainConfig["queue.buffering.max.ms"] = "10";
-            MainConfig["socket.blocking.max.ms"] = "10";
-            MainConfig["enable.auto.commit"] = "false";
-
-            return MainConfig.AsEnumerable();
+            return _kafkaConfig;
         }
     }
 }
