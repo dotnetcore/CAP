@@ -155,12 +155,13 @@ WriteLiteral("</th>\r\n                        </tr>\r\n                    </th
                          foreach (var subscriber in subscribers)
                         {
                             var i = 0;
+                            var rowCount = subscriber.Value.Count;
                             
             
             #line default
             #line hidden
             
-            #line 41 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 42 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                              foreach (var column in subscriber.Value)
                             {
 
@@ -171,7 +172,7 @@ WriteLiteral("                                <tr>\r\n");
 
 
             
-            #line 44 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 45 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                      if (i == 0)
                                     {
 
@@ -182,8 +183,8 @@ WriteLiteral("                                        <td rowspan=\"");
 
 
             
-            #line 46 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
-                                                Write(subscriber.Value.Count);
+            #line 47 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+                                                Write(rowCount);
 
             
             #line default
@@ -192,8 +193,8 @@ WriteLiteral("\">");
 
 
             
-            #line 46 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
-                                                                         Write(subscriber.Key);
+            #line 47 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+                                                           Write(subscriber.Key);
 
             
             #line default
@@ -202,7 +203,7 @@ WriteLiteral("</td>\r\n");
 
 
             
-            #line 47 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 48 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                     }
 
             
@@ -212,7 +213,7 @@ WriteLiteral("                                    <td>");
 
 
             
-            #line 48 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 49 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                    Write(column.Attribute.Name);
 
             
@@ -223,7 +224,7 @@ WriteLiteral("</td>\r\n                                    <td>\r\n             
 
 
             
-            #line 50 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 51 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                                                Write(column.ImplTypeInfo.Name);
 
             
@@ -235,7 +236,7 @@ WriteLiteral("</span>：\r\n                                        <div class=\
 
 
             
-            #line 53 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 54 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                                 Write(Html.MethodEscaped(column.MethodInfo));
 
             
@@ -248,7 +249,7 @@ WriteLiteral("</pre>\r\n                                            </code>\r\n 
 
 
             
-            #line 58 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 59 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
                                 i++;
                             }
                         }
@@ -260,7 +261,7 @@ WriteLiteral("                    </tbody>\r\n                </table>\r\n      
 
 
             
-            #line 64 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
+            #line 65 "..\..\Dashboard\Pages\SubscriberPage.cshtml"
         }
 
             

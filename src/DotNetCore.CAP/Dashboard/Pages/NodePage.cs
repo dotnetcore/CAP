@@ -15,13 +15,12 @@ namespace DotNetCore.CAP.Dashboard.Pages
             {
                 if (_nodes == null)
                 {
-                    var configOptions = RequestServices.GetService<DashboardOptions>();
-                    var discoveryServer = configOptions.Discovery;
-                    if (discoveryServer == null)
-                        return null;
+                    var configOptions = RequestServices.GetService<DiscoveryOptions>();
 
                     var factory = RequestServices.GetService<IDiscoveryProviderFactory>();
-                    var discoryProvider = factory.Get(discoveryServer);
+
+                    var discoryProvider = factory.Create(configOptions);
+
                     _nodes = discoryProvider.GetNodes().GetAwaiter().GetResult();
                 }
                 return _nodes;

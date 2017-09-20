@@ -38,12 +38,13 @@
                         @foreach (var subscriber in subscribers)
                         {
                             var i = 0;
+                            var rowCount = subscriber.Value.Count;
                             @foreach (var column in subscriber.Value)
                             {
                                 <tr>
                                     @if (i == 0)
                                     {
-                                        <td rowspan="@subscriber.Value.Count">@subscriber.Key</td>
+                                        <td rowspan="@rowCount">@subscriber.Key</td>
                                     }
                                     <td>@column.Attribute.Name</td>
                                     <td>

@@ -106,8 +106,11 @@ WriteLiteral(@"            <div class=""table-responsive"">
                 <table class=""table"">
                     <thead>
                         <tr>
-                            <th width=""50%"">节点名称</th>
-                            <th width=""50%"">IP地址</th>
+                            <th width=""20%"">节点名称</th>
+                            <th width=""20%"">IP地址</th>
+                            <th width=""7%"">端口号</th>
+                            <th>Tags</th>
+                            <th width=""20%"">操作</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -115,7 +118,7 @@ WriteLiteral(@"            <div class=""table-responsive"">
 
 
             
-            #line 30 "..\..\Dashboard\Pages\NodePage.cshtml"
+            #line 33 "..\..\Dashboard\Pages\NodePage.cshtml"
                          foreach (var node in Nodes)
                         {
 
@@ -126,7 +129,7 @@ WriteLiteral("                            <tr>\r\n                              
 
 
             
-            #line 33 "..\..\Dashboard\Pages\NodePage.cshtml"
+            #line 36 "..\..\Dashboard\Pages\NodePage.cshtml"
                                Write(node.Name);
 
             
@@ -136,17 +139,38 @@ WriteLiteral("</td>\r\n                                <td>");
 
 
             
-            #line 34 "..\..\Dashboard\Pages\NodePage.cshtml"
+            #line 37 "..\..\Dashboard\Pages\NodePage.cshtml"
                                Write(node.Address);
 
             
             #line default
             #line hidden
-WriteLiteral("</td>\r\n                            </tr>\r\n");
+WriteLiteral("</td>\r\n                                <td>");
 
 
             
-            #line 36 "..\..\Dashboard\Pages\NodePage.cshtml"
+            #line 38 "..\..\Dashboard\Pages\NodePage.cshtml"
+                               Write(node.Port);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</td>\r\n                                <td>");
+
+
+            
+            #line 39 "..\..\Dashboard\Pages\NodePage.cshtml"
+                               Write(node.Tags);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</td>\r\n                                <td><a class=\"btn\">切换到</a></td>\r\n         " +
+"                   </tr>\r\n");
+
+
+            
+            #line 42 "..\..\Dashboard\Pages\NodePage.cshtml"
                         }
 
             
@@ -156,7 +180,7 @@ WriteLiteral("                    </tbody>\r\n                </table>\r\n      
 
 
             
-            #line 40 "..\..\Dashboard\Pages\NodePage.cshtml"
+            #line 46 "..\..\Dashboard\Pages\NodePage.cshtml"
         }
 
             

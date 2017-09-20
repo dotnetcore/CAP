@@ -24,6 +24,7 @@
                         <tr>
                             <th width="20%">节点名称</th>
                             <th width="20%">IP地址</th>
+                            <th width="7%">端口号</th>
                             <th>Tags</th>
                             <th width="20%">操作</th>
                         </tr>
@@ -34,8 +35,9 @@
                             <tr>
                                 <td>@node.Name</td>
                                 <td>@node.Address</td>
-
-                                <td><a class="btn">切换到</a></td>
+                                <td>@node.Port</td>
+                                <td>@node.Tags</td>
+                                <td><a href="javascript:;" class="btn-link">切换到</a></td>
                             </tr>
                         }
                     </tbody>
