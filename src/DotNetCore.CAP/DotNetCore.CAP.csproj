@@ -143,7 +143,4 @@
       <Generator>RazorGenerator</Generator>
     </None>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Dashboard\Consul\" />
-  </ItemGroup>
 </Project>

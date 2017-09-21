@@ -5,7 +5,8 @@ using System.Text;
 namespace DotNetCore.CAP
 {
     using DotNetCore.CAP.Dashboard;
-    using DotNetCore.CAP.NodeDiscovery;
+    using DotNetCore.CAP.Dashboard.GatewayProxy;
+    using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
     using Microsoft.Extensions.DependencyInjection;
 
     internal sealed class DashboardOptionsExtension : ICapOptionsExtension
@@ -23,6 +24,10 @@ namespace DotNetCore.CAP
             _options?.Invoke(dashboardOptions);
             services.AddSingleton(dashboardOptions); 
             services.AddSingleton(DashboardRoutes.Routes);          
+            services.AddSingleton<IHttpRequester, HttpClientHttpRequester>();
+            services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
+
+            services.AddScoped<IRequestScopedDataRepository, HttpDataRepository>();
         }
     }
 }

@@ -1,5 +1,7 @@
 ﻿using System;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Dashboard.GatewayProxy.Request.Middleware;
+using DotNetCore.CAP.Dashboard.GatewayProxy.Requester.Middleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -49,7 +51,13 @@ namespace Microsoft.AspNetCore.Builder
                 throw new InvalidOperationException("Add Cap must be called on the service collection.");
             }
 
-            app.Map(new PathString(pathMatch), x => x.UseMiddleware<DashboardMiddleware>());
+            app.Map(new PathString(pathMatch), x =>
+            {
+                x.UseDownstreamRequestInitialiser();
+                x.UseHttpRequestBuilderMiddleware();
+                x.UseHttpRequesterMiddleware();
+                x.UseMiddleware<DashboardMiddleware>();
+            });
 
             return app;
         }
