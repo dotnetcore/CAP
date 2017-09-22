@@ -26,7 +26,7 @@ namespace Sample.Kafka.SqlServer
                     d.NodeName = "CAP 2号节点";
                 });
             });
-
+            services.AddSession();
             services.AddMvc();
         }
 
@@ -34,6 +34,8 @@ namespace Sample.Kafka.SqlServer
         {
             loggerFactory.AddConsole();
             loggerFactory.AddDebug();
+
+            app.UseSession();
 
             app.UseMvc();
 
