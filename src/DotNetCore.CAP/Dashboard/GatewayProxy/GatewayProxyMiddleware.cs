@@ -1,41 +1,62 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
+﻿using System;
+using System.Threading.Tasks;
+using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Dashboard.GatewayProxy
 {
-    public abstract class GatewayProxyMiddleware
+    public class GatewayProxyMiddleware : GatewayProxyMiddlewareBase
     {
-        private readonly IRequestScopedDataRepository _requestScopedDataRepository;
+        private readonly RequestDelegate _next;
+        private readonly ILogger _logger;
+        private readonly IRequestMapper _requestMapper;
+        private readonly IHttpRequester _requester;
 
-        protected GatewayProxyMiddleware(IRequestScopedDataRepository requestScopedDataRepository)
+        public GatewayProxyMiddleware(RequestDelegate next,
+           ILoggerFactory loggerFactory,
+           IRequestMapper requestMapper,
+           IHttpRequester requester)
+        {
+            _next = next;
+            _logger = loggerFactory.CreateLogger<GatewayProxyMiddleware>();
+            _requestMapper = requestMapper;
+            _requester = requester;
+        }
+
+        public async Task Invoke(HttpContext context, IRequestScopedDataRepository requestScopedDataRepository)
         {
             _requestScopedDataRepository = requestScopedDataRepository;
-            MiddlewareName = this.GetType().Name;
-        }
 
-        public string MiddlewareName { get; }
+            _logger.LogDebug("started calling gateway proxy middleware");
 
-        //public DownstreamRoute DownstreamRoute => _requestScopedDataRepository.Get<DownstreamRoute>("DownstreamRoute");
+            var downstreamRequest = await _requestMapper.Map(context.Request);
 
-        public HttpRequestMessage Request => _requestScopedDataRepository.Get<HttpRequestMessage>("Request");
+            _logger.LogDebug("setting downstream request");
 
-        public HttpRequestMessage DownstreamRequest => _requestScopedDataRepository.Get<HttpRequestMessage>("DownstreamRequest");
+            SetDownstreamRequest(downstreamRequest);
 
-        public HttpResponseMessage HttpResponseMessage => _requestScopedDataRepository.Get<HttpResponseMessage>("HttpResponseMessage");
+            _logger.LogDebug("setting upstream request");
 
-        public void SetUpstreamRequestForThisRequest(HttpRequestMessage request)
-        {
-            _requestScopedDataRepository.Add("Request", request);
-        }
+            SetUpstreamRequestForThisRequest(DownstreamRequest);
 
-        public void SetDownstreamRequest(HttpRequestMessage request)
-        {
-            _requestScopedDataRepository.Add("DownstreamRequest", request);
-        }
+            var uriBuilder = new UriBuilder(DownstreamRequest.RequestUri)
+            {
+                //Path = dsPath.Data.Value,
+                //Scheme = DownstreamRoute.ReRoute.DownstreamScheme
+            };
 
-        public void SetHttpResponseMessageThisRequest(HttpResponseMessage responseMessage)
-        {
-            _requestScopedDataRepository.Add("HttpResponseMessage", responseMessage);
+            DownstreamRequest.RequestUri = uriBuilder.Uri;
+
+            _logger.LogDebug("started calling request");
+
+            var response = await _requester.GetResponse(Request);
+
+            _logger.LogDebug("setting http response message");
+
+            SetHttpResponseMessageThisRequest(response);
+
+            _logger.LogDebug("returning to calling middleware");
         }
     }
 }

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DotNetCore.CAP.Dashboard.GatewayProxy
+﻿namespace DotNetCore.CAP.Dashboard.GatewayProxy
 {
     public class HostAndPort
     {

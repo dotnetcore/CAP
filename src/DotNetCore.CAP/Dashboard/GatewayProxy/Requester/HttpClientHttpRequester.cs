@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -38,7 +37,6 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
             {
                 _cacheHandlers.Set(cacheKey, httpClient, TimeSpan.FromHours(24));
             }
-
         }
 
         private IHttpClient GetHttpClient(string cacheKey, IHttpClientBuilder builder)

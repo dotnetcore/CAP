@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
 {
@@ -34,7 +30,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
 
         public IHttpClient Get(string id)
         {
-            IHttpClient client= null;
+            IHttpClient client = null;
             ConcurrentQueue<IHttpClient> connectionQueue;
             if (_httpClientsCache.TryGetValue(id, out connectionQueue))
             {
@@ -47,6 +43,6 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
         {
             ConcurrentQueue<IHttpClient> connectionQueue;
             _httpClientsCache.TryRemove(id, out connectionQueue);
-        }        
+        }
     }
 }

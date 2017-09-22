@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks; 
+using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
 {
@@ -14,15 +13,14 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
         public IHttpClient Create()
         {
             var httpclientHandler = new HttpClientHandler();
-            
-            var client = new HttpClient(CreateHttpMessageHandler(httpclientHandler));                
-            
+
+            var client = new HttpClient(CreateHttpMessageHandler(httpclientHandler));
+
             return new HttpClientWrapper(client);
         }
 
         private HttpMessageHandler CreateHttpMessageHandler(HttpMessageHandler httpMessageHandler)
-        {            
-   
+        {
             _handlers
                 .OrderByDescending(handler => handler.Key)
                 .Select(handler => handler.Value)
