@@ -405,4 +405,7 @@
   <data name="SubscribersPage_NoSubscribers" xml:space="preserve">
     <value>没有配置CAP订阅者</value>
   </data>
+  <data name="NodePage_Switch" xml:space="preserve">
+    <value>切换到</value>
+  </data>
 </root>

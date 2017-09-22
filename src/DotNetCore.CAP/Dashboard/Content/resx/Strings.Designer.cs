@@ -673,6 +673,15 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Switch.
+        /// </summary>
+        public static string NodePage_Switch {
+            get {
+                return ResourceManager.GetString("NodePage_Switch", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Nodes.
         /// </summary>
         public static string NodePage_Title {

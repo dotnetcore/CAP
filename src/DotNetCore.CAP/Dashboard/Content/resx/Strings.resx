@@ -381,4 +381,7 @@
   <data name="SubscribersPage_NoSubscribers" xml:space="preserve">
     <value>There are no config CAP subscribers.</value>
   </data>
+  <data name="NodePage_Switch" xml:space="preserve">
+    <value>Switch</value>
+  </data>
 </root>
