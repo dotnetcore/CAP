@@ -5,23 +5,28 @@
 @inherits RazorPage
 @{
     Layout = new LayoutPage(Strings.NodePage_Title);
+    if (CurrentNodeId != null)
+    {
+        Session.Set("cap_current_node",System.Text.Encoding.Default.GetBytes(CurrentNodeId));
+    }
 }
 <div class="row">
     <div class="col-md-12">
         <h1 class="page-header">@Strings.NodePage_Title</h1>
 
-        @if (Nodes == null || Nodes.Count==0)
+        @if (Nodes == null || Nodes.Count == 0)
         {
             <div class="alert alert-warning">
                 @Strings.NodePage_NoNodes
             </div>
         }
         else
-        { 
+        {
             <div class="table-responsive">
                 <table class="table">
                     <thead>
                         <tr>
+                            <th width="10%">编号</th>
                             <th width="20%">节点名称</th>
                             <th width="20%">IP地址</th>
                             <th width="7%">端口号</th>
@@ -32,12 +37,15 @@
                     <tbody>
                         @foreach (var node in Nodes)
                         {
-                            <tr>
+                            <tr class="@(CurrentNodeId == node.Id? "active":null )">
+                                <td>@node.Id</td>
                                 <td>@node.Name</td>
                                 <td>@node.Address</td>
                                 <td>@node.Port</td>
                                 <td>@node.Tags</td>
-                                <td><a href="javascript:;" class="btn-link">切换到</a></td>
+                                <td>
+                                    @Html.NodeSwitchLink(node.Id)
+                                </td>
                             </tr>
                         }
                     </tbody>

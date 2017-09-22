@@ -1,7 +1,6 @@
 ﻿using System;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Dashboard.GatewayProxy.Request.Middleware;
-using DotNetCore.CAP.Dashboard.GatewayProxy.Requester.Middleware;
+using DotNetCore.CAP.Dashboard.GatewayProxy;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -53,10 +52,8 @@ namespace Microsoft.AspNetCore.Builder
 
             app.Map(new PathString(pathMatch), x =>
             {
-                x.UseDownstreamRequestInitialiser();
-                x.UseHttpRequestBuilderMiddleware();
-                x.UseHttpRequesterMiddleware();
                 x.UseMiddleware<DashboardMiddleware>();
+                x.UseMiddleware<GatewayProxyMiddleware>();
             });
 
             return app;

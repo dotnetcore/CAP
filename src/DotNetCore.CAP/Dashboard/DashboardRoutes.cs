@@ -107,7 +107,8 @@ namespace DotNetCore.CAP.Dashboard
             Routes.AddRazorPage("/subscribers", x => new SubscriberPage());         
 
             Routes.AddRazorPage("/nodes", x => new NodePage());
-  
+
+            Routes.AddRazorPage("/nodes/node/(?<Id>.+)", x => new NodePage(x.Groups["Id"].Value));
 
             #endregion Razor pages and commands
         }

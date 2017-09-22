@@ -34,8 +34,8 @@ namespace DotNetCore.CAP.Dashboard
         public override string PathBase => _context.Request.PathBase.Value;
         public override string LocalIpAddress => _context.Connection.LocalIpAddress.ToString();
         public override string RemoteIpAddress => _context.Connection.RemoteIpAddress.ToString();
-
-        public override string GetQuery(string key) => _context.Request.Query[key];
+       
+        public override string GetQuery(string key) => _context.Request.Query[key];        
 
         public override async Task<IList<string>> GetFormValuesAsync(string key)
         {

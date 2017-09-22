@@ -21,10 +21,16 @@ namespace DotNetCore.CAP
             var discoveryOptions = new DiscoveryOptions();
 
             _options?.Invoke(discoveryOptions);
-            services.AddSingleton(discoveryOptions); 
+            services.AddSingleton(discoveryOptions);
 
             services.AddSingleton<IDiscoveryProviderFactory, DiscoveryProviderFactory>();
             services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
+            services.AddSingleton<INodeDiscoveryProvider>(x =>
+            {
+                var configOptions = x.GetService<DiscoveryOptions>();
+                var factory = x.GetService<IDiscoveryProviderFactory>();
+                return factory.Create(configOptions);
+            });
         }
     }
 }
@@ -37,7 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static CapOptions UseDiscovery(this CapOptions capOptions)
         {
-            return capOptions.UseDiscovery(opt => {});
+            return capOptions.UseDiscovery(opt => { });
         }
 
         public static CapOptions UseDiscovery(this CapOptions capOptions, Action<DiscoveryOptions> options)

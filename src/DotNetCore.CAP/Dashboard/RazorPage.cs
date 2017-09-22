@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Text;
 using DotNetCore.CAP.Dashboard.Monitoring;
+using Microsoft.AspNetCore.Http;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -37,9 +38,9 @@ namespace DotNetCore.CAP.Dashboard
             }
         }
 
-        internal DashboardRequest Request { private get; set; }
-        internal DashboardResponse Response { private get; set; }
-
+        protected DashboardRequest Request { private get; set; }
+        protected DashboardResponse Response { private get; set; }
+        internal ISession Session { get; private set; }
         internal IServiceProvider RequestServices { get; private set; }
 
         public string RequestPath => Request.Path;
@@ -67,6 +68,7 @@ namespace DotNetCore.CAP.Dashboard
             StatsPollingInterval = parentPage.StatsPollingInterval;
             Url = parentPage.Url;
             RequestServices = parentPage.RequestServices;
+            Session = parentPage.Session;
 
             GenerationTime = parentPage.GenerationTime;
             _statisticsLazy = parentPage._statisticsLazy;
@@ -77,7 +79,7 @@ namespace DotNetCore.CAP.Dashboard
             Request = context.Request;
             Response = context.Response;
             RequestServices = context.RequestServices;
-
+            Session = context.Session;
             Storage = context.Storage;
             AppPath = context.Options.AppPath;
             StatsPollingInterval = context.Options.StatsPollingInterval;

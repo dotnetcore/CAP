@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DotNetCore.CAP
 {
@@ -26,7 +24,8 @@ namespace DotNetCore.CAP
             services.AddSingleton(DashboardRoutes.Routes);          
             services.AddSingleton<IHttpRequester, HttpClientHttpRequester>();
             services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
-
+            services.AddSingleton<IRequestMapper, RequestMapper>();
+            //services.AddScoped<IRequestScopedDataRepository, ScopedDataRepository>();
             services.AddScoped<IRequestScopedDataRepository, HttpDataRepository>();
         }
     }

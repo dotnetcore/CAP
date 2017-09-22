@@ -190,6 +190,12 @@ namespace DotNetCore.CAP.Dashboard
                 $"<span class=\"labe label-defult text-uppercase\" title=\"{serverId}\">{shortenedId}</span>");
         }
 
+        public NonEscapedString NodeSwitchLink(string id)
+        {
+            return Raw($"<a class=\"job-method\" href=\"{_page.Url.NodeSwitch(id)}\">{Strings.NodePage_Switch}</a>");
+        }
+
+        #region MethodEscaped
         public NonEscapedString MethodEscaped(MethodInfo method)
         {
             var outputString = string.Empty;
@@ -288,7 +294,8 @@ namespace DotNetCore.CAP.Dashboard
         private string Span(string @class, string value)
         {
             return $"<span class=\"{@class}\">{value}</span>";
-        }
+        } 
+        #endregion
 
         public NonEscapedString StackTrace(string stackTrace)
         {

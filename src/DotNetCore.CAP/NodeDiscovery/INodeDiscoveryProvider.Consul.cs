@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Consul;
+using System.Security.Cryptography;
 
 namespace DotNetCore.CAP.NodeDiscovery
 {
@@ -33,7 +34,7 @@ namespace DotNetCore.CAP.NodeDiscovery
 
             var nodes = services.Response.Select(x => new Node
             {
-                Name = x.Key,
+                Name = x.Value.Service,
                 Address = x.Value.Address,
                 Port = x.Value.Port,
                 Tags = string.Join(", ", x.Value.Tags)

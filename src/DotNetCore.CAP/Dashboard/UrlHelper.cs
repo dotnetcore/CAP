@@ -29,6 +29,11 @@ namespace DotNetCore.CAP.Dashboard
             return To("/jobs/details/" + jobId);
         }
 
+        public string NodeSwitch(string id)
+        {
+            return To("/nodes/node/" + id);
+        }
+
         public string LinkToPublished()
         {
             return To("/published/succeeded");

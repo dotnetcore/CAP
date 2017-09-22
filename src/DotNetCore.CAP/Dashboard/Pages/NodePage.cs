@@ -8,6 +8,19 @@ namespace DotNetCore.CAP.Dashboard.Pages
     partial class NodePage
     {
         private IList<Node> _nodes = null;
+        private INodeDiscoveryProvider _discoveryProvider;
+
+        public NodePage()
+        {
+
+        }
+
+        public NodePage(string id)
+        {
+            CurrentNodeId = id;
+        }
+
+        public string CurrentNodeId { get; set; }
 
         public IList<Node> Nodes
         {
@@ -15,13 +28,8 @@ namespace DotNetCore.CAP.Dashboard.Pages
             {
                 if (_nodes == null)
                 {
-                    var configOptions = RequestServices.GetService<DiscoveryOptions>();
-
-                    var factory = RequestServices.GetService<IDiscoveryProviderFactory>();
-
-                    var discoryProvider = factory.Create(configOptions);
-
-                    _nodes = discoryProvider.GetNodes().GetAwaiter().GetResult();
+                    _discoveryProvider = RequestServices.GetService<INodeDiscoveryProvider>();
+                    _nodes = _discoveryProvider.GetNodes().GetAwaiter().GetResult();
                 }
                 return _nodes;
             }
