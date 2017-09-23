@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Consul;
-using System.Security.Cryptography;
+using System.Net;
 
 namespace DotNetCore.CAP.NodeDiscovery
 {
-    class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider, IDisposable
+    public class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider, IDisposable
     {
         private ConsulClient _consul;
         private readonly DiscoveryOptions _options;
@@ -34,6 +34,7 @@ namespace DotNetCore.CAP.NodeDiscovery
 
             var nodes = services.Response.Select(x => new Node
             {
+                Id = x.Key,
                 Name = x.Value.Service,
                 Address = x.Value.Address,
                 Port = x.Value.Port,
@@ -47,6 +48,7 @@ namespace DotNetCore.CAP.NodeDiscovery
         {
             return _consul.Agent.ServiceRegister(new AgentServiceRegistration
             {
+                ID = _options.NodeId.ToString(),
                 Name = _options.NodeName,
                 Address = _options.CurrentNodeHostName,
                 Port = _options.CurrentNodePort,

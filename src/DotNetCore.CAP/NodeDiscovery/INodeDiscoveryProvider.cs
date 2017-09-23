@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.NodeDiscovery
 {
-    interface INodeDiscoveryProvider
+    public interface INodeDiscoveryProvider
     {
         Task<IList<Node>> GetNodes();
 

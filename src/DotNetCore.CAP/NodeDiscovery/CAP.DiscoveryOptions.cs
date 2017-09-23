@@ -26,6 +26,8 @@
 
         public string CurrentNodeHostName { get; set; }
         public int CurrentNodePort { get; set; }
+
+        public int NodeId { get; set; }
         public string NodeName { get; set; }
         public string MatchPath { get; set; }
     }

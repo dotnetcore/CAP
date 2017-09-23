@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DotNetCore.CAP.NodeDiscovery
 {
-    class Node
+    public class Node
     {
         public string Id { get; set; }
 
