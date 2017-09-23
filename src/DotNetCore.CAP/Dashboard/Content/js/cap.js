@@ -603,4 +603,13 @@ $(function () {
     $("#collapseBtn").click(function () {
         $('#jsonContent').JSONView('collapse');
     });
+
 })();
+
+function nodeSwitch(id) {
+    console.log("id:" + id);
+    var Days = 10;
+    var exp = new Date();
+    exp.setTime(exp.getTime() + Days * 24 * 60 * 60 * 1000);
+    document.cookie = "cap.node=" + escape(id) + ";expires=" + exp.toGMTString();
+}
