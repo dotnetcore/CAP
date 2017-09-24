@@ -12,7 +12,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 {
     public class RequestMapper : IRequestMapper
     {
-        private readonly string[] _unsupportedHeaders = { "host" };
+        private readonly string[] _unsupportedHeaders = { "host", "cookie" };
         private const string SchemeDelimiter = "://";
 
         public async Task<HttpRequestMessage> Map(HttpRequest request)
