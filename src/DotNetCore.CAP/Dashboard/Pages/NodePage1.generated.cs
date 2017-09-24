@@ -54,10 +54,10 @@ WriteLiteral("\r\n");
             #line 6 "..\..\Dashboard\Pages\NodePage.cshtml"
   
     Layout = new LayoutPage(Strings.NodePage_Title);
-    if (CurrentNodeId != null)
-    {
-        Session.Set("cap_current_node",System.Text.Encoding.Default.GetBytes(CurrentNodeId));
-    }
+    //if (CurrentNodeId != null)
+    //{
+    //    Session.Set("cap_current_node",System.Text.Encoding.Default.GetBytes(CurrentNodeId));
+    //}
 
 
             
