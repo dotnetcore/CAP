@@ -36,12 +36,9 @@ namespace Microsoft.AspNetCore.Builder
             return app;
         }
 
-        public static IApplicationBuilder UseCapDashboard(
-             this IApplicationBuilder app,
-             string pathMatch = "/cap")
+        public static IApplicationBuilder UseCapDashboard(this IApplicationBuilder app)
         {
-            if (app == null) throw new ArgumentNullException(nameof(app));
-            if (pathMatch == null) throw new ArgumentNullException(nameof(pathMatch));
+            if (app == null) throw new ArgumentNullException(nameof(app));          
 
             var marker = app.ApplicationServices.GetService<CapMarkerService>();
 
@@ -50,12 +47,9 @@ namespace Microsoft.AspNetCore.Builder
                 throw new InvalidOperationException("Add Cap must be called on the service collection.");
             }
 
-            app.Map(new PathString(pathMatch), x =>
-            {
-                x.UseMiddleware<DashboardMiddleware>();
-                x.UseMiddleware<GatewayProxyMiddleware>();
-            });
-
+            app.UseMiddleware<GatewayProxyMiddleware>();
+            app.UseMiddleware<DashboardMiddleware>();
+           
             return app;
         }
     }
