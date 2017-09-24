@@ -21,33 +21,57 @@ namespace DotNetCore.CAP
             _routes = routes ?? throw new ArgumentNullException(nameof(routes));
         }
 
-        public Task Invoke(HttpContext httpContext)
+        public Task Invoke(HttpContext context)
         {
-            var context = new CapDashboardContext(_storage, _options, httpContext);
-            var findResult = _routes.FindDispatcher(httpContext.Request.Path.Value);
+            PathString matchedPath;
+            PathString remainingPath;
 
-            if (findResult == null)
+            if (context.Request.Path.StartsWithSegments(_options.PathMatch, out matchedPath, out remainingPath))
             {
-                return _next.Invoke(httpContext);
-            }
+                // Update the path
+                var path = context.Request.Path;
+                var pathBase = context.Request.PathBase;
+                context.Request.PathBase = pathBase.Add(matchedPath);
+                context.Request.Path = remainingPath;
 
-            foreach (var filter in _options.Authorization)
-            {
-                if (!filter.Authorize(context))
+                try
                 {
-                    var isAuthenticated = httpContext.User?.Identity?.IsAuthenticated;
+                    var dashboardContext = new CapDashboardContext(_storage, _options, context);
+                    var findResult = _routes.FindDispatcher(context.Request.Path.Value);
 
-                    httpContext.Response.StatusCode = isAuthenticated == true
-                        ? (int)HttpStatusCode.Forbidden
-                        : (int)HttpStatusCode.Unauthorized;
+                    if (findResult == null)
+                    {
+                        return _next.Invoke(context);
+                    }
 
-                    return Task.FromResult(0);
+                    foreach (var filter in _options.Authorization)
+                    {
+                        if (!filter.Authorize(dashboardContext))
+                        {
+                            var isAuthenticated = context.User?.Identity?.IsAuthenticated;
+
+                            context.Response.StatusCode = isAuthenticated == true
+                                ? (int)HttpStatusCode.Forbidden
+                                : (int)HttpStatusCode.Unauthorized;
+
+                            return Task.CompletedTask;
+                        }
+                    }
+
+                    dashboardContext.UriMatch = findResult.Item2;
+
+                    return findResult.Item1.Dispatch(dashboardContext);
+                }
+                finally
+                {
+                    context.Request.PathBase = pathBase;
+                    context.Request.Path = path;
                 }
             }
-
-            context.UriMatch = findResult.Item2;
-
-            return findResult.Item1.Dispatch(context);
+            else
+            {
+                return _next(context);
+            }
         }
     }
 }
