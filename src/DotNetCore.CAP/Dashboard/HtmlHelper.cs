@@ -192,7 +192,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public NonEscapedString NodeSwitchLink(string id)
         {
-            return Raw($"<a class=\"job-method\" href=\"{_page.Url.NodeSwitch(id)}\">{Strings.NodePage_Switch}</a>");
+            return Raw($"<a class=\"job-method\" onclick=\"nodeSwitch({id});\" href=\"javascript:;\">{Strings.NodePage_Switch}</a>");
         }
 
         #region MethodEscaped

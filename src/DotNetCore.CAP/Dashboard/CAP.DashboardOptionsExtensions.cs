@@ -26,7 +26,7 @@ namespace DotNetCore.CAP
             services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
             services.AddSingleton<IRequestMapper, RequestMapper>();
             //services.AddScoped<IRequestScopedDataRepository, ScopedDataRepository>();
-            services.AddScoped<IRequestScopedDataRepository, HttpDataRepository>();
+            //services.AddScoped<IRequestScopedDataRepository, HttpDataRepository>();
         }
     }
 }

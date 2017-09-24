@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Net;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -31,7 +32,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public string NodeSwitch(string id)
         {
-            return To("/nodes/node/" + id);
+            return To("/nodes/node/" + WebUtility.UrlEncode(id));
         }
 
         public string LinkToPublished()

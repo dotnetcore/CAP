@@ -25,8 +25,6 @@ namespace DotNetCore.CAP.Dashboard
 
         public DashboardResponse Response { get; protected set; }
 
-        public ISession Session { get; protected set; }
-
         public IServiceProvider RequestServices { get; protected set; }
     }
 
@@ -44,7 +42,6 @@ namespace DotNetCore.CAP.Dashboard
             Request = new CapDashboardRequest(httpContext);
             Response = new CapDashboardResponse(httpContext);
             RequestServices = httpContext.RequestServices;
-            Session = httpContext.Session;
         }
 
         public HttpContext HttpContext { get; }
