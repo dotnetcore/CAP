@@ -10,6 +10,7 @@ namespace DotNetCore.CAP
         public DashboardOptions()
         {
             AppPath = "/";
+            PathMatch = "/cap";
             Authorization = new[] { new LocalRequestsOnlyAuthorizationFilter() };
             StatsPollingInterval = 2000;
         }
@@ -18,6 +19,8 @@ namespace DotNetCore.CAP
         /// The path for the Back To Site link. Set to <see langword="null" /> in order to hide the Back To Site link.
         /// </summary>
         public string AppPath { get; set; }
+
+        public string PathMatch { get; set; }
 
         public IEnumerable<IDashboardAuthorizationFilter> Authorization { get; set; }
 
