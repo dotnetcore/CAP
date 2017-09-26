@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using Consul;
-using System.Net;
 
 namespace DotNetCore.CAP.NodeDiscovery
 {
@@ -24,24 +22,31 @@ namespace DotNetCore.CAP.NodeDiscovery
         {
             _consul = new ConsulClient(config =>
             {
+                config.WaitTime = TimeSpan.FromSeconds(5);
                 config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerProt}");
             });
         }
 
         public async Task<IList<Node>> GetNodes()
         {
-            var services = await _consul.Agent.Services();
+            try {
+                var services = await _consul.Agent.Services();
 
-            var nodes = services.Response.Select(x => new Node
-            {
-                Id = x.Key,
-                Name = x.Value.Service,
-                Address = x.Value.Address,
-                Port = x.Value.Port,
-                Tags = string.Join(", ", x.Value.Tags)
-            });
+                var nodes = services.Response.Select(x => new Node {
+                    Id = x.Key,
+                    Name = x.Value.Service,
+                    Address = x.Value.Address,
+                    Port = x.Value.Port,
+                    Tags = string.Join(", ", x.Value.Tags)
+                });
 
-            return nodes.ToList();
+                CapCache.Global.AddOrUpdate("cap.nodes.count", nodes.Count(), TimeSpan.FromSeconds(30),true);
+
+                return nodes.ToList();
+            }
+            catch (Exception) {
+                return null;
+            }
         }
 
         public Task RegisterNode()

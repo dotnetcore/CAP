@@ -55,7 +55,6 @@ _options.Schema);
                 }
                 return stats;
             });
-            statistics.Servers = 1;
             return statistics;
         }
 

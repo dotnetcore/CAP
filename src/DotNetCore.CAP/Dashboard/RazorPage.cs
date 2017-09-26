@@ -84,7 +84,14 @@ namespace DotNetCore.CAP.Dashboard
             _statisticsLazy = new Lazy<StatisticsDto>(() =>
             {
                 var monitoring = Storage.GetMonitoringApi();
-                return monitoring.GetStatistics();
+                var dto = monitoring.GetStatistics();
+
+                if (CapCache.Global.TryGet("cap.nodes.count", out object count))
+                {
+                    dto.Servers = (int)count;
+                }
+
+                return dto;
             });
         }
 
