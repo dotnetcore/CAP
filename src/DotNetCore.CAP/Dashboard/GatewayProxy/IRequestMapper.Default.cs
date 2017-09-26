@@ -36,71 +36,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             }
         }
 
-        private async Task<HttpContent> MapContent(HttpRequest request)
-        {
-            if (request.Body == null)
-            {
-                return null;
-            }
-
-            var content = new ByteArrayContent(await ToByteArray(request.Body));
-
-            content.Headers.TryAddWithoutValidation("Content-Type", new[] { request.ContentType });
-
-            return content;
-        }
-
-        private HttpMethod MapMethod(HttpRequest request)
-        {
-            return new HttpMethod(request.Method);
-        }
-
-        private Uri MapUri(HttpRequest request)
-        {
-            return new Uri(GetEncodedUrl(request));
-        }
-
-        private void MapHeaders(HttpRequest request, HttpRequestMessage requestMessage)
-        {
-            foreach (var header in request.Headers)
-            {
-                //todo get rid of if..
-                if (IsSupportedHeader(header))
-                {
-                    requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
-                }
-            }
-        }
-
-        private async Task<byte[]> ToByteArray(Stream stream)
-        {
-            using (stream)
-            {
-                using (var memStream = new MemoryStream())
-                {
-                    await stream.CopyToAsync(memStream);
-                    return memStream.ToArray();
-                }
-            }
-        }
-
-        private bool IsSupportedHeader(KeyValuePair<string, StringValues> header)
-        {
-            return !_unsupportedHeaders.Contains(header.Key.ToLower());
-        }
-
-        /// <summary>
-        /// Combines the given URI components into a string that is properly encoded for use in HTTP headers.
-        /// Note that unicode in the HostString will be encoded as punycode.
-        /// </summary>
-        /// <param name="scheme">http, https, etc.</param>
-        /// <param name="host">The host portion of the uri normally included in the Host header. This may include the port.</param>
-        /// <param name="pathBase">The first portion of the request path associated with application root.</param>
-        /// <param name="path">The portion of the request path that identifies the requested resource.</param>
-        /// <param name="query">The query, if any.</param>
-        /// <param name="fragment">The fragment, if any.</param>
-        /// <returns></returns>
-        public string BuildAbsolute(
+        private string BuildAbsolute(
             string scheme,
             HostString host,
             PathString pathBase = new PathString(),
@@ -133,15 +69,61 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
                 .ToString();
         }
 
-        /// <summary>
-        /// Returns the combined components of the request URL in a fully escaped form suitable for use in HTTP headers
-        /// and other HTTP operations.
-        /// </summary>
-        /// <param name="request">The request to assemble the uri pieces from.</param>
-        /// <returns></returns>
-        public string GetEncodedUrl(HttpRequest request)
+        private string GetEncodedUrl(HttpRequest request)
         {
             return BuildAbsolute(request.Scheme, request.Host, request.PathBase, request.Path, request.QueryString);
+        }
+
+        private async Task<HttpContent> MapContent(HttpRequest request)
+        {
+            if (request.Body == null)
+            {
+                return null;
+            }
+
+            var content = new ByteArrayContent(await ToByteArray(request.Body));
+
+            content.Headers.TryAddWithoutValidation("Content-Type", new[] { request.ContentType });
+
+            return content;
+        }
+
+        private HttpMethod MapMethod(HttpRequest request)
+        {
+            return new HttpMethod(request.Method);
+        }
+
+        private Uri MapUri(HttpRequest request)
+        {
+            return new Uri(GetEncodedUrl(request));
+        }
+
+        private void MapHeaders(HttpRequest request, HttpRequestMessage requestMessage)
+        {
+            foreach (var header in request.Headers)
+            {
+                if (IsSupportedHeader(header))
+                {
+                    requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                }
+            }
+        }
+
+        private async Task<byte[]> ToByteArray(Stream stream)
+        {
+            using (stream)
+            {
+                using (var memStream = new MemoryStream())
+                {
+                    await stream.CopyToAsync(memStream);
+                    return memStream.ToArray();
+                }
+            }
+        }
+
+        private bool IsSupportedHeader(KeyValuePair<string, StringValues> header)
+        {
+            return !_unsupportedHeaders.Contains(header.Key.ToLower());
         }
     }
 }

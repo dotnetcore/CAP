@@ -86,19 +86,6 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             }
         }
 
-        private bool TryGetRemoteNode(string requestNodeId, out Node node)
-        {
-            var nodes = _discoveryProvider.GetNodes().GetAwaiter().GetResult();
-            node = nodes.FirstOrDefault(x => x.Id == requestNodeId);
-            return node != null;
-        }
-
-        private void SetDownStreamRequestUri(Node node, string requestPath)
-        {
-            var uriBuilder = new UriBuilder("http://", node.Address, node.Port, requestPath);
-            DownstreamRequest.RequestUri = uriBuilder.Uri;
-        }
-
         public async Task SetResponseOnHttpContext(HttpContext context, HttpResponseMessage response)
         {
             foreach (var httpResponseHeader in response.Content.Headers)
@@ -129,6 +116,19 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
                     await stream.CopyToAsync(context.Response.Body);
                 }
             }
+        }
+
+        private bool TryGetRemoteNode(string requestNodeId, out Node node)
+        {
+            var nodes = _discoveryProvider.GetNodes().GetAwaiter().GetResult();
+            node = nodes.FirstOrDefault(x => x.Id == requestNodeId);
+            return node != null;
+        }
+
+        private void SetDownStreamRequestUri(Node node, string requestPath)
+        {
+            var uriBuilder = new UriBuilder("http://", node.Address, node.Port, requestPath);
+            DownstreamRequest.RequestUri = uriBuilder.Uri;
         }
 
         private static void AddHeaderIfDoesntExist(HttpContext context, 
