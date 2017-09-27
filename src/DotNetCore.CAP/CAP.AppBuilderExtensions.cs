@@ -58,7 +58,7 @@ namespace Microsoft.AspNetCore.Builder
             var messageQueuemarker = app.ApplicationServices.GetService<CapMessageQueueMakerService>();
             if (messageQueuemarker == null)
             {
-                throw new InvalidOperationException("You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseKafka(...) })");
+                throw new InvalidOperationException("You must be config used message queue provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseKafka(...) })");
             }
 
             var databaseMarker = app.ApplicationServices.GetService<CapDatabaseStorageMarkerService>();
