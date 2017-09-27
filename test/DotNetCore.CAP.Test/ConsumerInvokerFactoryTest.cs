@@ -17,6 +17,7 @@ namespace DotNetCore.CAP.Test
         {
             var services = new ServiceCollection();
             services.AddLogging();
+            services.AddSingleton<IContentSerializer, JsonContentSerializer>();
             var provider = services.BuildServiceProvider();
             var logFactory = provider.GetRequiredService<ILoggerFactory>();
             var binder = new ModelBinderFactory();
