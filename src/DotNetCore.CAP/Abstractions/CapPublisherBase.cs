@@ -64,17 +64,18 @@ namespace DotNetCore.CAP.Abstractions
 
         protected abstract Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message);
 
-        #region private methods
-
-        private string Serialize<T>(T obj, string callbackName = null)
+        protected virtual string Serialize<T>(T obj, string callbackName = null)
         {
-            var message = new Message(obj)
+            var serializer = (IContentSerializer)ServiceProvider.GetService(typeof(IContentSerializer));
+
+            var message = new CapMessageDto(obj)
             {
                 CallbackName = callbackName
             };
-
-            return Helper.ToJson(message);
+            return serializer.Serialize(message);
         }
+
+        #region private methods
 
         private void PrepareConnectionForAdo(IDbConnection dbConnection, IDbTransaction dbTransaction)
         {

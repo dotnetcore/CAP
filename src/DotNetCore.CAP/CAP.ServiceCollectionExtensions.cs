@@ -33,6 +33,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             AddSubscribeServices(services);
 
+            services.TryAddSingleton<IContentSerializer, JsonContentSerializer>();
             services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
             services.TryAddSingleton<IModelBinderFactory, ModelBinderFactory>();
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
@@ -42,7 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IProcessingServer, CapProcessingServer>();
             services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
             services.AddSingleton<IStateChanger, StateChanger>();
-
+           
             //Processors
             services.AddTransient<PublishQueuer>();
             services.AddTransient<SubscribeQueuer>();

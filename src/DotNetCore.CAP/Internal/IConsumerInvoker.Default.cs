@@ -35,6 +35,7 @@ namespace DotNetCore.CAP.Internal
         {
             _logger.LogDebug("Executing consumer Topic: {0}", _consumerContext.ConsumerDescriptor.MethodInfo.Name);
 
+            var serializer = _serviceProvider.GetService<IContentSerializer>();
             using (var scope = _serviceProvider.CreateScope())
             {
                 var provider = scope.ServiceProvider;
@@ -42,7 +43,7 @@ namespace DotNetCore.CAP.Internal
                 var obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, serviceType);
 
                 var jsonConent = _consumerContext.DeliverMessage.Content;
-                var message = Helper.FromJson<Message>(jsonConent);
+                var message =  serializer.DeSerialize<CapMessageDto>(jsonConent);
 
                 object result = null;
                 if (_executor.MethodParameters.Length > 0)
@@ -105,7 +106,7 @@ namespace DotNetCore.CAP.Internal
 
         private async Task SentCallbackMessage(string messageId, string topicName, object bodyObj)
         {
-            var callbackMessage = new Message
+            var callbackMessage = new CapMessageDto
             {
                 Id = messageId,
                 Content = bodyObj
