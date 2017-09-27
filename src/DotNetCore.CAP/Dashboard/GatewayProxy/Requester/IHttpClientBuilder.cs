@@ -1,4 +1,6 @@
-﻿namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
+﻿using System.Net.Http;
+
+namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
 {
     public interface IHttpClientBuilder
     {

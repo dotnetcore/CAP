@@ -310,6 +310,7 @@ a:hover .label-hover {
     padding: 12px;
     background-color: #fff;
     border: 1px solid #e5e5e5;
+    -ms-border-radius: 3px;
     border-radius: 3px;
 }
 
@@ -333,12 +334,14 @@ a:hover .label-hover {
 .state-card-body {
     padding: 10px;
     margin: 10px -12px -12px -12px;
+    -ms-border-bottom-left-radius: 3px;
     border-bottom-left-radius: 3px;
+    -ms-border-bottom-right-radius: 3px;
     border-bottom-right-radius: 3px;
     background-color: #f5f5f5;
 }
 
-    .state-card-body dl {
+.state-card-body dl {
         margin-top: 5px;
         margin-bottom: 0;
     }
@@ -353,7 +356,7 @@ a:hover .label-hover {
     .state-card-body .stack-trace {
         background-color: transparent;
         padding: 0 20px;
-        margin-bottom: 0px;
+        margin-bottom: 0;
     }
 
     .state-card-body .exception-type {
@@ -453,6 +456,7 @@ span.metric-default {
 
 div.metric {
     border: solid 1px transparent;
+    -ms-border-radius: 4px;
     border-radius: 4px;
     -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.05);
     box-shadow: 0 1px 1px rgba(0,0,0,.05);
@@ -460,7 +464,7 @@ div.metric {
     transition: color .1s ease-out, background .1s ease-out, border .1s ease-out;
 }
 
-    div.metric .metric-body {
+div.metric .metric-body {
         padding: 15px 15px 0;
         font-size: 26px;
         text-align: center;

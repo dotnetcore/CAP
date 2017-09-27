@@ -39,7 +39,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Gets the <see cref="IServiceCollection"/> where MVC services are configured.
         /// </summary>
-        public IServiceCollection Services { get; private set; }
+        public IServiceCollection Services { get; }
 
         /// <summary>
         /// Adds a scoped service of the type specified in serviceType with an implementation

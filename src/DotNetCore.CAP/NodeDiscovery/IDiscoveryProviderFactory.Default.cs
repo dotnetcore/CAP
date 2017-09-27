@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DotNetCore.CAP.NodeDiscovery
 {
-    class DiscoveryProviderFactory : IDiscoveryProviderFactory
+    internal class DiscoveryProviderFactory : IDiscoveryProviderFactory
     {
         public INodeDiscoveryProvider Create(DiscoveryOptions options)
         {

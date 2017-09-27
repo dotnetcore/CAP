@@ -8,20 +8,17 @@ using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
 {
-    public class ConsumerHandler : IConsumerHandler, IDisposable
+    internal class ConsumerHandler : IConsumerHandler
     {
         private readonly IServiceProvider _serviceProvider;
-        private readonly IConsumerInvokerFactory _consumerInvokerFactory;
         private readonly IConsumerClientFactory _consumerClientFactory;
         private readonly ILogger _logger;
 
         private readonly CancellationTokenSource _cts;
         private readonly MethodMatcherCache _selector;
-        private readonly CapOptions _options;
 
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
 
@@ -30,18 +27,14 @@ namespace DotNetCore.CAP
 
         public ConsumerHandler(
             IServiceProvider serviceProvider,
-            IConsumerInvokerFactory consumerInvokerFactory,
             IConsumerClientFactory consumerClientFactory,
             ILogger<ConsumerHandler> logger,
-            MethodMatcherCache selector,
-            IOptions<CapOptions> options)
+            MethodMatcherCache selector)
         {
             _selector = selector;
             _logger = logger;
             _serviceProvider = serviceProvider;
-            _consumerInvokerFactory = consumerInvokerFactory;
             _consumerClientFactory = consumerClientFactory;
-            _options = options.Value;
             _cts = new CancellationTokenSource();
         }
 
@@ -99,7 +92,8 @@ namespace DotNetCore.CAP
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    var receviedMessage = StoreMessage(scope, message);
+                    StoreMessage(scope, message);
+
                     client.Commit();
                 }
                 Pulse();
@@ -111,7 +105,7 @@ namespace DotNetCore.CAP
             };
         }
 
-        private CapReceivedMessage StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
+        private static void StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
         {
             var provider = serviceScope.ServiceProvider;
             var messageStore = provider.GetRequiredService<IStorageConnection>();
@@ -120,7 +114,6 @@ namespace DotNetCore.CAP
                 StatusName = StatusName.Scheduled,
             };
             messageStore.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
-            return receivedMessage;
         }
 
         public void Pulse()

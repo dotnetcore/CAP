@@ -1,25 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace DotNetCore.CAP.NodeDiscovery
+﻿namespace DotNetCore.CAP.NodeDiscovery
 {
-    class ConsulProcessingNodeServer : IProcessingServer
+    internal class ConsulProcessingNodeServer : IProcessingServer
     {
-        private readonly DiscoveryOptions dashboardOptions;
-        private readonly IDiscoveryProviderFactory discoveryProviderFactory;
+        private readonly DiscoveryOptions _dashboardOptions;
+        private readonly IDiscoveryProviderFactory _discoveryProviderFactory;
 
         public ConsulProcessingNodeServer(
             DiscoveryOptions dashboardOptions,
             IDiscoveryProviderFactory discoveryProviderFactory)
         {
-            this.dashboardOptions = dashboardOptions;
-            this.discoveryProviderFactory = discoveryProviderFactory;
+            _dashboardOptions = dashboardOptions;
+            _discoveryProviderFactory = discoveryProviderFactory;
         }
 
         public void Start()
         {
-            var discoveryProvider = discoveryProviderFactory.Create(dashboardOptions);
+            var discoveryProvider = _discoveryProviderFactory.Create(_dashboardOptions);
 
             discoveryProvider.RegisterNode();
         }

@@ -2,9 +2,9 @@
 
 namespace DotNetCore.CAP
 {
-    using DotNetCore.CAP.Dashboard;
-    using DotNetCore.CAP.Dashboard.GatewayProxy;
-    using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+    using Dashboard;
+    using Dashboard.GatewayProxy;
+    using Dashboard.GatewayProxy.Requester;
     using Microsoft.Extensions.DependencyInjection;
 
     internal sealed class DashboardOptionsExtension : ICapOptionsExtension
@@ -25,8 +25,6 @@ namespace DotNetCore.CAP
             services.AddSingleton<IHttpRequester, HttpClientHttpRequester>();
             services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
             services.AddSingleton<IRequestMapper, RequestMapper>();
-            //services.AddScoped<IRequestScopedDataRepository, ScopedDataRepository>();
-            //services.AddScoped<IRequestScopedDataRepository, HttpDataRepository>();
         }
     }
 }

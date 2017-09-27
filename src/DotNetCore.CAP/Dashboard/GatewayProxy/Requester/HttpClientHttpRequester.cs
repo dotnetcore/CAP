@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
             catch (Exception exception)
             {
                 _logger.LogError("Error making http request, exception:" + exception.Message);
-                throw exception;
+                throw;
             }
             finally
             {

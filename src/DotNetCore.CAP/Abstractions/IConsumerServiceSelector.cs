@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace DotNetCore.CAP.Abstractions
 {
@@ -10,7 +9,6 @@ namespace DotNetCore.CAP.Abstractions
     {
         /// <summary>
         /// Selects a set of <see cref="ConsumerExecutorDescriptor"/> candidates for the current message associated with
-        /// <paramref name="provider"/>.
         /// </summary>       
         /// <returns>A set of <see cref="ConsumerExecutorDescriptor"/> candidates or <c>null</c>.</returns>
         IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates();

@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Processor.States;
-using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Dashboard
 {

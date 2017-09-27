@@ -129,7 +129,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             var connection = new MySqlConnection(_options.ConnectionString);
             await connection.OpenAsync();
             var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
-            FetchedMessage fetchedMessage = null;
+            FetchedMessage fetchedMessage;
             try
             {
                 fetchedMessage = await connection.QueryFirstOrDefaultAsync<FetchedMessage>(sql, args, transaction);

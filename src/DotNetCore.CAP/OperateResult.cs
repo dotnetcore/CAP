@@ -51,8 +51,11 @@ namespace DotNetCore.CAP
 
         public static OperateResult Failed(Exception ex, params OperateError[] errors)
         {
-            var result = new OperateResult { Succeeded = false };
-            result.Exception = ex;
+            var result = new OperateResult
+            {
+                Succeeded = false,
+                Exception = ex
+            };
             if (errors != null)
             {
                 result._errors.AddRange(errors);

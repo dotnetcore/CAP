@@ -2,7 +2,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Dashboard;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 

@@ -41,7 +41,7 @@ namespace DotNetCore.CAP
                 var result = await PublishAsync(message.Name, message.Content);
                 sp.Stop();
 
-                var newState = default(IState);
+                IState newState;
                 if (!result.Succeeded)
                 {
                     var shouldRetry = await UpdateMessageForRetryAsync(message, connection);
@@ -78,11 +78,10 @@ namespace DotNetCore.CAP
             }
         }
 
-        private async Task<bool> UpdateMessageForRetryAsync(CapPublishedMessage message, IStorageConnection connection)
+        private static async Task<bool> UpdateMessageForRetryAsync(CapPublishedMessage message, IStorageConnection connection)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
-            var now = DateTime.Now;
             var retries = ++message.Retries;
             if (retries >= retryBehavior.RetryCount)
             {

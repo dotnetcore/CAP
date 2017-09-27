@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
 using Microsoft.AspNetCore.Http;
 
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class DashboardMiddleware
@@ -23,10 +25,8 @@ namespace DotNetCore.CAP
 
         public Task Invoke(HttpContext context)
         {
-            PathString matchedPath;
-            PathString remainingPath;
-
-            if (context.Request.Path.StartsWithSegments(_options.PathMatch, out matchedPath, out remainingPath))
+            if (context.Request.Path.StartsWithSegments(_options.PathMatch, 
+                out var matchedPath, out var remainingPath))
             {
                 // Update the path
                 var path = context.Request.Path;
@@ -44,18 +44,15 @@ namespace DotNetCore.CAP
                         return _next.Invoke(context);
                     }
 
-                    foreach (var filter in _options.Authorization)
+                    if (_options.Authorization.Any(filter => !filter.Authorize(dashboardContext)))
                     {
-                        if (!filter.Authorize(dashboardContext))
-                        {
-                            var isAuthenticated = context.User?.Identity?.IsAuthenticated;
+                        var isAuthenticated = context.User?.Identity?.IsAuthenticated;
 
-                            context.Response.StatusCode = isAuthenticated == true
-                                ? (int)HttpStatusCode.Forbidden
-                                : (int)HttpStatusCode.Unauthorized;
+                        context.Response.StatusCode = isAuthenticated == true
+                            ? (int)HttpStatusCode.Forbidden
+                            : (int)HttpStatusCode.Unauthorized;
 
-                            return Task.CompletedTask;
-                        }
+                        return Task.CompletedTask;
                     }
 
                     dashboardContext.UriMatch = findResult.Item2;

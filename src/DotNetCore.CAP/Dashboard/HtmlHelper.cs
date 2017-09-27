@@ -19,8 +19,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public HtmlHelper(RazorPage page)
         {
-            if (page == null) throw new ArgumentNullException(nameof(page));
-            _page = page;
+            _page = page ?? throw new ArgumentNullException(nameof(page));
         }
 
         public NonEscapedString Breadcrumbs(string title, IDictionary<string, string> items)
@@ -35,10 +34,7 @@ namespace DotNetCore.CAP.Dashboard
             {
                 return SidebarMenu(MessagesSidebarMenu.PublishedItems);
             }
-            else
-            {
-                return SidebarMenu(MessagesSidebarMenu.ReceivedItems);
-            }
+            return SidebarMenu(MessagesSidebarMenu.ReceivedItems);
         }
 
         public NonEscapedString SidebarMenu(IEnumerable<Func<RazorPage, MenuItem>> items)
@@ -198,11 +194,9 @@ namespace DotNetCore.CAP.Dashboard
         #region MethodEscaped
         public NonEscapedString MethodEscaped(MethodInfo method)
         {
-            var outputString = string.Empty;
-
             var @public = WrapKeyword("public");
             var @async = string.Empty;
-            var @return = string.Empty;
+            string @return;
 
             var isAwaitable = CoercedAwaitableInfo.IsTypeAwaitable(method.ReturnType, out var coercedAwaitableInfo);
             if (isAwaitable)
@@ -221,7 +215,6 @@ namespace DotNetCore.CAP.Dashboard
 
             string paramType = null;
             string paramName = null;
-            string paramString = string.Empty;
 
             var @params = method.GetParameters();
             if (@params.Length == 1)
@@ -232,16 +225,9 @@ namespace DotNetCore.CAP.Dashboard
                 paramName = firstParam.Name;
             }
 
-            if (paramType == null)
-            {
-                paramString = "();";
-            }
-            else
-            {
-                paramString = $"({paramType} {paramName});";
-            }
+            var paramString = paramType == null ? "();" : $"({paramType} {paramName});";
 
-            outputString = @public + " " + (string.IsNullOrEmpty(@async) ? "" : @async + " ") + @return + " " + @name + paramString;
+            var outputString = @public + " " + (string.IsNullOrEmpty(@async) ? "" : @async + " ") + @return + " " + @name + paramString;
 
             return new NonEscapedString(outputString);
         }
@@ -261,7 +247,7 @@ namespace DotNetCore.CAP.Dashboard
             {
                 return WrapType(type.Name);
             }
-            if (type.IsPrimitive || type.Equals(typeof(string)) || type.Equals(typeof(decimal)))
+            if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal))
             {
                 return WrapKeyword(type.Name.ToLower());
             }
@@ -284,11 +270,6 @@ namespace DotNetCore.CAP.Dashboard
         private string WrapType(string value)
         {
             return Span("type", value);
-        }
-
-        private string WrapString(string value)
-        {
-            return Span("string", value);
         }
 
         private string Span(string @class, string value)

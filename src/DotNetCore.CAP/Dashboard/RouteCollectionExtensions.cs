@@ -44,13 +44,13 @@ namespace DotNetCore.CAP.Dashboard
         public static void AddJsonResult(
            this RouteCollection routes,
            string pathTemplate,
-           Func<DashboardContext, string> Jsonfunc)
+           Func<DashboardContext, string> jsonfunc)
         {
             if (routes == null) throw new ArgumentNullException(nameof(routes));
             if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));
-            if (Jsonfunc == null) throw new ArgumentNullException(nameof(Jsonfunc));
+            if (jsonfunc == null) throw new ArgumentNullException(nameof(jsonfunc));
 
-            routes.Add(pathTemplate, new JsonDispatcher(Jsonfunc));
+            routes.Add(pathTemplate, new JsonDispatcher(jsonfunc));
         }
 
         public static void AddPublishBatchCommand(

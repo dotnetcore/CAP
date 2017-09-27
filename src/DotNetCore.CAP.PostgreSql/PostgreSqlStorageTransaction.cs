@@ -7,7 +7,7 @@ using Npgsql;
 
 namespace DotNetCore.CAP.PostgreSql
 {
-    public class PostgreSqlStorageTransaction : IStorageTransaction, IDisposable
+    public class PostgreSqlStorageTransaction : IStorageTransaction
     {
         private readonly string _schema;
 

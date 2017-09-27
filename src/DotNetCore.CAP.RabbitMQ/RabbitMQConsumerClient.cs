@@ -13,8 +13,8 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly string _exchageName;
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
+        private readonly ConnectionPool _connectionPool;
 
-        private ConnectionPool _connectionPool;
         private IModel _channel;
         private ulong _deliveryTag;
 
@@ -45,7 +45,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 type: RabbitMQOptions.ExchangeType,
                 durable: true);
 
-            var arguments = new Dictionary<string, object> { { "x-message-ttl", (int)_rabbitMQOptions.QueueMessageExpires } };
+            var arguments = new Dictionary<string, object> { { "x-message-ttl", _rabbitMQOptions.QueueMessageExpires } };
             _channel.QueueDeclare(_queueName,
                 durable: true,
                 exclusive: false,

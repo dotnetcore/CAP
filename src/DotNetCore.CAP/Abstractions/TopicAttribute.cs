@@ -2,6 +2,7 @@
 
 namespace DotNetCore.CAP.Abstractions
 {
+    /// <inheritdoc />
     /// <summary>
     /// An abstract attribute that for  kafka attribute or rabbitmq attribute
     /// </summary>
@@ -23,10 +24,5 @@ namespace DotNetCore.CAP.Abstractions
         /// rabbitmq --> queue.name
         /// </summary>
         public string Group { get; set; } = "cap.default.group";
-
-        /// <summary>
-        /// unused now
-        /// </summary>
-        public bool IsOneWay { get; set; }
     }
 }

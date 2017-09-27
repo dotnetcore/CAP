@@ -7,7 +7,7 @@ namespace DotNetCore.CAP.Processor.States
     {
         public const string StateName = "Succeeded";
 
-        public TimeSpan? ExpiresAfter { get; private set; }
+        public TimeSpan? ExpiresAfter { get; }
 
         public string Name => StateName;
 

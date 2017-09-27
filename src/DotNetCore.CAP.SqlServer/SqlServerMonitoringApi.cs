@@ -18,11 +18,8 @@ namespace DotNetCore.CAP.SqlServer
 
         public SqlServerMonitoringApi(IStorage storage, SqlServerOptions options)
         {
-            if (storage == null) throw new ArgumentNullException(nameof(storage));
-            if (options == null) throw new ArgumentNullException(nameof(options));
-
-            _options = options;
-            _storage = storage as SqlServerStorage;
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _storage = storage as SqlServerStorage ?? throw new ArgumentNullException(nameof(storage));
         }
 
 
@@ -74,7 +71,7 @@ _options.Schema);
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
         {
-            var tableName = queryDto.MessageType == Models.MessageType.Publish ? "Published" : "Received";
+            var tableName = queryDto.MessageType == MessageType.Publish ? "Published" : "Received";
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
             {
@@ -95,66 +92,45 @@ _options.Schema);
 
             var sqlQuery = $"select * from [{_options.Schema}].{tableName} where 1=1 {where} order by Added desc offset @Offset rows fetch next @Limit rows only";
 
-            return UseConnection(conn =>
+            return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
-                return conn.Query<MessageDto>(sqlQuery, new
-                {
-                    StatusName = queryDto.StatusName,
-                    Group = queryDto.Group,
-                    Name = queryDto.Name,
-                    Content = queryDto.Content,
-                    Offset = queryDto.CurrentPage * queryDto.PageSize,
-                    Limit = queryDto.PageSize,
-                }).ToList();
-            });
+                StatusName = queryDto.StatusName,
+                Group = queryDto.Group,
+                Name = queryDto.Name,
+                Content = queryDto.Content,
+                Offset = queryDto.CurrentPage * queryDto.PageSize,
+                Limit = queryDto.PageSize,
+            }).ToList());
         }
 
         public int PublishedFailedCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Published", StatusName.Failed);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Published", StatusName.Failed));
         }
 
         public int PublishedProcessingCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Published", StatusName.Processing);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Published", StatusName.Processing));
         }
 
         public int PublishedSucceededCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Published", StatusName.Succeeded);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Published", StatusName.Succeeded));
         }
 
         public int ReceivedFailedCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Received", StatusName.Failed);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Failed));
         }
 
         public int ReceivedProcessingCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Received", StatusName.Processing);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Processing));
         }
 
         public int ReceivedSucceededCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Received", StatusName.Succeeded);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Succeeded));
         }
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)

@@ -3,12 +3,11 @@ using System.Collections.Generic;
 
 namespace DotNetCore.CAP.Dashboard.Pages
 {
-    partial class SidebarMenu
+    internal partial class SidebarMenu
     {
         public SidebarMenu(IEnumerable<Func<RazorPage, MenuItem>> items)
         {
-            if (items == null) throw new ArgumentNullException(nameof(items));
-            Items = items;
+            Items = items ?? throw new ArgumentNullException(nameof(items));
         }
 
         public IEnumerable<Func<RazorPage, MenuItem>> Items { get; }

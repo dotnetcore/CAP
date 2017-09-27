@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -12,7 +11,7 @@ namespace DotNetCore.CAP
     /// <summary>
     /// Default implement of <see cref="IBootstrapper"/>.
     /// </summary>
-    public class DefaultBootstrapper : IBootstrapper
+    internal class DefaultBootstrapper : IBootstrapper
     {
         private readonly ILogger<DefaultBootstrapper> _logger;
         private readonly IApplicationLifetime _appLifetime;

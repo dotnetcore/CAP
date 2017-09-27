@@ -9,8 +9,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
 
         public void Set(string id, IHttpClient client, TimeSpan expirationTime)
         {
-            ConcurrentQueue<IHttpClient> connectionQueue;
-            if (_httpClientsCache.TryGetValue(id, out connectionQueue))
+            if (_httpClientsCache.TryGetValue(id, out var connectionQueue))
             {
                 connectionQueue.Enqueue(client);
             }
@@ -24,15 +23,13 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
 
         public bool Exists(string id)
         {
-            ConcurrentQueue<IHttpClient> connectionQueue;
-            return _httpClientsCache.TryGetValue(id, out connectionQueue);
+            return _httpClientsCache.TryGetValue(id, out _);
         }
 
         public IHttpClient Get(string id)
         {
             IHttpClient client = null;
-            ConcurrentQueue<IHttpClient> connectionQueue;
-            if (_httpClientsCache.TryGetValue(id, out connectionQueue))
+            if (_httpClientsCache.TryGetValue(id, out var connectionQueue))
             {
                 connectionQueue.TryDequeue(out client);
             }
@@ -41,8 +38,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
 
         public void Remove(string id)
         {
-            ConcurrentQueue<IHttpClient> connectionQueue;
-            _httpClientsCache.TryRemove(id, out connectionQueue);
+            _httpClientsCache.TryRemove(id, out _);
         }
     }
 }

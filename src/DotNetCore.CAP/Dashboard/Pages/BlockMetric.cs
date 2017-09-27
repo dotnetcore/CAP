@@ -1,6 +1,6 @@
 ﻿namespace DotNetCore.CAP.Dashboard.Pages
 {
-    partial class BlockMetric
+    internal partial class BlockMetric
     {
         public BlockMetric(DashboardMetric dashboardMetric)
         {

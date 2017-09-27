@@ -7,7 +7,7 @@ using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.SqlServer
 {
-    public class SqlServerStorageTransaction : IStorageTransaction, IDisposable
+    public class SqlServerStorageTransaction : IStorageTransaction
     {
         private readonly string _schema;
 
