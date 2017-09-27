@@ -18,6 +18,7 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
+            services.AddSingleton<CapDatabaseStorageMarkerService>();
             services.AddSingleton<IStorage, MySqlStorage>();
             services.AddScoped<IStorageConnection, MySqlStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();

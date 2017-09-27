@@ -11,6 +11,22 @@ namespace DotNetCore.CAP
     }
 
     /// <summary>
+    /// Used to verify cap database storage extension was added on a ServiceCollection
+    /// </summary>
+    public class CapDatabaseStorageMarkerService
+    {
+
+    }
+
+    /// <summary>
+    /// Used to verify cap message queue extension was added on a ServiceCollection
+    /// </summary>
+    public class CapMessageQueueMakerService
+    {
+
+    }
+
+    /// <summary>
     /// Allows fine grained configuration of CAP services.
     /// </summary>
     public class CapBuilder

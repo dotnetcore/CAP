@@ -16,6 +16,8 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
+            services.AddSingleton<CapMessageQueueMakerService>();
+
             var kafkaOptions = new KafkaOptions();
             _configure?.Invoke(kafkaOptions);
             services.AddSingleton(kafkaOptions);

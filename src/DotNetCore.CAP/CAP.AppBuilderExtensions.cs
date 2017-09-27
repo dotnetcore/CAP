@@ -1,7 +1,6 @@
 ﻿using System;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Microsoft.AspNetCore.Builder
@@ -23,12 +22,7 @@ namespace Microsoft.AspNetCore.Builder
                 throw new ArgumentNullException(nameof(app));
             }
 
-            var marker = app.ApplicationServices.GetService<CapMarkerService>();
-
-            if (marker == null)
-            {
-                throw new InvalidOperationException("Add Cap must be called on the service collection.");
-            }
+            CheckRequirement(app);
 
             var provider = app.ApplicationServices;
             var bootstrapper = provider.GetRequiredService<IBootstrapper>();
@@ -36,21 +30,42 @@ namespace Microsoft.AspNetCore.Builder
             return app;
         }
 
+        ///<summary>
+        /// Enables cap dashboard for the current application
+        /// </summary>
+        /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
+        /// <returns>The <see cref="IApplicationBuilder"/> instance this method extends.</returns>
         public static IApplicationBuilder UseCapDashboard(this IApplicationBuilder app)
         {
-            if (app == null) throw new ArgumentNullException(nameof(app));          
+            if (app == null) throw new ArgumentNullException(nameof(app));
 
-            var marker = app.ApplicationServices.GetService<CapMarkerService>();
-
-            if (marker == null)
-            {
-                throw new InvalidOperationException("Add Cap must be called on the service collection.");
-            }
+            CheckRequirement(app);
 
             app.UseMiddleware<GatewayProxyMiddleware>();
             app.UseMiddleware<DashboardMiddleware>();
-           
+
             return app;
+        }
+
+        private static void CheckRequirement(IApplicationBuilder app)
+        {
+            var marker = app.ApplicationServices.GetService<CapMarkerService>();
+            if (marker == null)
+            {
+                throw new InvalidOperationException("AddCap must be called on the service collection.   eg: services.AddCap(...)");
+            }
+
+            var messageQueuemarker = app.ApplicationServices.GetService<CapMessageQueueMakerService>();
+            if (messageQueuemarker == null)
+            {
+                throw new InvalidOperationException("You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseKafka(...) })");
+            }
+
+            var databaseMarker = app.ApplicationServices.GetService<CapDatabaseStorageMarkerService>();
+            if (databaseMarker == null)
+            {
+                throw new InvalidOperationException("You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseSqlServer(...) })");
+            }
         }
     }
 }

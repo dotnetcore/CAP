@@ -16,6 +16,8 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
+            services.AddSingleton<CapMessageQueueMakerService>();
+
             var options = new RabbitMQOptions();
             _configure?.Invoke(options);
             services.AddSingleton(options);
