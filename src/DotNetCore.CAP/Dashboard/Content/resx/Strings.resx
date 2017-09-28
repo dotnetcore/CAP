@@ -162,8 +162,8 @@
   <data name="Common_Reason" xml:space="preserve">
     <value>Reason</value>
   </data>
-  <data name="Common_RequeueJobs" xml:space="preserve">
-    <value>Requeue jobs</value>
+  <data name="Common_RequeueMessages" xml:space="preserve">
+    <value>Requeue messages</value>
   </data>
   <data name="Common_Retry" xml:space="preserve">
     <value>Retry</value>
@@ -383,5 +383,11 @@
   </data>
   <data name="NodePage_Switch" xml:space="preserve">
     <value>Switch</value>
+  </data>
+  <data name="Common_ReConsume" xml:space="preserve">
+    <value>ReExecution</value>
+  </data>
+  <data name="MessagesPage_Table_State" xml:space="preserve">
+    <value>State</value>
   </data>
 </root>

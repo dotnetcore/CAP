@@ -162,7 +162,7 @@
   <data name="Common_Reason" xml:space="preserve">
     <value>原因</value>
   </data>
-  <data name="Common_RequeueJobs" xml:space="preserve">
+  <data name="Common_RequeueMessages" xml:space="preserve">
     <value>重新加入队列</value>
   </data>
   <data name="Common_Retry" xml:space="preserve">
@@ -407,5 +407,11 @@
   </data>
   <data name="NodePage_Switch" xml:space="preserve">
     <value>切换到</value>
+  </data>
+  <data name="Common_ReConsume" xml:space="preserve">
+    <value>重新消费</value>
+  </data>
+  <data name="MessagesPage_Table_State" xml:space="preserve">
+    <value>状态</value>
   </data>
 </root>
