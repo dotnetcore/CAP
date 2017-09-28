@@ -32,7 +32,7 @@ select count(Id) from [{0}].Published with (nolock) where StatusName = N'Succeed
 select count(Id) from [{0}].Received with (nolock) where StatusName = N'Succeeded';
 select count(Id) from [{0}].Published with (nolock) where StatusName = N'Failed';
 select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
-select count(Id) from [{0}].Published with (nolock) where StatusName = N'Processing';
+select count(Id) from [{0}].Published with (nolock) where StatusName in (N'Processing',N'Scheduled',N'Enqueued');
 select count(Id) from [{0}].Received with (nolock) where StatusName = N'Processing';",
 _options.Schema);
 
@@ -75,7 +75,14 @@ _options.Schema);
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
             {
-                where += " and statusname=@StatusName";
+                if (string.Equals(queryDto.StatusName, ProcessingState.StateName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    where += " and statusname in (N'Processing',N'Scheduled',N'Enqueued')";
+                }
+                else
+                {
+                    where += " and statusname=@StatusName";
+                }
             }
             if (!string.IsNullOrEmpty(queryDto.Name))
             {
@@ -135,7 +142,10 @@ _options.Schema);
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName = @state";
+            var sqlQuery = statusName == StatusName.Processing
+                ? $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName in (N'Processing',N'Scheduled',N'Enqueued')"
+                : $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName = @state";
+
             var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
             return count;
         }
@@ -166,6 +176,7 @@ _options.Schema);
            string statusName,
            IDictionary<string, DateTime> keyMaps)
         {
+            //SQL Server 2012+
             string sqlQuery =
 $@"
 with aggr as (
