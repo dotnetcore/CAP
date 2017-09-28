@@ -14,11 +14,11 @@ namespace DotNetCore.CAP.Dashboard.Pages
 
         public int GetTotal(IMonitoringApi api)
         {
-            if (string.Compare(StatusName, SucceededState.StateName, StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(StatusName, SucceededState.StateName, StringComparison.CurrentCultureIgnoreCase))
             {
                 return api.PublishedSucceededCount();
             }
-            if (string.Compare(StatusName, ProcessingState.StateName, StringComparison.OrdinalIgnoreCase) == 0)
+            if (string.Equals(StatusName, ProcessingState.StateName, StringComparison.CurrentCultureIgnoreCase))
             {
                 return api.PublishedProcessingCount();
             }

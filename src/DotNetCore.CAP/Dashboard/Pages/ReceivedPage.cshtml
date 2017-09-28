@@ -22,7 +22,7 @@
     var queryDto = new MessageQueryDto
     {
         MessageType = MessageType.Subscribe,
-        Group =group,
+        Group = group,
         Name = name,
         Content = content,
         StatusName = StatusName,
@@ -34,7 +34,7 @@
 
 <div class="row">
     <div class="col-md-3">
-        @Html.JobsSidebar(MessageType.Subscribe)
+        @Html.MessagesSidebar(MessageType.Subscribe)
     </div>
     <div class="col-md-9">
         <h1 class="page-header">@Strings.ReceivedPage_Title</h1>
@@ -72,7 +72,7 @@
                             data-loading-text="@Strings.Common_Enqueueing"
                             disabled="disabled">
                         <span class="glyphicon glyphicon-repeat"></span>
-                        @Strings.Common_RequeueJobs
+                        @Strings.Common_ReConsume
                     </button>
 
                     @Html.PerPageSelector(pager)
@@ -89,6 +89,10 @@
                                 <th>@Strings.MessagesPage_Table_Group</th>
                                 <th>@Strings.MessagesPage_Table_Name</th>
                                 <th class="min-width">@Strings.MessagesPage_Table_Retries</th>
+                                @if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
+                                {
+                                    <th>@Strings.MessagesPage_Table_State</th>
+                                }
                                 <th class="align-right">@Strings.MessagesPage_Table_ExpiresAt</th>
                             </tr>
                         </thead>
@@ -111,6 +115,12 @@
                                     <td>
                                         @message.Retries
                                     </td>
+                                    @if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
+                                    {
+                                        <td>
+                                            @message.StatusName
+                                        </td>
+                                    }
                                     <td class="align-right">
                                         @if (message.ExpiresAt.HasValue)
                                         {
