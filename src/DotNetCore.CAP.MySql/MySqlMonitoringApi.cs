@@ -30,7 +30,7 @@ select count(Id) from `{0}.received` where StatusName = N'Succeeded';
 select count(Id) from `{0}.published` where StatusName = N'Failed';
 select count(Id) from `{0}.received` where StatusName = N'Failed';
 select count(Id) from `{0}.published` where StatusName in (N'Processing',N'Scheduled',N'Enqueued');
-select count(Id) from `{0}.received` where StatusName = N'Processing';", _prefix);
+select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Scheduled',N'Enqueued');", _prefix);
 
             var statistics = UseConnection(connection =>
             {

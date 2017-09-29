@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.SqlServer
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var sql = $"UPDATE [{_schema}].[Received] SET [Retries] = @Retries,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
+            var sql = $"UPDATE [{_schema}].[Received] SET [Retries] = @Retries,[Content] = @Content,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
         }
 

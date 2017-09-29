@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.MySql
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var sql = $"UPDATE `{_prefix}.received` SET `Retries` = @Retries,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+            var sql = $"UPDATE `{_prefix}.received` SET `Retries` = @Retries,`Content`= @Content,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
         }
 

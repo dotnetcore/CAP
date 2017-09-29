@@ -30,7 +30,7 @@ select count(Id) from [{0}].Received with (nolock) where StatusName = N'Succeede
 select count(Id) from [{0}].Published with (nolock) where StatusName = N'Failed';
 select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
 select count(Id) from [{0}].Published with (nolock) where StatusName in (N'Processing',N'Scheduled',N'Enqueued');
-select count(Id) from [{0}].Received with (nolock) where StatusName = N'Processing';",
+select count(Id) from [{0}].Received with (nolock) where StatusName in (N'Processing',N'Scheduled',N'Enqueued');",
 _options.Schema);
 
             var statistics = UseConnection(connection =>

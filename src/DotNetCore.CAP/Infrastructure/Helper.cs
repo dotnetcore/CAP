@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DotNetCore.CAP.Infrastructure
 {
@@ -89,6 +91,16 @@ namespace DotNetCore.CAP.Infrastructure
         public static bool IsComplexType(Type type)
         {
             return !CanConvertFromString(type);
+        }
+
+        public static string AddJsonProperty(string json, IList<KeyValuePair<string, string>> properties)
+        {
+            var jObj = JObject.Parse(json);
+            foreach (var property in properties)
+            {
+                jObj.Add(new JProperty(property.Key, property.Value));
+            }
+            return jObj.ToString();
         }
 
         private static bool CanConvertFromString(Type destinationType)

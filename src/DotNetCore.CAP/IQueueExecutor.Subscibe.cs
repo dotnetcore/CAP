@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
@@ -13,10 +15,10 @@ namespace DotNetCore.CAP
     public class SubscibeQueueExecutor : IQueueExecutor
     {
         private readonly IConsumerInvokerFactory _consumerInvokerFactory;
-        private readonly IStateChanger _stateChanger;
         private readonly ILogger _logger;
         private readonly CapOptions _options;
         private readonly MethodMatcherCache _selector;
+        private readonly IStateChanger _stateChanger;
 
         public SubscibeQueueExecutor(
             IStateChanger stateChanger,
@@ -41,16 +43,14 @@ namespace DotNetCore.CAP
                 await _stateChanger.ChangeStateAsync(message, new ProcessingState(), connection);
 
                 if (message.Retries > 0)
-                {
                     _logger.JobRetrying(message.Retries);
-                }
                 var result = await ExecuteSubscribeAsync(message);
                 sp.Stop();
 
                 IState newState;
                 if (!result.Succeeded)
                 {
-                    var shouldRetry = await UpdateMessageForRetryAsync(message, connection);
+                    var shouldRetry = await UpdateMessageForRetryAsync(message, connection, result.Exception?.Message);
                     if (shouldRetry)
                     {
                         newState = new ScheduledState();
@@ -71,16 +71,9 @@ namespace DotNetCore.CAP
                 fetched.RemoveFromQueue();
 
                 if (result.Succeeded)
-                {
                     _logger.JobExecuted(sp.Elapsed.TotalSeconds);
-                }
 
                 return OperateResult.Success;
-            }
-            catch (SubscriberNotFoundException ex)
-            {
-                _logger.LogError(ex.Message);
-                return OperateResult.Failed(ex);
             }
             catch (Exception ex)
             {
@@ -96,9 +89,7 @@ namespace DotNetCore.CAP
                 var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.Name);
 
                 if (!executeDescriptorGroup.ContainsKey(receivedMessage.Group))
-                {
                     throw new SubscriberNotFoundException(receivedMessage.Name + " has not been found.");
-                }
 
                 // If there are multiple consumers in the same group, we will take the first
                 var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
@@ -115,23 +106,31 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.Name}", ex);
+                _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.Name}",
+                    ex);
+
                 return OperateResult.Failed(ex);
             }
         }
 
-        private async Task<bool> UpdateMessageForRetryAsync(CapReceivedMessage message, IStorageConnection connection)
+        private static async Task<bool> UpdateMessageForRetryAsync(CapReceivedMessage message,
+            IStorageConnection connection, string exceptionMessage)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
             var retries = ++message.Retries;
             if (retries >= retryBehavior.RetryCount)
-            {
                 return false;
-            }
 
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
             message.ExpiresAt = due;
+
+            var exceptions = new List<KeyValuePair<string, string>>
+            {
+                new KeyValuePair<string, string>("ExceptionMessage", exceptionMessage)
+            };
+
+            message.Content = Helper.AddJsonProperty(message.Content, exceptions);
             using (var transaction = connection.CreateTransaction())
             {
                 transaction.UpdateMessage(message);
