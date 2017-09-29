@@ -1,6 +1,5 @@
 using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -62,7 +61,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         internal IDbConnection CreateAndOpenConnection()
         {
-            var connection = _existingConnection ?? new SqlConnection(_options.ConnectionString);
+            var connection = _existingConnection ?? new NpgsqlConnection(_options.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
             {
