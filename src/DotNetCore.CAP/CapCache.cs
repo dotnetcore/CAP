@@ -19,9 +19,9 @@ namespace DotNetCore.CAP
         /// </summary>
         public Cache() { }
 
-        private Dictionary<K, T> cache = new Dictionary<K, T>();
-        private Dictionary<K, Timer> timers = new Dictionary<K, Timer>();
-        private ReaderWriterLockSlim locker = new ReaderWriterLockSlim();
+        private Dictionary<K, T> _cache = new Dictionary<K, T>();
+        private Dictionary<K, Timer> _timers = new Dictionary<K, Timer>();
+        private ReaderWriterLockSlim _locker = new ReaderWriterLockSlim();
         #endregion
 
         #region IDisposable implementation & Clear
@@ -51,7 +51,7 @@ namespace DotNetCore.CAP
                 {
                     // Dispose managed resources.
                     Clear();
-                    locker.Dispose();
+                    _locker.Dispose();
                 }
                 // Dispose unmanaged resources
             }
@@ -62,21 +62,21 @@ namespace DotNetCore.CAP
         /// </summary>
         public void Clear()
         {
-            locker.EnterWriteLock();
+            _locker.EnterWriteLock();
             try
             {
                 try
                 {
-                    foreach (Timer t in timers.Values)
+                    foreach (Timer t in _timers.Values)
                         t.Dispose();
                 }
                 catch
                 { }
 
-                timers.Clear();
-                cache.Clear();
+                _timers.Clear();
+                _cache.Clear();
             }
-            finally { locker.ExitWriteLock(); }
+            finally { _locker.ExitWriteLock(); }
         }
         #endregion
 
@@ -86,22 +86,22 @@ namespace DotNetCore.CAP
         {
             Timer timer;
 
-            if (timers.TryGetValue(key, out timer))
+            if (_timers.TryGetValue(key, out timer))
             {
                 if (restartTimerIfExists)
                 {
                     timer.Change(
-                        (cacheTimeout == null ? Timeout.InfiniteTimeSpan : cacheTimeout.Value),
+                        cacheTimeout ?? Timeout.InfiniteTimeSpan,
                         Timeout.InfiniteTimeSpan);
                 }
             }
             else
-                timers.Add(
+                _timers.Add(
                     key,
                     new Timer(
                         new TimerCallback(RemoveByTimer),
                         key,
-                        (cacheTimeout == null ? Timeout.InfiniteTimeSpan : cacheTimeout.Value),
+                        cacheTimeout ?? Timeout.InfiniteTimeSpan,
                         Timeout.InfiniteTimeSpan));
         }
 
@@ -125,17 +125,17 @@ namespace DotNetCore.CAP
         {
             if (disposed) return;            
 
-            locker.EnterWriteLock();
+            _locker.EnterWriteLock();
             try
             {
                 CheckTimer(key, cacheTimeout, restartTimerIfExists);
 
-                if (!cache.ContainsKey(key))
-                    cache.Add(key, cacheObject);
+                if (!_cache.ContainsKey(key))
+                    _cache.Add(key, cacheObject);
                 else
-                    cache[key] = cacheObject;
+                    _cache[key] = cacheObject;
             }
-            finally { locker.ExitWriteLock(); }
+            finally { _locker.ExitWriteLock(); }
         }
 
         /// <summary>
@@ -164,13 +164,13 @@ namespace DotNetCore.CAP
         {
             if (disposed) return default(T);
 
-            locker.EnterReadLock();
+            _locker.EnterReadLock();
             try
             {
                 T rv;
-                return (cache.TryGetValue(key, out rv) ? rv : default(T));
+                return (_cache.TryGetValue(key, out rv) ? rv : default(T));
             }
-            finally { locker.ExitReadLock(); }
+            finally { _locker.ExitReadLock(); }
         }
 
         /// <summary>
@@ -187,12 +187,12 @@ namespace DotNetCore.CAP
                 return false;
             }
 
-            locker.EnterReadLock();
+            _locker.EnterReadLock();
             try
             {
-                return cache.TryGetValue(key, out value);
+                return _cache.TryGetValue(key, out value);
             }
-            finally { locker.ExitReadLock(); }
+            finally { _locker.ExitReadLock(); }
         }
 
         /// <summary>
@@ -203,22 +203,22 @@ namespace DotNetCore.CAP
         {
             if (disposed) return;
 
-            locker.EnterWriteLock();
+            _locker.EnterWriteLock();
             try
             {
-                var removers = (from k in cache.Keys.Cast<K>()
+                var removers = (from k in _cache.Keys.Cast<K>()
                                 where keyPattern(k)
                                 select k).ToList();
 
                 foreach (K workKey in removers)
                 {
-                    try { timers[workKey].Dispose(); }
+                    try { _timers[workKey].Dispose(); }
                     catch { }
-                    timers.Remove(workKey);
-                    cache.Remove(workKey);
+                    _timers.Remove(workKey);
+                    _cache.Remove(workKey);
                 }
             }
-            finally { locker.ExitWriteLock(); }
+            finally { _locker.ExitWriteLock(); }
         }
 
         /// <summary>
@@ -230,18 +230,18 @@ namespace DotNetCore.CAP
         {
             if (disposed) return;
 
-            locker.EnterWriteLock();
+            _locker.EnterWriteLock();
             try
             {
-                if (cache.ContainsKey(key))
+                if (_cache.ContainsKey(key))
                 {
-                    try { timers[key].Dispose(); }
+                    try { _timers[key].Dispose(); }
                     catch { }
-                    timers.Remove(key);
-                    cache.Remove(key);
+                    _timers.Remove(key);
+                    _cache.Remove(key);
                 }
             }
-            finally { locker.ExitWriteLock(); }
+            finally { _locker.ExitWriteLock(); }
         }
 
         /// <summary>
@@ -253,12 +253,12 @@ namespace DotNetCore.CAP
         {
             if (disposed) return false;
 
-            locker.EnterReadLock();
+            _locker.EnterReadLock();
             try
             {
-                return cache.ContainsKey(key);
+                return _cache.ContainsKey(key);
             }
-            finally { locker.ExitReadLock(); }
+            finally { _locker.ExitReadLock(); }
         }
         #endregion
     }

@@ -1,7 +1,4 @@
-﻿using Microsoft.Extensions.Options;
-using RabbitMQ.Client;
-
-namespace DotNetCore.CAP.RabbitMQ
+﻿namespace DotNetCore.CAP.RabbitMQ
 {
     internal sealed class RabbitMQConsumerClientFactory : IConsumerClientFactory
     {

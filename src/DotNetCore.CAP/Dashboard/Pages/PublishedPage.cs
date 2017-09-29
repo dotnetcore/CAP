@@ -14,18 +14,15 @@ namespace DotNetCore.CAP.Dashboard.Pages
 
         public int GetTotal(IMonitoringApi api)
         {
-            if (String.Compare(StatusName, SucceededState.StateName, true) == 0)
+            if (string.Equals(StatusName, SucceededState.StateName, StringComparison.CurrentCultureIgnoreCase))
             {
                 return api.PublishedSucceededCount();
             }
-            else if (String.Compare(StatusName, ProcessingState.StateName, true) == 0)
+            if (string.Equals(StatusName, ProcessingState.StateName, StringComparison.CurrentCultureIgnoreCase))
             {
                 return api.PublishedProcessingCount();
             }
-            else
-            {
-                return api.PublishedFailedCount();
-            }
+            return api.PublishedFailedCount();
         }
     }
 }

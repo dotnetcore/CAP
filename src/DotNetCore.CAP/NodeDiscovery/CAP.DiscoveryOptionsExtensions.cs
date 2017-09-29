@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace DotNetCore.CAP
 {
-    using DotNetCore.CAP.NodeDiscovery;
+    using NodeDiscovery;
     using Microsoft.Extensions.DependencyInjection;
 
     internal sealed class DiscoveryOptionsExtension : ICapOptionsExtension

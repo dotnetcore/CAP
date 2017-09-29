@@ -45,7 +45,7 @@ namespace DotNetCore.CAP.Internal
                 var jsonConent = _consumerContext.DeliverMessage.Content;
                 var message =  serializer.DeSerialize<CapMessageDto>(jsonConent);
 
-                object result = null;
+                object result;
                 if (_executor.MethodParameters.Length > 0)
                 {
                     result = await ExecuteWithParameterAsync(obj, message.Content.ToString());
@@ -68,10 +68,7 @@ namespace DotNetCore.CAP.Internal
             {
                 return await _executor.ExecuteAsync(@class);
             }
-            else
-            {
-                return _executor.Execute(@class);
-            }
+            return _executor.Execute(@class);
         }
 
         private async Task<object> ExecuteWithParameterAsync(object @class, string parameterString)
@@ -87,15 +84,9 @@ namespace DotNetCore.CAP.Internal
                     {
                         return await _executor.ExecuteAsync(@class, bindResult.Model);
                     }
-                    else
-                    {
-                        return _executor.Execute(@class, bindResult.Model);
-                    }
+                    return _executor.Execute(@class, bindResult.Model);
                 }
-                else
-                {
-                    throw new MethodBindException($"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameterString} ");
-                }
+                throw new MethodBindException($"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameterString} ");
             }
             catch (FormatException ex)
             {

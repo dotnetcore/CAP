@@ -24,20 +24,19 @@ namespace DotNetCore.CAP.Dashboard
 
         public CapDashboardResponse(HttpContext context)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public override string ContentType
         {
-            get { return _context.Response.ContentType; }
-            set { _context.Response.ContentType = value; }
+            get => _context.Response.ContentType;
+            set => _context.Response.ContentType = value;
         }
 
         public override int StatusCode
         {
-            get { return _context.Response.StatusCode; }
-            set { _context.Response.StatusCode = value; }
+            get => _context.Response.StatusCode;
+            set => _context.Response.StatusCode = value;
         }
 
         public override Stream Body => _context.Response.Body;

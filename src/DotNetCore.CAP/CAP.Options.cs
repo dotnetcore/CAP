@@ -8,7 +8,7 @@ namespace DotNetCore.CAP
     /// </summary>
     public class CapOptions
     {
-        internal IList<ICapOptionsExtension> Extensions { get; private set; }
+        internal IList<ICapOptionsExtension> Extensions { get; }
 
         /// <summary>
         /// Default value for polling delay timeout, in seconds.

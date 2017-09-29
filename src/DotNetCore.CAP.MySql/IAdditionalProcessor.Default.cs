@@ -9,7 +9,6 @@ namespace DotNetCore.CAP.MySql
 {
     internal class DefaultAdditionalProcessor : IAdditionalProcessor
     {
-        private readonly IServiceProvider _provider;
         private readonly ILogger _logger;
         private readonly MySqlOptions _options;
 
@@ -17,13 +16,10 @@ namespace DotNetCore.CAP.MySql
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
-        public DefaultAdditionalProcessor(
-            IServiceProvider provider,
-            ILogger<DefaultAdditionalProcessor> logger,
+        public DefaultAdditionalProcessor(ILogger<DefaultAdditionalProcessor> logger,
             MySqlOptions mysqlOptions)
         {
             _logger = logger;
-            _provider = provider;
             _options = mysqlOptions;
         }
 
@@ -31,14 +27,14 @@ namespace DotNetCore.CAP.MySql
         {
             _logger.LogDebug("Collecting expired entities.");
 
-            var tables = new string[]{
+            var tables = new[]{
                 $"{_options.TableNamePrefix}.published",
                 $"{_options.TableNamePrefix}.received"
             };
 
             foreach (var table in tables)
             {
-                var removedCount = 0;
+                int removedCount;
                 do
                 {
                     using (var connection = new MySqlConnection(_options.ConnectionString))

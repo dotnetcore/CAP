@@ -3,6 +3,7 @@ using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using Microsoft.Extensions.DependencyInjection;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
@@ -52,7 +53,7 @@ namespace Microsoft.AspNetCore.Builder
             var marker = app.ApplicationServices.GetService<CapMarkerService>();
             if (marker == null)
             {
-                throw new InvalidOperationException("AddCap must be called on the service collection.   eg: services.AddCap(...)");
+                throw new InvalidOperationException("AddCap() must be called on the service collection.   eg: services.AddCap(...)");
             }
 
             var messageQueuemarker = app.ApplicationServices.GetService<CapMessageQueueMakerService>();

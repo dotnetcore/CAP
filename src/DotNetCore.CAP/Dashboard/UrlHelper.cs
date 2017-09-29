@@ -9,8 +9,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public UrlHelper(DashboardContext context)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            _context = context;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public string To(string relativePath)

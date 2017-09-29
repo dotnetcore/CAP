@@ -7,7 +7,7 @@ using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class MySqlStorageTransaction : IStorageTransaction, IDisposable
+    public class MySqlStorageTransaction : IStorageTransaction
     {
         private readonly string _prefix;
 

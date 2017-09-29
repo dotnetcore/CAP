@@ -268,11 +268,20 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Requeue jobs.
+        ///   Looks up a localized string similar to ReExecution.
         /// </summary>
-        public static string Common_RequeueJobs {
+        public static string Common_ReConsume {
             get {
-                return ResourceManager.GetString("Common_RequeueJobs", resourceCulture);
+                return ResourceManager.GetString("Common_ReConsume", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Requeue messages.
+        /// </summary>
+        public static string Common_RequeueMessages {
+            get {
+                return ResourceManager.GetString("Common_RequeueMessages", resourceCulture);
             }
         }
         
@@ -543,6 +552,15 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string MessagesPage_Table_Retries {
             get {
                 return ResourceManager.GetString("MessagesPage_Table_Retries", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to State.
+        /// </summary>
+        public static string MessagesPage_Table_State {
+            get {
+                return ResourceManager.GetString("MessagesPage_Table_State", resourceCulture);
             }
         }
         

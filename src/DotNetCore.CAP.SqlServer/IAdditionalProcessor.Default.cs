@@ -9,7 +9,6 @@ namespace DotNetCore.CAP.SqlServer
 {
     public class DefaultAdditionalProcessor : IAdditionalProcessor
     {
-        private readonly IServiceProvider _provider;
         private readonly ILogger _logger;
         private readonly SqlServerOptions _options;
 
@@ -22,13 +21,10 @@ namespace DotNetCore.CAP.SqlServer
             "Published","Received"
         };
 
-        public DefaultAdditionalProcessor(
-            IServiceProvider provider,
-            ILogger<DefaultAdditionalProcessor> logger,
+        public DefaultAdditionalProcessor(ILogger<DefaultAdditionalProcessor> logger,
             SqlServerOptions sqlServerOptions)
         {
             _logger = logger;
-            _provider = provider;
             _options = sqlServerOptions;
         }
 
@@ -38,7 +34,7 @@ namespace DotNetCore.CAP.SqlServer
 
             foreach (var table in Tables)
             {
-                var removedCount = 0;
+                int removedCount;
                 do
                 {
                     using (var connection = new SqlConnection(_options.ConnectionString))

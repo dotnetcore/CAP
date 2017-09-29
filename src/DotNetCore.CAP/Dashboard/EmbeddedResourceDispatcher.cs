@@ -15,12 +15,16 @@ namespace DotNetCore.CAP.Dashboard
              Assembly assembly,
             string resourceName)
         {
-            if (contentType == null) throw new ArgumentNullException(nameof(contentType));
-            if (assembly == null) throw new ArgumentNullException(nameof(assembly));
-
-            _assembly = assembly;
-            _resourceName = resourceName;
-            _contentType = contentType;
+            if (assembly != null)
+            {
+                _assembly = assembly;
+                _resourceName = resourceName;
+                _contentType = contentType ?? throw new ArgumentNullException(nameof(contentType));
+            }
+            else
+            {
+                throw new ArgumentNullException(nameof(assembly));
+            }
         }
 
         public Task Dispatch(DashboardContext context)

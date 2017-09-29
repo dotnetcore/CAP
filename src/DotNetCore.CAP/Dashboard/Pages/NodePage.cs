@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using DotNetCore.CAP.NodeDiscovery;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard.Pages
 {
-    partial class NodePage
+    internal partial class NodePage
     {
-        private IList<Node> _nodes = null;
+        private IList<Node> _nodes;
         private INodeDiscoveryProvider _discoveryProvider;
 
         public NodePage()

@@ -16,11 +16,11 @@ namespace DotNetCore.CAP
         private static readonly Action<ILogger, string, Exception> _receivedMessageRetryExecuting;
         private static readonly Action<ILogger, string, string, string, Exception> _modelBinderFormattingException;
 
-        private static Action<ILogger, Exception> _jobFailed;
-        private static Action<ILogger, Exception> _jobFailedWillRetry;
-        private static Action<ILogger, double, Exception> _jobExecuted;
-        private static Action<ILogger, int, Exception> _jobRetrying;
-        private static Action<ILogger, string, Exception> _exceptionOccuredWhileExecutingJob;
+        private static readonly Action<ILogger, Exception> _jobFailed;
+        private static readonly Action<ILogger, Exception> _jobFailedWillRetry;
+        private static readonly Action<ILogger, double, Exception> _jobExecuted;
+        private static readonly Action<ILogger, int, Exception> _jobRetrying;
+        private static readonly Action<ILogger, string, Exception> _exceptionOccuredWhileExecutingJob;
 
         static LoggerExtensions()
         {

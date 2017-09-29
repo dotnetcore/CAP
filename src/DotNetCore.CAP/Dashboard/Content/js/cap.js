@@ -398,10 +398,10 @@
             updateRelativeDates();
             setInterval(updateRelativeDates, 30 * 1000);
 
-            $('*[title]').tooltip();
+            $("*[title]").tooltip();
 
             var self = this;
-            $('*[data-metric]').each(function () {
+            $("*[data-metric]").each(function () {
                 var name = $(this).data('metric');
                 self._metrics.addElement(name, this);
             });

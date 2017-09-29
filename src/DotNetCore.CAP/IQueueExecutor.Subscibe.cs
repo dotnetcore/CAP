@@ -47,7 +47,7 @@ namespace DotNetCore.CAP
                 var result = await ExecuteSubscribeAsync(message);
                 sp.Stop();
 
-                var newState = default(IState);
+                IState newState;
                 if (!result.Succeeded)
                 {
                     var shouldRetry = await UpdateMessageForRetryAsync(message, connection);

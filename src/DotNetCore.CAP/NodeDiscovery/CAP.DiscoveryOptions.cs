@@ -1,4 +1,5 @@
-﻿namespace DotNetCore.CAP
+﻿// ReSharper disable once CheckNamespace
+namespace DotNetCore.CAP
 {
     public class DiscoveryOptions
     {

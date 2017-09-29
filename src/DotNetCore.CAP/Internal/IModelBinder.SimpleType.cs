@@ -73,7 +73,7 @@ namespace DotNetCore.CAP.Internal
                     // so we capture the inner exception.
                     exception = ExceptionDispatchInfo.Capture(exception.InnerException).SourceException;
                 }
-                throw exception;
+                throw;
             }
         }
 

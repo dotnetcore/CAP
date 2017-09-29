@@ -11,46 +11,46 @@
 
 namespace DotNetCore.CAP.Dashboard.Pages
 {
-    
-    #line 2 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+
+#line 2 "..\..\ReceivedPage.cshtml"
     using System;
-    
-    #line default
-    #line hidden
+
+#line default
+#line hidden
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-    
-    #line 4 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+
+#line 4 "..\..\ReceivedPage.cshtml"
     using DotNetCore.CAP.Dashboard;
-    
-    #line default
-    #line hidden
-    
-    #line 6 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+
+#line default
+#line hidden
+
+#line 6 "..\..\ReceivedPage.cshtml"
     using DotNetCore.CAP.Dashboard.Monitoring;
-    
-    #line default
-    #line hidden
-    
-    #line 5 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+
+#line default
+#line hidden
+
+#line 5 "..\..\ReceivedPage.cshtml"
     using DotNetCore.CAP.Dashboard.Pages;
-    
-    #line default
-    #line hidden
-    
-    #line 7 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+
+#line default
+#line hidden
+
+#line 7 "..\..\ReceivedPage.cshtml"
     using DotNetCore.CAP.Dashboard.Resources;
-    
-    #line default
-    #line hidden
-    
-    #line 3 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+
+#line default
+#line hidden
+
+#line 3 "..\..\ReceivedPage.cshtml"
     using DotNetCore.CAP.Models;
-    
-    #line default
-    #line hidden
-    
+
+#line default
+#line hidden
+
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     internal partial class ReceivedPage : RazorPage
     {
@@ -60,7 +60,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
         {
 
 
-WriteLiteral("\r\n");
+            WriteLiteral("\r\n");
 
 
 
@@ -70,170 +70,170 @@ WriteLiteral("\r\n");
 
 
 
-            
-            #line 9 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-  
-    Layout = new LayoutPage(Strings.ReceivedMessagesPage_Title);
 
-    int from, perPage;
+#line 9 "..\..\ReceivedPage.cshtml"
 
-    int.TryParse(Query("from"), out from);
-    int.TryParse(Query("count"), out perPage);
-    string group = Query("group");
-    string name = Query("name");
-    string content = Query("content");
+            Layout = new LayoutPage(Strings.ReceivedMessagesPage_Title);
 
-    var monitor = Storage.GetMonitoringApi();
-    var pager = new Pager(from, perPage, GetTotal(monitor));
-    var queryDto = new MessageQueryDto
-    {
-        MessageType = MessageType.Subscribe,
-        Group =group,
-        Name = name,
-        Content = content,
-        StatusName = StatusName,
-        CurrentPage = pager.CurrentPage - 1,
-        PageSize = pager.RecordsPerPage
-    };
-    var succeededMessages = monitor.Messages(queryDto);
+            int from, perPage;
 
+            int.TryParse(Query("from"), out from);
+            int.TryParse(Query("count"), out perPage);
+            string group = Query("group");
+            string name = Query("name");
+            string content = Query("content");
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-3\">\r\n        ");
+            var monitor = Storage.GetMonitoringApi();
+            var pager = new Pager(from, perPage, GetTotal(monitor));
+            var queryDto = new MessageQueryDto
+            {
+                MessageType = MessageType.Subscribe,
+                Group = group,
+                Name = name,
+                Content = content,
+                StatusName = StatusName,
+                CurrentPage = pager.CurrentPage - 1,
+                PageSize = pager.RecordsPerPage
+            };
+            var succeededMessages = monitor.Messages(queryDto);
 
 
-            
-            #line 37 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-   Write(Html.MessagesSidebar(MessageType.Subscribe));
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n    </div>\r\n    <div class=\"col-md-9\">\r\n        <h1 class=\"page-header\">");
+#line default
+#line hidden
+            WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-3\">\r\n        ");
 
 
-            
-            #line 40 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                           Write(Strings.ReceivedPage_Title);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</h1>\r\n\r\n");
+#line 37 "..\..\ReceivedPage.cshtml"
+            Write(Html.MessagesSidebar(MessageType.Subscribe));
 
 
-            
-            #line 42 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-         if (succeededMessages.Count == 0)
-        {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <div class=\"alert alert-info\">\r\n                ");
+#line default
+#line hidden
+            WriteLiteral("\r\n    </div>\r\n    <div class=\"col-md-9\">\r\n        <h1 class=\"page-header\">");
 
 
-            
-            #line 45 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-           Write(Strings.MessagesPage_NoMessages);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n            </div>\r\n");
+#line 40 "..\..\ReceivedPage.cshtml"
+            Write(Strings.ReceivedPage_Title);
 
 
-            
-            #line 47 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-        }
-        else
-        {
+#line default
+#line hidden
+            WriteLiteral("</h1>\r\n\r\n");
 
-            
-            #line default
-            #line hidden
-WriteLiteral(@"            <div class=""js-jobs-list"">
+
+
+#line 42 "..\..\ReceivedPage.cshtml"
+            if (succeededMessages.Count == 0)
+            {
+
+
+#line default
+#line hidden
+                WriteLiteral("            <div class=\"alert alert-info\">\r\n                ");
+
+
+
+#line 45 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_NoMessages);
+
+
+#line default
+#line hidden
+                WriteLiteral("\r\n            </div>\r\n");
+
+
+
+#line 47 "..\..\ReceivedPage.cshtml"
+            }
+            else
+            {
+
+
+#line default
+#line hidden
+                WriteLiteral(@"            <div class=""js-jobs-list"">
                 <div class=""btn-toolbar btn-toolbar-top"">
                     <form class=""row"">
                         <span class=""col-md-2"">
-                            <input type=""text"" class=""form-control"" name=""name"" value=""");
+                            <input type=""text"" class=""form-control"" name=""group"" value=""");
 
 
-            
-            #line 54 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                  Write(Query("group"));
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\" placeholder=\"");
+#line 54 "..\..\ReceivedPage.cshtml"
+                Write(Query("group"));
 
 
-            
-            #line 54 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                                                Write(Strings.MessagesPage_Query_MessageGroup);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\" />\r\n                        </span>\r\n                        <span class=\"col-m" +
-"d-3\">\r\n                            <input type=\"text\" class=\"form-control\" name=" +
-"\"name\" value=\"");
+#line default
+#line hidden
+                WriteLiteral("\" placeholder=\"");
 
 
-            
-            #line 57 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                  Write(Query("name"));
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\" placeholder=\"");
+#line 54 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Query_MessageGroup);
 
 
-            
-            #line 57 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                                               Write(Strings.MessagesPage_Query_MessageName);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\" />\r\n                        </span>\r\n                        <div class=\"col-md" +
-"-5\">\r\n                            <div class=\"input-group\">\r\n                   " +
-"             <input type=\"text\" class=\"form-control\" name=\"content\" value=\"");
+#line default
+#line hidden
+                WriteLiteral("\" />\r\n                        </span>\r\n                        <span class=\"col-m" +
+                "d-3\">\r\n                            <input type=\"text\" class=\"form-control\" name=" +
+                "\"name\" value=\"");
 
 
-            
-            #line 61 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                         Write(Query("content"));
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\" placeholder=\"");
+#line 57 "..\..\ReceivedPage.cshtml"
+                Write(Query("name"));
 
 
-            
-            #line 61 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                                                         Write(Strings.MessagesPage_Query_MessageBody);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\" />\r\n                                <span class=\"input-group-btn\">\r\n           " +
-"                         <button class=\"btn btn-info\">");
+#line default
+#line hidden
+                WriteLiteral("\" placeholder=\"");
 
 
-            
-            #line 63 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                            Write(Strings.MessagesPage_Query_Button);
 
-            
-            #line default
-            #line hidden
-WriteLiteral(@"</button>
+#line 57 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Query_MessageName);
+
+
+#line default
+#line hidden
+                WriteLiteral("\" />\r\n                        </span>\r\n                        <div class=\"col-md" +
+                "-5\">\r\n                            <div class=\"input-group\">\r\n                   " +
+                "             <input type=\"text\" class=\"form-control\" name=\"content\" value=\"");
+
+
+
+#line 61 "..\..\ReceivedPage.cshtml"
+                Write(Query("content"));
+
+
+#line default
+#line hidden
+                WriteLiteral("\" placeholder=\"");
+
+
+
+#line 61 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Query_MessageBody);
+
+
+#line default
+#line hidden
+                WriteLiteral("\" />\r\n                                <span class=\"input-group-btn\">\r\n           " +
+                "                         <button class=\"btn btn-info\">");
+
+
+
+#line 63 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Query_Button);
+
+
+#line default
+#line hidden
+                WriteLiteral(@"</button>
                                 </span>
                             </div>
                         </div>
@@ -244,45 +244,45 @@ WriteLiteral(@"</button>
                             data-url=""");
 
 
-            
-            #line 71 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                 Write(Url.To("/received/requeue"));
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\"\r\n                            data-loading-text=\"");
+#line 71 "..\..\ReceivedPage.cshtml"
+                Write(Url.To("/received/requeue"));
 
 
-            
-            #line 72 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                          Write(Strings.Common_Enqueueing);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"\r\n                            disabled=\"disabled\">\r\n                        <spa" +
-"n class=\"glyphicon glyphicon-repeat\"></span>\r\n                        ");
+#line default
+#line hidden
+                WriteLiteral("\"\r\n                            data-loading-text=\"");
 
 
-            
-            #line 75 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                   Write(Strings.Common_RequeueJobs);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                    </button>\r\n\r\n                    ");
+#line 72 "..\..\ReceivedPage.cshtml"
+                Write(Strings.Common_Enqueueing);
 
 
-            
-            #line 78 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-               Write(Html.PerPageSelector(pager));
+#line default
+#line hidden
+                WriteLiteral("\"\r\n                            disabled=\"disabled\">\r\n                        <spa" +
+                "n class=\"glyphicon glyphicon-repeat\"></span>\r\n                        ");
 
-            
-            #line default
-            #line hidden
-WriteLiteral(@"
+
+
+#line 75 "..\..\ReceivedPage.cshtml"
+                Write(Strings.Common_ReConsume);
+
+
+#line default
+#line hidden
+                WriteLiteral("\r\n                    </button>\r\n\r\n                    ");
+
+
+
+#line 78 "..\..\ReceivedPage.cshtml"
+                Write(Html.PerPageSelector(pager));
+
+
+#line default
+#line hidden
+                WriteLiteral(@"
                 </div>
 
                 <div class=""table-responsive"">
@@ -295,192 +295,254 @@ WriteLiteral(@"
                                 <th>");
 
 
-            
-            #line 88 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                               Write(Strings.MessagesPage_Table_Code);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</th>\r\n                                <th>");
+#line 88 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Table_Code);
 
 
-            
-            #line 89 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                               Write(Strings.MessagesPage_Table_Group);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</th>\r\n                                <th>");
+#line default
+#line hidden
+                WriteLiteral("</th>\r\n                                <th>");
 
 
-            
-            #line 90 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                               Write(Strings.MessagesPage_Table_Name);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</th>\r\n                                <th class=\"min-width\">");
+#line 89 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Table_Group);
 
 
-            
-            #line 91 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                 Write(Strings.MessagesPage_Table_Retries);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</th>\r\n                                <th class=\"align-right\">");
+#line default
+#line hidden
+                WriteLiteral("</th>\r\n                                <th>");
 
 
-            
-            #line 92 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                   Write(Strings.MessagesPage_Table_ExpiresAt);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</th>\r\n                            </tr>\r\n                        </thead>\r\n     " +
-"                   <tbody>\r\n");
+#line 90 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Table_Name);
 
 
-            
-            #line 96 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                             foreach (var message in succeededMessages)
-                            {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                                <tr class=\"js-jobs-list-row hover\">\r\n            " +
-"                        <td>\r\n                                        <input typ" +
-"e=\"checkbox\" class=\"js-jobs-list-checkbox\" name=\"messages[]\" value=\"");
+#line default
+#line hidden
+                WriteLiteral("</th>\r\n                                <th class=\"min-width\">");
 
 
-            
-            #line 100 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                                                 Write(message.Id);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\" />\r\n                                    </td>\r\n                                " +
-"    <td class=\"word-break\">\r\n                                        <a href=\"ja" +
-"vascript:;\" data-url=\'");
+#line 91 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Table_Retries);
 
 
-            
-            #line 103 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                     Write(Url.To("/received/message/")+message.Id);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\' class=\"openModal\">#");
+#line default
+#line hidden
+                WriteLiteral("</th>\r\n");
 
 
-            
-            #line 103 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                                                                   Write(message.Id);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</a>\r\n                                    </td>\r\n                                " +
-"    <td>\r\n                                        ");
+#line 92 "..\..\ReceivedPage.cshtml"
+                if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
+                {
 
 
-            
-            #line 106 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                   Write(message.Group);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                                    </td>\r\n                                    " +
-"<td>\r\n                                        ");
+#line default
+#line hidden
+                    WriteLiteral("                                    <th>");
 
 
-            
-            #line 109 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                   Write(message.Name);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                                    </td>\r\n                                    " +
-"<td>\r\n                                        ");
+#line 94 "..\..\ReceivedPage.cshtml"
+                    Write(Strings.MessagesPage_Table_State);
 
 
-            
-            #line 112 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                   Write(message.Retries);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                                    </td>\r\n                                    " +
-"<td class=\"align-right\">\r\n");
+#line default
+#line hidden
+                    WriteLiteral("</th>\r\n");
 
 
-            
-            #line 115 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                         if (message.ExpiresAt.HasValue)
-                                        {
-                                            
-            
-            #line default
-            #line hidden
-            
-            #line 117 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                       Write(Html.RelativeTime(message.ExpiresAt.Value));
 
-            
-            #line default
-            #line hidden
-            
-            #line 117 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                       
-                                        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                                    </td>\r\n\r\n                                </tr" +
-">\r\n");
+#line 95 "..\..\ReceivedPage.cshtml"
+                }
 
 
-            
-            #line 122 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                            }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                        </tbody>\r\n                    </table>\r\n                <" +
-"/div>\r\n                ");
+#line default
+#line hidden
+                WriteLiteral("                                <th class=\"align-right\">");
 
 
-            
-            #line 126 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-           Write(Html.Paginator(pager));
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n            </div>\r\n");
+#line 96 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Table_ExpiresAt);
 
 
-            
-            #line 128 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
+#line default
+#line hidden
+                WriteLiteral("</th>\r\n                            </tr>\r\n                        </thead>\r\n     " +
+                "                   <tbody>\r\n");
 
 
-            
-            #line default
-            #line hidden
-WriteLiteral(@"            <div>
+
+#line 100 "..\..\ReceivedPage.cshtml"
+                foreach (var message in succeededMessages)
+                {
+
+
+#line default
+#line hidden
+                    WriteLiteral("                                <tr class=\"js-jobs-list-row hover\">\r\n            " +
+                    "                        <td>\r\n                                        <input typ" +
+                    "e=\"checkbox\" class=\"js-jobs-list-checkbox\" name=\"messages[]\" value=\"");
+
+
+
+#line 104 "..\..\ReceivedPage.cshtml"
+                    Write(message.Id);
+
+
+#line default
+#line hidden
+                    WriteLiteral("\" />\r\n                                    </td>\r\n                                " +
+                    "    <td class=\"word-break\">\r\n                                        <a href=\"ja" +
+                    "vascript:;\" data-url=\'");
+
+
+
+#line 107 "..\..\ReceivedPage.cshtml"
+                    Write(Url.To("/received/message/") + message.Id);
+
+
+#line default
+#line hidden
+                    WriteLiteral("\' class=\"openModal\">#");
+
+
+
+#line 107 "..\..\ReceivedPage.cshtml"
+                    Write(message.Id);
+
+
+#line default
+#line hidden
+                    WriteLiteral("</a>\r\n                                    </td>\r\n                                " +
+                    "    <td>\r\n                                        ");
+
+
+
+#line 110 "..\..\ReceivedPage.cshtml"
+                    Write(message.Group);
+
+
+#line default
+#line hidden
+                    WriteLiteral("\r\n                                    </td>\r\n                                    " +
+                    "<td>\r\n                                        ");
+
+
+
+#line 113 "..\..\ReceivedPage.cshtml"
+                    Write(message.Name);
+
+
+#line default
+#line hidden
+                    WriteLiteral("\r\n                                    </td>\r\n                                    " +
+                    "<td>\r\n                                        ");
+
+
+
+#line 116 "..\..\ReceivedPage.cshtml"
+                    Write(message.Retries);
+
+
+#line default
+#line hidden
+                    WriteLiteral("\r\n                                    </td>\r\n");
+
+
+
+#line 118 "..\..\ReceivedPage.cshtml"
+                    if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
+                    {
+
+
+#line default
+#line hidden
+                        WriteLiteral("                                        <td>\r\n                                   " +
+                        "         ");
+
+
+
+#line 121 "..\..\ReceivedPage.cshtml"
+                        Write(message.StatusName);
+
+
+#line default
+#line hidden
+                        WriteLiteral("\r\n                                        </td>\r\n");
+
+
+
+#line 123 "..\..\ReceivedPage.cshtml"
+                    }
+
+
+#line default
+#line hidden
+                    WriteLiteral("                                    <td class=\"align-right\">\r\n");
+
+
+
+#line 125 "..\..\ReceivedPage.cshtml"
+                    if (message.ExpiresAt.HasValue)
+                    {
+
+
+#line default
+#line hidden
+
+#line 127 "..\..\ReceivedPage.cshtml"
+                        Write(Html.RelativeTime(message.ExpiresAt.Value));
+
+
+#line default
+#line hidden
+
+#line 127 "..\..\ReceivedPage.cshtml"
+
+                    }
+
+
+#line default
+#line hidden
+                    WriteLiteral("                                    </td>\r\n\r\n                                </tr" +
+                    ">\r\n");
+
+
+
+#line 132 "..\..\ReceivedPage.cshtml"
+                }
+
+
+#line default
+#line hidden
+                WriteLiteral("                        </tbody>\r\n                    </table>\r\n                <" +
+                "/div>\r\n                ");
+
+
+
+#line 136 "..\..\ReceivedPage.cshtml"
+                Write(Html.Paginator(pager));
+
+
+#line default
+#line hidden
+                WriteLiteral("\r\n            </div>\r\n");
+
+
+
+#line 138 "..\..\ReceivedPage.cshtml"
+
+
+
+#line default
+#line hidden
+                WriteLiteral(@"            <div>
                 <div class=""modal fade"" tabindex=""-1"" role=""dialog"">
                     <div class=""modal-dialog"" role=""document"">
                         <div class=""modal-content"">
@@ -494,59 +556,59 @@ WriteLiteral(@"            <div>
                                 <button type=""button"" class=""btn btn-sm btn-primary"" id=""formatBtn"" onclick="""">");
 
 
-            
-            #line 140 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                                          Write(Strings.MessagesPage_Modal_Format);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</button>\r\n                                <button type=\"button\" class=\"btn btn-s" +
-"m btn-primary\" id=\"rawBtn\" onclick=\"\">");
+#line 150 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Modal_Format);
 
 
-            
-            #line 141 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                                       Write(Strings.MessagesPage_Modal_Raw);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</button>\r\n                                <button type=\"button\" class=\"btn btn-s" +
-"m btn-primary\" id=\"expandBtn\" onclick=\"\">");
+#line default
+#line hidden
+                WriteLiteral("</button>\r\n                                <button type=\"button\" class=\"btn btn-s" +
+                "m btn-primary\" id=\"rawBtn\" onclick=\"\">");
 
 
-            
-            #line 142 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                                          Write(Strings.MessagesPage_Modal_Expand);
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</button>\r\n                                <button type=\"button\" class=\"btn btn-s" +
-"m btn-primary\" id=\"collapseBtn\" onclick=\"\">");
+#line 151 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Modal_Raw);
 
 
-            
-            #line 143 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-                                                                                                            Write(Strings.MessagesPage_Model_Collaspse);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</button>\r\n                            </div>\r\n                        </div><!--" +
-" /.modal-content -->\r\n                    </div><!-- /.modal-dialog -->\r\n       " +
-"         </div><!-- /.modal -->\r\n            </div>\r\n");
+#line default
+#line hidden
+                WriteLiteral("</button>\r\n                                <button type=\"button\" class=\"btn btn-s" +
+                "m btn-primary\" id=\"expandBtn\" onclick=\"\">");
 
 
-            
-            #line 149 "..\..\Dashboard\Pages\ReceivedPage.cshtml"
-        }
 
-            
-            #line default
-            #line hidden
-WriteLiteral("    </div>\r\n</div>");
+#line 152 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Modal_Expand);
+
+
+#line default
+#line hidden
+                WriteLiteral("</button>\r\n                                <button type=\"button\" class=\"btn btn-s" +
+                "m btn-primary\" id=\"collapseBtn\" onclick=\"\">");
+
+
+
+#line 153 "..\..\ReceivedPage.cshtml"
+                Write(Strings.MessagesPage_Model_Collaspse);
+
+
+#line default
+#line hidden
+                WriteLiteral("</button>\r\n                            </div>\r\n                        </div><!--" +
+                " /.modal-content -->\r\n                    </div><!-- /.modal-dialog -->\r\n       " +
+                "         </div><!-- /.modal -->\r\n            </div>\r\n");
+
+
+
+#line 159 "..\..\ReceivedPage.cshtml"
+            }
+
+
+#line default
+#line hidden
+            WriteLiteral("    </div>\r\n</div>");
 
 
         }

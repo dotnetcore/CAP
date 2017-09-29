@@ -57,8 +57,7 @@ namespace DotNetCore.CAP.Infrastructure
 
         public static DateTime DeserializeDateTime(string value)
         {
-            long timestamp;
-            if (long.TryParse(value, out timestamp))
+            if (long.TryParse(value, out var timestamp))
             {
                 return FromTimestamp(timestamp);
             }
@@ -102,13 +101,13 @@ namespace DotNetCore.CAP.Infrastructure
         private static bool IsSimpleType(Type type)
         {
             return type.GetTypeInfo().IsPrimitive ||
-                type.Equals(typeof(decimal)) ||
-                type.Equals(typeof(string)) ||
-                type.Equals(typeof(DateTime)) ||
-                type.Equals(typeof(Guid)) ||
-                type.Equals(typeof(DateTimeOffset)) ||
-                type.Equals(typeof(TimeSpan)) ||
-                type.Equals(typeof(Uri));
+                type == typeof(decimal) ||
+                type == typeof(string) ||
+                type == typeof(DateTime) ||
+                type == typeof(Guid) ||
+                type == typeof(DateTimeOffset) ||
+                type == typeof(TimeSpan) ||
+                type == typeof(Uri);
         }
     }
 }

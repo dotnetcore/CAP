@@ -2,6 +2,7 @@
 
 namespace DotNetCore.CAP
 {
+    /// <inheritdoc />
     /// <summary>
     /// A process thread abstract of job process.
     /// </summary>

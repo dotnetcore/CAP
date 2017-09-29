@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 {
     public class GatewayProxyMiddleware
     {
-        private const string NODE_COOKIE_NAME = "cap.node";
+        public const string NodeCookieName = "cap.node";
 
         private readonly RequestDelegate _next;
         private readonly ILogger _logger;
@@ -45,12 +45,9 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 
             var request = context.Request;
             var pathMatch = discoveryOptions.MatchPath;
-            var isCapRequest = request.Path.StartsWithSegments(
-                new PathString(pathMatch),
-                out PathString matchedPath,
-                out PathString remainingPath);
+            var isCapRequest = request.Path.StartsWithSegments(new PathString(pathMatch));
 
-            var isSwitchNode = request.Cookies.TryGetValue(NODE_COOKIE_NAME, out string requestNodeId);
+            var isSwitchNode = request.Cookies.TryGetValue(NodeCookieName, out string requestNodeId);
             var isCurrentNode = discoveryOptions.NodeId.ToString() == requestNodeId;
 
             if (!isCapRequest || !isSwitchNode || isCurrentNode)
@@ -80,7 +77,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
                 }
                 else
                 {
-                    context.Response.Cookies.Delete(NODE_COOKIE_NAME);
+                    context.Response.Cookies.Delete(NodeCookieName);
                     await _next.Invoke(context);
                 }
             }

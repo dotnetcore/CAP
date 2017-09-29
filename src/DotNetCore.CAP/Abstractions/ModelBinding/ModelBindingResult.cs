@@ -77,7 +77,7 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         {
             return
                 IsSuccess == other.IsSuccess &&
-                object.Equals(Model, other.Model);
+                Equals(Model, other.Model);
         }
 
         /// <summary>

@@ -9,16 +9,16 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class CapProcessingServer : IProcessingServer, IDisposable
+    public class CapProcessingServer : IProcessingServer
     {
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IServiceProvider _provider;
         private readonly CancellationTokenSource _cts;
         private readonly CapOptions _options;
+        private readonly IList<IDispatcher> _messageDispatchers;
 
         private IProcessor[] _processors;
-        private IList<IDispatcher> _messageDispatchers;
         private ProcessingContext _context;
         private Task _compositeTask;
         private bool _disposed;
@@ -109,7 +109,7 @@ namespace DotNetCore.CAP.Processor
         private IProcessor[] GetProcessors(int processorCount)
         {
             var returnedProcessors = new List<IProcessor>();
-            for (int i = 0; i < processorCount; i++)
+            for (var i = 0; i < processorCount; i++)
             {
                 var messageProcessors = _provider.GetRequiredService<IDispatcher>();
                 _messageDispatchers.Add(messageProcessors);

@@ -125,11 +125,6 @@ namespace DotNetCore.CAP.Dashboard
             return $"{GetContentFolderNamespace(contentFolder)}.{resourceName}";
         }
 
-        private static EnqueuedState CreateEnqueuedState()
-        {
-            return new EnqueuedState();
-        }
-
         private static Assembly GetExecutingAssembly()
         {
             return typeof(DashboardRoutes).GetTypeInfo().Assembly;

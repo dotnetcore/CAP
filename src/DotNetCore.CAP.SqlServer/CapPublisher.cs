@@ -52,14 +52,14 @@ namespace DotNetCore.CAP.SqlServer
         {
             dbConnection.Execute(PrepareSql(), message, dbTransaction);
 
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
+            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
         }
 
         protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
         {
             await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
 
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
+            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
         }
 
         public async Task PublishAsync(CapPublishedMessage message)

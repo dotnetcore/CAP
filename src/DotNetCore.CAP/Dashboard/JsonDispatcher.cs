@@ -23,9 +23,6 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task Dispatch(DashboardContext context)
         {
-            var request = context.Request;
-            var response = context.Response;
-
             string serialized = null;
             if (_command != null)
             {

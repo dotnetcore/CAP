@@ -3,7 +3,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
@@ -11,24 +10,15 @@ namespace DotNetCore.CAP.Processor
     public class DefaultDispatcher : IDispatcher
     {
         private readonly IQueueExecutorFactory _queueExecutorFactory;
-        private readonly IServiceProvider _provider;
-        private readonly ILogger _logger;
 
-        private readonly CancellationTokenSource _cts;
         private readonly TimeSpan _pollingDelay;
 
         internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
 
-        public DefaultDispatcher(
-               IServiceProvider provider,
-               IQueueExecutorFactory queueExecutorFactory,
-               IOptions<CapOptions> capOptions,
-               ILogger<DefaultDispatcher> logger)
+        public DefaultDispatcher(IQueueExecutorFactory queueExecutorFactory,
+               IOptions<CapOptions> capOptions)
         {
-            _logger = logger;
             _queueExecutorFactory = queueExecutorFactory;
-            _provider = provider;
-            _cts = new CancellationTokenSource();
             _pollingDelay = TimeSpan.FromSeconds(capOptions.Value.PollingDelay);
         }
 
@@ -73,7 +63,7 @@ namespace DotNetCore.CAP.Processor
 
         private async Task<bool> Step(ProcessingContext context)
         {
-            var fetched = default(IFetchedMessage);
+            IFetchedMessage fetched;
             using (var scopedContext = context.CreateScope())
             {
                 var provider = scopedContext.Provider;

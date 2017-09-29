@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using DotNetCore.CAP.Dashboard;
 
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class DashboardOptions

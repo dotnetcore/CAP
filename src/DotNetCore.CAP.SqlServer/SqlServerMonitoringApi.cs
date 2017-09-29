@@ -18,11 +18,8 @@ namespace DotNetCore.CAP.SqlServer
 
         public SqlServerMonitoringApi(IStorage storage, SqlServerOptions options)
         {
-            if (storage == null) throw new ArgumentNullException(nameof(storage));
-            if (options == null) throw new ArgumentNullException(nameof(options));
-
-            _options = options;
-            _storage = storage as SqlServerStorage;
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _storage = storage as SqlServerStorage ?? throw new ArgumentNullException(nameof(storage));
         }
 
 
@@ -35,7 +32,7 @@ select count(Id) from [{0}].Published with (nolock) where StatusName = N'Succeed
 select count(Id) from [{0}].Received with (nolock) where StatusName = N'Succeeded';
 select count(Id) from [{0}].Published with (nolock) where StatusName = N'Failed';
 select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
-select count(Id) from [{0}].Published with (nolock) where StatusName = N'Processing';
+select count(Id) from [{0}].Published with (nolock) where StatusName in (N'Processing',N'Scheduled',N'Enqueued');
 select count(Id) from [{0}].Received with (nolock) where StatusName = N'Processing';",
 _options.Schema);
 
@@ -74,11 +71,18 @@ _options.Schema);
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
         {
-            var tableName = queryDto.MessageType == Models.MessageType.Publish ? "Published" : "Received";
+            var tableName = queryDto.MessageType == MessageType.Publish ? "Published" : "Received";
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
             {
-                where += " and statusname=@StatusName";
+                if (string.Equals(queryDto.StatusName, ProcessingState.StateName, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    where += " and statusname in (N'Processing',N'Scheduled',N'Enqueued')";
+                }
+                else
+                {
+                    where += " and statusname=@StatusName";
+                }
             }
             if (!string.IsNullOrEmpty(queryDto.Name))
             {
@@ -95,71 +99,53 @@ _options.Schema);
 
             var sqlQuery = $"select * from [{_options.Schema}].{tableName} where 1=1 {where} order by Added desc offset @Offset rows fetch next @Limit rows only";
 
-            return UseConnection(conn =>
+            return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
-                return conn.Query<MessageDto>(sqlQuery, new
-                {
-                    StatusName = queryDto.StatusName,
-                    Group = queryDto.Group,
-                    Name = queryDto.Name,
-                    Content = queryDto.Content,
-                    Offset = queryDto.CurrentPage * queryDto.PageSize,
-                    Limit = queryDto.PageSize,
-                }).ToList();
-            });
+                StatusName = queryDto.StatusName,
+                Group = queryDto.Group,
+                Name = queryDto.Name,
+                Content = queryDto.Content,
+                Offset = queryDto.CurrentPage * queryDto.PageSize,
+                Limit = queryDto.PageSize,
+            }).ToList());
         }
 
         public int PublishedFailedCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Published", StatusName.Failed);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Published", StatusName.Failed));
         }
 
         public int PublishedProcessingCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Published", StatusName.Processing);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Published", StatusName.Processing));
         }
 
         public int PublishedSucceededCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Published", StatusName.Succeeded);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Published", StatusName.Succeeded));
         }
 
         public int ReceivedFailedCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Received", StatusName.Failed);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Failed));
         }
 
         public int ReceivedProcessingCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Received", StatusName.Processing);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Processing));
         }
 
         public int ReceivedSucceededCount()
         {
-            return UseConnection(conn =>
-            {
-                return GetNumberOfMessage(conn, "Received", StatusName.Succeeded);
-            });
+            return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Succeeded));
         }
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName = @state";
+            var sqlQuery = statusName == StatusName.Processing
+                ? $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName in (N'Processing',N'Scheduled',N'Enqueued')"
+                : $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName = @state";
+
             var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
             return count;
         }
@@ -190,6 +176,7 @@ _options.Schema);
            string statusName,
            IDictionary<string, DateTime> keyMaps)
         {
+            //SQL Server 2012+
             string sqlQuery =
 $@"
 with aggr as (

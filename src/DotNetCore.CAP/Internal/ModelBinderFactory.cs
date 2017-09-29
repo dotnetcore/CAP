@@ -88,7 +88,7 @@ namespace DotNetCore.CAP.Internal
 
             public bool Equals(Key other)
             {
-                return _metadata.Equals(other._metadata) && object.ReferenceEquals(_token, other._token);
+                return _metadata.Equals(other._metadata) && ReferenceEquals(_token, other._token);
             }
 
             public override bool Equals(object obj)

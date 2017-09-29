@@ -8,8 +8,9 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Internal
 {
+    /// <inheritdoc />
     /// <summary>
-    ///  A default <see cref="IConsumerServiceSelector"/> implementation.
+    ///  A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
     /// </summary>
     public class DefaultConsumerServiceSelector : IConsumerServiceSelector
     {
@@ -39,7 +40,7 @@ namespace DotNetCore.CAP.Internal
 
             executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(_serviceProvider));
 
-            executorDescriptorList.AddRange(FindConsumersFromControllerTypes(_serviceProvider));
+            executorDescriptorList.AddRange(FindConsumersFromControllerTypes());
 
             return executorDescriptorList;
         }
@@ -67,8 +68,7 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes(
-            IServiceProvider provider)
+        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
@@ -91,7 +91,7 @@ namespace DotNetCore.CAP.Internal
             {
                 var topicAttrs = method.GetCustomAttributes<TopicAttribute>(true);
 
-                if (topicAttrs.Count() == 0) continue;
+                if (!topicAttrs.Any()) continue;
 
                 foreach (var attr in topicAttrs)
                 {

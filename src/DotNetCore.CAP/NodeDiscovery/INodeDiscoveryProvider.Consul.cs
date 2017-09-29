@@ -39,10 +39,11 @@ namespace DotNetCore.CAP.NodeDiscovery
                     Port = x.Value.Port,
                     Tags = string.Join(", ", x.Value.Tags)
                 });
+                var nodeList = nodes.ToList();
 
-                CapCache.Global.AddOrUpdate("cap.nodes.count", nodes.Count(), TimeSpan.FromSeconds(30),true);
+                CapCache.Global.AddOrUpdate("cap.nodes.count", nodeList.Count, TimeSpan.FromSeconds(30),true);
 
-                return nodes.ToList();
+                return nodeList;
             }
             catch (Exception) {
                 return null;
@@ -57,7 +58,7 @@ namespace DotNetCore.CAP.NodeDiscovery
                 Name = _options.NodeName,
                 Address = _options.CurrentNodeHostName,
                 Port = _options.CurrentNodePort,
-                Tags = new string[] { "CAP", "Client", "Dashboard" },
+                Tags = new[] { "CAP", "Client", "Dashboard" },
                 Check = new AgentServiceCheck
                 {
                     DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30),
