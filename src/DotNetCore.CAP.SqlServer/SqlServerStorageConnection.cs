@@ -6,20 +6,17 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor.States;
 
 namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerStorageConnection : IStorageConnection
     {
-        private readonly SqlServerOptions _options;
-
         public SqlServerStorageConnection(SqlServerOptions options)
         {
-            _options = options;
+            Options = options;
         }
 
-        public SqlServerOptions Options => _options;
+        public SqlServerOptions Options { get; }
 
         public IStorageTransaction CreateTransaction()
         {
@@ -28,9 +25,9 @@ namespace DotNetCore.CAP.SqlServer
 
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
         {
-            var sql = $@"SELECT * FROM [{_options.Schema}].[Published] WITH (readpast) WHERE Id={id}";
+            var sql = $@"SELECT * FROM [{Options.Schema}].[Published] WITH (readpast) WHERE Id={id}";
 
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
@@ -40,7 +37,7 @@ namespace DotNetCore.CAP.SqlServer
         {
             var sql = $@"
 DELETE TOP (1)
-FROM [{_options.Schema}].[Queue] WITH (readpast, updlock, rowlock)
+FROM [{Options.Schema}].[Queue] WITH (readpast, updlock, rowlock)
 OUTPUT DELETED.MessageId,DELETED.[MessageType];";
 
             return FetchNextMessageCoreAsync(sql);
@@ -48,9 +45,10 @@ OUTPUT DELETED.MessageId,DELETED.[MessageType];";
 
         public async Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync()
         {
-            var sql = $"SELECT TOP (1) * FROM [{_options.Schema}].[Published] WITH (readpast) WHERE StatusName = '{StatusName.Scheduled}'";
+            var sql =
+                $"SELECT TOP (1) * FROM [{Options.Schema}].[Published] WITH (readpast) WHERE StatusName = '{StatusName.Scheduled}'";
 
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
@@ -58,19 +56,21 @@ OUTPUT DELETED.MessageId,DELETED.[MessageType];";
 
         public async Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages()
         {
-            var sql = $"SELECT * FROM [{_options.Schema}].[Published] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
+            var sql =
+                $"SELECT * FROM [{Options.Schema}].[Published] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
 
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapPublishedMessage>(sql);
             }
         }
 
-        public bool ChangePublishedState(int messageId, IState state)
+        public bool ChangePublishedState(int messageId, string state)
         {
-            var sql = $"UPDATE [{_options.Schema}].[Published] SET Retries=Retries+1,StatusName = '{state.Name}' WHERE Id={messageId}";
+            var sql =
+                $"UPDATE [{Options.Schema}].[Published] SET Retries=Retries+1,StatusName = '{state}' WHERE Id={messageId}";
 
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 return connection.Execute(sql) > 0;
             }
@@ -83,10 +83,10 @@ OUTPUT DELETED.MessageId,DELETED.[MessageType];";
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             var sql = $@"
-INSERT INTO [{_options.Schema}].[Received]([Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])
+INSERT INTO [{Options.Schema}].[Received]([Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])
 VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 await connection.ExecuteAsync(sql, message);
             }
@@ -94,8 +94,8 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
         public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
         {
-            var sql = $@"SELECT * FROM [{_options.Schema}].[Received] WITH (readpast) WHERE Id={id}";
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            var sql = $@"SELECT * FROM [{Options.Schema}].[Received] WITH (readpast) WHERE Id={id}";
+            using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
@@ -103,8 +103,9 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
         public async Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync()
         {
-            var sql = $"SELECT TOP (1) * FROM [{_options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Scheduled}'";
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            var sql =
+                $"SELECT TOP (1) * FROM [{Options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Scheduled}'";
+            using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
@@ -112,18 +113,20 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
         public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages()
         {
-            var sql = $"SELECT * FROM [{_options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            var sql =
+                $"SELECT * FROM [{Options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
+            using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
             }
         }
 
-        public bool ChangeReceivedState(int messageId, IState state)
+        public bool ChangeReceivedState(int messageId, string state)
         {
-            var sql = $"UPDATE [{_options.Schema}].[Received] SET Retries=Retries+1,StatusName = '{state.Name}' WHERE Id={messageId}";
+            var sql =
+                $"UPDATE [{Options.Schema}].[Received] SET Retries=Retries+1,StatusName = '{state}' WHERE Id={messageId}";
 
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 return connection.Execute(sql) > 0;
             }
@@ -136,7 +139,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
         {
             //here don't use `using` to dispose
-            var connection = new SqlConnection(_options.ConnectionString);
+            var connection = new SqlConnection(Options.ConnectionString);
             await connection.OpenAsync();
             var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
             FetchedMessage fetchedMessage;
@@ -158,14 +161,8 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
                 return null;
             }
 
-            return new SqlServerFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection, transaction);
-        }
-
-        // ------------------------------------------
-
-        public List<string> GetRangeFromSet(string key, int startingFrom, int endingAt)
-        {
-            return new List<string> { "11", "22", "33" };
+            return new SqlServerFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection,
+                transaction);
         }
     }
 }

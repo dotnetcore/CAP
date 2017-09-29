@@ -7,7 +7,6 @@ using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor.States;
 
 namespace DotNetCore.CAP.SqlServer
 {
@@ -21,8 +20,6 @@ namespace DotNetCore.CAP.SqlServer
             _options = options ?? throw new ArgumentNullException(nameof(options));
             _storage = storage as SqlServerStorage ?? throw new ArgumentNullException(nameof(storage));
         }
-
-
 
         public StatisticsDto GetStatistics()
         {
@@ -59,14 +56,14 @@ _options.Schema);
         {
             var tableName = type == MessageType.Publish ? "Published" : "Received";
             return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, FailedState.StateName));
+                GetHourlyTimelineStats(connection, tableName, StatusName.Failed));
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? "Published" : "Received";
             return UseConnection(connection =>
-                 GetHourlyTimelineStats(connection, tableName, SucceededState.StateName));
+                 GetHourlyTimelineStats(connection, tableName, StatusName.Succeeded));
         }
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
@@ -75,7 +72,7 @@ _options.Schema);
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
             {
-                if (string.Equals(queryDto.StatusName, ProcessingState.StateName, StringComparison.CurrentCultureIgnoreCase))
+                if (string.Equals(queryDto.StatusName, StatusName.Processing, StringComparison.CurrentCultureIgnoreCase))
                 {
                     where += " and statusname in (N'Processing',N'Scheduled',N'Enqueued')";
                 }
@@ -101,10 +98,10 @@ _options.Schema);
 
             return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
-                StatusName = queryDto.StatusName,
-                Group = queryDto.Group,
-                Name = queryDto.Name,
-                Content = queryDto.Content,
+                queryDto.StatusName,
+                queryDto.Group,
+                queryDto.Name,
+                queryDto.Content,
                 Offset = queryDto.CurrentPage * queryDto.PageSize,
                 Limit = queryDto.PageSize,
             }).ToList());
@@ -190,7 +187,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] in @keys;";
 
             var valuesMap = connection.Query(
                 sqlQuery,
-                new { keys = keyMaps.Keys, statusName = statusName })
+                new { keys = keyMaps.Keys, statusName })
                 .ToDictionary(x => (string)x.Key, x => (int)x.Count);
 
             foreach (var key in keyMaps.Keys)

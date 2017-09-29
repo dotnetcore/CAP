@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor.States;
 
 namespace DotNetCore.CAP
 {
@@ -58,19 +57,23 @@ namespace DotNetCore.CAP
         /// </summary>
         Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages();
 
-        //-----------------------------------------
-
         /// <summary>
         /// Creates and returns an <see cref="IStorageTransaction"/>.
         /// </summary>
         IStorageTransaction CreateTransaction();
 
-        //-------------------------------------------
+        /// <summary>
+        /// Change specified message's state of published message
+        /// </summary>
+        /// <param name="messageId">Message id</param>
+        /// <param name="state">State name</param>
+        bool ChangePublishedState(int messageId, string state);
 
-        bool ChangePublishedState(int messageId, IState state);
-        bool ChangeReceivedState(int messageId, IState state);
-
-        List<string> GetRangeFromSet(string key, int startingFrom, int endingAt);
-
+        /// <summary>
+        /// Change specified message's state  of received message
+        /// </summary>
+        /// <param name="messageId">Message id</param>
+        /// <param name="state">State name</param>
+        bool ChangeReceivedState(int messageId, string state);
     }
 }
