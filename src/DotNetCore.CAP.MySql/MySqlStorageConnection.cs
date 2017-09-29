@@ -151,17 +151,12 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection, transaction);
         }
 
-        public List<string> GetRangeFromSet(string key, int startingFrom, int endingAt)
+        public bool ChangePublishedState(int messageId, string state)
         {
             throw new NotImplementedException();
         }
 
-        public bool ChangePublishedState(int messageId, IState state)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool ChangeReceivedState(int messageId, IState state)
+        public bool ChangeReceivedState(int messageId, string state)
         {
             throw new NotImplementedException();
         }

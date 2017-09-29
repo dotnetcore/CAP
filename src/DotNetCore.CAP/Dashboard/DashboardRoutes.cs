@@ -1,6 +1,6 @@
 ﻿using System.Reflection;
 using DotNetCore.CAP.Dashboard.Pages;
-using DotNetCore.CAP.Processor.States;
+using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -32,7 +32,7 @@ namespace DotNetCore.CAP.Dashboard
             Routes = new RouteCollection();
             Routes.AddRazorPage("/", x => new HomePage());
             Routes.Add("/stats", new JsonStats());
-            Routes.Add("/health",new OkStats());
+            Routes.Add("/health", new OkStats());
 
             #region Embedded static content
 
@@ -88,23 +88,25 @@ namespace DotNetCore.CAP.Dashboard
                 var id = int.Parse(x.UriMatch.Groups["Id"].Value);
                 var message = x.Storage.GetConnection().GetReceivedMessageAsync(id).GetAwaiter().GetResult();
                 return message.Content;
-            });           
+            });
 
             Routes.AddPublishBatchCommand(
-               "/published/requeue",
-               (client, messageId) => client.Storage.GetConnection().ChangePublishedState(messageId, new ScheduledState()));
+                "/published/requeue",
+                (client, messageId) =>
+                    client.Storage.GetConnection().ChangePublishedState(messageId, StatusName.Scheduled));
             Routes.AddPublishBatchCommand(
-               "/received/requeue",
-               (client, messageId) => client.Storage.GetConnection().ChangeReceivedState(messageId, new ScheduledState()));
+                "/received/requeue",
+                (client, messageId) =>
+                    client.Storage.GetConnection().ChangeReceivedState(messageId, StatusName.Scheduled));
 
             Routes.AddRazorPage(
                 "/published/(?<StatusName>.+)",
-                 x => new PublishedPage(x.Groups["StatusName"].Value));
+                x => new PublishedPage(x.Groups["StatusName"].Value));
             Routes.AddRazorPage(
-               "/received/(?<StatusName>.+)",
+                "/received/(?<StatusName>.+)",
                 x => new ReceivedPage(x.Groups["StatusName"].Value));
 
-            Routes.AddRazorPage("/subscribers", x => new SubscriberPage());         
+            Routes.AddRazorPage("/subscribers", x => new SubscriberPage());
 
             Routes.AddRazorPage("/nodes", x => new NodePage());
 
