@@ -124,7 +124,6 @@ namespace DotNetCore.CAP
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
-            var now = DateTime.Now;
             var retries = ++message.Retries;
             if (retries >= retryBehavior.RetryCount)
             {

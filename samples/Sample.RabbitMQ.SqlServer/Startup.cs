@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Sample.RabbitMQ.SqlServer.Services;
@@ -26,7 +25,7 @@ namespace Sample.RabbitMQ.SqlServer
                     z.UserName = "admin";
                     z.Password = "123123";
                 });
-                x.UseDashboard();
+                x.UseDashboard(d => { d.StatsPollingInterval = 1000000; });
                 x.UseDiscovery(d =>
                 {
                     d.DiscoveryServerHostName = "localhost";
@@ -48,8 +47,6 @@ namespace Sample.RabbitMQ.SqlServer
             app.UseMvc();
 
             app.UseCap();
-
-            app.UseCapDashboard();
         }
     }
 }

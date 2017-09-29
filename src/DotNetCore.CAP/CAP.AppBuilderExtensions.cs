@@ -26,24 +26,18 @@ namespace Microsoft.AspNetCore.Builder
             CheckRequirement(app);
 
             var provider = app.ApplicationServices;
+
             var bootstrapper = provider.GetRequiredService<IBootstrapper>();
             bootstrapper.BootstrapAsync();
-            return app;
-        }
 
-        ///<summary>
-        /// Enables cap dashboard for the current application
-        /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
-        /// <returns>The <see cref="IApplicationBuilder"/> instance this method extends.</returns>
-        public static IApplicationBuilder UseCapDashboard(this IApplicationBuilder app)
-        {
-            if (app == null) throw new ArgumentNullException(nameof(app));
-
-            CheckRequirement(app);
-
-            app.UseMiddleware<GatewayProxyMiddleware>();
-            app.UseMiddleware<DashboardMiddleware>();
+            if (provider.GetService<DashboardOptions>() != null)
+            {
+                if (provider.GetService<DiscoveryOptions>() != null)
+                {
+                    app.UseMiddleware<GatewayProxyMiddleware>();
+                }
+                app.UseMiddleware<DashboardMiddleware>();
+            }
 
             return app;
         }

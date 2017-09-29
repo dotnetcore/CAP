@@ -46,39 +46,47 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             var request = context.Request;
             var pathMatch = discoveryOptions.MatchPath;
             var isCapRequest = request.Path.StartsWithSegments(new PathString(pathMatch));
-
-            var isSwitchNode = request.Cookies.TryGetValue(NodeCookieName, out string requestNodeId);
-            var isCurrentNode = discoveryOptions.NodeId.ToString() == requestNodeId;
-
-            if (!isCapRequest || !isSwitchNode || isCurrentNode)
+            if (!isCapRequest)
             {
                 await _next.Invoke(context);
             }
             else
             {
-                _logger.LogDebug("started calling gateway proxy middleware");
+                //For performance reasons, we need to put this functionality in the else
+                var isSwitchNode = request.Cookies.TryGetValue(NodeCookieName, out string requestNodeId);
+                var isCurrentNode = discoveryOptions.NodeId.ToString() == requestNodeId;
+                var isNodesPage = request.Path.StartsWithSegments(new PathString(pathMatch + "/nodes"));
 
-                if (TryGetRemoteNode(requestNodeId, out Node node))
+                if (!isSwitchNode || isCurrentNode || isNodesPage)
                 {
-                    try
-                    {
-                        DownstreamRequest = await _requestMapper.Map(request);
-
-                        SetDownStreamRequestUri(node, request.Path.Value);
-
-                        var response = await _requester.GetResponse(DownstreamRequest);
-
-                        await SetResponseOnHttpContext(context, response);
-                    }
-                    catch(Exception ex)
-                    {
-                        _logger.LogError(ex.Message);
-                    }
+                    await _next.Invoke(context);
                 }
                 else
                 {
-                    context.Response.Cookies.Delete(NodeCookieName);
-                    await _next.Invoke(context);
+                    _logger.LogDebug("started calling gateway proxy middleware");
+
+                    if (TryGetRemoteNode(requestNodeId, out Node node))
+                    {
+                        try
+                        {
+                            DownstreamRequest = await _requestMapper.Map(request);
+
+                            SetDownStreamRequestUri(node, request.Path.Value);
+
+                            var response = await _requester.GetResponse(DownstreamRequest);
+
+                            await SetResponseOnHttpContext(context, response);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex.Message);
+                        }
+                    }
+                    else
+                    {
+                        context.Response.Cookies.Delete(NodeCookieName);
+                        await _next.Invoke(context);
+                    }
                 }
             }
         }
@@ -90,10 +98,9 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
                 AddHeaderIfDoesntExist(context, httpResponseHeader);
             }
 
-            var stringContent = await response.Content.ReadAsStringAsync();
             var content = await response.Content.ReadAsByteArrayAsync();
 
-            AddHeaderIfDoesntExist(context, 
+            AddHeaderIfDoesntExist(context,
                 new KeyValuePair<string, IEnumerable<string>>("Content-Length", new[] { content.Length.ToString() }));
 
             context.Response.OnStarting(state =>
@@ -128,7 +135,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             DownstreamRequest.RequestUri = uriBuilder.Uri;
         }
 
-        private static void AddHeaderIfDoesntExist(HttpContext context, 
+        private static void AddHeaderIfDoesntExist(HttpContext context,
             KeyValuePair<string, IEnumerable<string>> httpResponseHeader)
         {
             if (!context.Response.Headers.ContainsKey(httpResponseHeader.Key))

@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.Dashboard
             }
 
             context.Response.ContentType = "application/json";
-            await context.Response.WriteAsync(serialized);
+            await context.Response.WriteAsync(serialized ?? string.Empty);
         }
     }
 }

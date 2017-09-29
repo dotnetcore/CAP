@@ -25,49 +25,44 @@ namespace DotNetCore.CAP
 
         public Task Invoke(HttpContext context)
         {
-            if (context.Request.Path.StartsWithSegments(_options.PathMatch, 
-                out var matchedPath, out var remainingPath))
+            if (!context.Request.Path.StartsWithSegments(_options.PathMatch,
+                out var matchedPath, out var remainingPath)) return _next(context);
+
+            // Update the path
+            var path = context.Request.Path;
+            var pathBase = context.Request.PathBase;
+            context.Request.PathBase = pathBase.Add(matchedPath);
+            context.Request.Path = remainingPath;
+
+            try
             {
-                // Update the path
-                var path = context.Request.Path;
-                var pathBase = context.Request.PathBase;
-                context.Request.PathBase = pathBase.Add(matchedPath);
-                context.Request.Path = remainingPath;
+                var dashboardContext = new CapDashboardContext(_storage, _options, context);
+                var findResult = _routes.FindDispatcher(context.Request.Path.Value);
 
-                try
+                if (findResult == null)
                 {
-                    var dashboardContext = new CapDashboardContext(_storage, _options, context);
-                    var findResult = _routes.FindDispatcher(context.Request.Path.Value);
-
-                    if (findResult == null)
-                    {
-                        return _next.Invoke(context);
-                    }
-
-                    if (_options.Authorization.Any(filter => !filter.Authorize(dashboardContext)))
-                    {
-                        var isAuthenticated = context.User?.Identity?.IsAuthenticated;
-
-                        context.Response.StatusCode = isAuthenticated == true
-                            ? (int)HttpStatusCode.Forbidden
-                            : (int)HttpStatusCode.Unauthorized;
-
-                        return Task.CompletedTask;
-                    }
-
-                    dashboardContext.UriMatch = findResult.Item2;
-
-                    return findResult.Item1.Dispatch(dashboardContext);
+                    return _next.Invoke(context);
                 }
-                finally
+
+                if (_options.Authorization.Any(filter => !filter.Authorize(dashboardContext)))
                 {
-                    context.Request.PathBase = pathBase;
-                    context.Request.Path = path;
+                    var isAuthenticated = context.User?.Identity?.IsAuthenticated;
+
+                    context.Response.StatusCode = isAuthenticated == true
+                        ? (int)HttpStatusCode.Forbidden
+                        : (int)HttpStatusCode.Unauthorized;
+
+                    return Task.CompletedTask;
                 }
+
+                dashboardContext.UriMatch = findResult.Item2;
+
+                return findResult.Item1.Dispatch(dashboardContext);
             }
-            else
+            finally
             {
-                return _next(context);
+                context.Request.PathBase = pathBase;
+                context.Request.Path = path;
             }
         }
     }
