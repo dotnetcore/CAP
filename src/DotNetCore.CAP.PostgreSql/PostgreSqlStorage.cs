@@ -1,3 +1,6 @@
+using System;
+using System.Data;
+using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -11,6 +14,7 @@ namespace DotNetCore.CAP.PostgreSql
     {
         private readonly PostgreSqlOptions _options;
         private readonly ILogger _logger;
+        private readonly IDbConnection _existingConnection = null;
 
         public PostgreSqlStorage(ILogger<PostgreSqlStorage> logger, PostgreSqlOptions options)
         {
@@ -20,12 +24,12 @@ namespace DotNetCore.CAP.PostgreSql
 
         public IStorageConnection GetConnection()
         {
-            throw new System.NotImplementedException();
+            return new PostgreSqlStorageConnection(_options);
         }
 
         public IMonitoringApi GetMonitoringApi()
         {
-            throw new System.NotImplementedException();
+            return new PostgreSqlMonitoringApi(this, _options);
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -39,6 +43,46 @@ namespace DotNetCore.CAP.PostgreSql
                 await connection.ExecuteAsync(sql);
             }
             _logger.LogDebug("Ensuring all create database tables script are applied.");
+        }
+
+        internal T UseConnection<T>(Func<IDbConnection, T> func)
+        {
+            IDbConnection connection = null;
+
+            try
+            {
+                connection = CreateAndOpenConnection();
+                return func(connection);
+            }
+            finally
+            {
+                ReleaseConnection(connection);
+            }
+        }
+
+        internal IDbConnection CreateAndOpenConnection()
+        {
+            var connection = _existingConnection ?? new SqlConnection(_options.ConnectionString);
+
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+
+            return connection;
+        }
+
+        internal bool IsExistingConnection(IDbConnection connection)
+        {
+            return connection != null && ReferenceEquals(connection, _existingConnection);
+        }
+
+        internal void ReleaseConnection(IDbConnection connection)
+        {
+            if (connection != null && !IsExistingConnection(connection))
+            {
+                connection.Dispose();
+            }
         }
 
         protected virtual string CreateDbTablesScript(string schema)
