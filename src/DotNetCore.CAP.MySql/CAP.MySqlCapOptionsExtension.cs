@@ -31,9 +31,13 @@ namespace DotNetCore.CAP
             {
                 services.AddSingleton(x =>
                 {
-                    var dbContext = (DbContext)x.GetService(mysqlOptions.DbContextType);
-                    mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
-                    return mysqlOptions;
+                    using (var scope = x.CreateScope())
+                    {
+                        var provider = scope.ServiceProvider;
+                        var dbContext = (DbContext)provider.GetService(mysqlOptions.DbContextType);
+                        mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                        return mysqlOptions;
+                    }
                 });
             }
             else
