@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using DotNetCore.CAP.Processor.States;
+using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Dashboard
 {
-    public static class JobHistoryRenderer
+    public static class MessageHistoryRenderer
     {
         private static readonly IDictionary<string, Func<HtmlHelper, IDictionary<string, string>, NonEscapedString>>
             Renderers = new Dictionary<string, Func<HtmlHelper, IDictionary<string, string>, NonEscapedString>>();
@@ -17,23 +17,23 @@ namespace DotNetCore.CAP.Dashboard
             = new Dictionary<string, string>();
 
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
-        static JobHistoryRenderer()
+        static MessageHistoryRenderer()
         {
-            Register(SucceededState.StateName, SucceededRenderer);
-            Register(FailedState.StateName, FailedRenderer);
-            Register(ProcessingState.StateName, ProcessingRenderer);
+            Register(StatusName.Succeeded, SucceededRenderer);
+            Register(StatusName.Failed, FailedRenderer);
+            Register(StatusName.Processing, ProcessingRenderer);
 
-            BackgroundStateColors.Add(EnqueuedState.StateName, "#F5F5F5");
-            BackgroundStateColors.Add(SucceededState.StateName, "#EDF7ED");
-            BackgroundStateColors.Add(FailedState.StateName, "#FAEBEA");
-            BackgroundStateColors.Add(ProcessingState.StateName, "#FCEFDC");
-            BackgroundStateColors.Add(ScheduledState.StateName, "#E0F3F8");
+            BackgroundStateColors.Add(StatusName.Enqueued, "#F5F5F5");
+            BackgroundStateColors.Add(StatusName.Succeeded, "#EDF7ED");
+            BackgroundStateColors.Add(StatusName.Failed, "#FAEBEA");
+            BackgroundStateColors.Add(StatusName.Processing, "#FCEFDC");
+            BackgroundStateColors.Add(StatusName.Scheduled, "#E0F3F8");
 
-            ForegroundStateColors.Add(EnqueuedState.StateName, "#999");
-            ForegroundStateColors.Add(SucceededState.StateName, "#5cb85c");
-            ForegroundStateColors.Add(FailedState.StateName, "#d9534f");
-            ForegroundStateColors.Add(ProcessingState.StateName, "#f0ad4e");
-            ForegroundStateColors.Add(ScheduledState.StateName, "#5bc0de");
+            ForegroundStateColors.Add(StatusName.Enqueued, "#999");
+            ForegroundStateColors.Add(StatusName.Succeeded, "#5cb85c");
+            ForegroundStateColors.Add(StatusName.Failed, "#d9534f");
+            ForegroundStateColors.Add(StatusName.Processing, "#f0ad4e");
+            ForegroundStateColors.Add(StatusName.Scheduled, "#5bc0de");
         }
 
         public static void AddBackgroundStateColor(string stateName, string color)
