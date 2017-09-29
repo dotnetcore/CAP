@@ -1,3 +1,5 @@
+using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -11,6 +13,7 @@ namespace DotNetCore.CAP.MySql
     {
         private readonly MySqlOptions _options;
         private readonly ILogger _logger;
+        private readonly IDbConnection _existingConnection = null;
 
         public MySqlStorage(ILogger<MySqlStorage> logger, MySqlOptions options)
         {
@@ -20,12 +23,12 @@ namespace DotNetCore.CAP.MySql
 
         public IStorageConnection GetConnection()
         {
-            throw new System.NotImplementedException();
+            return new MySqlStorageConnection(_options);
         }
 
         public IMonitoringApi GetMonitoringApi()
         {
-            throw new System.NotImplementedException();
+            return new MySqlMonitoringApi(this, _options);
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -72,6 +75,46 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
             return batchSql;
+        }
+
+        internal T UseConnection<T>(Func<IDbConnection, T> func)
+        {
+            IDbConnection connection = null;
+
+            try
+            {
+                connection = CreateAndOpenConnection();
+                return func(connection);
+            }
+            finally
+            {
+                ReleaseConnection(connection);
+            }
+        }
+
+        internal IDbConnection CreateAndOpenConnection()
+        {
+            var connection = _existingConnection ?? new MySqlConnection(_options.ConnectionString);
+
+            if (connection.State == ConnectionState.Closed)
+            {
+                connection.Open();
+            }
+
+            return connection;
+        }
+
+        internal bool IsExistingConnection(IDbConnection connection)
+        {
+            return connection != null && ReferenceEquals(connection, _existingConnection);
+        }
+
+        internal void ReleaseConnection(IDbConnection connection)
+        {
+            if (connection != null && !IsExistingConnection(connection))
+            {
+                connection.Dispose();
+            }
         }
     }
 }
