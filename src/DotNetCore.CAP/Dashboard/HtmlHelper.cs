@@ -31,9 +31,7 @@ namespace DotNetCore.CAP.Dashboard
         public NonEscapedString MessagesSidebar(MessageType type)
         {
             if (type == MessageType.Publish)
-            {
                 return SidebarMenu(MessagesSidebarMenu.PublishedItems);
-            }
             return SidebarMenu(MessagesSidebarMenu.ReceivedItems);
         }
 
@@ -80,12 +78,11 @@ namespace DotNetCore.CAP.Dashboard
 
         public NonEscapedString StateLabel(string stateName)
         {
-            if (String.IsNullOrWhiteSpace(stateName))
-            {
+            if (string.IsNullOrWhiteSpace(stateName))
                 return Raw($"<em>{Strings.Common_NoState}</em>");
-            }
 
-            return Raw($"<span class=\"label label-default\" style=\"background-color: {MessageHistoryRenderer.GetForegroundStateColor(stateName)};\">{stateName}</span>");
+            return Raw(
+                $"<span class=\"label label-default\" style=\"background-color: {MessageHistoryRenderer.GetForegroundStateColor(stateName)};\">{stateName}</span>");
         }
 
         public NonEscapedString RelativeTime(DateTime value)
@@ -109,52 +106,36 @@ namespace DotNetCore.CAP.Dashboard
 
             var builder = new StringBuilder();
             if (displaySign)
-            {
                 builder.Append(duration.Value.TotalMilliseconds < 0 ? "-" : "+");
-            }
 
             duration = duration.Value.Duration();
 
             if (duration.Value.Days > 0)
-            {
                 builder.Append($"{duration.Value.Days}d ");
-            }
 
             if (duration.Value.Hours > 0)
-            {
                 builder.Append($"{duration.Value.Hours}h ");
-            }
 
             if (duration.Value.Minutes > 0)
-            {
                 builder.Append($"{duration.Value.Minutes}m ");
-            }
 
             if (duration.Value.TotalHours < 1)
-            {
                 if (duration.Value.Seconds > 0)
                 {
                     builder.Append(duration.Value.Seconds);
                     if (duration.Value.Milliseconds > 0)
-                    {
                         builder.Append($".{duration.Value.Milliseconds.ToString().PadLeft(3, '0')}");
-                    }
 
                     builder.Append("s ");
                 }
                 else
                 {
                     if (duration.Value.Milliseconds > 0)
-                    {
                         builder.Append($"{duration.Value.Milliseconds}ms ");
-                    }
                 }
-            }
 
             if (builder.Length <= 1)
-            {
                 builder.Append(" <1ms ");
-            }
 
             builder.Remove(builder.Length - 1, 1);
 
@@ -163,7 +144,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public string FormatProperties(IDictionary<string, string> properties)
         {
-            return String.Join(", ", properties.Select(x => $"{x.Key}: \"{x.Value}\""));
+            return string.Join(", ", properties.Select(x => $"{x.Key}: \"{x.Value}\""));
         }
 
         public NonEscapedString QueueLabel(string queue)
@@ -179,7 +160,7 @@ namespace DotNetCore.CAP.Dashboard
         {
             var parts = serverId.Split(':');
             var shortenedId = parts.Length > 1
-                ? String.Join(":", parts.Take(parts.Length - 1))
+                ? string.Join(":", parts.Take(parts.Length - 1))
                 : serverId;
 
             return new NonEscapedString(
@@ -188,20 +169,40 @@ namespace DotNetCore.CAP.Dashboard
 
         public NonEscapedString NodeSwitchLink(string id)
         {
-            return Raw($"<a class=\"job-method\" onclick=\"nodeSwitch({id});\" href=\"javascript:;\">{Strings.NodePage_Switch}</a>");
+            return Raw(
+                $"<a class=\"job-method\" onclick=\"nodeSwitch({id});\" href=\"javascript:;\">{Strings.NodePage_Switch}</a>");
+        }
+
+        public NonEscapedString StackTrace(string stackTrace)
+        {
+            try
+            {
+                //return new NonEscapedString(StackTraceFormatter.FormatHtml(stackTrace, StackTraceHtmlFragments));
+                return new NonEscapedString(stackTrace);
+            }
+            catch (RegexMatchTimeoutException)
+            {
+                return new NonEscapedString(HtmlEncode(stackTrace));
+            }
+        }
+
+        public string HtmlEncode(string text)
+        {
+            return WebUtility.HtmlEncode(text);
         }
 
         #region MethodEscaped
+
         public NonEscapedString MethodEscaped(MethodInfo method)
         {
             var @public = WrapKeyword("public");
-            var @async = string.Empty;
+            var async = string.Empty;
             string @return;
 
             var isAwaitable = CoercedAwaitableInfo.IsTypeAwaitable(method.ReturnType, out var coercedAwaitableInfo);
             if (isAwaitable)
             {
-                @async = WrapKeyword("async");
+                async = WrapKeyword("async");
                 var asyncResultType = coercedAwaitableInfo.AwaitableInfo.ResultType;
 
                 @return = WrapType("Task") + WrapIdentifier("<") + WrapType(asyncResultType) + WrapIdentifier(">");
@@ -211,7 +212,7 @@ namespace DotNetCore.CAP.Dashboard
                 @return = WrapType(method.ReturnType);
             }
 
-            var @name = method.Name;
+            var name = method.Name;
 
             string paramType = null;
             string paramName = null;
@@ -227,7 +228,8 @@ namespace DotNetCore.CAP.Dashboard
 
             var paramString = paramType == null ? "();" : $"({paramType} {paramName});";
 
-            var outputString = @public + " " + (string.IsNullOrEmpty(@async) ? "" : @async + " ") + @return + " " + @name + paramString;
+            var outputString = @public + " " + (string.IsNullOrEmpty(async) ? "" : async + " ") + @return + " " + name +
+                               paramString;
 
             return new NonEscapedString(outputString);
         }
@@ -235,26 +237,15 @@ namespace DotNetCore.CAP.Dashboard
         private string WrapType(Type type)
         {
             if (type == null)
-            {
                 return string.Empty;
-            }
 
             if (type.Name == "Void")
-            {
                 return WrapKeyword(type.Name.ToLower());
-            }
             if (Helper.IsComplexType(type))
-            {
                 return WrapType(type.Name);
-            }
             if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal))
-            {
                 return WrapKeyword(type.Name.ToLower());
-            }
-            else
-            {
-                return WrapType(type.Name);
-            }
+            return WrapType(type.Name);
         }
 
         private string WrapIdentifier(string value)
@@ -275,25 +266,8 @@ namespace DotNetCore.CAP.Dashboard
         private string Span(string @class, string value)
         {
             return $"<span class=\"{@class}\">{value}</span>";
-        } 
+        }
+
         #endregion
-
-        public NonEscapedString StackTrace(string stackTrace)
-        {
-            try
-            {
-                //return new NonEscapedString(StackTraceFormatter.FormatHtml(stackTrace, StackTraceHtmlFragments));
-                return new NonEscapedString(stackTrace);
-            }
-            catch (RegexMatchTimeoutException)
-            {
-                return new NonEscapedString(HtmlEncode(stackTrace));
-            }
-        }
-
-        public string HtmlEncode(string text)
-        {
-            return WebUtility.HtmlEncode(text);
-        }
     }
 }

@@ -9,17 +9,17 @@ namespace DotNetCore.CAP.SqlServer
 {
     public class DefaultAdditionalProcessor : IAdditionalProcessor
     {
-        private readonly ILogger _logger;
-        private readonly SqlServerOptions _options;
-
         private const int MaxBatch = 1000;
-        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
-        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
         private static readonly string[] Tables =
         {
-            "Published","Received"
+            "Published", "Received"
         };
+
+        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
+        private readonly ILogger _logger;
+        private readonly SqlServerOptions _options;
+        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
         public DefaultAdditionalProcessor(ILogger<DefaultAdditionalProcessor> logger,
             SqlServerOptions sqlServerOptions)
@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.SqlServer
                         removedCount = await connection.ExecuteAsync($@"
 DELETE TOP (@count)
 FROM [{_options.Schema}].[{table}] WITH (readpast)
-WHERE ExpiresAt < @now;", new { now = DateTime.Now, count = MaxBatch });
+WHERE ExpiresAt < @now;", new {now = DateTime.Now, count = MaxBatch});
                     }
 
                     if (removedCount != 0)

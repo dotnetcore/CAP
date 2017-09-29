@@ -17,12 +17,9 @@ namespace DotNetCore.CAP.Processor
             _logger = loggerFactory.CreateLogger<InfiniteRetryProcessor>();
         }
 
-        public override string ToString() => _inner.ToString();
-
         public async Task ProcessAsync(ProcessingContext context)
         {
             while (!context.IsStopping)
-            {
                 try
                 {
                     await _inner.ProcessAsync(context);
@@ -33,9 +30,13 @@ namespace DotNetCore.CAP.Processor
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(1, ex, "Prcessor '{ProcessorName}' failed. Retrying...", _inner.ToString());
+                    _logger.LogWarning(1, ex, "Processor '{ProcessorName}' failed. Retrying...", _inner.ToString());
                 }
-            }
+        }
+
+        public override string ToString()
+        {
+            return _inner.ToString();
         }
     }
 }

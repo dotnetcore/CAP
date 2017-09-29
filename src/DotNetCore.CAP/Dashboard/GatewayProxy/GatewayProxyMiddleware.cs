@@ -16,26 +16,26 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
     public class GatewayProxyMiddleware
     {
         public const string NodeCookieName = "cap.node";
+        private readonly ILogger _logger;
 
         private readonly RequestDelegate _next;
-        private readonly ILogger _logger;
-        private readonly IRequestMapper _requestMapper;
         private readonly IHttpRequester _requester;
+        private readonly IRequestMapper _requestMapper;
 
         private INodeDiscoveryProvider _discoveryProvider;
 
-        protected HttpRequestMessage DownstreamRequest { get; set; }
-
         public GatewayProxyMiddleware(RequestDelegate next,
-           ILoggerFactory loggerFactory,
-           IRequestMapper requestMapper,
-           IHttpRequester requester)
+            ILoggerFactory loggerFactory,
+            IRequestMapper requestMapper,
+            IHttpRequester requester)
         {
             _next = next;
             _logger = loggerFactory.CreateLogger<GatewayProxyMiddleware>();
             _requestMapper = requestMapper;
             _requester = requester;
         }
+
+        protected HttpRequestMessage DownstreamRequest { get; set; }
 
         public async Task Invoke(HttpContext context,
             DiscoveryOptions discoveryOptions,
@@ -53,7 +53,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             else
             {
                 //For performance reasons, we need to put this functionality in the else
-                var isSwitchNode = request.Cookies.TryGetValue(NodeCookieName, out string requestNodeId);
+                var isSwitchNode = request.Cookies.TryGetValue(NodeCookieName, out var requestNodeId);
                 var isCurrentNode = discoveryOptions.NodeId.ToString() == requestNodeId;
                 var isNodesPage = request.Path.StartsWithSegments(new PathString(pathMatch + "/nodes"));
 
@@ -65,7 +65,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
                 {
                     _logger.LogDebug("started calling gateway proxy middleware");
 
-                    if (TryGetRemoteNode(requestNodeId, out Node node))
+                    if (TryGetRemoteNode(requestNodeId, out var node))
                     {
                         try
                         {
@@ -94,31 +94,26 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
         public async Task SetResponseOnHttpContext(HttpContext context, HttpResponseMessage response)
         {
             foreach (var httpResponseHeader in response.Content.Headers)
-            {
                 AddHeaderIfDoesntExist(context, httpResponseHeader);
-            }
 
             var content = await response.Content.ReadAsByteArrayAsync();
 
             AddHeaderIfDoesntExist(context,
-                new KeyValuePair<string, IEnumerable<string>>("Content-Length", new[] { content.Length.ToString() }));
+                new KeyValuePair<string, IEnumerable<string>>("Content-Length", new[] {content.Length.ToString()}));
 
             context.Response.OnStarting(state =>
             {
-                var httpContext = (HttpContext)state;
+                var httpContext = (HttpContext) state;
 
-                httpContext.Response.StatusCode = (int)response.StatusCode;
+                httpContext.Response.StatusCode = (int) response.StatusCode;
 
                 return Task.CompletedTask;
-
             }, context);
 
             using (Stream stream = new MemoryStream(content))
             {
                 if (response.StatusCode != HttpStatusCode.NotModified)
-                {
                     await stream.CopyToAsync(context.Response.Body);
-                }
             }
         }
 
@@ -139,10 +134,8 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             KeyValuePair<string, IEnumerable<string>> httpResponseHeader)
         {
             if (!context.Response.Headers.ContainsKey(httpResponseHeader.Key))
-            {
                 context.Response.Headers.Add(httpResponseHeader.Key,
                     new StringValues(httpResponseHeader.Value.ToArray()));
-            }
         }
     }
 }

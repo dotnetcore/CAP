@@ -9,8 +9,8 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     internal sealed class PublishQueueExecutor : BasePublishQueueExecutor
     {
-        private readonly ILogger _logger;
         private readonly ConnectionPool _connectionPool;
+        private readonly ILogger _logger;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
         public PublishQueueExecutor(
@@ -36,11 +36,11 @@ namespace DotNetCore.CAP.RabbitMQ
                 {
                     var body = Encoding.UTF8.GetBytes(content);
 
-                    channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, RabbitMQOptions.ExchangeType, durable: true);
-                    channel.BasicPublish(exchange: _rabbitMQOptions.TopicExchangeName,
-                                         routingKey: keyName,
-                                         basicProperties: null,
-                                         body: body);
+                    channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, RabbitMQOptions.ExchangeType, true);
+                    channel.BasicPublish(_rabbitMQOptions.TopicExchangeName,
+                        keyName,
+                        null,
+                        body);
 
                     _logger.LogDebug($"rabbitmq topic message [{keyName}] has been published.");
                 }
@@ -48,10 +48,11 @@ namespace DotNetCore.CAP.RabbitMQ
             }
             catch (Exception ex)
             {
-                _logger.LogError($"rabbitmq topic message [{keyName}] has benn raised an exception of sending. the exception is: {ex.Message}");
+                _logger.LogError(
+                    $"rabbitmq topic message [{keyName}] has benn raised an exception of sending. the exception is: {ex.Message}");
 
                 return Task.FromResult(OperateResult.Failed(ex,
-                    new OperateError()
+                    new OperateError
                     {
                         Code = ex.HResult.ToString(),
                         Description = ex.Message

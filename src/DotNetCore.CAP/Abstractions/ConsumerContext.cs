@@ -3,15 +3,15 @@
 namespace DotNetCore.CAP.Abstractions
 {
     /// <summary>
-    /// A context for consumers, it used to be provider wapper of method description and received message.
+    /// A context for consumers, it used to be provider wrapper of method description and received message.
     /// </summary>
     public class ConsumerContext
     {
         /// <summary>
-        /// create a new instance of  <see cref="ConsumerContext"/> .
+        /// create a new instance of  <see cref="ConsumerContext" /> .
         /// </summary>
         /// <param name="descriptor">consumer method descriptor. </param>
-        /// <param name="message"> reveied message.</param>
+        /// <param name="message"> received message.</param>
         public ConsumerContext(ConsumerExecutorDescriptor descriptor, MessageContext message)
         {
             ConsumerDescriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.Abstractions
         public ConsumerExecutorDescriptor ConsumerDescriptor { get; set; }
 
         /// <summary>
-        /// consumer reveived message.
+        /// consumer received message.
         /// </summary>
         public MessageContext DeliverMessage { get; set; }
     }

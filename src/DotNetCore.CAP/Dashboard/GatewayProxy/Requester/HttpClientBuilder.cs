@@ -8,7 +8,8 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
 {
     internal class HttpClientBuilder : IHttpClientBuilder
     {
-        private readonly Dictionary<int, Func<DelegatingHandler>> _handlers = new Dictionary<int, Func<DelegatingHandler>>();
+        private readonly Dictionary<int, Func<DelegatingHandler>> _handlers =
+            new Dictionary<int, Func<DelegatingHandler>>();
 
         public IHttpClient Create()
         {
@@ -41,12 +42,12 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
     /// </summary>
     internal class HttpClientWrapper : IHttpClient
     {
-        public HttpClient Client { get; }
-
         public HttpClientWrapper(HttpClient client)
         {
             Client = client;
         }
+
+        public HttpClient Client { get; }
 
         public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
         {

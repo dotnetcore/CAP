@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
 {
-    public class SubscibeQueueExecutor : IQueueExecutor
+    public class SubscribeQueueExecutor : IQueueExecutor
     {
         private readonly IConsumerInvokerFactory _consumerInvokerFactory;
         private readonly ILogger _logger;
@@ -20,7 +20,7 @@ namespace DotNetCore.CAP
         private readonly MethodMatcherCache _selector;
         private readonly IStateChanger _stateChanger;
 
-        public SubscibeQueueExecutor(
+        public SubscribeQueueExecutor(
             IStateChanger stateChanger,
             MethodMatcherCache selector,
             CapOptions options,

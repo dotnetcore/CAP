@@ -20,11 +20,12 @@ namespace DotNetCore.CAP.Dashboard
                 Metric = DashboardMetrics.PublishedSucceededCount
             });
 
-            PublishedItems.Add(page => new MenuItem(Strings.SidebarMenu_Processing, page.Url.To("/published/processing"))
-            {
-                Active = page.RequestPath.StartsWith("/published/processing"),
-                Metric = DashboardMetrics.PublishedProcessingCount
-            });
+            PublishedItems.Add(page =>
+                new MenuItem(Strings.SidebarMenu_Processing, page.Url.To("/published/processing"))
+                {
+                    Active = page.RequestPath.StartsWith("/published/processing"),
+                    Metric = DashboardMetrics.PublishedProcessingCount
+                });
 
             PublishedItems.Add(page => new MenuItem(Strings.SidebarMenu_Failed, page.Url.To("/published/failed"))
             {

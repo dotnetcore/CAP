@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
 {
@@ -8,8 +9,6 @@ namespace DotNetCore.CAP
     /// </summary>
     public class CapOptions
     {
-        internal IList<ICapOptionsExtension> Extensions { get; }
-
         /// <summary>
         /// Default value for polling delay timeout, in seconds.
         /// </summary>
@@ -21,7 +20,7 @@ namespace DotNetCore.CAP
         public const int DefaultQueueProcessorCount = 2;
 
         /// <summary>
-        /// Default succeeded message expriation timespan, in seconds.
+        /// Default succeeded message expiration time span, in seconds.
         /// </summary>
         public const int DefaultSucceedMessageExpirationAfter = 24 * 3600;
 
@@ -39,8 +38,10 @@ namespace DotNetCore.CAP
             Extensions = new List<ICapOptionsExtension>();
         }
 
+        internal IList<ICapOptionsExtension> Extensions { get; }
+
         /// <summary>
-        /// Productor job polling delay time. 
+        /// Producer job polling delay time.
         /// Default is 15 sec.
         /// </summary>
         public int PollingDelay { get; set; }
@@ -52,8 +53,8 @@ namespace DotNetCore.CAP
         public int QueueProcessorCount { get; set; }
 
         /// <summary>
-        /// Sent or received succeed message after timespan of due, then the message will be deleted at due time. 
-        /// Dafault is 24*3600 seconds.
+        /// Sent or received succeed message after timespan of due, then the message will be deleted at due time.
+        /// Default is 24*3600 seconds.
         /// </summary>
         public int SucceedMessageExpiredAfter { get; set; }
 
@@ -66,7 +67,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// We’ll invoke this call-back with message type,name,content when requeue failed message.
         /// </summary>
-        public Action<Models.MessageType, string, string> FailedCallback { get; set; }
+        public Action<MessageType, string, string> FailedCallback { get; set; }
 
         /// <summary>
         /// Registers an extension that will be executed when building services.

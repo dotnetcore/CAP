@@ -1,6 +1,6 @@
 ﻿namespace DotNetCore.CAP.Dashboard.Pages
 {
-    partial class Paginator
+    internal partial class Paginator
     {
         private readonly Pager _pager;
 

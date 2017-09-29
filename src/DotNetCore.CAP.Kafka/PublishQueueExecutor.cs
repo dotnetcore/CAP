@@ -9,8 +9,8 @@ namespace DotNetCore.CAP.Kafka
 {
     internal class PublishQueueExecutor : BasePublishQueueExecutor
     {
-        private readonly ILogger _logger;
         private readonly KafkaOptions _kafkaOptions;
+        private readonly ILogger _logger;
 
         public PublishQueueExecutor(
             CapOptions options,
@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Kafka
         {
             try
             {
-                var config = _kafkaOptions.AskafkaConfig();
+                var config = _kafkaOptions.AsKafkaConfig();
                 var contentBytes = Encoding.UTF8.GetBytes(content);
                 using (var producer = new Producer(config))
                 {
@@ -39,19 +39,17 @@ namespace DotNetCore.CAP.Kafka
 
                         return Task.FromResult(OperateResult.Success);
                     }
-                    else
+                    return Task.FromResult(OperateResult.Failed(new OperateError
                     {
-                        return Task.FromResult(OperateResult.Failed(new OperateError
-                        {
-                            Code = message.Error.Code.ToString(),
-                            Description = message.Error.Reason
-                        }));
-                    }
+                        Code = message.Error.Code.ToString(),
+                        Description = message.Error.Reason
+                    }));
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"kafka topic message [{keyName}] has benn raised an exception of sending. the exception is: {ex.Message}");
+                _logger.LogError(
+                    $"kafka topic message [{keyName}] has benn raised an exception of sending. the exception is: {ex.Message}");
 
                 return Task.FromResult(OperateResult.Failed(ex));
             }

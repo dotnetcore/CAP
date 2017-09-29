@@ -9,14 +9,14 @@ using Microsoft.Extensions.Options;
 namespace DotNetCore.CAP
 {
     /// <summary>
-    /// Default implement of <see cref="IBootstrapper"/>.
+    /// Default implement of <see cref="IBootstrapper" />.
     /// </summary>
     internal class DefaultBootstrapper : IBootstrapper
     {
-        private readonly ILogger<DefaultBootstrapper> _logger;
         private readonly IApplicationLifetime _appLifetime;
         private readonly CancellationTokenSource _cts;
         private readonly CancellationTokenRegistration _ctsRegistration;
+        private readonly ILogger<DefaultBootstrapper> _logger;
         private Task _bootstrappingTask;
 
         public DefaultBootstrapper(
@@ -55,7 +55,7 @@ namespace DotNetCore.CAP
 
         public Task BootstrapAsync()
         {
-            return (_bootstrappingTask = BootstrapTaskAsync());
+            return _bootstrappingTask = BootstrapTaskAsync();
         }
 
         private async Task BootstrapTaskAsync()
@@ -69,7 +69,6 @@ namespace DotNetCore.CAP
             if (_cts.IsCancellationRequested) return;
 
             foreach (var item in Servers)
-            {
                 try
                 {
                     item.Start();
@@ -78,7 +77,6 @@ namespace DotNetCore.CAP
                 {
                     _logger.ServerStartedError(ex);
                 }
-            }
 
             _ctsRegistration.Dispose();
             _cts.Dispose();
@@ -89,9 +87,7 @@ namespace DotNetCore.CAP
             _appLifetime.ApplicationStopping.Register(() =>
             {
                 foreach (var item in Servers)
-                {
                     item.Dispose();
-                }
             });
             return Task.CompletedTask;
         }

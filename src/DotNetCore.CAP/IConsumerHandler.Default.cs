@@ -13,14 +13,14 @@ namespace DotNetCore.CAP
 {
     internal class ConsumerHandler : IConsumerHandler
     {
-        private readonly IServiceProvider _serviceProvider;
         private readonly IConsumerClientFactory _consumerClientFactory;
-        private readonly ILogger _logger;
 
         private readonly CancellationTokenSource _cts;
-        private readonly MethodMatcherCache _selector;
+        private readonly ILogger _logger;
 
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
+        private readonly MethodMatcherCache _selector;
+        private readonly IServiceProvider _serviceProvider;
 
         private Task _compositeTask;
         private bool _disposed;
@@ -43,7 +43,6 @@ namespace DotNetCore.CAP
             var groupingMatchs = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
             foreach (var matchGroup in groupingMatchs)
-            {
                 Task.Factory.StartNew(() =>
                 {
                     using (var client = _consumerClientFactory.Create(matchGroup.Key))
@@ -55,16 +54,13 @@ namespace DotNetCore.CAP
                         client.Listening(_pollingDelay, _cts.Token);
                     }
                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
-            }
             _compositeTask = Task.CompletedTask;
         }
 
         public void Dispose()
         {
             if (_disposed)
-            {
                 return;
-            }
             _disposed = true;
 
             _logger.ServerShuttingDown();
@@ -78,15 +74,18 @@ namespace DotNetCore.CAP
             {
                 var innerEx = ex.InnerExceptions[0];
                 if (!(innerEx is OperationCanceledException))
-                {
                     _logger.ExpectedOperationCanceledException(innerEx);
-                }
             }
+        }
+
+        public void Pulse()
+        {
+            SubscribeQueuer.PulseEvent.Set();
         }
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
-            client.OnMessageReceieved += (sender, message) =>
+            client.OnMessageReceived += (sender, message) =>
             {
                 _logger.EnqueuingReceivedMessage(message.Name, message.Content);
 
@@ -99,10 +98,7 @@ namespace DotNetCore.CAP
                 Pulse();
             };
 
-            client.OnError += (sender, reason) =>
-            {
-                _logger.LogError(reason);
-            };
+            client.OnError += (sender, reason) => { _logger.LogError(reason); };
         }
 
         private static void StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
@@ -111,14 +107,9 @@ namespace DotNetCore.CAP
             var messageStore = provider.GetRequiredService<IStorageConnection>();
             var receivedMessage = new CapReceivedMessage(messageContext)
             {
-                StatusName = StatusName.Scheduled,
+                StatusName = StatusName.Scheduled
             };
             messageStore.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
-        }
-
-        public void Pulse()
-        {
-            SubscribeQueuer.PulseEvent.Set();
         }
     }
 }

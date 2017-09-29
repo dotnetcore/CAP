@@ -10,6 +10,14 @@ namespace DotNetCore.CAP
     /// </summary>
     public class KafkaOptions
     {
+        /// <summary>
+        /// librdkafka configuration parameters (refer to https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md).
+        /// <para>
+        /// Topic configuration parameters are specified via the "default.topic.config" sub-dictionary config parameter.
+        /// </para>
+        /// </summary>
+        public readonly IDictionary<string, object> MainConfig;
+
         private IEnumerable<KeyValuePair<string, object>> _kafkaConfig;
 
 
@@ -19,29 +27,19 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
-        /// librdkafka configuration parameters (refer to https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md).
-        /// <para>
-        /// Topic configuration parameters are specified via the "default.topic.config" sub-dictionary config parameter.
-        /// </para>
-        /// </summary>
-        public readonly IDictionary<string, object> MainConfig;
-
-        /// <summary>
-        /// The `bootstrap.servers` item config of <see cref="MainConfig"/>.
+        /// The `bootstrap.servers` item config of <see cref="MainConfig" />.
         /// <para>
         /// Initial list of brokers as a CSV list of broker host or host:port.
         /// </para>
         /// </summary>
         public string Servers { get; set; }
 
-        internal IEnumerable<KeyValuePair<string, object>> AskafkaConfig()
+        internal IEnumerable<KeyValuePair<string, object>> AsKafkaConfig()
         {
             if (_kafkaConfig == null)
             {
                 if (string.IsNullOrWhiteSpace(Servers))
-                {
                     throw new ArgumentNullException(nameof(Servers));
-                }
 
                 MainConfig["bootstrap.servers"] = Servers;
                 MainConfig["queue.buffering.max.ms"] = "10";

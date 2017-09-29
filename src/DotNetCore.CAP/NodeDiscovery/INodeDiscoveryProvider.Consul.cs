@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Consul;
 
@@ -8,8 +8,8 @@ namespace DotNetCore.CAP.NodeDiscovery
 {
     public class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider, IDisposable
     {
-        private ConsulClient _consul;
         private readonly DiscoveryOptions _options;
+        private ConsulClient _consul;
 
         public ConsulNodeDiscoveryProvider(DiscoveryOptions options)
         {
@@ -18,21 +18,19 @@ namespace DotNetCore.CAP.NodeDiscovery
             InitClient();
         }
 
-        public void InitClient()
+        public void Dispose()
         {
-            _consul = new ConsulClient(config =>
-            {
-                config.WaitTime = TimeSpan.FromSeconds(5);
-                config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerProt}");
-            });
+            _consul.Dispose();
         }
 
         public async Task<IList<Node>> GetNodes()
         {
-            try {
+            try
+            {
                 var services = await _consul.Agent.Services();
 
-                var nodes = services.Response.Select(x => new Node {
+                var nodes = services.Response.Select(x => new Node
+                {
                     Id = x.Key,
                     Name = x.Value.Service,
                     Address = x.Value.Address,
@@ -41,11 +39,12 @@ namespace DotNetCore.CAP.NodeDiscovery
                 });
                 var nodeList = nodes.ToList();
 
-                CapCache.Global.AddOrUpdate("cap.nodes.count", nodeList.Count, TimeSpan.FromSeconds(30),true);
+                CapCache.Global.AddOrUpdate("cap.nodes.count", nodeList.Count, TimeSpan.FromSeconds(30), true);
 
                 return nodeList;
             }
-            catch (Exception) {
+            catch (Exception)
+            {
                 return null;
             }
         }
@@ -58,20 +57,25 @@ namespace DotNetCore.CAP.NodeDiscovery
                 Name = _options.NodeName,
                 Address = _options.CurrentNodeHostName,
                 Port = _options.CurrentNodePort,
-                Tags = new[] { "CAP", "Client", "Dashboard" },
+                Tags = new[] {"CAP", "Client", "Dashboard"},
                 Check = new AgentServiceCheck
                 {
                     DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30),
                     Interval = TimeSpan.FromSeconds(10),
                     Status = HealthStatus.Passing,
-                    HTTP = $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/health"
+                    HTTP =
+                        $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/health"
                 }
             });
         }
 
-        public void Dispose()
+        public void InitClient()
         {
-            _consul.Dispose();
+            _consul = new ConsulClient(config =>
+            {
+                config.WaitTime = TimeSpan.FromSeconds(5);
+                config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
+            });
         }
     }
 }

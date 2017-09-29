@@ -1,8 +1,8 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True TrimLeadingUnderscores : true *@
-@using DotNetCore.CAP.Dashboard
-@using DotNetCore.CAP.Dashboard.Resources;
 
-@inherits RazorPage
+@using DotNetCore.CAP.Dashboard
+@using DotNetCore.CAP.Dashboard.Resources
+@inherits DotNetCore.CAP.Dashboard.RazorPage
 <div class="btn-toolbar">
     @if (_pager.TotalPageCount > 1)
     {
@@ -13,7 +13,7 @@
                 {
                     case Pager.ItemType.Page:
                         <a href="@_pager.PageUrl(page.PageIndex)" class="btn btn-default @(_pager.CurrentPage == page.PageIndex ? "active" : null)">
-                            @page.PageIndex  
+                            @page.PageIndex
                         </a>
                         break;
                     case Pager.ItemType.NextPage:

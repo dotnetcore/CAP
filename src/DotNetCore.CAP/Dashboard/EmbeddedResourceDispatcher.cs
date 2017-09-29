@@ -7,12 +7,12 @@ namespace DotNetCore.CAP.Dashboard
     internal class EmbeddedResourceDispatcher : IDashboardDispatcher
     {
         private readonly Assembly _assembly;
-        private readonly string _resourceName;
         private readonly string _contentType;
+        private readonly string _resourceName;
 
         public EmbeddedResourceDispatcher(
-             string contentType,
-             Assembly assembly,
+            string contentType,
+            Assembly assembly,
             string resourceName)
         {
             if (assembly != null)
@@ -47,9 +47,8 @@ namespace DotNetCore.CAP.Dashboard
             using (var inputStream = assembly.GetManifestResourceStream(resourceName))
             {
                 if (inputStream == null)
-                {
-                    throw new ArgumentException($@"Resource with name {resourceName} not found in assembly {assembly}.");
-                }
+                    throw new ArgumentException(
+                        $@"Resource with name {resourceName} not found in assembly {assembly}.");
 
                 inputStream.CopyTo(response.Body);
             }

@@ -13,12 +13,6 @@ namespace DotNetCore.CAP.Kafka
         private readonly KafkaOptions _kafkaOptions;
         private Consumer<Null, string> _consumerClient;
 
-        public event EventHandler<MessageContext> OnMessageReceieved;
-
-        public event EventHandler<string> OnError;
-
-        public IDeserializer<string> StringDeserializer { get; set; }
-
         public KafkaConsumerClient(string groupId, KafkaOptions options)
         {
             _groupId = groupId;
@@ -26,15 +20,19 @@ namespace DotNetCore.CAP.Kafka
             StringDeserializer = new StringDeserializer(Encoding.UTF8);
         }
 
+        public IDeserializer<string> StringDeserializer { get; set; }
+
+        public event EventHandler<MessageContext> OnMessageReceived;
+
+        public event EventHandler<string> OnError;
+
         public void Subscribe(IEnumerable<string> topics)
         {
             if (topics == null)
                 throw new ArgumentNullException(nameof(topics));
 
             if (_consumerClient == null)
-            {
                 InitKafkaClient();
-            }
 
             //_consumerClient.Assign(topics.Select(x=> new TopicPartition(x, 0)));
             _consumerClient.Subscribe(topics);
@@ -65,7 +63,7 @@ namespace DotNetCore.CAP.Kafka
         {
             _kafkaOptions.MainConfig["group.id"] = _groupId;
 
-            var config = _kafkaOptions.AskafkaConfig();
+            var config = _kafkaOptions.AsKafkaConfig();
             _consumerClient = new Consumer<Null, string>(config, null, StringDeserializer);
 
             _consumerClient.OnMessage += ConsumerClient_OnMessage;
@@ -81,7 +79,7 @@ namespace DotNetCore.CAP.Kafka
                 Content = e.Value
             };
 
-            OnMessageReceieved?.Invoke(sender, message);
+            OnMessageReceived?.Invoke(sender, message);
         }
 
         private void ConsumerClient_OnError(object sender, Error e)

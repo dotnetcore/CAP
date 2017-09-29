@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -9,12 +10,11 @@ namespace DotNetCore.CAP.Processor
 {
     public class FailedJobProcessor : IProcessor
     {
-        private readonly CapOptions _options;
+        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly ILogger _logger;
+        private readonly CapOptions _options;
         private readonly IServiceProvider _provider;
         private readonly IStateChanger _stateChanger;
-
-        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly TimeSpan _waitingInterval;
 
         public FailedJobProcessor(
@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.Processor
 
                 await Task.WhenAll(
                     ProcessPublishedAsync(connection, context),
-                    ProcessReceivededAsync(connection, context));
+                    ProcessReceivedAsync(connection, context));
 
                 DefaultDispatcher.PulseEvent.Set();
 
@@ -58,18 +58,15 @@ namespace DotNetCore.CAP.Processor
             foreach (var message in messages)
             {
                 if (!hasException)
-                {
                     try
                     {
-                        _options.FailedCallback?.Invoke(Models.MessageType.Publish, message.Name, message.Content);
-
+                        _options.FailedCallback?.Invoke(MessageType.Publish, message.Name, message.Content);
                     }
                     catch (Exception ex)
                     {
                         hasException = true;
                         _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
                     }
-                }
 
                 using (var transaction = connection.CreateTransaction())
                 {
@@ -83,26 +80,23 @@ namespace DotNetCore.CAP.Processor
             }
         }
 
-        private async Task ProcessReceivededAsync(IStorageConnection connection, ProcessingContext context)
+        private async Task ProcessReceivedAsync(IStorageConnection connection, ProcessingContext context)
         {
-            var messages = await connection.GetFailedReceviedMessages();
+            var messages = await connection.GetFailedReceivedMessages();
             var hasException = false;
 
             foreach (var message in messages)
             {
                 if (!hasException)
-                {
                     try
                     {
-                        _options.FailedCallback?.Invoke(Models.MessageType.Subscribe, message.Name, message.Content);
-
+                        _options.FailedCallback?.Invoke(MessageType.Subscribe, message.Name, message.Content);
                     }
                     catch (Exception ex)
                     {
                         hasException = true;
                         _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
                     }
-                }
 
                 using (var transaction = connection.CreateTransaction())
                 {

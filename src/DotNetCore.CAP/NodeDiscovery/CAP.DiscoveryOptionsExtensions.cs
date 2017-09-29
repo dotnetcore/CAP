@@ -1,10 +1,10 @@
 ﻿using System;
+using DotNetCore.CAP;
+using DotNetCore.CAP.NodeDiscovery;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP
 {
-    using NodeDiscovery;
-    using Microsoft.Extensions.DependencyInjection;
-
     internal sealed class DiscoveryOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<DiscoveryOptions> _options;
@@ -23,7 +23,7 @@ namespace DotNetCore.CAP
 
             services.AddSingleton<IDiscoveryProviderFactory, DiscoveryProviderFactory>();
             services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
-            services.AddSingleton<INodeDiscoveryProvider>(x =>
+            services.AddSingleton(x =>
             {
                 var configOptions = x.GetService<DiscoveryOptions>();
                 var factory = x.GetService<IDiscoveryProviderFactory>();
@@ -35,8 +35,6 @@ namespace DotNetCore.CAP
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    using DotNetCore.CAP;
-
     public static class CapDiscoveryOptionsExtensions
     {
         public static CapOptions UseDiscovery(this CapOptions capOptions)

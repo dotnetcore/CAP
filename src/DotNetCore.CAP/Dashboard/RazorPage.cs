@@ -8,10 +8,9 @@ namespace DotNetCore.CAP.Dashboard
 {
     public abstract class RazorPage
     {
-        private Lazy<StatisticsDto> _statisticsLazy;
-
         private readonly StringBuilder _content = new StringBuilder();
         private string _body;
+        private Lazy<StatisticsDto> _statisticsLazy;
 
         protected RazorPage()
         {
@@ -20,7 +19,7 @@ namespace DotNetCore.CAP.Dashboard
         }
 
         public RazorPage Layout { get; protected set; }
-        public HtmlHelper Html { get; private set; }
+        public HtmlHelper Html { get; }
         public UrlHelper Url { get; private set; }
 
         public IStorage Storage { get; internal set; }
@@ -86,10 +85,8 @@ namespace DotNetCore.CAP.Dashboard
                 var monitoring = Storage.GetMonitoringApi();
                 var dto = monitoring.GetStatistics();
 
-                if (CapCache.Global.TryGet("cap.nodes.count", out object count))
-                {
-                    dto.Servers = (int)count;
-                }
+                if (CapCache.Global.TryGet("cap.nodes.count", out var count))
+                    dto.Servers = (int) count;
 
                 return dto;
             });
@@ -135,8 +132,8 @@ namespace DotNetCore.CAP.Dashboard
         private static string Encode(string text)
         {
             return string.IsNullOrEmpty(text)
-                       ? string.Empty
-                       : WebUtility.HtmlEncode(text);
+                ? string.Empty
+                : WebUtility.HtmlEncode(text);
         }
     }
 }

@@ -1,11 +1,11 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
 @using System
-@using DotNetCore.CAP.Models;
 @using DotNetCore.CAP.Dashboard
-@using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Monitoring
+@using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Resources
-@inherits RazorPage
+@using DotNetCore.CAP.Models
+@inherits DotNetCore.CAP.Dashboard.RazorPage
 @{
     Layout = new LayoutPage(Strings.PublishedMessagesPage_Title);
 
@@ -13,8 +13,8 @@
 
     int.TryParse(Query("from"), out from);
     int.TryParse(Query("count"), out perPage);
-    string name = Query("name");
-    string content = Query("content");
+    var name = Query("name");
+    var content = Query("content");
 
     var monitor = Storage.GetMonitoringApi();
     var pager = new Pager(from, perPage, GetTotal(monitor));
@@ -49,11 +49,11 @@
                 <div class="btn-toolbar btn-toolbar-top">
                     <form class="row">
                         <span class="col-md-3">
-                            <input type="text" class="form-control" name="name" value="@Query("name")" placeholder="@Strings.MessagesPage_Query_MessageName" />
+                            <input type="text" class="form-control" name="name" value="@Query("name")" placeholder="@Strings.MessagesPage_Query_MessageName"/>
                         </span>
                         <div class="col-md-5">
                             <div class="input-group">
-                                <input type="text" class="form-control" name="content" value="@Query("content")" placeholder="@Strings.MessagesPage_Query_MessageBody" />
+                                <input type="text" class="form-control" name="content" value="@Query("content")" placeholder="@Strings.MessagesPage_Query_MessageBody"/>
                                 <span class="input-group-btn">
                                     <button class="btn btn-info">@Strings.MessagesPage_Query_Button</button>
                                 </span>
@@ -76,51 +76,51 @@
                 <div class="table-responsive">
                     <table class="table">
                         <thead>
-                            <tr>
-                                <th style="width:60px;">
-                                    <input type="checkbox" class="js-jobs-list-select-all" />
-                                </th>
-                                <th>@Strings.MessagesPage_Table_Code</th>
-                                <th>@Strings.MessagesPage_Table_Name</th>
-                                <th class="min-width">@Strings.MessagesPage_Table_Retries</th>
-                                @if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
-                                {
-                                    <th>@Strings.MessagesPage_Table_State</th>
-                                }
-                                <th class="align-right">@Strings.MessagesPage_Table_ExpiresAt</th>
-                            </tr>
+                        <tr>
+                            <th style="width: 60px;">
+                                <input type="checkbox" class="js-jobs-list-select-all"/>
+                            </th>
+                            <th>@Strings.MessagesPage_Table_Code</th>
+                            <th>@Strings.MessagesPage_Table_Name</th>
+                            <th class="min-width">@Strings.MessagesPage_Table_Retries</th>
+                            @if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
+                            {
+                                <th>@Strings.MessagesPage_Table_State</th>
+                            }
+                            <th class="align-right">@Strings.MessagesPage_Table_ExpiresAt</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            @foreach (var message in succeededMessages)
-                            {
-                                <tr class="js-jobs-list-row hover">
+                        @foreach (var message in succeededMessages)
+                        {
+                            <tr class="js-jobs-list-row hover">
+                                <td>
+                                    <input type="checkbox" class="js-jobs-list-checkbox" name="messages[]" value="@message.Id"/>
+                                </td>
+                                <td class="word-break">
+                                    <a href="javascript:;" data-url='@(Url.To("/published/message/") + message.Id)' class="openModal">#@message.Id</a>
+                                </td>
+                                <td>
+                                    @message.Name
+                                </td>
+                                <td>
+                                    @message.Retries
+                                </td>
+                                @if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
+                                {
                                     <td>
-                                        <input type="checkbox" class="js-jobs-list-checkbox" name="messages[]" value="@message.Id" />
+                                        @message.StatusName
                                     </td>
-                                    <td class="word-break">
-                                        <a href="javascript:;" data-url='@(Url.To("/published/message/")+message.Id)' class="openModal">#@message.Id</a>
-                                    </td>
-                                    <td>
-                                        @message.Name
-                                    </td>
-                                    <td>
-                                        @message.Retries
-                                    </td>
-                                    @if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
+                                }
+                                <td class="align-right">
+                                    @if (message.ExpiresAt.HasValue)
                                     {
-                                        <td>
-                                            @message.StatusName
-                                        </td>
+                                        @Html.RelativeTime(message.ExpiresAt.Value)
                                     }
-                                    <td class="align-right">
-                                        @if (message.ExpiresAt.HasValue)
-                                        {
-                                            @Html.RelativeTime(message.ExpiresAt.Value)
-                                        }
-                                    </td>
+                                </td>
 
-                                </tr>
-                            }
+                            </tr>
+                        }
                         </tbody>
                     </table>
                 </div>
@@ -132,10 +132,12 @@
                     <div class="modal-dialog" role="document">
                         <div class="modal-content">
                             <div class="modal-header">
-                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                                 <h4 class="modal-title">Message Content</h4>
                             </div>
-                            <div id="jsonContent" style="max-height:500px;overflow-y:auto;" class="modal-body">
+                            <div id="jsonContent" style="max-height: 500px; overflow-y: auto;" class="modal-body">
                             </div>
                             <div class="modal-footer">
                                 <button type="button" class="btn btn-sm btn-primary" id="formatBtn" onclick="">@Strings.MessagesPage_Modal_Format</button>

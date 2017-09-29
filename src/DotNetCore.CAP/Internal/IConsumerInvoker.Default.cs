@@ -11,11 +11,11 @@ namespace DotNetCore.CAP.Internal
 {
     public class DefaultConsumerInvoker : IConsumerInvoker
     {
-        private readonly ILogger _logger;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IModelBinderFactory _modelBinderFactory;
         private readonly ConsumerContext _consumerContext;
         private readonly ObjectMethodExecutor _executor;
+        private readonly ILogger _logger;
+        private readonly IModelBinderFactory _modelBinderFactory;
+        private readonly IServiceProvider _serviceProvider;
 
         public DefaultConsumerInvoker(ILogger logger,
             IServiceProvider serviceProvider,
@@ -42,32 +42,24 @@ namespace DotNetCore.CAP.Internal
                 var serviceType = _consumerContext.ConsumerDescriptor.ImplTypeInfo.AsType();
                 var obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, serviceType);
 
-                var jsonConent = _consumerContext.DeliverMessage.Content;
-                var message =  serializer.DeSerialize<CapMessageDto>(jsonConent);
+                var jsonContent = _consumerContext.DeliverMessage.Content;
+                var message = serializer.DeSerialize<CapMessageDto>(jsonContent);
 
                 object result;
                 if (_executor.MethodParameters.Length > 0)
-                {
                     result = await ExecuteWithParameterAsync(obj, message.Content.ToString());
-                }
                 else
-                {
                     result = await ExecuteAsync(obj);
-                }
 
                 if (!string.IsNullOrEmpty(message.CallbackName))
-                {
                     await SentCallbackMessage(message.Id, message.CallbackName, result);
-                }
             }
         }
 
         private async Task<object> ExecuteAsync(object @class)
         {
             if (_executor.IsMethodAsync)
-            {
                 return await _executor.ExecuteAsync(@class);
-            }
             return _executor.Execute(@class);
         }
 
@@ -81,16 +73,16 @@ namespace DotNetCore.CAP.Internal
                 if (bindResult.IsSuccess)
                 {
                     if (_executor.IsMethodAsync)
-                    {
                         return await _executor.ExecuteAsync(@class, bindResult.Model);
-                    }
                     return _executor.Execute(@class, bindResult.Model);
                 }
-                throw new MethodBindException($"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameterString} ");
+                throw new MethodBindException(
+                    $"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameterString} ");
             }
             catch (FormatException ex)
             {
-                _logger.ModelBinderFormattingException(_executor.MethodInfo?.Name, firstParameter.Name, parameterString, ex);
+                _logger.ModelBinderFormattingException(_executor.MethodInfo?.Name, firstParameter.Name, parameterString,
+                    ex);
                 return null;
             }
         }

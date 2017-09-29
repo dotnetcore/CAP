@@ -16,11 +16,11 @@ namespace DotNetCore.CAP
 
         public IQueueExecutor GetInstance(MessageType messageType)
         {
-            var queueExectors = _serviceProvider.GetServices<IQueueExecutor>();
+            var queueExecutors = _serviceProvider.GetServices<IQueueExecutor>();
 
             return messageType == MessageType.Publish
-                ? queueExectors.FirstOrDefault(x => x is BasePublishQueueExecutor)
-                : queueExectors.FirstOrDefault(x => !(x is BasePublishQueueExecutor));
+                ? queueExecutors.FirstOrDefault(x => x is BasePublishQueueExecutor)
+                : queueExecutors.FirstOrDefault(x => !(x is BasePublishQueueExecutor));
         }
     }
 }

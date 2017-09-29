@@ -36,9 +36,7 @@ namespace DotNetCore.CAP.Dashboard
                     RegexOptions.CultureInvariant | RegexOptions.IgnoreCase | RegexOptions.Singleline);
 
                 if (match.Success)
-                {
                     return new Tuple<IDashboardDispatcher, Match>(dispatcher.Item2, match);
-                }
             }
 
             return null;

@@ -7,8 +7,8 @@ namespace DotNetCore.CAP.Dashboard
     {
         public static void AddRazorPage(
             this RouteCollection routes,
-             string pathTemplate,
-              Func<Match, RazorPage> pageFunc)
+            string pathTemplate,
+            Func<Match, RazorPage> pageFunc)
         {
             if (routes == null) throw new ArgumentNullException(nameof(routes));
             if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));
@@ -18,9 +18,9 @@ namespace DotNetCore.CAP.Dashboard
         }
 
         public static void AddCommand(
-             this RouteCollection routes,
-             string pathTemplate,
-              Func<DashboardContext, bool> command)
+            this RouteCollection routes,
+            string pathTemplate,
+            Func<DashboardContext, bool> command)
         {
             if (routes == null) throw new ArgumentNullException(nameof(routes));
             if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));
@@ -42,9 +42,9 @@ namespace DotNetCore.CAP.Dashboard
         }
 
         public static void AddJsonResult(
-           this RouteCollection routes,
-           string pathTemplate,
-           Func<DashboardContext, string> jsonfunc)
+            this RouteCollection routes,
+            string pathTemplate,
+            Func<DashboardContext, string> jsonfunc)
         {
             if (routes == null) throw new ArgumentNullException(nameof(routes));
             if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));
@@ -55,8 +55,8 @@ namespace DotNetCore.CAP.Dashboard
 
         public static void AddPublishBatchCommand(
             this RouteCollection routes,
-             string pathTemplate,
-             Action<DashboardContext, int> command)
+            string pathTemplate,
+            Action<DashboardContext, int> command)
         {
             if (routes == null) throw new ArgumentNullException(nameof(routes));
             if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));

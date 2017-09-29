@@ -11,9 +11,9 @@ namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerStorage : IStorage
     {
-        private readonly SqlServerOptions _options;
-        private readonly ILogger _logger;
         private readonly IDbConnection _existingConnection = null;
+        private readonly ILogger _logger;
+        private readonly SqlServerOptions _options;
 
         public SqlServerStorage(ILogger<SqlServerStorage> logger, SqlServerOptions options)
         {
@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.SqlServer
         protected virtual string CreateDbTablesScript(string schema)
         {
             var batchSql =
-    $@"
+                $@"
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}')
 BEGIN
 	EXEC('CREATE SCHEMA {schema}')
@@ -118,9 +118,7 @@ END;";
             var connection = _existingConnection ?? new SqlConnection(_options.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
-            {
                 connection.Open();
-            }
 
             return connection;
         }
@@ -133,10 +131,7 @@ END;";
         internal void ReleaseConnection(IDbConnection connection)
         {
             if (connection != null && !IsExistingConnection(connection))
-            {
                 connection.Dispose();
-            }
         }
-
     }
 }

@@ -1,12 +1,12 @@
 ﻿using System;
+using DotNetCore.CAP;
+using DotNetCore.CAP.Dashboard;
+using DotNetCore.CAP.Dashboard.GatewayProxy;
+using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP
 {
-    using Dashboard;
-    using Dashboard.GatewayProxy;
-    using Dashboard.GatewayProxy.Requester;
-    using Microsoft.Extensions.DependencyInjection;
-
     internal sealed class DashboardOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<DashboardOptions> _options;
@@ -20,8 +20,8 @@ namespace DotNetCore.CAP
         {
             var dashboardOptions = new DashboardOptions();
             _options?.Invoke(dashboardOptions);
-            services.AddSingleton(dashboardOptions); 
-            services.AddSingleton(DashboardRoutes.Routes);          
+            services.AddSingleton(dashboardOptions);
+            services.AddSingleton(DashboardRoutes.Routes);
             services.AddSingleton<IHttpRequester, HttpClientHttpRequester>();
             services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
             services.AddSingleton<IRequestMapper, RequestMapper>();
@@ -31,13 +31,11 @@ namespace DotNetCore.CAP
 
 namespace Microsoft.Extensions.DependencyInjection
 {
-    using DotNetCore.CAP;
-
     public static class CapOptionsExtensions
     {
         public static CapOptions UseDashboard(this CapOptions capOptions)
         {
-            return capOptions.UseDashboard(opt => {});
+            return capOptions.UseDashboard(opt => { });
         }
 
         public static CapOptions UseDashboard(this CapOptions capOptions, Action<DashboardOptions> options)

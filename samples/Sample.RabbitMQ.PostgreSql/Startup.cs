@@ -26,7 +26,7 @@ namespace Sample.RabbitMQ.PostgreSql
                 x.UseDiscovery(d =>
                 {
                     d.DiscoveryServerHostName = "localhost";
-                    d.DiscoveryServerProt = 8500;
+                    d.DiscoveryServerPort = 8500;
                     d.CurrentNodeHostName = "localhost";
                     d.CurrentNodePort = 5800;
                     d.NodeName = "CAP一号节点";

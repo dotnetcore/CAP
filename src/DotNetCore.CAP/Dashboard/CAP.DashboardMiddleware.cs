@@ -10,12 +10,13 @@ namespace DotNetCore.CAP
 {
     public class DashboardMiddleware
     {
-        private readonly DashboardOptions _options;
         private readonly RequestDelegate _next;
-        private readonly IStorage _storage;
+        private readonly DashboardOptions _options;
         private readonly RouteCollection _routes;
+        private readonly IStorage _storage;
 
-        public DashboardMiddleware(RequestDelegate next, DashboardOptions options, IStorage storage, RouteCollection routes)
+        public DashboardMiddleware(RequestDelegate next, DashboardOptions options, IStorage storage,
+            RouteCollection routes)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));
             _options = options ?? throw new ArgumentNullException(nameof(options));
@@ -40,17 +41,15 @@ namespace DotNetCore.CAP
                 var findResult = _routes.FindDispatcher(context.Request.Path.Value);
 
                 if (findResult == null)
-                {
                     return _next.Invoke(context);
-                }
 
                 if (_options.Authorization.Any(filter => !filter.Authorize(dashboardContext)))
                 {
                     var isAuthenticated = context.User?.Identity?.IsAuthenticated;
 
                     context.Response.StatusCode = isAuthenticated == true
-                        ? (int)HttpStatusCode.Forbidden
-                        : (int)HttpStatusCode.Unauthorized;
+                        ? (int) HttpStatusCode.Forbidden
+                        : (int) HttpStatusCode.Unauthorized;
 
                     return Task.CompletedTask;
                 }

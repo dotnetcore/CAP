@@ -26,20 +26,18 @@ namespace DotNetCore.CAP.Dashboard
             string serialized = null;
             if (_command != null)
             {
-                object result = _command(context);
+                var result = _command(context);
 
                 var settings = new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                    Converters = new JsonConverter[] { new StringEnumConverter { CamelCaseText = true } }
+                    Converters = new JsonConverter[] {new StringEnumConverter {CamelCaseText = true}}
                 };
                 serialized = JsonConvert.SerializeObject(result, settings);
             }
 
             if (_jsonCommand != null)
-            {
                 serialized = _jsonCommand(context);
-            }
 
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(serialized ?? string.Empty);

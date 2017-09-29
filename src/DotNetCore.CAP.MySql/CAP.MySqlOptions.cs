@@ -1,4 +1,5 @@
 ﻿// ReSharper disable once CheckNamespace
+
 namespace DotNetCore.CAP
 {
     public class MySqlOptions : EFOptions

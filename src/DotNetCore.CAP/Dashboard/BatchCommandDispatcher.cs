@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.Dashboard
                 _command(context, id);
             }
 
-            context.Response.StatusCode = (int)HttpStatusCode.NoContent;
+            context.Response.StatusCode = (int) HttpStatusCode.NoContent;
         }
     }
 }

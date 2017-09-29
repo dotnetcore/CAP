@@ -10,7 +10,7 @@ namespace DotNetCore.CAP
         {
             AppPath = "/";
             PathMatch = "/cap";
-            Authorization = new[] { new LocalRequestsOnlyAuthorizationFilter() };
+            Authorization = new[] {new LocalRequestsOnlyAuthorizationFilter()};
             StatsPollingInterval = 2000;
         }
 
@@ -28,5 +28,4 @@ namespace DotNetCore.CAP
         /// </summary>
         public int StatsPollingInterval { get; set; }
     }
-
 }

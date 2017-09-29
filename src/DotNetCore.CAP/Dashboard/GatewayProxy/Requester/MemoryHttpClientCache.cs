@@ -5,7 +5,8 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
 {
     public class MemoryHttpClientCache : IHttpClientCache
     {
-        private readonly ConcurrentDictionary<string, ConcurrentQueue<IHttpClient>> _httpClientsCache = new ConcurrentDictionary<string, ConcurrentQueue<IHttpClient>>();
+        private readonly ConcurrentDictionary<string, ConcurrentQueue<IHttpClient>> _httpClientsCache =
+            new ConcurrentDictionary<string, ConcurrentQueue<IHttpClient>>();
 
         public void Set(string id, IHttpClient client, TimeSpan expirationTime)
         {
@@ -30,9 +31,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
         {
             IHttpClient client = null;
             if (_httpClientsCache.TryGetValue(id, out var connectionQueue))
-            {
                 connectionQueue.TryDequeue(out client);
-            }
             return client;
         }
 

@@ -11,9 +11,9 @@ namespace DotNetCore.CAP.PostgreSql
 {
     public class PostgreSqlStorage : IStorage
     {
-        private readonly PostgreSqlOptions _options;
-        private readonly ILogger _logger;
         private readonly IDbConnection _existingConnection = null;
+        private readonly ILogger _logger;
+        private readonly PostgreSqlOptions _options;
 
         public PostgreSqlStorage(ILogger<PostgreSqlStorage> logger, PostgreSqlOptions options)
         {
@@ -64,9 +64,7 @@ namespace DotNetCore.CAP.PostgreSql
             var connection = _existingConnection ?? new NpgsqlConnection(_options.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
-            {
                 connection.Open();
-            }
 
             return connection;
         }
@@ -79,9 +77,7 @@ namespace DotNetCore.CAP.PostgreSql
         internal void ReleaseConnection(IDbConnection connection)
         {
             if (connection != null && !IsExistingConnection(connection))
-            {
                 connection.Dispose();
-            }
         }
 
         protected virtual string CreateDbTablesScript(string schema)

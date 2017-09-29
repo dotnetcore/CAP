@@ -8,11 +8,11 @@ namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerFetchedMessage : IFetchedMessage
     {
-        private readonly IDbConnection _connection;
-        private readonly IDbTransaction _transaction;
-        private readonly Timer _timer;
         private static readonly TimeSpan KeepAliveInterval = TimeSpan.FromMinutes(1);
+        private readonly IDbConnection _connection;
         private readonly object _lockObject = new object();
+        private readonly Timer _timer;
+        private readonly IDbTransaction _transaction;
 
         public SqlServerFetchedMessage(int messageId,
             MessageType type,

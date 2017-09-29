@@ -10,10 +10,10 @@ using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.PostgreSql
 {
-    public class PostgreSqlMonitoringApi: IMonitoringApi
+    public class PostgreSqlMonitoringApi : IMonitoringApi
     {
-        private readonly PostgreSqlStorage _storage;
         private readonly PostgreSqlOptions _options;
+        private readonly PostgreSqlStorage _storage;
 
         public PostgreSqlMonitoringApi(IStorage storage, PostgreSqlOptions options)
         {
@@ -23,7 +23,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         public StatisticsDto GetStatistics()
         {
-            string sql = String.Format(@"
+            var sql = string.Format(@"
 select count(Id) from ""{0}"".""published"" where ""StatusName"" = N'Succeeded';
 select count(Id) from ""{0}"".""received""  where ""StatusName"" = N'Succeeded';
 select count(Id) from ""{0}"".""published"" where ""StatusName"" = N'Failed';
@@ -55,32 +55,22 @@ select count(Id) from ""{0}"".""received""  where ""StatusName"" in (N'Processin
         {
             var tableName = queryDto.MessageType == MessageType.Publish ? "published" : "received";
             var where = string.Empty;
-            
-            if (!string.IsNullOrEmpty(queryDto.StatusName))
-            {
-                if (string.Equals(queryDto.StatusName, StatusName.Processing, StringComparison.CurrentCultureIgnoreCase))
-                {
-                    where += " and \"StatusName\" in (N'Processing',N'Scheduled',N'Enqueued')";
-                }
-                else
-                {
-                    where += " and \"StatusName\" = @StatusName";
-                }
-            }
-            if (!string.IsNullOrEmpty(queryDto.Name))
-            {
-                where += " and \"Name\" = @Name";
-            }
-            if (!string.IsNullOrEmpty(queryDto.Group))
-            {
-                where += " and \"Group\" = @Group";
-            }
-            if (!string.IsNullOrEmpty(queryDto.Content))
-            {
-                where += " and \"Content\" like '%@Content%'";
-            }
 
-            var sqlQuery = $"select * from \"{_options.Schema}\".\"{tableName}\" where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
+            if (!string.IsNullOrEmpty(queryDto.StatusName))
+                if (string.Equals(queryDto.StatusName, StatusName.Processing,
+                    StringComparison.CurrentCultureIgnoreCase))
+                    where += " and \"StatusName\" in (N'Processing',N'Scheduled',N'Enqueued')";
+                else
+                    where += " and \"StatusName\" = @StatusName";
+            if (!string.IsNullOrEmpty(queryDto.Name))
+                where += " and \"Name\" = @Name";
+            if (!string.IsNullOrEmpty(queryDto.Group))
+                where += " and \"Group\" = @Group";
+            if (!string.IsNullOrEmpty(queryDto.Content))
+                where += " and \"Content\" like '%@Content%'";
+
+            var sqlQuery =
+                $"select * from \"{_options.Schema}\".\"{tableName}\" where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
 
             return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
@@ -89,7 +79,7 @@ select count(Id) from ""{0}"".""received""  where ""StatusName"" in (N'Processin
                 queryDto.Name,
                 queryDto.Content,
                 Offset = queryDto.CurrentPage * queryDto.PageSize,
-                Limit = queryDto.PageSize,
+                Limit = queryDto.PageSize
             }).ToList());
         }
 
@@ -143,7 +133,7 @@ select count(Id) from ""{0}"".""received""  where ""StatusName"" in (N'Processin
                 ? $"select count(Id) from \"{_options.Schema}\".\"{tableName}\" where \"StatusName\" in (N'Processing',N'Scheduled',N'Enqueued')"
                 : $"select count(Id) from \"{_options.Schema}\".\"{tableName}\" where \"StatusName\" = @state";
 
-            var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
+            var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
             return count;
         }
 
@@ -152,7 +142,8 @@ select count(Id) from ""{0}"".""received""  where ""StatusName"" in (N'Processin
             return _storage.UseConnection(action);
         }
 
-        private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string tableName, string statusName)
+        private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string tableName,
+            string statusName)
         {
             var endDate = DateTime.Now;
             var dates = new List<DateTime>();
@@ -174,7 +165,7 @@ select count(Id) from ""{0}"".""received""  where ""StatusName"" in (N'Processin
             IDictionary<string, DateTime> keyMaps)
         {
             //SQL Server 2012+
-            string sqlQuery =
+            var sqlQuery =
                 $@"
 with aggr as (
     select to_char(""Added"",'yyyy-MM-dd-HH') as ""Key"",
@@ -187,13 +178,11 @@ select ""Key"",""Count"" from aggr where ""Key"" in @keys;";
 
             var valuesMap = connection.Query(
                     sqlQuery,
-                    new { keys = keyMaps.Keys, statusName })
-                .ToDictionary(x => (string)x.Key, x => (int)x.Count);
+                    new {keys = keyMaps.Keys, statusName})
+                .ToDictionary(x => (string) x.Key, x => (int) x.Count);
 
             foreach (var key in keyMaps.Keys)
-            {
                 if (!valuesMap.ContainsKey(key)) valuesMap.Add(key, 0);
-            }
 
             var result = new Dictionary<DateTime, int>();
             for (var i = 0; i < keyMaps.Count; i++)

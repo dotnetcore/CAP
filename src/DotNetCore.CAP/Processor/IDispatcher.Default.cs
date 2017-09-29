@@ -9,14 +9,13 @@ namespace DotNetCore.CAP.Processor
 {
     public class DefaultDispatcher : IDispatcher
     {
-        private readonly IQueueExecutorFactory _queueExecutorFactory;
-
-        private readonly TimeSpan _pollingDelay;
-
         internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
 
+        private readonly TimeSpan _pollingDelay;
+        private readonly IQueueExecutorFactory _queueExecutorFactory;
+
         public DefaultDispatcher(IQueueExecutorFactory queueExecutorFactory,
-               IOptions<CapOptions> capOptions)
+            IOptions<CapOptions> capOptions)
         {
             _queueExecutorFactory = queueExecutorFactory;
             _pollingDelay = TimeSpan.FromSeconds(capOptions.Value.PollingDelay);
@@ -39,7 +38,7 @@ namespace DotNetCore.CAP.Processor
             try
             {
                 var worked = await Step(context);
-                
+
                 context.ThrowIfStopping();
 
                 Waiting = true;
@@ -70,13 +69,11 @@ namespace DotNetCore.CAP.Processor
                 var connection = provider.GetRequiredService<IStorageConnection>();
 
                 if ((fetched = await connection.FetchNextMessageAsync()) != null)
-                {
                     using (fetched)
                     {
                         var queueExecutor = _queueExecutorFactory.GetInstance(fetched.MessageType);
                         await queueExecutor.ExecuteAsync(connection, fetched);
                     }
-                }
             }
             return fetched != null;
         }

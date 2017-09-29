@@ -5,23 +5,21 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor.States;
 using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
     public class MySqlStorageConnection : IStorageConnection
     {
-        private readonly MySqlOptions _options;
         private readonly string _prefix;
 
         public MySqlStorageConnection(MySqlOptions options)
         {
-            _options = options;
-            _prefix = _options.TableNamePrefix;
+            Options = options;
+            _prefix = Options.TableNamePrefix;
         }
 
-        public MySqlOptions Options => _options;
+        public MySqlOptions Options { get; }
 
         public IStorageTransaction CreateTransaction()
         {
@@ -32,7 +30,7 @@ namespace DotNetCore.CAP.MySql
         {
             var sql = $@"SELECT * FROM `{_prefix}.published` WHERE `Id`={id};";
 
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
@@ -59,7 +57,7 @@ DELETE FROM `{_prefix}.queue` LIMIT 1;";
         {
             var sql = $"SELECT * FROM `{_prefix}.published` WHERE `StatusName` = '{StatusName.Scheduled}' LIMIT 1;";
 
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
@@ -69,13 +67,11 @@ DELETE FROM `{_prefix}.queue` LIMIT 1;";
         {
             var sql = $"SELECT * FROM `{_prefix}.published` WHERE `StatusName` = '{StatusName.Failed}';";
 
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapPublishedMessage>(sql);
             }
         }
-
-        // CapReceviedMessage
 
         public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
         {
@@ -85,7 +81,7 @@ DELETE FROM `{_prefix}.queue` LIMIT 1;";
 INSERT INTO `{_prefix}.received`(`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
 VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 await connection.ExecuteAsync(sql, message);
             }
@@ -94,25 +90,25 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
         {
             var sql = $@"SELECT * FROM `{_prefix}.received` WHERE Id={id};";
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
 
-        public async Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync()
+        public async Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync()
         {
             var sql = $"SELECT * FROM `{_prefix}.received` WHERE `StatusName` = '{StatusName.Scheduled}' LIMIT 1;";
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
 
-        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages()
+        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
         {
             var sql = $"SELECT * FROM `{_prefix}.received` WHERE `StatusName` = '{StatusName.Failed}';";
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
             }
@@ -123,10 +119,32 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         {
         }
 
+        public bool ChangePublishedState(int messageId, string state)
+        {
+            var sql =
+                $"UPDATE `{_prefix}.published` SET `Retries`=`Retries`+1,`StatusName` = '{state}' WHERE `Id`={messageId}";
+
+            using (var connection = new MySqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
+        public bool ChangeReceivedState(int messageId, string state)
+        {
+            var sql =
+                $"UPDATE `{_prefix}.received` SET `Retries`=`Retries`+1,`StatusName` = '{state}' WHERE `Id`={messageId}";
+
+            using (var connection = new MySqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
         private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
         {
             //here don't use `using` to dispose
-            var connection = new MySqlConnection(_options.ConnectionString);
+            var connection = new MySqlConnection(Options.ConnectionString);
             await connection.OpenAsync();
             var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
             FetchedMessage fetchedMessage;
@@ -148,17 +166,8 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
                 return null;
             }
 
-            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection, transaction);
-        }
-
-        public bool ChangePublishedState(int messageId, string state)
-        {
-            throw new NotImplementedException();
-        }
-
-        public bool ChangeReceivedState(int messageId, string state)
-        {
-            throw new NotImplementedException();
+            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection,
+                transaction);
         }
     }
 }

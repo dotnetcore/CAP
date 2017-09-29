@@ -1,21 +1,18 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
-@using System
-@using System.Collections.Generic
-@using DotNetCore.CAP.Models;
-@using DotNetCore.CAP.Dashboard
 @using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Resources
+@using DotNetCore.CAP.Models
 @using Newtonsoft.Json
-@inherits RazorPage
+@inherits DotNetCore.CAP.Dashboard.RazorPage
 @{
     Layout = new LayoutPage(Strings.HomePage_Title);
 
     var monitor = Storage.GetMonitoringApi();
-    IDictionary<DateTime, int> publishedSucceeded = monitor.HourlySucceededJobs(MessageType.Publish);
-    IDictionary<DateTime, int> publishedFailed = monitor.HourlyFailedJobs(MessageType.Publish);
+    var publishedSucceeded = monitor.HourlySucceededJobs(MessageType.Publish);
+    var publishedFailed = monitor.HourlyFailedJobs(MessageType.Publish);
 
-    IDictionary<DateTime, int> receivedSucceeded = monitor.HourlySucceededJobs(MessageType.Subscribe);
-    IDictionary<DateTime, int> receivedFailed = monitor.HourlyFailedJobs(MessageType.Subscribe);
+    var receivedSucceeded = monitor.HourlySucceededJobs(MessageType.Subscribe);
+    var receivedFailed = monitor.HourlyFailedJobs(MessageType.Subscribe);
 }
 
 <div class="row">
@@ -41,7 +38,8 @@
              data-received-succeeded="@Statistics.ReceivedSucceeded"
              data-received-failed="@Statistics.ReceivedFailed"
              data-received-succeeded-string="@Strings.HomePage_GraphHover_RSucceeded"
-             data-received-failed-string="@Strings.HomePage_GraphHover_RFailed"></div>
+             data-received-failed-string="@Strings.HomePage_GraphHover_RFailed">
+        </div>
         <div style="display: none;">
             <span data-metric="published_succeeded:count"></span>
             <span data-metric="published_failed:count"></span>
@@ -61,7 +59,7 @@
              data-received-succeeded="@JsonConvert.SerializeObject(receivedSucceeded)"
              data-received-failed="@JsonConvert.SerializeObject(receivedFailed)"
              data-received-succeeded-string="@Strings.HomePage_GraphHover_RSucceeded"
-             data-received-failed-string="@Strings.HomePage_GraphHover_RFailed">         
+             data-received-failed-string="@Strings.HomePage_GraphHover_RFailed">
         </div>
     </div>
 </div>

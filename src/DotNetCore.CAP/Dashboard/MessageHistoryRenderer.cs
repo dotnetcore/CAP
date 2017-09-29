@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Text;
 using DotNetCore.CAP.Infrastructure;
 
@@ -16,7 +18,7 @@ namespace DotNetCore.CAP.Dashboard
         private static readonly IDictionary<string, string> ForegroundStateColors
             = new Dictionary<string, string>();
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
+        [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static MessageHistoryRenderer()
         {
             Register(StatusName.Succeeded, SucceededRenderer);
@@ -44,9 +46,7 @@ namespace DotNetCore.CAP.Dashboard
         public static string GetBackgroundStateColor(string stateName)
         {
             if (stateName == null || !BackgroundStateColors.ContainsKey(stateName))
-            {
                 return "inherit";
-            }
 
             return BackgroundStateColors[stateName];
         }
@@ -59,23 +59,18 @@ namespace DotNetCore.CAP.Dashboard
         public static string GetForegroundStateColor(string stateName)
         {
             if (stateName == null || !ForegroundStateColors.ContainsKey(stateName))
-            {
                 return "inherit";
-            }
 
             return ForegroundStateColors[stateName];
         }
 
-        public static void Register(string state, Func<HtmlHelper, IDictionary<string, string>, NonEscapedString> renderer)
+        public static void Register(string state,
+            Func<HtmlHelper, IDictionary<string, string>, NonEscapedString> renderer)
         {
             if (!Renderers.ContainsKey(state))
-            {
                 Renderers.Add(state, renderer);
-            }
             else
-            {
                 Renderers[state] = renderer;
-            }
         }
 
         public static bool Exists(string state)
@@ -141,10 +136,10 @@ namespace DotNetCore.CAP.Dashboard
                 itemsAdded = true;
             }
 
-            if (stateData.ContainsKey("Result") && !String.IsNullOrWhiteSpace(stateData["Result"]))
+            if (stateData.ContainsKey("Result") && !string.IsNullOrWhiteSpace(stateData["Result"]))
             {
                 var result = stateData["Result"];
-                builder.Append($"<dt>Result:</dt><dd>{System.Net.WebUtility.HtmlEncode(result)}</dd>");
+                builder.Append($"<dt>Result:</dt><dd>{WebUtility.HtmlEncode(result)}</dd>");
 
                 itemsAdded = true;
             }
@@ -171,13 +166,9 @@ namespace DotNetCore.CAP.Dashboard
             string serverId = null;
 
             if (stateData.ContainsKey("ServerId"))
-            {
                 serverId = stateData["ServerId"];
-            }
             else if (stateData.ContainsKey("ServerName"))
-            {
                 serverId = stateData["ServerName"];
-            }
 
             if (serverId != null)
             {

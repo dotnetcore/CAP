@@ -10,12 +10,12 @@ namespace DotNetCore.CAP.RabbitMQ
     {
         private const int DefaultPoolSize = 15;
 
-        private readonly ConcurrentQueue<IConnection> _pool = new ConcurrentQueue<IConnection>();
-
         private readonly Func<IConnection> _activator;
 
-        private int _maxSize;
+        private readonly ConcurrentQueue<IConnection> _pool = new ConcurrentQueue<IConnection>();
         private int _count;
+
+        private int _maxSize;
 
         public ConnectionPool(RabbitMQOptions options)
         {
@@ -24,9 +24,28 @@ namespace DotNetCore.CAP.RabbitMQ
             _activator = CreateActivator(options);
         }
 
+        IConnection IConnectionPool.Rent()
+        {
+            return Rent();
+        }
+
+        bool IConnectionPool.Return(IConnection connection)
+        {
+            return Return(connection);
+        }
+
+        public void Dispose()
+        {
+            _maxSize = 0;
+
+            IConnection context;
+            while (_pool.TryDequeue(out context))
+                context.Dispose();
+        }
+
         private static Func<IConnection> CreateActivator(RabbitMQOptions options)
         {
-            var factory = new ConnectionFactory()
+            var factory = new ConnectionFactory
             {
                 HostName = options.HostName,
                 UserName = options.UserName,
@@ -43,7 +62,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public virtual IConnection Rent()
         {
-            if (_pool.TryDequeue(out IConnection connection))
+            if (_pool.TryDequeue(out var connection))
             {
                 Interlocked.Decrement(ref _count);
 
@@ -71,21 +90,6 @@ namespace DotNetCore.CAP.RabbitMQ
             Debug.Assert(_maxSize == 0 || _pool.Count <= _maxSize);
 
             return false;
-        }
-
-        IConnection IConnectionPool.Rent() => Rent();
-
-        bool IConnectionPool.Return(IConnection connection) => Return(connection);
-
-        public void Dispose()
-        {
-            _maxSize = 0;
-
-            IConnection context;
-            while (_pool.TryDequeue(out context))
-            {
-                context.Dispose();
-            }
         }
     }
 }

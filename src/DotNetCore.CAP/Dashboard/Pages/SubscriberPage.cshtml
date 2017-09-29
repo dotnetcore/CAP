@@ -1,9 +1,8 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
-@using DotNetCore.CAP.Internal
-@using DotNetCore.CAP.Dashboard
 @using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Resources
-@inherits RazorPage
+@using DotNetCore.CAP.Internal
+@inherits DotNetCore.CAP.Dashboard.RazorPage
 @{
     Layout = new LayoutPage(Strings.SubscribersPage_Title);
 
@@ -26,39 +25,39 @@
             <div class="table-responsive">
                 <table class="table subscribe-table">
                     <thead>
-                        <tr>
-                            <th width="20%">@Strings.Common_Group</th>
-                            <th width="40%">
-                                @Strings.Common_Name
-                            </th>
-                            <th>@Strings.Common_Method</th>
-                        </tr>
+                    <tr>
+                        <th width="20%">@Strings.Common_Group</th>
+                        <th width="40%">
+                            @Strings.Common_Name
+                        </th>
+                        <th>@Strings.Common_Method</th>
+                    </tr>
                     </thead>
                     <tbody>
-                        @foreach (var subscriber in subscribers)
+                    @foreach (var subscriber in subscribers)
+                    {
+                        var i = 0;
+                        var rowCount = subscriber.Value.Count;
+                        foreach (var column in subscriber.Value)
                         {
-                            var i = 0;
-                            var rowCount = subscriber.Value.Count;
-                            foreach (var column in subscriber.Value)
-                            {
-                                <tr>
-                                    @if (i == 0)
-                                    {
-                                        <td rowspan="@rowCount">@subscriber.Key</td>
-                                    }
-                                    <td>@column.Attribute.Name</td>
-                                    <td>
-                                        <span style="color:#00bcd4">@column.ImplTypeInfo.Name</span>：
-                                        <div class="job-snippet-code">
-                                            <code>
-                                                <pre>@Html.MethodEscaped(column.MethodInfo)</pre>
-                                            </code>
-                                        </div>
-                                    </td>
-                                </tr>
-                                i++;
-                            }
+                            <tr>
+                                @if (i == 0)
+                                {
+                                    <td rowspan="@rowCount">@subscriber.Key</td>
+                                }
+                                <td>@column.Attribute.Name</td>
+                                <td>
+                                    <span style="color: #00bcd4">@column.ImplTypeInfo.Name</span>：
+                                    <div class="job-snippet-code">
+                                        <code>
+                                            <pre>@Html.MethodEscaped(column.MethodInfo)</pre>
+                                        </code>
+                                    </div>
+                                </td>
+                            </tr>
+                            i++;
                         }
+                    }
                     </tbody>
                 </table>
             </div>

@@ -10,8 +10,8 @@ namespace DotNetCore.CAP
         private static readonly Action<ILogger, Exception> _serverShuttingDown;
         private static readonly Action<ILogger, string, Exception> _expectedOperationCanceledException;
 
-        private static readonly Action<ILogger, string, string, Exception> _enqueuingSentMessage;
-        private static readonly Action<ILogger, string, string, Exception> _enqueuingReceivdeMessage;
+        private static readonly Action<ILogger, string, string, Exception> _enqueueingSentMessage;
+        private static readonly Action<ILogger, string, string, Exception> _enqueueingReceivdeMessage;
         private static readonly Action<ILogger, string, Exception> _executingConsumerMethod;
         private static readonly Action<ILogger, string, Exception> _receivedMessageRetryExecuting;
         private static readonly Action<ILogger, string, string, string, Exception> _modelBinderFormattingException;
@@ -44,12 +44,12 @@ namespace DotNetCore.CAP
                 3,
                 "Expected an OperationCanceledException, but found '{ExceptionMessage}'.");
 
-            _enqueuingSentMessage = LoggerMessage.Define<string, string>(
+            _enqueueingSentMessage = LoggerMessage.Define<string, string>(
                 LogLevel.Debug,
                 2,
                 "Enqueuing a topic to the sent message store. NameKey: '{NameKey}' Content: '{Content}'.");
 
-            _enqueuingReceivdeMessage = LoggerMessage.Define<string, string>(
+            _enqueueingReceivdeMessage = LoggerMessage.Define<string, string>(
                 LogLevel.Debug,
                 2,
                 "Enqueuing a topic to the received message store. NameKey: '{NameKey}. Content: '{Content}'.");
@@ -68,7 +68,7 @@ namespace DotNetCore.CAP
                 LogLevel.Error,
                 5,
                 "When call subscribe method, a parameter format conversion exception occurs. MethodName:'{MethodName}' ParameterName:'{ParameterName}' Content:'{Content}'."
-                );
+            );
 
             _jobRetrying = LoggerMessage.Define<int>(
                 LogLevel.Debug,
@@ -81,9 +81,9 @@ namespace DotNetCore.CAP
                 "Job executed. Took: {Seconds} secs.");
 
             _jobFailed = LoggerMessage.Define(
-            LogLevel.Warning,
-            1,
-            "Job failed to execute.");
+                LogLevel.Warning,
+                1,
+                "Job failed to execute.");
 
             _jobFailedWillRetry = LoggerMessage.Define(
                 LogLevel.Warning,
@@ -91,10 +91,10 @@ namespace DotNetCore.CAP
                 "Job failed to execute. Will retry.");
 
             _exceptionOccuredWhileExecutingJob = LoggerMessage.Define<string>(
-              LogLevel.Error,
-              6,
-              "An exception occured while trying to execute a job: '{JobId}'. " +
-              "Requeuing for another retry.");
+                LogLevel.Error,
+                6,
+                "An exception occured while trying to execute a job: '{JobId}'. " +
+                "Requeuing for another retry.");
         }
 
         public static void JobFailed(this ILogger logger, Exception ex)
@@ -129,12 +129,12 @@ namespace DotNetCore.CAP
 
         public static void EnqueuingReceivedMessage(this ILogger logger, string nameKey, string content)
         {
-            _enqueuingReceivdeMessage(logger, nameKey, content, null);
+            _enqueueingReceivdeMessage(logger, nameKey, content, null);
         }
 
         public static void EnqueuingSentMessage(this ILogger logger, string nameKey, string content)
         {
-            _enqueuingSentMessage(logger, nameKey, content, null);
+            _enqueueingSentMessage(logger, nameKey, content, null);
         }
 
         public static void ServerStarting(this ILogger logger, int machineProcessorCount, int processorCount)
@@ -162,7 +162,8 @@ namespace DotNetCore.CAP
             _exceptionOccuredWhileExecutingJob(logger, jobId, ex);
         }
 
-        public static void ModelBinderFormattingException(this ILogger logger, string methodName, string parameterName, string content, Exception ex)
+        public static void ModelBinderFormattingException(this ILogger logger, string methodName, string parameterName,
+            string content, Exception ex)
         {
             _modelBinderFormattingException(logger, methodName, parameterName, content, ex);
         }

@@ -121,7 +121,7 @@ namespace DotNetCore.CAP.MySql.Test
             };
             await _storage.StoreReceivedMessageAsync(receivedMessage);
 
-            var message = await _storage.GetNextReceviedMessageToBeEnqueuedAsync();
+            var message = await _storage.GetNextReceivedMessageToBeEnqueuedAsync();
 
             Assert.NotNull(message);
             Assert.Equal(StatusName.Scheduled, message.StatusName);

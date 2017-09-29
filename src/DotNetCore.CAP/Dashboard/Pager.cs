@@ -7,9 +7,9 @@ namespace DotNetCore.CAP.Dashboard
     {
         private const int PageItemsCount = 7;
         private const int DefaultRecordsPerPage = 10;
+        private int _endPageIndex = 1;
 
         private int _startPageIndex = 1;
-        private int _endPageIndex = 1;
 
         public Pager(int from, int perPage, long total)
         {
@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.Dashboard
             RecordsPerPage = perPage > 0 ? perPage : DefaultRecordsPerPage;
             TotalRecordCount = total;
             CurrentPage = FromRecord / RecordsPerPage + 1;
-            TotalPageCount = (int)Math.Ceiling((double)TotalRecordCount / RecordsPerPage);
+            TotalPageCount = (int) Math.Ceiling((double) TotalRecordCount / RecordsPerPage);
 
             PagerItems = GenerateItems();
         }
@@ -110,7 +110,7 @@ namespace DotNetCore.CAP.Dashboard
             if (_endPageIndex < TotalPageCount - 1)
             {
                 var index = _startPageIndex + PageItemsCount;
-                if (index > TotalPageCount) { index = TotalPageCount; }
+                if (index > TotalPageCount) index = TotalPageCount;
                 var item = new Item(index, false, ItemType.MorePage);
                 results.Add(item);
             }

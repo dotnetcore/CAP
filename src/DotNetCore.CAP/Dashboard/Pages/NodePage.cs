@@ -6,12 +6,11 @@ namespace DotNetCore.CAP.Dashboard.Pages
 {
     internal partial class NodePage
     {
-        private IList<Node> _nodes;
         private INodeDiscoveryProvider _discoveryProvider;
+        private IList<Node> _nodes;
 
         public NodePage()
         {
-
         }
 
         public NodePage(string id)
@@ -28,7 +27,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
                 if (_nodes == null)
                 {
                     _discoveryProvider = RequestServices.GetService<INodeDiscoveryProvider>();
-                    _nodes = _discoveryProvider.GetNodes().GetAwaiter().GetResult();                    
+                    _nodes = _discoveryProvider.GetNodes().GetAwaiter().GetResult();
                 }
                 return _nodes;
             }

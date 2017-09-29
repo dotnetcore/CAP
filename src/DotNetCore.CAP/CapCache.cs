@@ -6,26 +6,26 @@ using System.Threading;
 namespace DotNetCore.CAP
 {
     #region Cache<T> class
+
     /// <summary>
     /// This is a generic cache subsystem based on key/value pairs, where key is generic, too. Key must be unique.
     /// Every cache entry has its own timeout.
-    /// Cache is thread safe and will delete expired entries on its own using System.Threading.Timers (which run on <see cref="ThreadPool"/> threads).
+    /// Cache is thread safe and will delete expired entries on its own using System.Threading.Timers (which run on
+    /// <see cref="ThreadPool" /> threads).
     /// </summary>
     public class Cache<K, T> : IDisposable
     {
         #region Constructor and class members
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Cache{K,T}"/> class.
-        /// </summary>
-        public Cache() { }
 
-        private Dictionary<K, T> _cache = new Dictionary<K, T>();
-        private Dictionary<K, Timer> _timers = new Dictionary<K, Timer>();
-        private ReaderWriterLockSlim _locker = new ReaderWriterLockSlim();
+        private readonly Dictionary<K, T> _cache = new Dictionary<K, T>();
+        private readonly Dictionary<K, Timer> _timers = new Dictionary<K, Timer>();
+        private readonly ReaderWriterLockSlim _locker = new ReaderWriterLockSlim();
+
         #endregion
 
         #region IDisposable implementation & Clear
-        private bool disposed = false;
+
+        private bool disposed;
 
         /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -40,7 +40,8 @@ namespace DotNetCore.CAP
         /// Releases unmanaged and - optionally - managed resources.
         /// </summary>
         /// <param name="disposing">
-        ///   <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        /// <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.
+        /// </param>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposed)
@@ -67,20 +68,26 @@ namespace DotNetCore.CAP
             {
                 try
                 {
-                    foreach (Timer t in _timers.Values)
+                    foreach (var t in _timers.Values)
                         t.Dispose();
                 }
                 catch
-                { }
+                {
+                }
 
                 _timers.Clear();
                 _cache.Clear();
             }
-            finally { _locker.ExitWriteLock(); }
+            finally
+            {
+                _locker.ExitWriteLock();
+            }
         }
+
         #endregion
 
         #region CheckTimer
+
         // Checks whether a specific timer already exists and adds a new one, if not 
         private void CheckTimer(K key, TimeSpan? cacheTimeout, bool restartTimerIfExists)
         {
@@ -89,41 +96,48 @@ namespace DotNetCore.CAP
             if (_timers.TryGetValue(key, out timer))
             {
                 if (restartTimerIfExists)
-                {
                     timer.Change(
                         cacheTimeout ?? Timeout.InfiniteTimeSpan,
                         Timeout.InfiniteTimeSpan);
-                }
             }
             else
+            {
                 _timers.Add(
                     key,
                     new Timer(
-                        new TimerCallback(RemoveByTimer),
+                        RemoveByTimer,
                         key,
                         cacheTimeout ?? Timeout.InfiniteTimeSpan,
                         Timeout.InfiniteTimeSpan));
+            }
         }
 
         private void RemoveByTimer(object state)
         {
-            Remove((K)state);
+            Remove((K) state);
         }
+
         #endregion
 
         #region AddOrUpdate, Get, Remove, Exists, Clear
+
         /// <summary>
-        /// Adds or updates the specified cache-key with the specified cacheObject and applies a specified timeout (in seconds) to this key.
+        /// Adds or updates the specified cache-key with the specified cacheObject and applies a specified timeout (in seconds)
+        /// to this key.
         /// </summary>
         /// <param name="key">The cache-key to add or update.</param>
         /// <param name="cacheObject">The cache object to store.</param>
-        /// <param name="cacheTimeout">The cache timeout (lifespan) of this object. Must be 1 or greater.
-        /// Specify Timeout.Infinite to keep the entry forever.</param>
-        /// <param name="restartTimerIfExists">(Optional). If set to <c>true</c>, the timer for this cacheObject will be reset if the object already
-        /// exists in the cache. (Default = false).</param>
+        /// <param name="cacheTimeout">
+        /// The cache timeout (lifespan) of this object. Must be 1 or greater.
+        /// Specify Timeout.Infinite to keep the entry forever.
+        /// </param>
+        /// <param name="restartTimerIfExists">
+        /// (Optional). If set to <c>true</c>, the timer for this cacheObject will be reset if the object already
+        /// exists in the cache. (Default = false).
+        /// </param>
         public void AddOrUpdate(K key, T cacheObject, TimeSpan? cacheTimeout, bool restartTimerIfExists = false)
         {
-            if (disposed) return;            
+            if (disposed) return;
 
             _locker.EnterWriteLock();
             try
@@ -135,11 +149,15 @@ namespace DotNetCore.CAP
                 else
                     _cache[key] = cacheObject;
             }
-            finally { _locker.ExitWriteLock(); }
+            finally
+            {
+                _locker.ExitWriteLock();
+            }
         }
 
         /// <summary>
-        /// Adds or updates the specified cache-key with the specified cacheObject and applies <c>Timeout.Infinite</c> to this key.
+        /// Adds or updates the specified cache-key with the specified cacheObject and applies <c>Timeout.Infinite</c> to this
+        /// key.
         /// </summary>
         /// <param name="key">The cache-key to add or update.</param>
         /// <param name="cacheObject">The cache object to store.</param>
@@ -168,9 +186,12 @@ namespace DotNetCore.CAP
             try
             {
                 T rv;
-                return (_cache.TryGetValue(key, out rv) ? rv : default(T));
+                return _cache.TryGetValue(key, out rv) ? rv : default(T);
             }
-            finally { _locker.ExitReadLock(); }
+            finally
+            {
+                _locker.ExitReadLock();
+            }
         }
 
         /// <summary>
@@ -192,7 +213,10 @@ namespace DotNetCore.CAP
             {
                 return _cache.TryGetValue(key, out value);
             }
-            finally { _locker.ExitReadLock(); }
+            finally
+            {
+                _locker.ExitReadLock();
+            }
         }
 
         /// <summary>
@@ -207,18 +231,26 @@ namespace DotNetCore.CAP
             try
             {
                 var removers = (from k in _cache.Keys.Cast<K>()
-                                where keyPattern(k)
-                                select k).ToList();
+                    where keyPattern(k)
+                    select k).ToList();
 
-                foreach (K workKey in removers)
+                foreach (var workKey in removers)
                 {
-                    try { _timers[workKey].Dispose(); }
-                    catch { }
+                    try
+                    {
+                        _timers[workKey].Dispose();
+                    }
+                    catch
+                    {
+                    }
                     _timers.Remove(workKey);
                     _cache.Remove(workKey);
                 }
             }
-            finally { _locker.ExitWriteLock(); }
+            finally
+            {
+                _locker.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -235,13 +267,21 @@ namespace DotNetCore.CAP
             {
                 if (_cache.ContainsKey(key))
                 {
-                    try { _timers[key].Dispose(); }
-                    catch { }
+                    try
+                    {
+                        _timers[key].Dispose();
+                    }
+                    catch
+                    {
+                    }
                     _timers.Remove(key);
                     _cache.Remove(key);
                 }
             }
-            finally { _locker.ExitWriteLock(); }
+            finally
+            {
+                _locker.ExitWriteLock();
+            }
         }
 
         /// <summary>
@@ -258,33 +298,40 @@ namespace DotNetCore.CAP
             {
                 return _cache.ContainsKey(key);
             }
-            finally { _locker.ExitReadLock(); }
+            finally
+            {
+                _locker.ExitReadLock();
+            }
         }
+
         #endregion
     }
+
     #endregion
 
     #region Other Cache classes (derived)
-    /// <summary>
-    /// This is a generic cache subsystem based on key/value pairs, where key is a string.
-    /// You can add any item to this cache as long as the key is unique, so treat keys as something like namespaces and build them with a 
-    /// specific system/syntax in your application.
-    /// Every cache entry has its own timeout.
-    /// Cache is thread safe and will delete expired entries on its own using System.Threading.Timers (which run on <see cref="ThreadPool"/> threads).
-    /// </summary>
-    //public class Cache<T> : Cache<string, T>
-    //{
-    //}
 
     /// <summary>
+    /// This is a generic cache subsystem based on key/value pairs, where key is a string.
+    /// You can add any item to this cache as long as the key is unique, so treat keys as something like namespaces and
+    /// build them with a
+    /// specific system/syntax in your application.
+    /// Every cache entry has its own timeout.
+    /// Cache is thread safe and will delete expired entries on its own using System.Threading.Timers (which run on
+    /// <see cref="ThreadPool" /> threads).
+    /// </summary>
+    /// <summary>
     /// The non-generic Cache class instanciates a Cache{object} that can be used with any type of (mixed) contents.
-    /// It also publishes a static <c>.Global</c> member, so a cache can be used even without creating a dedicated instance.
+    /// It also publishes a static <c>.Global</c> member, so a cache can be used even without creating a dedicated
+    /// instance.
     /// The <c>.Global</c> member is lazy instanciated.
     /// </summary>
     public class CapCache : Cache<string, object>
     {
         #region Static Global Cache instance 
-        private static Lazy<CapCache> global = new Lazy<CapCache>();
+
+        private static readonly Lazy<CapCache> global = new Lazy<CapCache>();
+
         /// <summary>
         /// Gets the global shared cache instance valid for the entire process.
         /// </summary>
@@ -292,8 +339,9 @@ namespace DotNetCore.CAP
         /// The global shared cache instance.
         /// </value>
         public static CapCache Global => global.Value;
+
         #endregion
     }
-    #endregion
 
+    #endregion
 }

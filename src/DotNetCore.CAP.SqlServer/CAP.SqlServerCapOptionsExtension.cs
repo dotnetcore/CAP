@@ -34,22 +34,18 @@ namespace DotNetCore.CAP
             _configure(sqlServerOptions);
 
             if (sqlServerOptions.DbContextType != null)
-            {
                 services.AddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext)provider.GetService(sqlServerOptions.DbContextType);
+                        var dbContext = (DbContext) provider.GetService(sqlServerOptions.DbContextType);
                         sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return sqlServerOptions;
                     }
                 });
-            }
             else
-            {
                 services.AddSingleton(sqlServerOptions);
-            }
         }
     }
 }

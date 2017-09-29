@@ -7,8 +7,8 @@ namespace DotNetCore.CAP.Internal
     public class ConsumerInvokerFactory : IConsumerInvokerFactory
     {
         private readonly ILogger _logger;
-        private readonly IServiceProvider _serviceProvider;
         private readonly IModelBinderFactory _modelBinderFactory;
+        private readonly IServiceProvider _serviceProvider;
 
         public ConsumerInvokerFactory(
             ILoggerFactory loggerFactory,
@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.Internal
             var context = new ConsumerInvokerContext(consumerContext)
             {
                 Result = new DefaultConsumerInvoker(_logger, _serviceProvider,
-                        _modelBinderFactory, consumerContext)
+                    _modelBinderFactory, consumerContext)
             };
 
             return context.Result;

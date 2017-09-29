@@ -10,9 +10,9 @@ namespace DotNetCore.CAP
 {
     public abstract class BasePublishQueueExecutor : IQueueExecutor
     {
+        private readonly ILogger _logger;
         private readonly CapOptions _options;
         private readonly IStateChanger _stateChanger;
-        private readonly ILogger _logger;
 
         protected BasePublishQueueExecutor(
             CapOptions options,
@@ -24,8 +24,6 @@ namespace DotNetCore.CAP
             _logger = logger;
         }
 
-        public abstract Task<OperateResult> PublishAsync(string keyName, string content);
-
         public async Task<OperateResult> ExecuteAsync(IStorageConnection connection, IFetchedMessage fetched)
         {
             var message = await connection.GetPublishedMessageAsync(fetched.MessageId);
@@ -35,9 +33,7 @@ namespace DotNetCore.CAP
                 await _stateChanger.ChangeStateAsync(message, new ProcessingState(), connection);
 
                 if (message.Retries > 0)
-                {
                     _logger.JobRetrying(message.Retries);
-                }
                 var result = await PublishAsync(message.Name, message.Content);
                 sp.Stop();
 
@@ -65,9 +61,7 @@ namespace DotNetCore.CAP
                 fetched.RemoveFromQueue();
 
                 if (result.Succeeded)
-                {
                     _logger.JobExecuted(sp.Elapsed.TotalSeconds);
-                }
 
                 return OperateResult.Success;
             }
@@ -78,15 +72,16 @@ namespace DotNetCore.CAP
             }
         }
 
-        private static async Task<bool> UpdateMessageForRetryAsync(CapPublishedMessage message, IStorageConnection connection)
+        public abstract Task<OperateResult> PublishAsync(string keyName, string content);
+
+        private static async Task<bool> UpdateMessageForRetryAsync(CapPublishedMessage message,
+            IStorageConnection connection)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
             var retries = ++message.Retries;
             if (retries >= retryBehavior.RetryCount)
-            {
                 return false;
-            }
 
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
             message.ExpiresAt = due;

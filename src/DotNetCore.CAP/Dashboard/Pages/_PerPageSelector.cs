@@ -1,6 +1,6 @@
 ﻿namespace DotNetCore.CAP.Dashboard.Pages
 {
-    partial class PerPageSelector
+    internal partial class PerPageSelector
     {
         private readonly Pager _pager;
 

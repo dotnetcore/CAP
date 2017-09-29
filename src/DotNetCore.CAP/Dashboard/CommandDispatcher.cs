@@ -20,18 +20,14 @@ namespace DotNetCore.CAP.Dashboard
 
             if (!"POST".Equals(request.Method, StringComparison.OrdinalIgnoreCase))
             {
-                response.StatusCode = (int)HttpStatusCode.MethodNotAllowed;
+                response.StatusCode = (int) HttpStatusCode.MethodNotAllowed;
                 return Task.FromResult(false);
             }
 
             if (_command(context))
-            {
-                response.StatusCode = (int)HttpStatusCode.NoContent;
-            }
+                response.StatusCode = (int) HttpStatusCode.NoContent;
             else
-            {
                 response.StatusCode = 422;
-            }
 
             return Task.FromResult(true);
         }

@@ -11,9 +11,9 @@ namespace DotNetCore.CAP.MySql
 {
     public class MySqlStorage : IStorage
     {
-        private readonly MySqlOptions _options;
-        private readonly ILogger _logger;
         private readonly IDbConnection _existingConnection = null;
+        private readonly ILogger _logger;
+        private readonly MySqlOptions _options;
 
         public MySqlStorage(ILogger<MySqlStorage> logger, MySqlOptions options)
         {
@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.MySql
         protected virtual string CreateDbTablesScript(string prefix)
         {
             var batchSql =
-    $@"
+                $@"
 CREATE TABLE IF NOT EXISTS `{prefix}.queue` (
   `MessageId` int(11) NOT NULL,
   `MessageType` tinyint(4) NOT NULL
@@ -97,9 +97,7 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
             var connection = _existingConnection ?? new MySqlConnection(_options.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
-            {
                 connection.Open();
-            }
 
             return connection;
         }
@@ -112,9 +110,7 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
         internal void ReleaseConnection(IDbConnection connection)
         {
             if (connection != null && !IsExistingConnection(connection))
-            {
                 connection.Dispose();
-            }
         }
     }
 }

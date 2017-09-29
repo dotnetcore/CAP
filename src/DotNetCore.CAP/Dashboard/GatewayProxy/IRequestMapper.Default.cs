@@ -12,14 +12,14 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 {
     public class RequestMapper : IRequestMapper
     {
-        private readonly string[] _unsupportedHeaders = { "host", "cookie" };
         private const string SchemeDelimiter = "://";
+        private readonly string[] _unsupportedHeaders = {"host", "cookie"};
 
         public async Task<HttpRequestMessage> Map(HttpRequest request)
         {
             try
             {
-                var requestMessage = new HttpRequestMessage()
+                var requestMessage = new HttpRequestMessage
                 {
                     Content = await MapContent(request),
                     Method = MapMethod(request),
@@ -45,11 +45,9 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             FragmentString fragment = new FragmentString())
         {
             if (scheme == null)
-            {
                 throw new ArgumentNullException(nameof(scheme));
-            }
 
-            var combinedPath = (pathBase.HasValue || path.HasValue) ? (pathBase + path).ToString() : "/";
+            var combinedPath = pathBase.HasValue || path.HasValue ? (pathBase + path).ToString() : "/";
 
             var encodedHost = host.ToString();
             var encodedQuery = query.ToString();
@@ -57,7 +55,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 
             // PERF: Calculate string length to allocate correct buffer size for StringBuilder.
             var length = scheme.Length + SchemeDelimiter.Length + encodedHost.Length
-                + combinedPath.Length + encodedQuery.Length + encodedFragment.Length;
+                         + combinedPath.Length + encodedQuery.Length + encodedFragment.Length;
 
             return new StringBuilder(length)
                 .Append(scheme)
@@ -77,13 +75,11 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
         private async Task<HttpContent> MapContent(HttpRequest request)
         {
             if (request.Body == null)
-            {
                 return null;
-            }
 
             var content = new ByteArrayContent(await ToByteArray(request.Body));
 
-            content.Headers.TryAddWithoutValidation("Content-Type", new[] { request.ContentType });
+            content.Headers.TryAddWithoutValidation("Content-Type", new[] {request.ContentType});
 
             return content;
         }
@@ -101,12 +97,8 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
         private void MapHeaders(HttpRequest request, HttpRequestMessage requestMessage)
         {
             foreach (var header in request.Headers)
-            {
                 if (IsSupportedHeader(header))
-                {
                     requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
-                }
-            }
         }
 
         private async Task<byte[]> ToByteArray(Stream stream)

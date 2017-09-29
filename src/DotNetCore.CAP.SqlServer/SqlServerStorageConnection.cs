@@ -101,7 +101,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             }
         }
 
-        public async Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync()
+        public async Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync()
         {
             var sql =
                 $"SELECT TOP (1) * FROM [{Options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Scheduled}'";
@@ -111,7 +111,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             }
         }
 
-        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages()
+        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
         {
             var sql =
                 $"SELECT * FROM [{Options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";

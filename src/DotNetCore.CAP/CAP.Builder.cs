@@ -15,7 +15,6 @@ namespace DotNetCore.CAP
     /// </summary>
     public class CapDatabaseStorageMarkerService
     {
-
     }
 
     /// <summary>
@@ -23,7 +22,6 @@ namespace DotNetCore.CAP
     /// </summary>
     public class CapMessageQueueMakerService
     {
-
     }
 
     /// <summary>
@@ -37,7 +35,7 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
-        /// Gets the <see cref="IServiceCollection"/> where MVC services are configured.
+        /// Gets the <see cref="IServiceCollection" /> where MVC services are configured.
         /// </summary>
         public IServiceCollection Services { get; }
 
@@ -51,7 +49,7 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
-        /// Add an <see cref="ICapPublisher"/>.
+        /// Add an <see cref="ICapPublisher" />.
         /// </summary>
         /// <typeparam name="T">The type of the service.</typeparam>
         public virtual CapBuilder AddProducerService<T>()

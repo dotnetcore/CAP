@@ -1,6 +1,6 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True TrimLeadingUnderscores : true *@
 @using DotNetCore.CAP.Dashboard
-@inherits RazorPage
+@inherits DotNetCore.CAP.Dashboard.RazorPage
 @if (NavigationMenu.Items.Count > 0)
 {
     <ul class="nav navbar-nav">
@@ -8,7 +8,10 @@
         {
             var itemValue = item(this);
 
-            if (itemValue == null) { continue; }
+            if (itemValue == null)
+            {
+                continue;
+            }
 
             <li class="@(itemValue.Active ? "active" : null)">
                 <a href="@itemValue.Url">

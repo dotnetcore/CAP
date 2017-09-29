@@ -29,22 +29,18 @@ namespace DotNetCore.CAP
             _configure(postgreSqlOptions);
 
             if (postgreSqlOptions.DbContextType != null)
-            {
                 services.AddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext)provider.GetService(postgreSqlOptions.DbContextType);
+                        var dbContext = (DbContext) provider.GetService(postgreSqlOptions.DbContextType);
                         postgreSqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return postgreSqlOptions;
                     }
                 });
-            }
             else
-            {
                 services.AddSingleton(postgreSqlOptions);
-            }
         }
     }
 }

@@ -8,7 +8,7 @@ using DotNetCore.CAP.Infrastructure;
 namespace DotNetCore.CAP.Internal
 {
     /// <summary>
-    /// A factory for <see cref="IModelBinder"/> instances.
+    /// A factory for <see cref="IModelBinder" /> instances.
     /// </summary>
     public class ModelBinderFactory : IModelBinderFactory
     {
@@ -18,36 +18,25 @@ namespace DotNetCore.CAP.Internal
         public IModelBinder CreateBinder(ParameterInfo parameter)
         {
             if (parameter == null)
-            {
                 throw new ArgumentNullException(nameof(parameter));
-            }
 
             object token = parameter;
 
             var binder = CreateBinderCoreCached(parameter, token);
             if (binder == null)
-            {
                 throw new InvalidOperationException("Format Could Not Create IModelBinder");
-            }
 
             return binder;
         }
 
         private IModelBinder CreateBinderCoreCached(ParameterInfo parameterInfo, object token)
         {
-            IModelBinder binder;
-            if (TryGetCachedBinder(parameterInfo, token, out binder))
-            {
+            if (TryGetCachedBinder(parameterInfo, token, out var binder))
                 return binder;
-            }
             if (!Helper.IsComplexType(parameterInfo.ParameterType))
-            {
                 binder = new SimpleTypeModelBinder(parameterInfo);
-            }
             else
-            {
                 binder = new ComplexTypeModelBinder(parameterInfo);
-            }
 
             AddToCache(parameterInfo, token, binder);
 
@@ -57,9 +46,7 @@ namespace DotNetCore.CAP.Internal
         private void AddToCache(ParameterInfo info, object cacheToken, IModelBinder binder)
         {
             if (cacheToken == null)
-            {
                 return;
-            }
 
             _cache.TryAdd(new Key(info, cacheToken), binder);
         }

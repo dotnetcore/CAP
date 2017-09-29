@@ -22,12 +22,10 @@ namespace DotNetCore.CAP.Dashboard
         protected override void WriteResponse(DashboardResponse response)
         {
             foreach (var resourceName in _resourceNames)
-            {
                 WriteResource(
                     response,
                     _assembly,
                     $"{_baseNamespace}.{resourceName}");
-            }
         }
     }
 }

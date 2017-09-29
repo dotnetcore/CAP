@@ -20,7 +20,7 @@
         Info,
         Success,
         Warning,
-        Danger,
+        Danger
     }
 
     internal static class MetricStyleExtensions

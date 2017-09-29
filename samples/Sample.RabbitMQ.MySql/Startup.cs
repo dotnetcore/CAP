@@ -27,7 +27,7 @@ namespace Sample.RabbitMQ.MySql
                 x.UseDiscovery(d =>
                 {
                     d.DiscoveryServerHostName = "localhost";
-                    d.DiscoveryServerProt = 8500;
+                    d.DiscoveryServerPort = 8500;
                     d.CurrentNodeHostName = "localhost";
                     d.CurrentNodePort = 5800;
                     d.NodeName = "CAP 1号节点";
@@ -45,7 +45,6 @@ namespace Sample.RabbitMQ.MySql
             app.UseMvc();
 
             app.UseCap();
-            app.UseCapDashboard();
         }
     }
 }

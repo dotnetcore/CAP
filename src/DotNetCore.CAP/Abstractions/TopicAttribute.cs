@@ -4,7 +4,7 @@ namespace DotNetCore.CAP.Abstractions
 {
     /// <inheritdoc />
     /// <summary>
-    /// An abstract attribute that for  kafka attribute or rabbitmq attribute
+    /// An abstract attribute that for  kafka attribute or rabbit mq attribute
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
     public abstract class TopicAttribute : Attribute
@@ -20,8 +20,8 @@ namespace DotNetCore.CAP.Abstractions
         public string Name { get; }
 
         /// <summary>
-        /// kafak --> groups.id
-        /// rabbitmq --> queue.name
+        /// kafka --> groups.id
+        /// rabbit MQ --> queue.name
         /// </summary>
         public string Group { get; set; } = "cap.default.group";
     }

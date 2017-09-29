@@ -63,8 +63,6 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        // CapReceviedMessage
-
         public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
@@ -87,7 +85,7 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        public async Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync()
+        public async Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync()
         {
             var sql =
                 $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"StatusName\" = '{StatusName.Scheduled}' FOR UPDATE SKIP LOCKED LIMIT 1;";
@@ -97,7 +95,7 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages()
+        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
         {
             var sql =
                 $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"StatusName\"='{StatusName.Failed}' LIMIT 1000;";
@@ -125,7 +123,7 @@ namespace DotNetCore.CAP.PostgreSql
         public bool ChangeReceivedState(int messageId, string state)
         {
             var sql =
-                $"UPDATE \"{Options.Schema}\".\"received\" SET \"Retries\"=\"Retries\"+1,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}"; 
+                $"UPDATE \"{Options.Schema}\".\"received\" SET \"Retries\"=\"Retries\"+1,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";
 
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {

@@ -50,15 +50,15 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Returns the next message to be enqueued.
         /// </summary>
-        Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync();
+        Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync();
 
         /// <summary>
         /// Returns executed failed message.
         /// </summary>
-        Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages();
+        Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages();
 
         /// <summary>
-        /// Creates and returns an <see cref="IStorageTransaction"/>.
+        /// Creates and returns an <see cref="IStorageTransaction" />.
         /// </summary>
         IStorageTransaction CreateTransaction();
 

@@ -7,21 +7,19 @@ using Microsoft.Extensions.DependencyInjection;
 namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
-    /// app extensions for <see cref="IApplicationBuilder"/>
+    /// app extensions for <see cref="IApplicationBuilder" />
     /// </summary>
     public static class AppBuilderExtensions
     {
-        ///<summary>
+        /// <summary>
         /// Enables cap for the current application
         /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
-        /// <returns>The <see cref="IApplicationBuilder"/> instance this method extends.</returns>
+        /// <param name="app">The <see cref="IApplicationBuilder" /> instance this method extends.</param>
+        /// <returns>The <see cref="IApplicationBuilder" /> instance this method extends.</returns>
         public static IApplicationBuilder UseCap(this IApplicationBuilder app)
         {
             if (app == null)
-            {
                 throw new ArgumentNullException(nameof(app));
-            }
 
             CheckRequirement(app);
 
@@ -33,9 +31,7 @@ namespace Microsoft.AspNetCore.Builder
             if (provider.GetService<DashboardOptions>() != null)
             {
                 if (provider.GetService<DiscoveryOptions>() != null)
-                {
                     app.UseMiddleware<GatewayProxyMiddleware>();
-                }
                 app.UseMiddleware<DashboardMiddleware>();
             }
 
@@ -46,21 +42,18 @@ namespace Microsoft.AspNetCore.Builder
         {
             var marker = app.ApplicationServices.GetService<CapMarkerService>();
             if (marker == null)
-            {
-                throw new InvalidOperationException("AddCap() must be called on the service collection.   eg: services.AddCap(...)");
-            }
+                throw new InvalidOperationException(
+                    "AddCap() must be called on the service collection.   eg: services.AddCap(...)");
 
-            var messageQueuemarker = app.ApplicationServices.GetService<CapMessageQueueMakerService>();
-            if (messageQueuemarker == null)
-            {
-                throw new InvalidOperationException("You must be config used message queue provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseKafka(...) })");
-            }
+            var messageQueueMarker = app.ApplicationServices.GetService<CapMessageQueueMakerService>();
+            if (messageQueueMarker == null)
+                throw new InvalidOperationException(
+                    "You must be config used message queue provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseKafka(...) })");
 
             var databaseMarker = app.ApplicationServices.GetService<CapDatabaseStorageMarkerService>();
             if (databaseMarker == null)
-            {
-                throw new InvalidOperationException("You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseSqlServer(...) })");
-            }
+                throw new InvalidOperationException(
+                    "You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseSqlServer(...) })");
         }
     }
 }

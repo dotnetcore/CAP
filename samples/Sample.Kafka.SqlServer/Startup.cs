@@ -20,7 +20,7 @@ namespace Sample.Kafka.SqlServer
                 x.UseDiscovery(d =>
                 {
                     d.DiscoveryServerHostName = "localhost";
-                    d.DiscoveryServerProt = 8500;
+                    d.DiscoveryServerPort = 8500;
                     d.CurrentNodeHostName = "localhost";
                     d.CurrentNodePort = 5820;
                     d.NodeName = "CAP 2号节点";
@@ -40,8 +40,6 @@ namespace Sample.Kafka.SqlServer
             app.UseMvc();
 
             app.UseCap();
-
-            app.UseCapDashboard();
         }
     }
 }

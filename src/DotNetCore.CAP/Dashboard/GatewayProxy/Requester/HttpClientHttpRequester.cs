@@ -44,15 +44,13 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
             var httpClient = _cacheHandlers.Get(cacheKey);
 
             if (httpClient == null)
-            {
                 httpClient = builder.Create();
-            }
             return httpClient;
         }
 
         private string GetCacheKey(HttpRequestMessage request, IHttpClientBuilder builder)
         {
-            string baseUrl = $"{request.RequestUri.Scheme}://{request.RequestUri.Authority}";
+            var baseUrl = $"{request.RequestUri.Scheme}://{request.RequestUri.Authority}";
 
             return baseUrl;
         }

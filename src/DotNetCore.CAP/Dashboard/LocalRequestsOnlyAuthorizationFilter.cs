@@ -1,13 +1,11 @@
-﻿using System;
-
-namespace DotNetCore.CAP.Dashboard
+﻿namespace DotNetCore.CAP.Dashboard
 {
     public class LocalRequestsOnlyAuthorizationFilter : IDashboardAuthorizationFilter
     {
         public bool Authorize(DashboardContext context)
         {
             // if unknown, assume not local
-            if (String.IsNullOrEmpty(context.Request.RemoteIpAddress))
+            if (string.IsNullOrEmpty(context.Request.RemoteIpAddress))
                 return false;
 
             // check if localhost

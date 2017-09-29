@@ -12,12 +12,11 @@ namespace DotNetCore.CAP.Processor
 {
     public class PublishQueuer : IProcessor
     {
-        private readonly ILogger _logger;
-        private readonly IStateChanger _stateChanger;
-        private readonly IServiceProvider _provider;
-        private readonly TimeSpan _pollingDelay;
-
         public static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
+        private readonly ILogger _logger;
+        private readonly TimeSpan _pollingDelay;
+        private readonly IServiceProvider _provider;
+        private readonly IStateChanger _stateChanger;
 
         public PublishQueuer(
             ILogger<PublishQueuer> logger,
@@ -35,7 +34,7 @@ namespace DotNetCore.CAP.Processor
 
         public async Task ProcessAsync(ProcessingContext context)
         {
-            _logger.LogDebug("Publish Queuer start calling."); 
+            _logger.LogDebug("Publish Queuer start calling.");
             using (var scope = _provider.CreateScope())
             {
                 CapPublishedMessage sentMessage;

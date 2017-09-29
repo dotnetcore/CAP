@@ -10,7 +10,7 @@ namespace DotNetCore.CAP.Abstractions
     public abstract class CapPublisherBase : ICapPublisher, IDisposable
     {
         protected IDbConnection DbConnection { get; set; }
-        protected IDbTransaction DbTranasaction { get; set; }
+        protected IDbTransaction DbTransaction { get; set; }
         protected bool IsCapOpenedTrans { get; set; }
         protected bool IsCapOpenedConn { get; set; }
         protected bool IsUsingEF { get; set; }
@@ -60,13 +60,15 @@ namespace DotNetCore.CAP.Abstractions
 
         protected abstract void PrepareConnectionForEF();
 
-        protected abstract void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message);
+        protected abstract void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
+            CapPublishedMessage message);
 
-        protected abstract Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message);
+        protected abstract Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+            CapPublishedMessage message);
 
         protected virtual string Serialize<T>(T obj, string callbackName = null)
         {
-            var serializer = (IContentSerializer)ServiceProvider.GetService(typeof(IContentSerializer));
+            var serializer = (IContentSerializer) ServiceProvider.GetService(typeof(IContentSerializer));
 
             var message = new CapMessageDto(obj)
             {
@@ -85,11 +87,11 @@ namespace DotNetCore.CAP.Abstractions
                 IsCapOpenedConn = true;
                 DbConnection.Open();
             }
-            DbTranasaction = dbTransaction;
-            if (DbTranasaction == null)
+            DbTransaction = dbTransaction;
+            if (DbTransaction == null)
             {
                 IsCapOpenedTrans = true;
-                DbTranasaction = dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
+                DbTransaction = dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
             }
         }
 
@@ -97,15 +99,17 @@ namespace DotNetCore.CAP.Abstractions
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             if (!IsUsingEF)
-                throw new InvalidOperationException("If you are using the EntityFramework, you need to configure the DbContextType first." +
-                  " otherwise you need to use overloaded method with IDbConnection and IDbTransaction.");
+                throw new InvalidOperationException(
+                    "If you are using the EntityFramework, you need to configure the DbContextType first." +
+                    " otherwise you need to use overloaded method with IDbConnection and IDbTransaction.");
         }
 
         private void CheckIsAdoNet(string name)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             if (IsUsingEF)
-                throw new InvalidOperationException("If you are using the EntityFramework, you do not need to use this overloaded.");
+                throw new InvalidOperationException(
+                    "If you are using the EntityFramework, you do not need to use this overloaded.");
         }
 
         private async Task PublishWithTransAsync(string name, string content)
@@ -117,7 +121,7 @@ namespace DotNetCore.CAP.Abstractions
                 StatusName = StatusName.Scheduled
             };
 
-            await ExecuteAsync(DbConnection, DbTranasaction, message);
+            await ExecuteAsync(DbConnection, DbTransaction, message);
 
             ClosedCap();
 
@@ -133,7 +137,7 @@ namespace DotNetCore.CAP.Abstractions
                 StatusName = StatusName.Scheduled
             };
 
-            Execute(DbConnection, DbTranasaction, message);
+            Execute(DbConnection, DbTransaction, message);
 
             ClosedCap();
 
@@ -144,18 +148,16 @@ namespace DotNetCore.CAP.Abstractions
         {
             if (IsCapOpenedTrans)
             {
-                DbTranasaction.Commit();
-                DbTranasaction.Dispose();
+                DbTransaction.Commit();
+                DbTransaction.Dispose();
             }
             if (IsCapOpenedConn)
-            {
                 DbConnection.Dispose();
-            }
         }
 
         public void Dispose()
         {
-            DbTranasaction?.Dispose();
+            DbTransaction?.Dispose();
             DbConnection?.Dispose();
         }
 

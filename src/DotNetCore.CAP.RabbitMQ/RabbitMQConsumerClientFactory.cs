@@ -2,8 +2,8 @@
 {
     internal sealed class RabbitMQConsumerClientFactory : IConsumerClientFactory
     {
-        private readonly RabbitMQOptions _rabbitMQOptions;
         private readonly ConnectionPool _connectionPool;
+        private readonly RabbitMQOptions _rabbitMQOptions;
 
 
         public RabbitMQConsumerClientFactory(RabbitMQOptions rabbitMQOptions, ConnectionPool pool)
