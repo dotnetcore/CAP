@@ -76,7 +76,7 @@ OUTPUT DELETED.MessageId,DELETED.[MessageType];";
             }
         }
 
-        // CapReceviedMessage
+        // CapReceivedMessage
 
         public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
         {

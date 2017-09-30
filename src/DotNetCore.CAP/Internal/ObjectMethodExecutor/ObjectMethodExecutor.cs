@@ -6,10 +6,12 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reflection;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.Internal
 {
     internal class ObjectMethodExecutor
     {
+        // ReSharper disable once InconsistentNaming
         private static readonly ConstructorInfo _objectMethodExecutorAwaitableConstructor =
             typeof(ObjectMethodExecutorAwaitable).GetConstructor(new[]
             {
