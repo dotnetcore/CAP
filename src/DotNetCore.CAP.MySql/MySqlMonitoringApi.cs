@@ -83,7 +83,7 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
                 where += " and Content like '%@Content%'";
 
             var sqlQuery =
-                $"select * from `{_prefix}.{tableName}` where 1=1 {where} order by Added desc limit limit @Limit offset @Offset";
+                $"select * from `{_prefix}.{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
 
             return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
@@ -129,8 +129,8 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
             var sqlQuery = statusName == StatusName.Processing
-                ? $"select count(Id) from `{_prefix}].{tableName}` where StatusName in (N'Processing',N'Scheduled',N'Enqueued')"
-                : $"select count(Id) from `{_prefix}].{tableName}` where StatusName = @state";
+                ? $"select count(Id) from `{_prefix}.{tableName}` where StatusName in (N'Processing',N'Scheduled',N'Enqueued')"
+                : $"select count(Id) from `{_prefix}.{tableName}` where StatusName = @state";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
             return count;
