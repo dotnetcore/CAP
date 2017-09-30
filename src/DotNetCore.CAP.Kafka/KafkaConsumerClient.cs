@@ -45,11 +45,17 @@ namespace DotNetCore.CAP.Kafka
                 cancellationToken.ThrowIfCancellationRequested();
                 _consumerClient.Poll(timeout);
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         public void Commit()
         {
             _consumerClient.CommitAsync();
+        }
+
+        public void Reject()
+        {
+            // Ignore, Kafka will not commit offset when not commit.
         }
 
         public void Dispose()
@@ -65,9 +71,14 @@ namespace DotNetCore.CAP.Kafka
 
             var config = _kafkaOptions.AsKafkaConfig();
             _consumerClient = new Consumer<Null, string>(config, null, StringDeserializer);
-
+            _consumerClient.OnConsumeError += ConsumerClient_OnConsumeError;
             _consumerClient.OnMessage += ConsumerClient_OnMessage;
             _consumerClient.OnError += ConsumerClient_OnError;
+        }
+
+        private void ConsumerClient_OnConsumeError(object sender, Message e)
+        {
+            OnError?.Invoke(sender, $"Consumer client raised an error. Topic:{e.Topic}, Reason:{e.Error}");
         }
 
         private void ConsumerClient_OnMessage(object sender, Message<Null, string> e)
@@ -84,7 +95,7 @@ namespace DotNetCore.CAP.Kafka
 
         private void ConsumerClient_OnError(object sender, Error e)
         {
-            OnError?.Invoke(sender, e.Reason);
+            OnError?.Invoke(sender, e.ToString());
         }
 
         #endregion private methods

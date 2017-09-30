@@ -15,6 +15,8 @@ namespace DotNetCore.CAP
 
         void Commit();
 
+        void Reject();
+
         event EventHandler<MessageContext> OnMessageReceived;
 
         event EventHandler<string> OnError;

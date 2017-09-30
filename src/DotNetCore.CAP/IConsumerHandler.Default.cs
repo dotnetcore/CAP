@@ -91,9 +91,16 @@ namespace DotNetCore.CAP
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    StoreMessage(scope, message);
-
-                    client.Commit();
+                    try
+                    {
+                        StoreMessage(scope, message);
+                        client.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, "Raised an exception when storage received message。 Message：{0}", message);
+                        client.Reject();
+                    }
                 }
                 Pulse();
             };

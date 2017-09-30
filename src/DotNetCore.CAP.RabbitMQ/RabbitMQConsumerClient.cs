@@ -57,6 +57,11 @@ namespace DotNetCore.CAP.RabbitMQ
             _channel.BasicAck(_deliveryTag, false);
         }
 
+        public void Reject()
+        {
+            _channel.BasicReject(_deliveryTag, true);
+        }
+
         public void Dispose()
         {
             _channel.Dispose();
@@ -73,7 +78,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 RabbitMQOptions.ExchangeType,
                 true);
 
-            var arguments = new Dictionary<string, object> {{"x-message-ttl", _rabbitMQOptions.QueueMessageExpires}};
+            var arguments = new Dictionary<string, object> { { "x-message-ttl", _rabbitMQOptions.QueueMessageExpires } };
             _channel.QueueDeclare(_queueName,
                 true,
                 false,
