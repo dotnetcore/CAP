@@ -24,12 +24,12 @@ namespace DotNetCore.CAP.PostgreSql
         public StatisticsDto GetStatistics()
         {
             var sql = string.Format(@"
-select count(Id) from ""{0}"".""published"" where ""StatusName"" = N'Succeeded';
-select count(Id) from ""{0}"".""received""  where ""StatusName"" = N'Succeeded';
-select count(Id) from ""{0}"".""published"" where ""StatusName"" = N'Failed';
-select count(Id) from ""{0}"".""received""  where ""StatusName"" = N'Failed';
-select count(Id) from ""{0}"".""published"" where ""StatusName"" in (N'Processing',N'Scheduled',N'Enqueued');
-select count(Id) from ""{0}"".""received""  where ""StatusName"" in (N'Processing',N'Scheduled',N'Enqueued');",
+select count(""Id"") from ""{0}"".""published"" where ""StatusName"" = N'Succeeded';
+select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Succeeded';
+select count(""Id"") from ""{0}"".""published"" where ""StatusName"" = N'Failed';
+select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Failed';
+select count(""Id"") from ""{0}"".""published"" where ""StatusName"" in (N'Processing',N'Scheduled',N'Enqueued');
+select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Processing',N'Scheduled',N'Enqueued');",
                 _options.Schema);
 
             var statistics = UseConnection(connection =>
@@ -130,10 +130,10 @@ select count(Id) from ""{0}"".""received""  where ""StatusName"" in (N'Processin
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
             var sqlQuery = statusName == StatusName.Processing
-                ? $"select count(Id) from \"{_options.Schema}\".\"{tableName}\" where \"StatusName\" in (N'Processing',N'Scheduled',N'Enqueued')"
-                : $"select count(Id) from \"{_options.Schema}\".\"{tableName}\" where \"StatusName\" = @state";
+                ? $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where \"StatusName\" in (N'Processing',N'Scheduled',N'Enqueued')"
+                : $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where \"StatusName\" = @state";
 
-            var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
+            var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
             return count;
         }
 
@@ -174,12 +174,11 @@ with aggr as (
         where ""StatusName"" = N'Processing'
     group by to_char(""Added"", 'yyyy-MM-dd-HH')
 )
-select ""Key"",""Count"" from aggr where ""Key"" in @keys;";
+select ""Key"",""Count"" from aggr where ""Key""=Any(@keys);";
 
-            var valuesMap = connection.Query(
-                    sqlQuery,
-                    new {keys = keyMaps.Keys, statusName})
-                .ToDictionary(x => (string) x.Key, x => (int) x.Count);
+            var valuesMap = connection.Query(sqlQuery,new { keys = keyMaps.Keys.ToList(), statusName })
+                    .ToList()
+                    .ToDictionary(x => (string)x.Key, x => (int)x.Count);
 
             foreach (var key in keyMaps.Keys)
                 if (!valuesMap.ContainsKey(key)) valuesMap.Add(key, 0);

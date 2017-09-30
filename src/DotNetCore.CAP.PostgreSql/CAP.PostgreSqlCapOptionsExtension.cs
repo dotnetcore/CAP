@@ -34,7 +34,7 @@ namespace DotNetCore.CAP
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext) provider.GetService(postgreSqlOptions.DbContextType);
+                        var dbContext = (DbContext)provider.GetService(postgreSqlOptions.DbContextType);
                         postgreSqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return postgreSqlOptions;
                     }
