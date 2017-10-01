@@ -59,7 +59,7 @@ PM> Install-Package DotNetCore.CAP.PostgreSql
 
 首先配置CAP到 Startup.cs 文件中，如下：
 
-```cs
+```c#
 public void ConfigureServices(IServiceCollection services)
 {
 	......
@@ -96,7 +96,7 @@ public void Configure(IApplicationBuilder app)
 
 在 Controller 中注入 `ICapPublisher` 然后使用 `ICapPublisher` 进行消息发送
 
-```cs
+```c#
 public class PublishController : Controller
 {
 	private readonly ICapPublisher _publisher;
@@ -137,7 +137,7 @@ public class PublishController : Controller
 
 在 Action 上添加 CapSubscribeAttribute 来订阅相关消息。
 
-```cs
+```c#
 public class PublishController : Controller
 {
 	private readonly ICapPublisher _publisher;
@@ -164,7 +164,7 @@ public class PublishController : Controller
 
 如果你的订阅方法没有位于 Controller 中，则你订阅的类需要继承 `ICapSubscribe`：
 
-```cs
+```c#
 
 namespace xxx.Service
 {
@@ -188,12 +188,41 @@ namespace xxx.Service
 
 然后在 Startup.cs 中的 `ConfigureServices()` 中注入你的  `ISubscriberService` 类
 
-```cs
+```c#
 public void ConfigureServices(IServiceCollection services)
 {
 	services.AddTransient<ISubscriberService,SubscriberService>();
 }
 ```
+
+### Dashboard
+
+CAP 2.1+ 以上版本中提供了仪表盘（Dashboard）功能，你可以很方便的查看发出和接收到的消息。除此之外，你还可以在仪表盘中实时查看发送或者接收到的消息。 
+
+在分布式环境中，仪表盘内置集成了 [Consul](http://consul.io) 作为节点的注册发现，同时实现了网关代理功能，你同样可以方便的查看本节点或者其他节点的数据，它就像你访问本地资源一样。
+
+```c#
+services.AddCap(x =>
+{
+    //...
+    
+    // 注册 Dashboard
+    x.UseDashboard();
+    
+    // 注册节点到 Consul
+    x.UseDiscovery(d =>
+    {
+        d.DiscoveryServerHostName = "localhost";
+        d.DiscoveryServerPort = 8500;
+        d.CurrentNodeHostName = "localhost";
+        d.CurrentNodePort = 5800;
+        d.NodeId = 1;
+        d.NodeName = "CAP No.1 Node";
+    });
+});
+```
+
+
 
 ## 贡献
 
