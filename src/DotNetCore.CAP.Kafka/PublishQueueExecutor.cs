@@ -49,7 +49,7 @@ namespace DotNetCore.CAP.Kafka
             catch (Exception ex)
             {
                 _logger.LogError(
-                    $"kafka topic message [{keyName}] has been raised an exception of sending. the exception is: {ex.Message}");
+                    $"An error occurred during sending the topic message to kafka. Topic:[{keyName}], Exception: {ex.Message}");
 
                 return Task.FromResult(OperateResult.Failed(ex));
             }
