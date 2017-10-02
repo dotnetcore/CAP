@@ -61,13 +61,13 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
                     StringComparison.CurrentCultureIgnoreCase))
                     where += " and \"StatusName\" in (N'Processing',N'Scheduled',N'Enqueued')";
                 else
-                    where += " and \"StatusName\" = @StatusName";
+                    where += " and Lower(\"StatusName\") = Lower(@StatusName)";
             if (!string.IsNullOrEmpty(queryDto.Name))
-                where += " and \"Name\" = @Name";
+                where += " and Lower(\"Name\") = Lower(@Name)";
             if (!string.IsNullOrEmpty(queryDto.Group))
-                where += " and \"Group\" = @Group";
+                where += " and Lower(\"Group\") = Lower(@Group)";
             if (!string.IsNullOrEmpty(queryDto.Content))
-                where += " and \"Content\" like '%@Content%'";
+                where += " and \"Content\" ILike '%@Content%'";
 
             var sqlQuery =
                 $"select * from \"{_options.Schema}\".\"{tableName}\" where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
@@ -131,7 +131,7 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
         {
             var sqlQuery = statusName == StatusName.Processing
                 ? $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where \"StatusName\" in (N'Processing',N'Scheduled',N'Enqueued')"
-                : $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where \"StatusName\" = @state";
+                : $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where Lower(\"StatusName\") = Lower(@state)";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
             return count;
@@ -174,7 +174,7 @@ with aggr as (
         where ""StatusName"" = N'Processing'
     group by to_char(""Added"", 'yyyy-MM-dd-HH')
 )
-select ""Key"",""Count"" from aggr where ""Key""=Any(@keys);";
+select ""Key"",""Count"" from aggr where ""Key""= Any(@keys);";
 
             var valuesMap = connection.Query(sqlQuery,new { keys = keyMaps.Keys.ToList(), statusName })
                     .ToList()
