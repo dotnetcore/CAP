@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Net;
 using System.Text;
 using DotNetCore.CAP.Dashboard.Monitoring;
+using DotNetCore.CAP.NodeDiscovery;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -85,11 +87,27 @@ namespace DotNetCore.CAP.Dashboard
                 var monitoring = Storage.GetMonitoringApi();
                 var dto = monitoring.GetStatistics();
 
-                if (CapCache.Global.TryGet("cap.nodes.count", out var count))
-                    dto.Servers = (int) count;
+                SetServersCount(dto);
 
                 return dto;
             });
+        }
+
+        private void SetServersCount(StatisticsDto dto)
+        {
+            if (CapCache.Global.TryGet("cap.nodes.count", out var count))
+            {
+                dto.Servers = (int) count;
+            }
+            else
+            {
+                if (RequestServices.GetService<DiscoveryOptions>() != null)
+                {
+                    var discoveryProvider = RequestServices.GetService<INodeDiscoveryProvider>();
+                    var nodes = discoveryProvider.GetNodes().GetAwaiter().GetResult();
+                    dto.Servers = nodes.Count;
+                }
+            }
         }
 
         /// <exclude />

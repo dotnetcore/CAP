@@ -3,16 +3,19 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Consul;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.NodeDiscovery
 {
     public class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider, IDisposable
     {
+        private readonly ILogger<ConsulNodeDiscoveryProvider> _logger;
         private readonly DiscoveryOptions _options;
         private ConsulClient _consul;
 
-        public ConsulNodeDiscoveryProvider(DiscoveryOptions options)
+        public ConsulNodeDiscoveryProvider(ILoggerFactory logger, DiscoveryOptions options)
         {
+            _logger = logger.CreateLogger<ConsulNodeDiscoveryProvider>();
             _options = options;
 
             InitClient();
@@ -27,46 +30,64 @@ namespace DotNetCore.CAP.NodeDiscovery
         {
             try
             {
-                var services = await _consul.Agent.Services();
-
-                var nodes = services.Response.Select(x => new Node
+                var nodes = new List<Node>();
+                var services = await _consul.Catalog.Services();
+                foreach (var service in services.Response)
                 {
-                    Id = x.Key,
-                    Name = x.Value.Service,
-                    Address = x.Value.Address,
-                    Port = x.Value.Port,
-                    Tags = string.Join(", ", x.Value.Tags)
-                });
-                var nodeList = nodes.ToList();
+                    var serviceInfo = await _consul.Catalog.Service(service.Key);
+                    var node = serviceInfo.Response.
+                        SkipWhile(x => !x.ServiceTags.Contains("CAP"))
+                        .Select(info => new Node
+                        {
+                            Id = info.ServiceID,
+                            Name = info.ServiceName,
+                            Address = info.ServiceAddress,
+                            Port = info.ServicePort,
+                            Tags = string.Join(", ", info.ServiceTags)
+                        }).ToList();
 
-                CapCache.Global.AddOrUpdate("cap.nodes.count", nodeList.Count, TimeSpan.FromSeconds(30), true);
+                    nodes.AddRange(node);
+                }
 
-                return nodeList;
+                CapCache.Global.AddOrUpdate("cap.nodes.count", nodes.Count, TimeSpan.FromSeconds(60), true);
+
+                return nodes;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                CapCache.Global.AddOrUpdate("cap.nodes.count", 0, TimeSpan.FromSeconds(20));
+
+                _logger.LogError("Get consul nodes raised an exception. Exception:" + ex.Message);
                 return null;
             }
         }
 
         public Task RegisterNode()
         {
-            return _consul.Agent.ServiceRegister(new AgentServiceRegistration
+            try
             {
-                ID = _options.NodeId.ToString(),
-                Name = _options.NodeName,
-                Address = _options.CurrentNodeHostName,
-                Port = _options.CurrentNodePort,
-                Tags = new[] {"CAP", "Client", "Dashboard"},
-                Check = new AgentServiceCheck
+                return _consul.Agent.ServiceRegister(new AgentServiceRegistration
                 {
-                    DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30),
-                    Interval = TimeSpan.FromSeconds(10),
-                    Status = HealthStatus.Passing,
-                    HTTP =
-                        $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/health"
-                }
-            });
+                    ID = _options.NodeId.ToString(),
+                    Name = _options.NodeName,
+                    Address = _options.CurrentNodeHostName,
+                    Port = _options.CurrentNodePort,
+                    Tags = new[] { "CAP", "Client", "Dashboard" },
+                    Check = new AgentServiceCheck
+                    {
+                        DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30),
+                        Interval = TimeSpan.FromSeconds(10),
+                        Status = HealthStatus.Passing,
+                        HTTP =
+                            $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/health"
+                    }
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError("Register consul nodes raised an exception. Exception:" + ex.Message);
+                return null;
+            }
         }
 
         public void InitClient()
