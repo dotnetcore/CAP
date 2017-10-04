@@ -197,10 +197,9 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Dashboard
 
-At CAP 2.1 version and above provided the dashboard pages, you can easily check the send and receive messages. 
-In addition, you can also view real time sent or received messages.
+CAP 2.1 and above provides the dashboard pages, you can easily view the sent and received messages. In addition, you can also view the  message status in real time on the dashboard.
 
-In the distributed environment, the dashboard built-in integrated [Consul] (http://consul.io) as a node discovery, while the realization of the gateway agent function, you can also easily view the node or other node data, It's like you are visiting local resources.
+In the distributed environment, the dashboard built-in integrated [Consul](http://consul.io) as a node discovery, while the realization of the gateway agent function, you can also easily view the node or other node data, It's like you are visiting local resources.
 
 ```c#
 services.AddCap(x =>
