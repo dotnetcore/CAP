@@ -195,6 +195,43 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
+### Dashboard
+
+At CAP 2.1 version and above provided the dashboard pages, you can easily check the send and receive messages. 
+In addition, you can also view real time sent or received messages.
+
+In the distributed environment, the dashboard built-in integrated [Consul] (http://consul.io) as a node discovery, while the realization of the gateway agent function, you can also easily view the node or other node data, It's like you are visiting local resources.
+
+```c#
+services.AddCap(x =>
+{
+    //...
+    
+    // Register Dashboard
+    x.UseDashboard();
+    
+    // Register to Consul
+    x.UseDiscovery(d =>
+    {
+        d.DiscoveryServerHostName = "localhost";
+        d.DiscoveryServerPort = 8500;
+        d.CurrentNodeHostName = "localhost";
+        d.CurrentNodePort = 5800;
+        d.NodeId = 1;
+        d.NodeName = "CAP No.1 Node";
+    });
+});
+```
+
+![dashboard](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220827302-189215107.png)
+
+![received](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220934115-1107747665.png)
+
+![subscibers](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220949193-884674167.png)
+
+![nodes](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004221001880-1162918362.png)
+
+
 ## Contribute
 
 One of the easiest ways to contribute is to participate in discussions and discuss issues. You can also contribute by submitting pull requests with code changes.
