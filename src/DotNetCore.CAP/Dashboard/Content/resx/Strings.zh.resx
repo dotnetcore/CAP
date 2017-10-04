@@ -414,4 +414,13 @@
   <data name="MessagesPage_Table_State" xml:space="preserve">
     <value>状态</value>
   </data>
+  <data name="NodePage_Table_IP" xml:space="preserve">
+    <value>IP 地址</value>
+  </data>
+  <data name="NodePage_Table_NodeName" xml:space="preserve">
+    <value>节点名称</value>
+  </data>
+  <data name="NodePage_Table_Port" xml:space="preserve">
+    <value>端口号</value>
+  </data>
 </root>

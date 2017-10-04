@@ -390,4 +390,13 @@
   <data name="MessagesPage_Table_State" xml:space="preserve">
     <value>State</value>
   </data>
+  <data name="NodePage_Table_IP" xml:space="preserve">
+    <value>IP Address</value>
+  </data>
+  <data name="NodePage_Table_NodeName" xml:space="preserve">
+    <value>Node Name</value>
+  </data>
+  <data name="NodePage_Table_Port" xml:space="preserve">
+    <value>Port</value>
+  </data>
 </root>

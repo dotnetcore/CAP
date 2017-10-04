@@ -700,6 +700,33 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to IP Address.
+        /// </summary>
+        public static string NodePage_Table_IP {
+            get {
+                return ResourceManager.GetString("NodePage_Table_IP", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Node Name.
+        /// </summary>
+        public static string NodePage_Table_NodeName {
+            get {
+                return ResourceManager.GetString("NodePage_Table_NodeName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        public static string NodePage_Table_Port {
+            get {
+                return ResourceManager.GetString("NodePage_Table_Port", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Nodes.
         /// </summary>
         public static string NodePage_Title {

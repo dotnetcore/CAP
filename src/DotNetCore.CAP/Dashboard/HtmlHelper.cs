@@ -170,7 +170,7 @@ namespace DotNetCore.CAP.Dashboard
         public NonEscapedString NodeSwitchLink(string id)
         {
             return Raw(
-                $"<a class=\"job-method\" onclick=\"nodeSwitch({id});\" href=\"javascript:;\">{Strings.NodePage_Switch}</a>");
+                $"<a onclick=\"nodeSwitch({id});\" href=\"javascript:;\">{Strings.NodePage_Switch}</a>");
         }
 
         public NonEscapedString StackTrace(string stackTrace)
