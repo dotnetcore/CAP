@@ -164,14 +164,13 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
             string statusName,
             IDictionary<string, DateTime> keyMaps)
         {
-            //SQL Server 2012+
             var sqlQuery =
                 $@"
 with aggr as (
     select to_char(""Added"",'yyyy-MM-dd-HH') as ""Key"",
     count(""Id"") as ""Count""
     from ""{_options.Schema}"".""{tableName}""
-        where ""StatusName"" = N'Processing'
+        where ""StatusName"" = @statusName
     group by to_char(""Added"", 'yyyy-MM-dd-HH')
 )
 select ""Key"",""Count"" from aggr where ""Key""= Any(@keys);";
