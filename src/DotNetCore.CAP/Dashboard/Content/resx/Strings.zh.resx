@@ -150,9 +150,6 @@
   <data name="Common_MoreDetails" xml:space="preserve">
     <value>更多...</value>
   </data>
-  <data name="Common_NotAvailable" xml:space="preserve">
-    <value>N/A</value>
-  </data>
   <data name="Common_PeriodDay" xml:space="preserve">
     <value>天</value>
   </data>
@@ -213,27 +210,6 @@
   <data name="PerPageSelector_ItemsPerPage" xml:space="preserve">
     <value>每页条数</value>
   </data>
-  <data name="QueuesPage_NoJobs" xml:space="preserve">
-    <value>没有作业</value>
-  </data>
-  <data name="QueuesPage_NoQueues" xml:space="preserve">
-    <value>队列中不存在。尝试添加作业到队列</value>
-  </data>
-  <data name="QueuesPage_Table_Length" xml:space="preserve">
-    <value>长度</value>
-  </data>
-  <data name="QueuesPage_Table_NextsJobs" xml:space="preserve">
-    <value>下一个作业</value>
-  </data>
-  <data name="QueuesPage_Table_Queue" xml:space="preserve">
-    <value>队列</value>
-  </data>
-  <data name="QueuesPage_Title" xml:space="preserve">
-    <value>队列</value>
-  </data>
-  <data name="ServersPage_NoServers" xml:space="preserve">
-    <value>没有活动服务器。后台作业将不会被执行。</value>
-  </data>
   <data name="ServersPage_Table_Heartbeat" xml:space="preserve">
     <value>心跳</value>
   </data>
@@ -276,35 +252,17 @@
   <data name="NavigationMenu_Servers" xml:space="preserve">
     <value>服务器</value>
   </data>
-  <data name="Common_CannotFindTargetMethod" xml:space="preserve">
-    <value>Can not find the target method.</value>
-  </data>
   <data name="Common_Enqueued" xml:space="preserve">
     <value>队列</value>
   </data>
-  <data name="Common_NoState" xml:space="preserve">
-    <value>No state</value>
-  </data>
-  <data name="Metrics_ActiveConnections" xml:space="preserve">
-    <value>Active Connections</value>
-  </data>
   <data name="Metrics_DeletedJobs" xml:space="preserve">
     <value>删除</value>
-  </data>
-  <data name="Metrics_ProcessingJobs" xml:space="preserve">
-    <value>执行中</value>
   </data>
   <data name="Metrics_Servers" xml:space="preserve">
     <value>服务器</value>
   </data>
   <data name="Metrics_TotalConnections" xml:space="preserve">
     <value>总连接数</value>
-  </data>
-  <data name="Common_Condition" xml:space="preserve">
-    <value>Condition</value>
-  </data>
-  <data name="Common_Continuations" xml:space="preserve">
-    <value>Continuations</value>
   </data>
   <data name="Metrics_AwaitingCount" xml:space="preserve">
     <value>等待中</value>
@@ -356,9 +314,6 @@
   </data>
   <data name="MessagesPage_Table_Retries" xml:space="preserve">
     <value>重试次数</value>
-  </data>
-  <data name="MesssagesPage_NoMessages" xml:space="preserve">
-    <value>没有消息</value>
   </data>
   <data name="PublishedPage_Title" xml:space="preserve">
     <value>已发送消息</value>

@@ -13,6 +13,8 @@ namespace DotNetCore.CAP
     /// Cache is thread safe and will delete expired entries on its own using System.Threading.Timers (which run on
     /// <see cref="ThreadPool" /> threads).
     /// </summary>
+    // ReSharper disable once InheritdocConsiderUsage
+    // ReSharper disable once InconsistentNaming
     public class Cache<K, T> : IDisposable
     {
         #region Constructor and class members

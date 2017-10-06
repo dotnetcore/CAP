@@ -100,10 +100,10 @@
     <Compile Update="Dashboard\Pages\PublishedPage.cs">
       <DependentUpon>PublishedPage.cshtml</DependentUpon>
     </Compile>
-    <Compile Update="Dashboard\Pages\PublishedPage1.generated.cs">
+    <Compile Update="Dashboard\Pages\PublishedPage*.cs">
       <DependentUpon>PublishedPage.cshtml</DependentUpon>
     </Compile>
-    <Compile Update="Dashboard\Pages\LayoutPage1.generated.cs">
+    <Compile Update="Dashboard\Pages\LayoutPage.*.cs">
       <DependentUpon>LayoutPage.cshtml</DependentUpon>
     </Compile>
     <Compile Update="Dashboard\Pages\LayoutPage.cs">
@@ -137,10 +137,5 @@
       <CustomToolNamespace>DotNetCore.CAP.Dashboard.Resources</CustomToolNamespace>
       <LastGenOutput>Strings.Designer.cs</LastGenOutput>
     </EmbeddedResource>
-  </ItemGroup>
-  <ItemGroup>
-    <None Update="Dashboard\Pages\HomePage.cshtml">
-      <Generator>RazorGenerator</Generator>
-    </None>
   </ItemGroup>
 </Project>

@@ -6,7 +6,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Infrastructure
 {
     /// <summary>
     /// Represents an ObjectId

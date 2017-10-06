@@ -12,9 +12,9 @@ namespace DotNetCore.CAP.Processor.States
             ExpiresAfter = TimeSpan.FromHours(1);
         }
 
-        public SucceededState(int ExpireAfterSeconds)
+        public SucceededState(int expireAfterSeconds)
         {
-            ExpiresAfter = TimeSpan.FromSeconds(ExpireAfterSeconds);
+            ExpiresAfter = TimeSpan.FromSeconds(expireAfterSeconds);
         }
 
         public TimeSpan? ExpiresAfter { get; }

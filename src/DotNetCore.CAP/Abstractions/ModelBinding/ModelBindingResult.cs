@@ -43,7 +43,7 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         {
             if (IsSuccess)
                 return $"Success '{Model}'";
-            return $"Failed";
+            return "Failed";
         }
 
         public override bool Equals(object obj)

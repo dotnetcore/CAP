@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.NodeDiscovery
             {
                 CapCache.Global.AddOrUpdate("cap.nodes.count", 0, TimeSpan.FromSeconds(20));
 
-                _logger.LogError("Get consul nodes raised an exception. Exception:" + ex.Message);
+                _logger.LogError($"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException.Message}");
                 return null;
             }
         }
@@ -85,7 +85,7 @@ namespace DotNetCore.CAP.NodeDiscovery
             }
             catch (Exception ex)
             {
-                _logger.LogError("Register consul nodes raised an exception. Exception:" + ex.Message);
+                _logger.LogError($"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException.Message}");
                 return null;
             }
         }
