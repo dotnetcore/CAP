@@ -15,7 +15,8 @@ namespace DotNetCore.CAP.SqlServer.Test
         public SqlServerStorageConnectionTest()
         {
             var options = GetService<SqlServerOptions>();
-            _storage = new SqlServerStorageConnection(options);
+            var capOptions = GetService<CapOptions>();
+            _storage = new SqlServerStorageConnection(options, capOptions);
         }
 
         [Fact]
