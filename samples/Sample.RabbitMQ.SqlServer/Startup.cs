@@ -19,20 +19,17 @@ namespace Sample.RabbitMQ.SqlServer
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ(z =>
-                {
-                    z.HostName = "192.168.2.206";
-                    z.UserName = "admin";
-                    z.Password = "123123";
-                });
-                x.UseDashboard(d => { d.StatsPollingInterval = 1000000; });
+                x.UseRabbitMQ("localhost");
+                x.UseDashboard();
                 x.UseDiscovery(d =>
                 {
                     d.DiscoveryServerHostName = "localhost";
                     d.DiscoveryServerPort = 8500;
-                    d.CurrentNodeHostName = "localhost";
+
+                    d.CurrentNodeHostName = "192.168.1.11";
                     d.CurrentNodePort = 5800;
-                    d.NodeName = "CAP一号节点";
+                    d.NodeName = "CAP Node Windows";
+                    d.NodeId = 1;
                 });
             });
 

@@ -8,21 +8,7 @@ namespace Sample.RabbitMQ.SqlServer
 {
     public class Program
     {
-
-        //var config = new ConfigurationBuilder()
-        //    .AddCommandLine(args)
-        //    .AddEnvironmentVariables("ASPNETCORE_")
-        //    .Build();
-
-        //var host = new WebHostBuilder()
-        //    .UseConfiguration(config)
-        //    .UseKestrel()
-        //    .UseContentRoot(Directory.GetCurrentDirectory())
-        //    .UseIISIntegration()
-        //    .UseStartup<Startup>()
-        //    .Build();
-
-        //host.Run();
+ 
         public static void Main(string[] args)
         { 
             BuildWebHost(args).Run();
@@ -30,6 +16,7 @@ namespace Sample.RabbitMQ.SqlServer
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .UseUrls("http://*:5800")
                 .UseStartup<Startup>()
                 .Build();
 

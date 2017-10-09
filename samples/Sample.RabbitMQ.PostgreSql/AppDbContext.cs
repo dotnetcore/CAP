@@ -10,7 +10,7 @@ namespace Sample.RabbitMQ.PostgreSql
     {
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql("Server=localhost;Database=Sample.RabbitMQ.PostgreSql;UserId=postgre;Password=123123;");
+            optionsBuilder.UseNpgsql("Server=localhost;Database=Sample.RabbitMQ.PostgreSql;UserId=postgres;Password=123123;");
         }
     }
 }

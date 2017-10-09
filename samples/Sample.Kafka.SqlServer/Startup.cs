@@ -15,7 +15,7 @@ namespace Sample.Kafka.SqlServer
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseKafka("192.168.2.227:9091,192.168.2.227:9092,192.168.2.222:9092");
+                x.UseKafka("192.168.1.26:9092");
                 x.UseDashboard();
                 x.UseDiscovery(d =>
                 {

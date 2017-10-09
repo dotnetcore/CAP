@@ -13,15 +13,11 @@ namespace Sample.RabbitMQ.PostgreSql
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<AppDbContext>();
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ(z =>
-                {
-                    z.HostName = "192.168.2.206";
-                    z.UserName = "admin";
-                    z.Password = "123123";
-                });
+                x.UseRabbitMQ("localhost");
                 x.UseDashboard();
                 x.UseDiscovery(d =>
                 {
@@ -29,7 +25,7 @@ namespace Sample.RabbitMQ.PostgreSql
                     d.DiscoveryServerPort = 8500;
                     d.CurrentNodeHostName = "localhost";
                     d.CurrentNodePort = 5800;
-                    d.NodeName = "CAP一号节点";
+                    d.NodeName = "CAP 一号节点";
                 });
             });
             services.AddMvc();
