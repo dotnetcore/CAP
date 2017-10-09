@@ -20,14 +20,6 @@ namespace Sample.RabbitMQ.MySql
                 x.UseEntityFramework<AppDbContext>();
                 x.UseRabbitMQ("localhost");
                 x.UseDashboard();
-                x.UseDiscovery(d =>
-                {
-                    d.DiscoveryServerHostName = "localhost";
-                    d.DiscoveryServerPort = 8500;
-                    d.CurrentNodeHostName = "localhost";
-                    d.CurrentNodePort = 5800;
-                    d.NodeName = "CAP 1号节点";
-                });
             });
 
             services.AddMvc();
