@@ -52,11 +52,12 @@ namespace DotNetCore.CAP.MySql.Test
             {
                 connection.Execute(sql, queue);
             }
-            var fetchedMessage = await _storage.FetchNextMessageAsync();
-            fetchedMessage.Dispose();
-            Assert.NotNull(fetchedMessage);
-            Assert.Equal(MessageType.Publish, fetchedMessage.MessageType);
-            Assert.Equal(3333, fetchedMessage.MessageId);
+            using (var fetchedMessage = await _storage.FetchNextMessageAsync())
+            {
+                Assert.NotNull(fetchedMessage);
+                Assert.Equal(MessageType.Publish, fetchedMessage.MessageType);
+                Assert.Equal(3333, fetchedMessage.MessageId);
+            }
         }
 
         [Fact]

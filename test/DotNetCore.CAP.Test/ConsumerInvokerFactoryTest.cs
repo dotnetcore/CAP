@@ -48,7 +48,7 @@ namespace DotNetCore.CAP.Test
         [Theory]
         [InlineData(nameof(Sample.ThrowException))]
         [InlineData(nameof(Sample.AsyncMethod))]
-        public async void InvokeMethodTest(string methodName)
+        public void InvokeMethodTest(string methodName)
         {
             var methodInfo = typeof(Sample).GetRuntimeMethods()
                 .Single(x => x.Name == methodName);
@@ -64,10 +64,10 @@ namespace DotNetCore.CAP.Test
 
             var invoker = consumerInvokerFactory.CreateInvoker(context);
 
-            await Assert.ThrowsAsync(typeof(Exception), async () =>
+            Assert.Throws<Exception>(() =>
             {
-                await invoker.InvokeAsync();
-            });
+                invoker.InvokeAsync().GetAwaiter().GetResult();
+            }); 
         }
     }
 }
