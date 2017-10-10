@@ -150,14 +150,17 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
             try
             {
                 //fetchedMessage = await connection.QuerySingleOrDefaultAsync<FetchedMessage>(sql, args, transaction);
-                var reader = connection.ExecuteReader(sql, args, transaction);
-                while (reader.Read())
+                // An anomaly with unknown causes, sometimes QuerySingleOrDefaultAsync can't return expected result.
+                using (var reader = connection.ExecuteReader(sql, args, transaction))
                 {
-                    fetchedMessage = new FetchedMessage
+                    while (reader.Read())
                     {
-                        MessageId = (int)reader.GetInt64(0),
-                        MessageType = (MessageType)reader.GetInt64(1)
-                    };
+                        fetchedMessage = new FetchedMessage
+                        {
+                            MessageId = (int)reader.GetInt64(0),
+                            MessageType = (MessageType)reader.GetInt64(1)
+                        };
+                    }
                 }
             }
             catch (MySqlException)
