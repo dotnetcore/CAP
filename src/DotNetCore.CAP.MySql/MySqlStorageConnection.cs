@@ -41,8 +41,11 @@ namespace DotNetCore.CAP.MySql
         public Task<IFetchedMessage> FetchNextMessageAsync()
         {
             var sql = $@"
-SELECT @MId:=`MessageId` as MessageId, @MType:=`MessageType` as MessageType FROM `{_prefix}.queue` LIMIT 1;
-DELETE FROM `{_prefix}.queue` where `MessageId` = @MId AND `MessageType`=@MType;";
+SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
+DELETE FROM `{_prefix}.queue` LIMIT 1;";
+//            var sql = $@"
+//SELECT @MId:=`MessageId` as MessageId, @MType:=`MessageType` as MessageType FROM `{_prefix}.queue` LIMIT 1;
+//DELETE FROM `{_prefix}.queue` where `MessageId` = @MId AND `MessageType`=@MType;";
 
             return FetchNextMessageCoreAsync(sql);
         }
