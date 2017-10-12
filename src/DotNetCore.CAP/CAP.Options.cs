@@ -27,14 +27,20 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Failed message retry waiting interval.
         /// </summary>
-        public const int DefaultFailedMessageWaitingInterval = 180;
+        public const int DefaultFailedMessageWaitingInterval = 600;
+
+        /// <summary>
+        /// Failed message retry count.
+        /// </summary>
+        public const int DefaultFailedRetryCount = 100;
 
         public CapOptions()
         {
             PollingDelay = DefaultPollingDelay;
             QueueProcessorCount = DefaultQueueProcessorCount;
             SucceedMessageExpiredAfter = DefaultSucceedMessageExpirationAfter;
-            FailedMessageWaitingInterval = DefaultFailedMessageWaitingInterval;
+            FailedRetryInterval = DefaultFailedMessageWaitingInterval;
+            FailedRetryCount = DefaultFailedRetryCount;
             Extensions = new List<ICapOptionsExtension>();
         }
 
@@ -53,21 +59,27 @@ namespace DotNetCore.CAP
         public int QueueProcessorCount { get; set; }
 
         /// <summary>
-        /// Sent or received succeed message after timespan of due, then the message will be deleted at due time.
+        /// Sent or received succeed message after time span of due, then the message will be deleted at due time.
         /// Default is 24*3600 seconds.
         /// </summary>
         public int SucceedMessageExpiredAfter { get; set; }
 
         /// <summary>
         /// Failed messages polling delay time.
-        /// Default is 180 seconds.
+        /// Default is 600 seconds.
         /// </summary>
-        public int FailedMessageWaitingInterval { get; set; }
+        public int FailedRetryInterval { get; set; }
 
         /// <summary>
         /// We’ll invoke this call-back with message type,name,content when requeue failed message.
         /// </summary>
         public Action<MessageType, string, string> FailedCallback { get; set; }
+
+        /// <summary>
+        /// The number of message retries, the retry will stop when the threshold is reached.
+        /// Default is 100 times.
+        /// </summary>
+        public int FailedRetryCount { get; set; }
 
         /// <summary>
         /// Registers an extension that will be executed when building services.
