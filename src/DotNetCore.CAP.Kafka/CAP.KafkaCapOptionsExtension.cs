@@ -24,6 +24,7 @@ namespace DotNetCore.CAP
 
             services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
             services.AddSingleton<IQueueExecutor, PublishQueueExecutor>();
+            services.AddSingleton<IPublishExecutor, PublishQueueExecutor>();
         }
     }
 }
