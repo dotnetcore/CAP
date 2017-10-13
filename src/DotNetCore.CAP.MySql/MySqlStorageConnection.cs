@@ -11,12 +11,14 @@ namespace DotNetCore.CAP.MySql
 {
     public class MySqlStorageConnection : IStorageConnection
     {
+        private readonly CapOptions _capOptions;
         private readonly string _prefix;
 
         private const string DateTimeMaxValue = "9999-12-31 23:59:59";
 
-        public MySqlStorageConnection(MySqlOptions options)
+        public MySqlStorageConnection(MySqlOptions options, CapOptions capOptions)
         {
+            _capOptions = capOptions;
             Options = options;
             _prefix = Options.TableNamePrefix;
         }
@@ -43,9 +45,9 @@ namespace DotNetCore.CAP.MySql
             var sql = $@"
 SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
 DELETE FROM `{_prefix}.queue` LIMIT 1;";
-//            var sql = $@"
-//SELECT @MId:=`MessageId` as MessageId, @MType:=`MessageType` as MessageType FROM `{_prefix}.queue` LIMIT 1;
-//DELETE FROM `{_prefix}.queue` where `MessageId` = @MId AND `MessageType`=@MType;";
+            //            var sql = $@"
+            //SELECT @MId:=`MessageId` as MessageId, @MType:=`MessageType` as MessageType FROM `{_prefix}.queue` LIMIT 1;
+            //DELETE FROM `{_prefix}.queue` where `MessageId` = @MId AND `MessageType`=@MType;";
 
             return FetchNextMessageCoreAsync(sql);
         }
@@ -64,7 +66,7 @@ SELECT * FROM `{_prefix}.published` WHERE Id=LAST_INSERT_ID();";
 
         public async Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages()
         {
-            var sql = $"SELECT * FROM `{_prefix}.published` WHERE `StatusName` = '{StatusName.Failed}';";
+            var sql = $"SELECT * FROM `{_prefix}.published` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `StatusName` = '{StatusName.Failed}' LIMIT 200;";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
@@ -109,7 +111,7 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
 
         public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
         {
-            var sql = $"SELECT * FROM `{_prefix}.received` WHERE `StatusName` = '{StatusName.Failed}';";
+            var sql = $"SELECT * FROM `{_prefix}.received` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `StatusName` = '{StatusName.Failed}' LIMIT 200;";
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);

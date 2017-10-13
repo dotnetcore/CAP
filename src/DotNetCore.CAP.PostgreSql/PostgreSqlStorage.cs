@@ -13,17 +13,21 @@ namespace DotNetCore.CAP.PostgreSql
     {
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
+        private readonly CapOptions _capOptions;
         private readonly PostgreSqlOptions _options;
 
-        public PostgreSqlStorage(ILogger<PostgreSqlStorage> logger, PostgreSqlOptions options)
+        public PostgreSqlStorage(ILogger<PostgreSqlStorage> logger,
+            CapOptions capOptions,
+            PostgreSqlOptions options)
         {
             _options = options;
             _logger = logger;
+            _capOptions = capOptions;
         }
 
         public IStorageConnection GetConnection()
         {
-            return new PostgreSqlStorageConnection(_options);
+            return new PostgreSqlStorageConnection(_options, _capOptions);
         }
 
         public IMonitoringApi GetMonitoringApi()

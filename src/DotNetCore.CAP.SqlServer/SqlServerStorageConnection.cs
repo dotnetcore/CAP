@@ -11,8 +11,11 @@ namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerStorageConnection : IStorageConnection
     {
-        public SqlServerStorageConnection(SqlServerOptions options)
+        private readonly CapOptions _capOptions;
+
+        public SqlServerStorageConnection(SqlServerOptions options, CapOptions capOptions)
         {
+            _capOptions = capOptions;
             Options = options;
         }
 
@@ -57,7 +60,7 @@ OUTPUT DELETED.MessageId,DELETED.[MessageType];";
         public async Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages()
         {
             var sql =
-                $"SELECT * FROM [{Options.Schema}].[Published] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
+                $"SELECT TOP (200) * FROM [{Options.Schema}].[Published] WITH (readpast) WHERE Retries<{_capOptions.FailedRetryCount} AND StatusName = '{StatusName.Failed}'";
 
             using (var connection = new SqlConnection(Options.ConnectionString))
             {
@@ -114,7 +117,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
         {
             var sql =
-                $"SELECT * FROM [{Options.Schema}].[Received] WITH (readpast) WHERE StatusName = '{StatusName.Failed}'";
+                $"SELECT TOP (200) * FROM [{Options.Schema}].[Received] WITH (readpast) WHERE Retries<{_capOptions.FailedRetryCount} AND StatusName = '{StatusName.Failed}'";
             using (var connection = new SqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);

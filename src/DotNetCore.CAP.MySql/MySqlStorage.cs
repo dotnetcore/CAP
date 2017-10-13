@@ -14,16 +14,20 @@ namespace DotNetCore.CAP.MySql
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
         private readonly MySqlOptions _options;
+        private readonly CapOptions _capOptions;
 
-        public MySqlStorage(ILogger<MySqlStorage> logger, MySqlOptions options)
+        public MySqlStorage(ILogger<MySqlStorage> logger,
+            MySqlOptions options,
+            CapOptions capOptions)
         {
             _options = options;
+            _capOptions = capOptions;
             _logger = logger;
         }
 
         public IStorageConnection GetConnection()
         {
-            return new MySqlStorageConnection(_options);
+            return new MySqlStorageConnection(_options, _capOptions);
         }
 
         public IMonitoringApi GetMonitoringApi()

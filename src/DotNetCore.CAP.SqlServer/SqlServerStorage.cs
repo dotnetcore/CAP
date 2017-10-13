@@ -13,17 +13,21 @@ namespace DotNetCore.CAP.SqlServer
     {
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
+        private readonly CapOptions _capOptions;
         private readonly SqlServerOptions _options;
 
-        public SqlServerStorage(ILogger<SqlServerStorage> logger, SqlServerOptions options)
+        public SqlServerStorage(ILogger<SqlServerStorage> logger,
+            CapOptions capOptions,
+            SqlServerOptions options)
         {
             _options = options;
             _logger = logger;
+            _capOptions = capOptions;
         }
 
         public IStorageConnection GetConnection()
         {
-            return new SqlServerStorageConnection(_options);
+            return new SqlServerStorageConnection(_options, _capOptions);
         }
 
         public IMonitoringApi GetMonitoringApi()

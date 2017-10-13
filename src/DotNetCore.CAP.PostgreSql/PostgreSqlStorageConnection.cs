@@ -11,8 +11,11 @@ namespace DotNetCore.CAP.PostgreSql
 {
     public class PostgreSqlStorageConnection : IStorageConnection
     {
-        public PostgreSqlStorageConnection(PostgreSqlOptions options)
+        private readonly CapOptions _capOptions;
+
+        public PostgreSqlStorageConnection(PostgreSqlOptions options,CapOptions capOptions)
         {
+            _capOptions = capOptions;
             Options = options;
         }
 
@@ -35,9 +38,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         public Task<IFetchedMessage> FetchNextMessageAsync()
         {
-            var sql = $@"DELETE FROM ""{Options.Schema}"".""queue"" WHERE ""MessageId"" = (SELECT ""MessageId"" FROM ""{
-                    Options.Schema
-                }"".""queue"" FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *;";
+            var sql = $@"DELETE FROM ""{Options.Schema}"".""queue"" WHERE ""MessageId"" = (SELECT ""MessageId"" FROM ""{Options.Schema}"".""queue"" FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *;";
             return FetchNextMessageCoreAsync(sql);
         }
 
@@ -55,7 +56,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages()
         {
             var sql =
-                $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"StatusName\"='{StatusName.Failed}' LIMIT 1000;";
+                $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"StatusName\"='{StatusName.Failed}' LIMIT 200;";
 
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
@@ -98,7 +99,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
         {
             var sql =
-                $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"StatusName\"='{StatusName.Failed}' LIMIT 1000;";
+                $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"StatusName\"='{StatusName.Failed}' LIMIT 200;";
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);

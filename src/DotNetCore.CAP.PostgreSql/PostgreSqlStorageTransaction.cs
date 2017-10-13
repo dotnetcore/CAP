@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.PostgreSql
             var sql =
                 $@"UPDATE ""{
                         _schema
-                    }"".""published"" SET ""Retries""=@Retries,""ExpiresAt""=@ExpiresAt,""StatusName""=@StatusName WHERE ""Id""=@Id;";
+                    }"".""published"" SET ""Retries""=@Retries,""Content""= @Content,""ExpiresAt""=@ExpiresAt,""StatusName""=@StatusName WHERE ""Id""=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
         }
 
