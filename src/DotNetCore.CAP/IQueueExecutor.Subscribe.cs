@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
@@ -12,151 +10,114 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
 {
-	public class SubscribeQueueExecutor : IQueueExecutor
-	{
-		private readonly IConsumerInvokerFactory _consumerInvokerFactory;
-		private readonly ILogger _logger;
-		private readonly CapOptions _options;
-		private readonly MethodMatcherCache _selector;
-		private readonly IStateChanger _stateChanger;
+    public class SubscribeQueueExecutor : IQueueExecutor
+    {
+        private readonly ILogger _logger;
+        private readonly CapOptions _options;
+        private readonly IStateChanger _stateChanger;
+        private readonly ISubscriberExecutor _subscriberExecutor;
 
-		public SubscribeQueueExecutor(
-			IStateChanger stateChanger,
-			MethodMatcherCache selector,
-			CapOptions options,
-			IConsumerInvokerFactory consumerInvokerFactory,
-			ILogger<BasePublishQueueExecutor> logger)
-		{
-			_selector = selector;
-			_options = options;
-			_consumerInvokerFactory = consumerInvokerFactory;
-			_stateChanger = stateChanger;
-			_logger = logger;
-		}
+        public SubscribeQueueExecutor(
+            CapOptions options,
+            IStateChanger stateChanger,
+            ISubscriberExecutor subscriberExecutor,
+            ILogger<SubscribeQueueExecutor> logger)
+        {
+            _options = options;
+            _subscriberExecutor = subscriberExecutor;
+            _stateChanger = stateChanger;
+            _logger = logger;
+        }
 
-		public async Task<OperateResult> ExecuteAsync(IStorageConnection connection, IFetchedMessage fetched)
-		{
-			//return await Task.FromResult(OperateResult.Success);
-			var message = await connection.GetReceivedMessageAsync(fetched.MessageId);
-			try
-			{
-				var sp = Stopwatch.StartNew();
-				await _stateChanger.ChangeStateAsync(message, new ProcessingState(), connection);
+        public async Task<OperateResult> ExecuteAsync(IStorageConnection connection, IFetchedMessage fetched)
+        {
+            var message = await connection.GetReceivedMessageAsync(fetched.MessageId);
+            try
+            {
+                var sp = Stopwatch.StartNew();
+                await _stateChanger.ChangeStateAsync(message, new ProcessingState(), connection);
 
-				if (message.Retries > 0)
-					_logger.JobRetrying(message.Retries);
-				var result = await ExecuteSubscribeAsync(message);
-				sp.Stop();
+                if (message.Retries > 0)
+                    _logger.JobRetrying(message.Retries);
 
-				IState newState;
-				if (!result.Succeeded)
-				{
-					var shouldRetry = await UpdateMessageForRetryAsync(message, connection, result.Exception?.Message);
-					if (shouldRetry)
-					{
-						newState = new ScheduledState();
-						_logger.JobFailedWillRetry(result.Exception);
-					}
-					else
-					{
-						newState = new FailedState();
-						_logger.JobFailed(result.Exception);
-					}
-				}
-				else
-				{
-					newState = new SucceededState(_options.SucceedMessageExpiredAfter);
-				}
-				await _stateChanger.ChangeStateAsync(message, newState, connection);
+                var result = await _subscriberExecutor.ExecuteAsync(message);
+                sp.Stop();
 
-				fetched.RemoveFromQueue();
+                var state = GetNewState(result, message);
 
-				if (result.Succeeded)
-					_logger.JobExecuted(sp.Elapsed.TotalSeconds);
+                await _stateChanger.ChangeStateAsync(message, state, connection);
 
-				return OperateResult.Success;
-			}
-			catch (SubscriberNotFoundException ex)
-			{
-				_logger.LogError(ex.Message);
+                fetched.RemoveFromQueue();
 
-				await AddErrorReasonToContent(message, ex.Message, connection);
+                if (result.Succeeded)
+                    _logger.JobExecuted(sp.Elapsed.TotalSeconds);
 
-				await _stateChanger.ChangeStateAsync(message, new FailedState(), connection);
+                return OperateResult.Success;
+            }
+            catch (SubscriberNotFoundException ex)
+            {
+                _logger.LogError(ex.Message);
 
-				fetched.RemoveFromQueue();
+                AddErrorReasonToContent(message, ex);
 
-				return OperateResult.Failed(ex);
-			}
-			catch (Exception ex)
-			{
-				_logger.ExceptionOccuredWhileExecutingJob(message?.Name, ex);
+                await _stateChanger.ChangeStateAsync(message, new FailedState(), connection);
 
-				fetched.Requeue();
+                fetched.RemoveFromQueue();
 
-				return OperateResult.Failed(ex);
-			}
-		}
+                return OperateResult.Failed(ex);
+            }
+            catch (Exception ex)
+            {
+                _logger.ExceptionOccuredWhileExecutingJob(message?.Name, ex);
 
-		protected virtual async Task<OperateResult> ExecuteSubscribeAsync(CapReceivedMessage receivedMessage)
-		{
-			try
-			{
-				var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.Name);
+                fetched.Requeue();
 
-				if (!executeDescriptorGroup.ContainsKey(receivedMessage.Group))
-				{
-					var error = $"Topic:{receivedMessage.Name}, can not be found subscriber method.";
-					throw new SubscriberNotFoundException(error);
-				}
+                return OperateResult.Failed(ex);
+            }
+        }
 
-				// If there are multiple consumers in the same group, we will take the first
-				var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
-				var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
+        private IState GetNewState(OperateResult result, CapReceivedMessage message)
+        {
+            IState newState;
+            if (!result.Succeeded)
+            {
+                var shouldRetry = UpdateMessageForRetryAsync(message);
+                if (shouldRetry)
+                {
+                    newState = new ScheduledState();
+                    _logger.JobFailedWillRetry(result.Exception);
+                }
+                else
+                {
+                    newState = new FailedState();
+                    _logger.JobFailed(result.Exception);
+                }
+                AddErrorReasonToContent(message, result.Exception);
+            }
+            else
+            {
+                newState = new SucceededState(_options.SucceedMessageExpiredAfter);
+            }
+            return newState;
+        }
 
-				await _consumerInvokerFactory.CreateInvoker(consumerContext).InvokeAsync();
+        private static bool UpdateMessageForRetryAsync(CapReceivedMessage message)
+        {
+            var retryBehavior = RetryBehavior.DefaultRetry;
 
-				return OperateResult.Success;
-			}
-			catch (Exception ex)
-			{
-				_logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.Name}",
-					ex);
+            var retries = ++message.Retries;
+            if (retries >= retryBehavior.RetryCount)
+                return false;
 
-				return OperateResult.Failed(ex);
-			}
-		}
+            var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
+            message.ExpiresAt = due;
 
-		private static async Task<bool> UpdateMessageForRetryAsync(CapReceivedMessage message, IStorageConnection connection, string exceptionMessage)
-		{
-			var retryBehavior = RetryBehavior.DefaultRetry;
+            return true;
+        }
 
-			var retries = ++message.Retries;
-			if (retries >= retryBehavior.RetryCount)
-				return false;
-
-			var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
-			message.ExpiresAt = due;
-
-			await AddErrorReasonToContent(message, exceptionMessage, connection);
-
-			return true;
-		}
-
-		public static Task AddErrorReasonToContent(CapReceivedMessage message, string description, IStorageConnection connection)
-		{
-			var exceptions = new List<KeyValuePair<string, string>>
-			{
-				new KeyValuePair<string, string>("ExceptionMessage", description)
-			};
-
-			message.Content = Helper.AddJsonProperty(message.Content, exceptions);
-			using (var transaction = connection.CreateTransaction())
-			{
-				transaction.UpdateMessage(message);
-				transaction.CommitAsync();
-			}
-			return Task.CompletedTask;
-		}
-	}
+        private static void AddErrorReasonToContent(CapReceivedMessage message, Exception exception)
+        { 
+            message.Content = Helper.AddExceptionProperty(message.Content, exception);
+        }
+    }
 }

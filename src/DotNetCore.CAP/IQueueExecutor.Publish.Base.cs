@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
@@ -8,7 +9,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
 {
-    public abstract class BasePublishQueueExecutor : IQueueExecutor
+    public abstract class BasePublishQueueExecutor : IQueueExecutor, IPublishExecutor
     {
         private readonly ILogger _logger;
         private readonly CapOptions _options;
@@ -40,7 +41,7 @@ namespace DotNetCore.CAP
                 IState newState;
                 if (!result.Succeeded)
                 {
-                    var shouldRetry = await UpdateMessageForRetryAsync(message, connection);
+                    var shouldRetry = UpdateMessageForRetryAsync(message);
                     if (shouldRetry)
                     {
                         newState = new ScheduledState();
@@ -51,6 +52,7 @@ namespace DotNetCore.CAP
                         newState = new FailedState();
                         _logger.JobFailed(result.Exception);
                     }
+                    message.Content = Helper.AddExceptionProperty(message.Content, result.Exception);
                 }
                 else
                 {
@@ -67,6 +69,7 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
+                fetched.Requeue();
                 _logger.ExceptionOccuredWhileExecutingJob(message?.Name, ex);
                 return OperateResult.Failed(ex);
             }
@@ -74,8 +77,7 @@ namespace DotNetCore.CAP
 
         public abstract Task<OperateResult> PublishAsync(string keyName, string content);
 
-        private static async Task<bool> UpdateMessageForRetryAsync(CapPublishedMessage message,
-            IStorageConnection connection)
+        private static bool UpdateMessageForRetryAsync(CapPublishedMessage message)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
@@ -85,11 +87,7 @@ namespace DotNetCore.CAP
 
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
             message.ExpiresAt = due;
-            using (var transaction = connection.CreateTransaction())
-            {
-                transaction.UpdateMessage(message);
-                await transaction.CommitAsync();
-            }
+          
             return true;
         }
     }
