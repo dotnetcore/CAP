@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.Processor
             _context = new ProcessingContext(_provider, _cts.Token);
 
             var processorTasks = _processors
-                .Select(p => InfiniteRetry(p))
+                .Select(InfiniteRetry)
                 .Select(p => p.ProcessAsync(_context));
             _compositeTask = Task.WhenAll(processorTasks);
         }
@@ -84,10 +84,7 @@ namespace DotNetCore.CAP.Processor
 
         private bool AllProcessorsWaiting()
         {
-            foreach (var processor in _messageDispatchers)
-                if (!processor.Waiting)
-                    return false;
-            return true;
+            return _messageDispatchers.All(processor => processor.Waiting);
         }
 
         private IProcessor InfiniteRetry(IProcessor inner)
@@ -107,7 +104,7 @@ namespace DotNetCore.CAP.Processor
 
             returnedProcessors.Add(_provider.GetRequiredService<PublishQueuer>());
             returnedProcessors.Add(_provider.GetRequiredService<SubscribeQueuer>());
-            //returnedProcessors.Add(_provider.GetRequiredService<FailedJobProcessor>());
+            returnedProcessors.Add(_provider.GetRequiredService<FailedProcessor>());
 
             returnedProcessors.Add(_provider.GetRequiredService<IAdditionalProcessor>());
 
