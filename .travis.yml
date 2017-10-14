@@ -1,5 +1,4 @@
-#language: csharp
-language: cpp
+language: csharp
 sudo: required
 dist: trusty
 
@@ -31,18 +30,8 @@ before_install:
   - sudo sh -c 'echo "deb [arch=amd64] https://packages.microsoft.com/repos/microsoft-ubuntu-trusty-prod trusty main" > /etc/apt/sources.list.d/dotnetdev.list'
   - sudo apt-get update
   - sudo apt-get install -y dotnet-sdk-2.0.0 dotnet-sharedframework-microsoft.netcore.app-1.1.2
-  - export DOTNET_INSTALL_DIR="$PWD/.dotnetcli"
-  - export PATH="$DOTNET_INSTALL_DIR:$PATH"  
   
-#install:
-#  - travis_retry curl -sSL https://raw.githubusercontent.com/dotnet/cli/rel/1.0.0/scripts/obtain/dotnet-install.sh | bash /dev/stdin --channel 2.0 --install-dir "$DOTNET_INSTALL_DIR"
-
-#cache: 
-# - apt
-# - directories:
-#   - packages
-
 # Run the build script
 script:
-  - travis_retry dotnet restore --disable-parallel
-  - dotnet test test\DotNetCore.CAP.Test -verbose
+  - travis_retry dotnet restore
+  - dotnet test test\DotNetCore.CAP.Test
