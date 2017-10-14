@@ -2,10 +2,14 @@ language: cpp
 sudo: required
 dist: trusty
 
-os:  
-  - linux
-  - osx
-
+matrix:
+  include:
+  - os: linux
+    dist: trusty # Ubuntu 14.04
+    sudo: required
+  - os: osx
+    osx_image: xcode8.3 # macOS 10.12
+    
 env:  
   global:
     - DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
