@@ -33,5 +33,4 @@ before_install:
   
 # Run the build script
 script:
-  - travis_retry dotnet restore
-  - dotnet test test\DotNetCore.CAP.Test
+  - ./build.sh
