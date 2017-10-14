@@ -1,28 +1,22 @@
 language: csharp
-sudo: required
-mono: none
 
 matrix:
   include:
   - os: linux
     dist: trusty # Ubuntu 14.04
     dotnet: 2.0.0
-    mono: none
-    env: DOTNETCORE=1
     sudo: required
   - os: osx
     osx_image: xcode8.3 # macOS 10.12
     dotnet: 2.0.0
-    mono: none
-    env: DOTNETCORE=1
 
 before_install:
   - chmod a+x ./build.sh
   - if [ "$TRAVIS_OS_NAME" == "osx" ]; then ulimit -n 1024 ; fi
 
-install:
-  - export DOTNET_CLI_TELEMETRY_OPTOUT=1
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then rvm get stable; brew update; brew install openssl; fi
+#install:
+#  - export DOTNET_CLI_TELEMETRY_OPTOUT=1
+#  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then rvm get stable; brew update; brew install openssl; fi
 
 script:
   - ./build.sh
