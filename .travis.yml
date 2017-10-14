@@ -1,4 +1,4 @@
-language: csharp
+language: cpp
 sudo: required
 dist: trusty
 
