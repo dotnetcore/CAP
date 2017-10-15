@@ -1,4 +1,6 @@
-﻿namespace DotNetCore.CAP.Dashboard
+﻿using DotNetCore.CAP.Infrastructure;
+
+namespace DotNetCore.CAP.Dashboard
 {
     public class LocalRequestsOnlyAuthorizationFilter : IDashboardAuthorizationFilter
     {
@@ -14,6 +16,10 @@
 
             // compare with local address
             if (context.Request.RemoteIpAddress == context.Request.LocalIpAddress)
+                return true;
+
+            // check if private ip
+            if (Helper.IsInnerIP(context.Request.RemoteIpAddress))
                 return true;
 
             return false;
