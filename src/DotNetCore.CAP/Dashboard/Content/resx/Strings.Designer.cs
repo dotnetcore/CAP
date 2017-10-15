@@ -421,6 +421,15 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Node: {0}.
+        /// </summary>
+        public static string LayoutPage_Footer_NodeCurrent {
+            get {
+                return ResourceManager.GetString("LayoutPage_Footer_NodeCurrent", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Time:.
         /// </summary>
         public static string LayoutPage_Footer_Time {

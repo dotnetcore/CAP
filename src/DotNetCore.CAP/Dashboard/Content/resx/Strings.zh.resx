@@ -378,4 +378,7 @@
   <data name="NodePage_Table_Port" xml:space="preserve">
     <value>端口号</value>
   </data>
+  <data name="LayoutPage_Footer_NodeCurrent" xml:space="preserve">
+    <value>节点: {0}</value>
+  </data>
 </root>

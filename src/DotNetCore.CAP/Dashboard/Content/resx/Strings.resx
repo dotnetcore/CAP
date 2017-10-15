@@ -399,4 +399,7 @@
   <data name="NodePage_Table_Port" xml:space="preserve">
     <value>Port</value>
   </data>
+  <data name="LayoutPage_Footer_NodeCurrent" xml:space="preserve">
+    <value>Node: {0}</value>
+  </data>
 </root>
