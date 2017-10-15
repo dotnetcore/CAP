@@ -11,48 +11,42 @@
 
 namespace DotNetCore.CAP.Dashboard.Pages
 {
-    
-    #line 2 "..\..\Dashboard\Pages\LayoutPage.cshtml"
+
+#line 2 "..\..\LayoutPage.cshtml"
     using System;
-    
-    #line default
-    #line hidden
+
+#line default
+#line hidden
     using System.Collections.Generic;
-    
-    #line 3 "..\..\Dashboard\Pages\LayoutPage.cshtml"
+
+#line 3 "..\..\LayoutPage.cshtml"
     using System.Globalization;
-    
-    #line default
-    #line hidden
+
+#line default
+#line hidden
     using System.Linq;
-    
-    #line 4 "..\..\Dashboard\Pages\LayoutPage.cshtml"
+
+#line 4 "..\..\LayoutPage.cshtml"
     using System.Reflection;
-    
-    #line default
-    #line hidden
+
+#line default
+#line hidden
     using System.Text;
-    
-    #line 5 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-    using DotNetCore.CAP.Dashboard;
-    
-    #line default
-    #line hidden
-    
-    #line 6 "..\..\Dashboard\Pages\LayoutPage.cshtml"
+
+#line 5 "..\..\LayoutPage.cshtml"
     using DotNetCore.CAP.Dashboard.Pages;
-    
-    #line default
-    #line hidden
-    
-    #line 7 "..\..\Dashboard\Pages\LayoutPage.cshtml"
+
+#line default
+#line hidden
+
+#line 6 "..\..\LayoutPage.cshtml"
     using DotNetCore.CAP.Dashboard.Resources;
-    
-    #line default
-    #line hidden
-    
+
+#line default
+#line hidden
+
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    public partial class LayoutPage : RazorPage
+    public partial class LayoutPage : DotNetCore.CAP.Dashboard.RazorPage
     {
 #line hidden
 
@@ -60,7 +54,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
         {
 
 
-WriteLiteral("\r\n");
+            WriteLiteral("\r\n");
 
 
 
@@ -68,232 +62,262 @@ WriteLiteral("\r\n");
 
 
 
-
-WriteLiteral("<!DOCTYPE html>\r\n<html lang=\"");
-
-
-            
-            #line 10 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-       Write(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\">\r\n<head>\r\n    <title>");
+            WriteLiteral("<!DOCTYPE html>\r\n<html lang=\"");
 
 
-            
-            #line 12 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-      Write(Title);
 
-            
-            #line default
-            #line hidden
-WriteLiteral(" - CAP</title>\r\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\r\n    <m" +
-"eta charset=\"utf-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, ini" +
-"tial-scale=1.0\">\r\n");
+#line 9 "..\..\LayoutPage.cshtml"
+            Write(CultureInfo.CurrentUICulture.TwoLetterISOLanguageName);
 
 
-            
-            #line 16 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-       var version = GetType().GetTypeInfo().Assembly.GetName().Version; 
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    <link rel=\"stylesheet\" href=\"");
+#line default
+#line hidden
+            WriteLiteral("\">\r\n<head>\r\n    <title>");
 
 
-            
-            #line 17 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                            Write(Url.To($"/css{version.Major}{version.Minor}{version.Build}"));
 
-            
-            #line default
-            #line hidden
-WriteLiteral(@""">
+#line 11 "..\..\LayoutPage.cshtml"
+            Write(Title);
+
+
+#line default
+#line hidden
+            WriteLiteral(" - CAP</title>\r\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\">\r\n    <m" +
+            "eta charset=\"utf-8\">\r\n    <meta name=\"viewport\" content=\"width=device-width, ini" +
+            "tial-scale=1.0\">\r\n");
+
+
+
+#line 15 "..\..\LayoutPage.cshtml"
+            var version = GetType().GetTypeInfo().Assembly.GetName().Version;
+
+
+#line default
+#line hidden
+            WriteLiteral("    <link rel=\"stylesheet\" href=\"");
+
+
+
+#line 16 "..\..\LayoutPage.cshtml"
+            Write(Url.To($"/css{version.Major}{version.Minor}{version.Build}"));
+
+
+#line default
+#line hidden
+            WriteLiteral(@""">
 </head>
-    <body>
-        <!-- Wrap all page content here -->
-        <div id=""wrap"">
+<body>
+    <!-- Wrap all page content here -->
+    <div id=""wrap"">
 
-            <!-- Fixed navbar -->
-            <div class=""navbar navbar-default navbar-fixed-top"">
-                <div class=""container"">
-                    <div class=""navbar-header"">
-                        <button type=""button"" class=""navbar-toggle"" data-toggle=""collapse"" data-target="".navbar-collapse"">
-                            <span class=""icon-bar""></span>
-                            <span class=""icon-bar""></span>
-                            <span class=""icon-bar""></span>
-                        </button>
-                        <a class=""navbar-brand"" href=""");
-
-
-            
-            #line 32 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                                                 Write(Url.Home());
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\">CAP Dashboard</a>\r\n                    </div>\r\n                    <div class=\"" +
-"collapse navbar-collapse\">\r\n                        ");
-
-
-            
-            #line 35 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                   Write(Html.RenderPartial(new Navigation()));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n");
-
-
-            
-            #line 36 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                         if(@AppPath != null) {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                            <ul class=\"nav navbar-nav navbar-right\">\r\n           " +
-"                     <li>\r\n                                    <a href=\"");
-
-
-            
-            #line 39 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                                        Write(AppPath);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\">\r\n                                        <span class=\"glyphicon glyphicon-log-" +
-"out\"></span>\r\n                                        ");
-
-
-            
-            #line 41 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                                   Write(Strings.LayoutPage_Back);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                                    </a>\r\n                                </li>" +
-"\r\n                            </ul>\r\n");
-
-
-            
-            #line 45 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("                    </div>\r\n                    <!--/.nav-collapse -->\r\n         " +
-"       </div>\r\n            </div>\r\n\r\n            <!-- Begin page content -->\r\n  " +
-"          <div class=\"container\" style=\"margin-bottom: 20px;\">\r\n                " +
-"");
-
-
-            
-            #line 53 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-           Write(RenderBody());
-
-            
-            #line default
-            #line hidden
-WriteLiteral(@"
-            </div>
-        </div>
-
-        <div id=""footer"">
+        <!-- Fixed navbar -->
+        <div class=""navbar navbar-default navbar-fixed-top"">
             <div class=""container"">
-                <ul class=""list-inline credit"">
-                    <li>
-                        <a href=""https://github.com/dotnetcore/cap/"" target=""_blank"">CAP ");
+                <div class=""navbar-header"">
+                    <button type=""button"" class=""navbar-toggle"" data-toggle=""collapse"" data-target="".navbar-collapse"">
+                        <span class=""icon-bar""></span>
+                        <span class=""icon-bar""></span>
+                        <span class=""icon-bar""></span>
+                    </button>
+                    <a class=""navbar-brand"" href=""");
 
 
-            
-            #line 61 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                                                                                     Write($"{version.Major}.{version.Minor}.{version.Build}");
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n                        </a>\r\n                    </li>\r\n                    <l" +
-"i>");
+#line 31 "..\..\LayoutPage.cshtml"
+            Write(Url.Home());
 
 
-            
-            #line 64 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                   Write(Storage);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</li>\r\n                    <li>");
+#line default
+#line hidden
+            WriteLiteral("\">CAP Dashboard</a>\r\n                </div>\r\n                <div class=\"collapse" +
+            " navbar-collapse\">\r\n                    ");
 
 
-            
-            #line 65 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                   Write(Strings.LayoutPage_Footer_Time);
 
-            
-            #line default
-            #line hidden
-WriteLiteral(" ");
+#line 34 "..\..\LayoutPage.cshtml"
+            Write(Html.RenderPartial(new Navigation()));
 
 
-            
-            #line 65 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                                                   Write(Html.LocalTime(DateTime.UtcNow));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("</li>\r\n                    <li>");
+#line default
+#line hidden
+            WriteLiteral("\r\n");
 
 
-            
-            #line 66 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                   Write(String.Format(Strings.LayoutPage_Footer_Generatedms, GenerationTime.Elapsed.TotalMilliseconds.ToString("N")));
 
-            
-            #line default
-            #line hidden
-WriteLiteral("</li>\r\n                </ul>\r\n            </div>\r\n        </div>\r\n        \r\n     " +
-"   <div id=\"capConfig\"\r\n             data-pollinterval=\"");
+#line 35 "..\..\LayoutPage.cshtml"
+            if (AppPath != null)
+            {
 
 
-            
-            #line 72 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                           Write(StatsPollingInterval);
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\"\r\n             data-pollurl=\"");
+#line default
+#line hidden
+                WriteLiteral("                        <ul class=\"nav navbar-nav navbar-right\">\r\n               " +
+                "             <li>\r\n                                <a href=\"");
 
 
-            
-            #line 73 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                       Write(Url.To("/stats"));
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\">\r\n        </div>\r\n\r\n        <script src=\"");
+#line 39 "..\..\LayoutPage.cshtml"
+                Write(AppPath);
 
 
-            
-            #line 76 "..\..\Dashboard\Pages\LayoutPage.cshtml"
-                Write(Url.To($"/js{version.Major}{version.Minor}{version.Build}"));
+#line default
+#line hidden
+                WriteLiteral("\">\r\n                                    <span class=\"glyphicon glyphicon-log-out\"" +
+                "></span>\r\n                                    ");
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\"></script>\r\n    </body>\r\n</html>\r\n");
+
+
+#line 41 "..\..\LayoutPage.cshtml"
+                Write(Strings.LayoutPage_Back);
+
+
+#line default
+#line hidden
+                WriteLiteral("\r\n                                </a>\r\n                            </li>\r\n      " +
+                "                  </ul>\r\n");
+
+
+
+#line 45 "..\..\LayoutPage.cshtml"
+            }
+
+
+#line default
+#line hidden
+            WriteLiteral("                </div>\r\n                <!--/.nav-collapse -->\r\n            </div" +
+            ">\r\n        </div>\r\n\r\n        <!-- Begin page content -->\r\n        <div class=\"co" +
+            "ntainer\" style=\"margin-bottom: 20px;\">\r\n            ");
+
+
+
+#line 53 "..\..\LayoutPage.cshtml"
+            Write(RenderBody());
+
+
+#line default
+#line hidden
+            WriteLiteral(@"
+        </div>
+    </div>
+
+    <div id=""footer"">
+        <div class=""container"">
+            <ul class=""list-inline credit"">
+                <li>
+                    <a href=""https://github.com/dotnetcore/cap/"" target=""_blank"">
+                        CAP ");
+
+
+
+#line 62 "..\..\LayoutPage.cshtml"
+            Write($"{version.Major}.{version.Minor}.{version.Build}");
+
+
+#line default
+#line hidden
+            WriteLiteral("\r\n                    </a>\r\n                </li>\r\n                <li>");
+
+
+
+#line 65 "..\..\LayoutPage.cshtml"
+            Write(Storage);
+
+
+#line default
+#line hidden
+            WriteLiteral("</li>\r\n                <li>");
+
+
+
+#line 66 "..\..\LayoutPage.cshtml"
+            Write(Strings.LayoutPage_Footer_Time);
+
+
+#line default
+#line hidden
+            WriteLiteral(" ");
+
+
+
+#line 66 "..\..\LayoutPage.cshtml"
+            Write(Html.LocalTime(DateTime.UtcNow));
+
+
+#line default
+#line hidden
+            WriteLiteral("</li>\r\n                <li>");
+
+
+
+#line 67 "..\..\LayoutPage.cshtml"
+            Write(string.Format(Strings.LayoutPage_Footer_Generatedms, GenerationTime.Elapsed.TotalMilliseconds.ToString("N")));
+
+
+#line default
+#line hidden
+            WriteLiteral("</li>\r\n");
+
+
+
+#line 68 "..\..\LayoutPage.cshtml"
+            if (NodeName != null)
+            {
+
+
+#line default
+#line hidden
+                WriteLiteral("                    <li>");
+
+
+
+#line 70 "..\..\LayoutPage.cshtml"
+                Write(string.Format(Strings.LayoutPage_Footer_NodeCurrent, NodeName));
+
+
+#line default
+#line hidden
+                WriteLiteral("</li>\r\n");
+
+
+
+#line 71 "..\..\LayoutPage.cshtml"
+            }
+
+
+#line default
+#line hidden
+            WriteLiteral("            </ul>\r\n        </div>\r\n    </div>\r\n\r\n    <div id=\"capConfig\"\r\n       " +
+            "  data-pollinterval=\"");
+
+
+
+#line 77 "..\..\LayoutPage.cshtml"
+            Write(StatsPollingInterval);
+
+
+#line default
+#line hidden
+            WriteLiteral("\"\r\n         data-pollurl=\"");
+
+
+
+#line 78 "..\..\LayoutPage.cshtml"
+            Write(Url.To("/stats"));
+
+
+#line default
+#line hidden
+            WriteLiteral("\">\r\n    </div>\r\n\r\n    <script src=\"");
+
+
+
+#line 81 "..\..\LayoutPage.cshtml"
+            Write(Url.To($"/js{version.Major}{version.Minor}{version.Build}"));
+
+
+#line default
+#line hidden
+            WriteLiteral("\"></script>\r\n</body>\r\n</html>");
 
 
         }

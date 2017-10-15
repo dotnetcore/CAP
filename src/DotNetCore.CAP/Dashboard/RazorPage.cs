@@ -26,6 +26,8 @@ namespace DotNetCore.CAP.Dashboard
 
         public IStorage Storage { get; internal set; }
         public string AppPath { get; internal set; }
+        public string NodeName { get; internal set; }
+
         public int StatsPollingInterval { get; internal set; }
         public Stopwatch GenerationTime { get; private set; }
 
@@ -64,10 +66,10 @@ namespace DotNetCore.CAP.Dashboard
             Response = parentPage.Response;
             Storage = parentPage.Storage;
             AppPath = parentPage.AppPath;
+            NodeName = parentPage.NodeName;
             StatsPollingInterval = parentPage.StatsPollingInterval;
             Url = parentPage.Url;
             RequestServices = parentPage.RequestServices;
-
             GenerationTime = parentPage.GenerationTime;
             _statisticsLazy = parentPage._statisticsLazy;
         }
@@ -79,6 +81,7 @@ namespace DotNetCore.CAP.Dashboard
             RequestServices = context.RequestServices;
             Storage = context.Storage;
             AppPath = context.Options.AppPath;
+            NodeName = GetNodeName();
             StatsPollingInterval = context.Options.StatsPollingInterval;
             Url = new UrlHelper(context);
 
@@ -93,11 +96,21 @@ namespace DotNetCore.CAP.Dashboard
             });
         }
 
+        private string GetNodeName()
+        {
+            var discoveryOptions = RequestServices.GetService<DiscoveryOptions>();
+            if (discoveryOptions != null)
+            {
+                return $"{discoveryOptions.NodeName}({discoveryOptions.NodeId})";
+            }
+            return null;
+        }
+
         private void SetServersCount(StatisticsDto dto)
         {
             if (CapCache.Global.TryGet("cap.nodes.count", out var count))
             {
-                dto.Servers = (int) count;
+                dto.Servers = (int)count;
             }
             else
             {
