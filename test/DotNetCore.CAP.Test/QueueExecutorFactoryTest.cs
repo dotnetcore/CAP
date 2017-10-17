@@ -15,10 +15,7 @@ namespace DotNetCore.CAP.Test
             var services = new ServiceCollection();
             services.AddLogging();
             services.AddOptions();
-
-            var callbackSender = Mock.Of<ICallbackMessageSender>();
-
-            services.AddSingleton(callbackSender);
+            
             services.AddCap(x => { });
             _provider = services.BuildServiceProvider();
         }

@@ -1,6 +1,8 @@
 ﻿using System.Linq;
 using System.Reflection;
+using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Internal;
+using Moq;
 using Xunit;
 
 namespace DotNetCore.CAP.Test
@@ -11,7 +13,8 @@ namespace DotNetCore.CAP.Test
 
         public ModelBinderFactoryTest()
         {
-            _factory = new ModelBinderFactory();
+            var serializer = Mock.Of<IContentSerializer>();
+            _factory = new ModelBinderFactory(serializer);
         }
 
         [Theory]
