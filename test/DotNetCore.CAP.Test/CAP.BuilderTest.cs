@@ -106,6 +106,11 @@ namespace DotNetCore.CAP.Test
                 throw new NotImplementedException();
             }
 
+            public object DeSerialize(string content, Type type)
+            {
+                throw new NotImplementedException();
+            }
+
             public string Serialize<T>(T obj)
             {
                 throw new NotImplementedException();
