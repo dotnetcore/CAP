@@ -4,12 +4,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
 {
+    /// <inheritdoc />
     /// <summary>
-    /// Default implement of <see cref="IBootstrapper" />.
+    /// Default implement of <see cref="T:DotNetCore.CAP.IBootstrapper" />.
     /// </summary>
     internal class DefaultBootstrapper : IBootstrapper
     {
@@ -21,16 +21,14 @@ namespace DotNetCore.CAP
 
         public DefaultBootstrapper(
             ILogger<DefaultBootstrapper> logger,
-            IOptions<CapOptions> options,
             IStorage storage,
             IApplicationLifetime appLifetime,
-            IEnumerable<IProcessingServer> servers)
+            IEnumerable<IProcessingServer> processors)
         {
             _logger = logger;
             _appLifetime = appLifetime;
-            Options = options.Value;
             Storage = storage;
-            Servers = servers;
+            Processors = processors;
 
             _cts = new CancellationTokenSource();
             _ctsRegistration = appLifetime.ApplicationStopping.Register(() =>
@@ -47,11 +45,9 @@ namespace DotNetCore.CAP
             });
         }
 
-        protected CapOptions Options { get; }
-
         protected IStorage Storage { get; }
 
-        protected IEnumerable<IProcessingServer> Servers { get; }
+        protected IEnumerable<IProcessingServer> Processors { get; }
 
         public Task BootstrapAsync()
         {
@@ -68,7 +64,7 @@ namespace DotNetCore.CAP
 
             if (_cts.IsCancellationRequested) return;
 
-            foreach (var item in Servers)
+            foreach (var item in Processors)
                 try
                 {
                     item.Start();
@@ -86,7 +82,7 @@ namespace DotNetCore.CAP
         {
             _appLifetime.ApplicationStopping.Register(() =>
             {
-                foreach (var item in Servers)
+                foreach (var item in Processors)
                     item.Dispose();
             });
             return Task.CompletedTask;
