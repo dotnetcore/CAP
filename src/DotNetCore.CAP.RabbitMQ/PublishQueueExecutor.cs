@@ -42,14 +42,14 @@ namespace DotNetCore.CAP.RabbitMQ
                         null,
                         body);
 
-                    _logger.LogDebug($"rabbitmq topic message [{keyName}] has been published.");
+                    _logger.LogDebug($"RabbitMQ topic message [{keyName}] has been published.");
                 }
                 return Task.FromResult(OperateResult.Success);
             }
             catch (Exception ex)
             {
                 _logger.LogError(
-                    $"rabbitmq topic message [{keyName}] has benn raised an exception of sending. the exception is: {ex.Message}");
+                    $"RabbitMQ topic message [{keyName}] has been raised an exception of sending. the exception is: {ex.Message}");
 
                 return Task.FromResult(OperateResult.Failed(ex,
                     new OperateError

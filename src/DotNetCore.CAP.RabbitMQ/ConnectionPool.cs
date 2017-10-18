@@ -38,8 +38,7 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             _maxSize = 0;
 
-            IConnection context;
-            while (_pool.TryDequeue(out context))
+            while (_pool.TryDequeue(out var context))
                 context.Dispose();
         }
 

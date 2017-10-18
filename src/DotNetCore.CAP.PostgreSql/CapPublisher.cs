@@ -32,11 +32,11 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        public async Task PublishAsync(CapPublishedMessage message)
+        public Task PublishAsync(CapPublishedMessage message)
         {
             using (var conn = new NpgsqlConnection(_options.ConnectionString))
             {
-                await conn.ExecuteAsync(PrepareSql(), message);
+                return conn.ExecuteAsync(PrepareSql(), message);
             }
         }
 
@@ -64,12 +64,14 @@ namespace DotNetCore.CAP.PostgreSql
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
         }
 
-        protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected override Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message)
         {
-            await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
+            dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
 
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
+
+            return Task.CompletedTask;
         }
 
         #region private methods
