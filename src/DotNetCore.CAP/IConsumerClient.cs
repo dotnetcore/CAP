@@ -4,6 +4,7 @@ using System.Threading;
 
 namespace DotNetCore.CAP
 {
+    /// <inheritdoc />
     /// <summary>
     /// consumer client
     /// </summary>

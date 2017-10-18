@@ -15,7 +15,7 @@ namespace DotNetCore.CAP
         /// otherwise you need to use overloaded method with IDbConnection and IDbTransaction.
         /// </para>
         /// </summary>
-        /// <typeparam name="T">The type of conetent object.</typeparam>
+        /// <typeparam name="T">The type of content object.</typeparam>
         /// <param name="name">the topic name or exchange router key.</param>
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
         /// <param name="callbackName">callback subscriber name</param>
@@ -28,7 +28,7 @@ namespace DotNetCore.CAP
         /// otherwise you need to use overloaded method with IDbConnection and IDbTransaction.
         /// </para>
         /// </summary>
-        /// <typeparam name="T">The type of conetent object.</typeparam>
+        /// <typeparam name="T">The type of content object.</typeparam>
         /// <param name="name">the topic name or exchange router key.</param>
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
         /// <param name="callbackName">callback subscriber name</param>
