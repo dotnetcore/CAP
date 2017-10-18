@@ -4,7 +4,7 @@ namespace DotNetCore.CAP
 {
     /// <inheritdoc />
     /// <summary>
-    /// A process thread abstract of job process.
+    /// A process thread abstract of message process.
     /// </summary>
     public interface IProcessingServer : IDisposable
     {

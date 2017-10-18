@@ -32,12 +32,14 @@ namespace Microsoft.Extensions.DependencyInjection
 
             AddSubscribeServices(services);
 
+            // serializer and model binder
             services.TryAddSingleton<IContentSerializer, JsonContentSerializer>();
             services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
             services.TryAddSingleton<IModelBinderFactory, ModelBinderFactory>();
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();
 
+            //bootstrap
             services.AddSingleton<IProcessingServer, ConsumerHandler>();
             services.AddSingleton<IProcessingServer, CapProcessingServer>();
             services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
