@@ -32,6 +32,13 @@ namespace DotNetCore.CAP
         public async Task<OperateResult> ExecuteAsync(IStorageConnection connection, IFetchedMessage fetched)
         {
             var message = await connection.GetReceivedMessageAsync(fetched.MessageId);
+
+            if (message == null)
+            {
+                _logger.LogError($"Can not find mesage at cap received message table, message id:{fetched.MessageId} !!!");
+                return OperateResult.Failed();
+            }
+
             try
             {
                 var sp = Stopwatch.StartNew();
