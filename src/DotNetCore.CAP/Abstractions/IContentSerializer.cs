@@ -4,8 +4,15 @@ namespace DotNetCore.CAP.Abstractions
 {
     public interface IContentSerializer
     {
-        string Serialize<T>(T obj) where T : CapMessageDto, new();
+        string Serialize<T>(T obj);
 
-        T DeSerialize<T>(string content) where T : CapMessageDto, new();
+        T DeSerialize<T>(string content);
+    }
+
+    public interface IMessagePacker
+    {
+        string Pack(CapMessage obj);
+
+        CapMessage UnPack(string packingMessage);
     }
 }

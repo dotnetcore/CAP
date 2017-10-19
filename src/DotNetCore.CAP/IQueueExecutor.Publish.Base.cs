@@ -70,7 +70,7 @@ namespace DotNetCore.CAP
             catch (Exception ex)
             {
                 fetched.Requeue();
-                _logger.ExceptionOccuredWhileExecutingJob(message?.Name, ex);
+                _logger.ExceptionOccuredWhileExecuting(message?.Name, ex);
                 return OperateResult.Failed(ex);
             }
         }

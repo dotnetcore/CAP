@@ -93,7 +93,7 @@ namespace DotNetCore.CAP
             _exceptionOccuredWhileExecutingJob = LoggerMessage.Define<string>(
                 LogLevel.Error,
                 6,
-                "An exception occured while trying to execute a job: '{JobId}'. " +
+                "An exception occured while trying to execute a message: '{MessageId}'. " +
                 "Requeuing for another retry.");
         }
 
@@ -157,9 +157,9 @@ namespace DotNetCore.CAP
             _expectedOperationCanceledException(logger, ex.Message, ex);
         }
 
-        public static void ExceptionOccuredWhileExecutingJob(this ILogger logger, string jobId, Exception ex)
+        public static void ExceptionOccuredWhileExecuting(this ILogger logger, string messageId, Exception ex)
         {
-            _exceptionOccuredWhileExecutingJob(logger, jobId, ex);
+            _exceptionOccuredWhileExecutingJob(logger, messageId, ex);
         }
 
         public static void ModelBinderFormattingException(this ILogger logger, string methodName, string parameterName,

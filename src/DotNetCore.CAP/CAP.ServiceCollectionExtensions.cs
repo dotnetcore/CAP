@@ -34,6 +34,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             //Serializer and model binder
             services.TryAddSingleton<IContentSerializer, JsonContentSerializer>();
+            services.TryAddSingleton<IMessagePacker, DefaultMessagePacker>();
             services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
             services.TryAddSingleton<IModelBinderFactory, ModelBinderFactory>();
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();

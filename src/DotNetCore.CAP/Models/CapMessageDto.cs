@@ -3,7 +3,18 @@ using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Models
 {
-    public class CapMessageDto
+    public abstract class CapMessage
+    {
+        public virtual string Id { get; set; }
+
+        public virtual DateTime Timestamp { get; set; }
+
+        public virtual string Content { get; set; }
+
+        public virtual string CallbackName { get; set; }
+    }
+
+    public sealed class CapMessageDto: CapMessage
     {
         public CapMessageDto()
         {
@@ -11,17 +22,17 @@ namespace DotNetCore.CAP.Models
             Timestamp = DateTime.Now;
         }
 
-        public CapMessageDto(object content) : this()
+        public CapMessageDto(string content) : this()
         {
             Content = content;
         }
 
-        public virtual string Id { get; set; }
+        public override string Id { get; set; }
 
-        public virtual DateTime Timestamp { get; set; }
+        public override DateTime Timestamp { get; set; }
 
-        public virtual object Content { get; set; }
+        public override string Content { get; set; }
 
-        public virtual string CallbackName { get; set; }
+        public override string CallbackName { get; set; }
     }
 }

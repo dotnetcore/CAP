@@ -68,13 +68,17 @@ namespace DotNetCore.CAP.Abstractions
 
         protected virtual string Serialize<T>(T obj, string callbackName = null)
         {
-            var serializer = (IContentSerializer) ServiceProvider.GetService(typeof(IContentSerializer));
+            var serializer = (IContentSerializer)ServiceProvider.GetService(typeof(IContentSerializer));
+            var packer = (IMessagePacker)ServiceProvider.GetService(typeof(IMessagePacker));
 
-            var message = new CapMessageDto(obj)
+            var content = serializer.Serialize(obj);
+
+            var message = new CapMessageDto(content)
             {
                 CallbackName = callbackName
             };
-            return serializer.Serialize(message);
+
+            return packer.Pack(message);
         }
 
         #region private methods

@@ -61,6 +61,16 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
+        /// Add a custom message wapper
+        /// </summary>
+        /// <typeparam name="T">The type of the service.</typeparam>
+        public CapBuilder AddMessagePacker<T>()
+            where T : class, IMessagePacker
+        {
+            return AddSingleton(typeof(IMessagePacker), typeof(T));
+        }
+
+        /// <summary>
         /// Adds a scoped service of the type specified in serviceType with an implementation
         /// </summary>
         private CapBuilder AddScoped(Type serviceType, Type concreteType)

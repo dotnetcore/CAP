@@ -68,7 +68,7 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                _logger.ExceptionOccuredWhileExecutingJob(message?.Name, ex);
+                _logger.ExceptionOccuredWhileExecuting(message?.Name, ex);
 
                 fetched.Requeue();
 
