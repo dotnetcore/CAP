@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.Internal
 
                 object result;
                 if (_executor.MethodParameters.Length > 0)
-                    result = await ExecuteWithParameterAsync(obj, message.Content.ToString());
+                    result = await ExecuteWithParameterAsync(obj, message.Content);
                 else
                     result = await ExecuteAsync(obj);
 
@@ -89,23 +89,27 @@ namespace DotNetCore.CAP.Internal
 
         private async Task SentCallbackMessage(string messageId, string topicName, object bodyObj)
         {
-            var callbackMessage = new CapMessageDto
-            {
-                Id = messageId,
-                Content = bodyObj
-            };
-
             using (var scope = _serviceProvider.CreateScope())
             {
                 var provider = scope.ServiceProvider;
                 var publisher = provider.GetRequiredService<ICallbackPublisher>();
+                var serializer = provider.GetService<IContentSerializer>();
+                var packer = provider.GetService<IMessagePacker>();
+
+                var callbackMessage = new CapMessageDto
+                {
+                    Id = messageId,
+                    Content = serializer.Serialize(bodyObj)
+                };
+                var content = packer.Pack(callbackMessage);
 
                 var publishedMessage = new CapPublishedMessage
                 {
                     Name = topicName,
-                    Content = Helper.ToJson(callbackMessage),
+                    Content = content,
                     StatusName = StatusName.Scheduled
                 };
+
                 await publisher.PublishAsync(publishedMessage);
             }
         }
