@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetCore.CAP.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP
@@ -27,7 +28,7 @@ namespace DotNetCore.CAP
     /// <summary>
     /// Allows fine grained configuration of CAP services.
     /// </summary>
-    public class CapBuilder
+    public sealed class CapBuilder
     {
         public CapBuilder(IServiceCollection services)
         {
@@ -40,6 +41,26 @@ namespace DotNetCore.CAP
         public IServiceCollection Services { get; }
 
         /// <summary>
+        /// Add an <see cref="ICapPublisher" />.
+        /// </summary>
+        /// <typeparam name="T">The type of the service.</typeparam>
+        public CapBuilder AddProducerService<T>()
+            where T : class, ICapPublisher
+        {
+            return AddScoped(typeof(ICapPublisher), typeof(T));
+        }
+
+        /// <summary>
+        /// Add a custom content serializer
+        /// </summary>
+        /// <typeparam name="T">The type of the service.</typeparam>
+        public CapBuilder AddContentSerializer<T>()
+            where T : class, IContentSerializer
+        {
+            return AddSingleton(typeof(IContentSerializer), typeof(T));
+        }
+
+        /// <summary>
         /// Adds a scoped service of the type specified in serviceType with an implementation
         /// </summary>
         private CapBuilder AddScoped(Type serviceType, Type concreteType)
@@ -49,13 +70,12 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
-        /// Add an <see cref="ICapPublisher" />.
+        /// Adds a singleton service of the type specified in serviceType with an implementation
         /// </summary>
-        /// <typeparam name="T">The type of the service.</typeparam>
-        public virtual CapBuilder AddProducerService<T>()
-            where T : class, ICapPublisher
+        private CapBuilder AddSingleton(Type serviceType, Type concreteType)
         {
-            return AddScoped(typeof(ICapPublisher), typeof(T));
+            Services.AddSingleton(serviceType, concreteType);
+            return this;
         }
     }
 }
