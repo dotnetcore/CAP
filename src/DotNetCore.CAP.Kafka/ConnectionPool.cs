@@ -8,10 +8,7 @@ namespace DotNetCore.CAP.Kafka
 {
     public class ConnectionPool : IConnectionPool, IDisposable
     {
-        private const int DefaultPoolSize = 15;
-
         private readonly Func<Producer> _activator;
-
         private readonly ConcurrentQueue<Producer> _pool = new ConcurrentQueue<Producer>();
         private int _count;
 
@@ -19,8 +16,7 @@ namespace DotNetCore.CAP.Kafka
 
         public ConnectionPool(KafkaOptions options)
         {
-            _maxSize = DefaultPoolSize;
-
+            _maxSize = options.ConnectionPoolSize;
             _activator = CreateActivator(options);
         }
 
