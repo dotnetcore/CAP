@@ -20,9 +20,9 @@ namespace DotNetCore.CAP
         {
             services.AddSingleton<CapDatabaseStorageMarkerService>();
             services.AddSingleton<IStorage, MySqlStorage>();
-            services.AddScoped<IStorageConnection, MySqlStorageConnection>();
+            services.AddSingleton<IStorageConnection, MySqlStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddTransient<ICallbackPublisher, CapPublisher>();
+            services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
             var mysqlOptions = new MySqlOptions();
