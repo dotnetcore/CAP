@@ -20,9 +20,10 @@ namespace DotNetCore.CAP.Test
             services.AddSingleton<IContentSerializer, JsonContentSerializer>();
             var provider = services.BuildServiceProvider();
             var logFactory = provider.GetRequiredService<ILoggerFactory>();
+            var mesagePacker = provider.GetRequiredService<IMessagePacker>();
             var binder = new ModelBinderFactory();
 
-            consumerInvokerFactory = new ConsumerInvokerFactory(logFactory, binder, provider);
+            consumerInvokerFactory = new ConsumerInvokerFactory(logFactory, mesagePacker,binder,  provider);
         }
 
         [Fact]
