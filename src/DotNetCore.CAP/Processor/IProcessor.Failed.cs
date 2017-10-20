@@ -53,8 +53,6 @@ namespace DotNetCore.CAP.Processor
                     ProcessPublishedAsync(connection, context),
                     ProcessReceivedAsync(connection, context));
 
-                DefaultDispatcher.PulseEvent.Set();
-
                 await context.WaitAsync(_waitingInterval);
             }
         }
