@@ -30,11 +30,11 @@ namespace DotNetCore.CAP.MySql
             _dbContext = (DbContext) ServiceProvider.GetService(_options.DbContextType);
         }
 
-        public Task PublishAsync(CapPublishedMessage message)
+        public async Task PublishAsync(CapPublishedMessage message)
         {
             using (var conn = new MySqlConnection(_options.ConnectionString))
             {
-                return conn.ExecuteAsync(PrepareSql(), message);
+                await conn.ExecuteAsync(PrepareSql(), message);
             }
         }
 

@@ -28,14 +28,14 @@ namespace DotNetCore.CAP.SqlServer
             if (_options.DbContextType == null) return;
 
             IsUsingEF = true;
-            _dbContext = (DbContext) ServiceProvider.GetService(_options.DbContextType);
+            _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
         }
 
-        public Task PublishAsync(CapPublishedMessage message)
+        public async Task PublishAsync(CapPublishedMessage message)
         {
             using (var conn = new SqlConnection(_options.ConnectionString))
             {
-               return conn.ExecuteAsync(PrepareSql(), message);
+               await conn.ExecuteAsync(PrepareSql(), message);
             }
         }
 
@@ -66,7 +66,7 @@ namespace DotNetCore.CAP.SqlServer
         protected override Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message)
         {
-             dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
+            dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
 
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
 
