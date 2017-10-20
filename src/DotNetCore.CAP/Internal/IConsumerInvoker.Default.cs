@@ -16,14 +16,17 @@ namespace DotNetCore.CAP.Internal
         private readonly ILogger _logger;
         private readonly IModelBinderFactory _modelBinderFactory;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IMessagePacker _messagePacker;
 
         public DefaultConsumerInvoker(ILogger logger,
             IServiceProvider serviceProvider,
+            IMessagePacker messagePacker,
             IModelBinderFactory modelBinderFactory,
             ConsumerContext consumerContext)
         {
             _modelBinderFactory = modelBinderFactory;
             _serviceProvider = serviceProvider;
+            _messagePacker = messagePacker;
             _logger = logger;
             _consumerContext = consumerContext;
 
@@ -35,7 +38,6 @@ namespace DotNetCore.CAP.Internal
         {
             _logger.LogDebug("Executing consumer Topic: {0}", _consumerContext.ConsumerDescriptor.MethodInfo.Name);
 
-            var serializer = _serviceProvider.GetService<IContentSerializer>();
             using (var scope = _serviceProvider.CreateScope())
             {
                 var provider = scope.ServiceProvider;
@@ -43,8 +45,8 @@ namespace DotNetCore.CAP.Internal
                 var obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, serviceType);
 
                 var jsonContent = _consumerContext.DeliverMessage.Content;
-                var message = serializer.DeSerialize<CapMessageDto>(jsonContent);
-
+                var message = _messagePacker.UnPack(jsonContent);
+               
                 object result;
                 if (_executor.MethodParameters.Length > 0)
                     result = await ExecuteWithParameterAsync(obj, message.Content);
