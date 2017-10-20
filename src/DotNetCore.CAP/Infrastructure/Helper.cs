@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -43,13 +42,12 @@ namespace DotNetCore.CAP.Infrastructure
         public static long ToTimestamp(DateTime value)
         {
             var elapsedTime = value - Epoch;
-            return (long)elapsedTime.TotalSeconds;
+            return (long) elapsedTime.TotalSeconds;
         }
 
 
         public static DateTime FromTimestamp(long value)
         {
-            // ReSharper disable once ImpureMethodCallOnReadonlyValueField
             return Epoch.AddSeconds(value);
         }
 
@@ -73,31 +71,6 @@ namespace DotNetCore.CAP.Infrastructure
             return !CanConvertFromString(type);
         }
 
-        public static JObject ToJObject(Exception exception)
-        {
-            return new JObject(new
-            {
-                Source = exception.Source,
-                Message = exception.Message,
-                InnerMessage = exception.InnerException?.Message
-            });
-        }
-
-        public static string AddJsonProperty(string json, string propertyName, JObject propertyValue)
-        {
-            var jObj = JObject.Parse(json);
-
-            if (jObj.TryGetValue(propertyName, out var _))
-            {
-                jObj[propertyName] = propertyValue;
-            }
-            else
-            {
-                jObj.Add(new JProperty(propertyName, propertyValue));
-            }
-
-            return jObj.ToString();
-        }
 
         public static string AddExceptionProperty(string json, Exception exception)
         {
@@ -136,7 +109,7 @@ namespace DotNetCore.CAP.Infrastructure
             var ipNum = a * 256 * 256 * 256 + b * 256 * 256 + c * 256 + d;
             return ipNum;
         }
-         
+
         private static bool IsInner(long userIp, long begin, long end)
         {
             return userIp >= begin && userIp <= end;
@@ -159,6 +132,28 @@ namespace DotNetCore.CAP.Infrastructure
                    type == typeof(DateTimeOffset) ||
                    type == typeof(TimeSpan) ||
                    type == typeof(Uri);
+        }
+
+        private static JObject ToJObject(Exception exception)
+        {
+            return JObject.FromObject(new
+            {
+                exception.Source,
+                exception.Message,
+                InnerMessage = exception.InnerException?.Message
+            });
+        }
+
+        private static string AddJsonProperty(string json, string propertyName, JObject propertyValue)
+        {
+            var jObj = JObject.Parse(json);
+
+            if (jObj.TryGetValue(propertyName, out var _))
+                jObj[propertyName] = propertyValue;
+            else
+                jObj.Add(new JProperty(propertyName, propertyValue));
+
+            return jObj.ToString(Formatting.None);
         }
     }
 }
