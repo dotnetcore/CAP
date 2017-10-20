@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
-    <AssemblyName>Sample.RabbitMQ.SqlServer</AssemblyName>
+    <AssemblyName>Sample.Kafka.SqlServer</AssemblyName>
     <WarningsAsErrors>NU1701</WarningsAsErrors>
     <NoWarn>NU1701</NoWarn>
   </PropertyGroup>

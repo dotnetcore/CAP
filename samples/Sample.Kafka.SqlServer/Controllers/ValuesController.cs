@@ -4,18 +4,36 @@ using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace Sample.Kafka.SqlServer.Controllers
 {
     public class Person
     {
-        public int Id { get; set; }
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("uname")]
         public string Name { get; set; }
-        public int Age { get; set; }
+
+        public HAHA Haha { get; set; }
 
         public override string ToString()
         {
-            return "Name:" + Name + ";Age:" + Age;
+            return "Name:" + Name + ";Id:" + Id + "Haha:" + Haha?.ToString();
+        }
+    }
+
+    public class HAHA
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+
+        [JsonProperty("uname")]
+        public string Name { get; set; }
+        public override string ToString()
+        {
+            return "Name:" + Name + ";Id:" + Id;
         }
     }
 
@@ -32,21 +50,41 @@ namespace Sample.Kafka.SqlServer.Controllers
             _dbContext = dbContext;
         }
 
+
         [Route("~/publish")]
         public IActionResult PublishMessage()
         {
+            var p = new Person
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "杨晓东",
+                Haha = new HAHA
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = "1-1杨晓东",
+                }
+            };
 
-            _capBus.Publish("sample.rabbitmq.sqlserver.order.check", DateTime.Now);
+            _capBus.Publish("wl.yxd.test", p, "wl.yxd.test.callback");
 
-            //var person = new Person
-            //{
-            //    Name = "杨晓东",
-            //    Age = 11,
-            //    Id = 23
-            //};
-            //_capBus.Publish("sample.rabbitmq.mysql33333", person);
 
+            //_capBus.Publish("wl.cj.test", p);
             return Ok();
+        }
+
+        [CapSubscribe("wl.yxd.test.callback")]
+        public void KafkaTestCallback(Person p)
+        {
+            Console.WriteLine("回调内容：" + p);
+        }
+
+
+        [CapSubscribe("wl.cj.test")]
+        public string KafkaTestReceived(Person person)
+        {
+            Console.WriteLine(person);
+            Debug.WriteLine(person);
+            return "this is callback message";
         }
 
         [Route("~/publishWithTrans")]
@@ -61,7 +99,7 @@ namespace Sample.Kafka.SqlServer.Controllers
             return Ok();
         }
 
-        [CapSubscribe("sample.rabbitmq.mysql33333",Group ="Test.Group")]
+        [CapSubscribe("sample.rabbitmq.mysql33333", Group = "Test.Group")]
         public void KafkaTest22(Person person)
         {
             var aa = _dbContext.Database;
