@@ -14,7 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Confluent.Kafka" Version="0.11.0" />
+    <PackageReference Include="Confluent.Kafka" Version="0.11.1" />
+    <PackageReference Include="librdkafka.redist" Version="0.11.1" />
   </ItemGroup>
 
   <ItemGroup>
