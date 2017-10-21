@@ -37,6 +37,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IMessagePacker, DefaultMessagePacker>();
             services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
             services.TryAddSingleton<IModelBinderFactory, ModelBinderFactory>();
+
+            services.TryAddSingleton<ICallbackMessageSender, CallbackMessageSender>();
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();
 
