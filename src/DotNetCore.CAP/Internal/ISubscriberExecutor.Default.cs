@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.Logging;
 
@@ -8,19 +7,23 @@ namespace DotNetCore.CAP.Internal
 {
     public class DefaultSubscriberExecutor : ISubscriberExecutor
     {
-        private readonly IConsumerInvokerFactory _consumerInvokerFactory;
+        private readonly ICallbackMessageSender _callbackMessageSender;
         private readonly ILogger<DefaultSubscriberExecutor> _logger;
         private readonly MethodMatcherCache _selector;
 
+        public IConsumerInvoker Invoker { get; }
+
         public DefaultSubscriberExecutor(MethodMatcherCache selector,
             IConsumerInvokerFactory consumerInvokerFactory,
+            ICallbackMessageSender callbackMessageSender,
             ILogger<DefaultSubscriberExecutor> logger)
         {
             _selector = selector;
-            _consumerInvokerFactory = consumerInvokerFactory;
+            _callbackMessageSender = callbackMessageSender;
             _logger = logger;
-        }
 
+            Invoker = consumerInvokerFactory.CreateInvoker();
+        }
 
         public async Task<OperateResult> ExecuteAsync(CapReceivedMessage receivedMessage)
         {
@@ -38,8 +41,11 @@ namespace DotNetCore.CAP.Internal
                 var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
                 var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
 
-                await _consumerInvokerFactory.CreateInvoker(consumerContext).InvokeAsync();
+                var ret  = await Invoker.InvokeAsync(consumerContext);
 
+                if (!string.IsNullOrEmpty(ret.CallbackName)) 
+                   await  _callbackMessageSender.SendAsync(ret.MessageId,ret.CallbackName,ret.Result);
+                
                 return OperateResult.Success;
             }
             catch (Exception ex)

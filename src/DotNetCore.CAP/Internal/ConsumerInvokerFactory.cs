@@ -23,15 +23,9 @@ namespace DotNetCore.CAP.Internal
             _serviceProvider = serviceProvider;
         }
 
-        public IConsumerInvoker CreateInvoker(ConsumerContext consumerContext)
+        public IConsumerInvoker CreateInvoker()
         {
-            var context = new ConsumerInvokerContext(consumerContext)
-            {
-                Result = new DefaultConsumerInvoker(_logger, _serviceProvider, _messagePacker,
-                    _modelBinderFactory, consumerContext)
-            };
-
-            return context.Result;
+            return new DefaultConsumerInvoker(_logger, _serviceProvider, _messagePacker, _modelBinderFactory);
         }
     }
 }

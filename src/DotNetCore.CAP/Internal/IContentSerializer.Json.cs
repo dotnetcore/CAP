@@ -1,6 +1,5 @@
 ﻿using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.Internal
 {
