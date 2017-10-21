@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DotNetCore.CAP.Abstractions
+namespace DotNetCore.CAP.Internal
 {
     /// <summary>
     /// A context for consumers, it used to be provider wrapper of method description and received message.

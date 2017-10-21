@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace DotNetCore.CAP.Abstractions
+namespace DotNetCore.CAP.Internal
 {
     /// <summary>
     /// Defines an interface for selecting an consumer service method to invoke for the current message.

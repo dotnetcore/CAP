@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
+using DotNetCore.CAP.Abstractions;
 
-namespace DotNetCore.CAP.Abstractions
+namespace DotNetCore.CAP.Internal
 {
     /// <summary>
     /// A descriptor of user definition method.
