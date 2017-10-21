@@ -18,6 +18,7 @@ namespace DotNetCore.CAP.Test
             var services = new ServiceCollection();
             services.AddLogging();
             services.AddSingleton<IContentSerializer, JsonContentSerializer>();
+            services.AddSingleton<IMessagePacker, DefaultMessagePacker>();
             var provider = services.BuildServiceProvider();
             var logFactory = provider.GetRequiredService<ILoggerFactory>();
             var mesagePacker = provider.GetRequiredService<IMessagePacker>();
@@ -39,9 +40,7 @@ namespace DotNetCore.CAP.Test
             };
             var messageContext = new MessageContext();
 
-            var context = new ConsumerContext(description, messageContext);
-
-            var invoker = consumerInvokerFactory.CreateInvoker(context);
+            var invoker = consumerInvokerFactory.CreateInvoker();
 
             Assert.NotNull(invoker);
         }
@@ -63,11 +62,11 @@ namespace DotNetCore.CAP.Test
 
             var context = new ConsumerContext(description, messageContext);
 
-            var invoker = consumerInvokerFactory.CreateInvoker(context);
+            var invoker = consumerInvokerFactory.CreateInvoker();
 
             Assert.Throws<Exception>(() =>
             {
-                invoker.InvokeAsync().GetAwaiter().GetResult();
+                invoker.InvokeAsync(context).GetAwaiter().GetResult();
             }); 
         }
     }

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -50,6 +52,30 @@ namespace DotNetCore.CAP.Test
         }
 
         [Fact]
+        public void CanOverrideContentSerialize()
+        {
+            var services = new ServiceCollection();
+            services.AddCap(x => { }).AddContentSerializer<MyContentSerializer>();
+
+            var thingy = services.BuildServiceProvider()
+                .GetRequiredService<IContentSerializer>() as MyContentSerializer;
+
+            Assert.NotNull(thingy);
+        }
+
+        [Fact]
+        public void CanOverrideMessagePack()
+        {
+            var services = new ServiceCollection();
+            services.AddCap(x => { }).AddMessagePacker<MyMessagePacker>();
+
+            var thingy = services.BuildServiceProvider()
+                .GetRequiredService<IMessagePacker>() as MyMessagePacker;
+
+            Assert.NotNull(thingy);
+        }
+
+        [Fact]
         public void CanResolveCapOptions()
         {
             var services = new ServiceCollection();
@@ -57,6 +83,33 @@ namespace DotNetCore.CAP.Test
             var builder = services.BuildServiceProvider();
             var capOptions = builder.GetService<CapOptions>();
             Assert.NotNull(capOptions);
+        }
+
+        private class MyMessagePacker : IMessagePacker
+        {
+            public string Pack(CapMessage obj)
+            {
+                throw new NotImplementedException();
+            }
+
+            public CapMessage UnPack(string packingMessage)
+            {
+                throw new NotImplementedException();
+            }
+        }
+
+
+        private class MyContentSerializer : IContentSerializer
+        {
+            public T DeSerialize<T>(string content)
+            {
+                throw new NotImplementedException();
+            }
+
+            public string Serialize<T>(T obj)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         private class MyProducerService : ICapPublisher
