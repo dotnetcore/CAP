@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using DotNetCore.CAP.Abstractions.ModelBinding;
 
-namespace DotNetCore.CAP.Internal
+namespace DotNetCore.CAP.Abstractions
 {
     public interface IModelBinderFactory
     {

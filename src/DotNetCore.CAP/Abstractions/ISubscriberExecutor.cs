@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using DotNetCore.CAP.Models;
 
-namespace DotNetCore.CAP.Internal
+namespace DotNetCore.CAP.Abstractions
 {
     public interface ISubscriberExecutor
     {
