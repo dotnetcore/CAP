@@ -4,7 +4,7 @@ using System.Text;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class ConsumerExecutedResult
+    internal class ConsumerExecutedResult
     {
         public ConsumerExecutedResult(object result, string msgId, string callbackName)
         {

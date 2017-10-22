@@ -12,7 +12,7 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
     /// </summary>
-    public class DefaultConsumerServiceSelector : IConsumerServiceSelector
+    internal class DefaultConsumerServiceSelector : IConsumerServiceSelector
     {
         private readonly IServiceProvider _serviceProvider;
 

@@ -1,12 +1,11 @@
 ﻿using System.Threading.Tasks;
-using DotNetCore.CAP.Abstractions;
 
 namespace DotNetCore.CAP.Internal
 {
     /// <summary>
     /// Perform user definition method of consumers.
     /// </summary>
-    public interface IConsumerInvoker
+    internal interface IConsumerInvoker
     {
         /// <summary>
         /// Invoke consumer method whit consumer context.

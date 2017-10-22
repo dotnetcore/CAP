@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class DefaultSubscriberExecutor : ISubscriberExecutor
+    internal class DefaultSubscriberExecutor : ISubscriberExecutor
     {
         private readonly ICallbackMessageSender _callbackMessageSender;
         private readonly ILogger<DefaultSubscriberExecutor> _logger;
@@ -41,11 +42,11 @@ namespace DotNetCore.CAP.Internal
                 var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
                 var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
 
-                var ret  = await Invoker.InvokeAsync(consumerContext);
+                var ret = await Invoker.InvokeAsync(consumerContext);
 
-                if (!string.IsNullOrEmpty(ret.CallbackName)) 
-                   await  _callbackMessageSender.SendAsync(ret.MessageId,ret.CallbackName,ret.Result);
-                
+                if (!string.IsNullOrEmpty(ret.CallbackName))
+                    await _callbackMessageSender.SendAsync(ret.MessageId, ret.CallbackName, ret.Result);
+
                 return OperateResult.Success;
             }
             catch (Exception ex)

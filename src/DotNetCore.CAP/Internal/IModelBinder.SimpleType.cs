@@ -8,7 +8,7 @@ using DotNetCore.CAP.Abstractions.ModelBinding;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class SimpleTypeModelBinder : IModelBinder
+    internal class SimpleTypeModelBinder : IModelBinder
     {
         private readonly ParameterInfo _parameterInfo;
         private readonly TypeConverter _typeConverter;

@@ -5,7 +5,7 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// Defines an interface for selecting an consumer service method to invoke for the current message.
     /// </summary>
-    public interface IConsumerServiceSelector
+    internal interface IConsumerServiceSelector
     {
         /// <summary>
         /// Selects a set of <see cref="ConsumerExecutorDescriptor" /> candidates for the current message associated with

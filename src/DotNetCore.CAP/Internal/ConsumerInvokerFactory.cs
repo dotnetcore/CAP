@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class ConsumerInvokerFactory : IConsumerInvokerFactory
+    internal class ConsumerInvokerFactory : IConsumerInvokerFactory
     {
         private readonly ILogger _logger;
         private readonly IMessagePacker _messagePacker;

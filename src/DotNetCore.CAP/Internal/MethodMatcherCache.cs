@@ -6,7 +6,7 @@ using DotNetCore.CAP.Abstractions;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class MethodMatcherCache
+    internal class MethodMatcherCache
     {
         private readonly IConsumerServiceSelector _selector;
 

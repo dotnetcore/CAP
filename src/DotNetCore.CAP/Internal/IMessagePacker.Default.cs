@@ -3,7 +3,7 @@ using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class DefaultMessagePacker : IMessagePacker
+    internal class DefaultMessagePacker : IMessagePacker
     {
         private readonly IContentSerializer _serializer;
 

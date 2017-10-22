@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class DefaultConsumerInvoker : IConsumerInvoker
+    internal class DefaultConsumerInvoker : IConsumerInvoker
     {
         private readonly ILogger _logger;
         private readonly IModelBinderFactory _modelBinderFactory;

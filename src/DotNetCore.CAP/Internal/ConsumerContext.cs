@@ -5,7 +5,7 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// A context for consumers, it used to be provider wrapper of method description and received message.
     /// </summary>
-    public class ConsumerContext
+    internal class ConsumerContext
     {
         /// <summary>
         /// create a new instance of  <see cref="ConsumerContext" /> .

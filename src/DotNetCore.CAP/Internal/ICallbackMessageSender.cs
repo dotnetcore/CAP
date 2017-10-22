@@ -2,7 +2,7 @@
 
 namespace DotNetCore.CAP.Internal
 {
-    public interface ICallbackMessageSender
+    internal interface ICallbackMessageSender
     {
         Task SendAsync(string messageId, string topicName, object bodyObj);
     }
