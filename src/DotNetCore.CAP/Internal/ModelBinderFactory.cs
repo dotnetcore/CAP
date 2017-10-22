@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Abstractions.ModelBinding;
 using DotNetCore.CAP.Infrastructure;
 
@@ -10,10 +11,16 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// A factory for <see cref="IModelBinder" /> instances.
     /// </summary>
-    public class ModelBinderFactory : IModelBinderFactory
+    internal class ModelBinderFactory : IModelBinderFactory
     {
-        private readonly ConcurrentDictionary<Key, IModelBinder> _cache =
-            new ConcurrentDictionary<Key, IModelBinder>();
+        private readonly IContentSerializer _serializer;
+        private readonly ConcurrentDictionary<Key, IModelBinder> _cache;
+
+        public ModelBinderFactory(IContentSerializer contentSerializer)
+        {
+            _serializer = contentSerializer;
+            _cache = new ConcurrentDictionary<Key, IModelBinder>();
+        }
 
         public IModelBinder CreateBinder(ParameterInfo parameter)
         {
@@ -36,7 +43,7 @@ namespace DotNetCore.CAP.Internal
             if (!Helper.IsComplexType(parameterInfo.ParameterType))
                 binder = new SimpleTypeModelBinder(parameterInfo);
             else
-                binder = new ComplexTypeModelBinder(parameterInfo);
+                binder = new ComplexTypeModelBinder(parameterInfo, _serializer);
 
             AddToCache(parameterInfo, token, binder);
 

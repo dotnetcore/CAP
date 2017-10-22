@@ -1,4 +1,5 @@
-﻿using DotNetCore.CAP.Models;
+﻿using System;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.Abstractions
 {
@@ -7,6 +8,8 @@ namespace DotNetCore.CAP.Abstractions
         string Serialize<T>(T obj);
 
         T DeSerialize<T>(string content);
+
+        object DeSerialize(string content, Type type);
     }
 
     public interface IMessagePacker
