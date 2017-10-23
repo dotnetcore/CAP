@@ -153,7 +153,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
 #line default
 #line hidden
                 WriteLiteral("        <div class=\"js-jobs-list\">\r\n            <div class=\"btn-toolbar btn-toolb" +
-                "ar-top\">\r\n                <form class=\"row\">\r\n                    <span class=\"c" +
+                "ar-top\">\r\n                <form class=\"row\">\r\n                    <div class=\"c" +
                 "ol-md-3\">\r\n                        <input type=\"text\" class=\"form-control\" name=" +
                 "\"name\" value=\"");
 
@@ -175,7 +175,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
 
 #line default
 #line hidden
-                WriteLiteral("\" />\r\n                    </span>\r\n                    <div class=\"col-md-5\">\r\n  " +
+                WriteLiteral("\" />\r\n                    </div>\r\n                    <div class=\"col-md-5\">\r\n  " +
                 "                      <div class=\"input-group\">\r\n                            <in" +
                 "put type=\"text\" class=\"form-control\" name=\"content\" value=\"");
 
