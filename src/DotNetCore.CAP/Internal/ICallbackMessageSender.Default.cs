@@ -29,11 +29,13 @@ namespace DotNetCore.CAP.Internal
 
         public async Task SendAsync(string messageId, string topicName, object bodyObj)
         {
-            string body = null;
+            string body;
             if (bodyObj != null && Helper.IsComplexType(bodyObj.GetType()))
                 body = _contentSerializer.Serialize(bodyObj);
             else
                 body = bodyObj?.ToString();
+
+            _logger.LogDebug($"Callback message will publishing, name:{topicName},content:{body}");
 
             var callbackMessage = new CapMessageDto
             {
