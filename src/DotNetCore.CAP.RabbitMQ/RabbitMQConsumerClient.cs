@@ -78,12 +78,10 @@ namespace DotNetCore.CAP.RabbitMQ
                 RabbitMQOptions.ExchangeType,
                 true);
 
-            var arguments = new Dictionary<string, object> { { "x-message-ttl", _rabbitMQOptions.QueueMessageExpires } };
-            _channel.QueueDeclare(_queueName,
-                true,
-                false,
-                false,
-                arguments);
+            var arguments = new Dictionary<string, object> {
+                { "x-message-ttl", _rabbitMQOptions.QueueMessageExpires }
+            };
+            _channel.QueueDeclare(_queueName, true, false, false, arguments);
 
             _connectionPool.Return(connection);
         }

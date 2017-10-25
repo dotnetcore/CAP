@@ -78,7 +78,10 @@ namespace DotNetCore.CAP.Kafka
 
         private void ConsumerClient_OnConsumeError(object sender, Message e)
         {
-            OnError?.Invoke(sender, $"Consumer client raised an error. Topic:{e.Topic}, Reason:{e.Error}");
+            var message = e.Deserialize<Null, string>(null, StringDeserializer);
+
+            OnError?.Invoke(sender, $"An error occurred during consume the message; Topic:'{e.Topic}'," +
+                $"Message:'{message.Value}', Reason:'{e.Error}'.");
         }
 
         private void ConsumerClient_OnMessage(object sender, Message<Null, string> e)
