@@ -12,7 +12,7 @@ namespace DotNetCore.CAP.Internal
         private readonly ILogger<DefaultSubscriberExecutor> _logger;
         private readonly MethodMatcherCache _selector;
 
-        public IConsumerInvoker Invoker { get; }
+        private IConsumerInvoker Invoker { get; }
 
         public DefaultSubscriberExecutor(MethodMatcherCache selector,
             IConsumerInvokerFactory consumerInvokerFactory,
