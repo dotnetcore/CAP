@@ -22,6 +22,8 @@ namespace DotNetCore.CAP
         private static readonly Action<ILogger, int, Exception> _jobRetrying;
         private static readonly Action<ILogger, string, Exception> _exceptionOccuredWhileExecutingJob;
 
+        private static readonly Action<ILogger, string, Exception> _messageQueueError;
+
         static LoggerExtensions()
         {
             _serverStarting = LoggerMessage.Define<int, int>(
@@ -95,6 +97,11 @@ namespace DotNetCore.CAP
                 6,
                 "An exception occured while trying to execute a message: '{MessageId}'. " +
                 "Requeuing for another retry.");
+
+            _messageQueueError = LoggerMessage.Define<string>(
+                LogLevel.Error,
+                7,
+                "The MessageQueue Client fires an internal error:'{error}'.");
         }
 
         public static void JobFailed(this ILogger logger, Exception ex)
@@ -166,6 +173,11 @@ namespace DotNetCore.CAP
             string content, Exception ex)
         {
             _modelBinderFormattingException(logger, methodName, parameterName, content, ex);
+        }
+
+        public static void MessageQueueError(this ILogger logger, string error)
+        {
+            _messageQueueError(logger, error, null);
         }
     }
 }

@@ -105,7 +105,7 @@ namespace DotNetCore.CAP
                 Pulse();
             };
 
-            client.OnError += (sender, reason) => { _logger.LogError(reason); };
+            client.OnError += (sender, reason) => { _logger.MessageQueueError(reason); };
         }
 
         private static void StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
