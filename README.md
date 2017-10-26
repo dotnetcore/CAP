@@ -10,11 +10,11 @@ CAP is a .Net Standard library to achieve eventually consistent in distributed a
 
 ## OverView
 
-CAP is a library that used in an ASP.NET Core project, Of Course you can ues it in ASP.NET Core with .NET Framework.
+CAP is a library based on .Net standard, which is a solution to deal with distributed transactions, also has the function of EventBus, it is lightweight, easy to use, and efficiently.
 
-You can think of CAP as an EventBus because it has all the features of EventBus, and CAP provides a easier way to handle the publishing and subscribing than EventBus.
+In the process of building an SOA or MicroService system, we usually need to use the event to integrate each services. In the process, the simple use of message queue does not guarantee the reliability. CAP is adopted the local message table program integrated with the current database to solve the exception may occur in the process of the distributed system calling each other. It can ensure that the event messages are not lost in any case.
 
-CAP has the function of Message Persistence, and it makes messages reliability when your service is restarted or down. CAP provides a Publish Service based on Microsoft DI that integrates seamlessly with your business services and supports strong consistency transactions.
+You can also use the CAP as an EventBus. The CAP provides a simpler way to implement event publishing and subscriptions. You do not need to inherit or implement any interface during the process of subscription and sending.
 
 This is a diagram of the CAP working in the ASP.NET Core MicroService architecture:
 
@@ -140,14 +140,6 @@ Add the Attribute `[CapSubscribe()]` on Action to subscribe message:
 ```cs
 public class PublishController : Controller
 {
-	private readonly ICapPublisher _publisher;
-
-	public PublishController(ICapPublisher publisher)
-	{
-		_publisher = publisher;
-	}
-
-
 	[NoAction]
 	[CapSubscribe("xxx.services.account.check")]
 	public async Task CheckReceivedMessage(Person person)
