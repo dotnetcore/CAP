@@ -7,6 +7,7 @@
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
 CAP 是一个基于 .NET Standard 的 C# 库，它是一种处理分布式事务的解决方案，同样具有 EventBus 的功能，它具有轻量级、易使用、高性能等特点。
+
 你可以在这里[CAP Wiki](https://github.com/dotnetcore/CAP/wiki)看到更多详细资料。
 
 ## 预览（OverView）
