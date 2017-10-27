@@ -60,34 +60,34 @@ First,You need to config CAP in your Startup.cs：
 ```cs
 public void ConfigureServices(IServiceCollection services)
 {
-	......
+    //......
 
-	services.AddDbContext<AppDbContext>();
+    services.AddDbContext<AppDbContext>();
 
-	services.AddCap(x =>
-	{
-		// If you are using EF, you need to add the following configuration：
-		// Notice: You don't need to config x.UseSqlServer(""") again! CAP can autodiscovery.
-		x.UseEntityFramework<AppDbContext>();
+    services.AddCap(x =>
+    {
+        // If you are using EF, you need to add the following configuration：
+        // Notice: You don't need to config x.UseSqlServer(""") again! CAP can autodiscovery.
+        x.UseEntityFramework<AppDbContext>();
 
-		// If you are using ado.net,you need to add the configuration：
-		x.UseSqlServer("Your ConnectionStrings");
-		x.UseMySql("Your ConnectionStrings");
-		x.UsePostgreSql("Your ConnectionStrings");
+        // If you are using ado.net,you need to add the configuration：
+        x.UseSqlServer("Your ConnectionStrings");
+        x.UseMySql("Your ConnectionStrings");
+        x.UsePostgreSql("Your ConnectionStrings");
 		
-		// If you are using RabbitMQ, you need to add the configuration：
-		x.UseRabbitMQ("localhost");
+        // If you are using RabbitMQ, you need to add the configuration：
+        x.UseRabbitMQ("localhost");
 
-		// If you are using Kafka, you need to add the configuration：
-		x.UseKafka("localhost");
-	});
+        // If you are using Kafka, you need to add the configuration：
+        x.UseKafka("localhost");
+    });
 }
 
 public void Configure(IApplicationBuilder app)
 {
-	.....
+    //.....
 
-	app.UseCap();
+    app.UseCap();
 }
 
 ```
@@ -99,27 +99,27 @@ Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send 
 ```c#
 public class PublishController : Controller
 {
-	private readonly AppDbContext _dbContext;
+    private readonly AppDbContext _dbContext;
 
-	public PublishController(AppDbContext dbContext)
-	{
-		_dbContext = dbContext;
-	}
+    public PublishController(AppDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-	[Route("~/checkAccountWithTrans")]
-	public async Task<IActionResult> PublishMessageWithTransaction([FromServices]ICapPublisher publisher)
-	{
-		using (var trans = dbContext.Database.BeginTransaction())
-		{
-			// your business code
+    [Route("~/checkAccountWithTrans")]
+    public async Task<IActionResult> PublishMessageWithTransaction([FromServices]ICapPublisher publisher)
+    {
+        using (var trans = dbContext.Database.BeginTransaction())
+        {
+            // your business code
 
-			//Achieving atomicity between original database operation and the publish event log thanks to a local transaction
-			await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
+            //Achieving atomicity between original database operation and the publish event log thanks to a local transaction
+            await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
-			trans.Commit();
-		}
-		return Ok();
-	}
+            trans.Commit();
+        }
+        return Ok();
+    }
 }
 
 ```
@@ -133,13 +133,13 @@ Add the Attribute `[CapSubscribe()]` on Action to subscribe message:
 ```c#
 public class PublishController : Controller
 {
-	[CapSubscribe("xxx.services.account.check")]
-	public async Task CheckReceivedMessage(Person person)
-	{
-		Console.WriteLine(person.Name);
-		Console.WriteLine(person.Age);     
-		return Task.CompletedTask;
-	}
+    [CapSubscribe("xxx.services.account.check")]
+    public async Task CheckReceivedMessage(Person person)
+    {
+        Console.WriteLine(person.Name);
+        Console.WriteLine(person.Age);     
+        return Task.CompletedTask;
+    }
 }
 
 ```
@@ -148,34 +148,33 @@ public class PublishController : Controller
 
 If your subscribe method is not in the Controller,then your subscribe class need to Inheritance `ICapSubscribe`: 
 
-```cs
+```c#
 
 namespace xxx.Service
 {
-	public interface ISubscriberService
-	{
-		public void CheckReceivedMessage(Person person);
-	}
+    public interface ISubscriberService
+    {
+        public void CheckReceivedMessage(Person person);
+    }
 
 
-	public class SubscriberService: ISubscriberService, ICapSubscribe
-	{
-		[CapSubscribe("xxx.services.account.check")]
-		public void CheckReceivedMessage(Person person)
-		{
-
-		}
-	}
+    public class SubscriberService: ISubscriberService, ICapSubscribe
+    {
+        [CapSubscribe("xxx.services.account.check")]
+        public void CheckReceivedMessage(Person person)
+        {
+        }
+    }
 }
 
 ```
 
 Then inject your  `ISubscriberService`  class in Startup.cs 
 
-```cs
+```c#
 public void ConfigureServices(IServiceCollection services)
 {
-	services.AddTransient<ISubscriberService,SubscriberService>();
+    services.AddTransient<ISubscriberService,SubscriberService>();
 }
 ```
 
