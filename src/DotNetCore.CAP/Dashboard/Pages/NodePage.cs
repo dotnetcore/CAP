@@ -27,6 +27,10 @@ namespace DotNetCore.CAP.Dashboard.Pages
                 if (_nodes == null)
                 {
                     _discoveryProvider = RequestServices.GetService<INodeDiscoveryProvider>();
+                    if (_discoveryProvider == null)
+                    {
+                        return new List<Node>();
+                    }
                     _nodes = _discoveryProvider.GetNodes().GetAwaiter().GetResult();
                 }
                 return _nodes;
