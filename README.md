@@ -30,22 +30,24 @@ You can run the following command to install the CAP in your project.
 PM> Install-Package DotNetCore.CAP
 ```
 
-If your Message Queue is using Kafka, you can：
+If you want use Kafka to send integrating event, installing by:
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka
 ```
 
-If your Message Queue is using RabbitMQ, you can：
+If you want use RabbitMQ to send integrating event, installing by:
 
 ```
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP supported SqlServer, MySql, PostgreSql as message store extension：
+CAP supports SqlServer, MySql, PostgreSql as event log storage. 
 
 ```
-//Select a database provider you are using
+
+// select a database provider you are using, event log table will integrate into.
+
 PM> Install-Package DotNetCore.CAP.SqlServer
 PM> Install-Package DotNetCore.CAP.MySql
 PM> Install-Package DotNetCore.CAP.PostgreSql
@@ -64,19 +66,19 @@ public void ConfigureServices(IServiceCollection services)
 
 	services.AddCap(x =>
 	{
-		// If your SqlServer is using EF for data operations, you need to add the following configuration：
-		// Notice: You don't need to config x.UseSqlServer(""") again!
+		// If you are using EF, you need to add the following configuration：
+		// Notice: You don't need to config x.UseSqlServer(""") again! CAP can autodiscovery.
 		x.UseEntityFramework<AppDbContext>();
 
-		// If you are using Dapper,you need to add the config：
+		// If you are using ado.net,you need to add the configuration：
 		x.UseSqlServer("Your ConnectionStrings");
-		//x.UseMySql("Your ConnectionStrings");
-		//x.UsePostgreSql("Your ConnectionStrings");
-
-		// If your Message Queue is using RabbitMQ you need to add the config：
+		x.UseMySql("Your ConnectionStrings");
+		x.UsePostgreSql("Your ConnectionStrings");
+		
+		// If you are using RabbitMQ, you need to add the configuration：
 		x.UseRabbitMQ("localhost");
 
-		// If your Message Queue is using Kafka you need to add the config：
+		// If you are using Kafka, you need to add the configuration：
 		x.UseKafka("localhost");
 	});
 }
