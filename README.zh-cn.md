@@ -6,17 +6,15 @@
 [![Member project of .NET China Foundation](https://img.shields.io/badge/member_project_of-.NET_CHINA-red.svg?style=flat&colorB=9E20C8)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
-CAP 是一个在分布式系统（SOA、MicroService）中实现最终一致性的库，它具有轻量级、易使用、高性能等特点。
+CAP 是一个基于 .NET Standard 的 C# 库，它是一种处理分布式事务的解决方案，同样具有 EventBus 的功能，它具有轻量级、易使用、高性能等特点。
 
 你可以在这里[CAP Wiki](https://github.com/dotnetcore/CAP/wiki)看到更多详细资料。
 
 ## 预览（OverView）
 
-CAP 是在一个 ASP.NET Core 项目中使用的库，当然他可以用于 ASP.NET Core On .NET Framework 中。
+在我们构建 SOA 或者 微服务系统的过程中，我们通常需要使用事件来对各个服务进行集成，在这过程中简单的使用消息队列并不能保证数据的最终一致性，CAP 采用的是和当前数据库集成的本地消息表的方案来解决在分布式系统互相调用的各个环节可能出现的异常，它能够保证任何情况下事件消息都是不会丢失的。
 
-你可以把 CAP 看成是一个 EventBus，因为它具有 EventBus 的所有功能，并且 CAP 提供了更加简化的方式来处理 EventBus 中的发布和订阅。
-
-CAP 具有消息持久化的功能，当你的服务进行重启或者宕机时它可以保证消息的可靠性。CAP提供了基于Microsoft DI 的 Publisher Service 服务，它可以和你的业务服务进行无缝结合，并且支持强一致性的事务。
+你同样可以把 CAP 当做 EventBus 来使用，CAP提供了一种更加简单的方式来实现事件消息的发布和订阅，在订阅以及发布的过程中，你不需要继承或实现任何接口。
 
 这是CAP集在ASP.NET Core 微服务架构中的一个示意图：
 
