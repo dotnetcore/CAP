@@ -94,7 +94,7 @@ public void Configure(IApplicationBuilder app)
 
 Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send message
 
-```cs
+```c#
 public class PublishController : Controller
 {
 	private readonly AppDbContext _dbContext;
@@ -109,9 +109,9 @@ public class PublishController : Controller
 	{
 		using (var trans = dbContext.Database.BeginTransaction())
 		{
-            // your business code
+			// your business code
 
-            //Achieving atomicity between original database operation and the publish event log thanks to a local transaction
+			//Achieving atomicity between original database operation and the publish event log thanks to a local transaction
 			await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
 			trans.Commit();
@@ -128,10 +128,9 @@ public class PublishController : Controller
 
 Add the Attribute `[CapSubscribe()]` on Action to subscribe message:
 
-```cs
+```c#
 public class PublishController : Controller
 {
-	[NoAction]
 	[CapSubscribe("xxx.services.account.check")]
 	public async Task CheckReceivedMessage(Person person)
 	{

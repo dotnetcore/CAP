@@ -97,32 +97,25 @@ public void Configure(IApplicationBuilder app)
 ```c#
 public class PublishController : Controller
 {
-	private readonly ICapPublisher _publisher;
+	private readonly AppDbContext _dbContext;
 
-	public PublishController(ICapPublisher publisher)
+	public PublishController(AppDbContext dbContext)
 	{
-		_publisher = publisher;
-	}
-
-
-	[Route("~/checkAccount")]
-	public async Task<IActionResult> PublishMessage()
-	{
-		//指定发送的消息头和内容
-		await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
-
-		return Ok();
+		_dbContext = dbContext;
 	}
 
 	[Route("~/checkAccountWithTrans")]
-	public async Task<IActionResult> PublishMessageWithTransaction([FromServices]AppDbContext dbContext)
+	public async Task<IActionResult> PublishMessageWithTransaction([FromServices]ICapPublisher publisher)
 	{
-		 using (var trans = dbContext.Database.BeginTransaction())
-		 {
-			await _publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
+		using (var trans = dbContext.Database.BeginTransaction())
+		{
+			// your business code
+
+			//Achieving atomicity between original database operation and the publish event log thanks to a local transaction
+			await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
 			trans.Commit();
-		 }
+		}
 		return Ok();
 	}
 }
