@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Text;
 using DotNetCore.CAP.Dashboard.Monitoring;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.NodeDiscovery;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,16 +21,16 @@ namespace DotNetCore.CAP.Dashboard
             Html = new HtmlHelper(this);
         }
 
-        public RazorPage Layout { get; protected set; }
-        public HtmlHelper Html { get; }
+        protected RazorPage Layout { get; set; }
+        protected HtmlHelper Html { get; }
         public UrlHelper Url { get; private set; }
 
-        public IStorage Storage { get; internal set; }
-        public string AppPath { get; internal set; }
-        public string NodeName { get; internal set; }
+        protected IStorage Storage { get; set; }
+        protected string AppPath { get; set; }
+        protected string NodeName { get; set; }
 
-        public int StatsPollingInterval { get; internal set; }
-        public Stopwatch GenerationTime { get; private set; }
+        protected int StatsPollingInterval { get; set; }
+        protected Stopwatch GenerationTime { get; private set; }
 
         public StatisticsDto Statistics
         {
@@ -40,16 +41,16 @@ namespace DotNetCore.CAP.Dashboard
             }
         }
 
-        protected DashboardRequest Request { private get; set; }
-        protected DashboardResponse Response { private get; set; }
+        private DashboardRequest Request { get; set; }
+        private DashboardResponse Response { get; set; }
         internal IServiceProvider RequestServices { get; private set; }
 
         public string RequestPath => Request.Path;
 
         /// <exclude />
-        public abstract void Execute();
+        protected abstract void Execute();
 
-        public string Query(string key)
+        protected string Query(string key)
         {
             return Request.GetQuery(key);
         }

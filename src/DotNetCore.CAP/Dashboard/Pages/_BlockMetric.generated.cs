@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
     {
 #line hidden
 
-        public override void Execute()
+        protected override void Execute()
         {
 
 
