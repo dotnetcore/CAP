@@ -21,11 +21,11 @@ namespace DotNetCore.CAP.Internal
         /// <summary>
         /// a descriptor of consumer information need to be performed.
         /// </summary>
-        public ConsumerExecutorDescriptor ConsumerDescriptor { get; set; }
+        public ConsumerExecutorDescriptor ConsumerDescriptor { get; }
 
         /// <summary>
         /// consumer received message.
         /// </summary>
-        public MessageContext DeliverMessage { get; set; }
+        public MessageContext DeliverMessage { get; }
     }
 }

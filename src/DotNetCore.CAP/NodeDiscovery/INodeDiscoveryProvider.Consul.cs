@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Consul;
+using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.NodeDiscovery
@@ -90,7 +91,7 @@ namespace DotNetCore.CAP.NodeDiscovery
             }
         }
 
-        public void InitClient()
+        private void InitClient()
         {
             _consul = new ConsulClient(config =>
             {

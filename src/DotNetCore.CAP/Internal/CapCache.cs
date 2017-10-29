@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Internal
 {
     #region Cache<T> class
 
@@ -15,7 +15,7 @@ namespace DotNetCore.CAP
     /// </summary>
     // ReSharper disable once InheritdocConsiderUsage
     // ReSharper disable once InconsistentNaming
-    public class Cache<K, T> : IDisposable
+    internal class Cache<K, T> : IDisposable
     {
         #region Constructor and class members
 
@@ -328,7 +328,7 @@ namespace DotNetCore.CAP
     /// instance.
     /// The <c>.Global</c> member is lazy instanciated.
     /// </summary>
-    public class CapCache : Cache<string, object>
+    internal class CapCache : Cache<string, object>
     {
         #region Static Global Cache instance 
 
