@@ -132,15 +132,6 @@ public class PublishController : Controller
 ```c#
 public class PublishController : Controller
 {
-    private readonly ICapPublisher _publisher;
-
-    public PublishController(ICapPublisher publisher)
-    {
-        _publisher = publisher;
-    }
-
-
-    [NoAction]
     [CapSubscribe("xxx.services.account.check")]
     public async Task CheckReceivedMessage(Person person)
     {
