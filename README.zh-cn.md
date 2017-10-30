@@ -12,7 +12,8 @@ CAP 是一个基于 .NET Standard 的 C# 库，它是一种处理分布式事务
 
 ## 预览（OverView）
 
-在我们构建 SOA 或者 微服务系统的过程中，我们通常需要使用事件来对各个服务进行集成，在这过程中简单的使用消息队列并不能保证数据的最终一致性，CAP 采用的是和当前数据库集成的本地消息表的方案来解决在分布式系统互相调用的各个环节可能出现的异常，它能够保证任何情况下事件消息都是不会丢失的。
+在我们构建 SOA 或者 微服务系统的过程中，我们通常需要使用事件来对各个服务进行集成，在这过程中简单的使用消息队列并不能保证数据的最终一致性，
+CAP 采用的是和当前数据库集成的本地消息表的方案来解决在分布式系统互相调用的各个环节可能出现的异常，它能够保证任何情况下事件消息都是不会丢失的。
 
 你同样可以把 CAP 当做 EventBus 来使用，CAP提供了一种更加简单的方式来实现事件消息的发布和订阅，在订阅以及发布的过程中，你不需要继承或实现任何接口。
 
@@ -60,30 +61,30 @@ PM> Install-Package DotNetCore.CAP.PostgreSql
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
-	......
+    ......
 
-	services.AddDbContext<AppDbContext>();
+    services.AddDbContext<AppDbContext>();
 
-	services.AddCap(x =>
-	{
-		// 如果你的 SqlServer 使用的 EF 进行数据操作，你需要添加如下配置：
-		// 注意: 你不需要再次配置 x.UseSqlServer(""")
-		x.UseEntityFramework<AppDbContext>();
+    services.AddCap(x =>
+    {
+        // 如果你的 SqlServer 使用的 EF 进行数据操作，你需要添加如下配置：
+        // 注意: 你不需要再次配置 x.UseSqlServer(""")
+        x.UseEntityFramework<AppDbContext>();
 		
-		// 如果你使用的Dapper，你需要添加如下配置：
-		x.UseSqlServer("数据库连接字符串");
+        // 如果你使用的Dapper，你需要添加如下配置：
+        x.UseSqlServer("数据库连接字符串");
 
-		// 如果你使用的 RabbitMQ 作为MQ，你需要添加如下配置：
-		x.UseRabbitMQ("localhost");
+        // 如果你使用的 RabbitMQ 作为MQ，你需要添加如下配置：
+        x.UseRabbitMQ("localhost");
 
-		//如果你使用的 Kafka 作为MQ，你需要添加如下配置：
-		x.UseKafka("localhost");
-	});
+        //如果你使用的 Kafka 作为MQ，你需要添加如下配置：
+        x.UseKafka("localhost");
+    });
 }
 
 public void Configure(IApplicationBuilder app)
 {
-	.....
+    .....
 
     app.UseCap();
 }
@@ -97,27 +98,27 @@ public void Configure(IApplicationBuilder app)
 ```c#
 public class PublishController : Controller
 {
-	private readonly AppDbContext _dbContext;
+    private readonly AppDbContext _dbContext;
 
-	public PublishController(AppDbContext dbContext)
-	{
-		_dbContext = dbContext;
-	}
+    public PublishController(AppDbContext dbContext)
+    {
+        _dbContext = dbContext;
+    }
 
-	[Route("~/checkAccountWithTrans")]
-	public async Task<IActionResult> PublishMessageWithTransaction([FromServices]ICapPublisher publisher)
-	{
-		using (var trans = dbContext.Database.BeginTransaction())
-		{
-			// your business code
+    [Route("~/checkAccountWithTrans")]
+    public async Task<IActionResult> PublishMessageWithTransaction([FromServices]ICapPublisher publisher)
+    {
+        using (var trans = dbContext.Database.BeginTransaction())
+        {
+            // your business code
 
-			//Achieving atomicity between original database operation and the publish event log thanks to a local transaction
-			await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
+            //Achieving atomicity between original database operation and the publish event log thanks to a local transaction
+            await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
-			trans.Commit();
-		}
-		return Ok();
-	}
+            trans.Commit();
+        }
+        return Ok();
+    }
 }
 
 ```
@@ -131,22 +132,22 @@ public class PublishController : Controller
 ```c#
 public class PublishController : Controller
 {
-	private readonly ICapPublisher _publisher;
+    private readonly ICapPublisher _publisher;
 
-	public PublishController(ICapPublisher publisher)
-	{
-		_publisher = publisher;
-	}
+    public PublishController(ICapPublisher publisher)
+    {
+        _publisher = publisher;
+    }
 
 
-	[NoAction]
-	[CapSubscribe("xxx.services.account.check")]
-	public async Task CheckReceivedMessage(Person person)
-	{
-		Console.WriteLine(person.Name);
-		Console.WriteLine(person.Age);     
-		return Task.CompletedTask;
-	}
+    [NoAction]
+    [CapSubscribe("xxx.services.account.check")]
+    public async Task CheckReceivedMessage(Person person)
+    {
+        Console.WriteLine(person.Name);
+        Console.WriteLine(person.Age);     
+        return Task.CompletedTask;
+    }
 }
 
 ```
@@ -159,20 +160,20 @@ public class PublishController : Controller
 
 namespace xxx.Service
 {
-	public interface ISubscriberService
-	{
-		public void CheckReceivedMessage(Person person);
-	}
+    public interface ISubscriberService
+    {
+        public void CheckReceivedMessage(Person person);
+    }
 
 
-	public class SubscriberService: ISubscriberService, ICapSubscribe
-	{
-		[CapSubscribe("xxx.services.account.check")]
-		public void CheckReceivedMessage(Person person)
-		{
+    public class SubscriberService: ISubscriberService, ICapSubscribe
+    {
+        [CapSubscribe("xxx.services.account.check")]
+        public void CheckReceivedMessage(Person person)
+        {
 			
-		}
-	}
+        }
+    }
 }
 
 ```
@@ -182,7 +183,7 @@ namespace xxx.Service
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
-	services.AddTransient<ISubscriberService,SubscriberService>();
+    services.AddTransient<ISubscriberService,SubscriberService>();
 }
 ```
 
