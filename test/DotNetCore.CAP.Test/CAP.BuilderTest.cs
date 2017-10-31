@@ -124,7 +124,7 @@ namespace DotNetCore.CAP.Test
                 throw new NotImplementedException();
             }
 
-            public void Publish<T>(string name, T contentObj, IDbConnection dbConnection, string callbackName = null, IDbTransaction dbTransaction = null)
+            public void Publish<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
             {
                 throw new NotImplementedException();
             }
@@ -159,7 +159,7 @@ namespace DotNetCore.CAP.Test
                 throw new NotImplementedException();
             }
 
-            public Task PublishAsync<T>(string name, T contentObj, IDbConnection dbConnection, string callbackName = null, IDbTransaction dbTransaction = null)
+            public Task PublishAsync<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
             {
                 throw new NotImplementedException();
             }

@@ -39,21 +39,17 @@ namespace DotNetCore.CAP
         /// </summary>
         /// <param name="name">the topic name or exchange router key.</param>
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
-        /// <param name="callbackName">callback subscriber name</param>
-        /// <param name="dbConnection">the connection of <see cref="IDbConnection" /></param>
         /// <param name="dbTransaction">the transaction of <see cref="IDbTransaction" /></param>
-        Task PublishAsync<T>(string name, T contentObj, IDbConnection dbConnection, string callbackName = null,
-            IDbTransaction dbTransaction = null);
+        /// <param name="callbackName">callback subscriber name</param>
+        Task PublishAsync<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null);
 
         /// <summary>
         /// (ado.net) Publish a object message.
         /// </summary>
         /// <param name="name">the topic name or exchange router key.</param>
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
-        /// <param name="callbackName">callback subscriber name</param>
-        /// <param name="dbConnection">the connection of <see cref="IDbConnection" /></param>
         /// <param name="dbTransaction">the transaction of <see cref="IDbTransaction" /></param>
-        void Publish<T>(string name, T contentObj, IDbConnection dbConnection, string callbackName = null,
-            IDbTransaction dbTransaction = null);
+        /// <param name="callbackName">callback subscriber name</param>
+        void Publish<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null);
     }
 }
