@@ -105,7 +105,7 @@ public class PublishController : Controller
         {
             // 此处填写你的业务代码
 
-            //如果你使用的是EF，CAP会自动发现当前环境中的事务，所以你必须显式传递事务参数。
+            //如果你使用的是EF，CAP会自动发现当前环境中的事务，所以你不必显式传递事务参数。
             //由于本地事务, 当前数据库的业务操作和发布事件日志之间将实现原子性。
             await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
