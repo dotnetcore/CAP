@@ -98,24 +98,37 @@ public void Configure(IApplicationBuilder app)
 ```c#
 public class PublishController : Controller
 {
-    private readonly AppDbContext _dbContext;
-
-    public PublishController(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
     [Route("~/checkAccountWithTrans")]
-    public async Task<IActionResult> PublishMessageWithTransaction([FromServices]ICapPublisher publisher)
+    public async Task<IActionResult> PublishMessageWithTransaction([FromServices]AppDbContext dbContext, [FromServices]ICapPublisher publisher)
     {
         using (var trans = dbContext.Database.BeginTransaction())
         {
-            // your business code
+            // 此处填写你的业务代码
 
-            //Achieving atomicity between original database operation and the publish event log thanks to a local transaction
+            //如果你使用的是EF，CAP会自动发现当前环境中的事务，所以你必须显式传递事务参数。
+            //由于本地事务, 当前数据库的业务操作和发布事件日志之间将实现原子性。
             await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
             trans.Commit();
+        }
+        return Ok();
+    }
+
+    [Route("~/publishWithTransactionUsingAdonet")]
+    public async Task<IActionResult> PublishMessageWithTransactionUsingAdonet([FromServices]ICapPublisher publisher)
+    {
+        var connectionString = "";
+        using (var sqlConnection = new SqlConnection(connectionString))
+        {
+            sqlConnection.Open();
+            using (var sqlTransaction = sqlConnection.BeginTransaction())
+            {
+                // 此处填写你的业务代码，通常情况下，你可以将业务代码使用一个委托传递进来进行封装该区域代码。
+
+                publisher.Publish("xxx.services.account.check", new Person { Name = "Foo", Age = 11 }, sqlTransaction);
+
+                sqlTransaction.Commit();
+            }
         }
         return Ok();
     }

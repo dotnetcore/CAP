@@ -99,24 +99,37 @@ Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send 
 ```c#
 public class PublishController : Controller
 {
-    private readonly AppDbContext _dbContext;
-
-    public PublishController(AppDbContext dbContext)
-    {
-        _dbContext = dbContext;
-    }
-
-    [Route("~/checkAccountWithTrans")]
-    public async Task<IActionResult> PublishMessageWithTransaction([FromServices]ICapPublisher publisher)
+    [Route("~/publishWithTransactionUsingEF")]
+    public async Task<IActionResult> PublishMessageWithTransactionUsingEF([FromServices]AppDbContext dbContext, [FromServices]ICapPublisher publisher)
     {
         using (var trans = dbContext.Database.BeginTransaction())
         {
             // your business code
 
-            //Achieving atomicity between original database operation and the publish event log thanks to a local transaction
+            //If you are using EF, CAP will automatic discovery current environment transaction, so you do not need to explicit pass parameters.
+            //Achieving atomicity between original database operation and the publish event log thanks to a local transaction.
             await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
 
             trans.Commit();
+        }
+        return Ok();
+    }
+
+    [Route("~/publishWithTransactionUsingAdonet")]
+    public async Task<IActionResult> PublishMessageWithTransactionUsingAdonet([FromServices]ICapPublisher publisher)
+    {
+        var connectionString = "";
+        using (var sqlConnection = new SqlConnection(connectionString))
+        {
+            sqlConnection.Open();
+            using (var sqlTransaction = sqlConnection.BeginTransaction())
+            {
+                // your business code
+
+                publisher.Publish("xxx.services.account.check", new Person { Name = "Foo", Age = 11 }, sqlTransaction);
+
+                sqlTransaction.Commit();
+            }
         }
         return Ok();
     }
