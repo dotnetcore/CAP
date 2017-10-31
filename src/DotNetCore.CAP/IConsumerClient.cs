@@ -6,7 +6,7 @@ namespace DotNetCore.CAP
 {
     /// <inheritdoc />
     /// <summary>
-    /// consumer client
+    /// Message queue consumer client
     /// </summary>
     public interface IConsumerClient : IDisposable
     {
