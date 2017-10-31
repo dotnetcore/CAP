@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.Dashboard
 
         private class StubPage : RazorPage
         {
-            public override void Execute()
+            protected override void Execute()
             {
             }
         }
