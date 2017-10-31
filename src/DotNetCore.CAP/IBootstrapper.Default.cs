@@ -19,6 +19,10 @@ namespace DotNetCore.CAP
         private readonly ILogger<DefaultBootstrapper> _logger;
         private Task _bootstrappingTask;
 
+        private IStorage Storage { get; }
+
+        private IEnumerable<IProcessingServer> Processors { get; }
+
         public DefaultBootstrapper(
             ILogger<DefaultBootstrapper> logger,
             IStorage storage,
@@ -45,10 +49,6 @@ namespace DotNetCore.CAP
             });
         }
 
-        protected IStorage Storage { get; }
-
-        protected IEnumerable<IProcessingServer> Processors { get; }
-
         public Task BootstrapAsync()
         {
             return _bootstrappingTask = BootstrapTaskAsync();
@@ -60,10 +60,22 @@ namespace DotNetCore.CAP
 
             if (_cts.IsCancellationRequested) return;
 
-            await BootstrapCoreAsync();
+            _appLifetime.ApplicationStopping.Register(() =>
+            {
+                foreach (var item in Processors)
+                    item.Dispose();
+            });
 
             if (_cts.IsCancellationRequested) return;
 
+            await BootstrapCoreAsync();
+
+            _ctsRegistration.Dispose();
+            _cts.Dispose();
+        }
+
+        protected virtual Task BootstrapCoreAsync()
+        {
             foreach (var item in Processors)
                 try
                 {
@@ -71,20 +83,8 @@ namespace DotNetCore.CAP
                 }
                 catch (Exception ex)
                 {
-                    _logger.ServerStartedError(ex);
+                    _logger.ProcessorsStartedError(ex);
                 }
-
-            _ctsRegistration.Dispose();
-            _cts.Dispose();
-        }
-
-        public virtual Task BootstrapCoreAsync()
-        {
-            _appLifetime.ApplicationStopping.Register(() =>
-            {
-                foreach (var item in Processors)
-                    item.Dispose();
-            });
             return Task.CompletedTask;
         }
     }
