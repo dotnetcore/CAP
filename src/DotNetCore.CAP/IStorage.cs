@@ -14,8 +14,14 @@ namespace DotNetCore.CAP
         /// </summary>
         Task InitializeAsync(CancellationToken cancellationToken);
 
+        /// <summary>
+        /// Provider the dashboard metric api.
+        /// </summary>
         IMonitoringApi GetMonitoringApi();
 
+        /// <summary>
+        /// Storage connection of database operate.
+        /// </summary>
         IStorageConnection GetConnection();
     }
 }
