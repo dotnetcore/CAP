@@ -9,41 +9,34 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     internal sealed class PublishQueueExecutor : BasePublishQueueExecutor
     {
-        private readonly ConnectionPool _connectionPool;
+        private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly ILogger _logger;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
-        public PublishQueueExecutor(
-            CapOptions options,
-            IStateChanger stateChanger,
-            ConnectionPool connectionPool,
-            RabbitMQOptions rabbitMQOptions,
-            ILogger<PublishQueueExecutor> logger)
+        public PublishQueueExecutor(ILogger<PublishQueueExecutor> logger, CapOptions options,
+            RabbitMQOptions rabbitMQOptions, IConnectionChannelPool connectionChannelPool, IStateChanger stateChanger)
             : base(options, stateChanger, logger)
         {
             _logger = logger;
-            _connectionPool = connectionPool;
+            _connectionChannelPool = connectionChannelPool;
             _rabbitMQOptions = rabbitMQOptions;
         }
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)
         {
-            var connection = _connectionPool.Rent();
-
+            var channel = _connectionChannelPool.Rent();
             try
             {
-                using (var channel = connection.CreateModel())
-                {
-                    var body = Encoding.UTF8.GetBytes(content);
+                var body = Encoding.UTF8.GetBytes(content);
 
-                    channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, RabbitMQOptions.ExchangeType, true);
-                    channel.BasicPublish(_rabbitMQOptions.TopicExchangeName,
-                        keyName,
-                        null,
-                        body);
+                channel.ExchangeDeclare(_rabbitMQOptions.TopicExchangeName, RabbitMQOptions.ExchangeType, true);
+                channel.BasicPublish(_rabbitMQOptions.TopicExchangeName,
+                    keyName,
+                    null,
+                    body);
 
-                    _logger.LogDebug($"RabbitMQ topic message [{keyName}] has been published.");
-                }
+                _logger.LogDebug($"RabbitMQ topic message [{keyName}] has been published.");
+
                 return Task.FromResult(OperateResult.Success);
             }
             catch (Exception ex)
@@ -60,7 +53,7 @@ namespace DotNetCore.CAP.RabbitMQ
             }
             finally
             {
-                _connectionPool.Return(connection);
+                _connectionChannelPool.Return(channel);
             }
         }
     }

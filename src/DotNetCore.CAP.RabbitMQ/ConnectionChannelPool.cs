@@ -2,36 +2,48 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
-    public class ConnectionPool : IConnectionPool, IDisposable
+    public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     {
         private const int DefaultPoolSize = 15;
+        private readonly Func<IConnection> _connectionActivator;
+        private readonly ILogger<ConnectionChannelPool> _logger;
+        private readonly ConcurrentQueue<IModel> _pool = new ConcurrentQueue<IModel>();
+        private IConnection _connection;
 
-        private readonly Func<IConnection> _activator;
-
-        private readonly ConcurrentQueue<IConnection> _pool = new ConcurrentQueue<IConnection>();
         private int _count;
-
         private int _maxSize;
 
-        public ConnectionPool(RabbitMQOptions options)
+        public ConnectionChannelPool(ILogger<ConnectionChannelPool> logger,
+            RabbitMQOptions options)
         {
+            _logger = logger;
             _maxSize = DefaultPoolSize;
 
-            _activator = CreateActivator(options);
+            _connectionActivator = CreateConnection(options);
         }
 
-        IConnection IConnectionPool.Rent()
+        IModel IConnectionChannelPool.Rent()
         {
             return Rent();
         }
 
-        bool IConnectionPool.Return(IConnection connection)
+        bool IConnectionChannelPool.Return(IModel connection)
         {
             return Return(connection);
+        }
+
+        public IConnection GetConnection()
+        {
+            if (_connection != null && _connection.IsOpen)
+                return _connection;
+            _connection = _connectionActivator();
+            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
+            return _connection;
         }
 
         public void Dispose()
@@ -42,7 +54,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 context.Dispose();
         }
 
-        private static Func<IConnection> CreateActivator(RabbitMQOptions options)
+        private static Func<IConnection> CreateConnection(RabbitMQOptions options)
         {
             var factory = new ConnectionFactory
             {
@@ -59,23 +71,28 @@ namespace DotNetCore.CAP.RabbitMQ
             return () => factory.CreateConnection();
         }
 
-        public virtual IConnection Rent()
+        private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            if (_pool.TryDequeue(out var connection))
+            _logger.LogWarning($"RabbitMQ client connection closed! {e}");
+        }
+
+        public virtual IModel Rent()
+        {
+            if (_pool.TryDequeue(out var model))
             {
                 Interlocked.Decrement(ref _count);
 
                 Debug.Assert(_count >= 0);
 
-                return connection;
+                return model;
             }
 
-            connection = _activator();
+            model = GetConnection().CreateModel();
 
-            return connection;
+            return model;
         }
 
-        public virtual bool Return(IConnection connection)
+        public virtual bool Return(IModel connection)
         {
             if (Interlocked.Increment(ref _count) <= _maxSize)
             {

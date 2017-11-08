@@ -23,7 +23,7 @@ namespace DotNetCore.CAP
             services.AddSingleton(options);
 
             services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
-            services.AddSingleton<ConnectionPool>();
+            services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
             services.AddSingleton<IQueueExecutor, PublishQueueExecutor>();
             services.AddSingleton<IPublishExecutor, PublishQueueExecutor>();
         }

@@ -10,7 +10,7 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     internal sealed class RabbitMQConsumerClient : IConsumerClient
     {
-        private readonly ConnectionPool _connectionPool;
+        private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly string _exchageName;
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
@@ -19,11 +19,11 @@ namespace DotNetCore.CAP.RabbitMQ
         private ulong _deliveryTag;
 
         public RabbitMQConsumerClient(string queueName,
-            ConnectionPool connectionPool,
+            IConnectionChannelPool connectionChannelPool,
             RabbitMQOptions options)
         {
             _queueName = queueName;
-            _connectionPool = connectionPool;
+            _connectionChannelPool = connectionChannelPool;
             _rabbitMQOptions = options;
             _exchageName = options.TopicExchangeName;
 
@@ -69,7 +69,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void InitClient()
         {
-            var connection = _connectionPool.Rent();
+            var connection = _connectionChannelPool.GetConnection();
 
             _channel = connection.CreateModel();
 
@@ -82,8 +82,6 @@ namespace DotNetCore.CAP.RabbitMQ
                 { "x-message-ttl", _rabbitMQOptions.QueueMessageExpires }
             };
             _channel.QueueDeclare(_queueName, true, false, false, arguments);
-
-            _connectionPool.Return(connection);
         }
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
