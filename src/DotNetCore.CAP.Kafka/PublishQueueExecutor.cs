@@ -53,7 +53,9 @@ namespace DotNetCore.CAP.Kafka
             }
             finally
             {
-                _connectionPool.Return(producer);
+                var returned = _connectionPool.Return(producer);
+                if (!returned)
+                    producer.Dispose();
             }
         }
     }
