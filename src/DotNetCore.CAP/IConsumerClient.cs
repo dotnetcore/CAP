@@ -33,6 +33,6 @@ namespace DotNetCore.CAP
 
         event EventHandler<MessageContext> OnMessageReceived;
 
-        event EventHandler<string> OnError;
+        event EventHandler<LogMessageEventArgs> OnLog;
     }
 }
