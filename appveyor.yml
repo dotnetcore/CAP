@@ -4,7 +4,7 @@ environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
   Cap_SqlServer_ConnectionStringTemplate: Server=(local)\SQL2014;Database={0};User ID=sa;Password=Password12!
-  Cap_MySql_ConnectionStringTemplate: Server=localhost;Database={0};Uid=root;Pwd=Password12!
+  Cap_MySql_ConnectionStringTemplate: Server=localhost;Database={0};Uid=root;Pwd=Password12!;Allow User Variables=True
   Cap_PostgreSql_ConnectionStringTemplate: Server=localhost;Database={0};UserId=postgres;Password=Password12!
 services:
   - mssql2014

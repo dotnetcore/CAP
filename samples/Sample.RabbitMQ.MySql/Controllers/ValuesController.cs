@@ -24,7 +24,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         public IActionResult PublishMessage()
         {
             _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
-
+            
             return Ok();
         }
 

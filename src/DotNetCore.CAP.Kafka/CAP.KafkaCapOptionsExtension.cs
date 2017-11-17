@@ -16,12 +16,16 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
+            services.AddSingleton<CapMessageQueueMakerService>();
+
             var kafkaOptions = new KafkaOptions();
             _configure?.Invoke(kafkaOptions);
             services.AddSingleton(kafkaOptions);
 
             services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
             services.AddSingleton<IQueueExecutor, PublishQueueExecutor>();
+            services.AddSingleton<IPublishExecutor, PublishQueueExecutor>();
+            services.AddSingleton<ConnectionPool>();
         }
     }
 }

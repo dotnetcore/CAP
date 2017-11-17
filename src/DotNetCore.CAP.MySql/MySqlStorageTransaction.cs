@@ -7,12 +7,12 @@ using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class MySqlStorageTransaction : IStorageTransaction, IDisposable
+    public class MySqlStorageTransaction : IStorageTransaction
     {
-        private readonly string _prefix;
+        private readonly IDbConnection _dbConnection;
 
         private readonly IDbTransaction _dbTransaction;
-        private readonly IDbConnection _dbConnection;
+        private readonly string _prefix;
 
         public MySqlStorageTransaction(MySqlStorageConnection connection)
         {
@@ -28,7 +28,8 @@ namespace DotNetCore.CAP.MySql
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var sql = $"UPDATE `{_prefix}.published` SET `Retries` = @Retries,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+            var sql =
+                $"UPDATE `{_prefix}.published` SET `Retries` = @Retries,`Content`= @Content,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
         }
 
@@ -36,7 +37,8 @@ namespace DotNetCore.CAP.MySql
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var sql = $"UPDATE `{_prefix}.received` SET `Retries` = @Retries,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+            var sql =
+                $"UPDATE `{_prefix}.received` SET `Retries` = @Retries,`Content`= @Content,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
         }
 
@@ -45,7 +47,8 @@ namespace DotNetCore.CAP.MySql
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             var sql = $"INSERT INTO `{_prefix}.queue` values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue { MessageId = message.Id, MessageType = MessageType.Publish }, _dbTransaction);
+            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Publish},
+                _dbTransaction);
         }
 
         public void EnqueueMessage(CapReceivedMessage message)
@@ -53,7 +56,8 @@ namespace DotNetCore.CAP.MySql
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             var sql = $"INSERT INTO `{_prefix}.queue` values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue { MessageId = message.Id, MessageType = MessageType.Subscribe }, _dbTransaction);
+            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Subscribe},
+                _dbTransaction);
         }
 
         public Task CommitAsync()

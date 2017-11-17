@@ -12,7 +12,7 @@ namespace DotNetCore.CAP.MySql.Test
         private const string DefaultDatabaseName = @"DotNetCore.CAP.MySql.Test";
 
         private const string DefaultConnectionStringTemplate =
-            @"Server=localhost;Database={0};Uid=root;Pwd=123123;";
+            @"Server=localhost;Database={0};Uid=root;Pwd=123123;Allow User Variables=True;";
 
         public static string GetDatabaseName()
         {

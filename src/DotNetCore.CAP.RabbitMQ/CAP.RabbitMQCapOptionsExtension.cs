@@ -16,15 +16,16 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
+            services.AddSingleton<CapMessageQueueMakerService>();
+
             var options = new RabbitMQOptions();
             _configure?.Invoke(options);
             services.AddSingleton(options);
 
             services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
-
-            services.AddSingleton<ConnectionPool>();
-
+            services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
             services.AddSingleton<IQueueExecutor, PublishQueueExecutor>();
+            services.AddSingleton<IPublishExecutor, PublishQueueExecutor>();
         }
     }
 }

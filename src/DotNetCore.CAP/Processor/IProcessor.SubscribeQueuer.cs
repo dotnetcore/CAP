@@ -12,13 +12,11 @@ namespace DotNetCore.CAP.Processor
 {
     public class SubscribeQueuer : IProcessor
     {
-        private ILogger _logger;
-        private CapOptions _options;
-        private IStateChanger _stateChanger;
-        private IServiceProvider _provider;
-        private TimeSpan _pollingDelay;
-
         internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
+        private readonly ILogger _logger;
+        private readonly TimeSpan _pollingDelay;
+        private readonly IServiceProvider _provider;
+        private readonly IStateChanger _stateChanger;
 
         public SubscribeQueuer(
             ILogger<SubscribeQueuer> logger,
@@ -27,15 +25,16 @@ namespace DotNetCore.CAP.Processor
             IServiceProvider provider)
         {
             _logger = logger;
-            _options = options.Value;
             _stateChanger = stateChanger;
             _provider = provider;
 
-            _pollingDelay = TimeSpan.FromSeconds(_options.PollingDelay);
+            var capOptions = options.Value;
+            _pollingDelay = TimeSpan.FromSeconds(capOptions.PollingDelay);
         }
 
         public async Task ProcessAsync(ProcessingContext context)
         {
+            _logger.LogDebug("SubscribeQueuer start calling.");
             using (var scope = _provider.CreateScope())
             {
                 CapReceivedMessage message;
@@ -44,7 +43,7 @@ namespace DotNetCore.CAP.Processor
 
                 while (
                     !context.IsStopping &&
-                    (message = await connection.GetNextReceviedMessageToBeEnqueuedAsync()) != null)
+                    (message = await connection.GetNextReceivedMessageToBeEnqueuedAsync()) != null)
 
                 {
                     var state = new EnqueuedState();

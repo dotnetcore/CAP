@@ -9,26 +9,22 @@ namespace DotNetCore.CAP.PostgreSql
 {
     internal class DefaultAdditionalProcessor : IAdditionalProcessor
     {
-        private readonly IServiceProvider _provider;
-        private readonly ILogger _logger;
-        private readonly PostgreSqlOptions _options;
-
         private const int MaxBatch = 1000;
-        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
-        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
         private static readonly string[] Tables =
         {
-            "published","received"
+            "published", "received"
         };
 
-        public DefaultAdditionalProcessor(
-            IServiceProvider provider,
-            ILogger<DefaultAdditionalProcessor> logger,
+        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
+        private readonly ILogger _logger;
+        private readonly PostgreSqlOptions _options;
+        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
+
+        public DefaultAdditionalProcessor(ILogger<DefaultAdditionalProcessor> logger,
             PostgreSqlOptions sqlServerOptions)
         {
             _logger = logger;
-            _provider = provider;
             _options = sqlServerOptions;
         }
 
@@ -43,8 +39,9 @@ namespace DotNetCore.CAP.PostgreSql
                 {
                     using (var connection = new NpgsqlConnection(_options.ConnectionString))
                     {
-                        removedCount = await connection.ExecuteAsync($"DELETE FROM \"{_options.Schema}\".\"{table}\" WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM \"{_options.Schema}\".\"{table}\" LIMIT @count);",
-                            new { now = DateTime.Now, count = MaxBatch });
+                        removedCount = await connection.ExecuteAsync(
+                            $"DELETE FROM \"{_options.Schema}\".\"{table}\" WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM \"{_options.Schema}\".\"{table}\" LIMIT @count);",
+                            new {now = DateTime.Now, count = MaxBatch});
                     }
 
                     if (removedCount != 0)

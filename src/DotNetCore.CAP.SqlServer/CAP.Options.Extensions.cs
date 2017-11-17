@@ -9,10 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static CapOptions UseSqlServer(this CapOptions options, string connectionString)
         {
-            return options.UseSqlServer(opt =>
-            {
-                opt.ConnectionString = connectionString;
-            });
+            return options.UseSqlServer(opt => { opt.ConnectionString = connectionString; });
         }
 
         public static CapOptions UseSqlServer(this CapOptions options, Action<SqlServerOptions> configure)
@@ -27,10 +24,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static CapOptions UseEntityFramework<TContext>(this CapOptions options)
             where TContext : DbContext
         {
-            return options.UseEntityFramework<TContext>(opt =>
-            {
-                opt.DbContextType = typeof(TContext);
-            });
+            return options.UseEntityFramework<TContext>(opt => { opt.DbContextType = typeof(TContext); });
         }
 
         public static CapOptions UseEntityFramework<TContext>(this CapOptions options, Action<EFOptions> configure)
@@ -38,7 +32,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             if (configure == null) throw new ArgumentNullException(nameof(configure));
 
-            var efOptions = new EFOptions { DbContextType = typeof(TContext) };
+            var efOptions = new EFOptions {DbContextType = typeof(TContext)};
             configure(efOptions);
 
             options.RegisterExtension(new SqlServerCapOptionsExtension(configure));

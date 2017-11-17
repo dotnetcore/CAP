@@ -6,7 +6,7 @@ namespace DotNetCore.CAP
     public class EFOptions
     {
         /// <summary>
-        /// EF dbcontext type.
+        /// EF db context type.
         /// </summary>
         internal Type DbContextType { get; set; }
     }

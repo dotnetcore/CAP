@@ -50,18 +50,30 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Returns the next message to be enqueued.
         /// </summary>
-        Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync();
+        Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync();
 
         /// <summary>
         /// Returns executed failed message.
         /// </summary>
-        Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages();
-
-        //-----------------------------------------
+        Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages();
 
         /// <summary>
-        /// Creates and returns an <see cref="IStorageTransaction"/>.
+        /// Creates and returns an <see cref="IStorageTransaction" />.
         /// </summary>
         IStorageTransaction CreateTransaction();
+
+        /// <summary>
+        /// Change specified message's state of published message
+        /// </summary>
+        /// <param name="messageId">Message id</param>
+        /// <param name="state">State name</param>
+        bool ChangePublishedState(int messageId, string state);
+
+        /// <summary>
+        /// Change specified message's state  of received message
+        /// </summary>
+        /// <param name="messageId">Message id</param>
+        /// <param name="state">State name</param>
+        bool ChangeReceivedState(int messageId, string state);
     }
 }

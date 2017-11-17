@@ -1,37 +1,59 @@
 ﻿using System;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Dashboard.GatewayProxy;
 using Microsoft.Extensions.DependencyInjection;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.AspNetCore.Builder
 {
     /// <summary>
-    /// app extensions for <see cref="IApplicationBuilder"/>
+    /// app extensions for <see cref="IApplicationBuilder" />
     /// </summary>
     public static class AppBuilderExtensions
     {
-        ///<summary>
+        /// <summary>
         /// Enables cap for the current application
         /// </summary>
-        /// <param name="app">The <see cref="IApplicationBuilder"/> instance this method extends.</param>
-        /// <returns>The <see cref="IApplicationBuilder"/> instance this method extends.</returns>
+        /// <param name="app">The <see cref="IApplicationBuilder" /> instance this method extends.</param>
+        /// <returns>The <see cref="IApplicationBuilder" /> instance this method extends.</returns>
         public static IApplicationBuilder UseCap(this IApplicationBuilder app)
         {
             if (app == null)
-            {
                 throw new ArgumentNullException(nameof(app));
-            }
 
-            var marker = app.ApplicationServices.GetService<CapMarkerService>();
-
-            if (marker == null)
-            {
-                throw new InvalidOperationException("Add Cap must be called on the service collection.");
-            }
+            CheckRequirement(app);
 
             var provider = app.ApplicationServices;
+
             var bootstrapper = provider.GetRequiredService<IBootstrapper>();
             bootstrapper.BootstrapAsync();
+
+            if (provider.GetService<DashboardOptions>() != null)
+            {
+                if (provider.GetService<DiscoveryOptions>() != null)
+                    app.UseMiddleware<GatewayProxyMiddleware>();
+                app.UseMiddleware<DashboardMiddleware>();
+            }
+
             return app;
+        }
+
+        private static void CheckRequirement(IApplicationBuilder app)
+        {
+            var marker = app.ApplicationServices.GetService<CapMarkerService>();
+            if (marker == null)
+                throw new InvalidOperationException(
+                    "AddCap() must be called on the service collection.   eg: services.AddCap(...)");
+
+            var messageQueueMarker = app.ApplicationServices.GetService<CapMessageQueueMakerService>();
+            if (messageQueueMarker == null)
+                throw new InvalidOperationException(
+                    "You must be config used message queue provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseKafka(...) })");
+
+            var databaseMarker = app.ApplicationServices.GetService<CapDatabaseStorageMarkerService>();
+            if (databaseMarker == null)
+                throw new InvalidOperationException(
+                    "You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseSqlServer(...) })");
         }
     }
 }

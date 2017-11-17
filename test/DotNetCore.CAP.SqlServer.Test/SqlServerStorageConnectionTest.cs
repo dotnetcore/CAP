@@ -15,7 +15,8 @@ namespace DotNetCore.CAP.SqlServer.Test
         public SqlServerStorageConnectionTest()
         {
             var options = GetService<SqlServerOptions>();
-            _storage = new SqlServerStorageConnection(options);
+            var capOptions = GetService<CapOptions>();
+            _storage = new SqlServerStorageConnection(options, capOptions);
         }
 
         [Fact]
@@ -121,7 +122,7 @@ namespace DotNetCore.CAP.SqlServer.Test
             };
             await _storage.StoreReceivedMessageAsync(receivedMessage);
 
-            var message = await _storage.GetNextReceviedMessageToBeEnqueuedAsync();
+            var message = await _storage.GetNextReceivedMessageToBeEnqueuedAsync();
 
             Assert.NotNull(message);
             Assert.Equal(StatusName.Scheduled, message.StatusName);

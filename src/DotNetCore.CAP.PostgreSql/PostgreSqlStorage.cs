@@ -1,7 +1,9 @@
+using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
-using Microsoft.EntityFrameworkCore;
+using DotNetCore.CAP.Dashboard;
 using Microsoft.Extensions.Logging;
 using Npgsql;
 
@@ -9,13 +11,28 @@ namespace DotNetCore.CAP.PostgreSql
 {
     public class PostgreSqlStorage : IStorage
     {
-        private readonly PostgreSqlOptions _options;
+        private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
+        private readonly CapOptions _capOptions;
+        private readonly PostgreSqlOptions _options;
 
-        public PostgreSqlStorage(ILogger<PostgreSqlStorage> logger, PostgreSqlOptions options)
+        public PostgreSqlStorage(ILogger<PostgreSqlStorage> logger,
+            CapOptions capOptions,
+            PostgreSqlOptions options)
         {
             _options = options;
             _logger = logger;
+            _capOptions = capOptions;
+        }
+
+        public IStorageConnection GetConnection()
+        {
+            return new PostgreSqlStorageConnection(_options, _capOptions);
+        }
+
+        public IMonitoringApi GetMonitoringApi()
+        {
+            return new PostgreSqlMonitoringApi(this, _options);
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -29,6 +46,42 @@ namespace DotNetCore.CAP.PostgreSql
                 await connection.ExecuteAsync(sql);
             }
             _logger.LogDebug("Ensuring all create database tables script are applied.");
+        }
+
+        internal T UseConnection<T>(Func<IDbConnection, T> func)
+        {
+            IDbConnection connection = null;
+
+            try
+            {
+                connection = CreateAndOpenConnection();
+                return func(connection);
+            }
+            finally
+            {
+                ReleaseConnection(connection);
+            }
+        }
+
+        internal IDbConnection CreateAndOpenConnection()
+        {
+            var connection = _existingConnection ?? new NpgsqlConnection(_options.ConnectionString);
+
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            return connection;
+        }
+
+        internal bool IsExistingConnection(IDbConnection connection)
+        {
+            return connection != null && ReferenceEquals(connection, _existingConnection);
+        }
+
+        internal void ReleaseConnection(IDbConnection connection)
+        {
+            if (connection != null && !IsExistingConnection(connection))
+                connection.Dispose();
         }
 
         protected virtual string CreateDbTablesScript(string schema)

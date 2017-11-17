@@ -7,19 +7,19 @@ namespace DotNetCore.CAP.Processor.States
     {
         public const string StateName = "Succeeded";
 
-        public TimeSpan? ExpiresAfter { get; private set; }
-
-        public string Name => StateName;
-
         public SucceededState()
         {
             ExpiresAfter = TimeSpan.FromHours(1);
         }
 
-        public SucceededState(int ExpireAfterSeconds)
+        public SucceededState(int expireAfterSeconds)
         {
-            ExpiresAfter = TimeSpan.FromSeconds(ExpireAfterSeconds);
+            ExpiresAfter = TimeSpan.FromSeconds(expireAfterSeconds);
         }
+
+        public TimeSpan? ExpiresAfter { get; }
+
+        public string Name => StateName;
 
         public void Apply(CapPublishedMessage message, IStorageTransaction transaction)
         {

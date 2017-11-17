@@ -11,16 +11,19 @@ namespace DotNetCore.CAP.MySql
 {
     public class MySqlStorageConnection : IStorageConnection
     {
-        private readonly MySqlOptions _options;
+        private readonly CapOptions _capOptions;
         private readonly string _prefix;
 
-        public MySqlStorageConnection(MySqlOptions options)
+        private const string DateTimeMaxValue = "9999-12-31 23:59:59";
+
+        public MySqlStorageConnection(MySqlOptions options, CapOptions capOptions)
         {
-            _options = options;
-            _prefix = _options.TableNamePrefix;
+            _capOptions = capOptions;
+            Options = options;
+            _prefix = Options.TableNamePrefix;
         }
 
-        public MySqlOptions Options => _options;
+        public MySqlOptions Options { get; }
 
         public IStorageTransaction CreateTransaction()
         {
@@ -31,7 +34,7 @@ namespace DotNetCore.CAP.MySql
         {
             var sql = $@"SELECT * FROM `{_prefix}.published` WHERE `Id`={id};";
 
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
@@ -39,26 +42,23 @@ namespace DotNetCore.CAP.MySql
 
         public Task<IFetchedMessage> FetchNextMessageAsync()
         {
-            //Last execute statement(FOR UPDATE to fix dirty read) :
-
-            //SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-            //START TRANSACTION;
-            //SELECT MessageId,MessageType FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
-            //DELETE FROM `{_prefix}.queue` LIMIT 1;
-            //COMMIT;
-
             var sql = $@"
 SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
 DELETE FROM `{_prefix}.queue` LIMIT 1;";
+            //            var sql = $@"
+            //SELECT @MId:=`MessageId` as MessageId, @MType:=`MessageType` as MessageType FROM `{_prefix}.queue` LIMIT 1;
+            //DELETE FROM `{_prefix}.queue` where `MessageId` = @MId AND `MessageType`=@MType;";
 
             return FetchNextMessageCoreAsync(sql);
         }
 
         public async Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync()
         {
-            var sql = $"SELECT * FROM `{_prefix}.published` WHERE `StatusName` = '{StatusName.Scheduled}' LIMIT 1;";
+            var sql = $@"
+UPDATE `{_prefix}.published` SET Id=LAST_INSERT_ID(Id),ExpiresAt='{DateTimeMaxValue}' WHERE ExpiresAt IS NULL AND `StatusName` = '{StatusName.Scheduled}' LIMIT 1;
+SELECT * FROM `{_prefix}.published` WHERE Id=LAST_INSERT_ID();";
 
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
@@ -66,15 +66,13 @@ DELETE FROM `{_prefix}.queue` LIMIT 1;";
 
         public async Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages()
         {
-            var sql = $"SELECT * FROM `{_prefix}.published` WHERE `StatusName` = '{StatusName.Failed}';";
+            var sql = $"SELECT * FROM `{_prefix}.published` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `StatusName` = '{StatusName.Failed}' LIMIT 200;";
 
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapPublishedMessage>(sql);
             }
         }
-
-        // CapReceviedMessage
 
         public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
         {
@@ -84,7 +82,7 @@ DELETE FROM `{_prefix}.queue` LIMIT 1;";
 INSERT INTO `{_prefix}.received`(`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
 VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 await connection.ExecuteAsync(sql, message);
             }
@@ -93,44 +91,82 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
         {
             var sql = $@"SELECT * FROM `{_prefix}.received` WHERE Id={id};";
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
 
-        public async Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync()
+        public async Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync()
         {
-            var sql = $"SELECT * FROM `{_prefix}.received` WHERE `StatusName` = '{StatusName.Scheduled}' LIMIT 1;";
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            var sql = $@"
+UPDATE `{_prefix}.received` SET Id=LAST_INSERT_ID(Id),ExpiresAt='{DateTimeMaxValue}' WHERE ExpiresAt IS NULL AND `StatusName` = '{StatusName.Scheduled}' LIMIT 1;
+SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
+
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
 
-        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages()
+        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
         {
-            var sql = $"SELECT * FROM `{_prefix}.received` WHERE `StatusName` = '{StatusName.Failed}';";
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            var sql = $"SELECT * FROM `{_prefix}.received` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `StatusName` = '{StatusName.Failed}' LIMIT 200;";
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
             }
         }
 
+
         public void Dispose()
         {
+        }
+
+        public bool ChangePublishedState(int messageId, string state)
+        {
+            var sql =
+                $"UPDATE `{_prefix}.published` SET `Retries`=`Retries`+1,`StatusName` = '{state}' WHERE `Id`={messageId}";
+
+            using (var connection = new MySqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
+        public bool ChangeReceivedState(int messageId, string state)
+        {
+            var sql =
+                $"UPDATE `{_prefix}.received` SET `Retries`=`Retries`+1,`StatusName` = '{state}' WHERE `Id`={messageId}";
+
+            using (var connection = new MySqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
         }
 
         private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
         {
             //here don't use `using` to dispose
-            var connection = new MySqlConnection(_options.ConnectionString);
+            var connection = new MySqlConnection(Options.ConnectionString);
             await connection.OpenAsync();
             var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
             FetchedMessage fetchedMessage = null;
             try
             {
-                fetchedMessage = await connection.QueryFirstOrDefaultAsync<FetchedMessage>(sql, args, transaction);
+                //fetchedMessage = await connection.QuerySingleOrDefaultAsync<FetchedMessage>(sql, args, transaction);
+                // An anomaly with unknown causes, sometimes QuerySingleOrDefaultAsync can't return expected result.
+                using (var reader = connection.ExecuteReader(sql, args, transaction))
+                {
+                    while (reader.Read())
+                    {
+                        fetchedMessage = new FetchedMessage
+                        {
+                            MessageId = (int)reader.GetInt64(0),
+                            MessageType = (MessageType)reader.GetInt64(1)
+                        };
+                    }
+                }
             }
             catch (MySqlException)
             {
@@ -146,7 +182,8 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
                 return null;
             }
 
-            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection, transaction);
+            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection,
+                transaction);
         }
     }
 }

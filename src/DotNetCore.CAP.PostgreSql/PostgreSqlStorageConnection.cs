@@ -11,14 +11,15 @@ namespace DotNetCore.CAP.PostgreSql
 {
     public class PostgreSqlStorageConnection : IStorageConnection
     {
-        private readonly PostgreSqlOptions _options;
+        private readonly CapOptions _capOptions;
 
-        public PostgreSqlStorageConnection(PostgreSqlOptions options)
+        public PostgreSqlStorageConnection(PostgreSqlOptions options, CapOptions capOptions)
         {
-            _options = options;
+            _capOptions = capOptions;
+            Options = options;
         }
 
-        public PostgreSqlOptions Options => _options;
+        public PostgreSqlOptions Options { get; }
 
         public IStorageTransaction CreateTransaction()
         {
@@ -27,9 +28,9 @@ namespace DotNetCore.CAP.PostgreSql
 
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
         {
-            var sql = $"SELECT * FROM \"{_options.Schema}\".\"published\" WHERE \"Id\"={id}";
+            var sql = $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
 
-            using (var connection = new NpgsqlConnection(_options.ConnectionString))
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
@@ -37,15 +38,16 @@ namespace DotNetCore.CAP.PostgreSql
 
         public Task<IFetchedMessage> FetchNextMessageAsync()
         {
-            var sql = $@"DELETE FROM ""{_options.Schema}"".""queue"" WHERE ""MessageId"" = (SELECT ""MessageId"" FROM ""{_options.Schema}"".""queue"" FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *;";
+            var sql = $@"DELETE FROM ""{Options.Schema}"".""queue"" WHERE ""MessageId"" = (SELECT ""MessageId"" FROM ""{Options.Schema}"".""queue"" FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *;";
             return FetchNextMessageCoreAsync(sql);
         }
 
         public async Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync()
         {
-            var sql = $"SELECT * FROM \"{_options.Schema}\".\"published\" WHERE \"StatusName\" = '{StatusName.Scheduled}' FOR UPDATE SKIP LOCKED LIMIT 1;";
+            var sql =
+                $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"StatusName\" = '{StatusName.Scheduled}' FOR UPDATE SKIP LOCKED LIMIT 1;";
 
-            using (var connection = new NpgsqlConnection(_options.ConnectionString))
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
@@ -53,23 +55,23 @@ namespace DotNetCore.CAP.PostgreSql
 
         public async Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages()
         {
-            var sql = $"SELECT * FROM \"{_options.Schema}\".\"published\" WHERE \"StatusName\"='{StatusName.Failed}' LIMIT 1000;";
+            var sql =
+                $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"StatusName\"='{StatusName.Failed}' LIMIT 200;";
 
-            using (var connection = new NpgsqlConnection(_options.ConnectionString))
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapPublishedMessage>(sql);
             }
         }
 
-        // CapReceviedMessage
-
         public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var sql = $"INSERT INTO \"{_options.Schema}\".\"received\"(\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql =
+                $"INSERT INTO \"{Options.Schema}\".\"received\"(\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
-            using (var connection = new NpgsqlConnection(_options.ConnectionString))
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 await connection.ExecuteAsync(sql, message);
             }
@@ -77,26 +79,28 @@ namespace DotNetCore.CAP.PostgreSql
 
         public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
         {
-            var sql = $"SELECT * FROM \"{_options.Schema}\".\"received\" WHERE \"Id\"={id}";
-            using (var connection = new NpgsqlConnection(_options.ConnectionString))
+            var sql = $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
 
-        public async Task<CapReceivedMessage> GetNextReceviedMessageToBeEnqueuedAsync()
+        public async Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync()
         {
-            var sql = $"SELECT * FROM \"{_options.Schema}\".\"received\" WHERE \"StatusName\" = '{StatusName.Scheduled}' FOR UPDATE SKIP LOCKED LIMIT 1;";
-            using (var connection = new NpgsqlConnection(_options.ConnectionString))
+            var sql =
+                $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"StatusName\" = '{StatusName.Scheduled}' FOR UPDATE SKIP LOCKED LIMIT 1;";
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
 
-        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceviedMessages()
+        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
         {
-            var sql = $"SELECT * FROM \"{_options.Schema}\".\"received\" WHERE \"StatusName\"='{StatusName.Failed}' LIMIT 1000;";
-            using (var connection = new NpgsqlConnection(_options.ConnectionString))
+            var sql =
+                $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"StatusName\"='{StatusName.Failed}' LIMIT 200;";
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
             }
@@ -106,13 +110,35 @@ namespace DotNetCore.CAP.PostgreSql
         {
         }
 
+        public bool ChangePublishedState(int messageId, string state)
+        {
+            var sql =
+                $"UPDATE \"{Options.Schema}\".\"published\" SET \"Retries\"=\"Retries\"+1,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";
+
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
+        public bool ChangeReceivedState(int messageId, string state)
+        {
+            var sql =
+                $"UPDATE \"{Options.Schema}\".\"received\" SET \"Retries\"=\"Retries\"+1,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";
+
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
         private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
         {
             //here don't use `using` to dispose
-            var connection = new NpgsqlConnection(_options.ConnectionString);
+            var connection = new NpgsqlConnection(Options.ConnectionString);
             await connection.OpenAsync();
             var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
-            FetchedMessage fetchedMessage = null;
+            FetchedMessage fetchedMessage;
             try
             {
                 fetchedMessage = await connection.QueryFirstOrDefaultAsync<FetchedMessage>(sql, args, transaction);
@@ -131,7 +157,8 @@ namespace DotNetCore.CAP.PostgreSql
                 return null;
             }
 
-            return new PostgreSqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection, transaction);
+            return new PostgreSqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection,
+                transaction);
         }
     }
 }

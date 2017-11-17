@@ -15,7 +15,8 @@ namespace DotNetCore.CAP.MySql.Test
         public MySqlStorageConnectionTest()
         {
             var options = GetService<MySqlOptions>();
-            _storage = new MySqlStorageConnection(options);
+            var capOptions = GetService<CapOptions>();
+            _storage = new MySqlStorageConnection(options, capOptions);
         }
 
         [Fact]
@@ -52,11 +53,12 @@ namespace DotNetCore.CAP.MySql.Test
             {
                 connection.Execute(sql, queue);
             }
-            var fetchedMessage = await _storage.FetchNextMessageAsync();
-            fetchedMessage.Dispose();
-            Assert.NotNull(fetchedMessage);
-            Assert.Equal(MessageType.Publish, fetchedMessage.MessageType);
-            Assert.Equal(3333, fetchedMessage.MessageId);
+            using (var fetchedMessage = await _storage.FetchNextMessageAsync())
+            {
+                Assert.NotNull(fetchedMessage);
+                Assert.Equal(MessageType.Publish, fetchedMessage.MessageType);
+                Assert.Equal(3333, fetchedMessage.MessageId);
+            }
         }
 
         [Fact]
@@ -121,7 +123,7 @@ namespace DotNetCore.CAP.MySql.Test
             };
             await _storage.StoreReceivedMessageAsync(receivedMessage);
 
-            var message = await _storage.GetNextReceviedMessageToBeEnqueuedAsync();
+            var message = await _storage.GetNextReceivedMessageToBeEnqueuedAsync();
 
             Assert.NotNull(message);
             Assert.Equal(StatusName.Scheduled, message.StatusName);

@@ -18,17 +18,17 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
+            services.AddSingleton<CapDatabaseStorageMarkerService>();
             services.AddSingleton<IStorage, PostgreSqlStorage>();
-            services.AddScoped<IStorageConnection, PostgreSqlStorageConnection>();
+            services.AddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddTransient<ICallbackPublisher, CapPublisher>();
+            services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
             var postgreSqlOptions = new PostgreSqlOptions();
             _configure(postgreSqlOptions);
 
             if (postgreSqlOptions.DbContextType != null)
-            {
                 services.AddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
@@ -39,11 +39,8 @@ namespace DotNetCore.CAP
                         return postgreSqlOptions;
                     }
                 });
-            }
             else
-            {
                 services.AddSingleton(postgreSqlOptions);
-            }
         }
     }
 }

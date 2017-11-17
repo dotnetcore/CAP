@@ -8,15 +8,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Internal
 {
+    /// <inheritdoc />
     /// <summary>
-    ///  A default <see cref="IConsumerServiceSelector"/> implementation.
+    /// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
     /// </summary>
-    public class DefaultConsumerServiceSelector : IConsumerServiceSelector
+    internal class DefaultConsumerServiceSelector : IConsumerServiceSelector
     {
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// Creates a new <see cref="DefaultConsumerServiceSelector"/>.
+        /// Creates a new <see cref="DefaultConsumerServiceSelector" />.
         /// </summary>
         public DefaultConsumerServiceSelector(IServiceProvider serviceProvider)
         {
@@ -24,7 +25,7 @@ namespace DotNetCore.CAP.Internal
         }
 
         /// <summary>
-        /// Selects the best <see cref="ConsumerExecutorDescriptor"/> candidate from <paramref name="executeDescriptor"/> for the
+        /// Selects the best <see cref="ConsumerExecutorDescriptor" /> candidate from <paramref name="executeDescriptor" /> for the
         /// current message associated.
         /// </summary>
         public ConsumerExecutorDescriptor SelectBestCandidate(string key,
@@ -39,7 +40,7 @@ namespace DotNetCore.CAP.Internal
 
             executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(_serviceProvider));
 
-            executorDescriptorList.AddRange(FindConsumersFromControllerTypes(_serviceProvider));
+            executorDescriptorList.AddRange(FindConsumersFromControllerTypes());
 
             return executorDescriptorList;
         }
@@ -48,7 +49,7 @@ namespace DotNetCore.CAP.Internal
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
-            
+
             using (var scoped = provider.CreateScope())
             {
                 var scopedProvider = scoped.ServiceProvider;
@@ -57,9 +58,7 @@ namespace DotNetCore.CAP.Internal
                 {
                     var typeInfo = service.GetType().GetTypeInfo();
                     if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
-                    {
                         continue;
-                    }
 
                     executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
                 }
@@ -67,8 +66,7 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes(
-            IServiceProvider provider)
+        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
@@ -77,9 +75,7 @@ namespace DotNetCore.CAP.Internal
             {
                 var typeInfo = type.GetTypeInfo();
                 if (Helper.IsController(typeInfo))
-                {
                     executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
-                }
             }
 
             return executorDescriptorList;
@@ -89,14 +85,14 @@ namespace DotNetCore.CAP.Internal
         {
             foreach (var method in typeInfo.DeclaredMethods)
             {
-                var topicAttrs = method.GetCustomAttributes<TopicAttribute>(true);
+                var topicAttr = method.GetCustomAttributes<TopicAttribute>(true);
 
-                if (topicAttrs.Count() == 0) continue;
+                var topicAttributes = topicAttr as IList<TopicAttribute> ?? topicAttr.ToList();
 
-                foreach (var attr in topicAttrs)
-                {
+                if (!topicAttributes.Any()) continue;
+
+                foreach (var attr in topicAttributes)
                     yield return InitDescriptor(attr, method, typeInfo);
-                }
             }
         }
 
@@ -105,7 +101,7 @@ namespace DotNetCore.CAP.Internal
             MethodInfo methodInfo,
             TypeInfo implType)
         {
-            var descriptor = new ConsumerExecutorDescriptor()
+            var descriptor = new ConsumerExecutorDescriptor
             {
                 Attribute = attr,
                 MethodInfo = methodInfo,

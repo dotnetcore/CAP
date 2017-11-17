@@ -18,10 +18,11 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
+            services.AddSingleton<CapDatabaseStorageMarkerService>();
             services.AddSingleton<IStorage, SqlServerStorage>();
             services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
-            services.AddTransient<ICapPublisher, CapPublisher>();
-            services.AddTransient<ICallbackPublisher, CapPublisher>();
+            services.AddScoped<ICapPublisher, CapPublisher>();
+            services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
             AddSqlServerOptions(services);
         }
@@ -33,22 +34,18 @@ namespace DotNetCore.CAP
             _configure(sqlServerOptions);
 
             if (sqlServerOptions.DbContextType != null)
-            {
                 services.AddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext)provider.GetService(sqlServerOptions.DbContextType);
+                        var dbContext = (DbContext) provider.GetService(sqlServerOptions.DbContextType);
                         sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return sqlServerOptions;
                     }
                 });
-            }
             else
-            {
                 services.AddSingleton(sqlServerOptions);
-            }
         }
     }
 }

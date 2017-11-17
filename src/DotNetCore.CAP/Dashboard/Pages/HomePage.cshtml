@@ -1,0 +1,65 @@
+﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
+@using DotNetCore.CAP.Dashboard.Pages
+@using DotNetCore.CAP.Dashboard.Resources
+@using DotNetCore.CAP.Models
+@using Newtonsoft.Json
+@inherits DotNetCore.CAP.Dashboard.RazorPage
+@{
+    Layout = new LayoutPage(Strings.HomePage_Title);
+
+    var monitor = Storage.GetMonitoringApi();
+    var publishedSucceeded = monitor.HourlySucceededJobs(MessageType.Publish);
+    var publishedFailed = monitor.HourlyFailedJobs(MessageType.Publish);
+
+    var receivedSucceeded = monitor.HourlySucceededJobs(MessageType.Subscribe);
+    var receivedFailed = monitor.HourlyFailedJobs(MessageType.Subscribe);
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="page-header">@Strings.HomePage_Title</h1>
+        @if (Metrics.Count > 0)
+        {
+            <div class="row">
+                @foreach (var metric in Metrics)
+                {
+                    <div class="col-md-2">
+                        @Html.BlockMetric(metric)
+                    </div>
+                }
+            </div>
+        }
+        <h3>@Strings.HomePage_RealtimeGraph</h3>
+        <div id="realtimeGraph"
+             data-published-succeeded="@Statistics.PublishedSucceeded"
+             data-published-failed="@Statistics.PublishedFailed"
+             data-published-succeeded-string="@Strings.HomePage_GraphHover_PSucceeded"
+             data-published-failed-string="@Strings.HomePage_GraphHover_PFailed"
+             data-received-succeeded="@Statistics.ReceivedSucceeded"
+             data-received-failed="@Statistics.ReceivedFailed"
+             data-received-succeeded-string="@Strings.HomePage_GraphHover_RSucceeded"
+             data-received-failed-string="@Strings.HomePage_GraphHover_RFailed">
+        </div>
+        <div style="display: none;">
+            <span data-metric="published_succeeded:count"></span>
+            <span data-metric="published_failed:count"></span>
+            <span data-metric="received_succeeded:count"></span>
+            <span data-metric="received_failed:count"></span>
+        </div>
+        <div id="legend"></div>
+        <h3>
+            @Strings.HomePage_HistoryGraph
+        </h3>
+
+        <div id="historyGraph"
+             data-published-succeeded="@JsonConvert.SerializeObject(publishedSucceeded)"
+             data-published-failed="@JsonConvert.SerializeObject(publishedFailed)"
+             data-published-succeeded-string="@Strings.HomePage_GraphHover_PSucceeded"
+             data-published-failed-string="@Strings.HomePage_GraphHover_PFailed"
+             data-received-succeeded="@JsonConvert.SerializeObject(receivedSucceeded)"
+             data-received-failed="@JsonConvert.SerializeObject(receivedFailed)"
+             data-received-succeeded-string="@Strings.HomePage_GraphHover_RSucceeded"
+             data-received-failed-string="@Strings.HomePage_GraphHover_RFailed">
+        </div>
+    </div>
+</div>

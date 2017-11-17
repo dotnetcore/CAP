@@ -8,10 +8,7 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         public static CapOptions UseRabbitMQ(this CapOptions options, string hostName)
         {
-            return options.UseRabbitMQ(opt =>
-            {
-                opt.HostName = hostName;
-            });
+            return options.UseRabbitMQ(opt => { opt.HostName = hostName; });
         }
 
         public static CapOptions UseRabbitMQ(this CapOptions options, Action<RabbitMQOptions> configure)

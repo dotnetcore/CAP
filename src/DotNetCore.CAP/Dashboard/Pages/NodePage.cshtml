@@ -1,0 +1,51 @@
+﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
+@using DotNetCore.CAP.Dashboard.Pages
+@using DotNetCore.CAP.Dashboard.Resources
+@inherits DotNetCore.CAP.Dashboard.RazorPage
+@{
+    Layout = new LayoutPage(Strings.NodePage_Title);
+}
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="page-header">@Strings.NodePage_Title</h1>
+
+        @if (Nodes == null || Nodes.Count == 0)
+        {
+            <div class="alert alert-warning">
+                @Strings.NodePage_NoNodes
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th width="10%">@Strings.Common_Id</th>
+                        <th width="20%">@Strings.NodePage_Table_NodeName</th>
+                        <th width="20%">@Strings.NodePage_Table_IP</th>
+                        <th width="7%">@Strings.NodePage_Table_Port</th>
+                        <th>Tags</th>
+                        <th width="20%">@Strings.NodePage_Switch</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var node in Nodes)
+                    {
+                        <tr class="@(CurrentNodeId == node.Id ? "active" : null)">
+                            <td>@node.Id</td>
+                            <td>@node.Name</td>
+                            <td>@node.Address</td>
+                            <td>@node.Port</td>
+                            <td>@node.Tags</td>
+                            <td>
+                                @Html.NodeSwitchLink(node.Id)
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

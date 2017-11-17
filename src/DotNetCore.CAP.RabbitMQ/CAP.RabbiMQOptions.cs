@@ -1,6 +1,5 @@
-﻿using System;
+﻿// ReSharper disable once CheckNamespace
 
-// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class RabbitMQOptions

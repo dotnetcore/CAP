@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
 {
@@ -8,8 +9,6 @@ namespace DotNetCore.CAP
     /// </summary>
     public class CapOptions
     {
-        internal IList<ICapOptionsExtension> Extensions { get; private set; }
-
         /// <summary>
         /// Default value for polling delay timeout, in seconds.
         /// </summary>
@@ -21,26 +20,34 @@ namespace DotNetCore.CAP
         public const int DefaultQueueProcessorCount = 2;
 
         /// <summary>
-        /// Default successed message expriation timespan, in seconds.
+        /// Default succeeded message expiration time span, in seconds.
         /// </summary>
-        public const int DefaultSuccessMessageExpirationAfter = 3600;
+        public const int DefaultSucceedMessageExpirationAfter = 24 * 3600;
 
         /// <summary>
         /// Failed message retry waiting interval.
         /// </summary>
-        public const int DefaultFailedMessageWaitingInterval = 180;
+        public const int DefaultFailedMessageWaitingInterval = 600;
+
+        /// <summary>
+        /// Failed message retry count.
+        /// </summary>
+        public const int DefaultFailedRetryCount = 100;
 
         public CapOptions()
         {
             PollingDelay = DefaultPollingDelay;
             QueueProcessorCount = DefaultQueueProcessorCount;
-            SuccessedMessageExpiredAfter = DefaultSuccessMessageExpirationAfter;
-            FailedMessageWaitingInterval = DefaultFailedMessageWaitingInterval;
+            SucceedMessageExpiredAfter = DefaultSucceedMessageExpirationAfter;
+            FailedRetryInterval = DefaultFailedMessageWaitingInterval;
+            FailedRetryCount = DefaultFailedRetryCount;
             Extensions = new List<ICapOptionsExtension>();
         }
 
+        internal IList<ICapOptionsExtension> Extensions { get; }
+
         /// <summary>
-        /// Productor job polling delay time. 
+        /// Producer job polling delay time.
         /// Default is 15 sec.
         /// </summary>
         public int PollingDelay { get; set; }
@@ -52,21 +59,27 @@ namespace DotNetCore.CAP
         public int QueueProcessorCount { get; set; }
 
         /// <summary>
-        /// Sent or received successed message after timespan of due, then the message will be deleted at due time. 
-        /// Dafault is 3600 seconds.
+        /// Sent or received succeed message after time span of due, then the message will be deleted at due time.
+        /// Default is 24*3600 seconds.
         /// </summary>
-        public int SuccessedMessageExpiredAfter { get; set; }
+        public int SucceedMessageExpiredAfter { get; set; }
 
         /// <summary>
         /// Failed messages polling delay time.
-        /// Default is 180 seconds.
+        /// Default is 600 seconds.
         /// </summary>
-        public int FailedMessageWaitingInterval { get; set; }
+        public int FailedRetryInterval { get; set; }
 
         /// <summary>
         /// We’ll invoke this call-back with message type,name,content when requeue failed message.
         /// </summary>
-        public Action<Models.MessageType, string, string> FailedCallback { get; set; }
+        public Action<MessageType, string, string> FailedCallback { get; set; }
+
+        /// <summary>
+        /// The number of message retries, the retry will stop when the threshold is reached.
+        /// Default is 100 times.
+        /// </summary>
+        public int FailedRetryCount { get; set; }
 
         /// <summary>
         /// Registers an extension that will be executed when building services.

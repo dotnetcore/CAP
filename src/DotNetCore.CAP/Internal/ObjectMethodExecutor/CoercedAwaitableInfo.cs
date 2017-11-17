@@ -20,7 +20,8 @@ namespace Microsoft.Extensions.Internal
             CoercerResultType = null;
         }
 
-        public CoercedAwaitableInfo(Expression coercerExpression, Type coercerResultType, AwaitableInfo coercedAwaitableInfo)
+        public CoercedAwaitableInfo(Expression coercerExpression, Type coercerResultType,
+            AwaitableInfo coercedAwaitableInfo)
         {
             CoercerExpression = coercerExpression;
             CoercerResultType = coercerResultType;
@@ -40,13 +41,11 @@ namespace Microsoft.Extensions.Internal
             if (ObjectMethodExecutorFSharpSupport.TryBuildCoercerFromFSharpAsyncToAwaitable(type,
                 out var coercerExpression,
                 out var coercerResultType))
-            {
                 if (AwaitableInfo.IsTypeAwaitable(coercerResultType, out var coercedAwaitableInfo))
                 {
                     info = new CoercedAwaitableInfo(coercerExpression, coercerResultType, coercedAwaitableInfo);
                     return true;
                 }
-            }
 
             info = default(CoercedAwaitableInfo);
             return false;

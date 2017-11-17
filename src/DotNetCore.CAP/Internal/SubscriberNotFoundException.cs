@@ -14,6 +14,7 @@ namespace DotNetCore.CAP.Internal
 
         public SubscriberNotFoundException(string message, Exception inner) :
             base(message, inner)
-        { }
+        {
+        }
     }
 }

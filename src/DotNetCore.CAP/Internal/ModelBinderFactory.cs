@@ -2,52 +2,48 @@
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Abstractions.ModelBinding;
 using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Internal
 {
     /// <summary>
-    /// A factory for <see cref="IModelBinder"/> instances.
+    /// A factory for <see cref="IModelBinder" /> instances.
     /// </summary>
-    public class ModelBinderFactory : IModelBinderFactory
+    internal class ModelBinderFactory : IModelBinderFactory
     {
-        private readonly ConcurrentDictionary<Key, IModelBinder> _cache =
-            new ConcurrentDictionary<Key, IModelBinder>();
+        private readonly IContentSerializer _serializer;
+        private readonly ConcurrentDictionary<Key, IModelBinder> _cache;
+
+        public ModelBinderFactory(IContentSerializer contentSerializer)
+        {
+            _serializer = contentSerializer;
+            _cache = new ConcurrentDictionary<Key, IModelBinder>();
+        }
 
         public IModelBinder CreateBinder(ParameterInfo parameter)
         {
             if (parameter == null)
-            {
                 throw new ArgumentNullException(nameof(parameter));
-            }
 
             object token = parameter;
 
             var binder = CreateBinderCoreCached(parameter, token);
             if (binder == null)
-            {
                 throw new InvalidOperationException("Format Could Not Create IModelBinder");
-            }
 
             return binder;
         }
 
         private IModelBinder CreateBinderCoreCached(ParameterInfo parameterInfo, object token)
         {
-            IModelBinder binder;
-            if (TryGetCachedBinder(parameterInfo, token, out binder))
-            {
+            if (TryGetCachedBinder(parameterInfo, token, out var binder))
                 return binder;
-            }
             if (!Helper.IsComplexType(parameterInfo.ParameterType))
-            {
                 binder = new SimpleTypeModelBinder(parameterInfo);
-            }
             else
-            {
-                binder = new ComplexTypeModelBinder(parameterInfo);
-            }
+                binder = new ComplexTypeModelBinder(parameterInfo, _serializer);
 
             AddToCache(parameterInfo, token, binder);
 
@@ -57,9 +53,7 @@ namespace DotNetCore.CAP.Internal
         private void AddToCache(ParameterInfo info, object cacheToken, IModelBinder binder)
         {
             if (cacheToken == null)
-            {
                 return;
-            }
 
             _cache.TryAdd(new Key(info, cacheToken), binder);
         }
@@ -88,7 +82,7 @@ namespace DotNetCore.CAP.Internal
 
             public bool Equals(Key other)
             {
-                return _metadata.Equals(other._metadata) && object.ReferenceEquals(_token, other._token);
+                return _metadata.Equals(other._metadata) && ReferenceEquals(_token, other._token);
             }
 
             public override bool Equals(object obj)

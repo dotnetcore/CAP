@@ -18,11 +18,8 @@ namespace Sample.RabbitMQ.MySql
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ(y => {
-                    y.HostName = "192.168.2.206";
-                    y.UserName = "admin";
-                    y.Password = "123123";
-                });
+                x.UseRabbitMQ("localhost");
+                x.UseDashboard();
             });
 
             services.AddMvc();

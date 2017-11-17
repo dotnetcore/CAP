@@ -10,7 +10,7 @@ namespace DotNetCore.CAP.Abstractions
     public abstract class CapPublisherBase : ICapPublisher, IDisposable
     {
         protected IDbConnection DbConnection { get; set; }
-        protected IDbTransaction DbTranasaction { get; set; }
+        protected IDbTransaction DbTransaction { get; set; }
         protected bool IsCapOpenedTrans { get; set; }
         protected bool IsCapOpenedConn { get; set; }
         protected bool IsUsingEF { get; set; }
@@ -36,22 +36,20 @@ namespace DotNetCore.CAP.Abstractions
             return PublishWithTransAsync(name, content);
         }
 
-        public void Publish<T>(string name, T contentObj, IDbConnection dbConnection,
-            string callbackName = null, IDbTransaction dbTransaction = null)
+        public void Publish<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
         {
             CheckIsAdoNet(name);
-            PrepareConnectionForAdo(dbConnection, dbTransaction);
+            PrepareConnectionForAdo(dbTransaction);
 
             var content = Serialize(contentObj, callbackName);
 
             PublishWithTrans(name, content);
         }
 
-        public Task PublishAsync<T>(string name, T contentObj, IDbConnection dbConnection,
-            string callbackName = null, IDbTransaction dbTransaction = null)
+        public Task PublishAsync<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
         {
             CheckIsAdoNet(name);
-            PrepareConnectionForAdo(dbConnection, dbTransaction);
+            PrepareConnectionForAdo(dbTransaction);
 
             var content = Serialize(contentObj, callbackName);
 
@@ -60,35 +58,51 @@ namespace DotNetCore.CAP.Abstractions
 
         protected abstract void PrepareConnectionForEF();
 
-        protected abstract void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message);
+        protected abstract void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
+            CapPublishedMessage message);
 
-        protected abstract Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message);
+        protected abstract Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+            CapPublishedMessage message);
 
-        #region private methods
-
-        private string Serialize<T>(T obj, string callbackName = null)
+        protected virtual string Serialize<T>(T obj, string callbackName = null)
         {
-            var message = new Message(obj)
+            var packer = (IMessagePacker)ServiceProvider.GetService(typeof(IMessagePacker));
+            string content;
+            if (obj != null)
+            {
+                if (Helper.IsComplexType(obj.GetType()))
+                {
+                    var serializer = (IContentSerializer)ServiceProvider.GetService(typeof(IContentSerializer));
+                    content = serializer.Serialize(obj);
+                }
+                else
+                {
+                    content = obj.ToString();
+                }
+            }
+            else
+            {
+                content = string.Empty;
+            }
+
+            var message = new CapMessageDto(content)
             {
                 CallbackName = callbackName
             };
 
-            return Helper.ToJson(message);
+            return packer.Pack(message);
         }
 
-        private void PrepareConnectionForAdo(IDbConnection dbConnection, IDbTransaction dbTransaction)
+        #region private methods
+
+        private void PrepareConnectionForAdo(IDbTransaction dbTransaction)
         {
-            DbConnection = dbConnection ?? throw new ArgumentNullException(nameof(dbConnection));
+            DbTransaction = dbTransaction ?? throw new ArgumentNullException(nameof(dbTransaction));
+            DbConnection = DbTransaction.Connection;
             if (DbConnection.State != ConnectionState.Open)
             {
                 IsCapOpenedConn = true;
                 DbConnection.Open();
-            }
-            DbTranasaction = dbTransaction;
-            if (DbTranasaction == null)
-            {
-                IsCapOpenedTrans = true;
-                DbTranasaction = dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
             }
         }
 
@@ -96,18 +110,20 @@ namespace DotNetCore.CAP.Abstractions
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             if (!IsUsingEF)
-                throw new InvalidOperationException("If you are using the EntityFramework, you need to configure the DbContextType first." +
-                  " otherwise you need to use overloaded method with IDbConnection and IDbTransaction.");
+                throw new InvalidOperationException(
+                    "If you are using the EntityFramework, you need to configure the DbContextType first." +
+                    " otherwise you need to use overloaded method with IDbConnection and IDbTransaction.");
         }
 
         private void CheckIsAdoNet(string name)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             if (IsUsingEF)
-                throw new InvalidOperationException("If you are using the EntityFramework, you do not need to use this overloaded.");
+                throw new InvalidOperationException(
+                    "If you are using the EntityFramework, you do not need to use this overloaded.");
         }
 
-        private async Task PublishWithTransAsync(string name, string content)
+        private Task PublishWithTransAsync(string name, string content)
         {
             var message = new CapPublishedMessage
             {
@@ -116,11 +132,13 @@ namespace DotNetCore.CAP.Abstractions
                 StatusName = StatusName.Scheduled
             };
 
-            await ExecuteAsync(DbConnection, DbTranasaction, message);
+            ExecuteAsync(DbConnection, DbTransaction, message);
 
             ClosedCap();
 
             PublishQueuer.PulseEvent.Set();
+
+            return Task.CompletedTask;
         }
 
         private void PublishWithTrans(string name, string content)
@@ -132,7 +150,7 @@ namespace DotNetCore.CAP.Abstractions
                 StatusName = StatusName.Scheduled
             };
 
-            Execute(DbConnection, DbTranasaction, message);
+            Execute(DbConnection, DbTransaction, message);
 
             ClosedCap();
 
@@ -143,18 +161,16 @@ namespace DotNetCore.CAP.Abstractions
         {
             if (IsCapOpenedTrans)
             {
-                DbTranasaction.Commit();
-                DbTranasaction.Dispose();
+                DbTransaction.Commit();
+                DbTransaction.Dispose();
             }
             if (IsCapOpenedConn)
-            {
                 DbConnection.Dispose();
-            }
         }
 
         public void Dispose()
         {
-            DbTranasaction?.Dispose();
+            DbTransaction?.Dispose();
             DbConnection?.Dispose();
         }
 

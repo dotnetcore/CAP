@@ -1,20 +1,38 @@
+using System;
+using System.Data;
 using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
+using DotNetCore.CAP.Dashboard;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerStorage : IStorage
     {
-        private readonly SqlServerOptions _options;
+        private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
+        private readonly CapOptions _capOptions;
+        private readonly SqlServerOptions _options;
 
-        public SqlServerStorage(ILogger<SqlServerStorage> logger, SqlServerOptions options)
+        public SqlServerStorage(ILogger<SqlServerStorage> logger,
+            CapOptions capOptions,
+            SqlServerOptions options)
         {
             _options = options;
             _logger = logger;
+            _capOptions = capOptions;
+        }
+
+        public IStorageConnection GetConnection()
+        {
+            return new SqlServerStorageConnection(_options, _capOptions);
+        }
+
+        public IMonitoringApi GetMonitoringApi()
+        {
+            return new SqlServerMonitoringApi(this, _options);
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -33,7 +51,7 @@ namespace DotNetCore.CAP.SqlServer
         protected virtual string CreateDbTablesScript(string schema)
         {
             var batchSql =
-    $@"
+                $@"
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}')
 BEGIN
 	EXEC('CREATE SCHEMA {schema}')
@@ -82,6 +100,42 @@ CREATE TABLE [{schema}].[Published](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 END;";
             return batchSql;
+        }
+
+        internal T UseConnection<T>(Func<IDbConnection, T> func)
+        {
+            IDbConnection connection = null;
+
+            try
+            {
+                connection = CreateAndOpenConnection();
+                return func(connection);
+            }
+            finally
+            {
+                ReleaseConnection(connection);
+            }
+        }
+
+        internal IDbConnection CreateAndOpenConnection()
+        {
+            var connection = _existingConnection ?? new SqlConnection(_options.ConnectionString);
+
+            if (connection.State == ConnectionState.Closed)
+                connection.Open();
+
+            return connection;
+        }
+
+        internal bool IsExistingConnection(IDbConnection connection)
+        {
+            return connection != null && ReferenceEquals(connection, _existingConnection);
+        }
+
+        internal void ReleaseConnection(IDbConnection connection)
+        {
+            if (connection != null && !IsExistingConnection(connection))
+                connection.Dispose();
         }
     }
 }

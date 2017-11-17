@@ -5,11 +5,8 @@ namespace DotNetCore.CAP.Models
     public class CapPublishedMessage
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="CapPublishedMessage"/>.
+        /// Initializes a new instance of <see cref="CapPublishedMessage" />.
         /// </summary>
-        /// <remarks>
-        /// The Id property is initialized to from a new GUID string value.
-        /// </remarks>
         public CapPublishedMessage()
         {
             Added = DateTime.Now;

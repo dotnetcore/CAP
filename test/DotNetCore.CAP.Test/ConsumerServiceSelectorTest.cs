@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 

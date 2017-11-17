@@ -13,9 +13,9 @@ namespace DotNetCore.CAP.SqlServer
 {
     public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
+        private readonly DbContext _dbContext;
         private readonly ILogger _logger;
         private readonly SqlServerOptions _options;
-        private readonly DbContext _dbContext;
 
         public CapPublisher(IServiceProvider provider,
             ILogger<CapPublisher> logger,
@@ -25,10 +25,17 @@ namespace DotNetCore.CAP.SqlServer
             _logger = logger;
             _options = options;
 
-            if (_options.DbContextType != null)
+            if (_options.DbContextType == null) return;
+
+            IsUsingEF = true;
+            _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
+        }
+
+        public async Task PublishAsync(CapPublishedMessage message)
+        {
+            using (var conn = new SqlConnection(_options.ConnectionString))
             {
-                IsUsingEF = true;
-                _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
+               await conn.ExecuteAsync(PrepareSql(), message);
             }
         }
 
@@ -45,36 +52,33 @@ namespace DotNetCore.CAP.SqlServer
                 dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
                 dbTrans = dbContextTransaction.GetDbTransaction();
             }
-            DbTranasaction = dbTrans;
+            DbTransaction = dbTrans;
         }
 
-        protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
+        protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
+            CapPublishedMessage message)
         {
             dbConnection.Execute(PrepareSql(), message, dbTransaction);
 
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
+            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
         }
 
-        protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
+        protected override Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+            CapPublishedMessage message)
         {
-            await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
+            dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
 
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message.ToString());
-        }
+            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
 
-        public async Task PublishAsync(CapPublishedMessage message)
-        {
-            using (var conn = new SqlConnection(_options.ConnectionString))
-            {
-                await conn.ExecuteAsync(PrepareSql(), message);
-            }
+            return Task.CompletedTask;
         }
 
         #region private methods
 
         private string PrepareSql()
         {
-            return $"INSERT INTO {_options.Schema}.[Published] ([Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName)";
+            return
+                $"INSERT INTO {_options.Schema}.[Published] ([Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName)";
         }
 
         #endregion private methods

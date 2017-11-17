@@ -7,12 +7,12 @@ using Npgsql;
 
 namespace DotNetCore.CAP.PostgreSql
 {
-    public class PostgreSqlStorageTransaction : IStorageTransaction, IDisposable
+    public class PostgreSqlStorageTransaction : IStorageTransaction
     {
-        private readonly string _schema;
+        private readonly IDbConnection _dbConnection;
 
         private readonly IDbTransaction _dbTransaction;
-        private readonly IDbConnection _dbConnection;
+        private readonly string _schema;
 
         public PostgreSqlStorageTransaction(PostgreSqlStorageConnection connection)
         {
@@ -28,7 +28,10 @@ namespace DotNetCore.CAP.PostgreSql
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var sql = $@"UPDATE ""{_schema}"".""published"" SET ""Retries""=@Retries,""ExpiresAt""=@ExpiresAt,""StatusName""=@StatusName WHERE ""Id""=@Id;";
+            var sql =
+                $@"UPDATE ""{
+                        _schema
+                    }"".""published"" SET ""Retries""=@Retries,""Content""= @Content,""ExpiresAt""=@ExpiresAt,""StatusName""=@StatusName WHERE ""Id""=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
         }
 
@@ -36,7 +39,10 @@ namespace DotNetCore.CAP.PostgreSql
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var sql = $@"UPDATE ""{_schema}"".""received"" SET ""Retries""=@Retries,""ExpiresAt""=@ExpiresAt,""StatusName""=@StatusName WHERE ""Id""=@Id;";
+            var sql =
+                $@"UPDATE ""{
+                        _schema
+                    }"".""received"" SET ""Retries""=@Retries,""Content""= @Content,""ExpiresAt""=@ExpiresAt,""StatusName""=@StatusName WHERE ""Id""=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
         }
 
@@ -45,7 +51,8 @@ namespace DotNetCore.CAP.PostgreSql
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             var sql = $@"INSERT INTO ""{_schema}"".""queue"" values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue { MessageId = message.Id, MessageType = MessageType.Publish }, _dbTransaction);
+            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Publish},
+                _dbTransaction);
         }
 
         public void EnqueueMessage(CapReceivedMessage message)
@@ -53,7 +60,8 @@ namespace DotNetCore.CAP.PostgreSql
             if (message == null) throw new ArgumentNullException(nameof(message));
 
             var sql = $@"INSERT INTO ""{_schema}"".""queue"" values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue { MessageId = message.Id, MessageType = MessageType.Subscribe }, _dbTransaction);
+            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Subscribe},
+                _dbTransaction);
         }
 
         public Task CommitAsync()

@@ -10,8 +10,7 @@ namespace DotNetCore.CAP.Internal
 
         public int CombinedHash
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            get { return _combinedHash64.GetHashCode(); }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return _combinedHash64.GetHashCode(); }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -30,7 +29,7 @@ namespace DotNetCore.CAP.Internal
             else
             {
                 var count = 0;
-                foreach (object o in e)
+                foreach (var o in e)
                 {
                     Add(o);
                     count++;
@@ -54,14 +53,14 @@ namespace DotNetCore.CAP.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(string s)
         {
-            var hashCode = (s != null) ? s.GetHashCode() : 0;
+            var hashCode = s != null ? s.GetHashCode() : 0;
             Add(hashCode);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(object o)
         {
-            var hashCode = (o != null) ? o.GetHashCode() : 0;
+            var hashCode = o != null ? o.GetHashCode() : 0;
             Add(hashCode);
         }
 

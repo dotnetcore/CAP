@@ -10,6 +10,7 @@ namespace DotNetCore.CAP.Processor
         public static readonly RetryBehavior DefaultRetry;
         public static readonly RetryBehavior NoRetry;
 
+        // ReSharper disable once InconsistentNaming
         private static readonly Random _random = new Random();
 
         private readonly Func<int, int> _retryInThunk;
@@ -18,7 +19,7 @@ namespace DotNetCore.CAP.Processor
         {
             DefaultRetryCount = 15;
             DefaultRetryInThunk = retries =>
-                (int)Math.Round(Math.Pow(retries - 1, 4) + 15 + (_random.Next(30) * (retries)));
+                (int) Math.Round(Math.Pow(retries - 1, 4) + 15 + _random.Next(30) * retries);
 
             DefaultRetry = new RetryBehavior(true);
             NoRetry = new RetryBehavior(false);
@@ -30,7 +31,7 @@ namespace DotNetCore.CAP.Processor
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RetryBehavior"/> class.
+        /// Initializes a new instance of the <see cref="RetryBehavior" /> class.
         /// </summary>
         /// <param name="retry">Whether to retry.</param>
         /// <param name="retryCount">The maximum retry count.</param>
@@ -38,9 +39,7 @@ namespace DotNetCore.CAP.Processor
         public RetryBehavior(bool retry, int retryCount, Func<int, int> retryInThunk)
         {
             if (retry)
-            {
                 if (retryCount < 0) throw new ArgumentOutOfRangeException(nameof(retryCount), "Can't be negative.");
-            }
 
             Retry = retry;
             RetryCount = retryCount;

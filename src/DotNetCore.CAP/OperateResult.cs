@@ -22,51 +22,54 @@ namespace DotNetCore.CAP
         public Exception Exception { get; set; }
 
         /// <summary>
-        /// An <see cref="IEnumerable{T}"/> of <see cref="OperateError"/>s containing an errors
+        /// An <see cref="IEnumerable{T}" /> of <see cref="OperateError" />s containing an errors
         /// that occurred during the operation.
         /// </summary>
-        /// <value>An <see cref="IEnumerable{T}"/> of <see cref="OperateError"/>s.</value>
+        /// <value>An <see cref="IEnumerable{T}" /> of <see cref="OperateError" />s.</value>
         public IEnumerable<OperateError> Errors => _errors;
 
         /// <summary>
-        /// Returns an <see cref="OperateResult"/> indicating a successful identity operation.
+        /// Returns an <see cref="OperateResult" /> indicating a successful identity operation.
         /// </summary>
-        /// <returns>An <see cref="OperateResult"/> indicating a successful operation.</returns>
-        public static OperateResult Success { get; } = new OperateResult { Succeeded = true };
+        /// <returns>An <see cref="OperateResult" /> indicating a successful operation.</returns>
+        public static OperateResult Success { get; } = new OperateResult {Succeeded = true};
 
         /// <summary>
-        /// Creates an <see cref="OperateResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.
+        /// Creates an <see cref="OperateResult" /> indicating a failed operation, with a list of <paramref name="errors" /> if
+        /// applicable.
         /// </summary>
-        /// <param name="errors">An optional array of <see cref="OperateError"/>s which caused the operation to fail.</param>
-        /// <returns>An <see cref="OperateResult"/> indicating a failed operation, with a list of <paramref name="errors"/> if applicable.</returns>
+        /// <param name="errors">An optional array of <see cref="OperateError" />s which caused the operation to fail.</param>
+        /// <returns>
+        /// An <see cref="OperateResult" /> indicating a failed operation, with a list of <paramref name="errors" /> if
+        /// applicable.
+        /// </returns>
         public static OperateResult Failed(params OperateError[] errors)
         {
-            var result = new OperateResult { Succeeded = false };
+            var result = new OperateResult {Succeeded = false};
             if (errors != null)
-            {
                 result._errors.AddRange(errors);
-            }
             return result;
         }
 
         public static OperateResult Failed(Exception ex, params OperateError[] errors)
         {
-            var result = new OperateResult { Succeeded = false };
-            result.Exception = ex;
-            if (errors != null)
+            var result = new OperateResult
             {
+                Succeeded = false,
+                Exception = ex
+            };
+            if (errors != null)
                 result._errors.AddRange(errors);
-            }
             return result;
         }
 
         /// <summary>
-        /// Converts the value of the current <see cref="OperateResult"/> object to its equivalent string representation.
+        /// Converts the value of the current <see cref="OperateResult" /> object to its equivalent string representation.
         /// </summary>
-        /// <returns>A string representation of the current <see cref="OperateResult"/> object.</returns>
+        /// <returns>A string representation of the current <see cref="OperateResult" /> object.</returns>
         /// <remarks>
         /// If the operation was successful the ToString() will return "Succeeded" otherwise it returned
-        /// "Failed : " followed by a comma delimited list of error codes from its <see cref="Errors"/> collection, if any.
+        /// "Failed : " followed by a comma delimited list of error codes from its <see cref="Errors" /> collection, if any.
         /// </remarks>
         public override string ToString()
         {

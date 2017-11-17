@@ -9,19 +9,19 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class CapProcessingServer : IProcessingServer, IDisposable
+    public class CapProcessingServer : IProcessingServer
     {
+        private readonly CancellationTokenSource _cts;
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IServiceProvider _provider;
-        private readonly CancellationTokenSource _cts;
+        private readonly IList<IDispatcher> _messageDispatchers;
         private readonly CapOptions _options;
+        private readonly IServiceProvider _provider;
+        private Task _compositeTask;
+        private ProcessingContext _context;
+        private bool _disposed;
 
         private IProcessor[] _processors;
-        private IList<IDispatcher> _messageDispatchers;
-        private ProcessingContext _context;
-        private Task _compositeTask;
-        private bool _disposed;
 
         public CapProcessingServer(
             ILogger<CapProcessingServer> logger,
@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.Processor
             _context = new ProcessingContext(_provider, _cts.Token);
 
             var processorTasks = _processors
-                .Select(p => InfiniteRetry(p))
+                .Select(InfiniteRetry)
                 .Select(p => p.ProcessAsync(_context));
             _compositeTask = Task.WhenAll(processorTasks);
         }
@@ -55,10 +55,7 @@ namespace DotNetCore.CAP.Processor
         public void Pulse()
         {
             if (!AllProcessorsWaiting())
-            {
-                // Some processor is still executing jobs so no need to pulse.
                 return;
-            }
 
             _logger.LogTrace("Pulsing the Queuer.");
 
@@ -68,37 +65,26 @@ namespace DotNetCore.CAP.Processor
         public void Dispose()
         {
             if (_disposed)
-            {
                 return;
-            }
             _disposed = true;
 
             _logger.ServerShuttingDown();
             _cts.Cancel();
             try
             {
-                _compositeTask.Wait((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
+                _compositeTask.Wait((int) TimeSpan.FromSeconds(10).TotalMilliseconds);
             }
             catch (AggregateException ex)
             {
                 var innerEx = ex.InnerExceptions[0];
                 if (!(innerEx is OperationCanceledException))
-                {
                     _logger.ExpectedOperationCanceledException(innerEx);
-                }
             }
         }
 
         private bool AllProcessorsWaiting()
         {
-            foreach (var processor in _messageDispatchers)
-            {
-                if (!processor.Waiting)
-                {
-                    return false;
-                }
-            }
-            return true;
+            return _messageDispatchers.All(processor => processor.Waiting);
         }
 
         private IProcessor InfiniteRetry(IProcessor inner)
@@ -109,7 +95,7 @@ namespace DotNetCore.CAP.Processor
         private IProcessor[] GetProcessors(int processorCount)
         {
             var returnedProcessors = new List<IProcessor>();
-            for (int i = 0; i < processorCount; i++)
+            for (var i = 0; i < processorCount; i++)
             {
                 var messageProcessors = _provider.GetRequiredService<IDispatcher>();
                 _messageDispatchers.Add(messageProcessors);
@@ -118,7 +104,7 @@ namespace DotNetCore.CAP.Processor
 
             returnedProcessors.Add(_provider.GetRequiredService<PublishQueuer>());
             returnedProcessors.Add(_provider.GetRequiredService<SubscribeQueuer>());
-            returnedProcessors.Add(_provider.GetRequiredService<FailedJobProcessor>());
+            returnedProcessors.Add(_provider.GetRequiredService<FailedProcessor>());
 
             returnedProcessors.Add(_provider.GetRequiredService<IAdditionalProcessor>());
 

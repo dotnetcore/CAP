@@ -33,7 +33,15 @@ namespace DotNetCore.CAP.Processor
 
         public bool IsStopping => CancellationToken.IsCancellationRequested;
 
-        public void ThrowIfStopping() => CancellationToken.ThrowIfCancellationRequested();
+        public void Dispose()
+        {
+            _scope?.Dispose();
+        }
+
+        public void ThrowIfStopping()
+        {
+            CancellationToken.ThrowIfCancellationRequested();
+        }
 
         public ProcessingContext CreateScope()
         {
@@ -49,11 +57,6 @@ namespace DotNetCore.CAP.Processor
         public Task WaitAsync(TimeSpan timeout)
         {
             return Task.Delay(timeout, CancellationToken);
-        }
-
-        public void Dispose()
-        {
-            _scope?.Dispose();
         }
     }
 }

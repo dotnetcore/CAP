@@ -29,6 +29,7 @@ namespace DotNetCore.CAP.MySql.Test
 
             _connectionString = ConnectionUtil.GetConnectionString();
             services.AddSingleton(new MySqlOptions { ConnectionString = _connectionString });
+            services.AddSingleton(new CapOptions());
             services.AddSingleton<MySqlStorage>();
 
             _services = services;

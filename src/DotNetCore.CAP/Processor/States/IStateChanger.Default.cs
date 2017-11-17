@@ -9,13 +9,9 @@ namespace DotNetCore.CAP.Processor.States
         {
             var now = DateTime.Now;
             if (state.ExpiresAfter != null)
-            {
                 message.ExpiresAt = now.Add(state.ExpiresAfter.Value);
-            }
             else
-            {
                 message.ExpiresAt = null;
-            }
 
             message.StatusName = state.Name;
             state.Apply(message, transaction);
@@ -26,13 +22,9 @@ namespace DotNetCore.CAP.Processor.States
         {
             var now = DateTime.Now;
             if (state.ExpiresAfter != null)
-            {
                 message.ExpiresAt = now.Add(state.ExpiresAfter.Value);
-            }
             else
-            {
                 message.ExpiresAt = null;
-            }
 
             message.StatusName = state.Name;
             state.Apply(message, transaction);

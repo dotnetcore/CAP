@@ -1,9 +1,7 @@
-﻿using DotNetCore.CAP.Abstractions;
-
-namespace DotNetCore.CAP.Internal
+﻿namespace DotNetCore.CAP.Internal
 {
-    public interface IConsumerInvokerFactory
+    internal interface IConsumerInvokerFactory
     {
-        IConsumerInvoker CreateInvoker(ConsumerContext actionContext);
+        IConsumerInvoker CreateInvoker();
     }
 }

@@ -9,18 +9,17 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Configuration to use kafka in CAP.
         /// </summary>
+        /// <param name="options">CAP configuration options</param>
         /// <param name="bootstrapServers">Kafka bootstrap server urls.</param>
         public static CapOptions UseKafka(this CapOptions options, string bootstrapServers)
         {
-            return options.UseKafka(opt =>
-            {
-                opt.Servers = bootstrapServers;
-            });
+            return options.UseKafka(opt => { opt.Servers = bootstrapServers; });
         }
 
         /// <summary>
         /// Configuration to use kafka in CAP.
         /// </summary>
+        /// <param name="options">CAP configuration options</param>
         /// <param name="configure">Provides programmatic configuration for the kafka .</param>
         /// <returns></returns>
         public static CapOptions UseKafka(this CapOptions options, Action<KafkaOptions> configure)

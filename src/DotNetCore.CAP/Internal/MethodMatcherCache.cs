@@ -6,17 +6,17 @@ using DotNetCore.CAP.Abstractions;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class MethodMatcherCache
+    internal class MethodMatcherCache
     {
         private readonly IConsumerServiceSelector _selector;
-
-        private ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>> Entries { get; }
 
         public MethodMatcherCache(IConsumerServiceSelector selector)
         {
             _selector = selector;
             Entries = new ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>>();
         }
+
+        private ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>> Entries { get; }
 
         /// <summary>
         /// Get a dictionary of candidates.In the dictionary,
@@ -31,24 +31,20 @@ namespace DotNetCore.CAP.Internal
             var groupedCandidates = executorCollection.GroupBy(x => x.Attribute.Group);
 
             foreach (var item in groupedCandidates)
-            {
                 Entries.TryAdd(item.Key, item.ToList());
-            }
 
             return Entries;
         }
 
         /// <summary>
-        ///  Get a dictionary of specify topic candidates.
-        ///  The Key is Group name, the value is specify topic candidates.
+        /// Get a dictionary of specify topic candidates.
+        /// The Key is Group name, the value is specify topic candidates.
         /// </summary>
         /// <param name="topicName">message topic name</param>
         public IDictionary<string, IList<ConsumerExecutorDescriptor>> GetTopicExector(string topicName)
         {
             if (Entries == null)
-            {
                 throw new ArgumentNullException(nameof(Entries));
-            }
 
             var dic = new Dictionary<string, IList<ConsumerExecutorDescriptor>>();
             foreach (var item in Entries)

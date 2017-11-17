@@ -8,22 +8,22 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
     public struct ModelBindingResult
     {
         /// <summary>
-        /// Creates a <see cref="ModelBindingResult"/> representing a failed model binding operation.
+        /// Creates a <see cref="ModelBindingResult" /> representing a failed model binding operation.
         /// </summary>
-        /// <returns>A <see cref="ModelBindingResult"/> representing a failed model binding operation.</returns>
+        /// <returns>A <see cref="ModelBindingResult" /> representing a failed model binding operation.</returns>
         public static ModelBindingResult Failed()
         {
-            return new ModelBindingResult(model: null, isSuccess: false);
+            return new ModelBindingResult(null, false);
         }
 
         /// <summary>
-        /// Creates a <see cref="ModelBindingResult"/> representing a successful model binding operation.
+        /// Creates a <see cref="ModelBindingResult" /> representing a successful model binding operation.
         /// </summary>
         /// <param name="model">The model value. May be <c>null.</c></param>
-        /// <returns>A <see cref="ModelBindingResult"/> representing a successful model bind.</returns>
+        /// <returns>A <see cref="ModelBindingResult" /> representing a successful model bind.</returns>
         public static ModelBindingResult Success(object model)
         {
-            return new ModelBindingResult(model, isSuccess: true);
+            return new ModelBindingResult(model, true);
         }
 
         private ModelBindingResult(object model, bool isSuccess)
@@ -42,26 +42,16 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         public override string ToString()
         {
             if (IsSuccess)
-            {
                 return $"Success '{Model}'";
-            }
-            else
-            {
-                return $"Failed";
-            }
+            return "Failed";
         }
 
         public override bool Equals(object obj)
         {
             var other = obj as ModelBindingResult?;
             if (other == null)
-            {
                 return false;
-            }
-            else
-            {
-                return Equals(other.Value);
-            }
+            return Equals(other.Value);
         }
 
         public override int GetHashCode()
@@ -77,14 +67,14 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         {
             return
                 IsSuccess == other.IsSuccess &&
-                object.Equals(Model, other.Model);
+                Equals(Model, other.Model);
         }
 
         /// <summary>
-        /// Compares <see cref="ModelBindingResult"/> objects for equality.
+        /// Compares <see cref="ModelBindingResult" /> objects for equality.
         /// </summary>
-        /// <param name="x">A <see cref="ModelBindingResult"/>.</param>
-        /// <param name="y">A <see cref="ModelBindingResult"/>.</param>
+        /// <param name="x">A <see cref="ModelBindingResult" />.</param>
+        /// <param name="y">A <see cref="ModelBindingResult" />.</param>
         /// <returns><c>true</c> if the objects are equal, otherwise <c>false</c>.</returns>
         public static bool operator ==(ModelBindingResult x, ModelBindingResult y)
         {
@@ -92,10 +82,10 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         }
 
         /// <summary>
-        /// Compares <see cref="ModelBindingResult"/> objects for inequality.
+        /// Compares <see cref="ModelBindingResult" /> objects for inequality.
         /// </summary>
-        /// <param name="x">A <see cref="ModelBindingResult"/>.</param>
-        /// <param name="y">A <see cref="ModelBindingResult"/>.</param>
+        /// <param name="x">A <see cref="ModelBindingResult" />.</param>
+        /// <param name="y">A <see cref="ModelBindingResult" />.</param>
         /// <returns><c>true</c> if the objects are not equal, otherwise <c>false</c>.</returns>
         public static bool operator !=(ModelBindingResult x, ModelBindingResult y)
         {

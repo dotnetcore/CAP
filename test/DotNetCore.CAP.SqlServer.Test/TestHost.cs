@@ -29,6 +29,7 @@ namespace DotNetCore.CAP.SqlServer.Test
 
             _connectionString = ConnectionUtil.GetConnectionString();
             services.AddSingleton(new SqlServerOptions { ConnectionString = _connectionString });
+            services.AddSingleton(new CapOptions());
             services.AddSingleton<SqlServerStorage>();
 
             _services = services;
