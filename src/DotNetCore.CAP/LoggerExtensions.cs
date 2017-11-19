@@ -37,7 +37,7 @@ namespace DotNetCore.CAP
                 "Starting the processors throw an exception.");
 
             _serverShuttingDown = LoggerMessage.Define(
-                LogLevel.Debug,
+                LogLevel.Information,
                 2,
                 "Shutting down the processing server...");
 
