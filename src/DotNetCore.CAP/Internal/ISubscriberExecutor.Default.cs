@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Models;
@@ -32,11 +31,11 @@ namespace DotNetCore.CAP.Internal
             if (!_selector.TryGetTopicExector(receivedMessage.Name, receivedMessage.Group,
                 out var executor))
             {
-                var error = "this message can not be found subscriber. Message:" + receivedMessage;
+                var error = "message can not be found subscriber. Message:" + receivedMessage;
                 error += "\r\n  see: https://github.com/dotnetcore/CAP/issues/63";
                 throw new SubscriberNotFoundException(error);
             }
-
+            
             var consumerContext = new ConsumerContext(executor, receivedMessage.ToMessageContext());
             try
             {
