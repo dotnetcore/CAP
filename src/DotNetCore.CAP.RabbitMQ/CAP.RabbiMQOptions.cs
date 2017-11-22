@@ -30,7 +30,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Default exchange name (value: "cap.default.topic").
         /// </summary>
-        public const string DefaultExchangeName = "cap.default.topic";
+        public const string DefaultExchangeName = "cap.default.exchange";
 
         /// <summary> The topic exchange type. </summary>
         public const string ExchangeType = "topic";

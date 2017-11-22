@@ -46,8 +46,8 @@ namespace DotNetCore.CAP.Internal
                 if (typeof(ICapCustomSubscribe).IsAssignableFrom(serviceType))
                 {
                     jsonContent = Infrastructure.Helper.ToJson(new Dictionary<string, string> {
-                        { "Name", context.DeliverMessage.Name },
-                        { "Content", message.Content }
+                        ["Name"] =  context.DeliverMessage.Name,
+                        ["Content"] = message.Content
                     });
                     message.Content = jsonContent;
                 }
