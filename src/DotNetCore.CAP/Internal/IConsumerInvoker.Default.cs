@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -42,6 +43,16 @@ namespace DotNetCore.CAP.Internal
                 var jsonContent = context.DeliverMessage.Content;
                 var message = _messagePacker.UnPack(jsonContent);
 
+                if (typeof(ICapCustomSubscribe).IsAssignableFrom(serviceType))
+                {
+                    jsonContent = Infrastructure.Helper.ToJson(new Dictionary<string, string> {
+                        { "Name", context.DeliverMessage.Name },
+                        { "Content", message.Content }
+                    });
+                    message.Content = jsonContent;
+                }
+                
+                
                 object resultObj;
                 if (executor.MethodParameters.Length > 0)
                     resultObj = await ExecuteWithParameterAsync(executor, obj, message.Content);

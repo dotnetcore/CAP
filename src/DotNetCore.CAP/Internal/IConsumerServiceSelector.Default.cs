@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Internal
@@ -42,6 +43,8 @@ namespace DotNetCore.CAP.Internal
 
             executorDescriptorList.AddRange(FindConsumersFromControllerTypes());
 
+            executorDescriptorList.AddRange(FindCustomConsumersFromInterfaceTypes(_serviceProvider));
+
             return executorDescriptorList;
         }
 
@@ -66,6 +69,29 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
+        private static IEnumerable<ConsumerExecutorDescriptor> FindCustomConsumersFromInterfaceTypes(IServiceProvider provider)
+        {
+            var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
+
+            using (var scoped = provider.CreateScope())
+            {
+                var scopedProvider = scoped.ServiceProvider;
+                var customConsumerServices = scopedProvider.GetServices<ICapCustomSubscribe>();
+                var configuration = scopedProvider.GetService<IConfiguration>();
+                foreach (var service in customConsumerServices)
+                {
+                    var typeInfo = service.GetType().GetTypeInfo();
+                    if (!typeof(ICapCustomSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo)) continue;
+
+                    executorDescriptorList.AddRange(GetTopicConfigurationDescription(typeInfo, configuration));
+                }
+
+                return executorDescriptorList;
+            }
+        }
+
+
+
         private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
@@ -79,6 +105,17 @@ namespace DotNetCore.CAP.Internal
             }
 
             return executorDescriptorList;
+        }
+
+        private static IEnumerable<ConsumerExecutorDescriptor> GetTopicConfigurationDescription(TypeInfo typeInfo, IConfiguration configuration)
+        {
+            var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
+            var topics = configuration.GetSection("Topics").GetChildren();
+            var method = typeInfo.DeclaredMethods.ToArray()[0];
+            foreach (var topic in topics)
+            {
+                yield return InitDescriptor(new TopicName(topic.Key), method, typeInfo);
+            }
         }
 
         private static IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo)
