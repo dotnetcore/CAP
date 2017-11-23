@@ -52,8 +52,15 @@ namespace DotNetCore.CAP.Internal
 
                 if (!string.IsNullOrEmpty(ret.CallbackName))
                     await _callbackMessageSender.SendAsync(ret.MessageId, ret.CallbackName, ret.Result);
-
-                return OperateResult.Success;
+                if ((bool)ret.Result)
+                {
+                    return OperateResult.Success;
+                }
+                else
+                {
+                    return OperateResult.Failed(new Exception("RPC failed"));
+                }
+                
             }
             catch (Exception ex)
             {

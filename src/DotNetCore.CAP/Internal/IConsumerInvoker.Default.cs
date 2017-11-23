@@ -43,19 +43,9 @@ namespace DotNetCore.CAP.Internal
                 var jsonContent = context.DeliverMessage.Content;
                 var message = _messagePacker.UnPack(jsonContent);
 
-                if (typeof(ICapCustomSubscribe).IsAssignableFrom(serviceType))
-                {
-                    jsonContent = Infrastructure.Helper.ToJson(new Dictionary<string, string> {
-                        ["Name"] =  context.DeliverMessage.Name,
-                        ["Content"] = message.Content
-                    });
-                    message.Content = jsonContent;
-                }
-                
-                
                 object resultObj;
                 if (executor.MethodParameters.Length > 0)
-                    resultObj = await ExecuteWithParameterAsync(executor, obj, message.Content);
+                    resultObj = await ExecuteWithParameterAsync(executor, obj, message.Content, context.DeliverMessage.Name);
                 else
                     resultObj = await ExecuteAsync(executor, obj);
                 return new ConsumerExecutedResult(resultObj, message.Id, message.CallbackName);
@@ -70,18 +60,21 @@ namespace DotNetCore.CAP.Internal
         }
 
         private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor,
-            object @class, string parameterString)
+            object @class, string parameterString, string topic)
         {
-            var firstParameter = executor.MethodParameters[0];
+            var firstParameter = executor.MethodParameters[0]; //topic
+            var secondParameter = executor.MethodParameters[1]; // content
             try
             {
-                var binder = _modelBinderFactory.CreateBinder(firstParameter);
-                var bindResult = await binder.BindModelAsync(parameterString);
-                if (bindResult.IsSuccess)
+                var binder1 = _modelBinderFactory.CreateBinder(firstParameter);
+                var bindResult1 = await binder1.BindModelAsync(topic);
+                var binder2 = _modelBinderFactory.CreateBinder(secondParameter);
+                var bindResult2 = await binder2.BindModelAsync(parameterString);
+                if (bindResult1.IsSuccess && bindResult2.IsSuccess)
                 {
                     if (executor.IsMethodAsync)
-                        return await executor.ExecuteAsync(@class, bindResult.Model);
-                    return executor.Execute(@class, bindResult.Model);
+                        return await executor.ExecuteAsync(@class, new object[] { bindResult1.Model, bindResult2.Model });
+                    return executor.Execute(@class, new object[] { bindResult1.Model, bindResult2.Model });
                 }
                 throw new MethodBindException(
                     $"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameterString} ");
