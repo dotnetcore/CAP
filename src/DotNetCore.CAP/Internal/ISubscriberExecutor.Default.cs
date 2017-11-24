@@ -40,9 +40,9 @@ namespace DotNetCore.CAP.Internal
 
                 if (executeDescriptorGroup[receivedMessage.Group].Count == 0)
                 {
-                    var ex = new Exception("method not found");
+                    var ex = new Exception("Topic is no more subsribed");
                     _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.Name}", ex);
-                    return OperateResult.Failed(ex);
+                    return OperateResult.Success;
                 }
                 // If there are multiple consumers in the same group, we will take the first
                 var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
