@@ -2,13 +2,13 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using DotNetCore.CAP.Abstractions;
 
 namespace DotNetCore.CAP.Internal
 {
     internal class MethodMatcherCache
     {
         private readonly IConsumerServiceSelector _selector;
+        private List<string> _allTopics;
 
         public MethodMatcherCache(IConsumerServiceSelector selector)
         {
@@ -53,6 +53,28 @@ namespace DotNetCore.CAP.Internal
                 dic.Add(item.Key, topicCandidates.ToList());
             }
             return dic;
+        }
+
+        /// <summary>
+        /// Get all subscribe topics name.
+        /// </summary>
+        public IEnumerable<string> GetSubscribeTopics()
+        {
+            if (_allTopics != null)
+            {
+                return _allTopics;
+            }
+
+            if (Entries == null)
+                throw new ArgumentNullException(nameof(Entries));
+
+            _allTopics = new List<string>();
+
+            foreach (var descriptors in Entries.Values)
+            {
+                _allTopics.AddRange(descriptors.Select(x => x.Attribute.Name));
+            }
+            return _allTopics;
         }
     }
 }
