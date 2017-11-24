@@ -3,21 +3,22 @@ using System.Data;
 using System.Threading;
 using Dapper;
 using DotNetCore.CAP.Models;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
     public class MySqlFetchedMessage : IFetchedMessage
     {
         private static readonly TimeSpan KeepAliveInterval = TimeSpan.FromMinutes(1);
-        private readonly IDbConnection _connection;
+        private readonly MySqlConnection _connection;
         private readonly object _lockObject = new object();
         private readonly Timer _timer;
-        private readonly IDbTransaction _transaction;
+        private readonly MySqlTransaction _transaction;
 
         public MySqlFetchedMessage(int messageId,
             MessageType type,
-            IDbConnection connection,
-            IDbTransaction transaction)
+            MySqlConnection connection,
+            MySqlTransaction transaction)
         {
             MessageId = messageId;
             MessageType = type;

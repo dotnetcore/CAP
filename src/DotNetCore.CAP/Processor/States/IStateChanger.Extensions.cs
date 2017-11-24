@@ -8,7 +8,7 @@ namespace DotNetCore.CAP.Processor.States
         public static async Task ChangeStateAsync(
             this IStateChanger @this, CapPublishedMessage message, IState state, IStorageConnection connection)
         {
-            using (var transaction = connection.CreateTransaction())
+            using (var transaction = await connection.CreateTransaction())
             {
                 @this.ChangeState(message, state, transaction);
                 await transaction.CommitAsync();
@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.Processor.States
         public static async Task ChangeStateAsync(
             this IStateChanger @this, CapReceivedMessage message, IState state, IStorageConnection connection)
         {
-            using (var transaction = connection.CreateTransaction())
+            using (var transaction = await connection.CreateTransaction())
             {
                 @this.ChangeState(message, state, transaction);
                 await transaction.CommitAsync();

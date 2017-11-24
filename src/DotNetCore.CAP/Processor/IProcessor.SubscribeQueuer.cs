@@ -48,7 +48,7 @@ namespace DotNetCore.CAP.Processor
                 {
                     var state = new EnqueuedState();
 
-                    using (var transaction = connection.CreateTransaction())
+                    using (var transaction = await connection.CreateTransaction())
                     {
                         _stateChanger.ChangeState(message, state, transaction);
                         await transaction.CommitAsync();

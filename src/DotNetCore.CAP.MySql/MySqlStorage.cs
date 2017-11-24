@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.MySql
 {
     public class MySqlStorage : IStorage
     {
-        private readonly IDbConnection _existingConnection = null;
+        private readonly MySqlConnection _existingConnection = null;
         private readonly ILogger _logger;
         private readonly MySqlOptions _options;
         private readonly CapOptions _capOptions;
@@ -81,13 +81,13 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
             return batchSql;
         }
 
-        internal T UseConnection<T>(Func<IDbConnection, T> func)
+        internal async Task<T> UseConnectionAsync<T>(Func<IDbConnection, T> func)
         {
             IDbConnection connection = null;
 
             try
             {
-                connection = CreateAndOpenConnection();
+                connection = await CreateAndOpenConnectionAsync();
                 return func(connection);
             }
             finally
@@ -96,12 +96,12 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
             }
         }
 
-        internal IDbConnection CreateAndOpenConnection()
+        internal async Task<MySqlConnection> CreateAndOpenConnectionAsync()
         {
             var connection = _existingConnection ?? new MySqlConnection(_options.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
-                connection.Open();
+                await connection.OpenAsync();
 
             return connection;
         }

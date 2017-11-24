@@ -9,9 +9,9 @@ namespace DotNetCore.CAP.MySql
 {
     public class MySqlStorageTransaction : IStorageTransaction
     {
-        private readonly IDbConnection _dbConnection;
+        private readonly MySqlConnection _dbConnection;
 
-        private readonly IDbTransaction _dbTransaction;
+        private MySqlTransaction _dbTransaction;
         private readonly string _prefix;
 
         public MySqlStorageTransaction(MySqlStorageConnection connection)
@@ -20,10 +20,15 @@ namespace DotNetCore.CAP.MySql
             _prefix = options.TableNamePrefix;
 
             _dbConnection = new MySqlConnection(options.ConnectionString);
-            _dbConnection.Open();
-            _dbTransaction = _dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
         }
 
+        public async 
+        Task
+BeginTransactionAsync()
+        {
+            await _dbConnection.OpenAsync();
+            _dbTransaction = await _dbConnection.BeginTransactionAsync(IsolationLevel.ReadCommitted);
+        }
         public void UpdateMessage(CapPublishedMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
