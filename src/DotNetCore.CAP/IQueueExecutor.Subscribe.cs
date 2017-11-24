@@ -37,6 +37,7 @@ namespace DotNetCore.CAP
             if (message == null)
             {
                 _logger.LogError($"Can not find mesage at cap received message table, message id:{fetched.MessageId} !!!");
+                fetched.RemoveFromQueue();
                 return OperateResult.Failed();
             }
 

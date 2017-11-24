@@ -78,6 +78,12 @@ namespace Microsoft.Extensions.DependencyInjection
                     consumerListenerServices.Add(new KeyValuePair<Type, Type>(typeof(ICapSubscribe),
                         rejectedServices.ImplementationType));
 
+            foreach (var rejectedServices in services)
+                if (rejectedServices.ImplementationType != null
+                    && typeof(ICapCustomSubscribe).IsAssignableFrom(rejectedServices.ImplementationType))
+                    consumerListenerServices.Add(new KeyValuePair<Type, Type>(typeof(ICapCustomSubscribe),
+                        rejectedServices.ImplementationType));
+
             foreach (var service in consumerListenerServices)
                 services.AddTransient(service.Key, service.Value);
         }

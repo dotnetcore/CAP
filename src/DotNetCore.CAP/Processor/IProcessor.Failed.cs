@@ -77,7 +77,7 @@ namespace DotNetCore.CAP.Processor
                         _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
                     }
 
-                using (var transaction = connection.CreateTransaction())
+                using (var transaction = await connection.CreateTransaction())
                 {
                     try
                     {
@@ -121,7 +121,7 @@ namespace DotNetCore.CAP.Processor
                         _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
                     }
 
-                using (var transaction = connection.CreateTransaction())
+                using (var transaction = await connection.CreateTransaction())
                 {
                     var ret = await _subscriberExecutor.ExecuteAsync(message);
                     if (ret.Succeeded)

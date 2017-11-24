@@ -25,9 +25,11 @@ namespace DotNetCore.CAP.MySql
 
         public MySqlOptions Options { get; }
 
-        public IStorageTransaction CreateTransaction()
+        public async Task<IStorageTransaction> CreateTransaction()
         {
-            return new MySqlStorageTransaction(this);
+            var trans = new MySqlStorageTransaction(this);
+            await trans.BeginTransactionAsync();
+            return trans;
         }
 
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
@@ -60,6 +62,7 @@ SELECT * FROM `{_prefix}.published` WHERE Id=LAST_INSERT_ID();";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
+                await connection.ExecuteAsync("SELECT LAST_INSERT_ID(0);");
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
         }
@@ -105,6 +108,7 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
+                await connection.ExecuteAsync("SELECT LAST_INSERT_ID(0);");
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
@@ -150,13 +154,13 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
             //here don't use `using` to dispose
             var connection = new MySqlConnection(Options.ConnectionString);
             await connection.OpenAsync();
-            var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
+            var transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted);
             FetchedMessage fetchedMessage = null;
             try
             {
                 //fetchedMessage = await connection.QuerySingleOrDefaultAsync<FetchedMessage>(sql, args, transaction);
                 // An anomaly with unknown causes, sometimes QuerySingleOrDefaultAsync can't return expected result.
-                using (var reader = connection.ExecuteReader(sql, args, transaction))
+                using (var reader = await connection.ExecuteReaderAsync(sql, args, transaction))
                 {
                     while (reader.Read())
                     {
@@ -165,18 +169,23 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
                             MessageId = (int)reader.GetInt64(0),
                             MessageType = (MessageType)reader.GetInt64(1)
                         };
+                        break;
                     }
                 }
             }
             catch (MySqlException)
             {
+                if (transaction.Connection.State != ConnectionState.Closed)
+                {
+                    await transaction.RollbackAsync();
+                }
                 transaction.Dispose();
                 throw;
             }
 
             if (fetchedMessage == null)
             {
-                transaction.Rollback();
+                await transaction.RollbackAsync();
                 transaction.Dispose();
                 connection.Dispose();
                 return null;

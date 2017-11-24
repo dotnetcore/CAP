@@ -12,6 +12,8 @@ namespace DotNetCore.CAP.Models
         public virtual string Content { get; set; }
 
         public virtual string CallbackName { get; set; }
+
+        public virtual string Name { get; set; }
     }
 
     public sealed class CapMessageDto: CapMessage
@@ -34,5 +36,7 @@ namespace DotNetCore.CAP.Models
         public override string Content { get; set; }
 
         public override string CallbackName { get; set; }
+
+        public override string Name { get; set; }
     }
 }

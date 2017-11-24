@@ -38,6 +38,12 @@ namespace DotNetCore.CAP.Internal
                     throw new SubscriberNotFoundException(error);
                 }
 
+                if (executeDescriptorGroup[receivedMessage.Group].Count == 0)
+                {
+                    var ex = new Exception("Topic is no more subsribed");
+                    _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.Name}", ex);
+                    return OperateResult.Success;
+                }
                 // If there are multiple consumers in the same group, we will take the first
                 var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
                 var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
@@ -46,8 +52,15 @@ namespace DotNetCore.CAP.Internal
 
                 if (!string.IsNullOrEmpty(ret.CallbackName))
                     await _callbackMessageSender.SendAsync(ret.MessageId, ret.CallbackName, ret.Result);
-
-                return OperateResult.Success;
+                if ((bool)ret.Result)
+                {
+                    return OperateResult.Success;
+                }
+                else
+                {
+                    return OperateResult.Failed(new Exception("RPC failed"));
+                }
+                
             }
             catch (Exception ex)
             {

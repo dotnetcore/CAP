@@ -138,7 +138,7 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
 
         private T UseConnection<T>(Func<IDbConnection, T> action)
         {
-            return _storage.UseConnection(action);
+            return _storage.UseConnectionAsync(action).GetAwaiter().GetResult();
         }
 
         private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string tableName,

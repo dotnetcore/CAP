@@ -60,7 +60,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Creates and returns an <see cref="IStorageTransaction" />.
         /// </summary>
-        IStorageTransaction CreateTransaction();
+        Task<IStorageTransaction> CreateTransaction();
 
         /// <summary>
         /// Change specified message's state of published message
