@@ -171,6 +171,7 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
             catch (MySqlException)
             {
                 transaction.Dispose();
+                connection.Dispose();
                 throw;
             }
 

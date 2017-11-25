@@ -146,6 +146,7 @@ namespace DotNetCore.CAP.PostgreSql
             catch (NpgsqlException)
             {
                 transaction.Dispose();
+                connection.Dispose();
                 throw;
             }
 

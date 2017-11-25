@@ -153,6 +153,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             catch (SqlException)
             {
                 transaction.Dispose();
+                connection.Dispose();
                 throw;
             }
 
