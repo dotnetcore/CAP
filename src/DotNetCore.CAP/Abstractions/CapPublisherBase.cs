@@ -123,7 +123,7 @@ namespace DotNetCore.CAP.Abstractions
                     "If you are using the EntityFramework, you do not need to use this overloaded.");
         }
 
-        private Task PublishWithTransAsync(string name, string content)
+        private async Task PublishWithTransAsync(string name, string content)
         {
             var message = new CapPublishedMessage
             {
@@ -132,13 +132,11 @@ namespace DotNetCore.CAP.Abstractions
                 StatusName = StatusName.Scheduled
             };
 
-            ExecuteAsync(DbConnection, DbTransaction, message);
+            await ExecuteAsync(DbConnection, DbTransaction, message);
 
             ClosedCap();
 
             PublishQueuer.PulseEvent.Set();
-
-            return Task.CompletedTask;
         }
 
         private void PublishWithTrans(string name, string content)
