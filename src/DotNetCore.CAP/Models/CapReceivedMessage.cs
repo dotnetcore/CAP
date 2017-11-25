@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.Models
 
         public override string ToString()
         {
-            return "name:" + Name + ", content:" + Content;
+            return "name:" + Name + ", group:" + Group + ", content:" + Content;
         }
     }
 }

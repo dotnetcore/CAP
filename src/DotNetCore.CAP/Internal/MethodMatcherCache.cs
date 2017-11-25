@@ -56,6 +56,29 @@ namespace DotNetCore.CAP.Internal
         }
 
         /// <summary>
+        /// Attempts to get the topic exector associated with the specified topic name and group name from the <see cref="Entries"/>.
+        /// </summary>
+        /// <param name="topicName">The topic name of the value to get.</param>
+        /// <param name="groupName">The group name of the value to get.</param>
+        /// <param name="matchTopic">topic exector of the value.</param>
+        /// <returns>true if the key was found, otherwise false. </returns>
+        public bool TryGetTopicExector(string topicName, string groupName,
+            out ConsumerExecutorDescriptor matchTopic)
+        {
+            if (Entries == null)
+                throw new ArgumentNullException(nameof(Entries));
+
+            matchTopic = null;
+
+            if (Entries.TryGetValue(groupName, out var groupMatchTopics))
+            {
+                matchTopic = groupMatchTopics.FirstOrDefault(x => x.Attribute.Name == topicName);
+                return matchTopic != null;
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Get all subscribe topics name.
         /// </summary>
         public IEnumerable<string> GetSubscribeTopics()
