@@ -60,7 +60,7 @@ namespace DotNetCore.CAP.SqlServer
         {
             dbConnection.Execute(PrepareSql(), message, dbTransaction);
 
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
+            _logger.LogInformation("published message has been persisted to the database. name:" + message);
         }
 
         protected override Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
@@ -68,7 +68,7 @@ namespace DotNetCore.CAP.SqlServer
         {
             dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
 
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
+            _logger.LogInformation("published message has been persisted to the database. name:" + message);
 
             return Task.CompletedTask;
         }
