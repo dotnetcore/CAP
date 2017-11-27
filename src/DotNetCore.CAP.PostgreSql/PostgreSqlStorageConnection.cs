@@ -21,9 +21,14 @@ namespace DotNetCore.CAP.PostgreSql
 
         public PostgreSqlOptions Options { get; }
 
-        public IStorageTransaction CreateTransaction()
+        public Task<IStorageTransaction> CreateTransaction()
         {
-            return new PostgreSqlStorageTransaction(this);
+            var task = Task.Run<IStorageTransaction>(() =>
+            {
+                return new PostgreSqlStorageTransaction(this);
+            });
+
+            return task;
         }
 
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
