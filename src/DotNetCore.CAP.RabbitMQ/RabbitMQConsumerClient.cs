@@ -14,6 +14,7 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
+        private IConnection _connection;
         private IModel _channel;
         private ulong _deliveryTag;
 
@@ -57,6 +58,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 cancellationToken.ThrowIfCancellationRequested();
                 cancellationToken.WaitHandle.WaitOne(timeout);
             }
+            // ReSharper disable once FunctionNeverReturns
         }
 
         public void Commit()
@@ -72,11 +74,12 @@ namespace DotNetCore.CAP.RabbitMQ
         public void Dispose()
         {
             _channel.Dispose();
+            _connection.Dispose();
         }
 
         private void InitClient()
         {
-            var _connection = _connectionChannelPool.GetConnection();
+            _connection = _connectionChannelPool.GetConnection();
 
             _channel = _connection.CreateModel();
 
