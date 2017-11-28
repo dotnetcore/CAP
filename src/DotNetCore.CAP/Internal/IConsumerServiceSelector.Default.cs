@@ -10,23 +10,26 @@ namespace DotNetCore.CAP.Internal
 {
     /// <inheritdoc />
     /// <summary>
-    /// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
+    ///     A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
     /// </summary>
     internal class DefaultConsumerServiceSelector : IConsumerServiceSelector
     {
+        private readonly CapOptions _capOptions;
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// Creates a new <see cref="DefaultConsumerServiceSelector" />.
+        ///     Creates a new <see cref="DefaultConsumerServiceSelector" />.
         /// </summary>
-        public DefaultConsumerServiceSelector(IServiceProvider serviceProvider)
+        public DefaultConsumerServiceSelector(IServiceProvider serviceProvider, CapOptions capOptions)
         {
             _serviceProvider = serviceProvider;
+            _capOptions = capOptions;
         }
 
         /// <summary>
-        /// Selects the best <see cref="ConsumerExecutorDescriptor" /> candidate from <paramref name="executeDescriptor" /> for the
-        /// current message associated.
+        ///     Selects the best <see cref="ConsumerExecutorDescriptor" /> candidate from <paramref name="executeDescriptor" /> for
+        ///     the
+        ///     current message associated.
         /// </summary>
         public ConsumerExecutorDescriptor SelectBestCandidate(string key,
             IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
@@ -45,7 +48,7 @@ namespace DotNetCore.CAP.Internal
             return executorDescriptorList;
         }
 
-        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
+        private IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
@@ -66,7 +69,7 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
+        private IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
@@ -81,18 +84,21 @@ namespace DotNetCore.CAP.Internal
             return executorDescriptorList;
         }
 
-        private static IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo)
+        private IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo)
         {
             foreach (var method in typeInfo.DeclaredMethods)
             {
                 var topicAttr = method.GetCustomAttributes<TopicAttribute>(true);
-
                 var topicAttributes = topicAttr as IList<TopicAttribute> ?? topicAttr.ToList();
 
                 if (!topicAttributes.Any()) continue;
 
                 foreach (var attr in topicAttributes)
+                {
+                    if (attr.Group == null)
+                        attr.Group = _capOptions.DefaultGroup;
                     yield return InitDescriptor(attr, method, typeInfo);
+                }
             }
         }
 

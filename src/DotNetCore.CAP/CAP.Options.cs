@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Reflection;
 using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
@@ -34,6 +35,7 @@ namespace DotNetCore.CAP
         /// </summary>
         public const int DefaultFailedRetryCount = 100;
 
+
         public CapOptions()
         {
             PollingDelay = DefaultPollingDelay;
@@ -42,9 +44,15 @@ namespace DotNetCore.CAP
             FailedRetryInterval = DefaultFailedMessageWaitingInterval;
             FailedRetryCount = DefaultFailedRetryCount;
             Extensions = new List<ICapOptionsExtension>();
+            DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly().GetName().Name.ToLower();
         }
 
         internal IList<ICapOptionsExtension> Extensions { get; }
+
+        /// <summary>
+        /// Subscriber default group name. kafka-->group name. rabbitmq --> queue name.
+        /// </summary>
+        public string DefaultGroup { get; set; }
 
         /// <summary>
         /// Producer job polling delay time.
