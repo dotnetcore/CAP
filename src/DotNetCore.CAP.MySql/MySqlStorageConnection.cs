@@ -60,6 +60,7 @@ SELECT * FROM `{_prefix}.published` WHERE Id=LAST_INSERT_ID();";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
+                connection.Execute("SELECT LAST_INSERT_ID(0)");
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
         }
@@ -105,6 +106,7 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
+                connection.Execute("SELECT LAST_INSERT_ID(0)");
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
