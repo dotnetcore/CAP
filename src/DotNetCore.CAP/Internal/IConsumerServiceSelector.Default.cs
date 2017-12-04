@@ -114,7 +114,10 @@ namespace DotNetCore.CAP.Internal
             var method = typeInfo.DeclaredMethods.ToArray()[0];
             foreach (var topic in topics)
             {
-                yield return InitDescriptor(new TopicName(topic.Key), method, typeInfo);
+                var t = topic.Key.Split(';').ToArray();
+                var attr = new TopicName(t.Last());
+                attr.Group = t.First();
+                yield return InitDescriptor(attr, method, typeInfo);
             }
         }
 
