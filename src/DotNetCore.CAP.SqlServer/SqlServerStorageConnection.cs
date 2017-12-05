@@ -68,19 +68,6 @@ OUTPUT DELETED.MessageId,DELETED.[MessageType];";
             }
         }
 
-        public bool ChangePublishedState(int messageId, string state)
-        {
-            var sql =
-                $"UPDATE [{Options.Schema}].[Published] SET Retries=Retries+1,StatusName = '{state}' WHERE Id={messageId}";
-
-            using (var connection = new SqlConnection(Options.ConnectionString))
-            {
-                return connection.Execute(sql) > 0;
-            }
-        }
-
-        // CapReceivedMessage
-
         public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
         {
             if (message == null) throw new ArgumentNullException(nameof(message));
@@ -124,10 +111,21 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             }
         }
 
+        public bool ChangePublishedState(int messageId, string state)
+        {
+            var sql =
+                $"UPDATE [{Options.Schema}].[Published] SET Retries=Retries+1,ExpiresAt=NULL,StatusName = '{state}' WHERE Id={messageId}";
+
+            using (var connection = new SqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
         public bool ChangeReceivedState(int messageId, string state)
         {
             var sql =
-                $"UPDATE [{Options.Schema}].[Received] SET Retries=Retries+1,StatusName = '{state}' WHERE Id={messageId}";
+                $"UPDATE [{Options.Schema}].[Received] SET Retries=Retries+1,ExpiresAt=NULL,StatusName = '{state}' WHERE Id={messageId}";
 
             using (var connection = new SqlConnection(Options.ConnectionString))
             {
