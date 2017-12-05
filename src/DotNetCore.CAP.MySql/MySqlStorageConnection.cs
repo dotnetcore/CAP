@@ -45,7 +45,9 @@ namespace DotNetCore.CAP.MySql
             var sql = $@"
 SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
 DELETE FROM `{_prefix}.queue` LIMIT 1;";
-            //            var sql = $@"
+
+            // The following `sql` can improve performance, but repeated consumption occurs in multiple instances
+            //var sql = $@"
             //SELECT @MId:=`MessageId` as MessageId, @MType:=`MessageType` as MessageType FROM `{_prefix}.queue` LIMIT 1;
             //DELETE FROM `{_prefix}.queue` where `MessageId` = @MId AND `MessageType`=@MType;";
 
