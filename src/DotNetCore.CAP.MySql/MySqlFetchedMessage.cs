@@ -7,12 +7,14 @@ namespace DotNetCore.CAP.MySql
     public class MySqlFetchedMessage : IFetchedMessage
     {
         private readonly MySqlOptions _options;
+        private readonly string _processId;
 
-        public MySqlFetchedMessage(int messageId, MessageType type, MySqlOptions options)
+        public MySqlFetchedMessage(int messageId, MessageType type, string processId, MySqlOptions options)
         {
             MessageId = messageId;
             MessageType = type;
 
+            _processId = processId;
             _options = options;
         }
 
@@ -22,15 +24,19 @@ namespace DotNetCore.CAP.MySql
 
         public void RemoveFromQueue()
         {
-            // ignored
+            using (var connection = new MySqlConnection(_options.ConnectionString))
+            {
+                connection.Execute($"DELETE FROM `{_options.TableNamePrefix}.queue` WHERE `ProcessId`=@ProcessId"
+                    , new { ProcessId = _processId });
+            } 
         }
 
         public void Requeue()
         {
             using (var connection = new MySqlConnection(_options.ConnectionString))
             {
-                connection.Execute($"insert into `{_options.TableNamePrefix}.queue`(`MessageId`,`MessageType`) values(@MessageId,@MessageType);"
-                    , new {MessageId, MessageType });
+                connection.Execute($"UPDATE `{_options.TableNamePrefix}.queue` SET `ProcessId`=NULL WHERE `ProcessId`=@ProcessId"
+                    , new { ProcessId = _processId });
             }
         }
 

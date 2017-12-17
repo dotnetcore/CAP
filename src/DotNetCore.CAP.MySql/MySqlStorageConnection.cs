@@ -41,12 +41,12 @@ namespace DotNetCore.CAP.MySql
 
         public Task<IFetchedMessage> FetchNextMessageAsync()
         {
+            var processId = ObjectId.GenerateNewStringId();
             var sql = $@"
 UPDATE `{_prefix}.queue` SET `ProcessId`=@ProcessId WHERE `ProcessId` IS NULL LIMIT 1;
-SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` WHERE `ProcessId`=@ProcessId;
-DELETE FROM `{_prefix}.queue` WHERE `ProcessId`=@ProcessId";
+SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` WHERE `ProcessId`=@ProcessId;";
 
-            return FetchNextMessageCoreAsync(sql, new { ProcessId = Guid.NewGuid().ToString() });
+            return FetchNextMessageCoreAsync(sql, processId);
         }
 
         public async Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync()
@@ -139,18 +139,18 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
             }
         }
 
-        private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
+        private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, string processId)
         {
             FetchedMessage fetchedMessage;
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
-                fetchedMessage = await connection.QuerySingleOrDefaultAsync<FetchedMessage>(sql, args);
+                fetchedMessage = await connection.QuerySingleOrDefaultAsync<FetchedMessage>(sql, new { ProcessId = processId });
             }
 
             if (fetchedMessage == null)
                 return null;
 
-            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, Options);
+            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, processId, Options);
         }
 
         public void Dispose()
