@@ -53,7 +53,8 @@ namespace DotNetCore.CAP.MySql
                 $@"
 CREATE TABLE IF NOT EXISTS `{prefix}.queue` (
   `MessageId` int(11) NOT NULL,
-  `MessageType` tinyint(4) NOT NULL
+  `MessageType` tinyint(4) NOT NULL,
+  `ProcessId` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `{prefix}.received` (

@@ -1,29 +1,19 @@
-﻿using System;
-using System.Data;
-using System.Threading;
-using Dapper;
+﻿using Dapper;
 using DotNetCore.CAP.Models;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
     public class MySqlFetchedMessage : IFetchedMessage
     {
-        private static readonly TimeSpan KeepAliveInterval = TimeSpan.FromMinutes(1);
-        private readonly IDbConnection _connection;
-        private readonly object _lockObject = new object();
-        private readonly Timer _timer;
-        private readonly IDbTransaction _transaction;
+        private readonly string _connectionString = null;
 
-        public MySqlFetchedMessage(int messageId,
-            MessageType type,
-            IDbConnection connection,
-            IDbTransaction transaction)
+        public MySqlFetchedMessage(int messageId, MessageType type, string connectionString)
         {
             MessageId = messageId;
             MessageType = type;
-            _connection = connection;
-            _transaction = transaction;
-            _timer = new Timer(ExecuteKeepAliveQuery, null, KeepAliveInterval, KeepAliveInterval);
+
+            _connectionString = connectionString;
         }
 
         public int MessageId { get; }
@@ -32,43 +22,21 @@ namespace DotNetCore.CAP.MySql
 
         public void RemoveFromQueue()
         {
-            lock (_lockObject)
-            {
-                _transaction.Commit();
-            }
+            // ignored
         }
 
         public void Requeue()
         {
-            lock (_lockObject)
+            using (var connection = new MySqlConnection(_connectionString))
             {
-                _transaction.Rollback();
+                connection.Execute("insert into `cap.queue`(`MessageId`,`MessageType`) values(@MessageId,@MessageType);"
+                    , new {MessageId, MessageType });
             }
         }
 
         public void Dispose()
         {
-            lock (_lockObject)
-            {
-                _timer?.Dispose();
-                _transaction.Dispose();
-                _connection.Dispose();
-            }
-        }
-
-        private void ExecuteKeepAliveQuery(object obj)
-        {
-            lock (_lockObject)
-            {
-                try
-                {
-                    _connection?.Execute("SELECT 1", _transaction);
-                }
-                catch
-                {
-                    // ignored
-                }
-            }
+            // ignored
         }
     }
 }
