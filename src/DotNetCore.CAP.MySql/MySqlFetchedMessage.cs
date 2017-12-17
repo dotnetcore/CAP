@@ -6,14 +6,14 @@ namespace DotNetCore.CAP.MySql
 {
     public class MySqlFetchedMessage : IFetchedMessage
     {
-        private readonly string _connectionString = null;
+        private readonly MySqlOptions _options;
 
-        public MySqlFetchedMessage(int messageId, MessageType type, string connectionString)
+        public MySqlFetchedMessage(int messageId, MessageType type, MySqlOptions options)
         {
             MessageId = messageId;
             MessageType = type;
 
-            _connectionString = connectionString;
+            _options = options;
         }
 
         public int MessageId { get; }
@@ -27,9 +27,9 @@ namespace DotNetCore.CAP.MySql
 
         public void Requeue()
         {
-            using (var connection = new MySqlConnection(_connectionString))
+            using (var connection = new MySqlConnection(_options.ConnectionString))
             {
-                connection.Execute("insert into `cap.queue`(`MessageId`,`MessageType`) values(@MessageId,@MessageType);"
+                connection.Execute($"insert into `{_options.TableNamePrefix}.queue`(`MessageId`,`MessageType`) values(@MessageId,@MessageType);"
                     , new {MessageId, MessageType });
             }
         }

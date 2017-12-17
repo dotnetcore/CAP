@@ -150,7 +150,7 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
             if (fetchedMessage == null)
                 return null;
 
-            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, Options.ConnectionString);
+            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, Options);
         }
 
         public void Dispose()
