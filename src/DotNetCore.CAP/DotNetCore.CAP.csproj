@@ -5,6 +5,10 @@
     <AssemblyName>DotNetCore.CAP</AssemblyName>
     <PackageTags>$(PackageTags);</PackageTags>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>bin\Debug\netstandard2.0\DotNetCore.CAP.xml</DocumentationFile>
+    <NoWarn>1701;1702;1705;CS1591</NoWarn>
+  </PropertyGroup>
   <ItemGroup>
     <None Remove="Dashboard\Content\css\bootstrap.min.css" />
     <None Remove="Dashboard\Content\css\jsonview.min.css" />
