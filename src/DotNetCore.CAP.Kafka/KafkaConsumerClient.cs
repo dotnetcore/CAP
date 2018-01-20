@@ -54,7 +54,7 @@ namespace DotNetCore.CAP.Kafka
 
         public void Reject()
         {
-            // Ignore, Kafka will not commit offset when not commit.
+            _consumerClient.Assign(_consumerClient.Assignment);
         }
 
         public void Dispose()
