@@ -8,8 +8,8 @@
     <PackageTags>$(PackageTags);SQL Server</PackageTags>
   </PropertyGroup>
   
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile>bin\Debug\netstandard2.0\DotNetCore.CAP.SqlServer.xml</DocumentationFile>
+  <PropertyGroup>
+    <DocumentationFile>bin\$(Configuration)\netstandard2.0\DotNetCore.CAP.SqlServer.xml</DocumentationFile>
     <NoWarn>1701;1702;1705;CS1591</NoWarn>
   </PropertyGroup>
   

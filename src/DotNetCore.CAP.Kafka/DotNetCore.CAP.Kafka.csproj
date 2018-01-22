@@ -8,10 +8,10 @@
     <PackageTags>$(PackageTags);Kafka</PackageTags>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+  <PropertyGroup>
     <WarningsAsErrors>NU1605;NU1701</WarningsAsErrors>
     <NoWarn>NU1701;CS1591</NoWarn>
-    <DocumentationFile>bin\Debug\netstandard2.0\DotNetCore.CAP.Kafka.xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\netstandard2.0\DotNetCore.CAP.Kafka.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
