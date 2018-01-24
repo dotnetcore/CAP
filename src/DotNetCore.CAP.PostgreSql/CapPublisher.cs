@@ -64,14 +64,12 @@ namespace DotNetCore.CAP.PostgreSql
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
         }
 
-        protected override Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message)
         {
-            dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
+            await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
 
             _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
-
-            return Task.CompletedTask;
         }
 
         #region private methods
