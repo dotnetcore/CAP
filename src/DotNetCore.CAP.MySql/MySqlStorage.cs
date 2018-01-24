@@ -53,7 +53,8 @@ namespace DotNetCore.CAP.MySql
                 $@"
 CREATE TABLE IF NOT EXISTS `{prefix}.queue` (
   `MessageId` int(11) NOT NULL,
-  `MessageType` tinyint(4) NOT NULL
+  `MessageType` tinyint(4) NOT NULL,
+  `ProcessId` varchar(50) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `{prefix}.received` (
@@ -62,8 +63,8 @@ CREATE TABLE IF NOT EXISTS `{prefix}.received` (
   `Group` varchar(200) DEFAULT NULL,
   `Content` longtext,
   `Retries` int(11) DEFAULT NULL,
-  `Added` datetime(6) NOT NULL,
-  `ExpiresAt` datetime(6) DEFAULT NULL,
+  `Added` datetime NOT NULL,
+  `ExpiresAt` datetime DEFAULT NULL,
   `StatusName` varchar(50) NOT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -73,8 +74,8 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   `Name` varchar(200) NOT NULL,
   `Content` longtext,
   `Retries` int(11) DEFAULT NULL,
-  `Added` datetime(6) NOT NULL,
-  `ExpiresAt` datetime(6) DEFAULT NULL,
+  `Added` datetime NOT NULL,
+  `ExpiresAt` datetime DEFAULT NULL,
   `StatusName` varchar(40) NOT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;";

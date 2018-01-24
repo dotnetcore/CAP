@@ -2,13 +2,13 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using DotNetCore.CAP.Abstractions;
 
 namespace DotNetCore.CAP.Internal
 {
     internal class MethodMatcherCache
     {
         private readonly IConsumerServiceSelector _selector;
+        private List<string> _allTopics;
 
         public MethodMatcherCache(IConsumerServiceSelector selector)
         {
@@ -53,6 +53,51 @@ namespace DotNetCore.CAP.Internal
                 dic.Add(item.Key, topicCandidates.ToList());
             }
             return dic;
+        }
+
+        /// <summary>
+        /// Attempts to get the topic exector associated with the specified topic name and group name from the <see cref="Entries"/>.
+        /// </summary>
+        /// <param name="topicName">The topic name of the value to get.</param>
+        /// <param name="groupName">The group name of the value to get.</param>
+        /// <param name="matchTopic">topic exector of the value.</param>
+        /// <returns>true if the key was found, otherwise false. </returns>
+        public bool TryGetTopicExector(string topicName, string groupName,
+            out ConsumerExecutorDescriptor matchTopic)
+        {
+            if (Entries == null)
+                throw new ArgumentNullException(nameof(Entries));
+
+            matchTopic = null;
+
+            if (Entries.TryGetValue(groupName, out var groupMatchTopics))
+            {
+                matchTopic = groupMatchTopics.FirstOrDefault(x => x.Attribute.Name == topicName);
+                return matchTopic != null;
+            }
+            return false;
+        }
+
+        /// <summary>
+        /// Get all subscribe topics name.
+        /// </summary>
+        public IEnumerable<string> GetSubscribeTopics()
+        {
+            if (_allTopics != null)
+            {
+                return _allTopics;
+            }
+
+            if (Entries == null)
+                throw new ArgumentNullException(nameof(Entries));
+
+            _allTopics = new List<string>();
+
+            foreach (var descriptors in Entries.Values)
+            {
+                _allTopics.AddRange(descriptors.Select(x => x.Attribute.Name));
+            }
+            return _allTopics;
         }
     }
 }

@@ -76,7 +76,7 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                _logger.ExceptionOccuredWhileExecuting(message?.Name, ex);
+                _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
 
                 fetched.Requeue();
 
@@ -89,7 +89,7 @@ namespace DotNetCore.CAP
             IState newState;
             if (!result.Succeeded)
             {
-                var shouldRetry = UpdateMessageForRetryAsync(message);
+                var shouldRetry = UpdateMessageForRetry(message);
                 if (shouldRetry)
                 {
                     newState = new ScheduledState();
@@ -109,7 +109,7 @@ namespace DotNetCore.CAP
             return newState;
         }
 
-        private static bool UpdateMessageForRetryAsync(CapReceivedMessage message)
+        private static bool UpdateMessageForRetry(CapReceivedMessage message)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 

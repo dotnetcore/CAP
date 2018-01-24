@@ -113,7 +113,7 @@ namespace DotNetCore.CAP.PostgreSql
         public bool ChangePublishedState(int messageId, string state)
         {
             var sql =
-                $"UPDATE \"{Options.Schema}\".\"published\" SET \"Retries\"=\"Retries\"+1,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";
+                $"UPDATE \"{Options.Schema}\".\"published\" SET \"Retries\"=\"Retries\"+1,\"ExpiresAt\"=NULL,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";
 
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
@@ -124,7 +124,7 @@ namespace DotNetCore.CAP.PostgreSql
         public bool ChangeReceivedState(int messageId, string state)
         {
             var sql =
-                $"UPDATE \"{Options.Schema}\".\"received\" SET \"Retries\"=\"Retries\"+1,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";
+                $"UPDATE \"{Options.Schema}\".\"received\" SET \"Retries\"=\"Retries\"+1,\"ExpiresAt\"=NULL,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";
 
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
@@ -146,6 +146,7 @@ namespace DotNetCore.CAP.PostgreSql
             catch (NpgsqlException)
             {
                 transaction.Dispose();
+                connection.Dispose();
                 throw;
             }
 

@@ -20,9 +20,10 @@ namespace DotNetCore.CAP.Abstractions
         public string Name { get; }
 
         /// <summary>
+        /// Default group name is CapOptions setting.(Assembly name)
         /// kafka --> groups.id
         /// rabbit MQ --> queue.name
         /// </summary>
-        public string Group { get; set; } = "cap.default.group";
+        public string Group { get; set; }
     }
 }

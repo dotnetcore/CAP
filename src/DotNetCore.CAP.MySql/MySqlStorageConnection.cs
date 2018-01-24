@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
@@ -42,14 +41,12 @@ namespace DotNetCore.CAP.MySql
 
         public Task<IFetchedMessage> FetchNextMessageAsync()
         {
+            var processId = ObjectId.GenerateNewStringId();
             var sql = $@"
-SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` LIMIT 1 FOR UPDATE;
-DELETE FROM `{_prefix}.queue` LIMIT 1;";
-            //            var sql = $@"
-            //SELECT @MId:=`MessageId` as MessageId, @MType:=`MessageType` as MessageType FROM `{_prefix}.queue` LIMIT 1;
-            //DELETE FROM `{_prefix}.queue` where `MessageId` = @MId AND `MessageType`=@MType;";
+UPDATE `{_prefix}.queue` SET `ProcessId`=@ProcessId WHERE `ProcessId` IS NULL LIMIT 1;
+SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` WHERE `ProcessId`=@ProcessId;";
 
-            return FetchNextMessageCoreAsync(sql);
+            return FetchNextMessageCoreAsync(sql, processId);
         }
 
         public async Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync()
@@ -60,6 +57,7 @@ SELECT * FROM `{_prefix}.published` WHERE Id=LAST_INSERT_ID();";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
+                connection.Execute("SELECT LAST_INSERT_ID(0)");
                 return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
             }
         }
@@ -105,6 +103,7 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
+                connection.Execute("SELECT LAST_INSERT_ID(0)");
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
@@ -118,15 +117,10 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
             }
         }
 
-
-        public void Dispose()
-        {
-        }
-
         public bool ChangePublishedState(int messageId, string state)
         {
             var sql =
-                $"UPDATE `{_prefix}.published` SET `Retries`=`Retries`+1,`StatusName` = '{state}' WHERE `Id`={messageId}";
+                $"UPDATE `{_prefix}.published` SET `Retries`=`Retries`+1,`ExpiresAt`=NULL,`StatusName` = '{state}' WHERE `Id`={messageId}";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
@@ -137,7 +131,7 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
         public bool ChangeReceivedState(int messageId, string state)
         {
             var sql =
-                $"UPDATE `{_prefix}.received` SET `Retries`=`Retries`+1,`StatusName` = '{state}' WHERE `Id`={messageId}";
+                $"UPDATE `{_prefix}.received` SET `Retries`=`Retries`+1,`ExpiresAt`=NULL,`StatusName` = '{state}' WHERE `Id`={messageId}";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
@@ -145,45 +139,22 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
             }
         }
 
-        private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
+        private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, string processId)
         {
-            //here don't use `using` to dispose
-            var connection = new MySqlConnection(Options.ConnectionString);
-            await connection.OpenAsync();
-            var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
-            FetchedMessage fetchedMessage = null;
-            try
+            FetchedMessage fetchedMessage;
+            using (var connection = new MySqlConnection(Options.ConnectionString))
             {
-                //fetchedMessage = await connection.QuerySingleOrDefaultAsync<FetchedMessage>(sql, args, transaction);
-                // An anomaly with unknown causes, sometimes QuerySingleOrDefaultAsync can't return expected result.
-                using (var reader = connection.ExecuteReader(sql, args, transaction))
-                {
-                    while (reader.Read())
-                    {
-                        fetchedMessage = new FetchedMessage
-                        {
-                            MessageId = (int)reader.GetInt64(0),
-                            MessageType = (MessageType)reader.GetInt64(1)
-                        };
-                    }
-                }
-            }
-            catch (MySqlException)
-            {
-                transaction.Dispose();
-                throw;
+                fetchedMessage = await connection.QuerySingleOrDefaultAsync<FetchedMessage>(sql, new { ProcessId = processId });
             }
 
             if (fetchedMessage == null)
-            {
-                transaction.Rollback();
-                transaction.Dispose();
-                connection.Dispose();
                 return null;
-            }
 
-            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection,
-                transaction);
+            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, processId, Options);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

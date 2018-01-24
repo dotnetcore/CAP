@@ -28,22 +28,18 @@ namespace DotNetCore.CAP.Internal
 
         public async Task<OperateResult> ExecuteAsync(CapReceivedMessage receivedMessage)
         {
+            if (!_selector.TryGetTopicExector(receivedMessage.Name, receivedMessage.Group,
+                out var executor))
+            {
+                var error = "message can not be found subscriber. Message:" + receivedMessage;
+                error += "\r\n  see: https://github.com/dotnetcore/CAP/issues/63";
+                throw new SubscriberNotFoundException(error);
+            }
+            
+            var consumerContext = new ConsumerContext(executor, receivedMessage.ToMessageContext());
             try
             {
-                var executeDescriptorGroup = _selector.GetTopicExector(receivedMessage.Name);
-
-                if (!executeDescriptorGroup.ContainsKey(receivedMessage.Group))
-                {
-                    var error = $"Topic:{receivedMessage.Name}, can not be found subscriber method.";
-                    throw new SubscriberNotFoundException(error);
-                }
-
-                // If there are multiple consumers in the same group, we will take the first
-                var executeDescriptor = executeDescriptorGroup[receivedMessage.Group][0];
-                var consumerContext = new ConsumerContext(executeDescriptor, receivedMessage.ToMessageContext());
-
                 var ret = await Invoker.InvokeAsync(consumerContext);
-
                 if (!string.IsNullOrEmpty(ret.CallbackName))
                     await _callbackMessageSender.SendAsync(ret.MessageId, ret.CallbackName, ret.Result);
 
