@@ -25,7 +25,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static CapOptions UseEntityFramework<TContext>(this CapOptions options)
             where TContext : DbContext
         {
-            return options.UseEntityFramework<TContext>(opt => { opt.DbContextType = typeof(TContext); });
+            return options.UseEntityFramework<TContext>(opt => { });
         }
 
         public static CapOptions UseEntityFramework<TContext>(this CapOptions options, Action<EFOptions> configure)
