@@ -1,0 +1,48 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2024
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.NetworkProtocol", "src\SkyWalking.NetworkProtocol\SkyWalking.NetworkProtocol.csproj", "{54B9183A-928B-43E1-9851-10E2F1CCE61C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{05BF0D4E-C824-4EC8-8330-36C1FC49910E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "protos", "protos", "{39479996-FC5A-4A92-BDA1-498648C743D3}"
+	ProjectSection(SolutionItems) = preProject
+		protos\ApplicationRegisterService.proto = protos\ApplicationRegisterService.proto
+		protos\Common.proto = protos\Common.proto
+		protos\DiscoveryService.proto = protos\DiscoveryService.proto
+		protos\Downstream.proto = protos\Downstream.proto
+		protos\JVMMetricsService.proto = protos\JVMMetricsService.proto
+		protos\KeyWithIntegerValue.proto = protos\KeyWithIntegerValue.proto
+		protos\KeyWithStringValue.proto = protos\KeyWithStringValue.proto
+		protos\NetworkAddressRegisterService.proto = protos\NetworkAddressRegisterService.proto
+		protos\TraceSegmentService.proto = protos\TraceSegmentService.proto
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution items", "solution items", "{E38F0F6E-6E10-491D-8786-650F6A4B6698}"
+	ProjectSection(SolutionItems) = preProject
+		generate_protos.bat = generate_protos.bat
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{54B9183A-928B-43E1-9851-10E2F1CCE61C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54B9183A-928B-43E1-9851-10E2F1CCE61C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54B9183A-928B-43E1-9851-10E2F1CCE61C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54B9183A-928B-43E1-9851-10E2F1CCE61C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{54B9183A-928B-43E1-9851-10E2F1CCE61C} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {94C0DA2C-CCCB-4314-93A2-9809B5DD0583}
+	EndGlobalSection
+EndGlobal
