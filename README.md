@@ -7,6 +7,8 @@ Apache SkyWalking is an APM designed for microservices, cloud native and contain
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/asfskywalking.svg?style=for-the-badge&label=Follow&logo=twitter)](https://twitter.com/AsfSkyWalking)
 
+[![Build status](https://ci.appveyor.com/api/projects/status/fl6vucwfn1vu94dv/branch/master?svg=true)](https://ci.appveyor.com/project/wu-sheng/skywalking-csharp/branch/master)
+
 # Status
 [@lemon](https://github.com/liuhaoyang) is working with Apache SkyWalking official PMC team for our first release. Welcome anyone to join us.
 
