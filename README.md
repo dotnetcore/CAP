@@ -12,6 +12,9 @@ Apache SkyWalking is an APM designed for microservices, cloud native and contain
 # Status
 [@lemon](https://github.com/liuhaoyang) is working with Apache SkyWalking official PMC team for our first release. Welcome anyone to join us.
 
+# Contributing Guide
+This section is in progress here: [Contributing to skywalking-csharp](/CONTIBUTING.md)
+
 # Roadmap
 Expect to release 0.1 compatible with SkyWalking 5.0.0-alpha in May. 2018
 
