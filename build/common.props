@@ -1,0 +1,17 @@
+<Project>
+  <Import Project="version.props" />
+  <PropertyGroup>
+    <Authors>SkyWalking Team</Authors>
+    <Product>skywalking-csharp</Product>
+    <PackageIconUrl>https://avatars2.githubusercontent.com/u/32165127</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/OpenSkywalking/skywalking-csharp</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/OpenSkywalking/skywalking-csharp/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/OpenSkywalking/skywalking-csharp</RepositoryUrl>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>  
+  </PropertyGroup>
+</Project>

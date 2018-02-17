@@ -1,37 +1,25 @@
-version: 0.1.0-alpha-{build}
-
-image: Visual Studio 2017
-
-configuration: Release
-
+version: '{build}'
+os: Visual Studio 2017
+branches:
+  only:
+  - master
+environment:
+  BUILDING_ON_PLATFORM: win
+  BuildEnvironment: appveyor
+skip_tags: true
 skip_commits:
   files:
+    - docs/*
     - CONTIBUTING.md
     - LICENSE
     - README.md
     - generate_protos.bat
     - generate_protos_macos.sh
     - generate_protos_linux.sh
+    - .travis.yml
     - .gitignore
-
-branches:
-  only:
-  - master
-
-skip_tags: true
-
-dotnet_csproj:
-  patch: true
-  file: src\**\*.csproj
-  version: '{version}'
-  package_version: '{version}'
-  assembly_version: '{version}'
-  file_version: '{version}'
-  informational_version: '{version}'
-
-before_build:
-- cmd: dotnet restore
-
 build_script:
-- cmd: dotnet build -c Release
-    
+- ps: ./build.ps1
+test: off
+artifacts:
+- path: artifacts/packages/*.nupkg
