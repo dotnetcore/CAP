@@ -23,3 +23,12 @@ build_script:
 test: off
 artifacts:
 - path: artifacts/packages/*.nupkg
+deploy:
+- provider: NuGet
+  server: https://www.myget.org/F/skywalking/api/v2/package
+  api_key:
+    secure: y93uJrdiEYaeVTFxeCduQSlCussOUF4UztOyhkxyZxFnIco73J/K2rdA2QShoEuh
+  skip_symbols: true
+  artifact: /artifacts\/packages\/.+\.nupkg/
+  on:
+    branch: master
