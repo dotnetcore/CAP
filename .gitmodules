@@ -1,0 +1,3 @@
+[submodule "protos"]
+	path = protos
+	url = https://github.com/apache/incubator-skywalking-data-collect-protocol.git
