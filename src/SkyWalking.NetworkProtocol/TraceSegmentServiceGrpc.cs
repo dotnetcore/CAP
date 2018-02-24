@@ -13,7 +13,7 @@ using grpc = global::Grpc.Core;
 namespace SkyWalking.NetworkProtocol {
   public static partial class TraceSegmentService
   {
-    static readonly string __ServiceName = "SkyWalking.NetworkProtocol.TraceSegmentService";
+    static readonly string __ServiceName = "TraceSegmentService";
 
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.UpstreamSegment> __Marshaller_UpstreamSegment = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.UpstreamSegment.Parser.ParseFrom);
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.Downstream> __Marshaller_Downstream = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.Downstream.Parser.ParseFrom);

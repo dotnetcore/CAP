@@ -13,7 +13,7 @@ using grpc = global::Grpc.Core;
 namespace SkyWalking.NetworkProtocol {
   public static partial class InstanceDiscoveryService
   {
-    static readonly string __ServiceName = "SkyWalking.NetworkProtocol.InstanceDiscoveryService";
+    static readonly string __ServiceName = "InstanceDiscoveryService";
 
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.ApplicationInstance> __Marshaller_ApplicationInstance = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.ApplicationInstance.Parser.ParseFrom);
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.ApplicationInstanceMapping> __Marshaller_ApplicationInstanceMapping = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.ApplicationInstanceMapping.Parser.ParseFrom);
@@ -132,7 +132,7 @@ namespace SkyWalking.NetworkProtocol {
   /// </summary>
   public static partial class ServiceNameDiscoveryService
   {
-    static readonly string __ServiceName = "SkyWalking.NetworkProtocol.ServiceNameDiscoveryService";
+    static readonly string __ServiceName = "ServiceNameDiscoveryService";
 
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.ServiceNameCollection> __Marshaller_ServiceNameCollection = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.ServiceNameCollection.Parser.ParseFrom);
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.ServiceNameMappingCollection> __Marshaller_ServiceNameMappingCollection = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.ServiceNameMappingCollection.Parser.ParseFrom);

@@ -13,7 +13,7 @@ using grpc = global::Grpc.Core;
 namespace SkyWalking.NetworkProtocol {
   public static partial class JVMMetricsService
   {
-    static readonly string __ServiceName = "SkyWalking.NetworkProtocol.JVMMetricsService";
+    static readonly string __ServiceName = "JVMMetricsService";
 
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.JVMMetrics> __Marshaller_JVMMetrics = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.JVMMetrics.Parser.ParseFrom);
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.Downstream> __Marshaller_Downstream = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.Downstream.Parser.ParseFrom);

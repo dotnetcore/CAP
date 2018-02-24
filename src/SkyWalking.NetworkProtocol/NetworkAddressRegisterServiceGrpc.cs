@@ -13,7 +13,7 @@ using grpc = global::Grpc.Core;
 namespace SkyWalking.NetworkProtocol {
   public static partial class NetworkAddressRegisterService
   {
-    static readonly string __ServiceName = "SkyWalking.NetworkProtocol.NetworkAddressRegisterService";
+    static readonly string __ServiceName = "NetworkAddressRegisterService";
 
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.NetworkAddresses> __Marshaller_NetworkAddresses = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.NetworkAddresses.Parser.ParseFrom);
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.NetworkAddressMappings> __Marshaller_NetworkAddressMappings = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.NetworkAddressMappings.Parser.ParseFrom);

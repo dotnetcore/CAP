@@ -24,16 +24,14 @@ namespace SkyWalking.NetworkProtocol {
     static ApplicationRegisterServiceReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "CiBBcHBsaWNhdGlvblJlZ2lzdGVyU2VydmljZS5wcm90bxIaU2t5V2Fsa2lu",
-            "Zy5OZXR3b3JrUHJvdG9jb2waGUtleVdpdGhJbnRlZ2VyVmFsdWUucHJvdG8i",
-            "JgoLQXBwbGljYXRpb24SFwoPYXBwbGljYXRpb25Db2RlGAEgASgJIloKEkFw",
-            "cGxpY2F0aW9uTWFwcGluZxJECgthcHBsaWNhdGlvbhgBIAEoCzIvLlNreVdh",
-            "bGtpbmcuTmV0d29ya1Byb3RvY29sLktleVdpdGhJbnRlZ2VyVmFsdWUykgEK",
-            "GkFwcGxpY2F0aW9uUmVnaXN0ZXJTZXJ2aWNlEnQKF2FwcGxpY2F0aW9uQ29k",
-            "ZVJlZ2lzdGVyEicuU2t5V2Fsa2luZy5OZXR3b3JrUHJvdG9jb2wuQXBwbGlj",
-            "YXRpb24aLi5Ta3lXYWxraW5nLk5ldHdvcmtQcm90b2NvbC5BcHBsaWNhdGlv",
-            "bk1hcHBpbmciAEIrCidvcmcuYXBhY2hlLnNreXdhbGtpbmcuYXBtLm5ldHdv",
-            "cmsucHJvdG9QAWIGcHJvdG8z"));
+            "CiBBcHBsaWNhdGlvblJlZ2lzdGVyU2VydmljZS5wcm90bxoZS2V5V2l0aElu",
+            "dGVnZXJWYWx1ZS5wcm90byImCgtBcHBsaWNhdGlvbhIXCg9hcHBsaWNhdGlv",
+            "bkNvZGUYASABKAkiPwoSQXBwbGljYXRpb25NYXBwaW5nEikKC2FwcGxpY2F0",
+            "aW9uGAEgASgLMhQuS2V5V2l0aEludGVnZXJWYWx1ZTJcChpBcHBsaWNhdGlv",
+            "blJlZ2lzdGVyU2VydmljZRI+ChdhcHBsaWNhdGlvbkNvZGVSZWdpc3RlchIM",
+            "LkFwcGxpY2F0aW9uGhMuQXBwbGljYXRpb25NYXBwaW5nIgBCSAonb3JnLmFw",
+            "YWNoZS5za3l3YWxraW5nLmFwbS5uZXR3b3JrLnByb3RvUAGqAhpTa3lXYWxr",
+            "aW5nLk5ldHdvcmtQcm90b2NvbGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::SkyWalking.NetworkProtocol.KeyWithIntegerValueReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {

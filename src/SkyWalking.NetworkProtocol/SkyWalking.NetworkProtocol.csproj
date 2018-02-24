@@ -1,5 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
+  <Import Project="..\..\build\common.props" />
+  
   <PropertyGroup>
     <Description>SkyWalking gRPC protocol and generated codes.</Description>
     <AssemblyTitle>SkyWalking.NetworkProtocol</AssemblyTitle>

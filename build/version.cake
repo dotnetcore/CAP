@@ -77,7 +77,7 @@ public class BuildParameters
 		var suffix = versionQuality;
 		if (!IsTagged)
 		{
-			suffix += (IsCI ? "preview-" : "dv-") + Util.CreateStamp();
+			suffix += (IsCI ? "preview-" : "dev-") + Util.CreateStamp();
 		}
 		suffix = string.IsNullOrWhiteSpace(suffix) ? null : suffix;
 

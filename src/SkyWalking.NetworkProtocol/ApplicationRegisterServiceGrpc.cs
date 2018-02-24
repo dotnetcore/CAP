@@ -16,7 +16,7 @@ namespace SkyWalking.NetworkProtocol {
   /// </summary>
   public static partial class ApplicationRegisterService
   {
-    static readonly string __ServiceName = "SkyWalking.NetworkProtocol.ApplicationRegisterService";
+    static readonly string __ServiceName = "ApplicationRegisterService";
 
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.Application> __Marshaller_Application = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.Application.Parser.ParseFrom);
     static readonly grpc::Marshaller<global::SkyWalking.NetworkProtocol.ApplicationMapping> __Marshaller_ApplicationMapping = grpc::Marshallers.Create((arg) => global::Google.Protobuf.MessageExtensions.ToByteArray(arg), global::SkyWalking.NetworkProtocol.ApplicationMapping.Parser.ParseFrom);

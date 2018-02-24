@@ -24,9 +24,9 @@ namespace SkyWalking.NetworkProtocol {
     static DownstreamReflection() {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
-            "ChBEb3duc3RyZWFtLnByb3RvEhpTa3lXYWxraW5nLk5ldHdvcmtQcm90b2Nv",
-            "bCIMCgpEb3duc3RyZWFtQisKJ29yZy5hcGFjaGUuc2t5d2Fsa2luZy5hcG0u",
-            "bmV0d29yay5wcm90b1ABYgZwcm90bzM="));
+            "ChBEb3duc3RyZWFtLnByb3RvIgwKCkRvd25zdHJlYW1CSAonb3JnLmFwYWNo",
+            "ZS5za3l3YWxraW5nLmFwbS5uZXR3b3JrLnByb3RvUAGqAhpTa3lXYWxraW5n",
+            "Lk5ldHdvcmtQcm90b2NvbGIGcHJvdG8z"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {

@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <Description>SkyWalking Core abstractions and interfaces for apm agent.</Description>
+    <AssemblyTitle>SkyWalking.Abstractions</AssemblyTitle>
+    <TargetFrameworks>netstandard1.6;net45</TargetFrameworks>
+    <AssemblyName>SkyWalking.Abstractions</AssemblyName>
+    <PackageId>SkyWalking.Abstractions</PackageId>
+    <PackageTags>SkyWalking,APM</PackageTags>
+    <PackageReleaseNotes></PackageReleaseNotes>
+    <RootNamespace>SkyWalking</RootNamespace>
+  </PropertyGroup>
+  
+</Project>
