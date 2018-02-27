@@ -8,9 +8,13 @@
     <TargetFrameworks>netstandard1.6;net45</TargetFrameworks>
     <AssemblyName>SkyWalking.Abstractions</AssemblyName>
     <PackageId>SkyWalking.Abstractions</PackageId>
-    <PackageTags>SkyWalking,APM</PackageTags>
+    <PackageTags>SkyWalking;APM</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
     <RootNamespace>SkyWalking</RootNamespace>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SkyWalking.NetworkProtocol\SkyWalking.NetworkProtocol.csproj" />
+  </ItemGroup>
   
 </Project>

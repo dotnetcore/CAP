@@ -7,19 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.NetworkProtocol"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{05BF0D4E-C824-4EC8-8330-36C1FC49910E}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "protos", "protos", "{39479996-FC5A-4A92-BDA1-498648C743D3}"
-	ProjectSection(SolutionItems) = preProject
-		protos\ApplicationRegisterService.proto = protos\ApplicationRegisterService.proto
-		protos\Common.proto = protos\Common.proto
-		protos\DiscoveryService.proto = protos\DiscoveryService.proto
-		protos\Downstream.proto = protos\Downstream.proto
-		protos\JVMMetricsService.proto = protos\JVMMetricsService.proto
-		protos\KeyWithIntegerValue.proto = protos\KeyWithIntegerValue.proto
-		protos\KeyWithStringValue.proto = protos\KeyWithStringValue.proto
-		protos\NetworkAddressRegisterService.proto = protos\NetworkAddressRegisterService.proto
-		protos\TraceSegmentService.proto = protos\TraceSegmentService.proto
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution items", "solution items", "{E38F0F6E-6E10-491D-8786-650F6A4B6698}"
 	ProjectSection(SolutionItems) = preProject
 		generate_protos.bat = generate_protos.bat
@@ -29,11 +16,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution items", "solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Abstractions", "src\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj", "{C3860B5F-21D0-429F-8A00-B0C0F4573DF7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Core", "src\SkyWalking.Core\SkyWalking.Core.csproj", "{FD84A10C-C962-4AEA-BA06-86F08EB048E6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Core", "src\SkyWalking.Core\SkyWalking.Core.csproj", "{FD84A10C-C962-4AEA-BA06-86F08EB048E6}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{613F0980-91ED-4064-8E8C-168582EF4AD7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Core.Tests", "test\SkyWalking.Core.Tests\SkyWalking.Core.Tests.csproj", "{3915A2C2-7174-4651-A4F1-D45CD109916A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Core.Tests", "test\SkyWalking.Core.Tests\SkyWalking.Core.Tests.csproj", "{3915A2C2-7174-4651-A4F1-D45CD109916A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -8,7 +8,7 @@
     <TargetFrameworks>netstandard1.6;net45</TargetFrameworks>
     <AssemblyName>SkyWalking.Core</AssemblyName>
     <PackageId>SkyWalking.Core</PackageId>
-    <PackageTags>SkyWalking,APM</PackageTags>
+    <PackageTags>SkyWalking;APM</PackageTags>
     <PackageReleaseNotes></PackageReleaseNotes>
     <RootNamespace>SkyWalking</RootNamespace>
   </PropertyGroup>
