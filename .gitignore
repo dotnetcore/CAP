@@ -262,4 +262,5 @@ BenchmarkDotNet.Artifacts/
 
 tools/
 
-protos/*
+*.proto
+
