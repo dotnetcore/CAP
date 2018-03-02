@@ -68,6 +68,8 @@ namespace DotNetCore.CAP
 
                 AddErrorReasonToContent(message, ex);
 
+                ++message.Retries;  //issue: https://github.com/dotnetcore/CAP/issues/90
+
                 await _stateChanger.ChangeStateAsync(message, new FailedState(), connection);
 
                 fetched.RemoveFromQueue();
