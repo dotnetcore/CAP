@@ -110,25 +110,5 @@ namespace DotNetCore.CAP.MySql.Test
             Assert.Equal("MySqlStorageConnectionTest", message.Name);
             Assert.Equal("mygroup", message.Group);
         }
-
-        [Fact]
-        public async Task GetNextReceviedMessageToBeEnqueuedAsync_Test()
-        {
-            var receivedMessage = new CapReceivedMessage
-            {
-                Name = "MySqlStorageConnectionTest",
-                Content = "",
-                Group = "mygroup",
-                StatusName = StatusName.Scheduled
-            };
-            await _storage.StoreReceivedMessageAsync(receivedMessage);
-
-            var message = await _storage.GetNextReceivedMessageToBeEnqueuedAsync();
-
-            Assert.NotNull(message);
-            Assert.Equal(StatusName.Scheduled, message.StatusName);
-            Assert.Equal("MySqlStorageConnectionTest", message.Name);
-            Assert.Equal("mygroup", message.Group);
-        }
     }
 }

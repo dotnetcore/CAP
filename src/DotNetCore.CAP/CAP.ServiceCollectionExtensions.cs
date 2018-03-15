@@ -49,15 +49,12 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IStateChanger, StateChanger>();
 
             //Queue's message processor
-            services.AddTransient<PublishQueuer>();
-            services.AddTransient<SubscribeQueuer>();
-            services.AddTransient<FailedProcessor>();
-            services.AddTransient<IDispatcher, DefaultDispatcher>();
+            services.AddTransient<NeedRetryMessageProcessor>();
 
-            //Executors
-            services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
-            services.AddSingleton<IQueueExecutor, SubscribeQueueExecutor>();
-            services.TryAddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
+            //Sender and Executors   
+            services.AddSingleton<IDispatcher, Dispatcher>();
+            // Warning: IPublishMessageSender need to inject at extension project. 
+            services.AddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
 
             //Options and extension service
             var options = new CapOptions();

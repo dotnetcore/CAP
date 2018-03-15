@@ -3,12 +3,21 @@ using System.Data;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Abstractions
 {
     public abstract class CapPublisherBase : ICapPublisher, IDisposable
     {
+        private readonly ILogger _logger;
+        private readonly IDispatcher _dispatcher;
+
+        protected CapPublisherBase(ILogger logger, IDispatcher dispatcher)
+        {
+            _logger = logger;
+            _dispatcher = dispatcher;
+        }
+
         protected IDbConnection DbConnection { get; set; }
         protected IDbTransaction DbTransaction { get; set; }
         protected bool IsCapOpenedTrans { get; set; }
@@ -21,9 +30,7 @@ namespace DotNetCore.CAP.Abstractions
             CheckIsUsingEF(name);
             PrepareConnectionForEF();
 
-            var content = Serialize(contentObj, callbackName);
-
-            PublishWithTrans(name, content);
+            PublishWithTrans(name, contentObj, callbackName);
         }
 
         public Task PublishAsync<T>(string name, T contentObj, string callbackName = null)
@@ -31,9 +38,7 @@ namespace DotNetCore.CAP.Abstractions
             CheckIsUsingEF(name);
             PrepareConnectionForEF();
 
-            var content = Serialize(contentObj, callbackName);
-
-            return PublishWithTransAsync(name, content);
+            return PublishWithTransAsync(name, contentObj, callbackName);
         }
 
         public void Publish<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
@@ -41,9 +46,7 @@ namespace DotNetCore.CAP.Abstractions
             CheckIsAdoNet(name);
             PrepareConnectionForAdo(dbTransaction);
 
-            var content = Serialize(contentObj, callbackName);
-
-            PublishWithTrans(name, content);
+            PublishWithTrans(name, contentObj, callbackName);
         }
 
         public Task PublishAsync<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
@@ -51,17 +54,20 @@ namespace DotNetCore.CAP.Abstractions
             CheckIsAdoNet(name);
             PrepareConnectionForAdo(dbTransaction);
 
-            var content = Serialize(contentObj, callbackName);
+            return PublishWithTransAsync(name, contentObj, callbackName);
+        }
 
-            return PublishWithTransAsync(name, content);
+        protected void Enqueu(CapPublishedMessage message)
+        {
+            _dispatcher.EnqueuToPublish(message);
         }
 
         protected abstract void PrepareConnectionForEF();
 
-        protected abstract void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected abstract int Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message);
 
-        protected abstract Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected abstract Task<int> ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message);
 
         protected virtual string Serialize<T>(T obj, string callbackName = null)
@@ -89,7 +95,6 @@ namespace DotNetCore.CAP.Abstractions
             {
                 CallbackName = callbackName
             };
-
             return packer.Pack(message);
         }
 
@@ -123,36 +128,72 @@ namespace DotNetCore.CAP.Abstractions
                     "If you are using the EntityFramework, you do not need to use this overloaded.");
         }
 
-        private async Task PublishWithTransAsync(string name, string content)
+        private async Task PublishWithTransAsync<T>(string name, T contentObj, string callbackName = null)
         {
-            var message = new CapPublishedMessage
+            try
             {
-                Name = name,
-                Content = content,
-                StatusName = StatusName.Scheduled
-            };
+                var content = Serialize(contentObj, callbackName);
 
-            await ExecuteAsync(DbConnection, DbTransaction, message);
+                var message = new CapPublishedMessage
+                {
+                    Name = name,
+                    Content = content,
+                    StatusName = StatusName.Scheduled
+                };
 
-            ClosedCap();
+                var id = await ExecuteAsync(DbConnection, DbTransaction, message);
 
-            PublishQueuer.PulseEvent.Set();
+                ClosedCap();
+
+                if (id > 0)
+                {
+                    _logger.LogInformation($"message [{message}] has been persisted in the database.");
+
+                    message.Id = id;
+
+                    Enqueu(message);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("An exception was occurred when publish message. exception message:" + e.Message, e);
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
-        private void PublishWithTrans(string name, string content)
+        private void PublishWithTrans<T>(string name, T contentObj, string callbackName = null)
         {
-            var message = new CapPublishedMessage
+            try
             {
-                Name = name,
-                Content = content,
-                StatusName = StatusName.Scheduled
-            };
+                var content = Serialize(contentObj, callbackName);
 
-            Execute(DbConnection, DbTransaction, message);
+                var message = new CapPublishedMessage
+                {
+                    Name = name,
+                    Content = content,
+                    StatusName = StatusName.Scheduled
+                };
 
-            ClosedCap();
+                var id = Execute(DbConnection, DbTransaction, message);
 
-            PublishQueuer.PulseEvent.Set();
+                ClosedCap();
+
+                if (id > 0)
+                {
+                    _logger.LogInformation($"message [{message}] has been persisted in the database.");
+
+                    message.Id = id;
+
+                    Enqueu(message);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("An exception was occurred when publish message. exception message:" + e.Message, e);
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         private void ClosedCap()

@@ -57,12 +57,9 @@ BEGIN
 	EXEC('CREATE SCHEMA [{schema}]')
 END;
 
-IF OBJECT_ID(N'[{schema}].[Queue]',N'U') IS NULL
+IF OBJECT_ID(N'[{schema}].[Queue]',N'U') IS NOT NULL
 BEGIN
-	CREATE TABLE [{schema}].[Queue](
-		[MessageId] [int] NOT NULL,
-		[MessageType] [tinyint] NOT NULL
-	) ON [PRIMARY]
+	DROP TABLE [{schema}].[Queue];
 END;
 
 IF OBJECT_ID(N'[{schema}].[Received]',N'U') IS NULL

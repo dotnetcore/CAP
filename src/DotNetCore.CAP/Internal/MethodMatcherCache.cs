@@ -52,11 +52,13 @@ namespace DotNetCore.CAP.Internal
                 var topicCandidates = item.Value.Where(x => x.Attribute.Name == topicName);
                 dic.Add(item.Key, topicCandidates.ToList());
             }
+
             return dic;
         }
 
         /// <summary>
-        /// Attempts to get the topic exector associated with the specified topic name and group name from the <see cref="Entries"/>.
+        /// Attempts to get the topic exector associated with the specified topic name and group name from the
+        /// <see cref="Entries" />.
         /// </summary>
         /// <param name="topicName">The topic name of the value to get.</param>
         /// <param name="groupName">The group name of the value to get.</param>
@@ -75,6 +77,7 @@ namespace DotNetCore.CAP.Internal
                 matchTopic = groupMatchTopics.FirstOrDefault(x => x.Attribute.Name == topicName);
                 return matchTopic != null;
             }
+
             return false;
         }
 
@@ -83,20 +86,14 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         public IEnumerable<string> GetSubscribeTopics()
         {
-            if (_allTopics != null)
-            {
-                return _allTopics;
-            }
+            if (_allTopics != null) return _allTopics;
 
             if (Entries == null)
                 throw new ArgumentNullException(nameof(Entries));
 
             _allTopics = new List<string>();
 
-            foreach (var descriptors in Entries.Values)
-            {
-                _allTopics.AddRange(descriptors.Select(x => x.Attribute.Name));
-            }
+            foreach (var descriptors in Entries.Values) _allTopics.AddRange(descriptors.Select(x => x.Attribute.Name));
             return _allTopics;
         }
     }

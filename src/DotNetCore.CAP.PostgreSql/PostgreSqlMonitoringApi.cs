@@ -57,11 +57,7 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
             var where = string.Empty;
 
             if (!string.IsNullOrEmpty(queryDto.StatusName))
-                if (string.Equals(queryDto.StatusName, StatusName.Processing,
-                    StringComparison.CurrentCultureIgnoreCase))
-                    where += " and \"StatusName\" in (N'Processing',N'Scheduled',N'Enqueued')";
-                else
-                    where += " and Lower(\"StatusName\") = Lower(@StatusName)";
+                where += " and Lower(\"StatusName\") = Lower(@StatusName)";
             if (!string.IsNullOrEmpty(queryDto.Name))
                 where += " and Lower(\"Name\") = Lower(@Name)";
             if (!string.IsNullOrEmpty(queryDto.Group))
@@ -88,11 +84,6 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
             return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Failed));
         }
 
-        public int PublishedProcessingCount()
-        {
-            return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Processing));
-        }
-
         public int PublishedSucceededCount()
         {
             return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Succeeded));
@@ -101,11 +92,6 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
         public int ReceivedFailedCount()
         {
             return UseConnection(conn => GetNumberOfMessage(conn, "received", StatusName.Failed));
-        }
-
-        public int ReceivedProcessingCount()
-        {
-            return UseConnection(conn => GetNumberOfMessage(conn, "received", StatusName.Processing));
         }
 
         public int ReceivedSucceededCount()
@@ -129,9 +115,7 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = statusName == StatusName.Processing
-                ? $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where \"StatusName\" in (N'Processing',N'Scheduled',N'Enqueued')"
-                : $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where Lower(\"StatusName\") = Lower(@state)";
+            var sqlQuery = $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where Lower(\"StatusName\") = Lower(@state)";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
             return count;

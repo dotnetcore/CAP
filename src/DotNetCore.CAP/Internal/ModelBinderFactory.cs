@@ -13,8 +13,8 @@ namespace DotNetCore.CAP.Internal
     /// </summary>
     internal class ModelBinderFactory : IModelBinderFactory
     {
-        private readonly IContentSerializer _serializer;
         private readonly ConcurrentDictionary<Key, IModelBinder> _cache;
+        private readonly IContentSerializer _serializer;
 
         public ModelBinderFactory(IContentSerializer contentSerializer)
         {

@@ -452,6 +452,7 @@ namespace DotNetCore.CAP.Infrastructure
                 result[2 * i] = (char) val;
                 result[2 * i + 1] = (char) (val >> 16);
             }
+
             return new string(result);
         }
 

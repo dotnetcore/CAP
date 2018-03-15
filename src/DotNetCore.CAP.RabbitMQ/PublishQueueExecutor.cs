@@ -7,15 +7,16 @@ using RabbitMQ.Client;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
-    internal sealed class PublishQueueExecutor : BasePublishQueueExecutor
+    internal sealed class RabbitMQPublishMessageSender : BasePublishMessageSender
     {
         private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly ILogger _logger;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
-        public PublishQueueExecutor(ILogger<PublishQueueExecutor> logger, CapOptions options,
-            RabbitMQOptions rabbitMQOptions, IConnectionChannelPool connectionChannelPool, IStateChanger stateChanger)
-            : base(options, stateChanger, logger)
+        public RabbitMQPublishMessageSender(ILogger<RabbitMQPublishMessageSender> logger,
+            CapOptions options, RabbitMQOptions rabbitMQOptions, IServiceProvider provider,
+            IConnectionChannelPool connectionChannelPool, IStateChanger stateChanger)
+            : base(options, provider, stateChanger, logger)
         {
             _logger = logger;
             _connectionChannelPool = connectionChannelPool;

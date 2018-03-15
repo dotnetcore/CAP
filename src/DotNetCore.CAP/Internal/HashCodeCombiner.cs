@@ -10,7 +10,8 @@ namespace DotNetCore.CAP.Internal
 
         public int CombinedHash
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return _combinedHash64.GetHashCode(); }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _combinedHash64.GetHashCode(); }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -34,6 +35,7 @@ namespace DotNetCore.CAP.Internal
                     Add(o);
                     count++;
                 }
+
                 Add(count);
             }
         }

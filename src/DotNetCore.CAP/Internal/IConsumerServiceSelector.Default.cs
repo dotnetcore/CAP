@@ -10,7 +10,7 @@ namespace DotNetCore.CAP.Internal
 {
     /// <inheritdoc />
     /// <summary>
-    ///     A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
+    /// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
     /// </summary>
     internal class DefaultConsumerServiceSelector : IConsumerServiceSelector
     {
@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.Internal
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        ///     Creates a new <see cref="DefaultConsumerServiceSelector" />.
+        /// Creates a new <see cref="DefaultConsumerServiceSelector" />.
         /// </summary>
         public DefaultConsumerServiceSelector(IServiceProvider serviceProvider, CapOptions capOptions)
         {
@@ -27,9 +27,9 @@ namespace DotNetCore.CAP.Internal
         }
 
         /// <summary>
-        ///     Selects the best <see cref="ConsumerExecutorDescriptor" /> candidate from <paramref name="executeDescriptor" /> for
-        ///     the
-        ///     current message associated.
+        /// Selects the best <see cref="ConsumerExecutorDescriptor" /> candidate from <paramref name="executeDescriptor" /> for
+        /// the
+        /// current message associated.
         /// </summary>
         public ConsumerExecutorDescriptor SelectBestCandidate(string key,
             IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
@@ -65,6 +65,7 @@ namespace DotNetCore.CAP.Internal
 
                     executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
                 }
+
                 return executorDescriptorList;
             }
         }

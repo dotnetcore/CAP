@@ -5,37 +5,40 @@ using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
 {
-    public abstract class BasePublishQueueExecutor : IQueueExecutor, IPublishExecutor
+    public abstract class BasePublishMessageSender : IPublishMessageSender, IPublishExecutor
     {
         private readonly ILogger _logger;
         private readonly CapOptions _options;
+        private readonly IServiceProvider _provider;
         private readonly IStateChanger _stateChanger;
 
-        protected BasePublishQueueExecutor(
+        protected BasePublishMessageSender(
             CapOptions options,
+            IServiceProvider provider,
             IStateChanger stateChanger,
-            ILogger<BasePublishQueueExecutor> logger)
+            ILogger<BasePublishMessageSender> logger)
         {
             _options = options;
+            _provider = provider;
             _stateChanger = stateChanger;
             _logger = logger;
         }
 
-        public async Task<OperateResult> ExecuteAsync(IStorageConnection connection, IFetchedMessage fetched)
+        public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
-            var message = await connection.GetPublishedMessageAsync(fetched.MessageId);
             try
             {
                 var sp = Stopwatch.StartNew();
-                await _stateChanger.ChangeStateAsync(message, new ProcessingState(), connection);
 
                 if (message.Retries > 0)
                     _logger.JobRetrying(message.Retries);
                 var result = await PublishAsync(message.Name, message.Content);
+
                 sp.Stop();
 
                 IState newState;
@@ -52,15 +55,15 @@ namespace DotNetCore.CAP
                         newState = new FailedState();
                         _logger.JobFailed(result.Exception);
                     }
+
                     message.Content = Helper.AddExceptionProperty(message.Content, result.Exception);
                 }
                 else
                 {
                     newState = new SucceededState(_options.SucceedMessageExpiredAfter);
                 }
-                await _stateChanger.ChangeStateAsync(message, newState, connection);
 
-                fetched.RemoveFromQueue();
+                await ChangeState(message, newState);
 
                 if (result.Succeeded)
                     _logger.JobExecuted(sp.Elapsed.TotalSeconds);
@@ -69,7 +72,6 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                fetched.Requeue();
                 _logger.ExceptionOccuredWhileExecuting(message?.Name, ex);
                 return OperateResult.Failed(ex);
             }
@@ -87,8 +89,18 @@ namespace DotNetCore.CAP
 
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
             message.ExpiresAt = due;
-          
+
             return true;
+        }
+
+        private async Task ChangeState(CapPublishedMessage message, IState state)
+        {
+            using (var scope = _provider.CreateScope())
+            {
+                var provider = scope.ServiceProvider;
+                var storageConnection = provider.GetService<IStorageConnection>();
+                await _stateChanger.ChangeStateAsync(message, state, storageConnection);
+            }
         }
     }
 }

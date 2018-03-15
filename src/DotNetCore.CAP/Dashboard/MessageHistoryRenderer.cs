@@ -23,18 +23,13 @@ namespace DotNetCore.CAP.Dashboard
         {
             Register(StatusName.Succeeded, SucceededRenderer);
             Register(StatusName.Failed, FailedRenderer);
-            Register(StatusName.Processing, ProcessingRenderer);
-
-            BackgroundStateColors.Add(StatusName.Enqueued, "#F5F5F5");
+            
             BackgroundStateColors.Add(StatusName.Succeeded, "#EDF7ED");
             BackgroundStateColors.Add(StatusName.Failed, "#FAEBEA");
-            BackgroundStateColors.Add(StatusName.Processing, "#FCEFDC");
             BackgroundStateColors.Add(StatusName.Scheduled, "#E0F3F8");
-
-            ForegroundStateColors.Add(StatusName.Enqueued, "#999");
+            
             ForegroundStateColors.Add(StatusName.Succeeded, "#5cb85c");
             ForegroundStateColors.Add(StatusName.Failed, "#d9534f");
-            ForegroundStateColors.Add(StatusName.Processing, "#f0ad4e");
             ForegroundStateColors.Add(StatusName.Scheduled, "#5bc0de");
         }
 

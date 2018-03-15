@@ -6,7 +6,7 @@ namespace DotNetCore.CAP.Internal
 {
     internal class JsonContentSerializer : IContentSerializer
     {
-        public T DeSerialize<T>(string messageObjStr) 
+        public T DeSerialize<T>(string messageObjStr)
         {
             return Helper.FromJson<T>(messageObjStr);
         }

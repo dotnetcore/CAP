@@ -56,6 +56,7 @@ namespace DotNetCore.CAP.Internal
                     Clear();
                     _locker.Dispose();
                 }
+
                 // Dispose unmanaged resources
             }
         }
@@ -245,6 +246,7 @@ namespace DotNetCore.CAP.Internal
                     catch
                     {
                     }
+
                     _timers.Remove(workKey);
                     _cache.Remove(workKey);
                 }
@@ -276,6 +278,7 @@ namespace DotNetCore.CAP.Internal
                     catch
                     {
                     }
+
                     _timers.Remove(key);
                     _cache.Remove(key);
                 }

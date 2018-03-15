@@ -13,13 +13,9 @@ namespace DotNetCore.CAP.Dashboard
 
         int PublishedFailedCount();
 
-        int PublishedProcessingCount();
-
         int PublishedSucceededCount();
 
         int ReceivedFailedCount();
-
-        int ReceivedProcessingCount();
 
         int ReceivedSucceededCount();
 

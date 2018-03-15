@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.Models
         public virtual string CallbackName { get; set; }
     }
 
-    public sealed class CapMessageDto: CapMessage
+    public sealed class CapMessageDto : CapMessage
     {
         public CapMessageDto()
         {

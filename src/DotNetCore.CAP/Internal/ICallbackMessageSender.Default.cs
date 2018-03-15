@@ -10,10 +10,10 @@ namespace DotNetCore.CAP.Internal
 {
     internal class CallbackMessageSender : ICallbackMessageSender
     {
-        private readonly ILogger<CallbackMessageSender> _logger;
-        private readonly IServiceProvider _serviceProvider;
         private readonly IContentSerializer _contentSerializer;
+        private readonly ILogger<CallbackMessageSender> _logger;
         private readonly IMessagePacker _messagePacker;
+        private readonly IServiceProvider _serviceProvider;
 
         public CallbackMessageSender(
             ILogger<CallbackMessageSender> logger,
@@ -56,7 +56,7 @@ namespace DotNetCore.CAP.Internal
             {
                 var provider = scope.ServiceProvider;
                 var callbackPublisher = provider.GetService<ICallbackPublisher>();
-                await callbackPublisher.PublishAsync(publishedMessage);
+                await callbackPublisher.PublishCallbackAsync(publishedMessage);
             }
         }
     }

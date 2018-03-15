@@ -14,29 +14,29 @@ namespace DotNetCore.CAP.PostgreSql
     public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
         private readonly DbContext _dbContext;
-        private readonly ILogger _logger;
         private readonly PostgreSqlOptions _options;
 
-        public CapPublisher(IServiceProvider provider,
-            ILogger<CapPublisher> logger,
-            PostgreSqlOptions options)
+        public CapPublisher(ILogger<CapPublisher> logger, IDispatcher dispatcher,
+            IServiceProvider provider, PostgreSqlOptions options)
+            : base(logger, dispatcher)
         {
             ServiceProvider = provider;
             _options = options;
-            _logger = logger;
 
             if (_options.DbContextType != null)
             {
                 IsUsingEF = true;
-                _dbContext = (DbContext) ServiceProvider.GetService(_options.DbContextType);
+                _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
             }
         }
-         
-        public async Task PublishAsync(CapPublishedMessage message)
+
+        public async Task PublishCallbackAsync(CapPublishedMessage message)
         {
             using (var conn = new NpgsqlConnection(_options.ConnectionString))
             {
-                await conn.ExecuteAsync(PrepareSql(), message);
+                var id = await conn.ExecuteScalarAsync<int>(PrepareSql(), message);
+                message.Id = id;
+                Enqueu(message);
             }
         }
 
@@ -56,20 +56,16 @@ namespace DotNetCore.CAP.PostgreSql
             DbTransaction = dbTrans;
         }
 
-        protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected override int Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message)
         {
-            dbConnection.Execute(PrepareSql(), message, dbTransaction);
-
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
+            return dbConnection.ExecuteScalar<int>(PrepareSql(), message, dbTransaction);
         }
 
-        protected override async Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected override Task<int> ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message)
         {
-            await dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
-
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
+            return dbConnection.ExecuteScalarAsync<int>(PrepareSql(), message, dbTransaction);
         }
 
         #region private methods
@@ -77,7 +73,7 @@ namespace DotNetCore.CAP.PostgreSql
         private string PrepareSql()
         {
             return
-                $"INSERT INTO \"{_options.Schema}\".\"published\" (\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName)";
+                $"INSERT INTO \"{_options.Schema}\".\"published\" (\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING \"Id\";";
         }
 
         #endregion private methods

@@ -19,10 +19,6 @@ namespace DotNetCore.CAP
         private readonly ILogger<DefaultBootstrapper> _logger;
         private Task _bootstrappingTask;
 
-        private IStorage Storage { get; }
-
-        private IEnumerable<IProcessingServer> Processors { get; }
-
         public DefaultBootstrapper(
             ILogger<DefaultBootstrapper> logger,
             IStorage storage,
@@ -48,6 +44,10 @@ namespace DotNetCore.CAP
                 }
             });
         }
+
+        private IStorage Storage { get; }
+
+        private IEnumerable<IProcessingServer> Processors { get; }
 
         public Task BootstrapAsync()
         {
@@ -85,6 +85,7 @@ namespace DotNetCore.CAP
                 {
                     _logger.ProcessorsStartedError(ex);
                 }
+
             return Task.CompletedTask;
         }
     }

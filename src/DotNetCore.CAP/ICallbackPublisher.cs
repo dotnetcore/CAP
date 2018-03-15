@@ -11,6 +11,6 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Publish a callback message
         /// </summary>
-        Task PublishAsync(CapPublishedMessage obj);
+        Task PublishCallbackAsync(CapPublishedMessage obj);
     }
 }

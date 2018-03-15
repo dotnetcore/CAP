@@ -40,25 +40,25 @@ namespace DotNetCore.CAP.SqlServer.Test
             Assert.Equal(StatusName.Scheduled, message.StatusName);
         }
 
-        [Fact]
-        public async Task FetchNextMessageAsync_Test()
-        {
-            var sql = "INSERT INTO [Cap].[Queue]([MessageId],[MessageType]) VALUES(@MessageId,@MessageType);";
-            var queue = new CapQueue
-            {
-                MessageId = 3333,
-                MessageType = MessageType.Publish
-            };
-            using (var connection = ConnectionUtil.CreateConnection())
-            {
-                connection.Execute(sql, queue);
-            }
-            var fetchedMessage = await _storage.FetchNextMessageAsync();
-            fetchedMessage.Dispose();
-            Assert.NotNull(fetchedMessage);
-            Assert.Equal(MessageType.Publish, fetchedMessage.MessageType);
-            Assert.Equal(3333, fetchedMessage.MessageId);
-        }
+        //[Fact]
+        //public async Task FetchNextMessageAsync_Test()
+        //{
+        //    var sql = "INSERT INTO [Cap].[Queue]([MessageId],[MessageType]) VALUES(@MessageId,@MessageType);";
+        //    var queue = new CapQueue
+        //    {
+        //        MessageId = 3333,
+        //        MessageType = MessageType.Publish
+        //    };
+        //    using (var connection = ConnectionUtil.CreateConnection())
+        //    {
+        //        connection.Execute(sql, queue);
+        //    }
+        //    var fetchedMessage = await _storage.FetchNextMessageAsync();
+        //    fetchedMessage.Dispose();
+        //    Assert.NotNull(fetchedMessage);
+        //    Assert.Equal(MessageType.Publish, fetchedMessage.MessageType);
+        //    Assert.Equal(3333, fetchedMessage.MessageId);
+        //}
 
         [Fact]
         public async Task StoreReceivedMessageAsync_Test()
@@ -110,24 +110,24 @@ namespace DotNetCore.CAP.SqlServer.Test
             Assert.Equal("mygroup", message.Group);
         }
 
-        [Fact]
-        public async Task GetNextReceviedMessageToBeEnqueuedAsync_Test()
-        {
-            var receivedMessage = new CapReceivedMessage
-            {
-                Name = "SqlServerStorageConnectionTest",
-                Content = "",
-                Group = "mygroup",
-                StatusName = StatusName.Scheduled
-            };
-            await _storage.StoreReceivedMessageAsync(receivedMessage);
+        //[Fact]
+        //public async Task GetNextReceviedMessageToBeEnqueuedAsync_Test()
+        //{
+        //    var receivedMessage = new CapReceivedMessage
+        //    {
+        //        Name = "SqlServerStorageConnectionTest",
+        //        Content = "",
+        //        Group = "mygroup",
+        //        StatusName = StatusName.Scheduled
+        //    };
+        //    await _storage.StoreReceivedMessageAsync(receivedMessage);
 
-            var message = await _storage.GetNextReceivedMessageToBeEnqueuedAsync();
+        //    var message = await _storage.GetNextReceivedMessageToBeEnqueuedAsync();
 
-            Assert.NotNull(message);
-            Assert.Equal(StatusName.Scheduled, message.StatusName);
-            Assert.Equal("SqlServerStorageConnectionTest", message.Name);
-            Assert.Equal("mygroup", message.Group);
-        }
+        //    Assert.NotNull(message);
+        //    Assert.Equal(StatusName.Scheduled, message.StatusName);
+        //    Assert.Equal("SqlServerStorageConnectionTest", message.Name);
+        //    Assert.Equal("mygroup", message.Group);
+        //}
     }
 }

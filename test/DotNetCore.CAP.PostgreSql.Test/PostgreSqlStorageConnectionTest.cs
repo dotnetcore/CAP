@@ -110,24 +110,24 @@ namespace DotNetCore.CAP.PostgreSql.Test
             Assert.Equal("mygroup", message.Group);
         }
 
-        [Fact]
-        public async Task GetNextReceviedMessageToBeEnqueuedAsync_Test()
-        {
-            var receivedMessage = new CapReceivedMessage
-            {
-                Name = "PostgreSqlStorageConnectionTest",
-                Content = "",
-                Group = "mygroup",
-                StatusName = StatusName.Scheduled
-            };
-            await _storage.StoreReceivedMessageAsync(receivedMessage);
+        //[Fact]
+        //public async Task GetNextReceviedMessageToBeEnqueuedAsync_Test()
+        //{
+        //    var receivedMessage = new CapReceivedMessage
+        //    {
+        //        Name = "PostgreSqlStorageConnectionTest",
+        //        Content = "",
+        //        Group = "mygroup",
+        //        StatusName = StatusName.Scheduled
+        //    };
+        //    await _storage.StoreReceivedMessageAsync(receivedMessage);
 
-            var message = await _storage.GetNextReceivedMessageToBeEnqueuedAsync();
+        //    var message = await _storage.GetNextReceivedMessageToBeEnqueuedAsync();
 
-            Assert.NotNull(message);
-            Assert.Equal(StatusName.Scheduled, message.StatusName);
-            Assert.Equal("PostgreSqlStorageConnectionTest", message.Name);
-            Assert.Equal("mygroup", message.Group);
-        }
+        //    Assert.NotNull(message);
+        //    Assert.Equal(StatusName.Scheduled, message.StatusName);
+        //    Assert.Equal("PostgreSqlStorageConnectionTest", message.Name);
+        //    Assert.Equal("mygroup", message.Group);
+        //}
     }
 }

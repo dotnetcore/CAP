@@ -39,7 +39,8 @@ namespace DotNetCore.CAP.Processor
         public RetryBehavior(bool retry, int retryCount, Func<int, int> retryInThunk)
         {
             if (retry)
-                if (retryCount < 0) throw new ArgumentOutOfRangeException(nameof(retryCount), "Can't be negative.");
+                if (retryCount < 0)
+                    throw new ArgumentOutOfRangeException(nameof(retryCount), "Can't be negative.");
 
             Retry = retry;
             RetryCount = retryCount;

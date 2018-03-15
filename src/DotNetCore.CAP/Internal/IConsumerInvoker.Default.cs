@@ -10,9 +10,9 @@ namespace DotNetCore.CAP.Internal
     internal class DefaultConsumerInvoker : IConsumerInvoker
     {
         private readonly ILogger _logger;
+        private readonly IMessagePacker _messagePacker;
         private readonly IModelBinderFactory _modelBinderFactory;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IMessagePacker _messagePacker;
 
         public DefaultConsumerInvoker(ILogger logger,
             IServiceProvider serviceProvider,
@@ -72,6 +72,7 @@ namespace DotNetCore.CAP.Internal
                         return await executor.ExecuteAsync(@class, bindResult.Model);
                     return executor.Execute(@class, bindResult.Model);
                 }
+
                 throw new MethodBindException(
                     $"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameterString} ");
             }

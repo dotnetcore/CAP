@@ -14,10 +14,6 @@ namespace DotNetCore.CAP
 
         void UpdateMessage(CapReceivedMessage message);
 
-        void EnqueueMessage(CapPublishedMessage message);
-
-        void EnqueueMessage(CapReceivedMessage message);
-
         Task CommitAsync();
     }
 }

@@ -1,81 +1,106 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class DefaultDispatcher : IDispatcher
+    public class Dispatcher : IDispatcher, IDisposable
     {
-        internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly ISubscriberExecutor _executor;
+        private readonly ILogger<Dispatcher> _logger;
 
-        private readonly TimeSpan _pollingDelay;
-        private readonly IQueueExecutorFactory _queueExecutorFactory;
+        private readonly BlockingCollection<CapPublishedMessage> _publishedMessageQueue =
+            new BlockingCollection<CapPublishedMessage>(new ConcurrentQueue<CapPublishedMessage>());
 
-        public DefaultDispatcher(IQueueExecutorFactory queueExecutorFactory,
-            IOptions<CapOptions> capOptions)
+        private readonly BlockingCollection<CapReceivedMessage> _receivedMessageQueue =
+            new BlockingCollection<CapReceivedMessage>(new ConcurrentQueue<CapReceivedMessage>());
+
+        private readonly IPublishMessageSender _sender;
+
+        public Dispatcher(ILogger<Dispatcher> logger,
+            IPublishMessageSender sender,
+            ISubscriberExecutor executor)
         {
-            _queueExecutorFactory = queueExecutorFactory;
-            _pollingDelay = TimeSpan.FromSeconds(capOptions.Value.PollingDelay);
+            _logger = logger;
+            _sender = sender;
+            _executor = executor;
+
+            Task.Factory.StartNew(Sending);
+            Task.Factory.StartNew(Processing);
         }
 
-        public bool Waiting { get; private set; }
-
-        public Task ProcessAsync(ProcessingContext context)
+        public void EnqueuToPublish(CapPublishedMessage message)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-
-            context.ThrowIfStopping();
-
-            return ProcessCoreAsync(context);
+            _publishedMessageQueue.Add(message);
         }
 
-        public async Task ProcessCoreAsync(ProcessingContext context)
+        public void EnqueuToExecute(CapReceivedMessage message)
+        {
+            _receivedMessageQueue.Add(message);
+        }
+
+        public void Dispose()
+        {
+            _cts.Cancel();
+        }
+
+        private void Sending()
         {
             try
             {
-                var worked = await Step(context);
-
-                context.ThrowIfStopping();
-
-                Waiting = true;
-
-                if (!worked)
+                while (!_publishedMessageQueue.IsCompleted)
                 {
-                    var token = GetTokenToWaitOn(context);
-                    await WaitHandleEx.WaitAnyAsync(PulseEvent, token.WaitHandle, _pollingDelay);
-                }
-            }
-            finally
-            {
-                Waiting = false;
-            }
-        }
-
-        protected virtual CancellationToken GetTokenToWaitOn(ProcessingContext context)
-        {
-            return context.CancellationToken;
-        }
-
-        private async Task<bool> Step(ProcessingContext context)
-        {
-            IFetchedMessage fetched;
-            using (var scopedContext = context.CreateScope())
-            {
-                var provider = scopedContext.Provider;
-                var connection = provider.GetRequiredService<IStorageConnection>();
-
-                if ((fetched = await connection.FetchNextMessageAsync()) != null)
-                    using (fetched)
+                    if (_publishedMessageQueue.TryTake(out var message, 100))
                     {
-                        var queueExecutor = _queueExecutorFactory.GetInstance(fetched.MessageType);
-                        await queueExecutor.ExecuteAsync(connection, fetched);
+                        try
+                        {
+                            _sender.SendAsync(message);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
+                        }
+                    }
+                }
+
+                //foreach (var message in _publishedMessageQueue..GetConsumingEnumerable(_cts.Token))
+                //    try
+                //    {
+                //        _sender.SendAsync(message);
+                //    }
+                //    catch (Exception ex)
+                //    {
+                //        _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
+                //    }
+            }
+            catch (OperationCanceledException)
+            {
+                // expected
+            }
+        }
+
+        private void Processing()
+        {
+            try
+            {
+                foreach (var message in _receivedMessageQueue.GetConsumingEnumerable(_cts.Token))
+                    try
+                    {
+                        _executor.ExecuteAsync(message);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
                     }
             }
-            return fetched != null;
+            catch (OperationCanceledException)
+            {
+                // expected
+            }
         }
     }
 }

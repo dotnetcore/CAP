@@ -36,8 +36,7 @@ namespace DotNetCore.CAP.NodeDiscovery
                 foreach (var service in services.Response)
                 {
                     var serviceInfo = await _consul.Catalog.Service(service.Key);
-                    var node = serviceInfo.Response.
-                        SkipWhile(x => !x.ServiceTags.Contains("CAP"))
+                    var node = serviceInfo.Response.SkipWhile(x => !x.ServiceTags.Contains("CAP"))
                         .Select(info => new Node
                         {
                             Id = info.ServiceID,
@@ -58,7 +57,8 @@ namespace DotNetCore.CAP.NodeDiscovery
             {
                 CapCache.Global.AddOrUpdate("cap.nodes.count", 0, TimeSpan.FromSeconds(20));
 
-                _logger.LogError($"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException.Message}");
+                _logger.LogError(
+                    $"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException.Message}");
                 return null;
             }
         }
@@ -73,7 +73,7 @@ namespace DotNetCore.CAP.NodeDiscovery
                     Name = _options.NodeName,
                     Address = _options.CurrentNodeHostName,
                     Port = _options.CurrentNodePort,
-                    Tags = new[] { "CAP", "Client", "Dashboard" },
+                    Tags = new[] {"CAP", "Client", "Dashboard"},
                     Check = new AgentServiceCheck
                     {
                         DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30),
@@ -86,7 +86,8 @@ namespace DotNetCore.CAP.NodeDiscovery
             }
             catch (Exception ex)
             {
-                _logger.LogError($"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException.Message}");
+                _logger.LogError(
+                    $"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException.Message}");
                 return null;
             }
         }

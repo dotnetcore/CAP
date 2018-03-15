@@ -71,11 +71,7 @@ select count(Id) from [{0}].Received with (nolock) where StatusName in (N'Proces
             var tableName = queryDto.MessageType == MessageType.Publish ? "Published" : "Received";
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
-                if (string.Equals(queryDto.StatusName, StatusName.Processing,
-                    StringComparison.CurrentCultureIgnoreCase))
-                    where += " and statusname in (N'Processing',N'Scheduled',N'Enqueued')";
-                else
-                    where += " and statusname=@StatusName";
+                where += " and statusname=@StatusName";
             if (!string.IsNullOrEmpty(queryDto.Name))
                 where += " and name=@Name";
             if (!string.IsNullOrEmpty(queryDto.Group))
@@ -102,11 +98,6 @@ select count(Id) from [{0}].Received with (nolock) where StatusName in (N'Proces
             return UseConnection(conn => GetNumberOfMessage(conn, "Published", StatusName.Failed));
         }
 
-        public int PublishedProcessingCount()
-        {
-            return UseConnection(conn => GetNumberOfMessage(conn, "Published", StatusName.Processing));
-        }
-
         public int PublishedSucceededCount()
         {
             return UseConnection(conn => GetNumberOfMessage(conn, "Published", StatusName.Succeeded));
@@ -116,12 +107,7 @@ select count(Id) from [{0}].Received with (nolock) where StatusName in (N'Proces
         {
             return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Failed));
         }
-
-        public int ReceivedProcessingCount()
-        {
-            return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Processing));
-        }
-
+ 
         public int ReceivedSucceededCount()
         {
             return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Succeeded));
@@ -129,9 +115,7 @@ select count(Id) from [{0}].Received with (nolock) where StatusName in (N'Proces
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = statusName == StatusName.Processing
-                ? $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName in (N'Processing',N'Scheduled',N'Enqueued')"
-                : $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName = @state";
+            var sqlQuery = $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName = @state";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
             return count;

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -16,6 +15,7 @@ namespace DotNetCore.CAP
         private readonly IConsumerClientFactory _consumerClientFactory;
 
         private readonly CancellationTokenSource _cts;
+        private readonly IDispatcher _dispatcher;
         private readonly ILogger _logger;
 
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
@@ -29,6 +29,7 @@ namespace DotNetCore.CAP
         public ConsumerHandler(
             IServiceProvider serviceProvider,
             IConsumerClientFactory consumerClientFactory,
+            IDispatcher dispatcher,
             ILogger<ConsumerHandler> logger,
             MethodMatcherCache selector)
         {
@@ -36,6 +37,7 @@ namespace DotNetCore.CAP
             _logger = logger;
             _serviceProvider = serviceProvider;
             _consumerClientFactory = consumerClientFactory;
+            _dispatcher = dispatcher;
             _cts = new CancellationTokenSource();
         }
 
@@ -45,18 +47,18 @@ namespace DotNetCore.CAP
 
             foreach (var matchGroup in groupingMatches)
                 Task.Factory.StartNew(() =>
-                 {
-                     using (var client = _consumerClientFactory.Create(matchGroup.Key))
-                     {
-                         RegisterMessageProcessor(client);
+                {
+                    using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                    {
+                        RegisterMessageProcessor(client);
 
-                         client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
+                        client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
 
-                         client.Listening(_pollingDelay, _cts.Token);
-                     }
-                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                        client.Listening(_pollingDelay, _cts.Token);
+                    }
+                }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
 
-             _compositeTask = Task.CompletedTask;
+            _compositeTask = Task.CompletedTask;
         }
 
         public void Dispose()
@@ -79,7 +81,7 @@ namespace DotNetCore.CAP
 
         public void Pulse()
         {
-            SubscribeQueuer.PulseEvent.Set();
+            //ignore
         }
 
         private void RegisterMessageProcessor(IConsumerClient client)
@@ -92,16 +94,19 @@ namespace DotNetCore.CAP
                 {
                     try
                     {
-                        StoreMessage(scope, message);
+                        var storedMessage = StoreMessage(scope, message);
+
                         client.Commit();
+
+                        _dispatcher.EnqueuToExecute(storedMessage);
                     }
                     catch (Exception e)
                     {
-                        _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.", message);
+                        _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.",
+                            message);
                         client.Reject();
                     }
                 }
-                Pulse();
             };
 
             client.OnLog += WriteLog;
@@ -134,15 +139,19 @@ namespace DotNetCore.CAP
             }
         }
 
-        private static void StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
+        private static CapReceivedMessage StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
         {
             var provider = serviceScope.ServiceProvider;
             var messageStore = provider.GetRequiredService<IStorageConnection>();
             var receivedMessage = new CapReceivedMessage(messageContext)
             {
                 StatusName = StatusName.Scheduled
-            };
-            messageStore.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
+            }; 
+            var id = messageStore.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
+
+            receivedMessage.Id = id;
+
+            return receivedMessage;
         }
     }
 }

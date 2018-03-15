@@ -6,17 +6,15 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Kafka
 {
-    internal class PublishQueueExecutor : BasePublishQueueExecutor
+    internal class KafkaPublishMessageSender : BasePublishMessageSender
     {
         private readonly ConnectionPool _connectionPool;
         private readonly ILogger _logger;
 
-        public PublishQueueExecutor(
-            CapOptions options,
-            IStateChanger stateChanger,
-            ConnectionPool connectionPool,
-            ILogger<PublishQueueExecutor> logger)
-            : base(options, stateChanger, logger)
+        public KafkaPublishMessageSender(
+            CapOptions options, IStateChanger stateChanger, IServiceProvider provider,
+            ConnectionPool connectionPool, ILogger<KafkaPublishMessageSender> logger)
+            : base(options, provider, stateChanger, logger)
         {
             _logger = logger;
             _connectionPool = connectionPool;
@@ -42,7 +40,6 @@ namespace DotNetCore.CAP.Kafka
                     Code = message.Error.Code.ToString(),
                     Description = message.Error.Reason
                 });
-
             }
             catch (Exception ex)
             {

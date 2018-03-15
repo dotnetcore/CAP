@@ -14,7 +14,6 @@ namespace DotNetCore.CAP.Processor
         private readonly CancellationTokenSource _cts;
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IList<IDispatcher> _messageDispatchers;
         private readonly CapOptions _options;
         private readonly IServiceProvider _provider;
         private Task _compositeTask;
@@ -34,7 +33,6 @@ namespace DotNetCore.CAP.Processor
             _provider = provider;
             _options = options.Value;
             _cts = new CancellationTokenSource();
-            _messageDispatchers = new List<IDispatcher>();
         }
 
         public void Start()
@@ -54,12 +52,7 @@ namespace DotNetCore.CAP.Processor
 
         public void Pulse()
         {
-            if (!AllProcessorsWaiting())
-                return;
-
             _logger.LogTrace("Pulsing the Queuer.");
-
-            PublishQueuer.PulseEvent.Set();
         }
 
         public void Dispose()
@@ -82,11 +75,6 @@ namespace DotNetCore.CAP.Processor
             }
         }
 
-        private bool AllProcessorsWaiting()
-        {
-            return _messageDispatchers.All(processor => processor.Waiting);
-        }
-
         private IProcessor InfiniteRetry(IProcessor inner)
         {
             return new InfiniteRetryProcessor(inner, _loggerFactory);
@@ -94,19 +82,11 @@ namespace DotNetCore.CAP.Processor
 
         private IProcessor[] GetProcessors(int processorCount)
         {
-            var returnedProcessors = new List<IProcessor>();
-            for (var i = 0; i < processorCount; i++)
+            var returnedProcessors = new List<IProcessor>
             {
-                var messageProcessors = _provider.GetRequiredService<IDispatcher>();
-                _messageDispatchers.Add(messageProcessors);
-            }
-            returnedProcessors.AddRange(_messageDispatchers);
-
-            returnedProcessors.Add(_provider.GetRequiredService<PublishQueuer>());
-            returnedProcessors.Add(_provider.GetRequiredService<SubscribeQueuer>());
-            returnedProcessors.Add(_provider.GetRequiredService<FailedProcessor>());
-
-            returnedProcessors.Add(_provider.GetRequiredService<IAdditionalProcessor>());
+                _provider.GetRequiredService<NeedRetryMessageProcessor>(),
+                _provider.GetRequiredService<IAdditionalProcessor>()
+            };
 
             return returnedProcessors.ToArray();
         }

@@ -89,10 +89,7 @@ namespace DotNetCore.CAP.PostgreSql
             var batchSql = $@"
 CREATE SCHEMA IF NOT EXISTS ""{schema}"";
 
-CREATE TABLE IF NOT EXISTS ""{schema}"".""queue""(
-	""MessageId"" int NOT NULL ,
-	""MessageType"" int NOT NULL
-);
+DROP TABLE IF EXISTS ""{schema}"".""queue"";
 
 CREATE TABLE IF NOT EXISTS ""{schema}"".""received""(
 	""Id"" SERIAL PRIMARY KEY NOT NULL,

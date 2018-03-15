@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor.States;
@@ -10,20 +9,20 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class FailedProcessor : IProcessor
+    public class NeedRetryMessageProcessor : IProcessor
     {
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly ILogger _logger;
         private readonly CapOptions _options;
         private readonly IServiceProvider _provider;
+        private readonly IPublishExecutor _publishExecutor;
         private readonly IStateChanger _stateChanger;
         private readonly ISubscriberExecutor _subscriberExecutor;
-        private readonly IPublishExecutor _publishExecutor;
         private readonly TimeSpan _waitingInterval;
 
-        public FailedProcessor(
+        public NeedRetryMessageProcessor(
             IOptions<CapOptions> options,
-            ILogger<FailedProcessor> logger,
+            ILogger<NeedRetryMessageProcessor> logger,
             IServiceProvider provider,
             IStateChanger stateChanger,
             ISubscriberExecutor subscriberExecutor,
@@ -58,7 +57,7 @@ namespace DotNetCore.CAP.Processor
 
         private async Task ProcessPublishedAsync(IStorageConnection connection, ProcessingContext context)
         {
-            var messages = await connection.GetFailedPublishedMessages();
+            var messages = await connection.GetPublishedMessagesOfNeedRetry();
             var hasException = false;
 
             foreach (var message in messages)
@@ -91,6 +90,7 @@ namespace DotNetCore.CAP.Processor
                         message.Retries++;
                         transaction.UpdateMessage(message);
                     }
+
                     await transaction.CommitAsync();
                 }
 
@@ -102,7 +102,7 @@ namespace DotNetCore.CAP.Processor
 
         private async Task ProcessReceivedAsync(IStorageConnection connection, ProcessingContext context)
         {
-            var messages = await connection.GetFailedReceivedMessages();
+            var messages = await connection.GetReceivedMessagesOfNeedRetry();
             var hasException = false;
 
             foreach (var message in messages)
@@ -134,6 +134,7 @@ namespace DotNetCore.CAP.Processor
                         message.Content = Helper.AddExceptionProperty(message.Content, ret.Exception);
                         transaction.UpdateMessage(message);
                     }
+
                     await transaction.CommitAsync();
                 }
 

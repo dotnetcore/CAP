@@ -51,11 +51,7 @@ namespace DotNetCore.CAP.MySql
         {
             var batchSql =
                 $@"
-CREATE TABLE IF NOT EXISTS `{prefix}.queue` (
-  `MessageId` int(11) NOT NULL,
-  `MessageType` tinyint(4) NOT NULL,
-  `ProcessId` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `{prefix}.queue`;
 
 CREATE TABLE IF NOT EXISTS `{prefix}.received` (
   `Id` int(127) NOT NULL AUTO_INCREMENT,
