@@ -59,8 +59,7 @@ CREATE DATABASE ""{databaseName}"";");
             {
                 connection.Execute($@"
 TRUNCATE TABLE ""cap"".""published"";
-TRUNCATE TABLE ""cap"".""received"";
-TRUNCATE TABLE ""cap"".""queue"";");
+TRUNCATE TABLE ""cap"".""received"";");
             }
         }
     }
