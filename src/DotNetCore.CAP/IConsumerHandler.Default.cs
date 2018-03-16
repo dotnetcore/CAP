@@ -99,7 +99,7 @@ namespace DotNetCore.CAP
 
                     client.Commit();
 
-                    _dispatcher.EnqueuToExecute(storedMessage);
+                    _dispatcher.EnqueueToExecute(storedMessage);
                 }
                 catch (Exception e)
                 {

@@ -7,8 +7,8 @@ namespace DotNetCore.CAP
 {
     public interface IDispatcher
     {
-        void EnqueuToPublish(CapPublishedMessage message);
+        void EnqueueToPublish(CapPublishedMessage message);
 
-        void EnqueuToExecute(CapReceivedMessage message);
+        void EnqueueToExecute(CapReceivedMessage message);
     }
 }

@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.MySql
             {
                 var id = await conn.ExecuteScalarAsync<int>(PrepareSql(), message);
                 message.Id = id;
-                Enqueu(message);
+                Enqueue(message);
             }
         }
 
