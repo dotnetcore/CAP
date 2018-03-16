@@ -55,76 +55,59 @@ namespace DotNetCore.CAP
             {
                 var sp = Stopwatch.StartNew();
 
-                if (message.Retries > 0)
-                {
-                    _logger.JobRetrying(message.Retries);
-                }
-
-                var result = await InvokeAsync(message);
+                await InvokeConsumerMethodAsync(message);
 
                 sp.Stop();
 
-                var state = GetNewState(result, message);
+                await SetSuccessfulState(message);
 
-                await ChangeState(message, state);
-
-                if (result.Succeeded)
-                {
-                    _logger.JobExecuted(sp.Elapsed.TotalSeconds);
-                }
+                _logger.ConsumerExecuted(sp.Elapsed.TotalSeconds);
 
                 return OperateResult.Success;
-            }
-            catch (SubscriberNotFoundException ex)
-            {
-                _logger.LogError(ex.Message);
-
-                AddErrorReasonToContent(message, ex);
-
-                ++message.Retries; //issue: https://github.com/dotnetcore/CAP/issues/90
-
-                await ChangeState(message, new FailedState());
-
-                return OperateResult.Failed(ex);
             }
             catch (Exception ex)
             {
                 _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
 
+                await SetFailedState(message, ex, out bool stillRetry);
+                if (stillRetry)
+                {
+                    await ExecuteAsync(message);
+                }
+
                 return OperateResult.Failed(ex);
             }
         }
 
-        private async Task ChangeState(CapReceivedMessage message, IState state)
+        private Task SetSuccessfulState(CapReceivedMessage message)
         {
-            await _stateChanger.ChangeStateAsync(message, state, _connection);
+            var succeededState = new SucceededState(_options.SucceedMessageExpiredAfter);
+
+            return _stateChanger.ChangeStateAsync(message, succeededState, _connection);
         }
 
-        private IState GetNewState(OperateResult result, CapReceivedMessage message)
+        private Task SetFailedState(CapReceivedMessage message, Exception ex, out bool stillRetry)
         {
-            IState newState;
-            if (!result.Succeeded)
-            {
-                var shouldRetry = UpdateMessageForRetry(message);
-                if (shouldRetry)
-                {
-                    newState = new ScheduledState();
-                    _logger.JobFailedWillRetry(result.Exception);
-                }
-                else
-                {
-                    newState = new FailedState();
-                    _logger.JobFailed(result.Exception);
-                }
+            IState newState = new FailedState();
 
-                AddErrorReasonToContent(message, result.Exception);
+            if (ex is SubscriberNotFoundException)
+            {
+                stillRetry = false;
+                message.Retries = _options.FailedRetryCount; // not retry if SubscriberNotFoundException
             }
             else
             {
-                newState = new SucceededState(_options.SucceedMessageExpiredAfter);
+                stillRetry = UpdateMessageForRetry(message);
+                if (stillRetry)
+                {
+                    _logger.ConsumerExecutionFailedWillRetry(ex);
+                    return Task.CompletedTask;
+                }
             }
 
-            return newState;
+            AddErrorReasonToContent(message, ex);
+
+            return _stateChanger.ChangeStateAsync(message, newState, _connection);
         }
 
         private static bool UpdateMessageForRetry(CapReceivedMessage message)
@@ -148,45 +131,28 @@ namespace DotNetCore.CAP
             message.Content = Helper.AddExceptionProperty(message.Content, exception);
         }
 
-        private async Task<OperateResult> InvokeAsync(CapReceivedMessage receivedMessage)
+        private async Task InvokeConsumerMethodAsync(CapReceivedMessage receivedMessage)
         {
             if (!_selector.TryGetTopicExector(receivedMessage.Name, receivedMessage.Group,
                 out var executor))
             {
-                var error = "message can not be found subscriber. Message:" + receivedMessage;
-                error += "\r\n  see: https://github.com/dotnetcore/CAP/issues/63";
+                var error = $"message can not be found subscriber, Message:{receivedMessage},\r\n see: https://github.com/dotnetcore/CAP/issues/63";
                 throw new SubscriberNotFoundException(error);
             }
-
-            var consumerContext = new ConsumerContext(executor, receivedMessage.ToMessageContext());
             try
             {
+                var consumerContext = new ConsumerContext(executor, receivedMessage.ToMessageContext());
+
                 var ret = await Invoker.InvokeAsync(consumerContext);
 
-                try
+                if (!string.IsNullOrEmpty(ret.CallbackName))
                 {
-                    if (!string.IsNullOrEmpty(ret.CallbackName))
-                    {
-                        await _callbackMessageSender.SendAsync(ret.MessageId, ret.CallbackName, ret.Result);
-                    }
+                    await _callbackMessageSender.SendAsync(ret.MessageId, ret.CallbackName, ret.Result);
                 }
-                catch (Exception e)
-                {
-                    _logger.LogError(
-                        $"Group:{receivedMessage.Group}, Topic:{receivedMessage.Name} callback message store failed",
-                        e);
-
-                    return OperateResult.Failed(e);
-                }
-
-                return OperateResult.Success;
             }
             catch (Exception ex)
             {
-                _logger.ConsumerMethodExecutingFailed($"Group:{receivedMessage.Group}, Topic:{receivedMessage.Name}",
-                    ex);
-
-                return OperateResult.Failed(ex);
+                throw new SubscriberExecutionFailedException(ex.Message, ex);
             }
         }
     }

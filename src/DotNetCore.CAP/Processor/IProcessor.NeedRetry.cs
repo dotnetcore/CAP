@@ -89,7 +89,6 @@ namespace DotNetCore.CAP.Processor
                     catch (Exception e)
                     {
                         message.Content = Helper.AddExceptionProperty(message.Content, e);
-                        message.Retries++;
                         transaction.UpdateMessage(message);
                     }
 
@@ -127,22 +126,7 @@ namespace DotNetCore.CAP.Processor
                     }
                 }
 
-                using (var transaction = connection.CreateTransaction())
-                {
-                    var ret = await _subscriberExecutor.ExecuteAsync(message);
-                    if (ret.Succeeded)
-                    {
-                        _stateChanger.ChangeState(message, new SucceededState(), transaction);
-                    }
-                    else
-                    {
-                        message.Retries++;
-                        message.Content = Helper.AddExceptionProperty(message.Content, ret.Exception);
-                        transaction.UpdateMessage(message);
-                    }
-
-                    await transaction.CommitAsync();
-                }
+                await _subscriberExecutor.ExecuteAsync(message);
 
                 context.ThrowIfStopping();
 
