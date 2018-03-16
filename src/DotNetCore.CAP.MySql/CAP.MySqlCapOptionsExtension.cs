@@ -25,22 +25,32 @@ namespace DotNetCore.CAP
             services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
+            AddSingletionMySqlOptions(services);
+        }
+
+        private void AddSingletionMySqlOptions(IServiceCollection services)
+        {
             var mysqlOptions = new MySqlOptions();
+
             _configure(mysqlOptions);
 
             if (mysqlOptions.DbContextType != null)
+            {
                 services.AddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext) provider.GetService(mysqlOptions.DbContextType);
+                        var dbContext = (DbContext)provider.GetService(mysqlOptions.DbContextType);
                         mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return mysqlOptions;
                     }
                 });
+            }
             else
+            {
                 services.AddSingleton(mysqlOptions);
+            }
         }
     }
 }

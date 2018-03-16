@@ -25,10 +25,16 @@ namespace DotNetCore.CAP
             services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
+            AddSingletonPostgreSqlOptions(services);
+        }
+
+        private void AddSingletonPostgreSqlOptions(IServiceCollection services)
+        {
             var postgreSqlOptions = new PostgreSqlOptions();
             _configure(postgreSqlOptions);
 
             if (postgreSqlOptions.DbContextType != null)
+            {
                 services.AddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
@@ -39,8 +45,11 @@ namespace DotNetCore.CAP
                         return postgreSqlOptions;
                     }
                 });
+            }
             else
+            {
                 services.AddSingleton(postgreSqlOptions);
+            }
         }
     }
 }
