@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.Internal
         private readonly IModelBinderFactory _modelBinderFactory;
         private readonly IServiceProvider _serviceProvider;
 
-        public DefaultConsumerInvoker(ILogger logger,
+        public DefaultConsumerInvoker(ILoggerFactory loggerFactory,
             IServiceProvider serviceProvider,
             IMessagePacker messagePacker,
             IModelBinderFactory modelBinderFactory)
@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.Internal
             _modelBinderFactory = modelBinderFactory;
             _serviceProvider = serviceProvider;
             _messagePacker = messagePacker;
-            _logger = logger;
+            _logger = loggerFactory.CreateLogger<DefaultConsumerInvoker>();
         }
 
         public async Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context)

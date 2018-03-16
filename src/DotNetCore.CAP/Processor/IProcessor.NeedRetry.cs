@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.Processor
 
         public NeedRetryMessageProcessor(
             IOptions<CapOptions> options,
-            ILogger logger,
+            ILogger<NeedRetryMessageProcessor> logger,
             IStateChanger stateChanger,
             ISubscriberExecutor subscriberExecutor,
             IPublishExecutor publishExecutor)

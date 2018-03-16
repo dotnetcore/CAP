@@ -9,7 +9,7 @@ namespace DotNetCore.CAP.Internal
 {
     internal class ConsumerInvokerFactory : IConsumerInvokerFactory
     {
-        private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly IMessagePacker _messagePacker;
         private readonly IModelBinderFactory _modelBinderFactory;
         private readonly IServiceProvider _serviceProvider;
@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.Internal
             IModelBinderFactory modelBinderFactory,
             IServiceProvider serviceProvider)
         {
-            _logger = loggerFactory.CreateLogger<ConsumerInvokerFactory>();
+            _loggerFactory = loggerFactory;
             _messagePacker = messagePacker;
             _modelBinderFactory = modelBinderFactory;
             _serviceProvider = serviceProvider;
@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.Internal
 
         public IConsumerInvoker CreateInvoker()
         {
-            return new DefaultConsumerInvoker(_logger, _serviceProvider, _messagePacker, _modelBinderFactory);
+            return new DefaultConsumerInvoker(_loggerFactory, _serviceProvider, _messagePacker, _modelBinderFactory);
         }
     }
 }

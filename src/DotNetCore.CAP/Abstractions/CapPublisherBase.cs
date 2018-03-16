@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.Abstractions
         private readonly IDispatcher _dispatcher;
         private readonly ILogger _logger;
 
-        protected CapPublisherBase(ILogger logger, IDispatcher dispatcher)
+        protected CapPublisherBase(ILogger<CapPublisherBase> logger, IDispatcher dispatcher)
         {
             _logger = logger;
             _dispatcher = dispatcher;
