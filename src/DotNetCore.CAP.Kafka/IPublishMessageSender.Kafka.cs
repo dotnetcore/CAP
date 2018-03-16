@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.Kafka
         public KafkaPublishMessageSender(
             CapOptions options, IStateChanger stateChanger, IServiceProvider provider,
             ConnectionPool connectionPool, ILogger<KafkaPublishMessageSender> logger)
-            : base(options, provider, stateChanger, logger)
+            : base(logger, options, provider, stateChanger)
         {
             _logger = logger;
             _connectionPool = connectionPool;

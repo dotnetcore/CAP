@@ -41,27 +41,6 @@ namespace DotNetCore.CAP.MySql.Test
         }
 
         [Fact]
-        public async Task FetchNextMessageAsync_Test()
-        {
-            var sql = "INSERT INTO `Cap.Queue`(`MessageId`,`MessageType`) VALUES(@MessageId,@MessageType);";
-            var queue = new CapQueue
-            {
-                MessageId = 3333,
-                MessageType = MessageType.Publish
-            };
-            using (var connection = ConnectionUtil.CreateConnection())
-            {
-                connection.Execute(sql, queue);
-            }
-            using (var fetchedMessage = await _storage.FetchNextMessageAsync())
-            {
-                Assert.NotNull(fetchedMessage);
-                Assert.Equal(MessageType.Publish, fetchedMessage.MessageType);
-                Assert.Equal(3333, fetchedMessage.MessageId);
-            }
-        }
-
-        [Fact]
         public async Task StoreReceivedMessageAsync_Test()
         {
             var receivedMessage = new CapReceivedMessage

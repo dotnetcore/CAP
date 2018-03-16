@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.RabbitMQ
         public RabbitMQPublishMessageSender(ILogger<RabbitMQPublishMessageSender> logger,
             CapOptions options, RabbitMQOptions rabbitMQOptions, IServiceProvider provider,
             IConnectionChannelPool connectionChannelPool, IStateChanger stateChanger)
-            : base(options, provider, stateChanger, logger)
+            : base(logger, options, provider, stateChanger)
         {
             _logger = logger;
             _connectionChannelPool = connectionChannelPool;

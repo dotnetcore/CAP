@@ -6,7 +6,6 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
@@ -16,25 +15,25 @@ namespace DotNetCore.CAP
         private readonly ICallbackMessageSender _callbackMessageSender;
         private readonly ILogger _logger;
         private readonly CapOptions _options;
-        private readonly IServiceProvider _provider;
 
         private readonly MethodMatcherCache _selector;
         private readonly IStateChanger _stateChanger;
+        private readonly IStorageConnection _connection;
 
         public DefaultSubscriberExecutor(
-            MethodMatcherCache selector,
+            ILogger<DefaultSubscriberExecutor> logger,
+            CapOptions options,
             IConsumerInvokerFactory consumerInvokerFactory,
             ICallbackMessageSender callbackMessageSender,
-            CapOptions options,
-            IServiceProvider provider,
             IStateChanger stateChanger,
-            ILogger<DefaultSubscriberExecutor> logger)
+            IStorageConnection connection,
+            MethodMatcherCache selector)
         {
             _selector = selector;
             _callbackMessageSender = callbackMessageSender;
             _options = options;
-            _provider = provider;
             _stateChanger = stateChanger;
+            _connection = connection;
             _logger = logger;
 
             Invoker = consumerInvokerFactory.CreateInvoker();
@@ -88,12 +87,7 @@ namespace DotNetCore.CAP
 
         private async Task ChangeState(CapReceivedMessage message, IState state)
         {
-            using (var scope = _provider.CreateScope())
-            {
-                var provider = scope.ServiceProvider;
-                var storageConnection = provider.GetService<IStorageConnection>();
-                await _stateChanger.ChangeStateAsync(message, state, storageConnection);
-            }
+            await _stateChanger.ChangeStateAsync(message, state, _connection);
         }
 
         private IState GetNewState(OperateResult result, CapReceivedMessage message)

@@ -14,7 +14,6 @@ namespace DotNetCore.CAP.Processor
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly ILogger _logger;
         private readonly CapOptions _options;
-        private readonly IServiceProvider _provider;
         private readonly IPublishExecutor _publishExecutor;
         private readonly IStateChanger _stateChanger;
         private readonly ISubscriberExecutor _subscriberExecutor;
@@ -22,15 +21,13 @@ namespace DotNetCore.CAP.Processor
 
         public NeedRetryMessageProcessor(
             IOptions<CapOptions> options,
-            ILogger<NeedRetryMessageProcessor> logger,
-            IServiceProvider provider,
+            ILogger logger,
             IStateChanger stateChanger,
             ISubscriberExecutor subscriberExecutor,
             IPublishExecutor publishExecutor)
         {
             _options = options.Value;
             _logger = logger;
-            _provider = provider;
             _stateChanger = stateChanger;
             _subscriberExecutor = subscriberExecutor;
             _publishExecutor = publishExecutor;
@@ -42,17 +39,13 @@ namespace DotNetCore.CAP.Processor
             if (context == null)
                 throw new ArgumentNullException(nameof(context));
 
-            using (var scope = _provider.CreateScope())
-            {
-                var provider = scope.ServiceProvider;
-                var connection = provider.GetRequiredService<IStorageConnection>();
+            var connection =  context.Provider.GetRequiredService<IStorageConnection>();
 
-                await Task.WhenAll(
-                    ProcessPublishedAsync(connection, context),
-                    ProcessReceivedAsync(connection, context));
+            await Task.WhenAll(
+                ProcessPublishedAsync(connection, context),
+                ProcessReceivedAsync(connection, context));
 
-                await context.WaitAsync(_waitingInterval);
-            }
+            await context.WaitAsync(_waitingInterval);
         }
 
         private async Task ProcessPublishedAsync(IStorageConnection connection, ProcessingContext context)

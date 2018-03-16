@@ -37,16 +37,6 @@ namespace DotNetCore.CAP.MySql
             }
         }
 
-        public Task<IFetchedMessage> FetchNextMessageAsync()
-        {
-            var processId = ObjectId.GenerateNewStringId();
-            var sql = $@"
-UPDATE `{_prefix}.queue` SET `ProcessId`=@ProcessId WHERE `ProcessId` IS NULL LIMIT 1;
-SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` WHERE `ProcessId`=@ProcessId;";
-
-            return FetchNextMessageCoreAsync(sql, processId);
-        }
-
         public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
             var sql = $"SELECT * FROM `{_prefix}.published` WHERE `Retries`<{_capOptions.FailedRetryCount} AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
@@ -109,20 +99,6 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT LAST
             {
                 return connection.Execute(sql) > 0;
             }
-        }
-
-        private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, string processId)
-        {
-            FetchedMessage fetchedMessage;
-            using (var connection = new MySqlConnection(Options.ConnectionString))
-            {
-                fetchedMessage = await connection.QuerySingleOrDefaultAsync<FetchedMessage>(sql, new { ProcessId = processId });
-            }
-
-            if (fetchedMessage == null)
-                return null;
-
-            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, processId, Options);
         }
 
         public void Dispose()

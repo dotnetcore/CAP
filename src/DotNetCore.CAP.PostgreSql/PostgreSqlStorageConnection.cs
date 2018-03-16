@@ -36,12 +36,6 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        public Task<IFetchedMessage> FetchNextMessageAsync()
-        {
-            var sql = $@"DELETE FROM ""{Options.Schema}"".""queue"" WHERE ""MessageId"" = (SELECT ""MessageId"" FROM ""{Options.Schema}"".""queue"" FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *;";
-            return FetchNextMessageCoreAsync(sql);
-        }
-
         public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
             var sql =
@@ -109,36 +103,6 @@ namespace DotNetCore.CAP.PostgreSql
             {
                 return connection.Execute(sql) > 0;
             }
-        }
-
-        private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
-        {
-            //here don't use `using` to dispose
-            var connection = new NpgsqlConnection(Options.ConnectionString);
-            await connection.OpenAsync();
-            var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
-            FetchedMessage fetchedMessage;
-            try
-            {
-                fetchedMessage = await connection.QueryFirstOrDefaultAsync<FetchedMessage>(sql, args, transaction);
-            }
-            catch (NpgsqlException)
-            {
-                transaction.Dispose();
-                connection.Dispose();
-                throw;
-            }
-
-            if (fetchedMessage == null)
-            {
-                transaction.Rollback();
-                transaction.Dispose();
-                connection.Dispose();
-                return null;
-            }
-
-            return new PostgreSqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection,
-                transaction);
         }
     }
 }

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
@@ -13,31 +12,27 @@ namespace DotNetCore.CAP
     internal class ConsumerHandler : IConsumerHandler
     {
         private readonly IConsumerClientFactory _consumerClientFactory;
-
         private readonly CancellationTokenSource _cts;
         private readonly IDispatcher _dispatcher;
+        private readonly IStorageConnection _connection;
         private readonly ILogger _logger;
-
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly MethodMatcherCache _selector;
-        private readonly IServiceProvider _serviceProvider;
 
         private Task _compositeTask;
-
         private bool _disposed;
 
-        public ConsumerHandler(
-            IServiceProvider serviceProvider,
-            IConsumerClientFactory consumerClientFactory,
+        public ConsumerHandler(IConsumerClientFactory consumerClientFactory,
             IDispatcher dispatcher,
+            IStorageConnection connection,
             ILogger<ConsumerHandler> logger,
             MethodMatcherCache selector)
         {
             _selector = selector;
             _logger = logger;
-            _serviceProvider = serviceProvider;
             _consumerClientFactory = consumerClientFactory;
             _dispatcher = dispatcher;
+            _connection = connection;
             _cts = new CancellationTokenSource();
         }
 
@@ -90,23 +85,21 @@ namespace DotNetCore.CAP
             {
                 _logger.EnqueuingReceivedMessage(message.Name, message.Content);
 
-                using (var scope = _serviceProvider.CreateScope())
+                try
                 {
-                    try
-                    {
-                        var storedMessage = StoreMessage(scope, message);
+                    var storedMessage = StoreMessage(message);
 
-                        client.Commit();
+                    client.Commit();
 
-                        _dispatcher.EnqueuToExecute(storedMessage);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.",
-                            message);
-                        client.Reject();
-                    }
+                    _dispatcher.EnqueuToExecute(storedMessage);
                 }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.",
+                        message);
+                    client.Reject();
+                }
+
             };
 
             client.OnLog += WriteLog;
@@ -139,18 +132,14 @@ namespace DotNetCore.CAP
             }
         }
 
-        private static CapReceivedMessage StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
+        private CapReceivedMessage StoreMessage(MessageContext messageContext)
         {
-            var provider = serviceScope.ServiceProvider;
-            var messageStore = provider.GetRequiredService<IStorageConnection>();
             var receivedMessage = new CapReceivedMessage(messageContext)
             {
                 StatusName = StatusName.Scheduled
-            }; 
-            var id = messageStore.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
-
+            };
+            var id = _connection.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
             receivedMessage.Id = id;
-
             return receivedMessage;
         }
     }

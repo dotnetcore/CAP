@@ -5,7 +5,6 @@ using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
@@ -14,17 +13,17 @@ namespace DotNetCore.CAP
     {
         private readonly ILogger _logger;
         private readonly CapOptions _options;
-        private readonly IServiceProvider _provider;
+        private readonly IStorageConnection _connection;
         private readonly IStateChanger _stateChanger;
 
         protected BasePublishMessageSender(
+            ILogger logger,
             CapOptions options,
-            IServiceProvider provider,
-            IStateChanger stateChanger,
-            ILogger<BasePublishMessageSender> logger)
+            IStorageConnection connection,
+            IStateChanger stateChanger)
         {
             _options = options;
-            _provider = provider;
+            _connection = connection;
             _stateChanger = stateChanger;
             _logger = logger;
         }
@@ -42,6 +41,7 @@ namespace DotNetCore.CAP
                 sp.Stop();
 
                 IState newState;
+
                 if (!result.Succeeded)
                 {
                     var shouldRetry = UpdateMessageForRetryAsync(message);
@@ -63,7 +63,7 @@ namespace DotNetCore.CAP
                     newState = new SucceededState(_options.SucceedMessageExpiredAfter);
                 }
 
-                await ChangeState(message, newState);
+                await _stateChanger.ChangeStateAsync(message, newState, _connection);
 
                 if (result.Succeeded)
                     _logger.JobExecuted(sp.Elapsed.TotalSeconds);
@@ -91,16 +91,6 @@ namespace DotNetCore.CAP
             message.ExpiresAt = due;
 
             return true;
-        }
-
-        private async Task ChangeState(CapPublishedMessage message, IState state)
-        {
-            using (var scope = _provider.CreateScope())
-            {
-                var provider = scope.ServiceProvider;
-                var storageConnection = provider.GetService<IStorageConnection>();
-                await _stateChanger.ChangeStateAsync(message, state, storageConnection);
-            }
         }
     }
 }

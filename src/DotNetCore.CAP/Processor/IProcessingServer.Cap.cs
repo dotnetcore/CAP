@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
@@ -14,37 +13,30 @@ namespace DotNetCore.CAP.Processor
         private readonly CancellationTokenSource _cts;
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly CapOptions _options;
         private readonly IServiceProvider _provider;
+
         private Task _compositeTask;
         private ProcessingContext _context;
         private bool _disposed;
 
-        private IProcessor[] _processors;
-
         public CapProcessingServer(
             ILogger<CapProcessingServer> logger,
             ILoggerFactory loggerFactory,
-            IServiceProvider provider,
-            IOptions<CapOptions> options)
+            IServiceProvider provider)
         {
             _logger = logger;
             _loggerFactory = loggerFactory;
             _provider = provider;
-            _options = options.Value;
             _cts = new CancellationTokenSource();
         }
 
         public void Start()
         {
-            var processorCount = _options.QueueProcessorCount;
-            _processors = GetProcessors(processorCount);
-
-            _logger.ServerStarting(processorCount, _processors.Length);
+            _logger.ServerStarting();
 
             _context = new ProcessingContext(_provider, _cts.Token);
 
-            var processorTasks = _processors
+            var processorTasks = GetProcessors()
                 .Select(InfiniteRetry)
                 .Select(p => p.ProcessAsync(_context));
             _compositeTask = Task.WhenAll(processorTasks);
@@ -52,7 +44,7 @@ namespace DotNetCore.CAP.Processor
 
         public void Pulse()
         {
-            _logger.LogTrace("Pulsing the Queuer.");
+            _logger.LogTrace("Pulsing the processor.");
         }
 
         public void Dispose()
@@ -80,7 +72,7 @@ namespace DotNetCore.CAP.Processor
             return new InfiniteRetryProcessor(inner, _loggerFactory);
         }
 
-        private IProcessor[] GetProcessors(int processorCount)
+        private IProcessor[] GetProcessors()
         {
             var returnedProcessors = new List<IProcessor>
             {
