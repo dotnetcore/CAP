@@ -93,8 +93,6 @@ namespace DotNetCore.CAP
         {
             client.OnMessageReceived += (sender, message) =>
             {
-                _logger.EnqueuingReceivedMessage(message.Name, message.Content);
-
                 try
                 {
                     var storedMessage = StoreMessage(message);

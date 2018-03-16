@@ -2,8 +2,10 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
 
@@ -26,10 +28,10 @@ namespace DotNetCore.CAP.Kafka
         public override async Task<OperateResult> PublishAsync(string keyName, string content)
         {
             var producer = _connectionPool.Rent();
+
             try
             {
                 var contentBytes = Encoding.UTF8.GetBytes(content);
-
                 var message = await producer.ProduceAsync(keyName, null, contentBytes);
 
                 if (message.Error.HasError)
@@ -47,10 +49,8 @@ namespace DotNetCore.CAP.Kafka
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex,
-                    $"An error occurred during sending the topic message to kafka. Topic:[{keyName}], Exception: {ex.Message}");
-
-                return OperateResult.Failed(ex);
+                var wapperEx = new PublisherSentFailedException(ex.Message, ex);
+                return OperateResult.Failed(wapperEx);
             }
             finally
             {
