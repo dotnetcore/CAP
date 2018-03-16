@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
@@ -31,9 +34,13 @@ namespace DotNetCore.CAP.Internal
         {
             string body;
             if (bodyObj != null && Helper.IsComplexType(bodyObj.GetType()))
+            {
                 body = _contentSerializer.Serialize(bodyObj);
+            }
             else
+            {
                 body = bodyObj?.ToString();
+            }
 
             _logger.LogDebug($"Callback message will publishing, name:{topicName},content:{body}");
 

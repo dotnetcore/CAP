@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
@@ -22,7 +25,9 @@ namespace DotNetCore.CAP.Internal
         public Task<ModelBindingResult> BindModelAsync(string content)
         {
             if (content == null)
+            {
                 throw new ArgumentNullException(nameof(content));
+            }
 
             var parameterType = _parameterInfo.ParameterType;
 
@@ -30,27 +35,43 @@ namespace DotNetCore.CAP.Internal
             {
                 object model;
                 if (parameterType == typeof(string))
+                {
                     if (string.IsNullOrWhiteSpace(content))
+                    {
                         model = null;
+                    }
                     else
+                    {
                         model = content;
+                    }
+                }
                 else if (string.IsNullOrWhiteSpace(content))
+                {
                     model = null;
+                }
                 else
+                {
                     model = _typeConverter.ConvertFrom(
                         null,
                         CultureInfo.CurrentCulture,
                         content);
+                }
 
                 if (model == null && !IsReferenceOrNullableType(parameterType))
+                {
                     return Task.FromResult(ModelBindingResult.Failed());
+                }
+
                 return Task.FromResult(ModelBindingResult.Success(model));
             }
             catch (Exception exception)
             {
                 var isFormatException = exception is FormatException;
                 if (!isFormatException && exception.InnerException != null)
+                {
                     exception = ExceptionDispatchInfo.Capture(exception.InnerException).SourceException;
+                }
+
                 throw;
             }
         }

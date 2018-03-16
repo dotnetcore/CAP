@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 
 namespace DotNetCore.CAP.Processor
 {
@@ -39,8 +42,12 @@ namespace DotNetCore.CAP.Processor
         public RetryBehavior(bool retry, int retryCount, Func<int, int> retryInThunk)
         {
             if (retry)
+            {
                 if (retryCount < 0)
+                {
                     throw new ArgumentOutOfRangeException(nameof(retryCount), "Can't be negative.");
+                }
+            }
 
             Retry = retry;
             RetryCount = retryCount;

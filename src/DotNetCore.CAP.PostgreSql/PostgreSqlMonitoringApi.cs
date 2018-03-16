@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -46,6 +49,7 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
                     stats.PublishedProcessing = multi.ReadSingle<int>();
                     stats.ReceivedProcessing = multi.ReadSingle<int>();
                 }
+
                 return stats;
             });
             return statistics;
@@ -57,13 +61,24 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
             var where = string.Empty;
 
             if (!string.IsNullOrEmpty(queryDto.StatusName))
+            {
                 where += " and Lower(\"StatusName\") = Lower(@StatusName)";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Name))
+            {
                 where += " and Lower(\"Name\") = Lower(@Name)";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Group))
+            {
                 where += " and Lower(\"Group\") = Lower(@Group)";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Content))
+            {
                 where += " and \"Content\" ILike '%@Content%'";
+            }
 
             var sqlQuery =
                 $"select * from \"{_options.Schema}\".\"{tableName}\" where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
@@ -115,9 +130,10 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where Lower(\"StatusName\") = Lower(@state)";
+            var sqlQuery =
+                $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where Lower(\"StatusName\") = Lower(@state)";
 
-            var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
+            var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
             return count;
         }
 
@@ -159,12 +175,17 @@ with aggr as (
 )
 select ""Key"",""Count"" from aggr where ""Key""= Any(@keys);";
 
-            var valuesMap = connection.Query(sqlQuery,new { keys = keyMaps.Keys.ToList(), statusName })
-                    .ToList()
-                    .ToDictionary(x => (string)x.Key, x => (int)x.Count);
+            var valuesMap = connection.Query(sqlQuery, new {keys = keyMaps.Keys.ToList(), statusName})
+                .ToList()
+                .ToDictionary(x => (string) x.Key, x => (int) x.Count);
 
             foreach (var key in keyMaps.Keys)
-                if (!valuesMap.ContainsKey(key)) valuesMap.Add(key, 0);
+            {
+                if (!valuesMap.ContainsKey(key))
+                {
+                    valuesMap.Add(key, 0);
+                }
+            }
 
             var result = new Dictionary<DateTime, int>();
             for (var i = 0; i < keyMaps.Count; i++)

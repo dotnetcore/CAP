@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
@@ -26,7 +29,7 @@ namespace DotNetCore.CAP.PostgreSql
             if (_options.DbContextType != null)
             {
                 IsUsingEF = true;
-                _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
+                _dbContext = (DbContext) ServiceProvider.GetService(_options.DbContextType);
             }
         }
 
@@ -53,6 +56,7 @@ namespace DotNetCore.CAP.PostgreSql
                 dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
                 dbTrans = dbContextTransaction.GetDbTransaction();
             }
+
             DbTransaction = dbTrans;
         }
 

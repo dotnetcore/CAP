@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
@@ -40,7 +43,10 @@ namespace DotNetCore.CAP.RabbitMQ
         public IConnection GetConnection()
         {
             if (_connection != null && _connection.IsOpen)
+            {
                 return _connection;
+            }
+
             _connection = _connectionActivator();
             _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
             return _connection;
@@ -51,7 +57,9 @@ namespace DotNetCore.CAP.RabbitMQ
             _maxSize = 0;
 
             while (_pool.TryDequeue(out var context))
+            {
                 context.Dispose();
+            }
         }
 
         private static Func<IConnection> CreateConnection(RabbitMQOptions options)

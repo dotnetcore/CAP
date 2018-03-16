@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Data;
 using System.Data.SqlClient;
@@ -11,9 +14,9 @@ namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerStorage : IStorage
     {
+        private readonly CapOptions _capOptions;
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
-        private readonly CapOptions _capOptions;
         private readonly SqlServerOptions _options;
 
         public SqlServerStorage(ILogger<SqlServerStorage> logger,
@@ -37,7 +40,10 @@ namespace DotNetCore.CAP.SqlServer
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested) return;
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
 
             var sql = CreateDbTablesScript(_options.Schema);
 
@@ -45,6 +51,7 @@ namespace DotNetCore.CAP.SqlServer
             {
                 await connection.ExecuteAsync(sql);
             }
+
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
 
@@ -119,7 +126,9 @@ END;";
             var connection = _existingConnection ?? new SqlConnection(_options.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
+            {
                 connection.Open();
+            }
 
             return connection;
         }
@@ -132,7 +141,9 @@ END;";
         internal void ReleaseConnection(IDbConnection connection)
         {
             if (connection != null && !IsExistingConnection(connection))
+            {
                 connection.Dispose();
+            }
         }
     }
 }

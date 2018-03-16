@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Processor.States;
@@ -13,10 +16,9 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly ILogger _logger;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
-        public RabbitMQPublishMessageSender(ILogger<RabbitMQPublishMessageSender> logger,
-            CapOptions options, RabbitMQOptions rabbitMQOptions, IServiceProvider provider,
-            IConnectionChannelPool connectionChannelPool, IStateChanger stateChanger)
-            : base(logger, options, provider, stateChanger)
+        public RabbitMQPublishMessageSender(ILogger logger, CapOptions options, RabbitMQOptions rabbitMQOptions,
+            IStorageConnection connection, IConnectionChannelPool connectionChannelPool, IStateChanger stateChanger)
+            : base(logger, options, connection, stateChanger)
         {
             _logger = logger;
             _connectionChannelPool = connectionChannelPool;
@@ -56,7 +58,9 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 var returned = _connectionChannelPool.Return(channel);
                 if (!returned)
+                {
                     channel.Dispose();
+                }
             }
         }
     }

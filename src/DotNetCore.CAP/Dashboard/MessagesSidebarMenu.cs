@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using DotNetCore.CAP.Dashboard.Resources;
@@ -19,7 +22,7 @@ namespace DotNetCore.CAP.Dashboard
                 Active = page.RequestPath.StartsWith("/published/succeeded"),
                 Metric = DashboardMetrics.PublishedSucceededCount
             });
-             
+
             PublishedItems.Add(page => new MenuItem(Strings.SidebarMenu_Failed, page.Url.To("/published/failed"))
             {
                 Active = page.RequestPath.StartsWith("/published/failed"),

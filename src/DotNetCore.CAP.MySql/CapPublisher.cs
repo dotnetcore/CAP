@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
@@ -16,15 +19,20 @@ namespace DotNetCore.CAP.MySql
         private readonly DbContext _dbContext;
         private readonly MySqlOptions _options;
 
-        public CapPublisher(ILogger<CapPublisher> logger, IDispatcher dispatcher, IServiceProvider provider, MySqlOptions options)
+        public CapPublisher(ILogger<CapPublisher> logger, IDispatcher dispatcher, IServiceProvider provider,
+            MySqlOptions options)
             : base(logger, dispatcher)
         {
             ServiceProvider = provider;
             _options = options;
 
-            if (_options.DbContextType == null) return;
+            if (_options.DbContextType == null)
+            {
+                return;
+            }
+
             IsUsingEF = true;
-            _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
+            _dbContext = (DbContext) ServiceProvider.GetService(_options.DbContextType);
         }
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)
@@ -50,6 +58,7 @@ namespace DotNetCore.CAP.MySql
                 dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
                 dbTrans = dbContextTransaction.GetDbTransaction();
             }
+
             DbTransaction = dbTrans;
         }
 

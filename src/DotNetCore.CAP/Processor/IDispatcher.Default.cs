@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
@@ -88,6 +91,7 @@ namespace DotNetCore.CAP.Processor
             try
             {
                 foreach (var message in _receivedMessageQueue.GetConsumingEnumerable(_cts.Token))
+                {
                     try
                     {
                         _executor.ExecuteAsync(message);
@@ -96,6 +100,7 @@ namespace DotNetCore.CAP.Processor
                     {
                         _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
                     }
+                }
             }
             catch (OperationCanceledException)
             {

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -29,10 +32,14 @@ namespace DotNetCore.CAP.Kafka
         public void Subscribe(IEnumerable<string> topics)
         {
             if (topics == null)
+            {
                 throw new ArgumentNullException(nameof(topics));
+            }
 
             if (_consumerClient == null)
+            {
                 InitKafkaClient();
+            }
 
             _consumerClient.Subscribe(topics);
         }
@@ -44,6 +51,7 @@ namespace DotNetCore.CAP.Kafka
                 cancellationToken.ThrowIfCancellationRequested();
                 _consumerClient.Poll(timeout);
             }
+
             // ReSharper disable once FunctionNeverReturns
         }
 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using DotNetCore.CAP.Dashboard.Resources;
@@ -141,7 +144,10 @@ namespace DotNetCore.CAP.Dashboard
 
         public static void AddMetric(DashboardMetric metric)
         {
-            if (metric == null) throw new ArgumentNullException(nameof(metric));
+            if (metric == null)
+            {
+                throw new ArgumentNullException(nameof(metric));
+            }
 
             lock (Metrics)
             {

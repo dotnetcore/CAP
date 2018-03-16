@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Concurrent;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -25,13 +28,17 @@ namespace DotNetCore.CAP.Internal
         public IModelBinder CreateBinder(ParameterInfo parameter)
         {
             if (parameter == null)
+            {
                 throw new ArgumentNullException(nameof(parameter));
+            }
 
             object token = parameter;
 
             var binder = CreateBinderCoreCached(parameter, token);
             if (binder == null)
+            {
                 throw new InvalidOperationException("Format Could Not Create IModelBinder");
+            }
 
             return binder;
         }
@@ -39,11 +46,18 @@ namespace DotNetCore.CAP.Internal
         private IModelBinder CreateBinderCoreCached(ParameterInfo parameterInfo, object token)
         {
             if (TryGetCachedBinder(parameterInfo, token, out var binder))
+            {
                 return binder;
+            }
+
             if (!Helper.IsComplexType(parameterInfo.ParameterType))
+            {
                 binder = new SimpleTypeModelBinder(parameterInfo);
+            }
             else
+            {
                 binder = new ComplexTypeModelBinder(parameterInfo, _serializer);
+            }
 
             AddToCache(parameterInfo, token, binder);
 
@@ -53,7 +67,9 @@ namespace DotNetCore.CAP.Internal
         private void AddToCache(ParameterInfo info, object cacheToken, IModelBinder binder)
         {
             if (cacheToken == null)
+            {
                 return;
+            }
 
             _cache.TryAdd(new Key(info, cacheToken), binder);
         }

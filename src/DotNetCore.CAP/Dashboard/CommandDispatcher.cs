@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -25,9 +28,13 @@ namespace DotNetCore.CAP.Dashboard
             }
 
             if (_command(context))
+            {
                 response.StatusCode = (int) HttpStatusCode.NoContent;
+            }
             else
+            {
                 response.StatusCode = 422;
+            }
 
             return Task.FromResult(true);
         }

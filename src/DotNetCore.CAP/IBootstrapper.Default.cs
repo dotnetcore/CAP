@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,15 +61,23 @@ namespace DotNetCore.CAP
         {
             await Storage.InitializeAsync(_cts.Token);
 
-            if (_cts.IsCancellationRequested) return;
+            if (_cts.IsCancellationRequested)
+            {
+                return;
+            }
 
             _appLifetime.ApplicationStopping.Register(() =>
             {
                 foreach (var item in Processors)
+                {
                     item.Dispose();
+                }
             });
 
-            if (_cts.IsCancellationRequested) return;
+            if (_cts.IsCancellationRequested)
+            {
+                return;
+            }
 
             await BootstrapCoreAsync();
 
@@ -77,6 +88,7 @@ namespace DotNetCore.CAP
         protected virtual Task BootstrapCoreAsync()
         {
             foreach (var item in Processors)
+            {
                 try
                 {
                     item.Start();
@@ -85,6 +97,7 @@ namespace DotNetCore.CAP
                 {
                     _logger.ProcessorsStartedError(ex);
                 }
+            }
 
             return Task.CompletedTask;
         }

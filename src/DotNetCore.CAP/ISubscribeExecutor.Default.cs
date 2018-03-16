@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
@@ -13,12 +16,12 @@ namespace DotNetCore.CAP
     internal class DefaultSubscriberExecutor : ISubscriberExecutor
     {
         private readonly ICallbackMessageSender _callbackMessageSender;
+        private readonly IStorageConnection _connection;
         private readonly ILogger _logger;
         private readonly CapOptions _options;
 
         private readonly MethodMatcherCache _selector;
         private readonly IStateChanger _stateChanger;
-        private readonly IStorageConnection _connection;
 
         public DefaultSubscriberExecutor(
             ILogger<DefaultSubscriberExecutor> logger,
@@ -43,14 +46,19 @@ namespace DotNetCore.CAP
 
         public async Task<OperateResult> ExecuteAsync(CapReceivedMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
             try
             {
                 var sp = Stopwatch.StartNew();
 
                 if (message.Retries > 0)
+                {
                     _logger.JobRetrying(message.Retries);
+                }
 
                 var result = await InvokeAsync(message);
 
@@ -61,7 +69,9 @@ namespace DotNetCore.CAP
                 await ChangeState(message, state);
 
                 if (result.Succeeded)
+                {
                     _logger.JobExecuted(sp.Elapsed.TotalSeconds);
+                }
 
                 return OperateResult.Success;
             }
@@ -123,7 +133,9 @@ namespace DotNetCore.CAP
 
             var retries = ++message.Retries;
             if (retries >= retryBehavior.RetryCount)
+            {
                 return false;
+            }
 
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
             message.ExpiresAt = due;
@@ -154,7 +166,9 @@ namespace DotNetCore.CAP
                 try
                 {
                     if (!string.IsNullOrEmpty(ret.CallbackName))
+                    {
                         await _callbackMessageSender.SendAsync(ret.MessageId, ret.CallbackName, ret.Result);
+                    }
                 }
                 catch (Exception e)
                 {

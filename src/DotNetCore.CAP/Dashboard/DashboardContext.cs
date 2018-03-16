@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Http;
 
@@ -8,8 +11,15 @@ namespace DotNetCore.CAP.Dashboard
     {
         protected DashboardContext(IStorage storage, DashboardOptions options)
         {
-            if (storage == null) throw new ArgumentNullException(nameof(storage));
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (storage == null)
+            {
+                throw new ArgumentNullException(nameof(storage));
+            }
+
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
 
             Storage = storage;
             Options = options;
@@ -36,7 +46,10 @@ namespace DotNetCore.CAP.Dashboard
             HttpContext httpContext)
             : base(storage, options)
         {
-            if (httpContext == null) throw new ArgumentNullException(nameof(httpContext));
+            if (httpContext == null)
+            {
+                throw new ArgumentNullException(nameof(httpContext));
+            }
 
             HttpContext = httpContext;
             Request = new CapDashboardRequest(httpContext);

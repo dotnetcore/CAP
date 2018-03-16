@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -23,10 +26,13 @@ namespace DotNetCore.CAP.SqlServer
             ServiceProvider = provider;
             _options = options;
 
-            if (_options.DbContextType == null) return;
+            if (_options.DbContextType == null)
+            {
+                return;
+            }
 
             IsUsingEF = true;
-            _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
+            _dbContext = (DbContext) ServiceProvider.GetService(_options.DbContextType);
         }
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)
@@ -35,8 +41,8 @@ namespace DotNetCore.CAP.SqlServer
             {
                 var id = await conn.ExecuteScalarAsync<int>(PrepareSql(), message);
                 message.Id = id;
-                Enqueu(message); 
-            } 
+                Enqueu(message);
+            }
         }
 
         protected override void PrepareConnectionForEF()
@@ -52,6 +58,7 @@ namespace DotNetCore.CAP.SqlServer
                 dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
                 dbTrans = dbContextTransaction.GetDbTransaction();
             }
+
             DbTransaction = dbTrans;
         }
 

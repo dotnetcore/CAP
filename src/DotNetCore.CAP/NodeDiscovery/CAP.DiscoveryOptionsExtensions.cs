@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP;
 using DotNetCore.CAP.NodeDiscovery;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,7 +47,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static CapOptions UseDiscovery(this CapOptions capOptions, Action<DiscoveryOptions> options)
         {
-            if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options == null)
+            {
+                throw new ArgumentNullException(nameof(options));
+            }
 
             capOptions.RegisterExtension(new DiscoveryOptionsExtension(options));
 

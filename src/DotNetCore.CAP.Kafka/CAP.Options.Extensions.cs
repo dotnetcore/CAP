@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP;
 
 // ReSharper disable once CheckNamespace
@@ -24,7 +27,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <returns></returns>
         public static CapOptions UseKafka(this CapOptions options, Action<KafkaOptions> configure)
         {
-            if (configure == null) throw new ArgumentNullException(nameof(configure));
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
 
             options.RegisterExtension(new KafkaCapOptionsExtension(configure));
 

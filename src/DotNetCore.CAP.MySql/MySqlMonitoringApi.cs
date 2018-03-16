@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -46,6 +49,7 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
                     stats.PublishedProcessing = multi.ReadSingle<int>();
                     stats.ReceivedProcessing = multi.ReadSingle<int>();
                 }
+
                 return stats;
             });
             return statistics;
@@ -70,13 +74,24 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
             var tableName = queryDto.MessageType == MessageType.Publish ? "published" : "received";
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
+            {
                 where += " and StatusName=@StatusName";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Name))
+            {
                 where += " and Name=@Name";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Group))
+            {
                 where += " and Group=@Group";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Content))
+            {
                 where += " and Content like '%@Content%'";
+            }
 
             var sqlQuery =
                 $"select * from `{_prefix}.{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
@@ -113,10 +128,10 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
         }
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
-        { 
+        {
             var sqlQuery = $"select count(Id) from `{_prefix}.{tableName}` where StatusName = @state";
 
-            var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
+            var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
             return count;
         }
 
@@ -159,11 +174,16 @@ select aggr.* from (
 
             var valuesMap = connection.Query(
                     sqlQuery,
-                    new { keys = keyMaps.Keys, statusName })
-                .ToDictionary(x => (string)x.Key, x => (int)x.Count);
+                    new {keys = keyMaps.Keys, statusName})
+                .ToDictionary(x => (string) x.Key, x => (int) x.Count);
 
             foreach (var key in keyMaps.Keys)
-                if (!valuesMap.ContainsKey(key)) valuesMap.Add(key, 0);
+            {
+                if (!valuesMap.ContainsKey(key))
+                {
+                    valuesMap.Add(key, 0);
+                }
+            }
 
             var result = new Dictionary<DateTime, int>();
             for (var i = 0; i < keyMaps.Count; i++)

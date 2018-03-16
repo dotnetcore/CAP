@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Processor.States;
@@ -12,9 +15,9 @@ namespace DotNetCore.CAP.Kafka
         private readonly ILogger _logger;
 
         public KafkaPublishMessageSender(
-            CapOptions options, IStateChanger stateChanger, IServiceProvider provider,
-            ConnectionPool connectionPool, ILogger<KafkaPublishMessageSender> logger)
-            : base(logger, options, provider, stateChanger)
+            CapOptions options, IStateChanger stateChanger, IStorageConnection connection,
+            ConnectionPool connectionPool, ILogger logger)
+            : base(logger, options, connection, stateChanger)
         {
             _logger = logger;
             _connectionPool = connectionPool;
@@ -29,17 +32,18 @@ namespace DotNetCore.CAP.Kafka
 
                 var message = await producer.ProduceAsync(keyName, null, contentBytes);
 
-                if (!message.Error.HasError)
+                if (message.Error.HasError)
                 {
-                    _logger.LogDebug($"kafka topic message [{keyName}] has been published.");
-
-                    return OperateResult.Success;
+                    return OperateResult.Failed(new OperateError
+                    {
+                        Code = message.Error.Code.ToString(),
+                        Description = message.Error.Reason
+                    });
                 }
-                return OperateResult.Failed(new OperateError
-                {
-                    Code = message.Error.Code.ToString(),
-                    Description = message.Error.Reason
-                });
+
+                _logger.LogDebug($"kafka topic message [{keyName}] has been published.");
+
+                return OperateResult.Success;
             }
             catch (Exception ex)
             {
@@ -52,7 +56,9 @@ namespace DotNetCore.CAP.Kafka
             {
                 var returned = _connectionPool.Return(producer);
                 if (!returned)
+                {
                     producer.Dispose();
+                }
             }
         }
     }

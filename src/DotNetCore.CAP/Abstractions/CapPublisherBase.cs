@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Data;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
@@ -9,8 +12,8 @@ namespace DotNetCore.CAP.Abstractions
 {
     public abstract class CapPublisherBase : ICapPublisher, IDisposable
     {
-        private readonly ILogger _logger;
         private readonly IDispatcher _dispatcher;
+        private readonly ILogger _logger;
 
         protected CapPublisherBase(ILogger logger, IDispatcher dispatcher)
         {
@@ -72,13 +75,13 @@ namespace DotNetCore.CAP.Abstractions
 
         protected virtual string Serialize<T>(T obj, string callbackName = null)
         {
-            var packer = (IMessagePacker)ServiceProvider.GetService(typeof(IMessagePacker));
+            var packer = (IMessagePacker) ServiceProvider.GetService(typeof(IMessagePacker));
             string content;
             if (obj != null)
             {
                 if (Helper.IsComplexType(obj.GetType()))
                 {
-                    var serializer = (IContentSerializer)ServiceProvider.GetService(typeof(IContentSerializer));
+                    var serializer = (IContentSerializer) ServiceProvider.GetService(typeof(IContentSerializer));
                     content = serializer.Serialize(obj);
                 }
                 else
@@ -113,19 +116,31 @@ namespace DotNetCore.CAP.Abstractions
 
         private void CheckIsUsingEF(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             if (!IsUsingEF)
+            {
                 throw new InvalidOperationException(
                     "If you are using the EntityFramework, you need to configure the DbContextType first." +
                     " otherwise you need to use overloaded method with IDbConnection and IDbTransaction.");
+            }
         }
 
         private void CheckIsAdoNet(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             if (IsUsingEF)
+            {
                 throw new InvalidOperationException(
                     "If you are using the EntityFramework, you do not need to use this overloaded.");
+            }
         }
 
         private async Task PublishWithTransAsync<T>(string name, T contentObj, string callbackName = null)
@@ -203,8 +218,11 @@ namespace DotNetCore.CAP.Abstractions
                 DbTransaction.Commit();
                 DbTransaction.Dispose();
             }
+
             if (IsCapOpenedConn)
+            {
                 DbConnection.Dispose();
+            }
         }
 
         public void Dispose()

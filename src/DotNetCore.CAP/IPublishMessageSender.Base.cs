@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
@@ -11,9 +14,9 @@ namespace DotNetCore.CAP
 {
     public abstract class BasePublishMessageSender : IPublishMessageSender, IPublishExecutor
     {
+        private readonly IStorageConnection _connection;
         private readonly ILogger _logger;
         private readonly CapOptions _options;
-        private readonly IStorageConnection _connection;
         private readonly IStateChanger _stateChanger;
 
         protected BasePublishMessageSender(
@@ -28,6 +31,8 @@ namespace DotNetCore.CAP
             _logger = logger;
         }
 
+        public abstract Task<OperateResult> PublishAsync(string keyName, string content);
+
         public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
             try
@@ -35,7 +40,10 @@ namespace DotNetCore.CAP
                 var sp = Stopwatch.StartNew();
 
                 if (message.Retries > 0)
+                {
                     _logger.JobRetrying(message.Retries);
+                }
+
                 var result = await PublishAsync(message.Name, message.Content);
 
                 sp.Stop();
@@ -66,7 +74,9 @@ namespace DotNetCore.CAP
                 await _stateChanger.ChangeStateAsync(message, newState, _connection);
 
                 if (result.Succeeded)
+                {
                     _logger.JobExecuted(sp.Elapsed.TotalSeconds);
+                }
 
                 return OperateResult.Success;
             }
@@ -77,15 +87,15 @@ namespace DotNetCore.CAP
             }
         }
 
-        public abstract Task<OperateResult> PublishAsync(string keyName, string content);
-
         private static bool UpdateMessageForRetryAsync(CapPublishedMessage message)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
             var retries = ++message.Retries;
             if (retries >= retryBehavior.RetryCount)
+            {
                 return false;
+            }
 
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
             message.ExpiresAt = due;

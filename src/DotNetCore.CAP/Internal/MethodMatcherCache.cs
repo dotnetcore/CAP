@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,14 +27,19 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         public ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>> GetCandidatesMethodsOfGroupNameGrouped()
         {
-            if (Entries.Count != 0) return Entries;
+            if (Entries.Count != 0)
+            {
+                return Entries;
+            }
 
             var executorCollection = _selector.SelectCandidates();
 
             var groupedCandidates = executorCollection.GroupBy(x => x.Attribute.Group);
 
             foreach (var item in groupedCandidates)
+            {
                 Entries.TryAdd(item.Key, item.ToList());
+            }
 
             return Entries;
         }
@@ -44,7 +52,9 @@ namespace DotNetCore.CAP.Internal
         public IDictionary<string, IList<ConsumerExecutorDescriptor>> GetTopicExector(string topicName)
         {
             if (Entries == null)
+            {
                 throw new ArgumentNullException(nameof(Entries));
+            }
 
             var dic = new Dictionary<string, IList<ConsumerExecutorDescriptor>>();
             foreach (var item in Entries)
@@ -68,7 +78,9 @@ namespace DotNetCore.CAP.Internal
             out ConsumerExecutorDescriptor matchTopic)
         {
             if (Entries == null)
+            {
                 throw new ArgumentNullException(nameof(Entries));
+            }
 
             matchTopic = null;
 
@@ -86,14 +98,23 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         public IEnumerable<string> GetSubscribeTopics()
         {
-            if (_allTopics != null) return _allTopics;
+            if (_allTopics != null)
+            {
+                return _allTopics;
+            }
 
             if (Entries == null)
+            {
                 throw new ArgumentNullException(nameof(Entries));
+            }
 
             _allTopics = new List<string>();
 
-            foreach (var descriptors in Entries.Values) _allTopics.AddRange(descriptors.Select(x => x.Attribute.Name));
+            foreach (var descriptors in Entries.Values)
+            {
+                _allTopics.AddRange(descriptors.Select(x => x.Attribute.Name));
+            }
+
             return _allTopics;
         }
     }

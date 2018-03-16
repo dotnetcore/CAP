@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
@@ -36,7 +39,11 @@ namespace DotNetCore.CAP.Dashboard
         {
             get
             {
-                if (_statisticsLazy == null) throw new InvalidOperationException("Page is not initialized.");
+                if (_statisticsLazy == null)
+                {
+                    throw new InvalidOperationException("Page is not initialized.");
+                }
+
                 return _statisticsLazy.Value;
             }
         }
@@ -104,6 +111,7 @@ namespace DotNetCore.CAP.Dashboard
             {
                 return $"{discoveryOptions.NodeName}({discoveryOptions.NodeId})";
             }
+
             return null;
         }
 
@@ -111,7 +119,7 @@ namespace DotNetCore.CAP.Dashboard
         {
             if (CapCache.Global.TryGet("cap.nodes.count", out var count))
             {
-                dto.Servers = (int)count;
+                dto.Servers = (int) count;
             }
             else
             {
@@ -128,7 +136,10 @@ namespace DotNetCore.CAP.Dashboard
         protected void WriteLiteral(string textToAppend)
         {
             if (string.IsNullOrEmpty(textToAppend))
+            {
                 return;
+            }
+
             _content.Append(textToAppend);
         }
 
@@ -136,7 +147,10 @@ namespace DotNetCore.CAP.Dashboard
         protected virtual void Write(object value)
         {
             if (value == null)
+            {
                 return;
+            }
+
             var html = value as NonEscapedString;
             WriteLiteral(html?.ToString() ?? Encode(value.ToString()));
         }

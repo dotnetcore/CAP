@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -50,7 +53,10 @@ namespace DotNetCore.CAP.Processor
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
+            }
+
             _disposed = true;
 
             _logger.ServerShuttingDown();
@@ -63,7 +69,9 @@ namespace DotNetCore.CAP.Processor
             {
                 var innerEx = ex.InnerExceptions[0];
                 if (!(innerEx is OperationCanceledException))
+                {
                     _logger.ExpectedOperationCanceledException(innerEx);
+                }
             }
         }
 

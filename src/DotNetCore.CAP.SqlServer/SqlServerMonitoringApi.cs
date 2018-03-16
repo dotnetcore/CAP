@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -47,6 +50,7 @@ select count(Id) from [{0}].Received with (nolock) where StatusName in (N'Proces
                     stats.PublishedProcessing = multi.ReadSingle<int>();
                     stats.ReceivedProcessing = multi.ReadSingle<int>();
                 }
+
                 return stats;
             });
             return statistics;
@@ -71,13 +75,24 @@ select count(Id) from [{0}].Received with (nolock) where StatusName in (N'Proces
             var tableName = queryDto.MessageType == MessageType.Publish ? "Published" : "Received";
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
+            {
                 where += " and statusname=@StatusName";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Name))
+            {
                 where += " and name=@Name";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Group))
+            {
                 where += " and group=@Group";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Content))
+            {
                 where += " and content like '%@Content%'";
+            }
 
             var sqlQuery =
                 $"select * from [{_options.Schema}].{tableName} where 1=1 {where} order by Added desc offset @Offset rows fetch next @Limit rows only";
@@ -107,7 +122,7 @@ select count(Id) from [{0}].Received with (nolock) where StatusName in (N'Proces
         {
             return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Failed));
         }
- 
+
         public int ReceivedSucceededCount()
         {
             return UseConnection(conn => GetNumberOfMessage(conn, "Received", StatusName.Succeeded));
@@ -115,7 +130,8 @@ select count(Id) from [{0}].Received with (nolock) where StatusName in (N'Proces
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName = @state";
+            var sqlQuery =
+                $"select count(Id) from [{_options.Schema}].{tableName} with (nolock) where StatusName = @state";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
             return count;
@@ -166,7 +182,12 @@ select [Key], [Count] from aggr with (nolock) where [Key] in @keys;";
                 .ToDictionary(x => (string) x.Key, x => (int) x.Count);
 
             foreach (var key in keyMaps.Keys)
-                if (!valuesMap.ContainsKey(key)) valuesMap.Add(key, 0);
+            {
+                if (!valuesMap.ContainsKey(key))
+                {
+                    valuesMap.Add(key, 0);
+                }
+            }
 
             var result = new Dictionary<DateTime, int>();
             for (var i = 0; i < keyMaps.Count; i++)

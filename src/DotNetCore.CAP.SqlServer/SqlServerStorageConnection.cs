@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -48,7 +51,10 @@ namespace DotNetCore.CAP.SqlServer
 
         public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
             var sql = $@"
 INSERT INTO [{Options.Schema}].[Received]([Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])
@@ -68,7 +74,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT SCOP
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
             }
         }
-        
+
         public async Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
             var sql =
@@ -103,7 +109,6 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT SCOP
 
         public void Dispose()
         {
-
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,10 +14,10 @@ namespace DotNetCore.CAP
 {
     internal class ConsumerHandler : IConsumerHandler
     {
+        private readonly IStorageConnection _connection;
         private readonly IConsumerClientFactory _consumerClientFactory;
         private readonly CancellationTokenSource _cts;
         private readonly IDispatcher _dispatcher;
-        private readonly IStorageConnection _connection;
         private readonly ILogger _logger;
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly MethodMatcherCache _selector;
@@ -41,6 +44,7 @@ namespace DotNetCore.CAP
             var groupingMatches = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
             foreach (var matchGroup in groupingMatches)
+            {
                 Task.Factory.StartNew(() =>
                 {
                     using (var client = _consumerClientFactory.Create(matchGroup.Key))
@@ -52,6 +56,7 @@ namespace DotNetCore.CAP
                         client.Listening(_pollingDelay, _cts.Token);
                     }
                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            }
 
             _compositeTask = Task.CompletedTask;
         }
@@ -59,7 +64,10 @@ namespace DotNetCore.CAP
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
+            }
+
             _disposed = true;
             _cts.Cancel();
             try
@@ -70,7 +78,9 @@ namespace DotNetCore.CAP
             {
                 var innerEx = ex.InnerExceptions[0];
                 if (!(innerEx is OperationCanceledException))
+                {
                     _logger.ExpectedOperationCanceledException(innerEx);
+                }
             }
         }
 
@@ -99,7 +109,6 @@ namespace DotNetCore.CAP
                         message);
                     client.Reject();
                 }
-
             };
 
             client.OnLog += WriteLog;

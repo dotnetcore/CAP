@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using DotNetCore.CAP.Models;
@@ -72,7 +75,9 @@ namespace DotNetCore.CAP
         public void RegisterExtension(ICapOptionsExtension extension)
         {
             if (extension == null)
+            {
                 throw new ArgumentNullException(nameof(extension));
+            }
 
             Extensions.Add(extension);
         }

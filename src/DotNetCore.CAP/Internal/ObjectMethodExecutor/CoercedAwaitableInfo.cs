@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
 using System.Linq.Expressions;
@@ -41,11 +41,13 @@ namespace Microsoft.Extensions.Internal
             if (ObjectMethodExecutorFSharpSupport.TryBuildCoercerFromFSharpAsyncToAwaitable(type,
                 out var coercerExpression,
                 out var coercerResultType))
+            {
                 if (AwaitableInfo.IsTypeAwaitable(coercerResultType, out var coercedAwaitableInfo))
                 {
                     info = new CoercedAwaitableInfo(coercerExpression, coercerResultType, coercedAwaitableInfo);
                     return true;
                 }
+            }
 
             info = default(CoercedAwaitableInfo);
             return false;

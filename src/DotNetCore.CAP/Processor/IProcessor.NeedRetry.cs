@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
@@ -37,9 +40,11 @@ namespace DotNetCore.CAP.Processor
         public async Task ProcessAsync(ProcessingContext context)
         {
             if (context == null)
+            {
                 throw new ArgumentNullException(nameof(context));
+            }
 
-            var connection =  context.Provider.GetRequiredService<IStorageConnection>();
+            var connection = context.Provider.GetRequiredService<IStorageConnection>();
 
             await Task.WhenAll(
                 ProcessPublishedAsync(connection, context),
@@ -56,9 +61,12 @@ namespace DotNetCore.CAP.Processor
             foreach (var message in messages)
             {
                 if (message.Retries > _options.FailedRetryCount)
+                {
                     continue;
+                }
 
                 if (!hasException)
+                {
                     try
                     {
                         _options.FailedCallback?.Invoke(MessageType.Publish, message.Name, message.Content);
@@ -68,6 +76,7 @@ namespace DotNetCore.CAP.Processor
                         hasException = true;
                         _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
                     }
+                }
 
                 using (var transaction = connection.CreateTransaction())
                 {
@@ -101,9 +110,12 @@ namespace DotNetCore.CAP.Processor
             foreach (var message in messages)
             {
                 if (message.Retries > _options.FailedRetryCount)
+                {
                     continue;
+                }
 
                 if (!hasException)
+                {
                     try
                     {
                         _options.FailedCallback?.Invoke(MessageType.Subscribe, message.Name, message.Content);
@@ -113,6 +125,7 @@ namespace DotNetCore.CAP.Processor
                         hasException = true;
                         _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
                     }
+                }
 
                 using (var transaction = connection.CreateTransaction())
                 {

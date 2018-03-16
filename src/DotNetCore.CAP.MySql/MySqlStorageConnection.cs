@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -39,7 +42,8 @@ namespace DotNetCore.CAP.MySql
 
         public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
-            var sql = $"SELECT * FROM `{_prefix}.published` WHERE `Retries`<{_capOptions.FailedRetryCount} AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
+            var sql =
+                $"SELECT * FROM `{_prefix}.published` WHERE `Retries`<{_capOptions.FailedRetryCount} AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
@@ -49,7 +53,10 @@ namespace DotNetCore.CAP.MySql
 
         public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
             var sql = $@"
 INSERT INTO `{_prefix}.received`(`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
@@ -57,7 +64,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT LAST
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
-               return await connection.ExecuteScalarAsync<int>(sql, message);
+                return await connection.ExecuteScalarAsync<int>(sql, message);
             }
         }
 
@@ -72,7 +79,8 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT LAST
 
         public async Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
-            var sql = $"SELECT * FROM `{_prefix}.received` WHERE `Retries`<{_capOptions.FailedRetryCount} AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
+            var sql =
+                $"SELECT * FROM `{_prefix}.received` WHERE `Retries`<{_capOptions.FailedRetryCount} AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
