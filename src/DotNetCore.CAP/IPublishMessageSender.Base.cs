@@ -5,6 +5,7 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
@@ -35,56 +36,31 @@ namespace DotNetCore.CAP
 
         public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
-            try
+            var sp = Stopwatch.StartNew();
+
+            var result = await PublishAsync(message.Name, message.Content);
+
+            sp.Stop();
+
+            if (result.Succeeded)
             {
-                var sp = Stopwatch.StartNew();
-
-                if (message.Retries > 0)
-                {
-                    _logger.JobRetrying(message.Retries);
-                }
-
-                var result = await PublishAsync(message.Name, message.Content);
-
-                sp.Stop();
-
-                IState newState;
-
-                if (!result.Succeeded)
-                {
-                    var shouldRetry = UpdateMessageForRetryAsync(message);
-                    if (shouldRetry)
-                    {
-                        newState = new ScheduledState();
-                        _logger.JobFailedWillRetry(result.Exception);
-                    }
-                    else
-                    {
-                        newState = new FailedState();
-                        _logger.JobFailed(result.Exception);
-                    }
-
-                    message.Content = Helper.AddExceptionProperty(message.Content, result.Exception);
-                }
-                else
-                {
-                    newState = new SucceededState(_options.SucceedMessageExpiredAfter);
-                }
-
-                await _stateChanger.ChangeStateAsync(message, newState, _connection);
-
-                if (result.Succeeded)
-                {
-                    _logger.JobExecuted(sp.Elapsed.TotalSeconds);
-                }
+                await SetSuccessfulState(message);
+                _logger.MessageHasBeenSent(sp.Elapsed.TotalSeconds);
 
                 return OperateResult.Success;
             }
-            catch (Exception ex)
+
+            _logger.MessagePublishException(message.Id, result.Exception);
+
+            await SetFailedState(message, result.Exception, out bool stillRetry);
+
+            if (stillRetry)
             {
-                _logger.ExceptionOccuredWhileExecuting(message?.Name, ex);
-                return OperateResult.Failed(ex);
+                _logger.SenderRetrying(3);
+
+                await SendAsync(message);
             }
+            return OperateResult.Failed(result.Exception);
         }
 
         private static bool UpdateMessageForRetryAsync(CapPublishedMessage message)
@@ -101,6 +77,42 @@ namespace DotNetCore.CAP
             message.ExpiresAt = due;
 
             return true;
+        }
+
+        private Task SetSuccessfulState(CapPublishedMessage message)
+        {
+            var succeededState = new SucceededState(_options.SucceedMessageExpiredAfter);
+
+            return _stateChanger.ChangeStateAsync(message, succeededState, _connection);
+        }
+
+        private Task SetFailedState(CapPublishedMessage message, Exception ex, out bool stillRetry)
+        {
+            IState newState = new FailedState();
+
+            if (ex is PublisherSentFailedException)
+            {
+                stillRetry = false;
+                message.Retries = _options.FailedRetryCount; // not retry if PublisherSentFailedException
+            }
+            else
+            {
+                stillRetry = UpdateMessageForRetryAsync(message);
+                if (stillRetry)
+                {
+                    _logger.ConsumerExecutionFailedWillRetry(ex);
+                    return Task.CompletedTask;
+                }
+            }
+
+            AddErrorReasonToContent(message, ex);
+
+            return _stateChanger.ChangeStateAsync(message, newState, _connection);
+        }
+
+        private static void AddErrorReasonToContent(CapPublishedMessage message, Exception exception)
+        {
+            message.Content = Helper.AddExceptionProperty(message.Content, exception);
         }
     }
 }
