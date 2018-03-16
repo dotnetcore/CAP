@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.Processor
             {
                 while (!_publishedMessageQueue.IsCompleted)
                 {
-                    if (_publishedMessageQueue.TryTake(out var message, 100))
+                    if (_publishedMessageQueue.TryTake(out var message, 100, _cts.Token))
                     {
                         try
                         {
@@ -69,16 +69,6 @@ namespace DotNetCore.CAP.Processor
                         }
                     }
                 }
-
-                //foreach (var message in _publishedMessageQueue..GetConsumingEnumerable(_cts.Token))
-                //    try
-                //    {
-                //        _sender.SendAsync(message);
-                //    }
-                //    catch (Exception ex)
-                //    {
-                //        _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
-                //    }
             }
             catch (OperationCanceledException)
             {
