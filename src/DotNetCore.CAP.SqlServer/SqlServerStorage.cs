@@ -54,7 +54,7 @@ namespace DotNetCore.CAP.SqlServer
                 $@"
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}')
 BEGIN
-	EXEC('CREATE SCHEMA {schema}')
+	EXEC('CREATE SCHEMA [{schema}]')
 END;
 
 IF OBJECT_ID(N'[{schema}].[Queue]',N'U') IS NULL
