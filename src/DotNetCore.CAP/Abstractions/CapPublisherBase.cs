@@ -60,9 +60,9 @@ namespace DotNetCore.CAP.Abstractions
             return PublishWithTransAsync(name, contentObj, callbackName);
         }
 
-        protected void Enqueu(CapPublishedMessage message)
+        protected void Enqueue(CapPublishedMessage message)
         {
-            _dispatcher.EnqueuToPublish(message);
+            _dispatcher.EnqueueToPublish(message);
         }
 
         protected abstract void PrepareConnectionForEF();
@@ -166,7 +166,7 @@ namespace DotNetCore.CAP.Abstractions
 
                     message.Id = id;
 
-                    Enqueu(message);
+                    Enqueue(message);
                 }
             }
             catch (Exception e)
@@ -200,7 +200,7 @@ namespace DotNetCore.CAP.Abstractions
 
                     message.Id = id;
 
-                    Enqueu(message);
+                    Enqueue(message);
                 }
             }
             catch (Exception e)

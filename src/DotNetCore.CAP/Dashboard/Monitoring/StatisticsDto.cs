@@ -12,8 +12,5 @@ namespace DotNetCore.CAP.Dashboard.Monitoring
 
         public int PublishedFailed { get; set; }
         public int ReceivedFailed { get; set; }
-
-        public int PublishedProcessing { get; set; }
-        public int ReceivedProcessing { get; set; }
     }
 }

@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.PostgreSql
             {
                 var id = await conn.ExecuteScalarAsync<int>(PrepareSql(), message);
                 message.Id = id;
-                Enqueu(message);
+                Enqueue(message);
             }
         }
 

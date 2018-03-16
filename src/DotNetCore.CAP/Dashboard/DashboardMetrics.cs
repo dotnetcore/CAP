@@ -68,24 +68,6 @@ namespace DotNetCore.CAP.Dashboard
                 : null);
 
         //----------------------------------------------------
-
-        public static readonly DashboardMetric PublishedProcessingCount = new DashboardMetric(
-            "published_processing:count",
-            "Metrics_ProcessingJobs",
-            page => new Metric(page.Statistics.PublishedProcessing.ToString("N0"))
-            {
-                Style = page.Statistics.PublishedProcessing > 0 ? MetricStyle.Warning : MetricStyle.Default
-            });
-
-        public static readonly DashboardMetric ReceivedProcessingCount = new DashboardMetric(
-            "received_processing:count",
-            "Metrics_ProcessingJobs",
-            page => new Metric(page.Statistics.ReceivedProcessing.ToString("N0"))
-            {
-                Style = page.Statistics.ReceivedProcessing > 0 ? MetricStyle.Warning : MetricStyle.Default
-            });
-
-        //----------------------------------------------------
         public static readonly DashboardMetric PublishedSucceededCount = new DashboardMetric(
             "published_succeeded:count",
             "Metrics_SucceededJobs",
@@ -131,9 +113,6 @@ namespace DotNetCore.CAP.Dashboard
 
             AddMetric(PublishedFailedCountOrNull);
             AddMetric(ReceivedFailedCountOrNull);
-
-            AddMetric(PublishedProcessingCount);
-            AddMetric(ReceivedProcessingCount);
 
             AddMetric(PublishedSucceededCount);
             AddMetric(ReceivedSucceededCount);

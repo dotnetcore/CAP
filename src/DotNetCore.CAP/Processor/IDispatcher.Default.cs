@@ -36,12 +36,12 @@ namespace DotNetCore.CAP.Processor
             Task.Factory.StartNew(Processing);
         }
 
-        public void EnqueuToPublish(CapPublishedMessage message)
+        public void EnqueueToPublish(CapPublishedMessage message)
         {
             _publishedMessageQueue.Add(message);
         }
 
-        public void EnqueuToExecute(CapReceivedMessage message)
+        public void EnqueueToExecute(CapReceivedMessage message)
         {
             _receivedMessageQueue.Add(message);
         }

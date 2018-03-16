@@ -240,9 +240,6 @@
   <data name="SidebarMenu_Failed" xml:space="preserve">
     <value>Failed</value>
   </data>
-  <data name="SidebarMenu_Processing" xml:space="preserve">
-    <value>Processing</value>
-  </data>
   <data name="SidebarMenu_Succeeded" xml:space="preserve">
     <value>Succeeded</value>
   </data>

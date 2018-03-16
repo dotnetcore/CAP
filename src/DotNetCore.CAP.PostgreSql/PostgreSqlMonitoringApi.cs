@@ -30,9 +30,7 @@ namespace DotNetCore.CAP.PostgreSql
 select count(""Id"") from ""{0}"".""published"" where ""StatusName"" = N'Succeeded';
 select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Succeeded';
 select count(""Id"") from ""{0}"".""published"" where ""StatusName"" = N'Failed';
-select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Failed';
-select count(""Id"") from ""{0}"".""published"" where ""StatusName"" in (N'Processing',N'Scheduled',N'Enqueued');
-select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Processing',N'Scheduled',N'Enqueued');",
+select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Failed';",
                 _options.Schema);
 
             var statistics = UseConnection(connection =>
@@ -45,9 +43,6 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" in (N'Proce
 
                     stats.PublishedFailed = multi.ReadSingle<int>();
                     stats.ReceivedFailed = multi.ReadSingle<int>();
-
-                    stats.PublishedProcessing = multi.ReadSingle<int>();
-                    stats.ReceivedProcessing = multi.ReadSingle<int>();
                 }
 
                 return stats;
