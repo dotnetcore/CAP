@@ -16,30 +16,23 @@
  *
  */
 
-using System.Collections.Generic;
-using SkyWalking.Dictionarys;
+using SkyWalking.Context.Trace;
 
-namespace SkyWalking.Config
+namespace SkyWalking.Context.Tag
 {
-    /// <summary>
-    /// The <code>RemoteDownstreamConfig</code> includes configurations from collector side.
-    /// All of them initialized null, Null-Value or empty collection.
-    /// </summary>
-    public static class RemoteDownstreamConfig
+    public abstract class AbstractTag<T>
     {
-        public static class Agent
-        {
-            public static int ApplicationId { get; set; } = DictionaryUtil.NullValue;
 
-            public static int ApplicationInstanceId { get; set; } = DictionaryUtil.NullValue;
+        public AbstractTag(string tagKey)
+        {
+            Key = tagKey;
         }
 
-        public static class Collector
-        {
-            /// <summary>
-            /// Collector GRPC-Service address.
-            /// </summary>
-            public static IList<string> gRPCServers = new List<string>();
-        }
+        protected abstract void Set(ISpan span, T tagValue);
+
+        /**
+         * @return the key of this tag.
+         */
+        public string Key { get; protected set; }
     }
 }

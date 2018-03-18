@@ -19,7 +19,7 @@
 using System;
 using System.Threading;
 using SkyWalking.Config;
-using SkyWalking.Dictionary;
+using SkyWalking.Dictionarys;
 
 namespace SkyWalking.Context.Ids
 {

@@ -16,7 +16,7 @@
  *
  */
 
-namespace SkyWalking.Dictionary
+namespace SkyWalking.Dictionarys
 {
     public static class DictionaryUtil
     {

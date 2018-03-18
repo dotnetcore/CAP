@@ -17,29 +17,42 @@
  */
 
 using System.Collections.Generic;
-using SkyWalking.Dictionarys;
 
-namespace SkyWalking.Config
+namespace SkyWalking.NetworkProtocol.Trace
 {
-    /// <summary>
-    /// The <code>RemoteDownstreamConfig</code> includes configurations from collector side.
-    /// All of them initialized null, Null-Value or empty collection.
-    /// </summary>
-    public static class RemoteDownstreamConfig
+    public class ComponentsDefine
     {
-        public static class Agent
-        {
-            public static int ApplicationId { get; set; } = DictionaryUtil.NullValue;
+        public static readonly OfficialComponent AspNetCore = new OfficialComponent(1, "AspNetCore");
 
-            public static int ApplicationInstanceId { get; set; } = DictionaryUtil.NullValue;
+        private static readonly ComponentsDefine _instance = new ComponentsDefine();
+
+        public ComponentsDefine Instance
+        {
+            get
+            {
+                return _instance;
+            }
         }
 
-        public static class Collector
+        private Dictionary<int, string> _components;
+
+        private ComponentsDefine()
         {
-            /// <summary>
-            /// Collector GRPC-Service address.
-            /// </summary>
-            public static IList<string> gRPCServers = new List<string>();
+            _components = new Dictionary<int, string>();
+        }
+
+        private void AddComponent(OfficialComponent component)
+        {
+            _components[component.Id] = component.Name;
+        }
+
+        public string GetComponentName(int componentId)
+        {
+            if (_components.TryGetValue(componentId, out var value))
+            {
+                return value;
+            }
+            return null;
         }
     }
 }

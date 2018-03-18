@@ -16,30 +16,27 @@
  *
  */
 
-using System.Collections.Generic;
-using SkyWalking.Dictionarys;
+using System;
 
-namespace SkyWalking.Config
+namespace SkyWalking.Context.Trace
 {
-    /// <summary>
-    /// The <code>RemoteDownstreamConfig</code> includes configurations from collector side.
-    /// All of them initialized null, Null-Value or empty collection.
-    /// </summary>
-    public static class RemoteDownstreamConfig
+    public class NoopExitSpan : NoopSpan, IWithPeerInfo
     {
-        public static class Agent
-        {
-            public static int ApplicationId { get; set; } = DictionaryUtil.NullValue;
+        public int PeerId => throw new NotImplementedException();
 
-            public static int ApplicationInstanceId { get; set; } = DictionaryUtil.NullValue;
+        public string Peer => throw new NotImplementedException();
+
+        private String peer;
+        private int peerId;
+
+        public NoopExitSpan(int peerId)
+        {
+            this.peerId = peerId;
         }
 
-        public static class Collector
+        public NoopExitSpan(String peer)
         {
-            /// <summary>
-            /// Collector GRPC-Service address.
-            /// </summary>
-            public static IList<string> gRPCServers = new List<string>();
+            this.peer = peer;
         }
     }
 }

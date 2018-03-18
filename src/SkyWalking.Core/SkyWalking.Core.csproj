@@ -1,7 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
-
   <PropertyGroup>
     <Description>SkyWalking core components.</Description>
     <AssemblyTitle>SkyWalking.Core</AssemblyTitle>
@@ -9,8 +7,11 @@
     <AssemblyName>SkyWalking.Core</AssemblyName>
     <PackageId>SkyWalking.Core</PackageId>
     <PackageTags>SkyWalking;APM</PackageTags>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>
+    </PackageReleaseNotes>
     <RootNamespace>SkyWalking</RootNamespace>
   </PropertyGroup>
-
+  <ItemGroup>
+    <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
+  </ItemGroup>
 </Project>

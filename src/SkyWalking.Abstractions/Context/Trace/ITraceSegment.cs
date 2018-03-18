@@ -17,29 +17,37 @@
  */
 
 using System.Collections.Generic;
-using SkyWalking.Dictionarys;
+using SkyWalking.Context.Ids;
+using SkyWalking.NetworkProtocol;
 
-namespace SkyWalking.Config
+namespace SkyWalking.Context.Trace
 {
-    /// <summary>
-    /// The <code>RemoteDownstreamConfig</code> includes configurations from collector side.
-    /// All of them initialized null, Null-Value or empty collection.
-    /// </summary>
-    public static class RemoteDownstreamConfig
+    public interface ITraceSegment
     {
-        public static class Agent
-        {
-            public static int ApplicationId { get; set; } = DictionaryUtil.NullValue;
+        void Archive(AbstractTracingSpan finishedSpan);
 
-            public static int ApplicationInstanceId { get; set; } = DictionaryUtil.NullValue;
-        }
+        ITraceSegment Finish(bool isSizeLimited);
 
-        public static class Collector
-        {
-            /// <summary>
-            /// Collector GRPC-Service address.
-            /// </summary>
-            public static IList<string> gRPCServers = new List<string>();
-        }
+        int ApplicationId { get; }
+
+        int ApplicationInstanceId { get; }
+
+        IEnumerable<ITraceSegmentRef> Refs { get; }
+
+        IEnumerable<DistributedTraceId> RelatedGlobalTraces { get; }
+
+        ID TraceSegmentId { get; }
+
+        bool HasRef { get; }
+
+        bool IsIgnore { get; set; }
+
+        bool IsSingleSpanSegment { get; }
+
+        void Ref(ITraceSegmentRef refSegment);
+
+        void RelatedGlobalTrace(DistributedTraceId distributedTraceId);
+
+        UpstreamSegment Transform();
     }
 }

@@ -16,34 +16,23 @@
  *
  */
 
-using System.Collections.Generic;
 
-namespace SkyWalking.Context.Ids
+namespace SkyWalking.Context.Trace
 {
-    public class DistributedTraceIds
+    public abstract class StackBasedTracingSpan : AbstractTracingSpan
     {
-        private readonly List<DistributedTraceId> _relatedGlobalTraces;
+        protected int _stackDepth;
 
-        public DistributedTraceIds()
+        protected StackBasedTracingSpan(int spanId, int parentSpanId, string operationName)
+            : base(spanId, parentSpanId, operationName)
         {
-            _relatedGlobalTraces = new List<DistributedTraceId>();
+            _stackDepth = 0;
         }
 
-        public IReadOnlyList<DistributedTraceId> GetRelatedGlobalTraces()
+        protected StackBasedTracingSpan(int spanId, int parentSpanId, int operationId)
+            : base(spanId, parentSpanId, operationId)
         {
-            return _relatedGlobalTraces.AsReadOnly();
-        }
-
-        public void Append(DistributedTraceId distributedTraceId)
-        {
-            if (_relatedGlobalTraces.Count > 0 && _relatedGlobalTraces[0] is NewDistributedTraceId)
-            {
-                _relatedGlobalTraces.RemoveAt(0);
-            }
-            if (!_relatedGlobalTraces.Contains(distributedTraceId))
-            {
-                _relatedGlobalTraces.Add(distributedTraceId);
-            }
+            _stackDepth = 0;
         }
     }
 }

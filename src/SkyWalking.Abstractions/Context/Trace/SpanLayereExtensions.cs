@@ -16,30 +16,33 @@
  *
  */
 
-using System.Collections.Generic;
-using SkyWalking.Dictionarys;
-
-namespace SkyWalking.Config
+namespace SkyWalking.Context.Trace
 {
-    /// <summary>
-    /// The <code>RemoteDownstreamConfig</code> includes configurations from collector side.
-    /// All of them initialized null, Null-Value or empty collection.
-    /// </summary>
-    public static class RemoteDownstreamConfig
+    public static class SpanLayereExtensions
     {
-        public static class Agent
+        public static void AsDB(this ISpan span)
         {
-            public static int ApplicationId { get; set; } = DictionaryUtil.NullValue;
-
-            public static int ApplicationInstanceId { get; set; } = DictionaryUtil.NullValue;
+            span.SetLayer(SpanLayer.DB);
         }
 
-        public static class Collector
+        public static void AsCache(this ISpan span)
         {
-            /// <summary>
-            /// Collector GRPC-Service address.
-            /// </summary>
-            public static IList<string> gRPCServers = new List<string>();
+            span.SetLayer(SpanLayer.CACHE);
+        }
+
+        public static void AsRPCFramework(this ISpan span)
+        {
+            span.SetLayer(SpanLayer.RPC_FRAMEWORK);
+        }
+
+        public static void AsHttp(this ISpan span)
+        {
+            span.SetLayer(SpanLayer.HTTP);
+        }
+
+        public static void AsMQ(this ISpan span)
+        {
+            span.SetLayer(SpanLayer.MQ);
         }
     }
 }

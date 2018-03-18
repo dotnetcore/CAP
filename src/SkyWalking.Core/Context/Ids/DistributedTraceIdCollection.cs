@@ -17,29 +17,33 @@
  */
 
 using System.Collections.Generic;
-using SkyWalking.Dictionarys;
 
-namespace SkyWalking.Config
+namespace SkyWalking.Context.Ids
 {
-    /// <summary>
-    /// The <code>RemoteDownstreamConfig</code> includes configurations from collector side.
-    /// All of them initialized null, Null-Value or empty collection.
-    /// </summary>
-    public static class RemoteDownstreamConfig
+    public class DistributedTraceIdCollection : IDistributedTraceIdCollection
     {
-        public static class Agent
-        {
-            public static int ApplicationId { get; set; } = DictionaryUtil.NullValue;
+        private readonly List<DistributedTraceId> _relatedGlobalTraces;
 
-            public static int ApplicationInstanceId { get; set; } = DictionaryUtil.NullValue;
+        public DistributedTraceIdCollection()
+        {
+            _relatedGlobalTraces = new List<DistributedTraceId>();
         }
 
-        public static class Collector
+        public IReadOnlyList<DistributedTraceId> GetRelatedGlobalTraces()
         {
-            /// <summary>
-            /// Collector GRPC-Service address.
-            /// </summary>
-            public static IList<string> gRPCServers = new List<string>();
+            return _relatedGlobalTraces.AsReadOnly();
+        }
+
+        public void Append(DistributedTraceId distributedTraceId)
+        {
+            if (_relatedGlobalTraces.Count > 0 && _relatedGlobalTraces[0] is NewDistributedTraceId)
+            {
+                _relatedGlobalTraces.RemoveAt(0);
+            }
+            if (!_relatedGlobalTraces.Contains(distributedTraceId))
+            {
+                _relatedGlobalTraces.Add(distributedTraceId);
+            }
         }
     }
 }

@@ -16,30 +16,14 @@
  *
  */
 
-using System.Collections.Generic;
-using SkyWalking.Dictionarys;
-
-namespace SkyWalking.Config
+namespace SkyWalking.NetworkProtocol.Trace
 {
     /// <summary>
-    /// The <code>RemoteDownstreamConfig</code> includes configurations from collector side.
-    /// All of them initialized null, Null-Value or empty collection.
+    /// The <code>Component</code> represents component library , which has been supported by skywalking
     /// </summary>
-    public static class RemoteDownstreamConfig
+    public interface IComponent
     {
-        public static class Agent
-        {
-            public static int ApplicationId { get; set; } = DictionaryUtil.NullValue;
-
-            public static int ApplicationInstanceId { get; set; } = DictionaryUtil.NullValue;
-        }
-
-        public static class Collector
-        {
-            /// <summary>
-            /// Collector GRPC-Service address.
-            /// </summary>
-            public static IList<string> gRPCServers = new List<string>();
-        }
+        int Id { get; }
+        string Name { get; }
     }
 }

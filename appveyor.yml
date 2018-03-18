@@ -7,17 +7,7 @@ environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
 skip_tags: true
-skip_commits:
-  files:
-    - docs/*
-    - CONTIBUTING.md
-    - LICENSE
-    - README.md
-    - generate_protos.bat
-    - generate_protos_macos.sh
-    - generate_protos_linux.sh
-    - .travis.yml
-    - .gitignore
+
 build_script:
 - ps: ./build.ps1
 test: off

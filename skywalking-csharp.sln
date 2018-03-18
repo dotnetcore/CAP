@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{613F0980-9
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Core.Tests", "test\SkyWalking.Core.Tests\SkyWalking.Core.Tests.csproj", "{3915A2C2-7174-4651-A4F1-D45CD109916A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.NetworkProtocol.Trace", "src\SkyWalking.NetworkProtocol.Trace\SkyWalking.NetworkProtocol.Trace.csproj", "{50BE8184-EC7A-4257-AF54-764C0E61276F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -44,6 +46,10 @@ Global
 		{3915A2C2-7174-4651-A4F1-D45CD109916A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3915A2C2-7174-4651-A4F1-D45CD109916A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3915A2C2-7174-4651-A4F1-D45CD109916A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50BE8184-EC7A-4257-AF54-764C0E61276F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50BE8184-EC7A-4257-AF54-764C0E61276F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50BE8184-EC7A-4257-AF54-764C0E61276F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50BE8184-EC7A-4257-AF54-764C0E61276F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,6 +59,7 @@ Global
 		{C3860B5F-21D0-429F-8A00-B0C0F4573DF7} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
 		{FD84A10C-C962-4AEA-BA06-86F08EB048E6} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
 		{3915A2C2-7174-4651-A4F1-D45CD109916A} = {613F0980-91ED-4064-8E8C-168582EF4AD7}
+		{50BE8184-EC7A-4257-AF54-764C0E61276F} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94C0DA2C-CCCB-4314-93A2-9809B5DD0583}
