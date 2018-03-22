@@ -1,10 +1,7 @@
-﻿using System.IO;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 
-namespace Sample.Kafka.SqlServer
+namespace Sample.Kafka.MySql
 {
     public class Program
     {
