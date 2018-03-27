@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.ComponentModel;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -32,7 +35,10 @@ namespace DotNetCore.CAP.Infrastructure
 
         public static object FromJson(string value, Type type)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
             return value != null
                 ? JsonConvert.DeserializeObject(value, type, _serializerSettings)
@@ -54,13 +60,19 @@ namespace DotNetCore.CAP.Infrastructure
         public static bool IsController(TypeInfo typeInfo)
         {
             if (!typeInfo.IsClass)
+            {
                 return false;
+            }
 
             if (typeInfo.IsAbstract)
+            {
                 return false;
+            }
 
             if (!typeInfo.IsPublic)
+            {
                 return false;
+            }
 
             return !typeInfo.ContainsGenericParameters
                    && typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase);
@@ -149,9 +161,13 @@ namespace DotNetCore.CAP.Infrastructure
             var jObj = JObject.Parse(json);
 
             if (jObj.TryGetValue(propertyName, out var _))
+            {
                 jObj[propertyName] = propertyValue;
+            }
             else
+            {
                 jObj.Add(new JProperty(propertyName, propertyValue));
+            }
 
             return jObj.ToString(Formatting.None);
         }

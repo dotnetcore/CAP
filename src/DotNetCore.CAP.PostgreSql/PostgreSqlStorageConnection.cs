@@ -1,6 +1,8 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
@@ -36,27 +38,11 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        public Task<IFetchedMessage> FetchNextMessageAsync()
+        public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
-            var sql = $@"DELETE FROM ""{Options.Schema}"".""queue"" WHERE ""MessageId"" = (SELECT ""MessageId"" FROM ""{Options.Schema}"".""queue"" FOR UPDATE SKIP LOCKED LIMIT 1) RETURNING *;";
-            return FetchNextMessageCoreAsync(sql);
-        }
-
-        public async Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync()
-        {
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
             var sql =
-                $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"StatusName\" = '{StatusName.Scheduled}' FOR UPDATE SKIP LOCKED LIMIT 1;";
-
-            using (var connection = new NpgsqlConnection(Options.ConnectionString))
-            {
-                return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
-            }
-        }
-
-        public async Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages()
-        {
-            var sql =
-                $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"StatusName\"='{StatusName.Failed}' LIMIT 200;";
+                $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"Added\"<'{fourMinsAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
 
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
@@ -64,16 +50,19 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
+        public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
             var sql =
-                $"INSERT INTO \"{Options.Schema}\".\"received\"(\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+                $"INSERT INTO \"{Options.Schema}\".\"received\"(\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING \"Id\";";
 
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
-                await connection.ExecuteAsync(sql, message);
+                return await connection.ExecuteScalarAsync<int>(sql, message);
             }
         }
 
@@ -86,20 +75,11 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        public async Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync()
+        public async Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
             var sql =
-                $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"StatusName\" = '{StatusName.Scheduled}' FOR UPDATE SKIP LOCKED LIMIT 1;";
-            using (var connection = new NpgsqlConnection(Options.ConnectionString))
-            {
-                return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
-            }
-        }
-
-        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
-        {
-            var sql =
-                $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"StatusName\"='{StatusName.Failed}' LIMIT 200;";
+                $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"Added\"<'{fourMinsAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
@@ -130,36 +110,6 @@ namespace DotNetCore.CAP.PostgreSql
             {
                 return connection.Execute(sql) > 0;
             }
-        }
-
-        private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, object args = null)
-        {
-            //here don't use `using` to dispose
-            var connection = new NpgsqlConnection(Options.ConnectionString);
-            await connection.OpenAsync();
-            var transaction = connection.BeginTransaction(IsolationLevel.ReadCommitted);
-            FetchedMessage fetchedMessage;
-            try
-            {
-                fetchedMessage = await connection.QueryFirstOrDefaultAsync<FetchedMessage>(sql, args, transaction);
-            }
-            catch (NpgsqlException)
-            {
-                transaction.Dispose();
-                connection.Dispose();
-                throw;
-            }
-
-            if (fetchedMessage == null)
-            {
-                transaction.Rollback();
-                transaction.Dispose();
-                connection.Dispose();
-                return null;
-            }
-
-            return new PostgreSqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, connection,
-                transaction);
         }
     }
 }

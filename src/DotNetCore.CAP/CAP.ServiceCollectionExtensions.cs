@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Abstractions;
@@ -25,7 +28,10 @@ namespace Microsoft.Extensions.DependencyInjection
             this IServiceCollection services,
             Action<CapOptions> setupAction)
         {
-            if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
+            if (setupAction == null)
+            {
+                throw new ArgumentNullException(nameof(setupAction));
+            }
 
             services.TryAddSingleton<CapMarkerService>();
             services.Configure(setupAction);
@@ -49,21 +55,21 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton<IStateChanger, StateChanger>();
 
             //Queue's message processor
-            services.AddTransient<PublishQueuer>();
-            services.AddTransient<SubscribeQueuer>();
-            services.AddTransient<FailedProcessor>();
-            services.AddTransient<IDispatcher, DefaultDispatcher>();
+            services.AddTransient<NeedRetryMessageProcessor>();
 
-            //Executors
-            services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
-            services.AddSingleton<IQueueExecutor, SubscribeQueueExecutor>();
-            services.TryAddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
+            //Sender and Executors   
+            services.AddSingleton<IDispatcher, Dispatcher>();
+            // Warning: IPublishMessageSender need to inject at extension project. 
+            services.AddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
 
             //Options and extension service
             var options = new CapOptions();
             setupAction(options);
             foreach (var serviceExtension in options.Extensions)
+            {
                 serviceExtension.AddServices(services);
+            }
+
             services.AddSingleton(options);
 
             return new CapBuilder(services);
@@ -73,13 +79,19 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             var consumerListenerServices = new List<KeyValuePair<Type, Type>>();
             foreach (var rejectedServices in services)
+            {
                 if (rejectedServices.ImplementationType != null
                     && typeof(ICapSubscribe).IsAssignableFrom(rejectedServices.ImplementationType))
+                {
                     consumerListenerServices.Add(new KeyValuePair<Type, Type>(typeof(ICapSubscribe),
                         rejectedServices.ImplementationType));
+                }
+            }
 
             foreach (var service in consumerListenerServices)
+            {
                 services.AddTransient(service.Key, service.Value);
+            }
         }
     }
 }

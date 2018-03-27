@@ -1,41 +1,41 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
 {
     internal class ConsumerHandler : IConsumerHandler
     {
+        private readonly IStorageConnection _connection;
         private readonly IConsumerClientFactory _consumerClientFactory;
-
         private readonly CancellationTokenSource _cts;
+        private readonly IDispatcher _dispatcher;
         private readonly ILogger _logger;
-
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly MethodMatcherCache _selector;
-        private readonly IServiceProvider _serviceProvider;
 
         private Task _compositeTask;
-
         private bool _disposed;
 
-        public ConsumerHandler(
-            IServiceProvider serviceProvider,
-            IConsumerClientFactory consumerClientFactory,
+        public ConsumerHandler(IConsumerClientFactory consumerClientFactory,
+            IDispatcher dispatcher,
+            IStorageConnection connection,
             ILogger<ConsumerHandler> logger,
             MethodMatcherCache selector)
         {
             _selector = selector;
             _logger = logger;
-            _serviceProvider = serviceProvider;
             _consumerClientFactory = consumerClientFactory;
+            _dispatcher = dispatcher;
+            _connection = connection;
             _cts = new CancellationTokenSource();
         }
 
@@ -44,25 +44,30 @@ namespace DotNetCore.CAP
             var groupingMatches = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
             foreach (var matchGroup in groupingMatches)
+            {
                 Task.Factory.StartNew(() =>
-                 {
-                     using (var client = _consumerClientFactory.Create(matchGroup.Key))
-                     {
-                         RegisterMessageProcessor(client);
+                {
+                    using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                    {
+                        RegisterMessageProcessor(client);
 
-                         client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
+                        client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
 
-                         client.Listening(_pollingDelay, _cts.Token);
-                     }
-                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                        client.Listening(_pollingDelay, _cts.Token);
+                    }
+                }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            }
 
-             _compositeTask = Task.CompletedTask;
+            _compositeTask = Task.CompletedTask;
         }
 
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
+            }
+
             _disposed = true;
             _cts.Cancel();
             try
@@ -73,35 +78,35 @@ namespace DotNetCore.CAP
             {
                 var innerEx = ex.InnerExceptions[0];
                 if (!(innerEx is OperationCanceledException))
+                {
                     _logger.ExpectedOperationCanceledException(innerEx);
+                }
             }
         }
 
         public void Pulse()
         {
-            SubscribeQueuer.PulseEvent.Set();
+            //ignore
         }
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
             client.OnMessageReceived += (sender, message) =>
             {
-                _logger.EnqueuingReceivedMessage(message.Name, message.Content);
-
-                using (var scope = _serviceProvider.CreateScope())
+                try
                 {
-                    try
-                    {
-                        StoreMessage(scope, message);
-                        client.Commit();
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.", message);
-                        client.Reject();
-                    }
+                    var storedMessage = StoreMessage(message);
+
+                    client.Commit();
+
+                    _dispatcher.EnqueueToExecute(storedMessage);
                 }
-                Pulse();
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.",
+                        message);
+                    client.Reject();
+                }
             };
 
             client.OnLog += WriteLog;
@@ -134,15 +139,15 @@ namespace DotNetCore.CAP
             }
         }
 
-        private static void StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
+        private CapReceivedMessage StoreMessage(MessageContext messageContext)
         {
-            var provider = serviceScope.ServiceProvider;
-            var messageStore = provider.GetRequiredService<IStorageConnection>();
             var receivedMessage = new CapReceivedMessage(messageContext)
             {
                 StatusName = StatusName.Scheduled
             };
-            messageStore.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
+            var id = _connection.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
+            receivedMessage.Id = id;
+            return receivedMessage;
         }
     }
 }

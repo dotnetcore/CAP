@@ -1,4 +1,7 @@
-﻿namespace DotNetCore.CAP.Infrastructure
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+namespace DotNetCore.CAP.Infrastructure
 {
     /// <summary>
     /// The message status name.
@@ -6,8 +9,6 @@
     public struct StatusName
     {
         public const string Scheduled = nameof(Scheduled);
-        public const string Enqueued = nameof(Enqueued);
-        public const string Processing = nameof(Processing);
         public const string Succeeded = nameof(Succeeded);
         public const string Failed = nameof(Failed);
     }

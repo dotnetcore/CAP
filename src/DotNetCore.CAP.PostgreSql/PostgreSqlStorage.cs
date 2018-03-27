@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Data;
 using System.Threading;
@@ -11,9 +14,9 @@ namespace DotNetCore.CAP.PostgreSql
 {
     public class PostgreSqlStorage : IStorage
     {
+        private readonly CapOptions _capOptions;
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
-        private readonly CapOptions _capOptions;
         private readonly PostgreSqlOptions _options;
 
         public PostgreSqlStorage(ILogger<PostgreSqlStorage> logger,
@@ -37,7 +40,10 @@ namespace DotNetCore.CAP.PostgreSql
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested) return;
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
 
             var sql = CreateDbTablesScript(_options.Schema);
 
@@ -45,6 +51,7 @@ namespace DotNetCore.CAP.PostgreSql
             {
                 await connection.ExecuteAsync(sql);
             }
+
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
 
@@ -68,7 +75,9 @@ namespace DotNetCore.CAP.PostgreSql
             var connection = _existingConnection ?? new NpgsqlConnection(_options.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
+            {
                 connection.Open();
+            }
 
             return connection;
         }
@@ -81,7 +90,9 @@ namespace DotNetCore.CAP.PostgreSql
         internal void ReleaseConnection(IDbConnection connection)
         {
             if (connection != null && !IsExistingConnection(connection))
+            {
                 connection.Dispose();
+            }
         }
 
         protected virtual string CreateDbTablesScript(string schema)
@@ -89,10 +100,7 @@ namespace DotNetCore.CAP.PostgreSql
             var batchSql = $@"
 CREATE SCHEMA IF NOT EXISTS ""{schema}"";
 
-CREATE TABLE IF NOT EXISTS ""{schema}"".""queue""(
-	""MessageId"" int NOT NULL ,
-	""MessageType"" int NOT NULL
-);
+DROP TABLE IF EXISTS ""{schema}"".""queue"";
 
 CREATE TABLE IF NOT EXISTS ""{schema}"".""received""(
 	""Id"" SERIAL PRIMARY KEY NOT NULL,

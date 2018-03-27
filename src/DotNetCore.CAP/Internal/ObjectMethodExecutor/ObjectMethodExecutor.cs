@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,9 @@ namespace Microsoft.Extensions.Internal
         private ObjectMethodExecutor(MethodInfo methodInfo, TypeInfo targetTypeInfo, object[] parameterDefaultValues)
         {
             if (methodInfo == null)
+            {
                 throw new ArgumentNullException(nameof(methodInfo));
+            }
 
             MethodInfo = methodInfo;
             MethodParameters = methodInfo.GetParameters();
@@ -48,7 +50,9 @@ namespace Microsoft.Extensions.Internal
             _executor = GetExecutor(methodInfo, targetTypeInfo);
 
             if (IsMethodAsync)
+            {
                 _executorAsync = GetExecutorAsync(methodInfo, targetTypeInfo, coercedAwaitableInfo);
+            }
 
             _parameterDefaultValues = parameterDefaultValues;
         }
@@ -75,7 +79,9 @@ namespace Microsoft.Extensions.Internal
             object[] parameterDefaultValues)
         {
             if (parameterDefaultValues == null)
+            {
                 throw new ArgumentNullException(nameof(parameterDefaultValues));
+            }
 
             return new ObjectMethodExecutor(methodInfo, targetTypeInfo, parameterDefaultValues);
         }
@@ -127,11 +133,15 @@ namespace Microsoft.Extensions.Internal
         public object GetDefaultValueForParameter(int index)
         {
             if (_parameterDefaultValues == null)
+            {
                 throw new InvalidOperationException(
                     $"Cannot call {nameof(GetDefaultValueForParameter)}, because no parameter default values were supplied.");
+            }
 
             if (index < 0 || index > MethodParameters.Length - 1)
+            {
                 throw new ArgumentOutOfRangeException(nameof(index));
+            }
 
             return _parameterDefaultValues[index];
         }
@@ -241,6 +251,7 @@ namespace Microsoft.Extensions.Internal
             var getResultParam = Expression.Parameter(typeof(object), "awaiter");
             Func<object, object> getResultFunc;
             if (awaitableInfo.ResultType == typeof(void))
+            {
                 getResultFunc = Expression.Lambda<Func<object, object>>(
                     Expression.Block(
                         Expression.Call(
@@ -249,7 +260,9 @@ namespace Microsoft.Extensions.Internal
                         Expression.Constant(null)
                     ),
                     getResultParam).Compile();
+            }
             else
+            {
                 getResultFunc = Expression.Lambda<Func<object, object>>(
                     Expression.Convert(
                         Expression.Call(
@@ -257,6 +270,7 @@ namespace Microsoft.Extensions.Internal
                             awaitableInfo.AwaiterGetResultMethod),
                         typeof(object)),
                     getResultParam).Compile();
+            }
 
             // var onCompletedFunc = (object awaiter, Action continuation) => {
             //     ((CustomAwaiterType)awaiter).OnCompleted(continuation);
