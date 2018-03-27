@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -10,7 +13,7 @@ namespace DotNetCore.CAP.Internal
 {
     /// <inheritdoc />
     /// <summary>
-    ///     A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
+    /// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
     /// </summary>
     internal class DefaultConsumerServiceSelector : IConsumerServiceSelector
     {
@@ -18,7 +21,7 @@ namespace DotNetCore.CAP.Internal
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        ///     Creates a new <see cref="DefaultConsumerServiceSelector" />.
+        /// Creates a new <see cref="DefaultConsumerServiceSelector" />.
         /// </summary>
         public DefaultConsumerServiceSelector(IServiceProvider serviceProvider, CapOptions capOptions)
         {
@@ -27,9 +30,9 @@ namespace DotNetCore.CAP.Internal
         }
 
         /// <summary>
-        ///     Selects the best <see cref="ConsumerExecutorDescriptor" /> candidate from <paramref name="executeDescriptor" /> for
-        ///     the
-        ///     current message associated.
+        /// Selects the best <see cref="ConsumerExecutorDescriptor" /> candidate from <paramref name="executeDescriptor" /> for
+        /// the
+        /// current message associated.
         /// </summary>
         public ConsumerExecutorDescriptor SelectBestCandidate(string key,
             IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
@@ -61,10 +64,13 @@ namespace DotNetCore.CAP.Internal
                 {
                     var typeInfo = service.GetType().GetTypeInfo();
                     if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
+                    {
                         continue;
+                    }
 
                     executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
                 }
+
                 return executorDescriptorList;
             }
         }
@@ -78,7 +84,9 @@ namespace DotNetCore.CAP.Internal
             {
                 var typeInfo = type.GetTypeInfo();
                 if (Helper.IsController(typeInfo))
+                {
                     executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                }
             }
 
             return executorDescriptorList;
@@ -91,12 +99,18 @@ namespace DotNetCore.CAP.Internal
                 var topicAttr = method.GetCustomAttributes<TopicAttribute>(true);
                 var topicAttributes = topicAttr as IList<TopicAttribute> ?? topicAttr.ToList();
 
-                if (!topicAttributes.Any()) continue;
+                if (!topicAttributes.Any())
+                {
+                    continue;
+                }
 
                 foreach (var attr in topicAttributes)
                 {
                     if (attr.Group == null)
+                    {
                         attr.Group = _capOptions.DefaultGroup;
+                    }
+
                     yield return InitDescriptor(attr, method, typeInfo);
                 }
             }

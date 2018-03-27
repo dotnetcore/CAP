@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.MySql;
 using DotNetCore.CAP.Processor;
 using Microsoft.EntityFrameworkCore;
@@ -41,7 +44,7 @@ namespace DotNetCore.CAP
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext)provider.GetService(mysqlOptions.DbContextType);
+                        var dbContext = (DbContext) provider.GetService(mysqlOptions.DbContextType);
                         mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return mysqlOptions;
                     }

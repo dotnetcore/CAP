@@ -1,11 +1,13 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
@@ -14,39 +16,30 @@ namespace DotNetCore.CAP.Processor
         private readonly CancellationTokenSource _cts;
         private readonly ILogger _logger;
         private readonly ILoggerFactory _loggerFactory;
-        private readonly IList<IDispatcher> _messageDispatchers;
-        private readonly CapOptions _options;
         private readonly IServiceProvider _provider;
+
         private Task _compositeTask;
         private ProcessingContext _context;
         private bool _disposed;
 
-        private IProcessor[] _processors;
-
         public CapProcessingServer(
             ILogger<CapProcessingServer> logger,
             ILoggerFactory loggerFactory,
-            IServiceProvider provider,
-            IOptions<CapOptions> options)
+            IServiceProvider provider)
         {
             _logger = logger;
             _loggerFactory = loggerFactory;
             _provider = provider;
-            _options = options.Value;
             _cts = new CancellationTokenSource();
-            _messageDispatchers = new List<IDispatcher>();
         }
 
         public void Start()
         {
-            var processorCount = _options.QueueProcessorCount;
-            _processors = GetProcessors(processorCount);
-
-            _logger.ServerStarting(processorCount, _processors.Length);
+            _logger.ServerStarting();
 
             _context = new ProcessingContext(_provider, _cts.Token);
 
-            var processorTasks = _processors
+            var processorTasks = GetProcessors()
                 .Select(InfiniteRetry)
                 .Select(p => p.ProcessAsync(_context));
             _compositeTask = Task.WhenAll(processorTasks);
@@ -54,18 +47,16 @@ namespace DotNetCore.CAP.Processor
 
         public void Pulse()
         {
-            if (!AllProcessorsWaiting())
-                return;
-
-            _logger.LogTrace("Pulsing the Queuer.");
-
-            PublishQueuer.PulseEvent.Set();
+            _logger.LogTrace("Pulsing the processor.");
         }
 
         public void Dispose()
         {
             if (_disposed)
+            {
                 return;
+            }
+
             _disposed = true;
 
             _logger.ServerShuttingDown();
@@ -78,13 +69,10 @@ namespace DotNetCore.CAP.Processor
             {
                 var innerEx = ex.InnerExceptions[0];
                 if (!(innerEx is OperationCanceledException))
+                {
                     _logger.ExpectedOperationCanceledException(innerEx);
+                }
             }
-        }
-
-        private bool AllProcessorsWaiting()
-        {
-            return _messageDispatchers.All(processor => processor.Waiting);
         }
 
         private IProcessor InfiniteRetry(IProcessor inner)
@@ -92,21 +80,13 @@ namespace DotNetCore.CAP.Processor
             return new InfiniteRetryProcessor(inner, _loggerFactory);
         }
 
-        private IProcessor[] GetProcessors(int processorCount)
+        private IProcessor[] GetProcessors()
         {
-            var returnedProcessors = new List<IProcessor>();
-            for (var i = 0; i < processorCount; i++)
+            var returnedProcessors = new List<IProcessor>
             {
-                var messageProcessors = _provider.GetRequiredService<IDispatcher>();
-                _messageDispatchers.Add(messageProcessors);
-            }
-            returnedProcessors.AddRange(_messageDispatchers);
-
-            returnedProcessors.Add(_provider.GetRequiredService<PublishQueuer>());
-            returnedProcessors.Add(_provider.GetRequiredService<SubscribeQueuer>());
-            returnedProcessors.Add(_provider.GetRequiredService<FailedProcessor>());
-
-            returnedProcessors.Add(_provider.GetRequiredService<IAdditionalProcessor>());
+                _provider.GetRequiredService<NeedRetryMessageProcessor>(),
+                _provider.GetRequiredService<IAdditionalProcessor>()
+            };
 
             return returnedProcessors.ToArray();
         }

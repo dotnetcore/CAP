@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Test
             var fixture = Create();
             var message = new CapPublishedMessage
             {
-                StatusName = StatusName.Enqueued
+                StatusName = StatusName.Scheduled
             };
             var state = Mock.Of<IState>(s => s.Name == "s" && s.ExpiresAfter == null);
             var mockTransaction = new Mock<IStorageTransaction>();
@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.Test
             var fixture = Create();
             var message = new CapPublishedMessage
             {
-                StatusName = StatusName.Enqueued
+                StatusName = StatusName.Scheduled
             };
             var state = Mock.Of<IState>(s => s.Name == "s" && s.ExpiresAfter == TimeSpan.FromHours(1));
             var mockTransaction = new Mock<IStorageTransaction>();

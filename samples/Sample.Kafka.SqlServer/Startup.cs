@@ -1,23 +1,18 @@
 ﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Sample.RabbitMQ.SqlServer;
 
-namespace Sample.Kafka.SqlServer
+namespace Sample.Kafka.MySql
 {
     public class Startup
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<AppDbContext>();
-
             services.AddCap(x =>
             {
-                x.UseEntityFramework<AppDbContext>();
-                x.UseKafka("192.168.2.215:9092");
+                x.UseMySql("Server=192.168.10.110;Database=testcap;UserId=root;Password=123123;");
+                x.UseKafka("192.168.10.110:9092");
                 x.UseDashboard();
+
                 //x.UseDiscovery(d =>
                 //{
                 //    d.DiscoveryServerHostName = "localhost";
@@ -26,11 +21,12 @@ namespace Sample.Kafka.SqlServer
                 //    d.CurrentNodePort = 5820;
                 //    d.NodeName = "CAP 2号节点";
                 //});
-            }).AddMessagePacker<MyMessagePacker>();
+            });
+
             services.AddMvc();
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app)
         {
             app.UseMvc();
 

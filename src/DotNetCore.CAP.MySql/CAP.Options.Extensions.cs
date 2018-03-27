@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +17,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static CapOptions UseMySql(this CapOptions options, Action<MySqlOptions> configure)
         {
-            if (configure == null) throw new ArgumentNullException(nameof(configure));
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
 
 
             options.RegisterExtension(new MySqlCapOptionsExtension(configure));
@@ -31,7 +37,10 @@ namespace Microsoft.Extensions.DependencyInjection
         public static CapOptions UseEntityFramework<TContext>(this CapOptions options, Action<EFOptions> configure)
             where TContext : DbContext
         {
-            if (configure == null) throw new ArgumentNullException(nameof(configure));
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
 
             options.RegisterExtension(new MySqlCapOptionsExtension(x =>
             {

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
@@ -26,7 +29,10 @@ namespace DotNetCore.CAP.SqlServer
 
         public void UpdateMessage(CapPublishedMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
             var sql =
                 $"UPDATE [{_schema}].[Published] SET [Retries] = @Retries,[Content] = @Content,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
@@ -35,29 +41,14 @@ namespace DotNetCore.CAP.SqlServer
 
         public void UpdateMessage(CapReceivedMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
             var sql =
                 $"UPDATE [{_schema}].[Received] SET [Retries] = @Retries,[Content] = @Content,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
-        }
-
-        public void EnqueueMessage(CapPublishedMessage message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            var sql = $"INSERT INTO [{_schema}].[Queue] values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Publish},
-                _dbTransaction);
-        }
-
-        public void EnqueueMessage(CapReceivedMessage message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            var sql = $"INSERT INTO [{_schema}].[Queue] values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Subscribe},
-                _dbTransaction);
         }
 
         public Task CommitAsync()
@@ -70,6 +61,30 @@ namespace DotNetCore.CAP.SqlServer
         {
             _dbTransaction.Dispose();
             _dbConnection.Dispose();
+        }
+
+        public void EnqueueMessage(CapPublishedMessage message)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            var sql = $"INSERT INTO [{_schema}].[Queue] values(@MessageId,@MessageType);";
+            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Publish},
+                _dbTransaction);
+        }
+
+        public void EnqueueMessage(CapReceivedMessage message)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            var sql = $"INSERT INTO [{_schema}].[Queue] values(@MessageId,@MessageType);";
+            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Subscribe},
+                _dbTransaction);
         }
     }
 }

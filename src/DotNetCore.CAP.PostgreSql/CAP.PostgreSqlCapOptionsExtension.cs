@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.PostgreSql;
 using DotNetCore.CAP.Processor;
 using Microsoft.EntityFrameworkCore;
@@ -40,7 +43,7 @@ namespace DotNetCore.CAP
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext)provider.GetService(postgreSqlOptions.DbContextType);
+                        var dbContext = (DbContext) provider.GetService(postgreSqlOptions.DbContextType);
                         postgreSqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return postgreSqlOptions;
                     }

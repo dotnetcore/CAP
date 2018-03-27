@@ -30,7 +30,6 @@ namespace DotNetCore.CAP.MySql.Test
 
         [Theory]
         [InlineData("cap.published")]
-        [InlineData("cap.queue")]
         [InlineData("cap.received")]
         public void DatabaseTable_IsExists(string tableName)
         {
