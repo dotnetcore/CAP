@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>SkyWalking Core abstractions and interfaces for apm agent.</Description>
     <AssemblyTitle>SkyWalking.Abstractions</AssemblyTitle>
-    <TargetFrameworks>netstandard1.6;net45</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AssemblyName>SkyWalking.Abstractions</AssemblyName>
     <PackageId>SkyWalking.Abstractions</PackageId>
     <PackageTags>SkyWalking;APM</PackageTags>
