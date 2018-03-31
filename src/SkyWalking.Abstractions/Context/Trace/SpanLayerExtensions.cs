@@ -18,7 +18,7 @@
 
 namespace SkyWalking.Context.Trace
 {
-    public static class SpanLayereExtensions
+    public static class SpanLayerExtensions
     {
         public static void AsDB(this ISpan span)
         {
