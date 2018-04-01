@@ -16,30 +16,14 @@
  *
  */
 
-using SkyWalking.Context.Trace;
+using SkyWalking.Boot;
 
-namespace SkyWalking.Context
+namespace SkyWalking.Sampling
 {
-    public interface ITracerContext
+    public interface ISampler : IBootService
     {
-        void Inject(IContextCarrier carrier);
+        bool TrySampling();
 
-        void Extract(IContextCarrier carrier);
-        
-        IContextSnapshot Capture { get; }
-        
-        ISpan ActiveSpan { get; }
-
-        void Continued(IContextSnapshot snapshot);
-
-        string GetReadableGlobalTraceId();
-
-        ISpan CreateEntrySpan(string operationName);
-
-        ISpan CreateLocalSpan(string operationName);
-
-        ISpan CreateExitSpan(string operationName, string remotePeer);     
-
-        void StopSpan(ISpan span);
+        void ForceSampled();
     }
 }

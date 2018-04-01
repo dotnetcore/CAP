@@ -19,6 +19,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using SkyWalking.Config;
 
 namespace SkyWalking.Context
 {
@@ -57,7 +58,14 @@ namespace SkyWalking.Context
 
         public CarrierItem(String headKey, String headValue, CarrierItem next)
         {
-            _headKey = headKey;
+            if (string.IsNullOrEmpty(AgentConfig.Namespace))
+            {
+                _headKey = headKey;
+            }
+            else
+            {
+                _headKey = $"{AgentConfig.Namespace}:{headKey}";
+            }
             _headValue = headValue;
             _next = next;
         }
