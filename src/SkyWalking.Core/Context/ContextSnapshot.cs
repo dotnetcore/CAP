@@ -38,10 +38,10 @@ namespace SkyWalking.Context
         private string _entryOperationName;
         private string _parentOperationName;
 
-        private DistributedTraceId _primaryDistributedTraceId;
+        private readonly DistributedTraceId _primaryDistributedTraceId;
         private int _entryApplicationInstanceId = DictionaryUtil.NullValue;
 
-        public ContextSnapshot(ID traceSegmentId, int spanId, List<DistributedTraceId> distributedTraceIds)
+        public ContextSnapshot(ID traceSegmentId, int spanId, IEnumerable<DistributedTraceId> distributedTraceIds)
         {
             _traceSegmentId = traceSegmentId;
             _spanId = spanId;
