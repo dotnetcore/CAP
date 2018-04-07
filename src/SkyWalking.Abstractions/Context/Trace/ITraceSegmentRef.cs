@@ -27,7 +27,7 @@ namespace SkyWalking.Context.Trace
         
         int EntryOperationId { get; }
         
-        int EntryApplicationInstance { get; }
+        int EntryApplicationInstanceId { get; }
 
         TraceSegmentReference Transform();
     }
