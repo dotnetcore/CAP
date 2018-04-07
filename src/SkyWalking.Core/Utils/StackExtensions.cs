@@ -16,29 +16,34 @@
  *
  */
 
-using System.Threading.Tasks;
+using System.Collections.Generic;
 
-namespace SkyWalking.Sampling
+namespace SkyWalking.Utils
 {
-    public class SamplingService : ISampler
+    public static class StackExtensions
     {
-        public Task Executing()
+        public static bool TryPeek<T>(this Stack<T> stack, out T value)
         {
-            return Task.CompletedTask;
-        }
+            if (stack == null || stack.Count == 0)
+            {
+                value = default(T);
+                return false;
+            }
 
-        public Task Executed()
-        {
-            return Task.CompletedTask;
-        }
-
-        public bool TrySampling()
-        {
+            value = stack.Peek();
             return true;
         }
 
-        public void ForceSampled()
+        public static bool TryPop<T>(this Stack<T> stack, out T value)
         {
+            if (stack == null || stack.Count == 0)
+            {
+                value = default(T);
+                return false;
+            }
+
+            value = stack.Pop();
+            return true;
         }
     }
 }

@@ -16,16 +16,28 @@
  *
  */
 
+using System.Collections;
+using System.Collections.Generic;
 using SkyWalking.Context.Trace;
+using SkyWalking.Sampling;
 
 namespace SkyWalking.Context
 {
     public class TracingContext: ITracerContext
     {
         private long _lastWarningTimestamp = 0;
-        
-        
-        
+        private ISampler _sampler;
+        private ITraceSegment _segment;
+        private Stack<ISpan> _activeSpanStacks;
+        private int _spanIdGenerator;
+
+        public TracingContext()
+        {
+            _sampler = new SamplingService();
+            _segment = new TraceSegment();
+            _activeSpanStacks = new Stack<ISpan>();
+        }
+
         public void Inject(IContextCarrier carrier)
         {
             throw new System.NotImplementedException();

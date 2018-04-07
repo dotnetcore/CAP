@@ -16,29 +16,35 @@
  *
  */
 
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+using SkyWalking.Context.Trace;
 
-namespace SkyWalking.Sampling
+namespace SkyWalking.Context
 {
-    public class SamplingService : ISampler
+    public static class ListenerManager
     {
-        public Task Executing()
+        private static readonly IList<ITracingContextListener> _listeners = new List<ITracingContextListener>();
+
+
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static void Add(ITracingContextListener listener)
         {
-            return Task.CompletedTask;
+            _listeners.Add(listener);
         }
 
-        public Task Executed()
+        [MethodImpl(MethodImplOptions.Synchronized)]
+        public static void Remove(ITracingContextListener listener)
         {
-            return Task.CompletedTask;
+            _listeners.Remove(listener);
         }
 
-        public bool TrySampling()
+        public static void NotifyFinish(ITraceSegment traceSegment)
         {
-            return true;
-        }
-
-        public void ForceSampled()
-        {
+            foreach (var listener in _listeners)
+            {
+                listener.AfterFinished(traceSegment);
+            }
         }
     }
 }
