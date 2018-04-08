@@ -218,6 +218,8 @@ services.AddCap(x =>
 });
 ```
 
+仪表盘默认的访问地址是：[http://localhost:xxx/cap](http://localhost:xxx/cap)，你可以在`d.MatchPath`配置项中修改`cap`路径后缀为其他的名字。
+
 ![dashboard](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220827302-189215107.png)
 
 ![received](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220934115-1107747665.png)
