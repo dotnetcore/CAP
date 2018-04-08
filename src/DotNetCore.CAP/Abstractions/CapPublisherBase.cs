@@ -3,8 +3,10 @@
 
 using System;
 using System.Data;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.Logging;
 
@@ -14,6 +16,11 @@ namespace DotNetCore.CAP.Abstractions
     {
         private readonly IDispatcher _dispatcher;
         private readonly ILogger _logger;
+
+        // diagnostics listener
+        // ReSharper disable once InconsistentNaming
+        private static readonly DiagnosticListener s_diagnosticListener =
+            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
         protected CapPublisherBase(ILogger<CapPublisherBase> logger, IDispatcher dispatcher)
         {
@@ -75,13 +82,13 @@ namespace DotNetCore.CAP.Abstractions
 
         protected virtual string Serialize<T>(T obj, string callbackName = null)
         {
-            var packer = (IMessagePacker) ServiceProvider.GetService(typeof(IMessagePacker));
+            var packer = (IMessagePacker)ServiceProvider.GetService(typeof(IMessagePacker));
             string content;
             if (obj != null)
             {
                 if (Helper.IsComplexType(obj.GetType()))
                 {
-                    var serializer = (IContentSerializer) ServiceProvider.GetService(typeof(IContentSerializer));
+                    var serializer = (IContentSerializer)ServiceProvider.GetService(typeof(IContentSerializer));
                     content = serializer.Serialize(obj);
                 }
                 else
@@ -179,16 +186,20 @@ namespace DotNetCore.CAP.Abstractions
 
         private void PublishWithTrans<T>(string name, T contentObj, string callbackName = null)
         {
+            Guid operationId = default(Guid);
+
+            var content = Serialize(contentObj, callbackName);
+
+            var message = new CapPublishedMessage
+            {
+                Name = name,
+                Content = content,
+                StatusName = StatusName.Scheduled
+            };
+
             try
             {
-                var content = Serialize(contentObj, callbackName);
-
-                var message = new CapPublishedMessage
-                {
-                    Name = name,
-                    Content = content,
-                    StatusName = StatusName.Scheduled
-                };
+                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
 
                 var id = Execute(DbConnection, DbTransaction, message);
 
@@ -197,15 +208,15 @@ namespace DotNetCore.CAP.Abstractions
                 if (id > 0)
                 {
                     _logger.LogInformation($"message [{message}] has been persisted in the database.");
-
+                    s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
                     message.Id = id;
-
                     Enqueue(message);
                 }
             }
             catch (Exception e)
             {
                 _logger.LogError("An exception was occurred when publish message. exception message:" + e.Message, e);
+                s_diagnosticListener.WritePublishMessageStoreError(operationId, message, e);
                 Console.WriteLine(e);
                 throw;
             }

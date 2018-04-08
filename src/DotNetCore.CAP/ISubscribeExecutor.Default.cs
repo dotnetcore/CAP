@@ -18,10 +18,14 @@ namespace DotNetCore.CAP
         private readonly ICallbackMessageSender _callbackMessageSender;
         private readonly IStorageConnection _connection;
         private readonly ILogger _logger;
-        private readonly CapOptions _options;
-
-        private readonly MethodMatcherCache _selector;
         private readonly IStateChanger _stateChanger;
+        private readonly CapOptions _options;
+        private readonly MethodMatcherCache _selector;
+
+        // diagnostics listener
+        // ReSharper disable once InconsistentNaming
+        private static readonly DiagnosticListener s_diagnosticListener =
+            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
         public DefaultSubscriberExecutor(
             ILogger<DefaultSubscriberExecutor> logger,
@@ -139,11 +143,17 @@ namespace DotNetCore.CAP
                 var error = $"message can not be found subscriber, Message:{receivedMessage},\r\n see: https://github.com/dotnetcore/CAP/issues/63";
                 throw new SubscriberNotFoundException(error);
             }
+
+            Guid operationId = default(Guid);
+            var consumerContext = new ConsumerContext(executor, receivedMessage.ToMessageContext());
+
             try
             {
-                var consumerContext = new ConsumerContext(executor, receivedMessage.ToMessageContext());
+                operationId = s_diagnosticListener.WriteConsumerInvokeBefore(consumerContext);
 
                 var ret = await Invoker.InvokeAsync(consumerContext);
+
+                s_diagnosticListener.WriteConsumerInvokeAfter(operationId,consumerContext);
 
                 if (!string.IsNullOrEmpty(ret.CallbackName))
                 {
@@ -152,6 +162,8 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
+                s_diagnosticListener.WriteConsumerInvokeError(operationId, consumerContext, ex);
+
                 throw new SubscriberExecutionFailedException(ex.Message, ex);
             }
         }

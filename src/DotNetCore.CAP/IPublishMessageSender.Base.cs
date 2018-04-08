@@ -20,6 +20,11 @@ namespace DotNetCore.CAP
         private readonly CapOptions _options;
         private readonly IStateChanger _stateChanger;
 
+        // diagnostics listener
+        // ReSharper disable once InconsistentNaming
+        private static readonly DiagnosticListener s_diagnosticListener =
+            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
+
         protected BasePublishMessageSender(
             ILogger logger,
             CapOptions options,
@@ -37,6 +42,7 @@ namespace DotNetCore.CAP
         public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
             var sp = Stopwatch.StartNew();
+            var operationId = s_diagnosticListener.WritePublishBefore(message);
 
             var result = await PublishAsync(message.Name, message.Content);
 
@@ -45,22 +51,26 @@ namespace DotNetCore.CAP
             if (result.Succeeded)
             {
                 await SetSuccessfulState(message);
+
+                s_diagnosticListener.WritePublishAfter(operationId, message);
                 _logger.MessageHasBeenSent(sp.Elapsed.TotalSeconds);
 
                 return OperateResult.Success;
             }
-
-            _logger.MessagePublishException(message.Id, result.Exception);
-
-            await SetFailedState(message, result.Exception, out bool stillRetry);
-
-            if (stillRetry)
+            else
             {
-                _logger.SenderRetrying(3);
+                s_diagnosticListener.WritePublishError(operationId, message, result.Exception);
+                _logger.MessagePublishException(message.Id, result.Exception);
 
-                await SendAsync(message);
+                await SetFailedState(message, result.Exception, out bool stillRetry);
+                if (stillRetry)
+                {
+                    _logger.SenderRetrying(3);
+
+                    await SendAsync(message);
+                }
+                return OperateResult.Failed(result.Exception);
             }
-            return OperateResult.Failed(result.Exception);
         }
 
         private static bool UpdateMessageForRetryAsync(CapPublishedMessage message)

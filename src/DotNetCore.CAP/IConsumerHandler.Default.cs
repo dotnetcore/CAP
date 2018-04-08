@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,6 +25,11 @@ namespace DotNetCore.CAP
 
         private Task _compositeTask;
         private bool _disposed;
+
+        // diagnostics listener
+        // ReSharper disable once InconsistentNaming
+        private static readonly DiagnosticListener s_diagnosticListener =
+            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
         public ConsumerHandler(IConsumerClientFactory consumerClientFactory,
             IDispatcher dispatcher,
@@ -91,21 +97,34 @@ namespace DotNetCore.CAP
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
-            client.OnMessageReceived += (sender, message) =>
+            client.OnMessageReceived += (sender, messageContext) =>
             {
+                Guid operationId = default(Guid);
+
+                var receivedMessage = new CapReceivedMessage(messageContext)
+                {
+                    StatusName = StatusName.Scheduled
+                };
+
                 try
                 {
-                    var storedMessage = StoreMessage(message);
+                    operationId = s_diagnosticListener.WriteReceiveMessageStoreBefore(receivedMessage);
+
+                    StoreMessage(receivedMessage);
 
                     client.Commit();
 
-                    _dispatcher.EnqueueToExecute(storedMessage);
+                    s_diagnosticListener.WriteReceiveMessageStoreAfter(operationId, receivedMessage);
+
+                    _dispatcher.EnqueueToExecute(receivedMessage);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.",
-                        message);
+                    _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.", messageContext);
+
                     client.Reject();
+
+                    s_diagnosticListener.WriteReceiveMessageStoreError(operationId, receivedMessage, e);
                 }
             };
 
@@ -139,15 +158,12 @@ namespace DotNetCore.CAP
             }
         }
 
-        private CapReceivedMessage StoreMessage(MessageContext messageContext)
+        private void StoreMessage(CapReceivedMessage receivedMessage)
         {
-            var receivedMessage = new CapReceivedMessage(messageContext)
-            {
-                StatusName = StatusName.Scheduled
-            };
-            var id = _connection.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
+            var id = _connection.StoreReceivedMessageAsync(receivedMessage)
+                .GetAwaiter().GetResult();
+
             receivedMessage.Id = id;
-            return receivedMessage;
         }
     }
 }
