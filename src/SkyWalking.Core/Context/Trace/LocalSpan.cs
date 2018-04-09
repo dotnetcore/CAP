@@ -21,11 +21,11 @@ namespace SkyWalking.Context.Trace
 {
     public class LocalSpan : StackBasedTracingSpan
     {
-        protected LocalSpan(int spanId, int parentSpanId, string operationName) : base(spanId, parentSpanId, operationName)
+        public LocalSpan(int spanId, int parentSpanId, string operationName) : base(spanId, parentSpanId, operationName)
         {
         }
 
-        protected LocalSpan(int spanId, int parentSpanId, int operationId) : base(spanId, parentSpanId, operationId)
+        public LocalSpan(int spanId, int parentSpanId, int operationId) : base(spanId, parentSpanId, operationId)
         {
         }
 

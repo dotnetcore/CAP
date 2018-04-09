@@ -27,16 +27,34 @@ namespace SkyWalking.Context.Trace
 {
     public class ExitSpan : StackBasedTracingSpan, IWithPeerInfo
     {
-        private string _peer;
-        private int _peerId;
+        private readonly string _peer;
+        private readonly int _peerId;
 
-        protected ExitSpan(int spanId, int parentSpanId, string operationName,string peer) : base(spanId, parentSpanId, operationName)
+        public ExitSpan(int spanId, int parentSpanId, String operationName, String peer)
+            : base(spanId, parentSpanId, operationName)
         {
             _peer = peer;
+            _peerId = DictionaryUtil.NullValue;
         }
 
-        protected ExitSpan(int spanId, int parentSpanId, int operationId,int peerId) : base(spanId, parentSpanId, operationId)
+        public ExitSpan(int spanId, int parentSpanId, int operationId, int peerId)
+            : base(spanId, parentSpanId, operationId)
         {
+            _peer = null;
+            _peerId = peerId;
+        }
+
+        public ExitSpan(int spanId, int parentSpanId, int operationId, String peer)
+            : base(spanId, parentSpanId, operationId)
+        {
+            _peer = peer;
+            _peerId = DictionaryUtil.NullValue;
+        }
+
+        public ExitSpan(int spanId, int parentSpanId, String operationName, int peerId)
+            : base(spanId, parentSpanId, operationName)
+        {
+            _peer = null;
             _peerId = peerId;
         }
 
@@ -54,6 +72,7 @@ namespace SkyWalking.Context.Trace
             {
                 base.Start();
             }
+
             return base.Start();
         }
 
@@ -63,6 +82,7 @@ namespace SkyWalking.Context.Trace
             {
                 base.Tag(key, value);
             }
+
             return this;
         }
 
@@ -72,6 +92,7 @@ namespace SkyWalking.Context.Trace
             {
                 return base.SetLayer(layer);
             }
+
             return this;
         }
 
@@ -81,6 +102,7 @@ namespace SkyWalking.Context.Trace
             {
                 return base.SetComponent(component);
             }
+
             return this;
         }
 
@@ -90,15 +112,13 @@ namespace SkyWalking.Context.Trace
             {
                 return base.SetComponent(componentName);
             }
+
             return this;
         }
 
         public override string OperationName
         {
-            get
-            {
-                return base.OperationName;
-            }
+            get { return base.OperationName; }
             set
             {
                 if (_stackDepth == 1)
@@ -110,10 +130,7 @@ namespace SkyWalking.Context.Trace
 
         public override int OperationId
         {
-            get
-            {
-                return base.OperationId;
-            }
+            get { return base.OperationId; }
             set
             {
                 if (_stackDepth == 1)
@@ -125,7 +142,7 @@ namespace SkyWalking.Context.Trace
 
         public override SpanObject Transform()
         {
-            var spanObject= base.Transform();
+            var spanObject = base.Transform();
 
             if (_peerId != DictionaryUtil.NullValue)
             {
