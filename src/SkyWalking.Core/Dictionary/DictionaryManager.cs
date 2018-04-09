@@ -20,6 +20,8 @@ namespace SkyWalking.Dictionary
 {
     public class DictionaryManager
     {
-        
+        public static NetworkAddressDictionary NetworkAddress => NetworkAddressDictionary.Instance;
+
+        public static OperationNameDictionary OperationName => OperationNameDictionary.Instance;
     }
 }

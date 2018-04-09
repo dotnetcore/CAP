@@ -29,6 +29,13 @@ namespace SkyWalking.Dictionary
 {
     public class OperationNameDictionary
     {
+        private static readonly OperationNameDictionary _instance=new OperationNameDictionary();
+        public static OperationNameDictionary Instance => _instance;
+
+        private OperationNameDictionary()
+        {
+        }
+
         private readonly ConcurrentDictionary<OperationNameKey,int> _operationNameDic=new ConcurrentDictionary<OperationNameKey, int>();
         private readonly ConcurrentDictionary<OperationNameKey,object> _unRegisterOpNames=new ConcurrentDictionary<OperationNameKey, object>();
 
