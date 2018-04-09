@@ -7,6 +7,10 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     public interface IConnectionChannelPool
     {
+        string HostAddress { get; }
+
+        string Exchange { get; }
+
         IConnection GetConnection();
 
         IModel Rent();
