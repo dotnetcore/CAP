@@ -58,7 +58,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Topic exchange name when declare a topic exchange.
         /// </summary>
-        public string TopicExchangeName { get; set; } = DefaultExchangeName;
+        public string ExchangeName { get; set; } = DefaultExchangeName;
 
         /// <summary>
         /// Timeout setting for connection attempts (in milliseconds).
