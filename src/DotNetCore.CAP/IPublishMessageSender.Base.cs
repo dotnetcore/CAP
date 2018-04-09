@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
@@ -22,7 +23,7 @@ namespace DotNetCore.CAP
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
-        private static readonly DiagnosticListener s_diagnosticListener =
+        protected static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
         protected BasePublishMessageSender(
@@ -42,7 +43,6 @@ namespace DotNetCore.CAP
         public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
             var sp = Stopwatch.StartNew();
-            var operationId = s_diagnosticListener.WritePublishBefore(message);
 
             var result = await PublishAsync(message.Name, message.Content);
 
@@ -52,14 +52,12 @@ namespace DotNetCore.CAP
             {
                 await SetSuccessfulState(message);
 
-                s_diagnosticListener.WritePublishAfter(operationId, message);
                 _logger.MessageHasBeenSent(sp.Elapsed.TotalSeconds);
 
                 return OperateResult.Success;
             }
             else
             {
-                s_diagnosticListener.WritePublishError(operationId, message, result.Exception);
                 _logger.MessagePublishException(message.Id, result.Exception);
 
                 await SetFailedState(message, result.Exception, out bool stillRetry);
