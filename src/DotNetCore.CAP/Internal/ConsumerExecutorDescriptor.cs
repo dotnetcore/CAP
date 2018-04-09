@@ -9,7 +9,7 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// A descriptor of user definition method.
     /// </summary>
-    internal class ConsumerExecutorDescriptor
+    public class ConsumerExecutorDescriptor
     {
         public MethodInfo MethodInfo { get; set; }
 
