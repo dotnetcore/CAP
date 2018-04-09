@@ -7,6 +7,8 @@ namespace DotNetCore.CAP.Kafka
 {
     public interface IConnectionPool
     {
+        string ServersAddress { get; }
+
         Producer Rent();
 
         bool Return(Producer context);

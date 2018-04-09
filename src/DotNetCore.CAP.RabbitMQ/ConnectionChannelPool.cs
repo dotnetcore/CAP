@@ -28,6 +28,8 @@ namespace DotNetCore.CAP.RabbitMQ
             _maxSize = DefaultPoolSize;
 
             _connectionActivator = CreateConnection(options);
+            HostAddress = options.HostName + ":" + options.Port;
+            Exchange = options.ExchangeName;
         }
 
         IModel IConnectionChannelPool.Rent()
@@ -39,6 +41,10 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             return Return(connection);
         }
+
+        public string HostAddress { get; }
+
+        public string Exchange { get; }
 
         public IConnection GetConnection()
         {

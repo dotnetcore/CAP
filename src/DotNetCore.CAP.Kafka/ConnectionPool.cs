@@ -21,7 +21,11 @@ namespace DotNetCore.CAP.Kafka
         {
             _maxSize = options.ConnectionPoolSize;
             _activator = CreateActivator(options);
+
+            ServersAddress = options.Servers;
         }
+
+        public string ServersAddress { get; }
 
         Producer IConnectionPool.Rent()
         {
