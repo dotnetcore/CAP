@@ -6,6 +6,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
@@ -99,7 +100,9 @@ namespace DotNetCore.CAP
         {
             client.OnMessageReceived += (sender, messageContext) =>
             {
-                Guid operationId = default(Guid);
+                var startTime = DateTimeOffset.UtcNow;
+                var stopwatch = Stopwatch.StartNew();
+                var operationId = Guid.Empty;
 
                 var receivedMessage = new CapReceivedMessage(messageContext)
                 {
@@ -108,13 +111,22 @@ namespace DotNetCore.CAP
 
                 try
                 {
-                    operationId = s_diagnosticListener.WriteReceiveMessageStoreBefore(receivedMessage);
+                    operationId = s_diagnosticListener.WriteReceiveMessageStoreBefore(
+                        messageContext.Name,
+                        messageContext.Content,
+                        messageContext.Group);
 
                     StoreMessage(receivedMessage);
 
                     client.Commit();
 
-                    s_diagnosticListener.WriteReceiveMessageStoreAfter(operationId, receivedMessage);
+                    s_diagnosticListener.WriteReceiveMessageStoreAfter(
+                        operationId,
+                        messageContext.Name,
+                        messageContext.Content,
+                        messageContext.Group,
+                        startTime,
+                        stopwatch.Elapsed);
 
                     _dispatcher.EnqueueToExecute(receivedMessage);
                 }
@@ -124,7 +136,13 @@ namespace DotNetCore.CAP
 
                     client.Reject();
 
-                    s_diagnosticListener.WriteReceiveMessageStoreError(operationId, receivedMessage, e);
+                    s_diagnosticListener.WriteReceiveMessageStoreError(operationId,
+                        messageContext.Name,
+                        messageContext.Content,
+                        messageContext.Group,
+                        e,
+                        startTime,
+                        stopwatch.Elapsed);
                 }
             };
 

@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
@@ -144,7 +145,10 @@ namespace DotNetCore.CAP
                 throw new SubscriberNotFoundException(error);
             }
 
-            Guid operationId = default(Guid);
+            var startTime = DateTimeOffset.UtcNow;
+            var stopwatch = Stopwatch.StartNew();
+            var operationId = Guid.Empty;
+
             var consumerContext = new ConsumerContext(executor, receivedMessage.ToMessageContext());
 
             try
@@ -153,7 +157,7 @@ namespace DotNetCore.CAP
 
                 var ret = await Invoker.InvokeAsync(consumerContext);
 
-                s_diagnosticListener.WriteConsumerInvokeAfter(operationId,consumerContext);
+                s_diagnosticListener.WriteConsumerInvokeAfter(operationId, consumerContext, startTime, stopwatch.Elapsed);
 
                 if (!string.IsNullOrEmpty(ret.CallbackName))
                 {
@@ -162,7 +166,7 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                s_diagnosticListener.WriteConsumerInvokeError(operationId, consumerContext, ex);
+                s_diagnosticListener.WriteConsumerInvokeError(operationId, consumerContext, ex, startTime, stopwatch.Elapsed);
 
                 throw new SubscriberExecutionFailedException(ex.Message, ex);
             }
