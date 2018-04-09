@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _queueName = queueName;
             _connectionChannelPool = connectionChannelPool;
             _rabbitMQOptions = options;
-            _exchageName = options.TopicExchangeName;
+            _exchageName = options.ExchangeName;
 
             InitClient();
         }
