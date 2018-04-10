@@ -4,6 +4,7 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using DotNetCore.CAP.Diagnostics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -48,7 +49,7 @@ namespace DotNetCore.CAP.Infrastructure
         public static long ToTimestamp(DateTime value)
         {
             var elapsedTime = value - Epoch;
-            return (long) elapsedTime.TotalSeconds;
+            return (long)elapsedTime.TotalSeconds;
         }
 
 
@@ -88,6 +89,12 @@ namespace DotNetCore.CAP.Infrastructure
         {
             var jObject = ToJObject(exception);
             return AddJsonProperty(json, "ExceptionMessage", jObject);
+        }
+
+        public static string AddTracingHeaderProperty(string json, TracingHeaders headers)
+        {
+            var jObject = ToJObject(headers);
+            return AddJsonProperty(json, "TracingHeaders", jObject);
         }
 
         public static bool IsInnerIP(string ipAddress)
@@ -154,6 +161,16 @@ namespace DotNetCore.CAP.Infrastructure
                 exception.Message,
                 InnerMessage = exception.InnerException?.Message
             });
+        }
+
+        private static JObject ToJObject(TracingHeaders headers)
+        {
+            var jobj = new JObject();
+            foreach (var keyValuePair in headers)
+            {
+                jobj[keyValuePair.Key] = keyValuePair.Value;
+            }
+            return jobj;
         }
 
         private static string AddJsonProperty(string json, string propertyName, JObject propertyValue)
