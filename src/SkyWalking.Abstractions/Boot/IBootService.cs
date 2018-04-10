@@ -16,14 +16,12 @@
  *
  */
 
-using System.Threading.Tasks;
+using System;
 
 namespace SkyWalking.Boot
 {
-    public interface IBootService
+    public interface IBootService: IDisposable
     {
-        Task Executing();
-
-        Task Executed();
+        void Init();
     }
 }

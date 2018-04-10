@@ -21,7 +21,7 @@ using SkyWalking.Config;
 using SkyWalking.Dictionarys;
 using SkyWalking.NetworkProtocol;
 
-namespace SkyWalking.Dictionary
+namespace SkyWalking.Dictionarys
 {
     public class NetworkAddressDictionary
     {

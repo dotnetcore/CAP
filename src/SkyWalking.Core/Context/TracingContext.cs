@@ -17,13 +17,10 @@
  */
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Runtime.InteropServices;
+using SkyWalking.Boot;
 using SkyWalking.Context.Trace;
-using SkyWalking.Dictionary;
 using SkyWalking.Dictionarys;
 using SkyWalking.Sampling;
 using SkyWalking.Utils;
@@ -40,7 +37,7 @@ namespace SkyWalking.Context
 
         public TracingContext()
         {
-            _sampler = new SamplingService();
+            _sampler = ServiceManager.Instance.GetService<SamplingService>();
             _segment = new TraceSegment();
             _activeSpanStacks = new Stack<ISpan>();
         }

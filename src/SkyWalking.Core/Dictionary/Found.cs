@@ -18,7 +18,7 @@
 
 using SkyWalking.Dictionarys;
 
-namespace SkyWalking.Dictionary
+namespace SkyWalking.Dictionarys
 {
     public class Found : PossibleFound
     {

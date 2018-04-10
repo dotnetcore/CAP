@@ -16,21 +16,10 @@
  *
  */
 
-using System.Threading.Tasks;
-
 namespace SkyWalking.Sampling
 {
     public class SamplingService : ISampler
     {
-        public Task Executing()
-        {
-            return Task.CompletedTask;
-        }
-
-        public Task Executed()
-        {
-            return Task.CompletedTask;
-        }
 
         public bool TrySampling()
         {
@@ -39,6 +28,16 @@ namespace SkyWalking.Sampling
 
         public void ForceSampled()
         {
+        }
+
+        public void Dispose()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public void Init()
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
