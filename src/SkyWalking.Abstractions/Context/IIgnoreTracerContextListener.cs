@@ -16,35 +16,10 @@
  *
  */
 
-using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using SkyWalking.Context.Trace;
-
 namespace SkyWalking.Context
 {
-    public static class ListenerManager
+    public interface IIgnoreTracerContextListener
     {
-        private static readonly IList<ITracingContextListener> _listeners = new List<ITracingContextListener>();
-
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public static void Add(ITracingContextListener listener)
-        {
-            _listeners.Add(listener);
-        }
-
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public static void Remove(ITracingContextListener listener)
-        {
-            _listeners.Remove(listener);
-        }
-
-        public static void NotifyFinish(ITraceSegment traceSegment)
-        {
-            foreach (var listener in _listeners)
-            {
-                listener.AfterFinished(traceSegment);
-            }
-        }
+        void AfterFinish(ITracerContext tracerContext);
     }
 }

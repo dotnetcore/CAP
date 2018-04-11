@@ -19,6 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using SkyWalking.Boot;
 using SkyWalking.Context.Trace;
 using SkyWalking.Dictionarys;
@@ -379,6 +380,33 @@ namespace SkyWalking.Context
             noopSpan = null;
             
             return true;
+        }
+        
+        
+        public static class ListenerManager
+        {
+            private static readonly IList<ITracingContextListener> _listeners = new List<ITracingContextListener>();
+
+
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            public static void Add(ITracingContextListener listener)
+            {
+                _listeners.Add(listener);
+            }
+
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            public static void Remove(ITracingContextListener listener)
+            {
+                _listeners.Remove(listener);
+            }
+
+            public static void NotifyFinish(ITraceSegment traceSegment)
+            {
+                foreach (var listener in _listeners)
+                {
+                    listener.AfterFinished(traceSegment);
+                }
+            }
         }
     }
 }

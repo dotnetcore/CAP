@@ -31,13 +31,14 @@ namespace SkyWalking.Context
     /// We also provide the CONTEXT propagation based on ThreadLocal mechanism.
     /// Meaning, each segment also related to singe thread.
     /// </summary>
-    public class ContextManager :ITracingContextListener, IBootService
+    public class ContextManager : ITracingContextListener, IBootService, IIgnoreTracerContextListener
     {
         private static readonly ThreadLocal<ITracerContext> _context = new ThreadLocal<ITracerContext>();
 
         private static ITracerContext GetOrCreateContext(String operationName, bool forceSampling)
         {
-            if (!_context.IsValueCreated)
+            var context = _context.Value;
+            if (context == null)
             {
                 if (string.IsNullOrEmpty(operationName))
                 {
@@ -84,7 +85,7 @@ namespace SkyWalking.Context
         {
             get
             {
-                if (_context.IsValueCreated)
+                if (_context.Value != null)
                 {
                     return _context.Value.GetReadableGlobalTraceId();
                 }
@@ -98,11 +99,13 @@ namespace SkyWalking.Context
         public static ISpan CreateEntrySpan(string operationName, IContextCarrier carrier)
         {
             //todo samplingService
+            
             return null;
         }
 
         public void AfterFinished(ITraceSegment traceSegment)
         {
+            _context.Value = null;
         }
 
         public void Dispose()
@@ -111,7 +114,13 @@ namespace SkyWalking.Context
 
         public void Init()
         {
-            throw new NotImplementedException();
+            TracingContext.ListenerManager.Add(this);
+            IgnoredTracerContext.ListenerManager.Add(this);
+        }
+
+        public void AfterFinish(ITracerContext tracerContext)
+        {
+            _context.Value = null;
         }
     }
 }

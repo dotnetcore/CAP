@@ -17,6 +17,8 @@
  */
 
 
+using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using SkyWalking.Context.Trace;
 
 namespace SkyWalking.Context
@@ -70,6 +72,31 @@ namespace SkyWalking.Context
         public void StopSpan(ISpan span)
         {
             _stackDepth--;
+        }
+        
+        public static class ListenerManager
+        {
+            private static readonly List<IIgnoreTracerContextListener> _listeners = new List<IIgnoreTracerContextListener>();
+
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            public static void Add(IIgnoreTracerContextListener listener)
+            {
+                _listeners.Add(listener);
+            }
+
+            public static void NotifyFinish(ITracerContext tracerContext)
+            {
+                foreach (var listener in _listeners)
+                {
+                    listener.AfterFinish(tracerContext);
+                }
+            }
+
+            [MethodImpl(MethodImplOptions.Synchronized)]
+            public static void Remove(IIgnoreTracerContextListener listener)
+            {
+                _listeners.Remove(listener);
+            }
         }
     }
 }
