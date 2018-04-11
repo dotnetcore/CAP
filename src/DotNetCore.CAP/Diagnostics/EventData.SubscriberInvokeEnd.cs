@@ -1,11 +1,12 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 
 namespace DotNetCore.CAP.Diagnostics
 {
     public class SubscriberInvokeEndEventData : SubscriberInvokeEventData
     {
-        public TimeSpan Duration { get; }
-
         public SubscriberInvokeEndEventData(Guid operationId, string operation,
             string methodName, string subscribeName, string subscribeGroup,
             string parameterValues, DateTimeOffset startTime, TimeSpan duration)
@@ -13,5 +14,7 @@ namespace DotNetCore.CAP.Diagnostics
         {
             Duration = duration;
         }
+
+        public TimeSpan Duration { get; }
     }
 }
