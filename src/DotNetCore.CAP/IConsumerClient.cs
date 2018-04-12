@@ -13,6 +13,8 @@ namespace DotNetCore.CAP
     /// </summary>
     public interface IConsumerClient : IDisposable
     {
+        string ServersAddress { get; }
+
         /// <summary>
         /// Subscribe to a set of topics to the message queue
         /// </summary>

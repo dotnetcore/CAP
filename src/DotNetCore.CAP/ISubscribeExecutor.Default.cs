@@ -153,11 +153,11 @@ namespace DotNetCore.CAP
 
             try
             {
-                operationId = s_diagnosticListener.WriteConsumerInvokeBefore(consumerContext);
+                operationId = s_diagnosticListener.WriteSubscriberInvokeBefore(consumerContext);
 
                 var ret = await Invoker.InvokeAsync(consumerContext);
 
-                s_diagnosticListener.WriteConsumerInvokeAfter(operationId, consumerContext, startTime, stopwatch.Elapsed);
+                s_diagnosticListener.WriteSubscriberInvokeAfter(operationId, consumerContext, startTime, stopwatch.Elapsed);
 
                 if (!string.IsNullOrEmpty(ret.CallbackName))
                 {
@@ -166,7 +166,7 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                s_diagnosticListener.WriteConsumerInvokeError(operationId, consumerContext, ex, startTime, stopwatch.Elapsed);
+                s_diagnosticListener.WriteSubscriberInvokeError(operationId, consumerContext, ex, startTime, stopwatch.Elapsed);
 
                 throw new SubscriberExecutionFailedException(ex.Message, ex);
             }

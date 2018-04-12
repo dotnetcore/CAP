@@ -24,6 +24,7 @@ namespace DotNetCore.CAP
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly MethodMatcherCache _selector;
 
+        private string _serverAddress;
         private Task _compositeTask;
         private bool _disposed;
 
@@ -56,6 +57,8 @@ namespace DotNetCore.CAP
                 {
                     using (var client = _consumerClientFactory.Create(matchGroup.Key))
                     {
+                        _serverAddress = client.ServersAddress;
+
                         RegisterMessageProcessor(client);
 
                         client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
@@ -102,30 +105,24 @@ namespace DotNetCore.CAP
             {
                 var startTime = DateTimeOffset.UtcNow;
                 var stopwatch = Stopwatch.StartNew();
-                var operationId = Guid.Empty;
+
+                var tracingResult = TracingBefore(messageContext.Name, messageContext.Content);
+                var operationId = tracingResult.Item1;
+                var messageBody = tracingResult.Item2;
 
                 var receivedMessage = new CapReceivedMessage(messageContext)
                 {
-                    StatusName = StatusName.Scheduled
+                    StatusName = StatusName.Scheduled,
+                    Content = messageBody
                 };
 
                 try
                 {
-                    operationId = s_diagnosticListener.WriteReceiveMessageStoreBefore(
-                        messageContext.Name,
-                        messageContext.Content,
-                        messageContext.Group);
-
                     StoreMessage(receivedMessage);
 
                     client.Commit();
 
-                    s_diagnosticListener.WriteReceiveMessageStoreAfter(
-                        operationId,
-                        messageContext.Name,
-                        messageContext.Content,
-                        messageContext.Group,
-                        startTime,
+                    TracingAfter(operationId, receivedMessage.Name, receivedMessage.Content, startTime,
                         stopwatch.Elapsed);
 
                     _dispatcher.EnqueueToExecute(receivedMessage);
@@ -136,12 +133,7 @@ namespace DotNetCore.CAP
 
                     client.Reject();
 
-                    s_diagnosticListener.WriteReceiveMessageStoreError(operationId,
-                        messageContext.Name,
-                        messageContext.Content,
-                        messageContext.Group,
-                        e,
-                        startTime,
+                    TracingError(operationId, receivedMessage.Name, receivedMessage.Content, e, startTime,
                         stopwatch.Elapsed);
                 }
             };
@@ -182,6 +174,51 @@ namespace DotNetCore.CAP
                 .GetAwaiter().GetResult();
 
             receivedMessage.Id = id;
+        }
+
+        private (Guid, string) TracingBefore(string topic, string values)
+        {
+            Guid operationId = Guid.NewGuid();
+
+            var eventData = new BrokerConsumeEventData(
+                operationId, "",
+                _serverAddress,
+                topic,
+                values,
+                DateTimeOffset.UtcNow);
+
+            s_diagnosticListener.WriteConsumeBefore(eventData);
+
+            return (operationId, eventData.BrokerTopicBody);
+        }
+
+        private void TracingAfter(Guid operationId, string topic, string values, DateTimeOffset startTime, TimeSpan du)
+        {
+            var eventData = new BrokerConsumeEndEventData(
+                operationId,
+                "",
+                _serverAddress,
+                topic,
+                values,
+                startTime,
+                du);
+
+            s_diagnosticListener.WriteConsumeAfter(eventData);
+        }
+
+        private void TracingError(Guid operationId, string topic, string values, Exception ex, DateTimeOffset startTime, TimeSpan du)
+        {
+            var eventData = new BrokerConsumeErrorEventData(
+                operationId,
+                "",
+                _serverAddress,
+                topic,
+                values,
+                ex,
+                startTime,
+                du);
+
+            s_diagnosticListener.WriteConsumeError(eventData);
         }
     }
 }
