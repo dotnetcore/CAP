@@ -2,7 +2,9 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using DotNetCore.CAP.Diagnostics;
 using Newtonsoft.Json;
@@ -94,7 +96,29 @@ namespace DotNetCore.CAP.Infrastructure
         public static string AddTracingHeaderProperty(string json, TracingHeaders headers)
         {
             var jObject = ToJObject(headers);
-            return AddJsonProperty(json, "TracingHeaders", jObject);
+            return AddJsonProperty(json, nameof(TracingHeaders), jObject);
+        }
+
+        public static bool TryExtractTracingHeaders(string json, out TracingHeaders headers, out string removedHeadersJson)
+        {
+            var jObj = JObject.Parse(json);
+            var jToken = jObj[nameof(TracingHeaders)];
+            if (jToken != null)
+            {
+                headers = new TracingHeaders();
+                foreach (var item in jToken.ToObject<Dictionary<string,string>>())
+                {
+                    headers.Add(item.Key, item.Value);
+                }
+
+                jObj.Remove(nameof(TracingHeaders)); 
+                removedHeadersJson = jObj.ToString();
+                return true;
+            }
+
+            headers = null;
+            removedHeadersJson = null;
+            return false;
         }
 
         public static bool IsInnerIP(string ipAddress)
