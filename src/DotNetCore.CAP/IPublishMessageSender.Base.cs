@@ -21,6 +21,8 @@ namespace DotNetCore.CAP
         private readonly CapOptions _options;
         private readonly IStateChanger _stateChanger;
 
+        protected string ServersAddress { get; set; }
+
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
         protected static readonly DiagnosticListener s_diagnosticListener =
@@ -42,25 +44,35 @@ namespace DotNetCore.CAP
 
         public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
-            var sp = Stopwatch.StartNew();
+            var startTime = DateTimeOffset.UtcNow;
+            var stopwatch = Stopwatch.StartNew();
 
-            var result = await PublishAsync(message.Name, message.Content);
+            var tracingResult = TracingBefore(message.Name, message.Content);
+            var operationId = tracingResult.Item1;
 
-            sp.Stop();
+            var sendValues = tracingResult.Item2 != null
+                ? Helper.AddTracingHeaderProperty(message.Content, tracingResult.Item2)
+                : message.Content;
 
+            var result = await PublishAsync(message.Name, sendValues);
+
+            stopwatch.Stop();
             if (result.Succeeded)
             {
                 await SetSuccessfulState(message);
 
-                _logger.MessageHasBeenSent(sp.Elapsed.TotalSeconds);
+                TracingAfter(operationId, message.Name, sendValues, startTime, stopwatch.Elapsed);
 
                 return OperateResult.Success;
             }
             else
             {
+                TracingError(operationId, message.Name, sendValues, result.Exception, startTime, stopwatch.Elapsed);
+
                 _logger.MessagePublishException(message.Id, result.Exception);
 
                 await SetFailedState(message, result.Exception, out bool stillRetry);
+
                 if (stillRetry)
                 {
                     _logger.SenderRetrying(3);
@@ -121,6 +133,52 @@ namespace DotNetCore.CAP
         private static void AddErrorReasonToContent(CapPublishedMessage message, Exception exception)
         {
             message.Content = Helper.AddExceptionProperty(message.Content, exception);
+        }
+
+        private (Guid, TracingHeaders) TracingBefore(string topic, string values)
+        {
+            Guid operationId = Guid.NewGuid();
+
+            var eventData = new BrokerPublishEventData(
+                operationId, "",
+                ServersAddress, topic,
+                values,
+                DateTimeOffset.UtcNow);
+
+            s_diagnosticListener.WritePublishBefore(eventData);
+
+            return (operationId, eventData.Headers);
+        }
+
+        private void TracingAfter(Guid operationId, string topic, string values, DateTimeOffset startTime, TimeSpan du)
+        {
+            var eventData = new BrokerPublishEndEventData(
+                operationId,
+                "",
+                ServersAddress,
+                topic,
+                values,
+                startTime,
+                du);
+
+            s_diagnosticListener.WritePublishAfter(eventData);
+
+            _logger.MessageHasBeenSent(du.TotalSeconds);
+        }
+
+        private void TracingError(Guid operationId, string topic, string values, Exception ex, DateTimeOffset startTime, TimeSpan du)
+        {
+            var eventData = new BrokerPublishErrorEventData(
+                operationId,
+                "",
+                ServersAddress,
+                topic,
+                values,
+                ex,
+                startTime,
+                du);
+
+            s_diagnosticListener.WritePublishError(eventData);
         }
     }
 }

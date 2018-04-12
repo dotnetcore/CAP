@@ -29,6 +29,8 @@ namespace DotNetCore.CAP.Kafka
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
+        public string ServersAddress => _kafkaOptions.Servers;
+
         public void Subscribe(IEnumerable<string> topics)
         {
             if (topics == null)

@@ -174,7 +174,7 @@ namespace DotNetCore.CAP.Diagnostics
                 var subscribeGroup = context.ConsumerDescriptor.Attribute.Group;
                 var parameterValues = context.DeliverMessage.Content;
 
-                @this.Write(CapBeforePublish, new SubscriberInvokeEventData(operationId, operation, methodName,
+                @this.Write(CapBeforeSubscriberInvoke, new SubscriberInvokeEventData(operationId, operation, methodName,
                     subscribeName,
                     subscribeGroup, parameterValues, DateTimeOffset.UtcNow));
 
@@ -198,7 +198,7 @@ namespace DotNetCore.CAP.Diagnostics
                 var subscribeGroup = context.ConsumerDescriptor.Attribute.Group;
                 var parameterValues = context.DeliverMessage.Content;
 
-                @this.Write(CapBeforePublish, new SubscriberInvokeEndEventData(operationId, operation, methodName,
+                @this.Write(CapAfterSubscriberInvoke, new SubscriberInvokeEndEventData(operationId, operation, methodName,
                     subscribeName,
                     subscribeGroup, parameterValues, startTime, duration));
             }
@@ -219,7 +219,7 @@ namespace DotNetCore.CAP.Diagnostics
                 var subscribeGroup = context.ConsumerDescriptor.Attribute.Group;
                 var parameterValues = context.DeliverMessage.Content;
 
-                @this.Write(CapBeforePublish, new SubscriberInvokeErrorEventData(operationId, operation, methodName,
+                @this.Write(CapErrorSubscriberInvoke, new SubscriberInvokeErrorEventData(operationId, operation, methodName,
                     subscribeName,
                     subscribeGroup, parameterValues, ex, startTime, duration));
             }
