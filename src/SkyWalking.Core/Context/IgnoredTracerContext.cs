@@ -72,6 +72,9 @@ namespace SkyWalking.Context
         public void StopSpan(ISpan span)
         {
             _stackDepth--;
+            if (_stackDepth == 0) {
+                ListenerManager.NotifyFinish(this);
+            }
         }
         
         public static class ListenerManager

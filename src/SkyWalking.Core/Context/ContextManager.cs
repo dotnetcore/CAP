@@ -98,11 +98,77 @@ namespace SkyWalking.Context
 
         public static ISpan CreateEntrySpan(string operationName, IContextCarrier carrier)
         {
-            //todo samplingService
-            
-            return null;
+            var samplingService = ServiceManager.Instance.GetService<SamplingService>();
+            if (carrier != null && carrier.IsValid)
+            {
+                samplingService.ForceSampled();
+                var context = GetOrCreateContext(operationName, true);
+                var span = context.CreateEntrySpan(operationName);
+                context.Extract(carrier);
+                return span;
+            }
+            else
+            {
+                var context = GetOrCreateContext(operationName, false);
+                
+                return context.CreateEntrySpan(operationName);
+            }
         }
 
+        public static ISpan CreateLocalSpan(string operationName)
+        {
+            var context = GetOrCreateContext(operationName, false);
+            return context.CreateLocalSpan(operationName);
+        }
+
+        public static ISpan CreateExitSpan(string operationName, IContextCarrier carrier, string remotePeer)
+        {
+            var context = GetOrCreateContext(operationName, false);
+            var span = context.CreateExitSpan(operationName, remotePeer);
+            context.Inject(carrier);
+            return span;
+        }
+        
+        public static ISpan CreateExitSpan(string operationName, string remotePeer)
+        {
+            var context = GetOrCreateContext(operationName, false);
+            var span = context.CreateExitSpan(operationName, remotePeer);
+            return span;
+        }
+
+        public static void Inject(IContextCarrier carrier)
+        {
+            Context?.Inject(carrier);
+        }
+
+        public static void Extract(IContextCarrier carrier)
+        {
+            Context?.Extract(carrier);
+        }
+
+        public static void Continued(IContextSnapshot snapshot)
+        {
+            if (snapshot.IsValid && !snapshot.IsFromCurrent)
+            {
+                Context?.Continued(snapshot);
+            }
+        }
+
+        public static void StopSpan()
+        {
+            StopSpan(ActiveSpan);
+        }
+
+        public static ISpan ActiveSpan
+        {
+            get { return Context?.ActiveSpan; }
+        }
+
+        public static void StopSpan(ISpan span)
+        {
+            Context?.StopSpan(span);
+        }
+        
         public void AfterFinished(ITraceSegment traceSegment)
         {
             _context.Value = null;
