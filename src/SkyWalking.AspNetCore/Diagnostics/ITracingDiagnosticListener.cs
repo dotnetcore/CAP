@@ -16,19 +16,10 @@
  *
  */
 
-using SkyWalking.Context.Trace;
-
-namespace SkyWalking.Context.Tag
+namespace SkyWalking.AspNetCore.Diagnostics
 {
-    public class StringTag : AbstractTag<string>
+    public interface ITracingDiagnosticListener
     {
-        public StringTag(string tagKey) : base(tagKey)
-        {
-        }
-
-        public override void Set(ISpan span, string tagValue)
-        {
-            span.Tag(Key, tagValue);
-        }
+        string ListenerName { get; }
     }
 }

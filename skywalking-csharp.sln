@@ -28,6 +28,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.AspNetCore", "src\SkyWalking.AspNetCore\SkyWalking.AspNetCore.csproj", "{D75B68C5-6788-4871-A63F-F6EB48FB0DC5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 		{50BE8184-EC7A-4257-AF54-764C0E61276F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{50BE8184-EC7A-4257-AF54-764C0E61276F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{50BE8184-EC7A-4257-AF54-764C0E61276F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D75B68C5-6788-4871-A63F-F6EB48FB0DC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D75B68C5-6788-4871-A63F-F6EB48FB0DC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D75B68C5-6788-4871-A63F-F6EB48FB0DC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D75B68C5-6788-4871-A63F-F6EB48FB0DC5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -66,6 +72,7 @@ Global
 		{FD84A10C-C962-4AEA-BA06-86F08EB048E6} = {CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810}
 		{54B9183A-928B-43E1-9851-10E2F1CCE61C} = {CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810}
 		{50BE8184-EC7A-4257-AF54-764C0E61276F} = {CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810}
+		{D75B68C5-6788-4871-A63F-F6EB48FB0DC5} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94C0DA2C-CCCB-4314-93A2-9809B5DD0583}

@@ -28,7 +28,7 @@ namespace SkyWalking.Context.Tag
             Key = tagKey;
         }
 
-        protected abstract void Set(ISpan span, T tagValue);
+        public abstract void Set(ISpan span, T tagValue);
 
         /**
          * @return the key of this tag.
