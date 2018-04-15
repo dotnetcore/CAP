@@ -16,6 +16,9 @@
  *
  */
 
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace SkyWalking.Sampling
 {
     public class SamplingService : ISampler
@@ -32,12 +35,11 @@ namespace SkyWalking.Sampling
 
         public void Dispose()
         {
-            throw new System.NotImplementedException();
         }
 
-        public void Init()
+        public Task Initialize(CancellationToken token)
         {
-            throw new System.NotImplementedException();
+            return Task.CompletedTask;
         }
     }
 }

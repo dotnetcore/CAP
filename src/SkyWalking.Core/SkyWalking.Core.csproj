@@ -14,4 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Remote" />
+  </ItemGroup>
 </Project>

@@ -18,6 +18,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using SkyWalking.Boot;
 using SkyWalking.Config;
 using SkyWalking.Context.Trace;
@@ -178,10 +179,11 @@ namespace SkyWalking.Context
         {
         }
 
-        public void Init()
+        public Task Initialize(CancellationToken token)
         {
             TracingContext.ListenerManager.Add(this);
             IgnoredTracerContext.ListenerManager.Add(this);
+            return Task.CompletedTask;
         }
 
         public void AfterFinish(ITracerContext tracerContext)

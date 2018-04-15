@@ -20,6 +20,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace SkyWalking.Boot
 {
@@ -30,6 +32,7 @@ namespace SkyWalking.Boot
         public static ServiceManager Instance => _instance;
         
         private readonly Dictionary<Type, object> _services = new Dictionary<Type, object>();
+        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
 
         private ServiceManager()
         {
@@ -52,16 +55,14 @@ namespace SkyWalking.Boot
             return (T) GetService(typeof(T));
         }
 
-        
-        [MethodImpl(MethodImplOptions.Synchronized)]
-        public void Init()
+        public async Task Initialize()
         {
             var types = FindServiceTypes();
             foreach (var type in types)
             {
                 if (Activator.CreateInstance(type) is IBootService service)
                 {
-                    service.Init();
+                    await service.Initialize(_tokenSource.Token);
                     _services.Add(type, service);
                 }
             }
@@ -70,11 +71,13 @@ namespace SkyWalking.Boot
         [MethodImpl(MethodImplOptions.Synchronized)]
         public void Dispose()
         {
+            _tokenSource.Cancel();
             foreach (var item in _services.Values)
             {
                 var service = item as IBootService;
                 service?.Dispose();
             }
+            _tokenSource.Dispose();
         }
     }
 }

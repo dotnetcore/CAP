@@ -16,14 +16,9 @@
  *
  */
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
-namespace SkyWalking.Boot
+namespace SkyWalking.Config
 {
-    public interface IBootService : IDisposable
+    public class CollectorConfig
     {
-        Task Initialize(CancellationToken token);
     }
 }

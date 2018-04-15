@@ -22,8 +22,34 @@ using System.Threading.Tasks;
 
 namespace SkyWalking.Boot
 {
-    public interface IBootService : IDisposable
+    public abstract class TimerService : IBootService
     {
-        Task Initialize(CancellationToken token);
+        protected abstract TimeSpan Interval { get; }
+        private Task _task;
+
+        public virtual void Dispose()
+        {
+        }
+
+        public async Task Initialize(CancellationToken token)
+        {
+            await Initializing(token);
+            _task = Task.Factory.StartNew(async () =>
+                {
+                    while (true)
+                    {
+                        await Execute(token);
+                        await Task.Delay(Interval, token);
+                    }  
+                },
+                token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+        }
+
+        protected virtual Task Initializing(CancellationToken token)
+        {
+            return Task.CompletedTask;
+        }
+
+        protected abstract Task Execute(CancellationToken token);
     }
 }
