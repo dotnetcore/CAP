@@ -18,9 +18,7 @@
 
 using System;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
-using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Boot;
@@ -50,7 +48,7 @@ namespace SkyWalking.Remote
             var registerTime = DateTime.UtcNow.GetTimeMillis();
 
             var hostName = Dns.GetHostName();
-//            var ipv4s = Dns.GetHostAddresses(hostName);
+           
             var osInfo = new OSInfo
             {
                 Hostname = hostName,
@@ -58,8 +56,10 @@ namespace SkyWalking.Remote
                 ProcessNo = Process.GetCurrentProcess().Id
             };
 
-//            foreach (var ipAddress in ipv4s.Where(x => x.AddressFamily == AddressFamily.InterNetwork))
-//                osInfo.Ipv4S.Add(ipAddress.ToString());
+            // todo fix Device not configured
+            //var ipv4s = Dns.GetHostAddresses(hostName);          
+            //foreach (var ipAddress in ipv4s.Where(x => x.AddressFamily == AddressFamily.InterNetwork))
+            //   osInfo.Ipv4S.Add(ipAddress.ToString());
 
             var applicationInstance = new ApplicationInstance
             {
@@ -75,8 +75,7 @@ namespace SkyWalking.Remote
         }
 
         protected override TimeSpan Interval { get; } = TimeSpan.FromMinutes(1);
-        
-        
+           
         protected override async Task Execute(CancellationToken token)
         {
             var instanceDiscoveryService =
