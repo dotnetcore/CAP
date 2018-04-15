@@ -179,6 +179,8 @@ namespace SkyWalking.Context
         {
         }
 
+        public int Order { get; } = 1;
+
         public Task Initialize(CancellationToken token)
         {
             TracingContext.ListenerManager.Add(this);

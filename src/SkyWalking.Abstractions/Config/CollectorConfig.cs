@@ -20,5 +20,20 @@ namespace SkyWalking.Config
 {
     public class CollectorConfig
     {
+        /// <summary>
+        /// service registry check interval
+        /// </summary>
+        public static long ServiceRegisterCheckInterval { get; set; } = 3;
+        
+        /// <summary>
+        /// Collector agent_gRPC/grpc service addresses.
+        /// By using this, no discovery mechanism provided. The agent only uses these addresses to uplink data.
+        /// Recommend to use this only when collector cluster IPs are unreachable from agent side. Such as:
+        /// 1. Agent and collector cluster are in different VPC in Cloud.
+        /// 2. Agent uplinks data to collector cluster through Internet.
+        /// Single collector：DirectServers="127.0.0.1:11800"
+        /// Collector cluster：DirectServers="10.2.45.126:11800,10.2.45.127:11800"
+        /// </summary>
+        public static string DirectServers { get; set; }
     }
 }

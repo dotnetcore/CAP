@@ -17,6 +17,7 @@
  */
 
 using System.Collections.Generic;
+using System.Linq;
 using SkyWalking.Dictionarys;
 
 namespace SkyWalking.Config
@@ -36,10 +37,15 @@ namespace SkyWalking.Config
 
         public static class Collector
         {
+            private static IList<string> _grpcServers;
             /// <summary>
             /// Collector GRPC-Service address.
             /// </summary>
-            public static IList<string> gRPCServers = new List<string>();
+            public static IList<string> gRPCServers
+            {
+                get => _grpcServers ?? CollectorConfig.DirectServers.Split(',').ToList();
+                set => _grpcServers = value;
+            }
         }
     }
 }

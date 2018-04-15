@@ -40,7 +40,8 @@ namespace SkyWalking.Boot
 
         private Type[] FindServiceTypes()
         {
-            return typeof(ServiceManager).Assembly.GetTypes().Where(x => typeof(IBootService).IsAssignableFrom(x))
+            return typeof(ServiceManager).Assembly.GetTypes().Where(x => 
+                  x.IsClass && !x.IsAbstract && typeof(IBootService).IsAssignableFrom(x))
                 .ToArray();
         }
 
