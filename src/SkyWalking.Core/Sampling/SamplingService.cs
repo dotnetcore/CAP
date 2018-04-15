@@ -37,6 +37,8 @@ namespace SkyWalking.Sampling
         {
         }
 
+        public int Order { get; } = 1;
+
         public Task Initialize(CancellationToken token)
         {
             return Task.CompletedTask;

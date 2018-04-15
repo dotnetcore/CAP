@@ -58,13 +58,10 @@ namespace SkyWalking.Boot
         public async Task Initialize()
         {
             var types = FindServiceTypes();
-            foreach (var type in types)
+            foreach (var service in types.Select(Activator.CreateInstance).OfType<IBootService>().OrderBy(x => x.Order))
             {
-                if (Activator.CreateInstance(type) is IBootService service)
-                {
-                    await service.Initialize(_tokenSource.Token);
-                    _services.Add(type, service);
-                }
+                await service.Initialize(_tokenSource.Token);
+                _services.Add(service.GetType(), service);
             }
         }
 

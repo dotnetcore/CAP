@@ -31,6 +31,8 @@ namespace SkyWalking.Boot
         {
         }
 
+        public virtual int Order { get; } = 2;
+
         public async Task Initialize(CancellationToken token)
         {
             await Initializing(token);

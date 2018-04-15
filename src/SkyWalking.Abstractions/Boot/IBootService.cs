@@ -24,6 +24,8 @@ namespace SkyWalking.Boot
 {
     public interface IBootService : IDisposable
     {
+        int Order { get; }
+        
         Task Initialize(CancellationToken token);
     }
 }
