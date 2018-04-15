@@ -25,7 +25,7 @@ namespace SkyWalking.Context.Ids
 {
     public static class GlobalIdGenerator
     {
-        private static ThreadLocal<IDContext> threadIdSequence = new ThreadLocal<IDContext>(() => new IDContext(DateTime.Now.GetTimeMillis(), 0));
+        private static readonly ThreadLocal<IDContext> threadIdSequence = new ThreadLocal<IDContext>(() => new IDContext(DateTime.Now.GetTimeMillis(), 0));
 
         public static ID Generate()
         {
@@ -37,7 +37,7 @@ namespace SkyWalking.Context.Ids
             IDContext context = threadIdSequence.Value;
 
             return new ID(
-                RemoteDownstreamConfig.Agent.ApplicationId,
+                RemoteDownstreamConfig.Agent.ApplicationInstanceId,
                 Thread.CurrentThread.ManagedThreadId,
                 context.NextSeq()
             );
@@ -51,7 +51,7 @@ namespace SkyWalking.Context.Ids
             // Just for considering time-shift-back only.
             private long _runRandomTimestamp;
             private int _lastRandomValue;
-            private Random _random;
+            private readonly Random _random;
 
             public IDContext(long lastTimestamp, short threadSeq)
             {

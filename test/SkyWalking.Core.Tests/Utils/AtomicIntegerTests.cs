@@ -11,7 +11,7 @@ namespace SkyWalking.Core.Tests.Utils
         {
             var atomicInteger = new AtomicInteger();
             var result = atomicInteger.Add(2);
-            Assert.Equal(result, 2);
+            Assert.Equal(2, result);
         }
 
         [Fact]
@@ -19,7 +19,7 @@ namespace SkyWalking.Core.Tests.Utils
         {
             var atomicInteger = new AtomicInteger(5);
             var result = atomicInteger.Increment();
-            Assert.Equal(result, 6);
+            Assert.Equal(6, result);
         }
         
         [Fact]
@@ -27,7 +27,7 @@ namespace SkyWalking.Core.Tests.Utils
         {
             var atomicInteger = new AtomicInteger(5);
             var result = atomicInteger.Decrement();
-            Assert.Equal(result, 4);
+            Assert.Equal(4, result);
         }
 
         [Fact]
@@ -35,7 +35,7 @@ namespace SkyWalking.Core.Tests.Utils
         {
             var atomicInteger = new AtomicInteger(5);
             var result = atomicInteger + 2;
-            Assert.Equal<int>(result, 7);
+            Assert.Equal<int>(7, result);
         }
         
         [Fact]
@@ -43,7 +43,7 @@ namespace SkyWalking.Core.Tests.Utils
         {
             var atomicInteger = new AtomicInteger(5);
             var result = atomicInteger - 2;
-            Assert.Equal<int>(result, 3);
+            Assert.Equal<int>(3, result);
         }
 
         [Fact]
