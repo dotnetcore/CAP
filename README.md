@@ -187,7 +187,10 @@ Then inject your  `ISubscriberService`  class in Startup.cs
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
+    //Note: The injection of services needs before of `services.AddCap(x=>{});`
     services.AddTransient<ISubscriberService,SubscriberService>();
+	
+	services.AddCap(x=>{});
 }
 ```
 
