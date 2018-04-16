@@ -32,6 +32,9 @@ namespace SkyWalking.AspNetCore
 {
     public class SkyWalkingHostedService : IHostedService
     {
+        private readonly IEnumerable<ITracingDiagnosticListener> _tracingDiagnosticListeners;
+        private readonly DiagnosticListener _diagnosticListener;
+        
         public SkyWalkingHostedService(IOptions<SkyWalkingOptions> options, IHostingEnvironment hostingEnvironment,
             IEnumerable<ITracingDiagnosticListener> tracingDiagnosticListeners, DiagnosticListener diagnosticListener)
         {
@@ -48,19 +51,21 @@ namespace SkyWalking.AspNetCore
             AgentConfig.ApplicationCode = options.Value.ApplicationCode;
             CollectorConfig.DirectServers = options.Value.DirectServers;
 
-            foreach (var tracingDiagnosticListener in tracingDiagnosticListeners)
-                diagnosticListener.SubscribeWithAdapter(tracingDiagnosticListener);
+            _tracingDiagnosticListeners = tracingDiagnosticListeners;
+            _diagnosticListener = diagnosticListener;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await GrpcChannelManager.Instance.ConnectAsync();
             await ServiceManager.Instance.Initialize();
+            foreach (var tracingDiagnosticListener in _tracingDiagnosticListeners)
+                _diagnosticListener.SubscribeWithAdapter(tracingDiagnosticListener);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            GrpcChannelManager.Instance.ShutdownAsync();
+            await GrpcChannelManager.Instance.ShutdownAsync();
             ServiceManager.Instance.Dispose();
         }
     }

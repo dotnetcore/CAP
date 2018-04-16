@@ -34,9 +34,9 @@ namespace SkyWalking.Context
     /// </summary>
     public class ContextManager : ITracingContextListener, IBootService, IIgnoreTracerContextListener
     {
-        private static readonly ThreadLocal<ITracerContext> _context = new ThreadLocal<ITracerContext>();
+        private static readonly AsyncLocal<ITracerContext> _context = new AsyncLocal<ITracerContext>();
 
-        private static ITracerContext GetOrCreateContext(String operationName, bool forceSampling)
+        private static ITracerContext GetOrCreateContext(string operationName, bool forceSampling)
         {
             var context = _context.Value;
             if (context == null)
@@ -49,7 +49,7 @@ namespace SkyWalking.Context
                 else
                 {
                     if (!DictionaryUtil.IsNull(RemoteDownstreamConfig.Agent.ApplicationId) &&
-                        DictionaryUtil.IsNull(RemoteDownstreamConfig.Agent.ApplicationInstanceId))
+                        !DictionaryUtil.IsNull(RemoteDownstreamConfig.Agent.ApplicationInstanceId))
                     {
                         var suffixIdx = operationName.LastIndexOf('.');
                         if (suffixIdx > -1 && AgentConfig.IgnoreSuffix.Contains(operationName.Substring(suffixIdx)))

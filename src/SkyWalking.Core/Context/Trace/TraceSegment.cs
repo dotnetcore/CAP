@@ -39,7 +39,7 @@ namespace SkyWalking.Context.Trace
 
         public IEnumerable<ITraceSegmentRef> Refs => _refs;
 
-        public IEnumerable<DistributedTraceId> RelatedGlobalTraces { get; }
+        public IEnumerable<DistributedTraceId> RelatedGlobalTraces => _relatedGlobalTraces.GetRelatedGlobalTraces();
 
         public ID TraceSegmentId { get; }
 

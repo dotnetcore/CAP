@@ -29,7 +29,7 @@ namespace SkyWalking.Remote
                 new TraceSegmentService.TraceSegmentServiceClient(GrpcChannelManager.Instance.Channel);
             using (var asyncClientStreamingCall = traceSegmentService.collect())
             {
-                asyncClientStreamingCall.RequestStream.WriteAsync(segment);
+                await asyncClientStreamingCall.RequestStream.WriteAsync(segment);
                 await asyncClientStreamingCall.RequestStream.CompleteAsync();
             }
         }

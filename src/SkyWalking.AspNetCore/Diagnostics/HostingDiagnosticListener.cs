@@ -22,6 +22,7 @@ using Microsoft.Extensions.DiagnosticAdapter;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
 using SkyWalking.Context.Trace;
+using SkyWalking.NetworkProtocol.Trace;
 
 namespace SkyWalking.AspNetCore.Diagnostics
 {
@@ -48,7 +49,7 @@ namespace SkyWalking.AspNetCore.Diagnostics
 
             var httpRequestSpan = ContextManager.CreateEntrySpan(httpContext.Request.Path, carrier);
             httpRequestSpan.AsHttp();
-            httpRequestSpan.SetComponent("Asp.Net Core");
+            httpRequestSpan.SetComponent(ComponentsDefine.AspNetCore);
             Tags.Url.Set(httpRequestSpan, httpContext.Request.Path);
             Tags.HTTP.Method.Set(httpRequestSpan, httpContext.Request.Method);
         }
@@ -57,6 +58,10 @@ namespace SkyWalking.AspNetCore.Diagnostics
         public void HttpRequestInStop(HttpContext httpContext)
         {
             var httpRequestSpan = ContextManager.ActiveSpan;
+            if (httpRequestSpan == null)
+            {
+                return;
+            }
             var statusCode = httpContext.Response.StatusCode;
             if (statusCode >= 400)
             {

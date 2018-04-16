@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using SkyWalking.Boot;
 using SkyWalking.Config;
 using SkyWalking.Context;
+using SkyWalking.Dictionarys;
 using SkyWalking.NetworkProtocol;
 
 namespace SkyWalking.Remote
@@ -37,9 +38,16 @@ namespace SkyWalking.Remote
             var application = new Application {ApplicationCode = AgentConfig.ApplicationCode};
             var applicationRegisterService =
                 new ApplicationRegisterService.ApplicationRegisterServiceClient(GrpcChannelManager.Instance.Channel);
-            var applicationMapping = await applicationRegisterService.applicationCodeRegisterAsync(application);
 
-            RemoteDownstreamConfig.Agent.ApplicationId = applicationMapping.Application.Value;
+            var applicationId = default(int?);
+
+            while (!applicationId.HasValue || DictionaryUtil.IsNull(applicationId.Value))
+            {
+                var applicationMapping = await applicationRegisterService.applicationCodeRegisterAsync(application);
+                applicationId = applicationMapping?.Application?.Value;
+            }
+
+            RemoteDownstreamConfig.Agent.ApplicationId = applicationId.Value;
 
             var instanceDiscoveryService =
                 new InstanceDiscoveryService.InstanceDiscoveryServiceClient(GrpcChannelManager.Instance.Channel);
@@ -63,14 +71,21 @@ namespace SkyWalking.Remote
 
             var applicationInstance = new ApplicationInstance
             {
-                ApplicationId = applicationMapping.Application.Value,
+                ApplicationId = applicationId.Value,
                 AgentUUID = agentUUID,
                 RegisterTime = registerTime,
                 Osinfo = osInfo
             };
 
-            var applicationInstanceMapping = await instanceDiscoveryService.registerInstanceAsync(applicationInstance);
-            RemoteDownstreamConfig.Agent.ApplicationInstanceId = applicationInstanceMapping.ApplicationInstanceId;
+            var applicationInstanceId = 0;
+           
+            while (DictionaryUtil.IsNull(applicationInstanceId))
+            {
+                var applicationInstanceMapping = await instanceDiscoveryService.registerInstanceAsync(applicationInstance);
+                applicationInstanceId = applicationInstanceMapping.ApplicationInstanceId;
+            }
+
+            RemoteDownstreamConfig.Agent.ApplicationInstanceId = applicationInstanceId;
 
         }
 

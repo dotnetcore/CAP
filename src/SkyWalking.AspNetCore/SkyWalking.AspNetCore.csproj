@@ -7,6 +7,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.0-preview2-final" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.1.0-preview2-final" />
     <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="2.1.0-preview2-final" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.0-preview2-final" />
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.1.0-preview2-final" />
     <PackageReference Include="Microsoft.Extensions.Options" Version="2.1.0-preview2-final" />
     <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.1.0-preview2-final" />

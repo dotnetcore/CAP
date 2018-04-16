@@ -72,7 +72,7 @@ namespace SkyWalking.Context
             }
 
             var refs = _segment.Refs;
-            var firstSpan = _activeSpanStacks.First();
+            var firstSpan = _activeSpanStacks.Last();
 
             var metaValue = GetMetaValue(refs);
 
@@ -132,7 +132,7 @@ namespace SkyWalking.Context
 
         public string GetReadableGlobalTraceId()
         {
-            return _segment.RelatedGlobalTraces.First()?.ToString();
+            return _segment.RelatedGlobalTraces.FirstOrDefault()?.ToString();
         }
 
         /// <summary>
@@ -320,7 +320,7 @@ namespace SkyWalking.Context
                 snapshot.EntryOperationId = metaValue.operationId;
             }
 
-            var parentSpan = _activeSpanStacks.First();
+            var parentSpan = _activeSpanStacks.Last();
 
             if (DictionaryUtil.IsNull(parentSpan.OperationId))
             {
@@ -345,7 +345,7 @@ namespace SkyWalking.Context
             }
             else
             {
-                var span = _activeSpanStacks.First();
+                var span = _activeSpanStacks.Last();
                 return (span.OperationName, span.OperationId, _segment.ApplicationInstanceId);
             }
         }

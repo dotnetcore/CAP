@@ -19,7 +19,9 @@
 using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Http;
 using SkyWalking.AspNetCore.Diagnostics;
 
 namespace SkyWalking.AspNetCore
@@ -50,9 +52,12 @@ namespace SkyWalking.AspNetCore
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddSingleton<IHostedService, SkyWalkingHostedService>();
-            services.AddSingleton<ITracingDiagnosticListener, HostingDiagnosticListener>();
+            services.AddHttpClient<TracingHttpClient>("sw-tracing");
 
+            services.AddSingleton<IHostedService, SkyWalkingHostedService>();
+            services.TryAddSingleton<ITracingDiagnosticListener, HostingDiagnosticListener>();
+            services.AddTransient<HttpMessageHandlerBuilder, TracingHttpMessageHandlerBuilder>();
+            
             return services;
         }
     }

@@ -107,7 +107,7 @@ namespace SkyWalking.Context
         public string PeerHost
         {
             get => _peerHost;
-            set => _peerHost = value;
+            set => _peerHost = "#" + value;
         }
 
         public int PeerId
@@ -137,8 +137,9 @@ namespace SkyWalking.Context
                        && _spanId > -1
                        && _parentApplicationInstanceId != DictionaryUtil.NullValue
                        && _entryApplicationInstanceId != DictionaryUtil.NullValue
-                       && string.IsNullOrEmpty(_parentOperationName)
-                       && string.IsNullOrEmpty(_entryOperationName)
+                       && !string.IsNullOrEmpty(_peerHost)
+                       && !string.IsNullOrEmpty(_parentOperationName)
+                       && !string.IsNullOrEmpty(_entryOperationName)
                        && _primaryDistributedTraceId != null;
             }
         }
