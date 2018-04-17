@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
@@ -18,7 +21,11 @@ namespace DotNetCore.CAP.Kafka
         {
             _maxSize = options.ConnectionPoolSize;
             _activator = CreateActivator(options);
+
+            ServersAddress = options.Servers;
         }
+
+        public string ServersAddress { get; }
 
         Producer IConnectionPool.Rent()
         {
@@ -35,7 +42,9 @@ namespace DotNetCore.CAP.Kafka
             _maxSize = 0;
 
             while (_pool.TryDequeue(out var context))
+            {
                 context.Dispose();
+            }
         }
 
         private static Func<Producer> CreateActivator(KafkaOptions options)

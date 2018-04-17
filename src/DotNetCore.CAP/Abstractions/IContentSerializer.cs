@@ -1,11 +1,17 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP.Abstractions
 {
     /// <summary>
     /// Message content serializer.
-    /// <para>By default, CAP will use Json as a serializer, and you can customize this interface to achieve serialization of other methods.</para> 
+    /// <para>
+    /// By default, CAP will use Json as a serializer, and you can customize this interface to achieve serialization of
+    /// other methods.
+    /// </para>
     /// </summary>
     public interface IContentSerializer
     {
@@ -40,7 +46,7 @@ namespace DotNetCore.CAP.Abstractions
     /// </summary>
     /// <remarks>
     /// We use the wrapper to provide some additional information for the message content,which is important for CAP。
-    /// Typically, we may need to customize the field display name of the message, 
+    /// Typically, we may need to customize the field display name of the message,
     /// which includes interacting with other message components, which can be adapted in this manner
     /// </remarks>
     public interface IMessagePacker
@@ -52,9 +58,9 @@ namespace DotNetCore.CAP.Abstractions
         string Pack(CapMessage obj);
 
         /// <summary>
-        /// Unpack a message strings to <see cref="CapMessage"/> object.
+        /// Unpack a message strings to <see cref="CapMessage" /> object.
         /// </summary>
         /// <param name="packingMessage">The string of packed message.</param>
         CapMessage UnPack(string packingMessage);
-    } 
+    }
 }

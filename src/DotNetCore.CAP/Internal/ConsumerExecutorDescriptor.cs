@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System.Reflection;
 using DotNetCore.CAP.Abstractions;
 
 namespace DotNetCore.CAP.Internal
@@ -6,7 +9,7 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// A descriptor of user definition method.
     /// </summary>
-    internal class ConsumerExecutorDescriptor
+    public class ConsumerExecutorDescriptor
     {
         public MethodInfo MethodInfo { get; set; }
 

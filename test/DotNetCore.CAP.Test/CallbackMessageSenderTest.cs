@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.Test
         {
             // Arrange
             _mockCallbackPublisher
-                .Setup(x => x.PublishAsync(It.IsAny<CapPublishedMessage>()))
+                .Setup(x => x.PublishCallbackAsync(It.IsAny<CapPublishedMessage>()))
                 .Returns(Task.CompletedTask).Verifiable();
 
             _mockContentSerializer

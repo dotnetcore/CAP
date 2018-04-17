@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
@@ -27,7 +30,10 @@ namespace DotNetCore.CAP
         public Task Invoke(HttpContext context)
         {
             if (!context.Request.Path.StartsWithSegments(_options.PathMatch,
-                out var matchedPath, out var remainingPath)) return _next(context);
+                out var matchedPath, out var remainingPath))
+            {
+                return _next(context);
+            }
 
             // Update the path
             var path = context.Request.Path;
@@ -41,7 +47,9 @@ namespace DotNetCore.CAP
                 var findResult = _routes.FindDispatcher(context.Request.Path.Value);
 
                 if (findResult == null)
+                {
                     return _next.Invoke(context);
+                }
 
                 if (_options.Authorization.Any(filter => !filter.Authorize(dashboardContext)))
                 {

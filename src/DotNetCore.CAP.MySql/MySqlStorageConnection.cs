@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,8 +15,6 @@ namespace DotNetCore.CAP.MySql
     {
         private readonly CapOptions _capOptions;
         private readonly string _prefix;
-
-        private const string DateTimeMaxValue = "9999-12-31 23:59:59";
 
         public MySqlStorageConnection(MySqlOptions options, CapOptions capOptions)
         {
@@ -39,33 +40,11 @@ namespace DotNetCore.CAP.MySql
             }
         }
 
-        public Task<IFetchedMessage> FetchNextMessageAsync()
+        public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
-            var processId = ObjectId.GenerateNewStringId();
-            var sql = $@"
-UPDATE `{_prefix}.queue` SET `ProcessId`=@ProcessId WHERE `ProcessId` IS NULL LIMIT 1;
-SELECT `MessageId`,`MessageType` FROM `{_prefix}.queue` WHERE `ProcessId`=@ProcessId;";
-
-            return FetchNextMessageCoreAsync(sql, processId);
-        }
-
-        public async Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync()
-        {
-            var sql = $@"
-UPDATE `{_prefix}.published` SET Id=LAST_INSERT_ID(Id),ExpiresAt='{DateTimeMaxValue}' WHERE ExpiresAt IS NULL AND `StatusName` = '{StatusName.Scheduled}' LIMIT 1;
-SELECT * FROM `{_prefix}.published` WHERE Id=LAST_INSERT_ID();";
-
-            using (var connection = new MySqlConnection(Options.ConnectionString))
-            {
-                connection.Open();
-                connection.Execute("SELECT LAST_INSERT_ID(0)");
-                return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
-            }
-        }
-
-        public async Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages()
-        {
-            var sql = $"SELECT * FROM `{_prefix}.published` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `StatusName` = '{StatusName.Failed}' LIMIT 200;";
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
+            var sql =
+                $"SELECT * FROM `{_prefix}.published` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `Added`<'{fourMinsAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
@@ -73,17 +52,20 @@ SELECT * FROM `{_prefix}.published` WHERE Id=LAST_INSERT_ID();";
             }
         }
 
-        public async Task StoreReceivedMessageAsync(CapReceivedMessage message)
+        public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
             var sql = $@"
 INSERT INTO `{_prefix}.received`(`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
-VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT LAST_INSERT_ID();";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
-                await connection.ExecuteAsync(sql, message);
+                return await connection.ExecuteScalarAsync<int>(sql, message);
             }
         }
 
@@ -96,23 +78,11 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             }
         }
 
-        public async Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync()
+        public async Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
-            var sql = $@"
-UPDATE `{_prefix}.received` SET Id=LAST_INSERT_ID(Id),ExpiresAt='{DateTimeMaxValue}' WHERE ExpiresAt IS NULL AND `StatusName` = '{StatusName.Scheduled}' LIMIT 1;
-SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
-
-            using (var connection = new MySqlConnection(Options.ConnectionString))
-            {
-                connection.Open();
-                connection.Execute("SELECT LAST_INSERT_ID(0)");
-                return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
-            }
-        }
-
-        public async Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages()
-        {
-            var sql = $"SELECT * FROM `{_prefix}.received` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `StatusName` = '{StatusName.Failed}' LIMIT 200;";
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
+            var sql =
+                $"SELECT * FROM `{_prefix}.received` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `Added`<'{fourMinsAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
@@ -139,20 +109,6 @@ SELECT * FROM `{_prefix}.received` WHERE Id=LAST_INSERT_ID();";
             {
                 return connection.Execute(sql) > 0;
             }
-        }
-
-        private async Task<IFetchedMessage> FetchNextMessageCoreAsync(string sql, string processId)
-        {
-            FetchedMessage fetchedMessage;
-            using (var connection = new MySqlConnection(Options.ConnectionString))
-            {
-                fetchedMessage = await connection.QuerySingleOrDefaultAsync<FetchedMessage>(sql, new { ProcessId = processId });
-            }
-
-            if (fetchedMessage == null)
-                return null;
-
-            return new MySqlFetchedMessage(fetchedMessage.MessageId, fetchedMessage.MessageType, processId, Options);
         }
 
         public void Dispose()

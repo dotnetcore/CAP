@@ -25,7 +25,6 @@ SELECT 'False'";
 
         [Theory]
         [InlineData("[Cap].[Published]")]
-        [InlineData("[Cap].[Queue]")]
         [InlineData("[Cap].[Received]")]
         public void DatabaseTable_IsExists(string tableName)
         {

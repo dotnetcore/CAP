@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
@@ -37,7 +40,9 @@ namespace DotNetCore.CAP.Dashboard
             }
 
             if (_jsonCommand != null)
+            {
                 serialized = _jsonCommand(context);
+            }
 
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(serialized ?? string.Empty);

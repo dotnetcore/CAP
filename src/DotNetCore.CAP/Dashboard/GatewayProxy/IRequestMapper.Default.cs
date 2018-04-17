@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -45,7 +48,9 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             FragmentString fragment = new FragmentString())
         {
             if (scheme == null)
+            {
                 throw new ArgumentNullException(nameof(scheme));
+            }
 
             var combinedPath = pathBase.HasValue || path.HasValue ? (pathBase + path).ToString() : "/";
 
@@ -75,7 +80,9 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
         private async Task<HttpContent> MapContent(HttpRequest request)
         {
             if (request.Body == null)
+            {
                 return null;
+            }
 
             var content = new ByteArrayContent(await ToByteArray(request.Body));
 
@@ -97,8 +104,12 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
         private void MapHeaders(HttpRequest request, HttpRequestMessage requestMessage)
         {
             foreach (var header in request.Headers)
+            {
                 if (IsSupportedHeader(header))
+                {
                     requestMessage.Headers.TryAddWithoutValidation(header.Key, header.Value.ToArray());
+                }
+            }
         }
 
         private async Task<byte[]> ToByteArray(Stream stream)
