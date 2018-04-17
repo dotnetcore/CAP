@@ -187,7 +187,10 @@ Then inject your  `ISubscriberService`  class in Startup.cs
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
+    //Note: The injection of services needs before of `services.AddCap()`
     services.AddTransient<ISubscriberService,SubscriberService>();
+	
+    services.AddCap(x=>{});
 }
 ```
 
@@ -217,6 +220,8 @@ services.AddCap(x =>
     });
 });
 ```
+
+The default dashboard address is :[http://localhost:xxx/cap](http://localhost:xxx/cap) , you can also change the `cap` suffix to others with `d.MatchPath` configuration options.
 
 ![dashboard](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220827302-189215107.png)
 

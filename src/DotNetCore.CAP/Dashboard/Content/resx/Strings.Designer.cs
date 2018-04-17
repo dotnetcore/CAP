@@ -880,15 +880,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Processing.
-        /// </summary>
-        public static string SidebarMenu_Processing {
-            get {
-                return ResourceManager.GetString("SidebarMenu_Processing", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Succeeded.
         /// </summary>
         public static string SidebarMenu_Succeeded {

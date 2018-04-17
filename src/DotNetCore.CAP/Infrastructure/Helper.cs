@@ -1,6 +1,12 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
+using DotNetCore.CAP.Diagnostics;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -32,7 +38,10 @@ namespace DotNetCore.CAP.Infrastructure
 
         public static object FromJson(string value, Type type)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
+            if (type == null)
+            {
+                throw new ArgumentNullException(nameof(type));
+            }
 
             return value != null
                 ? JsonConvert.DeserializeObject(value, type, _serializerSettings)
@@ -42,7 +51,7 @@ namespace DotNetCore.CAP.Infrastructure
         public static long ToTimestamp(DateTime value)
         {
             var elapsedTime = value - Epoch;
-            return (long) elapsedTime.TotalSeconds;
+            return (long)elapsedTime.TotalSeconds;
         }
 
 
@@ -54,13 +63,19 @@ namespace DotNetCore.CAP.Infrastructure
         public static bool IsController(TypeInfo typeInfo)
         {
             if (!typeInfo.IsClass)
+            {
                 return false;
+            }
 
             if (typeInfo.IsAbstract)
+            {
                 return false;
+            }
 
             if (!typeInfo.IsPublic)
+            {
                 return false;
+            }
 
             return !typeInfo.ContainsGenericParameters
                    && typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase);
@@ -76,6 +91,34 @@ namespace DotNetCore.CAP.Infrastructure
         {
             var jObject = ToJObject(exception);
             return AddJsonProperty(json, "ExceptionMessage", jObject);
+        }
+
+        public static string AddTracingHeaderProperty(string json, TracingHeaders headers)
+        {
+            var jObject = ToJObject(headers);
+            return AddJsonProperty(json, nameof(TracingHeaders), jObject);
+        }
+
+        public static bool TryExtractTracingHeaders(string json, out TracingHeaders headers, out string removedHeadersJson)
+        {
+            var jObj = JObject.Parse(json);
+            var jToken = jObj[nameof(TracingHeaders)];
+            if (jToken != null)
+            {
+                headers = new TracingHeaders();
+                foreach (var item in jToken.ToObject<Dictionary<string,string>>())
+                {
+                    headers.Add(item.Key, item.Value);
+                }
+
+                jObj.Remove(nameof(TracingHeaders)); 
+                removedHeadersJson = jObj.ToString();
+                return true;
+            }
+
+            headers = null;
+            removedHeadersJson = null;
+            return false;
         }
 
         public static bool IsInnerIP(string ipAddress)
@@ -144,14 +187,28 @@ namespace DotNetCore.CAP.Infrastructure
             });
         }
 
+        private static JObject ToJObject(TracingHeaders headers)
+        {
+            var jobj = new JObject();
+            foreach (var keyValuePair in headers)
+            {
+                jobj[keyValuePair.Key] = keyValuePair.Value;
+            }
+            return jobj;
+        }
+
         private static string AddJsonProperty(string json, string propertyName, JObject propertyValue)
         {
             var jObj = JObject.Parse(json);
 
             if (jObj.TryGetValue(propertyName, out var _))
+            {
                 jObj[propertyName] = propertyValue;
+            }
             else
+            {
                 jObj.Add(new JProperty(propertyName, propertyValue));
+            }
 
             return jObj.ToString(Formatting.None);
         }

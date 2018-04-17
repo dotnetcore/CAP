@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -57,7 +60,10 @@ namespace DotNetCore.CAP.Infrastructure
         public ObjectId(byte[] bytes)
         {
             if (bytes == null)
+            {
                 throw new ArgumentNullException("bytes");
+            }
+
             Unpack(bytes, out _timestamp, out _machine, out _pid, out _increment);
         }
 
@@ -83,11 +89,16 @@ namespace DotNetCore.CAP.Infrastructure
         public ObjectId(int timestamp, int machine, short pid, int increment)
         {
             if ((machine & 0xff000000) != 0)
+            {
                 throw new ArgumentOutOfRangeException("machine",
                     "The machine value must be between 0 and 16777215 (it must fit in 3 bytes).");
+            }
+
             if ((increment & 0xff000000) != 0)
+            {
                 throw new ArgumentOutOfRangeException("increment",
                     "The increment value must be between 0 and 16777215 (it must fit in 3 bytes).");
+            }
 
             _timestamp = timestamp;
             _machine = machine;
@@ -102,7 +113,10 @@ namespace DotNetCore.CAP.Infrastructure
         public ObjectId(string value)
         {
             if (value == null)
+            {
                 throw new ArgumentNullException("value");
+            }
+
             Unpack(ParseHexString(value), out _timestamp, out _machine, out _pid, out _increment);
         }
 
@@ -256,11 +270,16 @@ namespace DotNetCore.CAP.Infrastructure
         public static byte[] Pack(int timestamp, int machine, short pid, int increment)
         {
             if ((machine & 0xff000000) != 0)
+            {
                 throw new ArgumentOutOfRangeException("machine",
                     "The machine value must be between 0 and 16777215 (it must fit in 3 bytes).");
+            }
+
             if ((increment & 0xff000000) != 0)
+            {
                 throw new ArgumentOutOfRangeException("increment",
                     "The increment value must be between 0 and 16777215 (it must fit in 3 bytes).");
+            }
 
             var bytes = new byte[12];
             bytes[0] = (byte) (timestamp >> 24);
@@ -286,9 +305,15 @@ namespace DotNetCore.CAP.Infrastructure
         public static ObjectId Parse(string s)
         {
             if (s == null)
+            {
                 throw new ArgumentNullException("s");
+            }
+
             if (s.Length != 24)
+            {
                 throw new ArgumentOutOfRangeException("s", "ObjectId string value must be 24 characters.");
+            }
+
             return new ObjectId(ParseHexString(s));
         }
 
@@ -303,9 +328,15 @@ namespace DotNetCore.CAP.Infrastructure
         public static void Unpack(byte[] bytes, out int timestamp, out int machine, out short pid, out int increment)
         {
             if (bytes == null)
+            {
                 throw new ArgumentNullException("bytes");
+            }
+
             if (bytes.Length != 12)
+            {
                 throw new ArgumentOutOfRangeException("bytes", "Byte array must be 12 bytes long.");
+            }
+
             timestamp = (bytes[0] << 24) + (bytes[1] << 16) + (bytes[2] << 8) + bytes[3];
             machine = (bytes[4] << 16) + (bytes[5] << 8) + bytes[6];
             pid = (short) ((bytes[7] << 8) + bytes[8]);
@@ -349,11 +380,23 @@ namespace DotNetCore.CAP.Infrastructure
         public int CompareTo(ObjectId other)
         {
             var r = _timestamp.CompareTo(other._timestamp);
-            if (r != 0) return r;
+            if (r != 0)
+            {
+                return r;
+            }
+
             r = _machine.CompareTo(other._machine);
-            if (r != 0) return r;
+            if (r != 0)
+            {
+                return r;
+            }
+
             r = _pid.CompareTo(other._pid);
-            if (r != 0) return r;
+            if (r != 0)
+            {
+                return r;
+            }
+
             return _increment.CompareTo(other._increment);
         }
 
@@ -379,7 +422,10 @@ namespace DotNetCore.CAP.Infrastructure
         public override bool Equals(object obj)
         {
             if (obj is ObjectId)
+            {
                 return Equals((ObjectId) obj);
+            }
+
             return false;
         }
 
@@ -423,15 +469,21 @@ namespace DotNetCore.CAP.Infrastructure
         public static byte[] ParseHexString(string s)
         {
             if (s == null)
+            {
                 throw new ArgumentNullException("s");
+            }
 
             if (s.Length % 2 == 1)
+            {
                 throw new Exception("The binary key cannot have an odd number of digits");
+            }
 
             var arr = new byte[s.Length >> 1];
 
             for (var i = 0; i < s.Length >> 1; ++i)
+            {
                 arr[i] = (byte) ((GetHexVal(s[i << 1]) << 4) + GetHexVal(s[(i << 1) + 1]));
+            }
 
             return arr;
         }
@@ -444,7 +496,10 @@ namespace DotNetCore.CAP.Infrastructure
         public static string ToHexString(byte[] bytes)
         {
             if (bytes == null)
+            {
                 throw new ArgumentNullException("bytes");
+            }
+
             var result = new char[bytes.Length * 2];
             for (var i = 0; i < bytes.Length; i++)
             {
@@ -452,6 +507,7 @@ namespace DotNetCore.CAP.Infrastructure
                 result[2 * i] = (char) val;
                 result[2 * i + 1] = (char) (val >> 16);
             }
+
             return new string(result);
         }
 
@@ -474,9 +530,15 @@ namespace DotNetCore.CAP.Infrastructure
         public static DateTime ToUniversalTime(DateTime dateTime)
         {
             if (dateTime == DateTime.MinValue)
+            {
                 return DateTime.SpecifyKind(DateTime.MinValue, DateTimeKind.Utc);
+            }
+
             if (dateTime == DateTime.MaxValue)
+            {
                 return DateTime.SpecifyKind(DateTime.MaxValue, DateTimeKind.Utc);
+            }
+
             return dateTime.ToUniversalTime();
         }
 

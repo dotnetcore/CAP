@@ -1,5 +1,5 @@
-// Copyright (c) .NET Foundation. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
 using System.Linq;
@@ -73,12 +73,17 @@ namespace Microsoft.Extensions.Internal
         {
             var typeFullName = possibleFSharpAsyncGenericType?.FullName;
             if (!string.Equals(typeFullName, "Microsoft.FSharp.Control.FSharpAsync`1", StringComparison.Ordinal))
+            {
                 return false;
+            }
 
             lock (_fsharpValuesCacheLock)
             {
                 if (_fsharpCoreAssembly != null)
+                {
                     return possibleFSharpAsyncGenericType.Assembly == _fsharpCoreAssembly;
+                }
+
                 return TryPopulateFSharpValueCaches(possibleFSharpAsyncGenericType);
             }
         }
@@ -90,7 +95,9 @@ namespace Microsoft.Extensions.Internal
             var fsharpAsyncType = assembly.GetType("Microsoft.FSharp.Control.FSharpAsync");
 
             if (fsharpOptionType == null || fsharpAsyncType == null)
+            {
                 return false;
+            }
 
             // Get a reference to FSharpOption<TaskCreationOptions>.None
             var fsharpOptionOfTaskCreationOptionsType = fsharpOptionType

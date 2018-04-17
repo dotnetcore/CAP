@@ -1,14 +1,33 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Data;
+using System.Diagnostics;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Abstractions
 {
     public abstract class CapPublisherBase : ICapPublisher, IDisposable
     {
+        private readonly IDispatcher _dispatcher;
+        private readonly ILogger _logger;
+
+        // diagnostics listener
+        // ReSharper disable once InconsistentNaming
+        private static readonly DiagnosticListener s_diagnosticListener =
+            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
+
+        protected CapPublisherBase(ILogger<CapPublisherBase> logger, IDispatcher dispatcher)
+        {
+            _logger = logger;
+            _dispatcher = dispatcher;
+        }
+
         protected IDbConnection DbConnection { get; set; }
         protected IDbTransaction DbTransaction { get; set; }
         protected bool IsCapOpenedTrans { get; set; }
@@ -21,9 +40,7 @@ namespace DotNetCore.CAP.Abstractions
             CheckIsUsingEF(name);
             PrepareConnectionForEF();
 
-            var content = Serialize(contentObj, callbackName);
-
-            PublishWithTrans(name, content);
+            PublishWithTrans(name, contentObj, callbackName);
         }
 
         public Task PublishAsync<T>(string name, T contentObj, string callbackName = null)
@@ -31,9 +48,7 @@ namespace DotNetCore.CAP.Abstractions
             CheckIsUsingEF(name);
             PrepareConnectionForEF();
 
-            var content = Serialize(contentObj, callbackName);
-
-            return PublishWithTransAsync(name, content);
+            return PublishWithTransAsync(name, contentObj, callbackName);
         }
 
         public void Publish<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
@@ -41,9 +56,7 @@ namespace DotNetCore.CAP.Abstractions
             CheckIsAdoNet(name);
             PrepareConnectionForAdo(dbTransaction);
 
-            var content = Serialize(contentObj, callbackName);
-
-            PublishWithTrans(name, content);
+            PublishWithTrans(name, contentObj, callbackName);
         }
 
         public Task PublishAsync<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
@@ -51,17 +64,20 @@ namespace DotNetCore.CAP.Abstractions
             CheckIsAdoNet(name);
             PrepareConnectionForAdo(dbTransaction);
 
-            var content = Serialize(contentObj, callbackName);
+            return PublishWithTransAsync(name, contentObj, callbackName);
+        }
 
-            return PublishWithTransAsync(name, content);
+        protected void Enqueue(CapPublishedMessage message)
+        {
+            _dispatcher.EnqueueToPublish(message);
         }
 
         protected abstract void PrepareConnectionForEF();
 
-        protected abstract void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected abstract int Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message);
 
-        protected abstract Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected abstract Task<int> ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message);
 
         protected virtual string Serialize<T>(T obj, string callbackName = null)
@@ -89,7 +105,6 @@ namespace DotNetCore.CAP.Abstractions
             {
                 CallbackName = callbackName
             };
-
             return packer.Pack(message);
         }
 
@@ -108,23 +123,38 @@ namespace DotNetCore.CAP.Abstractions
 
         private void CheckIsUsingEF(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             if (!IsUsingEF)
+            {
                 throw new InvalidOperationException(
                     "If you are using the EntityFramework, you need to configure the DbContextType first." +
                     " otherwise you need to use overloaded method with IDbConnection and IDbTransaction.");
+            }
         }
 
         private void CheckIsAdoNet(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
+            if (name == null)
+            {
+                throw new ArgumentNullException(nameof(name));
+            }
+
             if (IsUsingEF)
+            {
                 throw new InvalidOperationException(
                     "If you are using the EntityFramework, you do not need to use this overloaded.");
+            }
         }
 
-        private async Task PublishWithTransAsync(string name, string content)
+        private async Task PublishWithTransAsync<T>(string name, T contentObj, string callbackName = null)
         {
+            Guid operationId = default(Guid);
+            var content = Serialize(contentObj, callbackName);
+
             var message = new CapPublishedMessage
             {
                 Name = name,
@@ -132,15 +162,39 @@ namespace DotNetCore.CAP.Abstractions
                 StatusName = StatusName.Scheduled
             };
 
-            await ExecuteAsync(DbConnection, DbTransaction, message);
+            try
+            {
+                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
 
-            ClosedCap();
+                var id = await ExecuteAsync(DbConnection, DbTransaction, message);
 
-            PublishQueuer.PulseEvent.Set();
+                ClosedCap();
+
+                if (id > 0)
+                {
+                    _logger.LogInformation($"message [{message}] has been persisted in the database.");
+                    s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
+
+                    message.Id = id;
+
+                    Enqueue(message);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("An exception was occurred when publish message. exception message:" + e.Message, e);
+                s_diagnosticListener.WritePublishMessageStoreError(operationId, message, e);
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
-        private void PublishWithTrans(string name, string content)
+        private void PublishWithTrans<T>(string name, T contentObj, string callbackName = null)
         {
+            Guid operationId = default(Guid);
+
+            var content = Serialize(contentObj, callbackName);
+
             var message = new CapPublishedMessage
             {
                 Name = name,
@@ -148,11 +202,29 @@ namespace DotNetCore.CAP.Abstractions
                 StatusName = StatusName.Scheduled
             };
 
-            Execute(DbConnection, DbTransaction, message);
+            try
+            {
+                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
 
-            ClosedCap();
+                var id = Execute(DbConnection, DbTransaction, message);
 
-            PublishQueuer.PulseEvent.Set();
+                ClosedCap();
+
+                if (id > 0)
+                {
+                    _logger.LogInformation($"message [{message}] has been persisted in the database.");
+                    s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
+                    message.Id = id;
+                    Enqueue(message);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError("An exception was occurred when publish message. exception message:" + e.Message, e);
+                s_diagnosticListener.WritePublishMessageStoreError(operationId, message, e);
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         private void ClosedCap()
@@ -162,8 +234,11 @@ namespace DotNetCore.CAP.Abstractions
                 DbTransaction.Commit();
                 DbTransaction.Dispose();
             }
+
             if (IsCapOpenedConn)
+            {
                 DbConnection.Dispose();
+            }
         }
 
         public void Dispose()

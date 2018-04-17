@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
 
@@ -10,6 +13,8 @@ namespace DotNetCore.CAP
     /// </summary>
     public interface IConsumerClient : IDisposable
     {
+        string ServersAddress { get; }
+
         /// <summary>
         /// Subscribe to a set of topics to the message queue
         /// </summary>

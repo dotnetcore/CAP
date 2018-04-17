@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -28,9 +31,7 @@ set transaction isolation level read committed;
 select count(Id) from `{0}.published` where StatusName = N'Succeeded';
 select count(Id) from `{0}.received` where StatusName = N'Succeeded';
 select count(Id) from `{0}.published` where StatusName = N'Failed';
-select count(Id) from `{0}.received` where StatusName = N'Failed';
-select count(Id) from `{0}.published` where StatusName in (N'Processing',N'Scheduled',N'Enqueued');
-select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Scheduled',N'Enqueued');", _prefix);
+select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
             var statistics = UseConnection(connection =>
             {
@@ -42,10 +43,8 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
 
                     stats.PublishedFailed = multi.ReadSingle<int>();
                     stats.ReceivedFailed = multi.ReadSingle<int>();
-
-                    stats.PublishedProcessing = multi.ReadSingle<int>();
-                    stats.ReceivedProcessing = multi.ReadSingle<int>();
                 }
+
                 return stats;
             });
             return statistics;
@@ -70,17 +69,24 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
             var tableName = queryDto.MessageType == MessageType.Publish ? "published" : "received";
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
-                if (string.Equals(queryDto.StatusName, StatusName.Processing,
-                    StringComparison.CurrentCultureIgnoreCase))
-                    where += " and StatusName in (N'Processing',N'Scheduled',N'Enqueued')";
-                else
-                    where += " and StatusName=@StatusName";
+            {
+                where += " and StatusName=@StatusName";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Name))
+            {
                 where += " and Name=@Name";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Group))
+            {
                 where += " and Group=@Group";
+            }
+
             if (!string.IsNullOrEmpty(queryDto.Content))
+            {
                 where += " and Content like '%@Content%'";
+            }
 
             var sqlQuery =
                 $"select * from `{_prefix}.{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
@@ -101,11 +107,6 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
             return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Failed));
         }
 
-        public int PublishedProcessingCount()
-        {
-            return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Processing));
-        }
-
         public int PublishedSucceededCount()
         {
             return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Succeeded));
@@ -116,11 +117,6 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
             return UseConnection(conn => GetNumberOfMessage(conn, "received", StatusName.Failed));
         }
 
-        public int ReceivedProcessingCount()
-        {
-            return UseConnection(conn => GetNumberOfMessage(conn, "received", StatusName.Processing));
-        }
-
         public int ReceivedSucceededCount()
         {
             return UseConnection(conn => GetNumberOfMessage(conn, "received", StatusName.Succeeded));
@@ -128,9 +124,7 @@ select count(Id) from `{0}.received` where StatusName  in (N'Processing',N'Sched
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = statusName == StatusName.Processing
-                ? $"select count(Id) from `{_prefix}.{tableName}` where StatusName in (N'Processing',N'Scheduled',N'Enqueued')"
-                : $"select count(Id) from `{_prefix}.{tableName}` where StatusName = @state";
+            var sqlQuery = $"select count(Id) from `{_prefix}.{tableName}` where StatusName = @state";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
             return count;
@@ -179,7 +173,12 @@ select aggr.* from (
                 .ToDictionary(x => (string) x.Key, x => (int) x.Count);
 
             foreach (var key in keyMaps.Keys)
-                if (!valuesMap.ContainsKey(key)) valuesMap.Add(key, 0);
+            {
+                if (!valuesMap.ContainsKey(key))
+                {
+                    valuesMap.Add(key, 0);
+                }
+            }
 
             var result = new Dictionary<DateTime, int>();
             for (var i = 0; i < keyMaps.Count; i++)

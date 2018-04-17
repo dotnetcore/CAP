@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 
 namespace DotNetCore.CAP.Processor
 {
@@ -17,9 +20,9 @@ namespace DotNetCore.CAP.Processor
 
         static RetryBehavior()
         {
-            DefaultRetryCount = 15;
+            DefaultRetryCount = 3;
             DefaultRetryInThunk = retries =>
-                (int) Math.Round(Math.Pow(retries - 1, 4) + 15 + _random.Next(30) * retries);
+                (int) Math.Round(Math.Pow(retries - 1, 4) + 3 + _random.Next(30) * retries);
 
             DefaultRetry = new RetryBehavior(true);
             NoRetry = new RetryBehavior(false);
@@ -39,7 +42,12 @@ namespace DotNetCore.CAP.Processor
         public RetryBehavior(bool retry, int retryCount, Func<int, int> retryInThunk)
         {
             if (retry)
-                if (retryCount < 0) throw new ArgumentOutOfRangeException(nameof(retryCount), "Can't be negative.");
+            {
+                if (retryCount < 0)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(retryCount), "Can't be negative.");
+                }
+            }
 
             Retry = retry;
             RetryCount = retryCount;

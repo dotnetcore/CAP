@@ -1,5 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
 
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class RabbitMQOptions
@@ -56,7 +58,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Topic exchange name when declare a topic exchange.
         /// </summary>
-        public string TopicExchangeName { get; set; } = DefaultExchangeName;
+        public string ExchangeName { get; set; } = DefaultExchangeName;
 
         /// <summary>
         /// Timeout setting for connection attempts (in milliseconds).

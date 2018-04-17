@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,7 +17,10 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static CapOptions UsePostgreSql(this CapOptions options, Action<PostgreSqlOptions> configure)
         {
-            if (configure == null) throw new ArgumentNullException(nameof(configure));
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
 
             options.RegisterExtension(new PostgreSqlCapOptionsExtension(configure));
 
@@ -30,7 +36,10 @@ namespace Microsoft.Extensions.DependencyInjection
         public static CapOptions UseEntityFramework<TContext>(this CapOptions options, Action<EFOptions> configure)
             where TContext : DbContext
         {
-            if (configure == null) throw new ArgumentNullException(nameof(configure));
+            if (configure == null)
+            {
+                throw new ArgumentNullException(nameof(configure));
+            }
 
             options.RegisterExtension(new PostgreSqlCapOptionsExtension(x =>
             {

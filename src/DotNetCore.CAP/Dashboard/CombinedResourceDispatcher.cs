@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System.Reflection;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -22,10 +25,12 @@ namespace DotNetCore.CAP.Dashboard
         protected override void WriteResponse(DashboardResponse response)
         {
             foreach (var resourceName in _resourceNames)
+            {
                 WriteResource(
                     response,
                     _assembly,
                     $"{_baseNamespace}.{resourceName}");
+            }
         }
     }
 }

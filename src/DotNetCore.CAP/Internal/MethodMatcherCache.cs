@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,14 +27,19 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         public ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>> GetCandidatesMethodsOfGroupNameGrouped()
         {
-            if (Entries.Count != 0) return Entries;
+            if (Entries.Count != 0)
+            {
+                return Entries;
+            }
 
             var executorCollection = _selector.SelectCandidates();
 
             var groupedCandidates = executorCollection.GroupBy(x => x.Attribute.Group);
 
             foreach (var item in groupedCandidates)
+            {
                 Entries.TryAdd(item.Key, item.ToList());
+            }
 
             return Entries;
         }
@@ -44,7 +52,9 @@ namespace DotNetCore.CAP.Internal
         public IDictionary<string, IList<ConsumerExecutorDescriptor>> GetTopicExector(string topicName)
         {
             if (Entries == null)
+            {
                 throw new ArgumentNullException(nameof(Entries));
+            }
 
             var dic = new Dictionary<string, IList<ConsumerExecutorDescriptor>>();
             foreach (var item in Entries)
@@ -52,11 +62,13 @@ namespace DotNetCore.CAP.Internal
                 var topicCandidates = item.Value.Where(x => x.Attribute.Name == topicName);
                 dic.Add(item.Key, topicCandidates.ToList());
             }
+
             return dic;
         }
 
         /// <summary>
-        /// Attempts to get the topic exector associated with the specified topic name and group name from the <see cref="Entries"/>.
+        /// Attempts to get the topic exector associated with the specified topic name and group name from the
+        /// <see cref="Entries" />.
         /// </summary>
         /// <param name="topicName">The topic name of the value to get.</param>
         /// <param name="groupName">The group name of the value to get.</param>
@@ -66,7 +78,9 @@ namespace DotNetCore.CAP.Internal
             out ConsumerExecutorDescriptor matchTopic)
         {
             if (Entries == null)
+            {
                 throw new ArgumentNullException(nameof(Entries));
+            }
 
             matchTopic = null;
 
@@ -75,6 +89,7 @@ namespace DotNetCore.CAP.Internal
                 matchTopic = groupMatchTopics.FirstOrDefault(x => x.Attribute.Name == topicName);
                 return matchTopic != null;
             }
+
             return false;
         }
 
@@ -89,7 +104,9 @@ namespace DotNetCore.CAP.Internal
             }
 
             if (Entries == null)
+            {
                 throw new ArgumentNullException(nameof(Entries));
+            }
 
             _allTopics = new List<string>();
 
@@ -97,6 +114,7 @@ namespace DotNetCore.CAP.Internal
             {
                 _allTopics.AddRange(descriptors.Select(x => x.Attribute.Name));
             }
+
             return _allTopics;
         }
     }

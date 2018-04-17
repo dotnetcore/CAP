@@ -187,7 +187,10 @@ namespace xxx.Service
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
+    //注意: 注入的服务需要在 `services.AddCap()` 之前
     services.AddTransient<ISubscriberService,SubscriberService>();
+	
+    services.AddCap(x=>{});
 }
 ```
 
@@ -217,6 +220,8 @@ services.AddCap(x =>
     });
 });
 ```
+
+仪表盘默认的访问地址是：[http://localhost:xxx/cap](http://localhost:xxx/cap)，你可以在`d.MatchPath`配置项中修改`cap`路径后缀为其他的名字。
 
 ![dashboard](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220827302-189215107.png)
 

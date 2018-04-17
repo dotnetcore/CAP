@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -13,9 +16,9 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly string _exchageName;
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
+        private IModel _channel;
 
         private IConnection _connection;
-        private IModel _channel;
         private ulong _deliveryTag;
 
         public RabbitMQConsumerClient(string queueName,
@@ -25,7 +28,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _queueName = queueName;
             _connectionChannelPool = connectionChannelPool;
             _rabbitMQOptions = options;
-            _exchageName = options.TopicExchangeName;
+            _exchageName = options.ExchangeName;
 
             InitClient();
         }
@@ -34,12 +37,19 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
+        public string ServersAddress => _rabbitMQOptions.HostName;
+
         public void Subscribe(IEnumerable<string> topics)
         {
-            if (topics == null) throw new ArgumentNullException(nameof(topics));
+            if (topics == null)
+            {
+                throw new ArgumentNullException(nameof(topics));
+            }
 
             foreach (var topic in topics)
+            {
                 _channel.QueueBind(_queueName, _exchageName, topic);
+            }
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
@@ -58,6 +68,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 cancellationToken.ThrowIfCancellationRequested();
                 cancellationToken.WaitHandle.WaitOne(timeout);
             }
+
             // ReSharper disable once FunctionNeverReturns
         }
 
@@ -88,8 +99,9 @@ namespace DotNetCore.CAP.RabbitMQ
                 RabbitMQOptions.ExchangeType,
                 true);
 
-            var arguments = new Dictionary<string, object> {
-                { "x-message-ttl", _rabbitMQOptions.QueueMessageExpires }
+            var arguments = new Dictionary<string, object>
+            {
+                {"x-message-ttl", _rabbitMQOptions.QueueMessageExpires}
             };
             _channel.QueueDeclare(_queueName, true, false, false, arguments);
         }
@@ -100,7 +112,7 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             var args = new LogMessageEventArgs
             {
-                LogType =  MqLogType.ConsumerCancelled,
+                LogType = MqLogType.ConsumerCancelled,
                 Reason = e.ConsumerTag
             };
             OnLog?.Invoke(sender, args);

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
@@ -24,44 +27,71 @@ namespace DotNetCore.CAP.Dashboard
 
         public NonEscapedString Breadcrumbs(string title, IDictionary<string, string> items)
         {
-            if (items == null) throw new ArgumentNullException(nameof(items));
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
             return RenderPartial(new Breadcrumbs(title, items));
         }
 
         public NonEscapedString MessagesSidebar(MessageType type)
         {
             if (type == MessageType.Publish)
+            {
                 return SidebarMenu(MessagesSidebarMenu.PublishedItems);
+            }
+
             return SidebarMenu(MessagesSidebarMenu.ReceivedItems);
         }
 
         public NonEscapedString SidebarMenu(IEnumerable<Func<RazorPage, MenuItem>> items)
         {
-            if (items == null) throw new ArgumentNullException(nameof(items));
+            if (items == null)
+            {
+                throw new ArgumentNullException(nameof(items));
+            }
+
             return RenderPartial(new SidebarMenu(items));
         }
 
         public NonEscapedString BlockMetric(DashboardMetric metric)
         {
-            if (metric == null) throw new ArgumentNullException(nameof(metric));
+            if (metric == null)
+            {
+                throw new ArgumentNullException(nameof(metric));
+            }
+
             return RenderPartial(new BlockMetric(metric));
         }
 
         public NonEscapedString InlineMetric(DashboardMetric metric)
         {
-            if (metric == null) throw new ArgumentNullException(nameof(metric));
+            if (metric == null)
+            {
+                throw new ArgumentNullException(nameof(metric));
+            }
+
             return RenderPartial(new InlineMetric(metric));
         }
 
         public NonEscapedString Paginator(Pager pager)
         {
-            if (pager == null) throw new ArgumentNullException(nameof(pager));
+            if (pager == null)
+            {
+                throw new ArgumentNullException(nameof(pager));
+            }
+
             return RenderPartial(new Paginator(pager));
         }
 
         public NonEscapedString PerPageSelector(Pager pager)
         {
-            if (pager == null) throw new ArgumentNullException(nameof(pager));
+            if (pager == null)
+            {
+                throw new ArgumentNullException(nameof(pager));
+            }
+
             return RenderPartial(new PerPageSelector(pager));
         }
 
@@ -79,7 +109,9 @@ namespace DotNetCore.CAP.Dashboard
         public NonEscapedString StateLabel(string stateName)
         {
             if (string.IsNullOrWhiteSpace(stateName))
+            {
                 return Raw($"<em>{Strings.Common_NoState}</em>");
+            }
 
             return Raw(
                 $"<span class=\"label label-default\" style=\"background-color: {MessageHistoryRenderer.GetForegroundStateColor(stateName)};\">{stateName}</span>");
@@ -102,40 +134,59 @@ namespace DotNetCore.CAP.Dashboard
 
         public string ToHumanDuration(TimeSpan? duration, bool displaySign = true)
         {
-            if (duration == null) return null;
+            if (duration == null)
+            {
+                return null;
+            }
 
             var builder = new StringBuilder();
             if (displaySign)
+            {
                 builder.Append(duration.Value.TotalMilliseconds < 0 ? "-" : "+");
+            }
 
             duration = duration.Value.Duration();
 
             if (duration.Value.Days > 0)
+            {
                 builder.Append($"{duration.Value.Days}d ");
+            }
 
             if (duration.Value.Hours > 0)
+            {
                 builder.Append($"{duration.Value.Hours}h ");
+            }
 
             if (duration.Value.Minutes > 0)
+            {
                 builder.Append($"{duration.Value.Minutes}m ");
+            }
 
             if (duration.Value.TotalHours < 1)
+            {
                 if (duration.Value.Seconds > 0)
                 {
                     builder.Append(duration.Value.Seconds);
                     if (duration.Value.Milliseconds > 0)
+                    {
                         builder.Append($".{duration.Value.Milliseconds.ToString().PadLeft(3, '0')}");
+                    }
 
                     builder.Append("s ");
                 }
                 else
                 {
                     if (duration.Value.Milliseconds > 0)
+                    {
                         builder.Append($"{duration.Value.Milliseconds}ms ");
+                    }
                 }
+            }
 
             if (builder.Length <= 1)
+            {
                 builder.Append(" <1ms ");
+            }
 
             builder.Remove(builder.Length - 1, 1);
 
@@ -237,14 +288,25 @@ namespace DotNetCore.CAP.Dashboard
         private string WrapType(Type type)
         {
             if (type == null)
+            {
                 return string.Empty;
+            }
 
             if (type.Name == "Void")
+            {
                 return WrapKeyword(type.Name.ToLower());
+            }
+
             if (Helper.IsComplexType(type))
+            {
                 return WrapType(type.Name);
+            }
+
             if (type.IsPrimitive || type == typeof(string) || type == typeof(decimal))
+            {
                 return WrapKeyword(type.Name.ToLower());
+            }
+
             return WrapType(type.Name);
         }
 

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
@@ -26,7 +29,10 @@ namespace DotNetCore.CAP.PostgreSql
 
         public void UpdateMessage(CapPublishedMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
             var sql =
                 $@"UPDATE ""{
@@ -37,31 +43,16 @@ namespace DotNetCore.CAP.PostgreSql
 
         public void UpdateMessage(CapReceivedMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
 
             var sql =
                 $@"UPDATE ""{
                         _schema
                     }"".""received"" SET ""Retries""=@Retries,""Content""= @Content,""ExpiresAt""=@ExpiresAt,""StatusName""=@StatusName WHERE ""Id""=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
-        }
-
-        public void EnqueueMessage(CapPublishedMessage message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            var sql = $@"INSERT INTO ""{_schema}"".""queue"" values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Publish},
-                _dbTransaction);
-        }
-
-        public void EnqueueMessage(CapReceivedMessage message)
-        {
-            if (message == null) throw new ArgumentNullException(nameof(message));
-
-            var sql = $@"INSERT INTO ""{_schema}"".""queue"" values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Subscribe},
-                _dbTransaction);
         }
 
         public Task CommitAsync()
@@ -74,6 +65,30 @@ namespace DotNetCore.CAP.PostgreSql
         {
             _dbTransaction.Dispose();
             _dbConnection.Dispose();
+        }
+
+        public void EnqueueMessage(CapPublishedMessage message)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            var sql = $@"INSERT INTO ""{_schema}"".""queue"" values(@MessageId,@MessageType);";
+            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Publish},
+                _dbTransaction);
+        }
+
+        public void EnqueueMessage(CapReceivedMessage message)
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            var sql = $@"INSERT INTO ""{_schema}"".""queue"" values(@MessageId,@MessageType);";
+            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Subscribe},
+                _dbTransaction);
         }
     }
 }
