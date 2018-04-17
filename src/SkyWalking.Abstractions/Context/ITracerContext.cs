@@ -16,12 +16,30 @@
  *
  */
 
-using System;
+using SkyWalking.Context.Trace;
 
 namespace SkyWalking.Context
 {
     public interface ITracerContext
     {
+        void Inject(IContextCarrier carrier);
 
+        void Extract(IContextCarrier carrier);
+        
+        IContextSnapshot Capture { get; }
+        
+        ISpan ActiveSpan { get; }
+
+        void Continued(IContextSnapshot snapshot);
+
+        string GetReadableGlobalTraceId();
+
+        ISpan CreateEntrySpan(string operationName);
+
+        ISpan CreateLocalSpan(string operationName);
+
+        ISpan CreateExitSpan(string operationName, string remotePeer);     
+
+        void StopSpan(ISpan span);
     }
 }

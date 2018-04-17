@@ -146,7 +146,7 @@ namespace SkyWalking.Context.Trace
 
         public int EntryOperationId => _entryOperationId;
 
-        public int EntryApplicationInstance => _entryApplicationInstanceId;
+        public int EntryApplicationInstanceId => _entryApplicationInstanceId;
 
         public TraceSegmentReference Transform()
         {

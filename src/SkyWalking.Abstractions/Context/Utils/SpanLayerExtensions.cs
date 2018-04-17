@@ -16,36 +16,33 @@
  *
  */
 
-using System;
-using System.Threading;
-
-namespace SkyWalking.Context
+namespace SkyWalking.Context.Trace
 {
-    /// <summary>
-    /// Context manager controls the whole context of tracing. Since .NET server application runs as same as Java,
-    /// We also provide the CONTEXT propagation based on ThreadLocal mechanism.
-    /// Meaning, each segment also related to singe thread.
-    /// </summary>
-    public static class ContextManager
+    public static class SpanLayerExtensions
     {
-        private static readonly ThreadLocal<ITracerContext> CONTEXT = new ThreadLocal<ITracerContext>();
-
-        private static ITracerContext GetOrCreate(String operationName, bool forceSampling)
+        public static void AsDB(this ISpan span)
         {
-            if (!CONTEXT.IsValueCreated)
-            {
-                return null;
-            }
-            else
-            {
-                return null;
-            }
-
+            span.SetLayer(SpanLayer.DB);
         }
 
-        public static IContextSnapshot Capture()
+        public static void AsCache(this ISpan span)
         {
-            return null;
+            span.SetLayer(SpanLayer.CACHE);
+        }
+
+        public static void AsRPCFramework(this ISpan span)
+        {
+            span.SetLayer(SpanLayer.RPC_FRAMEWORK);
+        }
+
+        public static void AsHttp(this ISpan span)
+        {
+            span.SetLayer(SpanLayer.HTTP);
+        }
+
+        public static void AsMQ(this ISpan span)
+        {
+            span.SetLayer(SpanLayer.MQ);
         }
     }
 }

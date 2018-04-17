@@ -27,18 +27,15 @@ namespace SkyWalking.Context.Trace
         private long _timestamp = 0;
         private Dictionary<string, string> _logs;
 
-        private LogDataEntity(long timestamp,Dictionary<string,string> logs)
+        private LogDataEntity(long timestamp, Dictionary<string, string> logs)
         {
             _timestamp = timestamp;
             _logs = logs;
         }
 
-        public IReadOnlyDictionary<string,string> Logs
+        public IReadOnlyDictionary<string, string> Logs
         {
-            get
-            {
-                return new ReadOnlyDictionary<string, string>(_logs);
-            }
+            get { return new ReadOnlyDictionary<string, string>(_logs); }
         }
 
         public class Builder
@@ -57,7 +54,7 @@ namespace SkyWalking.Context.Trace
                 return this;
             }
 
-            public Builder Add(string key,string value)
+            public Builder Add(string key, string value)
             {
                 _logs.Add(key, value);
                 return this;
@@ -73,10 +70,11 @@ namespace SkyWalking.Context.Trace
         {
             LogMessage logMessage = new LogMessage();
             logMessage.Time = _timestamp;
-            foreach(var log in _logs)
+            foreach (var log in _logs)
             {
-                logMessage.Data.Add(new KeyWithStringValue { Key = log.Key, Value = log.Value });
+                logMessage.Data.Add(new KeyWithStringValue {Key = log.Key, Value = log.Value});
             }
+
             return logMessage;
         }
     }

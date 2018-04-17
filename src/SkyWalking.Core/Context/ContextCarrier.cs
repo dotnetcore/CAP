@@ -1,4 +1,22 @@
-﻿using System.Collections.Generic;
+﻿/*
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements.  See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+using System.Collections.Generic;
 using System.Linq;
 using SkyWalking.Context.Ids;
 using SkyWalking.Dictionarys;
@@ -29,64 +47,85 @@ namespace SkyWalking.Context
         /// </summary>
         private string _peerHost;
 
+        private int _peerId;
+
         /// <summary>
         /// Operation/Service name of the first one in this distributed trace .
         /// </summary>
         private string _entryOperationName;
 
+        private int _entryOperationId;
+
         /// <summary>
         /// Operation/Service name of the parent one in this distributed trace .
         /// </summary>
-        private string _parentOPerationName;
+        private string _parentOperationName;
+
+        private int _parentOperationId;
 
         private DistributedTraceId _primaryDistributedTraceId;
 
 
-        public DistributedTraceId DistributedTraceId
-        {
-            get { return _primaryDistributedTraceId; }
-        }
+        public DistributedTraceId DistributedTraceId => _primaryDistributedTraceId;
 
         public int EntryApplicationInstanceId
         {
-            get { return _entryApplicationInstanceId; }
-            set { _entryApplicationInstanceId = value; }
+            get => _entryApplicationInstanceId;
+            set => _entryApplicationInstanceId = value;
         }
 
         public string EntryOperationName
         {
-            get { return _entryOperationName; }
-            set { _entryOperationName = "#" + value; }
+            get => _entryOperationName;
+            set => _entryOperationName = "#" + value;
+        }
+
+        public int EntryOperationId
+        {
+            get => _entryOperationId;
+            set => _entryOperationId = value;
         }
 
         public int ParentApplicationInstanceId
         {
-            get { return _parentApplicationInstanceId; }
-            set { _parentApplicationInstanceId = value; }
+            get => _parentApplicationInstanceId;
+            set => _parentApplicationInstanceId = value;
         }
 
         public string ParentOperationName
         {
-            get { return _parentOPerationName; }
-            set { _parentOPerationName = "#" + value; }
+            get => _parentOperationName;
+            set => _parentOperationName = "#" + value;
+        }
+
+        public int ParentOperationId
+        {
+            get => _parentOperationId;
+            set => _parentOperationId = value;
         }
 
         public string PeerHost
         {
-            get { return _peerHost; }
-            set { _peerHost = value; }
+            get => _peerHost;
+            set => _peerHost = "#" + value;
+        }
+
+        public int PeerId
+        {
+            get => _peerId;
+            set => _peerId = value;
         }
 
         public int SpanId
         {
-            get { return _spanId; }
-            set { _spanId = value; }
+            get => _spanId;
+            set => _spanId = value;
         }
 
         public ID TraceSegmentId
         {
-            get { return _traceSegmentId; }
-            set { _traceSegmentId = value; }
+            get => _traceSegmentId;
+            set => _traceSegmentId = value;
         }
 
         public bool IsValid
@@ -98,8 +137,9 @@ namespace SkyWalking.Context
                        && _spanId > -1
                        && _parentApplicationInstanceId != DictionaryUtil.NullValue
                        && _entryApplicationInstanceId != DictionaryUtil.NullValue
-                       && string.IsNullOrEmpty(_parentOPerationName)
-                       && string.IsNullOrEmpty(_entryOperationName)
+                       && !string.IsNullOrEmpty(_peerHost)
+                       && !string.IsNullOrEmpty(_parentOperationName)
+                       && !string.IsNullOrEmpty(_entryOperationName)
                        && _primaryDistributedTraceId != null;
             }
         }
@@ -115,7 +155,7 @@ namespace SkyWalking.Context
                 _entryApplicationInstanceId = int.Parse(parts[3]);
                 _peerHost = parts[4];
                 _entryOperationName = parts[5];
-                _parentOPerationName = parts[6];
+                _parentOperationName = parts[6];
                 _primaryDistributedTraceId = new PropagatedTraceId(parts[7]);
             }
 

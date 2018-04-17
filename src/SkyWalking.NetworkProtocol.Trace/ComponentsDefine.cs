@@ -17,12 +17,17 @@
  */
 
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 
 namespace SkyWalking.NetworkProtocol.Trace
 {
     public class ComponentsDefine
     {
-        public static readonly OfficialComponent AspNetCore = new OfficialComponent(1, "AspNetCore");
+        public static readonly OfficialComponent HttpClient = new OfficialComponent(2, "HttpClient");
+        
+        public static readonly OfficialComponent AspNetCore = new OfficialComponent(30, "AspNetCore");
+
+        public static readonly OfficialComponent EntityFrameworkCore = new OfficialComponent(31, "EntityFrameworkCore");
 
         private static readonly ComponentsDefine _instance = new ComponentsDefine();
 
@@ -39,6 +44,8 @@ namespace SkyWalking.NetworkProtocol.Trace
         private ComponentsDefine()
         {
             _components = new Dictionary<int, string>();
+            AddComponent(AspNetCore);
+            AddComponent(EntityFrameworkCore);
         }
 
         private void AddComponent(OfficialComponent component)

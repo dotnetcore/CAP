@@ -23,7 +23,7 @@ namespace SkyWalking.Context
     public class SW3CarrierItem : CarrierItem
     {
         public const String HEADER_NAME = "sw3";
-        private IContextCarrier _carrier;
+        private readonly IContextCarrier _carrier;
 
         public SW3CarrierItem(IContextCarrier carrier, CarrierItem next)
             : base(HEADER_NAME, carrier.Serialize(), next)

@@ -29,12 +29,18 @@ namespace SkyWalking.Context
         int EntryApplicationInstanceId { get; set; }
 
         string EntryOperationName { get; set; }
+        
+        int EntryOperationId { get; set; }
 
         int ParentApplicationInstanceId { get; set; }
 
         string ParentOperationName { get; set; }
+        
+        int ParentOperationId { get; set; }
 
         string PeerHost { get; set; }
+        
+        int PeerId { get; set; }
 
         int SpanId { get; set; }
 

@@ -16,13 +16,12 @@
  *
  */
 
-using System;
-using System.Collections.Generic;
-using System.Text;
+using SkyWalking.Context.Trace;
 
 namespace SkyWalking.Context
 {
-    interface ITracingContextListener
+   public interface ITracingContextListener
     {
+        void AfterFinished(ITraceSegment traceSegment);
     }
 }
