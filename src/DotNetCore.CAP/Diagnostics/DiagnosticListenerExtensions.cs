@@ -107,6 +107,7 @@ namespace DotNetCore.CAP.Diagnostics
         {
             if (@this.IsEnabled(CapBeforePublish))
             {
+                eventData.Headers = new TracingHeaders();
                 @this.Write(CapBeforePublish, eventData);
             }
         }
@@ -115,6 +116,7 @@ namespace DotNetCore.CAP.Diagnostics
         {
             if (@this.IsEnabled(CapAfterPublish))
             {
+                eventData.Headers = new TracingHeaders();
                 @this.Write(CapAfterPublish, eventData);
             }
         }
@@ -123,6 +125,7 @@ namespace DotNetCore.CAP.Diagnostics
         {
             if (@this.IsEnabled(CapErrorPublish))
             {
+                eventData.Headers = new TracingHeaders();
                 @this.Write(CapErrorPublish, eventData);
             }
         }
@@ -135,6 +138,7 @@ namespace DotNetCore.CAP.Diagnostics
         {
             if (@this.IsEnabled(CapBeforeConsume))
             {
+                eventData.Headers = new TracingHeaders();
                 @this.Write(CapBeforeConsume, eventData);
             }
 
@@ -145,6 +149,7 @@ namespace DotNetCore.CAP.Diagnostics
         {
             if (@this.IsEnabled(CapAfterConsume))
             {
+                eventData.Headers = new TracingHeaders();
                 @this.Write(CapAfterConsume, eventData);
             }
         }
@@ -153,6 +158,7 @@ namespace DotNetCore.CAP.Diagnostics
         {
             if (@this.IsEnabled(CapErrorConsume))
             {
+                eventData.Headers = new TracingHeaders();
                 @this.Write(CapErrorConsume, eventData);
             }
         }
