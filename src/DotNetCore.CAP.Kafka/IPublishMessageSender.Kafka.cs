@@ -36,11 +36,7 @@ namespace DotNetCore.CAP.Kafka
 
                 if (message.Error.HasError)
                 {
-                    return OperateResult.Failed(new OperateError
-                    {
-                        Code = message.Error.Code.ToString(),
-                        Description = message.Error.Reason
-                    });
+                    throw new PublisherSentFailedException(message.Error.ToString());
                 }
 
                 _logger.LogDebug($"kafka topic message [{keyName}] has been published.");
@@ -61,6 +57,6 @@ namespace DotNetCore.CAP.Kafka
                     producer.Dispose();
                 }
             }
-        } 
+        }
     }
 }
