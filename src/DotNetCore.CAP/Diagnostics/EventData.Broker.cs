@@ -11,7 +11,6 @@ namespace DotNetCore.CAP.Diagnostics
             string brokerTopicName, string brokerTopicBody)
             : base(operationId, operation)
         {
-            Headers = new TracingHeaders();
             BrokerAddress = brokerAddress;
             BrokerTopicName = brokerTopicName;
             BrokerTopicBody = brokerTopicBody;

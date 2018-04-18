@@ -147,7 +147,7 @@ namespace DotNetCore.CAP
 
             s_diagnosticListener.WritePublishBefore(eventData);
 
-            return (operationId, eventData.Headers);
+            return (operationId, eventData.Headers);  //if not enabled diagnostics ,the header will be null
         }
 
         private void TracingAfter(Guid operationId, string topic, string values, DateTimeOffset startTime, TimeSpan du)
