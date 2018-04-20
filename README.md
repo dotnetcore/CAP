@@ -9,8 +9,9 @@ SkyWalking C#/.NET instrument agent
 
 [![Build status](https://ci.appveyor.com/api/projects/status/fl6vucwfn1vu94dv/branch/master?svg=true)](https://ci.appveyor.com/project/wu-sheng/skywalking-csharp/branch/master)
 
-# Supported .NET versions
-This project currently supports apps targeting netstandard2.0 or higher.
+# Supported
+- This project currently supports apps targeting netstandard2.0 or higher.
+- [Supported middlewares, frameworks and libraries.](docs/Supported-list.md)
 
 # Features
 A quick list of SkyWalking .NET Core Agent's capabilities
@@ -50,10 +51,11 @@ public void ConfigureServices(IServiceCollection services)
     services.AddSkyWalking(option =>
     {
         // Application code is showed in sky-walking-ui
-        option.DirectServers = "localhost:11800";
+        option.ApplicationCode = "Your_ApplicationName";
 
         //Collector agent_gRPC/grpc service addresses.
-        option.ApplicationCode = "Your_ApplicationName";
+        option.DirectServers = "localhost:11800";
+        
     });
 }
 ```
