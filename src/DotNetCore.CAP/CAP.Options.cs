@@ -58,9 +58,9 @@ namespace DotNetCore.CAP
         public int FailedRetryInterval { get; set; }
 
         /// <summary>
-        /// We’ll invoke this call-back with message type,name,content when requeue failed message.
+        /// We’ll invoke this call-back with message type,name,content when retry failed (send or executed) messages equals <see cref="FailedRetryCount"/> times.
         /// </summary>
-        public Action<MessageType, string, string> FailedCallback { get; set; }
+        public Action<MessageType, string, string> FailedThresholdCallback { get; set; }
 
         /// <summary>
         /// The number of message retries, the retry will stop when the threshold is reached.
