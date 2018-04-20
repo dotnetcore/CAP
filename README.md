@@ -50,10 +50,11 @@ public void ConfigureServices(IServiceCollection services)
     services.AddSkyWalking(option =>
     {
         // Application code is showed in sky-walking-ui
-        option.DirectServers = "localhost:11800";
+        option.ApplicationCode = "Your_ApplicationName";
 
         //Collector agent_gRPC/grpc service addresses.
-        option.ApplicationCode = "Your_ApplicationName";
+        option.DirectServers = "localhost:11800";
+        
     });
 }
 ```
