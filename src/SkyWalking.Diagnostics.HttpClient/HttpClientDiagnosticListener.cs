@@ -17,24 +17,20 @@
  */
 
 using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.DiagnosticAdapter;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
 using SkyWalking.Context.Trace;
 using SkyWalking.NetworkProtocol.Trace;
 
-namespace SkyWalking.AspNetCore
+namespace SkyWalking.Diagnostics.HttpClient
 {
-    public class TracingHttpHandler : DelegatingHandler
+    public class HttpClientDiagnosticListener : ITracingDiagnosticListener
     {
-        public TracingHttpHandler()
-        {
-            InnerHandler = new HttpClientHandler();
-        }
+        public string ListenerName { get; } = "HttpHandlerDiagnosticListener";
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
-            CancellationToken cancellationToken)
+        [DiagnosticName("System.Net.Http.Request")]
+        public void HttpRequest(HttpRequestMessage request)
         {
             var contextCarrier = new ContextCarrier();
             var peer = $"{request.RequestUri.Host}:{request.RequestUri.Port}";
@@ -45,10 +41,17 @@ namespace SkyWalking.AspNetCore
             Tags.HTTP.Method.Set(span, request.Method.ToString());
             foreach (var item in contextCarrier.Items)
                 request.Headers.Add(item.HeadKey, item.HeadValue);
-            var response = await base.SendAsync(request, cancellationToken);
-            Tags.StatusCode.Set(span, response.StatusCode.ToString());
-            ContextManager.StopSpan(span);
-            return response;
+        }
+
+        [DiagnosticName("System.Net.Http.Response")]
+        public void HttpResponse(HttpResponseMessage response)
+        {
+            var span = ContextManager.ActiveSpan;
+            if (span != null && span.IsExit)
+            {
+                Tags.StatusCode.Set(span, response.StatusCode.ToString());
+                ContextManager.StopSpan(span);
+            }        
         }
     }
 }

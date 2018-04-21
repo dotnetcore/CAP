@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <Description>SkyWalking.Diagnostics.HttpClient notifies outgoing Http requests.</Description>
+    <AssemblyTitle>SkyWalking.Diagnostics.HttpClient</AssemblyTitle>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>SkyWalking.Diagnostics.HttpClient</AssemblyName>
+    <PackageId>SkyWalking.Diagnostics.HttpClient</PackageId>
+    <PackageTags>SkyWalking;APM;Diagnostics;HttpClient</PackageTags>
+    <PackageReleaseNotes>
+    </PackageReleaseNotes>
+    <RootNamespace>SkyWalking.Diagnostics.HttpClient</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="2.1.0-preview2-final" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
+    <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+  </ItemGroup>
+</Project>

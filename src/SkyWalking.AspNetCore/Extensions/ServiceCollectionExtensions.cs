@@ -1,5 +1,5 @@
 ﻿/*
- * Licensed to the Apache Software Foundation (ASF) under one or more
+ * Licensed to the OpenSkywalking under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * The ASF licenses this file to You under the Apache License, Version 2.0
@@ -23,6 +23,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using SkyWalking.AspNetCore.Diagnostics;
+using SkyWalking.Diagnostics;
 
 namespace SkyWalking.AspNetCore
 {
@@ -55,7 +56,7 @@ namespace SkyWalking.AspNetCore
             services.AddHttpClient<TracingHttpClient>("sw-tracing");
 
             services.AddSingleton<IHostedService, SkyWalkingHostedService>();
-            services.TryAddSingleton<ITracingDiagnosticListener, HostingDiagnosticListener>();
+            services.AddSingleton<ITracingDiagnosticListener, HostingDiagnosticListener>();
             services.AddTransient<HttpMessageHandlerBuilder, TracingHttpMessageHandlerBuilder>();
             
             return services;
