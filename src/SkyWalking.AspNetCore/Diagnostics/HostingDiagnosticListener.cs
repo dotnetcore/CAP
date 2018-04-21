@@ -22,6 +22,7 @@ using Microsoft.Extensions.DiagnosticAdapter;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
 using SkyWalking.Context.Trace;
+using SkyWalking.Diagnostics;
 using SkyWalking.NetworkProtocol.Trace;
 
 namespace SkyWalking.AspNetCore.Diagnostics

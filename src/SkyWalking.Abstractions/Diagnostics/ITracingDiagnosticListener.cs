@@ -16,7 +16,7 @@
  *
  */
 
-namespace SkyWalking.AspNetCore.Diagnostics
+namespace SkyWalking.Diagnostics
 {
     public interface ITracingDiagnosticListener
     {

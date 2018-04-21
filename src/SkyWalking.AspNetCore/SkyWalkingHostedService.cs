@@ -23,9 +23,9 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using SkyWalking.AspNetCore.Diagnostics;
 using SkyWalking.Boot;
 using SkyWalking.Config;
+using SkyWalking.Diagnostics;
 using SkyWalking.Remote;
 
 namespace SkyWalking.AspNetCore
