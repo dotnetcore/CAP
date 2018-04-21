@@ -10,7 +10,7 @@ using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    internal class DefaultAdditionalProcessor : IAdditionalProcessor
+    internal class MySqlCollectProcessor : ICollectProcessor
     {
         private const int MaxBatch = 1000;
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.MySql
         private readonly MySqlOptions _options;
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
-        public DefaultAdditionalProcessor(ILogger<DefaultAdditionalProcessor> logger,
+        public MySqlCollectProcessor(ILogger<MySqlCollectProcessor> logger,
             MySqlOptions mysqlOptions)
         {
             _logger = logger;
@@ -27,8 +27,6 @@ namespace DotNetCore.CAP.MySql
 
         public async Task ProcessAsync(ProcessingContext context)
         {
-            _logger.LogDebug("Collecting expired entities.");
-
             var tables = new[]
             {
                 $"{_options.TableNamePrefix}.published",
@@ -37,6 +35,8 @@ namespace DotNetCore.CAP.MySql
 
             foreach (var table in tables)
             {
+                _logger.LogDebug($"Collecting expired data from table [{table}].");
+               
                 int removedCount;
                 do
                 {
