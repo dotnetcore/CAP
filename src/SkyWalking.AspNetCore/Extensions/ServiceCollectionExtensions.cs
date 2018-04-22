@@ -19,17 +19,14 @@
 using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Http;
-using SkyWalking.AspNetCore.Diagnostics;
-using SkyWalking.Diagnostics;
+using SkyWalking.Diagnostics.HttpClient;
+using SkyWalking.Extensions.DependencyInjection;
 
 namespace SkyWalking.AspNetCore
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSkyWalking(this IServiceCollection services,
+        public static SkyWalkingBuilder AddSkyWalking(this IServiceCollection services,
             Action<SkyWalkingOptions> options)
         {
             if (options == null)
@@ -37,29 +34,27 @@ namespace SkyWalking.AspNetCore
                 throw new ArgumentNullException(nameof(options));
             }
 
-            return services.AddSkyWalking().Configure(options);
+            return services.Configure(options).AddSkyWalkingCore();
         }
 
-        public static IServiceCollection AddSkyWalking(this IServiceCollection services,
+        public static SkyWalkingBuilder AddSkyWalking(this IServiceCollection services,
             IConfiguration configuration)
         {
-            return services.AddSkyWalking().Configure<SkyWalkingOptions>(configuration);
+            return services.Configure<SkyWalkingOptions>(configuration).AddSkyWalkingCore();
         }
 
-        private static IServiceCollection AddSkyWalking(this IServiceCollection services)
+        private static SkyWalkingBuilder AddSkyWalkingCore(this IServiceCollection services)
         {
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.AddHttpClient<TracingHttpClient>("sw-tracing");
+            var builder = new SkyWalkingBuilder(services);
 
-            services.AddSingleton<IHostedService, SkyWalkingHostedService>();
-            services.AddSingleton<ITracingDiagnosticListener, HostingDiagnosticListener>();
-            services.AddTransient<HttpMessageHandlerBuilder, TracingHttpMessageHandlerBuilder>();
-            
-            return services;
+            builder.AddHosting().AddDiagnostics().AddHttpClient();
+
+            return builder;
         }
     }
 }

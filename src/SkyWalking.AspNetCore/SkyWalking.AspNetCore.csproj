@@ -23,5 +23,10 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+    <ProjectReference Include="..\SkyWalking.Diagnostics.HttpClient\SkyWalking.Diagnostics.HttpClient.csproj" />
+    <ProjectReference Include="..\SkyWalking.Extensions.DependencyInjection\SkyWalking.Extensions.DependencyInjection.csproj">
+      <Project>{BF5579ED-113C-4EE6-AE03-9A9CA590C924}</Project>
+      <Name>SkyWalking.Extensions.DependencyInjection</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

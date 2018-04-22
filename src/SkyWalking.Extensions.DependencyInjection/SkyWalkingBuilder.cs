@@ -16,10 +16,17 @@
  *
  */
 
-namespace SkyWalking.Diagnostics
+using Microsoft.Extensions.DependencyInjection;
+
+namespace SkyWalking.Extensions.DependencyInjection
 {
-    public interface ITracingDiagnosticListener
+    public class SkyWalkingBuilder
     {
-        string ListenerName { get; }
+        public IServiceCollection Services { get; }
+
+        public SkyWalkingBuilder(IServiceCollection services)
+        {
+            Services = services;
+        }
     }
 }

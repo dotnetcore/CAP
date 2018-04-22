@@ -16,6 +16,7 @@
  *
  */
 
+using System.Diagnostics;
 using System.Net.Http;
 using Microsoft.Extensions.DiagnosticAdapter;
 using SkyWalking.Context;
@@ -25,7 +26,7 @@ using SkyWalking.NetworkProtocol.Trace;
 
 namespace SkyWalking.Diagnostics.HttpClient
 {
-    public class HttpClientDiagnosticListener : ITracingDiagnosticListener
+    public class HttpClientDiagnosticProcessor : ITracingDiagnosticProcessor
     {
         public string ListenerName { get; } = "HttpHandlerDiagnosticListener";
 

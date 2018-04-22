@@ -17,5 +17,6 @@
   <ItemGroup>
     <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
     <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+    <ProjectReference Include="..\SkyWalking.Extensions.DependencyInjection\SkyWalking.Extensions.DependencyInjection.csproj" />
   </ItemGroup>
 </Project>

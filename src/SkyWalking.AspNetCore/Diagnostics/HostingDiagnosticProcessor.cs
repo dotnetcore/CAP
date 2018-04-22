@@ -27,12 +27,8 @@ using SkyWalking.NetworkProtocol.Trace;
 
 namespace SkyWalking.AspNetCore.Diagnostics
 {
-    public class HostingDiagnosticListener : ITracingDiagnosticListener
+    public class HostingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
-        public HostingDiagnosticListener()
-        {
-        }
-
         public string ListenerName { get; } = "Microsoft.AspNetCore";
 
         [DiagnosticName("Microsoft.AspNetCore.Hosting.HttpRequestIn")]

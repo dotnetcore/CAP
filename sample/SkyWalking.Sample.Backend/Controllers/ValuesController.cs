@@ -19,9 +19,9 @@ namespace SkyWalking.Sample.Backend.Controllers
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<string> Get(int id, [FromServices] IHttpClientFactory httpClientFactory)
+        public async Task<string> Get(int id)
         {
-            var httpClient = httpClientFactory.CreateClient("tracing");
+            var httpClient = new HttpClient();
             return await httpClient.GetStringAsync("http://www.baidu.com");
         }
 

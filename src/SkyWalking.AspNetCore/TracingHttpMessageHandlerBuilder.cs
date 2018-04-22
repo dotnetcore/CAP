@@ -31,15 +31,7 @@ namespace SkyWalking.AspNetCore
         public override string Name
         {
             get => _name;
-            set
-            {
-                if (value == null)
-                {
-                    throw new ArgumentNullException(nameof(value));
-                }
-
-                _name = value;
-            }
+            set => _name = value ?? throw new ArgumentNullException(nameof(value));
         }
         
         public override IList<DelegatingHandler> AdditionalHandlers { get; } = new List<DelegatingHandler>();

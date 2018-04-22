@@ -17,7 +17,6 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -32,11 +31,9 @@ namespace SkyWalking.AspNetCore
 {
     public class SkyWalkingHostedService : IHostedService
     {
-        private readonly IEnumerable<ITracingDiagnosticListener> _tracingDiagnosticListeners;
-        private readonly DiagnosticListener _diagnosticListener;
+        private readonly TracingDiagnosticObserver _diagnosticObserver;
         
-        public SkyWalkingHostedService(IOptions<SkyWalkingOptions> options, IHostingEnvironment hostingEnvironment,
-            IEnumerable<ITracingDiagnosticListener> tracingDiagnosticListeners, DiagnosticListener diagnosticListener)
+        public SkyWalkingHostedService(IOptions<SkyWalkingOptions> options, IHostingEnvironment hostingEnvironment, TracingDiagnosticObserver diagnosticObserver)
         {
             if (string.IsNullOrEmpty(options.Value.DirectServers))
             {
@@ -50,17 +47,14 @@ namespace SkyWalking.AspNetCore
 
             AgentConfig.ApplicationCode = options.Value.ApplicationCode;
             CollectorConfig.DirectServers = options.Value.DirectServers;
-
-            _tracingDiagnosticListeners = tracingDiagnosticListeners;
-            _diagnosticListener = diagnosticListener;
+            _diagnosticObserver = diagnosticObserver;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             await GrpcChannelManager.Instance.ConnectAsync();
             await ServiceManager.Instance.Initialize();
-            foreach (var tracingDiagnosticListener in _tracingDiagnosticListeners)
-                _diagnosticListener.SubscribeWithAdapter(tracingDiagnosticListener);
+            DiagnosticListener.AllListeners.Subscribe(_diagnosticObserver);
         }
 
         public async Task StopAsync(CancellationToken cancellationToken)
