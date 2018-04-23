@@ -10,7 +10,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.SqlServer
 {
-    public class DefaultAdditionalProcessor : IAdditionalProcessor
+    public class SqlServerCollectProcessor : ICollectProcessor
     {
         private const int MaxBatch = 1000;
 
@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.SqlServer
         private readonly SqlServerOptions _options;
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
-        public DefaultAdditionalProcessor(ILogger<DefaultAdditionalProcessor> logger,
+        public SqlServerCollectProcessor(ILogger<SqlServerCollectProcessor> logger,
             SqlServerOptions sqlServerOptions)
         {
             _logger = logger;
@@ -33,10 +33,10 @@ namespace DotNetCore.CAP.SqlServer
 
         public async Task ProcessAsync(ProcessingContext context)
         {
-            _logger.LogDebug("Collecting expired entities.");
-
             foreach (var table in Tables)
             {
+                _logger.LogDebug($"Collecting expired data from table [{_options.Schema}].[{table}].");
+
                 int removedCount;
                 do
                 {
