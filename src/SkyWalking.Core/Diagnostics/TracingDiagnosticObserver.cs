@@ -19,12 +19,15 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using SkyWalking.Logging;
 using SkyWalking.Utils;
 
 namespace SkyWalking.Diagnostics
 {
     public abstract class TracingDiagnosticObserver : IObserver<DiagnosticListener>
     {
+        private static readonly ILogger _logger = LogManager.GetLogger<TracingDiagnosticObserver>();
+
         private readonly IEnumerable<ITracingDiagnosticProcessor> _tracingDiagnosticProcessors;
 
         public TracingDiagnosticObserver(IEnumerable<ITracingDiagnosticProcessor> tracingDiagnosticProcessors)
@@ -48,6 +51,7 @@ namespace SkyWalking.Diagnostics
                 if (listener.Name == diagnosticProcessor.ListenerName)
                 {
                     OnNext(listener, diagnosticProcessor);
+                    _logger.Debug($"TracingDiagnosticObserver -- Subscribe {diagnosticProcessor.ListenerName}.");
                 }
             }
         }

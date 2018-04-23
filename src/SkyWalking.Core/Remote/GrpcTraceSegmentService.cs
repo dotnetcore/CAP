@@ -16,17 +16,21 @@
  *
  */
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Boot;
 using SkyWalking.Context;
 using SkyWalking.Context.Trace;
+using SkyWalking.Logging;
 using SkyWalking.NetworkProtocol;
 
 namespace SkyWalking.Remote
 {
     public class GrpcTraceSegmentService : IBootService, ITracingContextListener
     {
+        private static readonly ILogger _logger = LogManager.GetLogger<GrpcTraceSegmentService>();
+        
         public void Dispose()
         {
             TracingContext.ListenerManager.Remove(this);
@@ -42,14 +46,26 @@ namespace SkyWalking.Remote
 
         public async void AfterFinished(ITraceSegment traceSegment)
         {
-            var segment = traceSegment.Transform();
-            var traceSegmentService =
-                new TraceSegmentService.TraceSegmentServiceClient(GrpcChannelManager.Instance.Channel);
-            using (var asyncClientStreamingCall = traceSegmentService.collect())
+            if (traceSegment.IsIgnore)
             {
-                await asyncClientStreamingCall.RequestStream.WriteAsync(segment);
-                await asyncClientStreamingCall.RequestStream.CompleteAsync();
+                return;
             }
+
+            try
+            {
+                var segment = traceSegment.Transform();
+                var traceSegmentService =
+                    new TraceSegmentService.TraceSegmentServiceClient(GrpcChannelManager.Instance.Channel);
+                using (var asyncClientStreamingCall = traceSegmentService.collect())
+                {
+                    await asyncClientStreamingCall.RequestStream.WriteAsync(segment);
+                    await asyncClientStreamingCall.RequestStream.CompleteAsync();
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.Error("Transform and send UpstreamSegment to collector fail.", e);
+            }   
         }
     }
 }

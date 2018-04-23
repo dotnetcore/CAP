@@ -20,8 +20,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Http;
 using SkyWalking.AspNetCore.Diagnostics;
+using SkyWalking.AspNetCore.Logging;
 using SkyWalking.Diagnostics;
 using SkyWalking.Extensions.DependencyInjection;
+using SkyWalking.Logging;
 
 namespace SkyWalking.AspNetCore
 {
@@ -31,6 +33,7 @@ namespace SkyWalking.AspNetCore
         {   
             builder.Services.AddSingleton<IHostedService, SkyWalkingHostedService>();
             builder.Services.AddSingleton<ITracingDiagnosticProcessor, HostingDiagnosticProcessor>();
+            builder.Services.AddSingleton<ILoggerFactory, LoggerFactoryAdapter>();
             return builder;
         }
 

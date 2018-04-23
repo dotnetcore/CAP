@@ -19,11 +19,13 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using SkyWalking.Logging;
 
 namespace SkyWalking.Boot
 {
     public abstract class TimerService : IBootService
     {
+        private static readonly ILogger _logger = LogManager.GetLogger<TimerService>();
         protected abstract TimeSpan Interval { get; }
         private Task _task;
 
@@ -40,7 +42,14 @@ namespace SkyWalking.Boot
                 {
                     while (true)
                     {
-                        await Execute(token);
+                        try
+                        {
+                            await Execute(token);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.Error($"{GetType().Name} execute fail.", e);
+                        }
                         await Task.Delay(Interval, token);
                     }  
                 },
