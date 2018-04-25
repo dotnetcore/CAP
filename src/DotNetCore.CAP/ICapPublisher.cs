@@ -15,7 +15,7 @@ namespace DotNetCore.CAP
         /// (EntityFramework) Asynchronous publish a object message.
         /// <para>
         /// If you are using the EntityFramework, you need to configure the DbContextType first.
-        /// otherwise you need to use overloaded method with IDbConnection and IDbTransaction.
+        /// otherwise you need to use overloaded method with  IDbTransaction.
         /// </para>
         /// </summary>
         /// <typeparam name="T">The type of content object.</typeparam>
@@ -28,7 +28,7 @@ namespace DotNetCore.CAP
         /// (EntityFramework) Publish a object message.
         /// <para>
         /// If you are using the EntityFramework, you need to configure the DbContextType first.
-        /// otherwise you need to use overloaded method with IDbConnection and IDbTransaction.
+        /// otherwise you need to use overloaded method with IDbTransaction.
         /// </para>
         /// </summary>
         /// <typeparam name="T">The type of content object.</typeparam>
