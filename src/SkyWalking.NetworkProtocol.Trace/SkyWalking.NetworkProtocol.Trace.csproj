@@ -1,7 +1,5 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
-
   <PropertyGroup>
     <Description>SkyWalking trace protocol.</Description>
     <AssemblyTitle>SkyWalking.NetworkProtocol.Trace</AssemblyTitle>
@@ -9,7 +7,10 @@
     <AssemblyName>SkyWalking.NetworkProtocol.Trace</AssemblyName>
     <PackageId>SkyWalking.NetworkProtocol.Trace</PackageId>
     <PackageTags>SkyWalking</PackageTags>
-    <PackageReleaseNotes></PackageReleaseNotes>
+    <PackageReleaseNotes>
+    </PackageReleaseNotes>
   </PropertyGroup>
-
+  <ItemGroup>
+    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
+  </ItemGroup>
 </Project>

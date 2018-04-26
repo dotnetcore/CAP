@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using SkyWalking.AspNetCore;
 
 namespace SkyWalking.Sample.Frontend.Controllers
 {
@@ -12,9 +10,9 @@ namespace SkyWalking.Sample.Frontend.Controllers
     {
         // GET api/values
         [HttpGet]
-        public async Task<IEnumerable<string>> Get([FromServices] TracingHttpClient httpClient)
+        public async Task<IEnumerable<string>> Get()
         {
-            await httpClient.HttpClient.GetAsync("http://localhost:5002/api/values");
+            await new HttpClient().GetAsync("http://localhost:5002/api/values");
             return new string[] {"value1", "value2"};
         }
 
