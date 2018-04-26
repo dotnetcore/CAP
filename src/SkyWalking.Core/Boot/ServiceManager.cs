@@ -68,11 +68,11 @@ namespace SkyWalking.Boot
                 {
                     await service.Initialize(_tokenSource.Token);
                     _services.Add(service.GetType(), service);
-                    _logger.Debug($"ServiceManager init {service.GetType()}.");
+                    _logger.Debug($"ServiceManager loaded {service.GetType()}.");
                 }
                 catch (Exception e)
                 {
-                    _logger.Error($"ServiceManager init {service.GetType()} fail.",e);
+                    _logger.Error($"ServiceManager loaded {service.GetType()} fail.",e);
                 }      
             }
         }

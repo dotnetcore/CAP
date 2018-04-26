@@ -152,7 +152,7 @@ namespace SkyWalking.Context.Trace
                 .Add("error.kind", exception.GetType().FullName)
                 .Add("message", exception.Message)
                 .Add("stack", exception.StackTrace)
-                .Build(DateTime.UtcNow.GetTimeMillis()));
+                .Build(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds()));
             return this;
         }
 
@@ -176,7 +176,7 @@ namespace SkyWalking.Context.Trace
 
         public virtual ISpan Start()
         {
-            _startTime = DateTime.UtcNow.GetTimeMillis();
+            _startTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             return this;
         }
 
@@ -205,7 +205,7 @@ namespace SkyWalking.Context.Trace
         /// <returns></returns>
         public virtual bool Finish(ITraceSegment owner)
         {
-            _endTime = DateTime.UtcNow.GetTimeMillis();
+            _endTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             owner.Archive(this);
             return true;
         }

@@ -25,7 +25,7 @@ namespace SkyWalking.Context.Ids
 {
     public static class GlobalIdGenerator
     {
-        private static readonly ThreadLocal<IDContext> threadIdSequence = new ThreadLocal<IDContext>(() => new IDContext(DateTime.Now.GetTimeMillis(), 0));
+        private static readonly ThreadLocal<IDContext> threadIdSequence = new ThreadLocal<IDContext>(() => new IDContext(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), 0));
 
         public static ID Generate()
         {
@@ -67,7 +67,7 @@ namespace SkyWalking.Context.Ids
 
             private long GetTimestamp()
             {
-                long currentTimeMillis = DateTime.Now.GetTimeMillis();
+                long currentTimeMillis = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
                 if (currentTimeMillis < _lastTimestamp)
                 {

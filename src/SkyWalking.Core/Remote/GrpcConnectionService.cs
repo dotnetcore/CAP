@@ -17,16 +17,23 @@
  */
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
+using SkyWalking.Boot;
 
-namespace SkyWalking.Context
+namespace SkyWalking.Remote
 {
-    public static class DateTimeExtensions
+    public class GrpcConnectionService : TimerService
     {
-        private static readonly DateTime dtFrom = new DateTime(1970, 1, 1, 0, 0, 0, 0);
+        protected override TimeSpan Interval { get; } = TimeSpan.FromMinutes(1);
 
-        public static long GetTimeMillis(this DateTime dateTime)
+        protected override async Task Execute(CancellationToken token)
         {
-            return (dateTime.Ticks - dtFrom.Ticks) / 10000;
+            var connection = GrpcConnectionManager.Instance.GetAvailableConnection();
+            if (connection == null || !connection.CheckState())
+            {
+                await GrpcConnectionManager.Instance.ConnectAsync();
+            }
         }
     }
 }

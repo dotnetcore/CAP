@@ -357,7 +357,7 @@ namespace SkyWalking.Context
                 return false;
             }
 
-            var currentTimeMillis = DateTime.UtcNow.GetTimeMillis();
+            var currentTimeMillis = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
             if (currentTimeMillis - _lastWarningTimestamp > 30 * 1000)
             {
                 //todo log warning

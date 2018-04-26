@@ -16,37 +16,14 @@
  *
  */
 
-using System.Linq;
-using System.Threading.Tasks;
-using Grpc.Core;
-using SkyWalking.Boot;
-using SkyWalking.Config;
-
 namespace SkyWalking.Remote
 {
-    public class GrpcChannelManager
+    public enum GrpcConnectionState
     {
-        private static readonly GrpcChannelManager _client = new GrpcChannelManager();
-
-        public static GrpcChannelManager Instance => _client;
-        
-        private Channel _channel;
-
-        public Channel Channel => _channel;
-
-        private GrpcChannelManager()
-        {
-            _channel = new Channel(RemoteDownstreamConfig.Collector.gRPCServers.First(), ChannelCredentials.Insecure);
-        }
-        
-        public Task ConnectAsync()
-        {
-            return _channel.ConnectAsync();
-        }
-
-        public Task ShutdownAsync()
-        {
-            return _channel.ShutdownAsync();
-        }
+        Idle,
+        Connecting,
+        Ready,
+        Failure,
+        Shutdown
     }
 }

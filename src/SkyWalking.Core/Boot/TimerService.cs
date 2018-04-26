@@ -40,6 +40,7 @@ namespace SkyWalking.Boot
             await Initializing(token);
             _task = Task.Factory.StartNew(async () =>
                 {
+                    await Starting(token);
                     while (true)
                     {
                         try
@@ -61,6 +62,11 @@ namespace SkyWalking.Boot
             return Task.CompletedTask;
         }
 
+        protected virtual Task Starting(CancellationToken token)
+        {
+            return Task.CompletedTask;
+        }
+        
         protected abstract Task Execute(CancellationToken token);
     }
 }

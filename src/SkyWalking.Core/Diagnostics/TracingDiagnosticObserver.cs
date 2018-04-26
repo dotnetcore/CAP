@@ -51,7 +51,7 @@ namespace SkyWalking.Diagnostics
                 if (listener.Name == diagnosticProcessor.ListenerName)
                 {
                     OnNext(listener, diagnosticProcessor);
-                    _logger.Debug($"TracingDiagnosticObserver -- Subscribe {diagnosticProcessor.ListenerName}.");
+                    _logger.Debug($"TracingDiagnosticObserver subscribe diagnosticListener named [{diagnosticProcessor.ListenerName}].");
                 }
             }
         }

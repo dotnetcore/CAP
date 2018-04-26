@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Boot;
@@ -30,7 +31,7 @@ namespace SkyWalking.Remote
     public class GrpcTraceSegmentService : IBootService, ITracingContextListener
     {
         private static readonly ILogger _logger = LogManager.GetLogger<GrpcTraceSegmentService>();
-        
+
         public void Dispose()
         {
             TracingContext.ListenerManager.Remove(this);
@@ -51,21 +52,33 @@ namespace SkyWalking.Remote
                 return;
             }
 
+            var availableConnection = GrpcConnectionManager.Instance.GetAvailableConnection();
+            if (availableConnection == null)
+            {
+                _logger.Warning(
+                    $"Transform and send UpstreamSegment to collector fail. {GrpcConnectionManager.NotFoundErrorMessage}");
+                return;
+            }
+
             try
             {
                 var segment = traceSegment.Transform();
                 var traceSegmentService =
-                    new TraceSegmentService.TraceSegmentServiceClient(GrpcChannelManager.Instance.Channel);
+                    new TraceSegmentService.TraceSegmentServiceClient(availableConnection.GrpcChannel);
                 using (var asyncClientStreamingCall = traceSegmentService.collect())
                 {
                     await asyncClientStreamingCall.RequestStream.WriteAsync(segment);
                     await asyncClientStreamingCall.RequestStream.CompleteAsync();
                 }
+
+                _logger.Debug(
+                    $"Transform and send UpstreamSegment to collector. TraceSegmentId : {traceSegment.TraceSegmentId}");
             }
             catch (Exception e)
             {
-                _logger.Error("Transform and send UpstreamSegment to collector fail.", e);
-            }   
+                _logger.Warning($"Transform and send UpstreamSegment to collector fail. {e.Message}");
+                availableConnection?.Failure();
+            }
         }
     }
 }
