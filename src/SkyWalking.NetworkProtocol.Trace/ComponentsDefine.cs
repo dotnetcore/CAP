@@ -25,10 +25,18 @@ namespace SkyWalking.NetworkProtocol.Trace
     {
         public static readonly OfficialComponent HttpClient = new OfficialComponent(2, "HttpClient");
         
-        public static readonly OfficialComponent AspNetCore = new OfficialComponent(30, "AspNetCore");
+        public static readonly OfficialComponent AspNetCore = new OfficialComponent(3001, "AspNetCore");
 
-        public static readonly OfficialComponent EntityFrameworkCore = new OfficialComponent(31, "EntityFrameworkCore");
+        public static readonly OfficialComponent EntityFrameworkCore = new OfficialComponent(3002, "EntityFrameworkCore");
 
+        public static readonly OfficialComponent SqlClient = new OfficialComponent(3003, "SqlClient");
+        
+        public static readonly OfficialComponent CAP = new OfficialComponent(3004, "CAP");
+        
+        public static readonly OfficialComponent StackExchange_Redis = new OfficialComponent(3005, "StackExchange.Redis");
+        
+        public static readonly OfficialComponent SqlServer = new OfficialComponent(3006, "SqlServer");
+        
         private static readonly ComponentsDefine _instance = new ComponentsDefine();
 
         public ComponentsDefine Instance
@@ -46,6 +54,10 @@ namespace SkyWalking.NetworkProtocol.Trace
             _components = new Dictionary<int, string>();
             AddComponent(AspNetCore);
             AddComponent(EntityFrameworkCore);
+            AddComponent(SqlClient);
+            AddComponent(CAP);
+            AddComponent(StackExchange_Redis);
+            AddComponent(SqlServer);
         }
 
         private void AddComponent(OfficialComponent component)
