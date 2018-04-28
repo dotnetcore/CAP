@@ -132,7 +132,7 @@ namespace DotNetCore.CAP.Abstractions
             {
                 throw new InvalidOperationException(
                     "If you are using the EntityFramework, you need to configure the DbContextType first." +
-                    " otherwise you need to use overloaded method with IDbConnection and IDbTransaction.");
+                    " otherwise you need to use overloaded method with IDbTransaction.");
             }
         }
 

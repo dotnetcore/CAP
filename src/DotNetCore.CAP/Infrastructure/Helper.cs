@@ -86,7 +86,6 @@ namespace DotNetCore.CAP.Infrastructure
             return !CanConvertFromString(type);
         }
 
-
         public static string AddExceptionProperty(string json, Exception exception)
         {
             var jObject = ToJObject(exception);

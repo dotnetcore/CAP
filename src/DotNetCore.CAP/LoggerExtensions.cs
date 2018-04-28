@@ -17,10 +17,10 @@ namespace DotNetCore.CAP
         private static readonly Action<ILogger, string, string, string, Exception> _modelBinderFormattingException;
         private static readonly Action<ILogger, Exception> _consumerFailedWillRetry;
         private static readonly Action<ILogger, double, Exception> _consumerExecuted;
-        private static readonly Action<ILogger, int, Exception> _senderRetrying;
+        private static readonly Action<ILogger, int, int, Exception> _senderRetrying;
         private static readonly Action<ILogger, string, Exception> _exceptionOccuredWhileExecuting;
         private static readonly Action<ILogger, double, Exception> _messageHasBeenSent;
-        private static readonly Action<ILogger, int, Exception> _messagePublishException;
+        private static readonly Action<ILogger, int, string, Exception> _messagePublishException;
 
         static LoggerExtensions()
         {
@@ -60,10 +60,10 @@ namespace DotNetCore.CAP
                 "When call subscribe method, a parameter format conversion exception occurs. MethodName:'{MethodName}' ParameterName:'{ParameterName}' Content:'{Content}'."
             );
 
-            _senderRetrying = LoggerMessage.Define<int>(
+            _senderRetrying = LoggerMessage.Define<int, int>(
                 LogLevel.Debug,
                 3,
-                "Retrying send a message: {Retries}...");
+                "The {Retries}th retrying send a message failed. message id: {MessageId} ");
 
             _consumerExecuted = LoggerMessage.Define<double>(
                 LogLevel.Debug,
@@ -78,17 +78,17 @@ namespace DotNetCore.CAP
             _exceptionOccuredWhileExecuting = LoggerMessage.Define<string>(
                 LogLevel.Error,
                 6,
-                "An exception occured while trying to store a message: '{MessageId}'. ");
+                "An exception occured while trying to store a message. message id: {MessageId}");
 
             _messageHasBeenSent = LoggerMessage.Define<double>(
                 LogLevel.Debug,
                 4,
                 "Message published. Took: {Seconds} secs.");
 
-            _messagePublishException = LoggerMessage.Define<int>(
+            _messagePublishException = LoggerMessage.Define<int, string>(
                 LogLevel.Error,
                 6,
-                "An exception occured while publishing a message: '{MessageId}'. ");
+                "An exception occured while publishing a message, reason:{Reason}. message id:{MessageId}");
         }
 
         public static void ConsumerExecutionFailedWillRetry(this ILogger logger, Exception ex)
@@ -96,9 +96,9 @@ namespace DotNetCore.CAP
             _consumerFailedWillRetry(logger, ex);
         }
 
-        public static void SenderRetrying(this ILogger logger, int retries)
+        public static void SenderRetrying(this ILogger logger, int messageId, int retries)
         {
-            _senderRetrying(logger, retries, null);
+            _senderRetrying(logger, messageId, retries, null);
         }
 
         public static void MessageHasBeenSent(this ILogger logger, double seconds)
@@ -106,9 +106,9 @@ namespace DotNetCore.CAP
             _messageHasBeenSent(logger, seconds, null);
         }
 
-        public static void MessagePublishException(this ILogger logger, int messageId, Exception ex)
+        public static void MessagePublishException(this ILogger logger, int messageId, string reason, Exception ex)
         {
-            _messagePublishException(logger, messageId, ex);
+            _messagePublishException(logger, messageId, reason, ex);
         }
 
         public static void ConsumerExecuted(this ILogger logger, double seconds)

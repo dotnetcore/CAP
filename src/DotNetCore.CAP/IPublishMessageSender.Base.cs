@@ -67,15 +67,13 @@ namespace DotNetCore.CAP
             }
             else
             {
-                TracingError(operationId, message.Name, sendValues, result.Exception, startTime, stopwatch.Elapsed);
-
-                _logger.MessagePublishException(message.Id, result.Exception);
+                TracingError(operationId, message, result, startTime, stopwatch.Elapsed);
 
                 await SetFailedState(message, result.Exception, out bool stillRetry);
 
                 if (stillRetry)
                 {
-                    _logger.SenderRetrying(3);
+                    _logger.SenderRetrying(message.Id, message.Retries);
 
                     await SendAsync(message);
                 }
@@ -109,20 +107,11 @@ namespace DotNetCore.CAP
         private Task SetFailedState(CapPublishedMessage message, Exception ex, out bool stillRetry)
         {
             IState newState = new FailedState();
-
-            if (ex is PublisherSentFailedException)
+            stillRetry = UpdateMessageForRetryAsync(message);
+            if (stillRetry)
             {
-                stillRetry = false;
-                message.Retries = _options.FailedRetryCount; // not retry if PublisherSentFailedException
-            }
-            else
-            {
-                stillRetry = UpdateMessageForRetryAsync(message);
-                if (stillRetry)
-                {
-                    _logger.ConsumerExecutionFailedWillRetry(ex);
-                    return Task.CompletedTask;
-                }
+                _logger.ConsumerExecutionFailedWillRetry(ex);
+                return Task.CompletedTask;
             }
 
             AddErrorReasonToContent(message, ex);
@@ -166,14 +155,18 @@ namespace DotNetCore.CAP
             _logger.MessageHasBeenSent(du.TotalSeconds);
         }
 
-        private void TracingError(Guid operationId, string topic, string values, Exception ex, DateTimeOffset startTime, TimeSpan du)
+        private void TracingError(Guid operationId, CapPublishedMessage message, OperateResult result, DateTimeOffset startTime, TimeSpan du)
         {
+            var ex = new PublisherSentFailedException(result.ToString(), result.Exception);
+
+            _logger.MessagePublishException(message.Id, result.ToString(), ex);
+
             var eventData = new BrokerPublishErrorEventData(
                 operationId,
                 "",
                 ServersAddress,
-                topic,
-                values,
+                message.Name,
+                message.Content,
                 ex,
                 startTime,
                 du);

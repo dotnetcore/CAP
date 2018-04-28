@@ -57,6 +57,8 @@ namespace DotNetCore.CAP
                 MainConfig["socket.blocking.max.ms"] = "10";
                 MainConfig["enable.auto.commit"] = "false";
                 MainConfig["log.connection.close"] = "false";
+                MainConfig["request.timeout.ms"] = "3000";
+                MainConfig["message.timeout.ms"] = "5000";
 
                 _kafkaConfig = MainConfig.AsEnumerable();
             }
