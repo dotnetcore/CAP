@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
+using NLog.Web;
 
 namespace Sample.Kafka.MySql
 {
@@ -14,7 +15,11 @@ namespace Sample.Kafka.MySql
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
+                .ConfigureLogging((hostingContext, builder) =>
+                {
+                    hostingContext.HostingEnvironment.ConfigureNLog("nlog.config");
+                })
+                .UseNLog()
                 .Build();
-
     }
 }
