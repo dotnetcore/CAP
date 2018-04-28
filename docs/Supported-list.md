@@ -1,4 +1,5 @@
-* Web Framework
-    * [ASP.NET Core](https://github.com/aspnet)
-* HttpClient
-    * [HttpClientFactory](https://github.com/aspnet/HttpClientFactory)
+- [ASP.NET Core](https://github.com/aspnet)    
+- [HttpClientFactory](https://github.com/aspnet/HttpClientFactory)
+- [EntityFrameworkCore](https://github.com/aspnet/EntityFrameworkCore)
+- [.NET Core BCL types (HttpClient and SqlClient)](https://github.com/dotnet/corefx)
+- [CAP](https://github.com/dotnetcore/CAP)
