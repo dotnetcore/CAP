@@ -1,19 +1,22 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
+
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <Description>SkyWalking.Diagnostics.HttpClient notifies outgoing Http requests.</Description>
-    <AssemblyTitle>SkyWalking.Diagnostics.HttpClient</AssemblyTitle>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>SkyWalking.Diagnostics.HttpClient</AssemblyName>
-    <PackageId>SkyWalking.Diagnostics.HttpClient</PackageId>
-    <PackageTags>SkyWalking;APM;Diagnostics;HttpClient</PackageTags>
-    <PackageReleaseNotes>
-    </PackageReleaseNotes>
-    <RootNamespace>SkyWalking.Diagnostics.HttpClient</RootNamespace>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Description>SkyWalking.Diagnostics.CAP notifies of CAP messages.</Description>
+    <AssemblyTitle>SkyWalking.Diagnostics.CAP</AssemblyTitle>
+    <AssemblyName>SkyWalking.Diagnostics.CAP</AssemblyName>
+    <PackageId>SkyWalking.Diagnostics.CAP</PackageId>
+    <PackageTags>SkyWalking;APM;CAP</PackageTags>
+    <RootNamespace>SkyWalking.Diagnostics.CAP</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="DotNetCore.CAP" Version="2.2.2" />
     <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="2.1.0-preview2-final" />
   </ItemGroup>
 
@@ -22,4 +25,5 @@
     <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
     <ProjectReference Include="..\SkyWalking.Extensions.DependencyInjection\SkyWalking.Extensions.DependencyInjection.csproj" />
   </ItemGroup>
+
 </Project>

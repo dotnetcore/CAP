@@ -14,8 +14,5 @@
   <ItemGroup>
     <ProjectReference Include="..\SkyWalking.NetworkProtocol.Trace\SkyWalking.NetworkProtocol.Trace.csproj" />
     <ProjectReference Include="..\SkyWalking.NetworkProtocol\SkyWalking.NetworkProtocol.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="NETStandard.Library" Version="2.0.0" />
-  </ItemGroup>
+  </ItemGroup> 
 </Project>
