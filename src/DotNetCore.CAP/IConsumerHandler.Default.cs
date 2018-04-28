@@ -178,6 +178,8 @@ namespace DotNetCore.CAP
 
         private (Guid, string) TracingBefore(string topic, string values)
         {
+            _logger.LogDebug("CAP received topic message:" + topic);
+
             Guid operationId = Guid.NewGuid();
 
             var eventData = new BrokerConsumeEventData(
