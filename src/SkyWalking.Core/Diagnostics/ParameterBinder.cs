@@ -17,33 +17,11 @@
  */
 
 using System;
-using System.Collections.Generic;
 
 namespace SkyWalking.Diagnostics
 {
-    internal class TracingDiagnosticObserver : IObserver<KeyValuePair<string, object>>
+    public abstract class ParameterBinder : Attribute, IParameterResolver
     {
-        private readonly TracingDiagnosticMethodCollection _methodCollection;
-
-        public TracingDiagnosticObserver(ITracingDiagnosticProcessor tracingDiagnosticProcessor)
-        {
-            _methodCollection = new TracingDiagnosticMethodCollection(tracingDiagnosticProcessor);
-        }
-
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
-
-        public void OnNext(KeyValuePair<string, object> value)
-        {
-            foreach (var method in _methodCollection)
-            {
-                method.Invoke(value.Key, value.Value);
-            }
-        }
+        public abstract object Resolve(object value);
     }
 }

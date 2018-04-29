@@ -33,11 +33,11 @@ namespace SkyWalking.AspNetCore
 {
     public class SkyWalkingHostedService : IHostedService
     {
-        private readonly TracingDiagnosticObserver _diagnosticObserver;
+        private readonly TracingDiagnosticProcessorObserver _diagnosticObserver;
         private readonly ILogger _logger;
 
         public SkyWalkingHostedService(IOptions<SkyWalkingOptions> options, IHostingEnvironment hostingEnvironment,
-            TracingDiagnosticObserver diagnosticObserver, ILoggerFactory loggerFactory)
+            TracingDiagnosticProcessorObserver diagnosticObserver, ILoggerFactory loggerFactory)
         {
        
             if (string.IsNullOrEmpty(options.Value.DirectServers))

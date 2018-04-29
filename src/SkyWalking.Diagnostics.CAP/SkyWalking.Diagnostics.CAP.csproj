@@ -17,7 +17,6 @@
 
   <ItemGroup>
     <PackageReference Include="DotNetCore.CAP" Version="2.2.2" />
-    <PackageReference Include="Microsoft.Extensions.DiagnosticAdapter" Version="2.1.0-preview2-final" />
   </ItemGroup>
 
   <ItemGroup>

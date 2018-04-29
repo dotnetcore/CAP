@@ -39,7 +39,7 @@ namespace SkyWalking.AspNetCore
 
         public static SkyWalkingBuilder AddDiagnostics(this SkyWalkingBuilder builder)
         {
-            builder.Services.AddSingleton<TracingDiagnosticObserver, AdatpeTracingDiagnosticObserver>();
+            builder.Services.AddSingleton<TracingDiagnosticProcessorObserver>();
             return builder;
         }
 

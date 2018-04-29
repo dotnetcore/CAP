@@ -16,34 +16,22 @@
  *
  */
 
-using System;
-using System.Collections.Generic;
-
 namespace SkyWalking.Diagnostics
 {
-    internal class TracingDiagnosticObserver : IObserver<KeyValuePair<string, object>>
+    public class PropertyAttribute : ParameterBinder
     {
-        private readonly TracingDiagnosticMethodCollection _methodCollection;
+        public string Name { get; set; }
 
-        public TracingDiagnosticObserver(ITracingDiagnosticProcessor tracingDiagnosticProcessor)
+        public override object Resolve(object value)
         {
-            _methodCollection = new TracingDiagnosticMethodCollection(tracingDiagnosticProcessor);
-        }
-
-        public void OnCompleted()
-        {
-        }
-
-        public void OnError(Exception error)
-        {
-        }
-
-        public void OnNext(KeyValuePair<string, object> value)
-        {
-            foreach (var method in _methodCollection)
+            if (value == null || Name == null)
             {
-                method.Invoke(value.Key, value.Value);
+                return null;
             }
+
+            var property = value.GetType().GetProperty(Name);
+            
+            return property?.GetValue(value);
         }
     }
 }

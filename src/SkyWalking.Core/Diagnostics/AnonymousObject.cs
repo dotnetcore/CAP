@@ -16,22 +16,13 @@
  *
  */
 
-using System.Collections.Generic;
-using System.Diagnostics;
-using SkyWalking.Diagnostics;
-
-namespace SkyWalking.AspNetCore.Diagnostics
+namespace SkyWalking.Diagnostics
 {
-    public class AdatpeTracingDiagnosticObserver : TracingDiagnosticObserver
+    public class AnonymousObject : ParameterBinder
     {
-        public AdatpeTracingDiagnosticObserver(IEnumerable<ITracingDiagnosticProcessor> tracingDiagnosticProcessors) 
-            : base(tracingDiagnosticProcessors)
+        public override object Resolve(object value)
         {
-        }
-
-        protected override void OnNext(DiagnosticListener listener, ITracingDiagnosticProcessor diagnosticProcessor)
-        {
-            listener.SubscribeWithAdapter(diagnosticProcessor);
+            return value;
         }
     }
 }

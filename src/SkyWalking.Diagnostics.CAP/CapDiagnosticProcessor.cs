@@ -19,7 +19,6 @@
 using System;
 using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
-using Microsoft.Extensions.DiagnosticAdapter;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
 using SkyWalking.Context.Trace;

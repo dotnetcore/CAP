@@ -24,7 +24,7 @@ namespace SkyWalking.Logging
     {
         public ILogger CreateLogger(Type type)
         {
-            return null;
+            return new NullLogger();
         }
     }
 }

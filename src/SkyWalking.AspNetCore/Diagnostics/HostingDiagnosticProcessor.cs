@@ -18,7 +18,6 @@
 
 using System;
 using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DiagnosticAdapter;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
 using SkyWalking.Context.Trace;

@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SkyWalking.AspNetCore;
-using SkyWalking.Diagnostics.CAP;
 
 namespace SkyWalking.Sample.Backend
 {
@@ -21,17 +20,11 @@ namespace SkyWalking.Sample.Backend
         {
             services.AddMvc();
 
-            //services.AddCap(x =>
-            //{
-            //    x.UseKafka("192.168.10.110:9092");
-            //    x.UseMySql("Server=192.168.10.110;Database=testcap;UserId=root;Password=123123;");
-            //});
-
             services.AddSkyWalking(option =>
             {
                 option.DirectServers = "localhost:11800";
                 option.ApplicationCode = "asp-net-core-backend";
-            });//.AddCap();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -43,8 +36,6 @@ namespace SkyWalking.Sample.Backend
             }
 
             app.UseMvc();
-
-           // app.UseCap();
         }
     }
 }
