@@ -37,7 +37,7 @@ namespace Sample.Kafka.MySql.Controllers
         [CapSubscribe("xxx.xxx.test2")]
         public void Test2(int value)
         {
-            Console.WriteLine(value);
+            Console.WriteLine("Subscriber output message: " + value);
         }
     }
 }
