@@ -65,19 +65,6 @@ namespace DotNetCore.CAP.Processor
                     continue;
                 }
 
-                if (!hasException)
-                {
-                    try
-                    {
-                        _options.FailedCallback?.Invoke(MessageType.Publish, message.Name, message.Content);
-                    }
-                    catch (Exception ex)
-                    {
-                        hasException = true;
-                        _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
-                    }
-                }
-
                 using (var transaction = connection.CreateTransaction())
                 {
                     var result = await _publishExecutor.PublishAsync(message.Name, message.Content);
@@ -101,6 +88,21 @@ namespace DotNetCore.CAP.Processor
                         {
                             _logger.LogError($"The message still sent failed after {_options.FailedRetryCount} retries. We will stop retrying the message. " +
                                              "MessageId:" + message.Id);
+                            if (message.Retries == _options.FailedRetryCount)
+                            {
+                                if (!hasException)
+                                {
+                                    try
+                                    {
+                                        _options.FailedThresholdCallback?.Invoke(MessageType.Publish, message.Name, message.Content);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        hasException = true;
+                                        _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
+                                    }
+                                }
+                            }
                         }
                     }
                     await transaction.CommitAsync();
@@ -122,19 +124,6 @@ namespace DotNetCore.CAP.Processor
                 if (message.Retries > _options.FailedRetryCount)
                 {
                     continue;
-                }
-
-                if (!hasException)
-                {
-                    try
-                    {
-                        _options.FailedCallback?.Invoke(MessageType.Subscribe, message.Name, message.Content);
-                    }
-                    catch (Exception ex)
-                    {
-                        hasException = true;
-                        _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
-                    }
                 }
 
                 using (var transaction = connection.CreateTransaction())
@@ -160,6 +149,22 @@ namespace DotNetCore.CAP.Processor
                         {
                             _logger.LogError($"[Subscriber]The message still executed failed after {_options.FailedRetryCount} retries. " +
                                              "We will stop retrying to execute the message. message id:" + message.Id);
+
+                            if (message.Retries == _options.FailedRetryCount)
+                            {
+                                if (!hasException)
+                                {
+                                    try
+                                    {
+                                        _options.FailedThresholdCallback?.Invoke(MessageType.Subscribe, message.Name, message.Content);
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        hasException = true;
+                                        _logger.LogWarning("Failed call-back method raised an exception:" + ex.Message);
+                                    }
+                                }
+                            }
                         }
                     }
                     await transaction.CommitAsync();
