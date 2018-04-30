@@ -63,6 +63,7 @@ namespace SkyWalking.Remote
                         new ApplicationRegisterService.ApplicationRegisterServiceClient(availableConnection
                             .GrpcChannel);
                     var applicationMapping = await applicationRegisterService.applicationCodeRegisterAsync(application);
+                    await Task.Delay(TimeSpan.FromSeconds(1), token);
                     var applicationId = applicationMapping?.Application?.Value;
                     if (!applicationId.HasValue || DictionaryUtil.IsNull(applicationId.Value))
                     {

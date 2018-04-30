@@ -42,6 +42,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Extensions.Depen
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.CAP", "src\SkyWalking.Diagnostics.CAP\SkyWalking.Diagnostics.CAP.csproj", "{55621423-19C3-4928-8B45-666FA87BF6A2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.HttpClient.Tests", "test\SkyWalking.Diagnostics.HttpClient.Tests\SkyWalking.Diagnostics.HttpClient.Tests.csproj", "{05E533B1-473F-48C0-95F7-B87061BE9834}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -92,6 +94,10 @@ Global
 		{55621423-19C3-4928-8B45-666FA87BF6A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55621423-19C3-4928-8B45-666FA87BF6A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55621423-19C3-4928-8B45-666FA87BF6A2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05E533B1-473F-48C0-95F7-B87061BE9834}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05E533B1-473F-48C0-95F7-B87061BE9834}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05E533B1-473F-48C0-95F7-B87061BE9834}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05E533B1-473F-48C0-95F7-B87061BE9834}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,6 +116,7 @@ Global
 		{49DEFCA8-4289-4875-B6A5-35D84B3D2290} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
 		{BF5579ED-113C-4EE6-AE03-9A9CA590C924} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
 		{55621423-19C3-4928-8B45-666FA87BF6A2} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
+		{05E533B1-473F-48C0-95F7-B87061BE9834} = {613F0980-91ED-4064-8E8C-168582EF4AD7}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94C0DA2C-CCCB-4314-93A2-9809B5DD0583}

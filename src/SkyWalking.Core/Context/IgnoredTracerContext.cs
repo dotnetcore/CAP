@@ -19,15 +19,16 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using SkyWalking.Context.Trace;
+using SkyWalking.Utils;
 
 namespace SkyWalking.Context
 {
     public class IgnoredTracerContext : ITracerContext
     {
         private static readonly NoopSpan noopSpan = new NoopSpan();
+        private static readonly NoopEntrySpan noopEntrySpan=new NoopEntrySpan();
 
-        private int _stackDepth;
-        
+        private readonly Stack<ISpan> _spans = new Stack<ISpan>();
         
         public void Inject(IContextCarrier carrier)
         {
@@ -38,9 +39,16 @@ namespace SkyWalking.Context
         }
 
         public IContextSnapshot Capture { get; }
-        
-        public ISpan ActiveSpan { get; }
-        
+
+        public ISpan ActiveSpan
+        {
+            get
+            {
+                _spans.TryPeek(out var span);
+                return span;
+            }
+        }
+
         public void Continued(IContextSnapshot snapshot)
         {
         }
@@ -52,30 +60,32 @@ namespace SkyWalking.Context
 
         public ISpan CreateEntrySpan(string operationName)
         {
-            _stackDepth++;
-            return noopSpan;
+            _spans.Push(noopEntrySpan);
+            return noopEntrySpan;
         }
 
         public ISpan CreateLocalSpan(string operationName)
         {
-            _stackDepth++;
+            _spans.Push(noopSpan);
             return noopSpan;
         }
 
         public ISpan CreateExitSpan(string operationName, string remotePeer)
         {
-            _stackDepth++;
-            return noopSpan;
+            var exitSpan = new NoopExitSpan(remotePeer);
+            _spans.Push(exitSpan);
+            return exitSpan;
         }
 
         public void StopSpan(ISpan span)
         {
-            _stackDepth--;
-            if (_stackDepth == 0) {
+            _spans.TryPop(out _);
+            if (_spans.Count == 0)
+            {
                 ListenerManager.NotifyFinish(this);
             }
         }
-        
+
         public static class ListenerManager
         {
             private static readonly List<IIgnoreTracerContextListener> _listeners = new List<IIgnoreTracerContextListener>();

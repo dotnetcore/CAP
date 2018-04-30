@@ -18,7 +18,6 @@
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Http;
 using SkyWalking.AspNetCore.Diagnostics;
 using SkyWalking.AspNetCore.Logging;
 using SkyWalking.Diagnostics;
@@ -40,13 +39,6 @@ namespace SkyWalking.AspNetCore
         public static SkyWalkingBuilder AddDiagnostics(this SkyWalkingBuilder builder)
         {
             builder.Services.AddSingleton<TracingDiagnosticProcessorObserver>();
-            return builder;
-        }
-
-        public static SkyWalkingBuilder AddHttpClientFactory(this SkyWalkingBuilder builder)
-        {
-            builder.Services.AddHttpClient<TracingHttpClient>();         
-            builder.Services.AddTransient<HttpMessageHandlerBuilder, TracingHttpMessageHandlerBuilder>();
             return builder;
         }
     }

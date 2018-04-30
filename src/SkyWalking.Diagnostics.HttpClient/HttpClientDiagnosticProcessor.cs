@@ -16,6 +16,7 @@
  *
  */
 
+using System;
 using System.Net.Http;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
@@ -29,7 +30,7 @@ namespace SkyWalking.Diagnostics.HttpClient
         public string ListenerName { get; } = "HttpHandlerDiagnosticListener";
 
         [DiagnosticName("System.Net.Http.Request")]
-        public void HttpRequest(HttpRequestMessage request)
+        public void HttpRequest([Property(Name = "Request")] HttpRequestMessage request)
         {
             var contextCarrier = new ContextCarrier();
             var peer = $"{request.RequestUri.Host}:{request.RequestUri.Port}";
@@ -43,14 +44,26 @@ namespace SkyWalking.Diagnostics.HttpClient
         }
 
         [DiagnosticName("System.Net.Http.Response")]
-        public void HttpResponse(HttpResponseMessage response)
+        public void HttpResponse([Property(Name = "Response")] HttpResponseMessage response)
+        {
+            var span = ContextManager.ActiveSpan;
+            if (span != null && response != null)
+            {
+                Tags.StatusCode.Set(span, response.StatusCode.ToString());
+            }
+
+            ContextManager.StopSpan(span);
+        }
+
+        [DiagnosticName("System.Net.Http.Exception")]
+        public void HttpException([Property(Name = "Request")] HttpRequestMessage request,
+            [Property(Name = "Exception")] Exception ex)
         {
             var span = ContextManager.ActiveSpan;
             if (span != null && span.IsExit)
             {
-                Tags.StatusCode.Set(span, response.StatusCode.ToString());
-                ContextManager.StopSpan(span);
-            }        
+                span.ErrorOccurred();
+            }
         }
     }
 }

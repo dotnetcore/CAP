@@ -22,9 +22,9 @@ namespace SkyWalking.Context.Trace
 {
     public class NoopExitSpan : NoopSpan, IWithPeerInfo
     {
-        public int PeerId => throw new NotImplementedException();
+        public int PeerId => peerId;
 
-        public string Peer => throw new NotImplementedException();
+        public string Peer => peer;
 
         private String peer;
         private int peerId;
@@ -38,5 +38,7 @@ namespace SkyWalking.Context.Trace
         {
             this.peer = peer;
         }
+
+        public override bool IsExit { get; } = true;
     }
 }

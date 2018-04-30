@@ -35,7 +35,7 @@ namespace SkyWalking.Remote
 
         protected override async Task Starting(CancellationToken token)
         {
-            await Task.Delay(TimeSpan.FromSeconds(15));
+            await Task.Delay(TimeSpan.FromSeconds(15), token);
         }
 
         protected override async Task Execute(CancellationToken token)

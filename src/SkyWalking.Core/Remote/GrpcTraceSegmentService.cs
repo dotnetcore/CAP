@@ -72,7 +72,7 @@ namespace SkyWalking.Remote
                 }
 
                 _logger.Debug(
-                    $"Transform and send UpstreamSegment to collector. TraceSegmentId : {traceSegment.TraceSegmentId}");
+                    $"Transform and send UpstreamSegment to collector. [TraceSegmentId] = {traceSegment.TraceSegmentId} [GlobalTraceId] = {traceSegment.RelatedGlobalTraces.FirstOrDefault()}");
             }
             catch (Exception e)
             {

@@ -48,7 +48,7 @@ namespace SkyWalking.Diagnostics.CAP
         }
 
         [DiagnosticName(CapEvents.CapBeforePublish)]
-        public void CapBeforePublish(BrokerPublishEventData eventData)
+        public void CapBeforePublish([Object]BrokerPublishEventData eventData)
         {
             var operationName = BrokerOperationNameResolver(eventData);
             var contextCarrier = new ContextCarrier();
@@ -56,7 +56,7 @@ namespace SkyWalking.Diagnostics.CAP
             var span = ContextManager.CreateExitSpan(operationName, contextCarrier, peer);
             span.SetComponent(ComponentsDefine.CAP);
             span.SetLayer(SpanLayer.MQ);
-            span.Tag(Tags.MqTopic.Key, eventData.BrokerTopicName);
+            Tags.MqTopic.Set(span, eventData.BrokerTopicName);
             foreach (var item in contextCarrier.Items)
             {
                 eventData.Headers.Add(item.HeadKey, item.HeadValue);
@@ -64,13 +64,13 @@ namespace SkyWalking.Diagnostics.CAP
         }
 
         [DiagnosticName(CapEvents.CapAfterPublish)]
-        public void CapAfterPublish(BrokerPublishEndEventData eventData)
+        public void CapAfterPublish([Object]BrokerPublishEndEventData eventData)
         {
             ContextManager.StopSpan();
         }
 
         [DiagnosticName(CapEvents.CapErrorPublish)]
-        public void CapErrorPublish(BrokerPublishErrorEventData eventData)
+        public void CapErrorPublish([Object]BrokerPublishErrorEventData eventData)
         {
             var capSpan = ContextManager.ActiveSpan;
             if (capSpan == null)
@@ -83,7 +83,7 @@ namespace SkyWalking.Diagnostics.CAP
         }
 
         [DiagnosticName(CapEvents.CapBeforeConsume)]
-        public void CapBeforeConsume(BrokerConsumeEventData eventData)
+        public void CapBeforeConsume([Object]BrokerConsumeEventData eventData)
         {
             var operationName = BrokerOperationNameResolver(eventData);
             var carrier = new ContextCarrier();
@@ -108,11 +108,11 @@ namespace SkyWalking.Diagnostics.CAP
             var span = ContextManager.CreateEntrySpan(operationName, carrier);
             span.SetComponent(ComponentsDefine.CAP);
             span.SetLayer(SpanLayer.MQ);
-            span.Tag(Tags.MqTopic.Key, eventData.BrokerTopicName);
+            Tags.MqTopic.Set(span, eventData.BrokerTopicName);
         }
 
         [DiagnosticName(CapEvents.CapAfterConsume)]
-        public void CapAfterConsume(BrokerConsumeEndEventData eventData)
+        public void CapAfterConsume([Object]BrokerConsumeEndEventData eventData)
         {
             var capSpan = ContextManager.ActiveSpan;
             if (capSpan == null)
@@ -124,7 +124,7 @@ namespace SkyWalking.Diagnostics.CAP
         }
 
         [DiagnosticName(CapEvents.CapErrorConsume)]
-        public void CapErrorConsume(BrokerConsumeErrorEventData eventData)
+        public void CapErrorConsume([Object]BrokerConsumeErrorEventData eventData)
         {
             var capSpan = ContextManager.ActiveSpan;
             if (capSpan == null)
@@ -138,7 +138,7 @@ namespace SkyWalking.Diagnostics.CAP
         }
 
         [DiagnosticName(CapEvents.CapBeforeSubscriberInvoke)]
-        public void CapBeforeSubscriberInvoke(SubscriberInvokeEventData eventData)
+        public void CapBeforeSubscriberInvoke([Object]SubscriberInvokeEventData eventData)
         {
             var span = ContextManager.CreateLocalSpan("Subscriber invoke");
             span.SetComponent(ComponentsDefine.CAP);
@@ -146,13 +146,13 @@ namespace SkyWalking.Diagnostics.CAP
         }
 
         [DiagnosticName(CapEvents.CapAfterSubscriberInvoke)]
-        public void CapAfterSubscriberInvoke(SubscriberInvokeEventData eventData)
+        public void CapAfterSubscriberInvoke([Object]SubscriberInvokeEventData eventData)
         {
             ContextManager.StopSpan();
         }
 
         [DiagnosticName(CapEvents.CapErrorSubscriberInvoke)]
-        public void CapErrorSubscriberInvoke(SubscriberInvokeErrorEventData eventData)
+        public void CapErrorSubscriberInvoke([Object]SubscriberInvokeErrorEventData eventData)
         {
             var capSpan = ContextManager.ActiveSpan;
             if (capSpan == null)

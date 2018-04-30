@@ -30,14 +30,8 @@ namespace SkyWalking.AspNetCore.Diagnostics
     {
         public string ListenerName { get; } = "Microsoft.AspNetCore";
 
-        [DiagnosticName("Microsoft.AspNetCore.Hosting.HttpRequestIn")]
-        public void HttpRequestIn()
-        {
-            // do nothing, just enable the diagnotic source
-        }
-
-        [DiagnosticName("Microsoft.AspNetCore.Hosting.HttpRequestIn.Start")]
-        public void HttpRequestInStart(HttpContext httpContext)
+        [DiagnosticName("Microsoft.AspNetCore.Hosting.BeginRequest")]
+        public void BeginRequest([Property]HttpContext httpContext)
         {
             var carrier = new ContextCarrier();
             foreach (var item in carrier.Items)
@@ -50,8 +44,8 @@ namespace SkyWalking.AspNetCore.Diagnostics
             Tags.HTTP.Method.Set(httpRequestSpan, httpContext.Request.Method);
         }
 
-        [DiagnosticName("Microsoft.AspNetCore.Hosting.HttpRequestIn.Stop")]
-        public void HttpRequestInStop(HttpContext httpContext)
+        [DiagnosticName("Microsoft.AspNetCore.Hosting.EndRequest")]
+        public void EndRequest([Property]HttpContext httpContext)
         {
             var httpRequestSpan = ContextManager.ActiveSpan;
             if (httpRequestSpan == null)
@@ -67,12 +61,6 @@ namespace SkyWalking.AspNetCore.Diagnostics
             ContextManager.StopSpan(httpRequestSpan);
         }
 
-        [DiagnosticName("Microsoft.AspNetCore.Diagnostics.HandledException")]
-        public void DiagnosticHandledException(HttpContext httpContext, Exception exception)
-        {
-            ContextManager.ActiveSpan.ErrorOccurred();
-        }
-
         [DiagnosticName("Microsoft.AspNetCore.Diagnostics.UnhandledException")]
         public void DiagnosticUnhandledException(HttpContext httpContext, Exception exception)
         {
@@ -80,7 +68,7 @@ namespace SkyWalking.AspNetCore.Diagnostics
         }
 
         [DiagnosticName("Microsoft.AspNetCore.Hosting.UnhandledException")]
-        public void HostingUnhandledException(HttpContext httpContext, Exception exception)
+        public void HostingUnhandledException([Property]HttpContext httpContext, [Property]Exception exception)
         {
             ContextManager.ActiveSpan.ErrorOccurred();
         }
