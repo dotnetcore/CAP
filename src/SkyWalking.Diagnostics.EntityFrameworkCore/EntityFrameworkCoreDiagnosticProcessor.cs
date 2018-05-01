@@ -66,7 +66,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
         }
 
         [DiagnosticName("Microsoft.EntityFrameworkCore.Database.Command.CommandError")]
-        public void CommandError(CommandErrorEventData eventData)
+        public void CommandError([Object]CommandErrorEventData eventData)
         {
             var span = ContextManager.ActiveSpan;
             if (span == null)
