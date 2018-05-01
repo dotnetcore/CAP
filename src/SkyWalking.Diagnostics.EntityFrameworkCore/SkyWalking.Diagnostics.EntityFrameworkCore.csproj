@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <AssemblyName>SkyWalking.Diagnostics.EntityFrameworkCore</AssemblyName>
+        <AssemblyTitle>SkyWalking.Diagnostics.EntityFrameworkCore</AssemblyTitle>
+
+        <PackageId>SkyWalking.AspNetCore</PackageId>
+        <PackageTags>SkyWalking;APM;EntityFrameworkCore;EF</PackageTags>
+
+        <Description>SkyWalking.Diagnostics.EntityFrameworkCore notifies of EF requests.</Description>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.0.2" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
+        <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+        <ProjectReference Include="..\SkyWalking.Extensions.DependencyInjection\SkyWalking.Extensions.DependencyInjection.csproj" />
+    </ItemGroup>
+
+</Project>
