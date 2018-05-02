@@ -20,6 +20,7 @@ using System;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SkyWalking.Diagnostics.HttpClient;
+using SkyWalking.Diagnostics.SqlClient;
 using SkyWalking.Extensions.DependencyInjection;
 
 namespace SkyWalking.AspNetCore
@@ -52,7 +53,7 @@ namespace SkyWalking.AspNetCore
 
             var builder = new SkyWalkingBuilder(services);
 
-            builder.AddHosting().AddDiagnostics().AddHttpClient();
+            builder.AddHosting().AddDiagnostics().AddHttpClient().AddSqlClient();
 
             return builder;
         }

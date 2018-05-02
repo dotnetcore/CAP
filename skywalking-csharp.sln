@@ -48,6 +48,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.Enti
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.EntityFrameworkCore.Tests", "test\SkyWalking.Diagnostics.EntityFrameworkCore.Tests\SkyWalking.Diagnostics.EntityFrameworkCore.Tests.csproj", "{4CF91A8C-25C8-4BD8-A93D-3183AF0FE2E2}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.SqlClient", "src\SkyWalking.Diagnostics.SqlClient\SkyWalking.Diagnostics.SqlClient.csproj", "{44DFFDF7-5935-475A-825F-2C0298464117}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -110,6 +112,10 @@ Global
 		{4CF91A8C-25C8-4BD8-A93D-3183AF0FE2E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4CF91A8C-25C8-4BD8-A93D-3183AF0FE2E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4CF91A8C-25C8-4BD8-A93D-3183AF0FE2E2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{44DFFDF7-5935-475A-825F-2C0298464117}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{44DFFDF7-5935-475A-825F-2C0298464117}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{44DFFDF7-5935-475A-825F-2C0298464117}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{44DFFDF7-5935-475A-825F-2C0298464117}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -131,6 +137,7 @@ Global
 		{05E533B1-473F-48C0-95F7-B87061BE9834} = {613F0980-91ED-4064-8E8C-168582EF4AD7}
 		{CD334460-8E61-41EB-9762-62C6A342CACB} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
 		{4CF91A8C-25C8-4BD8-A93D-3183AF0FE2E2} = {613F0980-91ED-4064-8E8C-168582EF4AD7}
+		{44DFFDF7-5935-475A-825F-2C0298464117} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94C0DA2C-CCCB-4314-93A2-9809B5DD0583}

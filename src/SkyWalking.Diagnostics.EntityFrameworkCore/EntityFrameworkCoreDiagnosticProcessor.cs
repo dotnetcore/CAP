@@ -54,6 +54,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
             var span = ContextManager.CreateLocalSpan(operationName);
             span.SetComponent(ComponentsDefine.EntityFrameworkCore);
             span.SetLayer(SpanLayer.DB);
+            Tags.DbType.Set(span, "Sql");
             Tags.DbInstance.Set(span, eventData.Command.Connection.Database);
             Tags.DbStatement.Set(span, eventData.Command.CommandText);
             Tags.DbBindVariables.Set(span, BuildParameterVariables(eventData.Command.Parameters));

@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <Description>SkyWalking.Diagnostics.SqlClient notifies outgoing SqlClient requests.</Description>
+    <AssemblyTitle>SkyWalking.Diagnostics.SqlClient</AssemblyTitle>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>SSkyWalking.Diagnostics.SqlClient</AssemblyName>
+    <PackageId>SkyWalking.Diagnostics.SqlClient</PackageId>
+    <PackageTags>SkyWalking;APM;Diagnostics;SqlClient</PackageTags>
+    <PackageReleaseNotes>
+    </PackageReleaseNotes>
+    <RootNamespace>SkyWalking.Diagnostics.SqlClient</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
+    <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+    <ProjectReference Include="..\SkyWalking.Extensions.DependencyInjection\SkyWalking.Extensions.DependencyInjection.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
+  </ItemGroup>
+</Project>
