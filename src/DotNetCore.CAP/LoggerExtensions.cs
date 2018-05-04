@@ -18,7 +18,6 @@ namespace DotNetCore.CAP
         private static readonly Action<ILogger, Exception> _consumerFailedWillRetry;
         private static readonly Action<ILogger, double, Exception> _consumerExecuted;
         private static readonly Action<ILogger, int, int, Exception> _senderRetrying;
-        private static readonly Action<ILogger, string, Exception> _exceptionOccuredWhileExecuting;
         private static readonly Action<ILogger, double, Exception> _messageHasBeenSent;
         private static readonly Action<ILogger, int, string, Exception> _messagePublishException;
 
@@ -73,12 +72,7 @@ namespace DotNetCore.CAP
             _consumerFailedWillRetry = LoggerMessage.Define(
                 LogLevel.Warning,
                 2,
-                "Consumer failed to execute. Will retry.");
-
-            _exceptionOccuredWhileExecuting = LoggerMessage.Define<string>(
-                LogLevel.Error,
-                6,
-                "An exception occured while trying to store a message. message id: {MessageId}");
+                "Consumer failed to execute. Will retry."); 
 
             _messageHasBeenSent = LoggerMessage.Define<double>(
                 LogLevel.Debug,
@@ -134,11 +128,6 @@ namespace DotNetCore.CAP
         public static void ExpectedOperationCanceledException(this ILogger logger, Exception ex)
         {
             _expectedOperationCanceledException(logger, ex.Message, ex);
-        }
-
-        public static void ExceptionOccuredWhileExecuting(this ILogger logger, string messageId, Exception ex)
-        {
-            _exceptionOccuredWhileExecuting(logger, messageId, ex);
         }
 
         public static void ModelBinderFormattingException(this ILogger logger, string methodName, string parameterName,
