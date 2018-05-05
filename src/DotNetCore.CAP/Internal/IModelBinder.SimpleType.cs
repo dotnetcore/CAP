@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.ComponentModel;
 using System.Globalization;
 using System.Reflection;
@@ -8,7 +11,7 @@ using DotNetCore.CAP.Abstractions.ModelBinding;
 
 namespace DotNetCore.CAP.Internal
 {
-    public class SimpleTypeModelBinder : IModelBinder
+    internal class SimpleTypeModelBinder : IModelBinder
     {
         private readonly ParameterInfo _parameterInfo;
         private readonly TypeConverter _typeConverter;
@@ -44,36 +47,32 @@ namespace DotNetCore.CAP.Internal
                 }
                 else if (string.IsNullOrWhiteSpace(content))
                 {
-                    // Other than the StringConverter, converters Trim() the value then throw if the result is empty.
                     model = null;
                 }
                 else
                 {
                     model = _typeConverter.ConvertFrom(
-                         context: null,
-                         culture: CultureInfo.CurrentCulture,
-                         value: content);
+                        null,
+                        CultureInfo.CurrentCulture,
+                        content);
                 }
 
                 if (model == null && !IsReferenceOrNullableType(parameterType))
                 {
                     return Task.FromResult(ModelBindingResult.Failed());
                 }
-                else
-                {
-                    return Task.FromResult(ModelBindingResult.Success(model));
-                }
+
+                return Task.FromResult(ModelBindingResult.Success(model));
             }
             catch (Exception exception)
             {
                 var isFormatException = exception is FormatException;
                 if (!isFormatException && exception.InnerException != null)
                 {
-                    // TypeConverter throws System.Exception wrapping the FormatException,
-                    // so we capture the inner exception.
                     exception = ExceptionDispatchInfo.Capture(exception.InnerException).SourceException;
                 }
-                throw exception;
+
+                throw;
             }
         }
 

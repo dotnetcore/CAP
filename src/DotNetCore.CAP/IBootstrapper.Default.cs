@@ -1,38 +1,37 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
 {
+    /// <inheritdoc />
     /// <summary>
-    /// Default implement of <see cref="IBootstrapper"/>.
+    /// Default implement of <see cref="T:DotNetCore.CAP.IBootstrapper" />.
     /// </summary>
-    public class DefaultBootstrapper : IBootstrapper
+    internal class DefaultBootstrapper : IBootstrapper
     {
-        private readonly ILogger<DefaultBootstrapper> _logger;
         private readonly IApplicationLifetime _appLifetime;
         private readonly CancellationTokenSource _cts;
         private readonly CancellationTokenRegistration _ctsRegistration;
+        private readonly ILogger<DefaultBootstrapper> _logger;
         private Task _bootstrappingTask;
 
         public DefaultBootstrapper(
             ILogger<DefaultBootstrapper> logger,
-            IOptions<CapOptions> options,
             IStorage storage,
             IApplicationLifetime appLifetime,
-            IServiceProvider provider)
+            IEnumerable<IProcessingServer> processors)
         {
             _logger = logger;
             _appLifetime = appLifetime;
-            Options = options.Value;
             Storage = storage;
-            Provider = provider;
-            Servers = Provider.GetServices<IProcessingServer>();
+            Processors = processors;
 
             _cts = new CancellationTokenSource();
             _ctsRegistration = appLifetime.ApplicationStopping.Register(() =>
@@ -40,7 +39,7 @@ namespace DotNetCore.CAP
                 _cts.Cancel();
                 try
                 {
-                    _bootstrappingTask?.Wait();
+                    _bootstrappingTask?.GetAwaiter().GetResult();
                 }
                 catch (OperationCanceledException ex)
                 {
@@ -49,30 +48,46 @@ namespace DotNetCore.CAP
             });
         }
 
-        protected CapOptions Options { get; }
+        private IStorage Storage { get; }
 
-        protected IStorage Storage { get; }
-
-        protected IEnumerable<IProcessingServer> Servers { get; }
-
-        public IServiceProvider Provider { get; private set; }
+        private IEnumerable<IProcessingServer> Processors { get; }
 
         public Task BootstrapAsync()
         {
-            return (_bootstrappingTask = BootstrapTaskAsync());
+            return _bootstrappingTask = BootstrapTaskAsync();
         }
 
         private async Task BootstrapTaskAsync()
         {
             await Storage.InitializeAsync(_cts.Token);
 
-            if (_cts.IsCancellationRequested) return;
+            if (_cts.IsCancellationRequested)
+            {
+                return;
+            }
+
+            _appLifetime.ApplicationStopping.Register(() =>
+            {
+                foreach (var item in Processors)
+                {
+                    item.Dispose();
+                }
+            });
+
+            if (_cts.IsCancellationRequested)
+            {
+                return;
+            }
 
             await BootstrapCoreAsync();
 
-            if (_cts.IsCancellationRequested) return;
+            _ctsRegistration.Dispose();
+            _cts.Dispose();
+        }
 
-            foreach (var item in Servers)
+        protected virtual Task BootstrapCoreAsync()
+        {
+            foreach (var item in Processors)
             {
                 try
                 {
@@ -80,23 +95,10 @@ namespace DotNetCore.CAP
                 }
                 catch (Exception ex)
                 {
-                    _logger.ServerStartedError(ex);
+                    _logger.ProcessorsStartedError(ex);
                 }
             }
 
-            _ctsRegistration.Dispose();
-            _cts.Dispose();
-        }
-
-        public virtual Task BootstrapCoreAsync()
-        {
-            _appLifetime.ApplicationStopping.Register(() =>
-            {
-                foreach (var item in Servers)
-                {
-                    item.Dispose();
-                }
-            });
             return Task.CompletedTask;
         }
     }

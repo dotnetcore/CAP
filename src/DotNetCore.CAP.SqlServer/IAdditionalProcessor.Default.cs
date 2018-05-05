@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
@@ -9,26 +12,22 @@ namespace DotNetCore.CAP.SqlServer
 {
     public class DefaultAdditionalProcessor : IAdditionalProcessor
     {
-        private readonly IServiceProvider _provider;
-        private readonly ILogger _logger;
-        private readonly SqlServerOptions _options;
-
         private const int MaxBatch = 1000;
-        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
-        private readonly TimeSpan _waitingInterval = TimeSpan.FromHours(2);
 
         private static readonly string[] Tables =
         {
-            "Published","Received"
+            "Published", "Received"
         };
 
-        public DefaultAdditionalProcessor(
-            IServiceProvider provider,
-            ILogger<DefaultAdditionalProcessor> logger,
+        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
+        private readonly ILogger _logger;
+        private readonly SqlServerOptions _options;
+        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
+
+        public DefaultAdditionalProcessor(ILogger<DefaultAdditionalProcessor> logger,
             SqlServerOptions sqlServerOptions)
         {
             _logger = logger;
-            _provider = provider;
             _options = sqlServerOptions;
         }
 
@@ -38,7 +37,7 @@ namespace DotNetCore.CAP.SqlServer
 
             foreach (var table in Tables)
             {
-                var removedCount = 0;
+                int removedCount;
                 do
                 {
                     using (var connection = new SqlConnection(_options.ConnectionString))
@@ -46,7 +45,7 @@ namespace DotNetCore.CAP.SqlServer
                         removedCount = await connection.ExecuteAsync($@"
 DELETE TOP (@count)
 FROM [{_options.Schema}].[{table}] WITH (readpast)
-WHERE ExpiresAt < @now;", new { now = DateTime.Now, count = MaxBatch });
+WHERE ExpiresAt < @now;", new {now = DateTime.Now, count = MaxBatch});
                     }
 
                     if (removedCount != 0)

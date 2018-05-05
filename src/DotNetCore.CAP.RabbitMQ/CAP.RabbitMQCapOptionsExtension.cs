@@ -1,11 +1,14 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
-    public class RabbitMQCapOptionsExtension : ICapOptionsExtension
+    internal sealed class RabbitMQCapOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<RabbitMQOptions> _configure;
 
@@ -16,15 +19,16 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.Configure(_configure);
+            services.AddSingleton<CapMessageQueueMakerService>();
 
-            var rabbitMQOptions = new RabbitMQOptions();
-            _configure(rabbitMQOptions);
-
-            services.AddSingleton(rabbitMQOptions);
+            var options = new RabbitMQOptions();
+            _configure?.Invoke(options);
+            services.AddSingleton(options);
 
             services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
-            services.AddTransient<IQueueExecutor, PublishQueueExecutor>();
+            services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
+            services.AddSingleton<IPublishExecutor, RabbitMQPublishMessageSender>();
+            services.AddSingleton<IPublishMessageSender, RabbitMQPublishMessageSender>();
         }
     }
 }

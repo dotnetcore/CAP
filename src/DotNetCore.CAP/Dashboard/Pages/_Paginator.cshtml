@@ -1,0 +1,42 @@
+﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True TrimLeadingUnderscores : true *@
+@using DotNetCore.CAP.Dashboard
+@using DotNetCore.CAP.Dashboard.Resources
+@inherits DotNetCore.CAP.Dashboard.RazorPage
+<div class="btn-toolbar">
+    @if (_pager.TotalPageCount > 1)
+    {
+        <div class="btn-group paginator">
+            @foreach (var page in _pager.PagerItems)
+            {
+                switch (page.Type)
+                {
+                    case Pager.ItemType.Page:
+                        <a href="@_pager.PageUrl(page.PageIndex)" class="btn btn-default @(_pager.CurrentPage == page.PageIndex ? "active" : null)">
+                            @page.PageIndex
+                        </a>
+                        break;
+                    case Pager.ItemType.NextPage:
+                        <a href="@_pager.PageUrl(page.PageIndex)" class="btn btn-default @(page.Disabled ? "disabled" : null)">
+                            @Strings.Paginator_Next
+                        </a>
+                        break;
+                    case Pager.ItemType.PrevPage:
+                        <a href="@_pager.PageUrl(page.PageIndex)" class="btn btn-default @(page.Disabled ? "disabled" : null)">
+                            @Strings.Paginator_Prev
+                        </a>
+                        break;
+                    case Pager.ItemType.MorePage:
+                        <a href="#" class="btn btn-default disabled">
+                            …
+                        </a>
+                        break;
+                }
+            }
+        </div>
+        <div class="btn-toolbar-spacer"></div>
+    }
+
+    <div class="btn-toolbar-label">
+        @Strings.Paginator_TotalItems: @_pager.TotalRecordCount
+    </div>
+</div>

@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.Test
             var result = new OperateResult();
 
             Assert.False(result.Succeeded);
-            Assert.Equal(0, result.Errors.Count());
+            Assert.Empty(result.Errors);
         }
 
         [Fact]
@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.Test
             var result = OperateResult.Failed();
 
             Assert.False(result.Succeeded);
-            Assert.Equal(0, result.Errors.Count());
+            Assert.Empty(result.Errors);
         }
     }
 }

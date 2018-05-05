@@ -1,15 +1,15 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 
 namespace DotNetCore.CAP.Models
 {
     public class CapReceivedMessage
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="CapReceivedMessage"/>.
+        /// Initializes a new instance of <see cref="CapReceivedMessage" />.
         /// </summary>
-        /// <remarks>
-        /// The Id property is initialized to from a new GUID string value.
-        /// </remarks>
         public CapReceivedMessage()
         {
             Added = DateTime.Now;
@@ -46,6 +46,11 @@ namespace DotNetCore.CAP.Models
                 Name = Name,
                 Content = Content
             };
+        }
+
+        public override string ToString()
+        {
+            return "name:" + Name + ", group:" + Group + ", content:" + Content;
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -17,8 +20,6 @@ namespace DotNetCore.CAP.Processor
             _logger = loggerFactory.CreateLogger<InfiniteRetryProcessor>();
         }
 
-        public override string ToString() => _inner.ToString();
-
         public async Task ProcessAsync(ProcessingContext context)
         {
             while (!context.IsStopping)
@@ -33,9 +34,14 @@ namespace DotNetCore.CAP.Processor
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(1, ex, "Prcessor '{ProcessorName}' failed. Retrying...", _inner.ToString());
+                    _logger.LogWarning(1, ex, "Processor '{ProcessorName}' failed. Retrying...", _inner.ToString());
                 }
             }
+        }
+
+        public override string ToString()
+        {
+            return _inner.ToString();
         }
     }
 }

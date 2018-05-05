@@ -1,5 +1,10 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
+using System.Reflection;
+using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
 {
@@ -8,51 +13,73 @@ namespace DotNetCore.CAP
     /// </summary>
     public class CapOptions
     {
-        internal IList<ICapOptionsExtension> Extensions { get; private set; }
+        /// <summary>
+        /// Default succeeded message expiration time span, in seconds.
+        /// </summary>
+        public const int DefaultSucceedMessageExpirationAfter = 24 * 3600;
 
         /// <summary>
-        /// Default value for polling delay timeout, in seconds.
+        /// Failed message retry waiting interval.
         /// </summary>
-        public const int DefaultPollingDelay = 8;
+        public const int DefaultFailedMessageWaitingInterval = 60;
+
+        /// <summary>
+        /// Failed message retry count.
+        /// </summary>
+        public const int DefaultFailedRetryCount = 50;
+
 
         public CapOptions()
         {
-            PollingDelay = DefaultPollingDelay;
+            SucceedMessageExpiredAfter = DefaultSucceedMessageExpirationAfter;
+            FailedRetryInterval = DefaultFailedMessageWaitingInterval;
+            FailedRetryCount = DefaultFailedRetryCount;
             Extensions = new List<ICapOptionsExtension>();
+            DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly().GetName().Name.ToLower();
         }
 
-        /// <summary>
-        /// Productor job polling delay time. Default is 5 sec.
-        /// </summary>
-        public int PollingDelay { get; set; } = 5;
+        internal IList<ICapOptionsExtension> Extensions { get; }
 
         /// <summary>
-        /// Failed messages polling delay time. Default is 2 min.
+        /// Subscriber default group name. kafka-->group name. rabbitmq --> queue name.
         /// </summary>
-        public TimeSpan FailedMessageWaitingInterval = TimeSpan.FromMinutes(2);
+        public string DefaultGroup { get; set; }
 
         /// <summary>
-        /// We’ll send a POST request to the URL below with details of any subscribed events.
+        /// Sent or received succeed message after time span of due, then the message will be deleted at due time.
+        /// Default is 24*3600 seconds.
         /// </summary>
-        public WebHook WebHook => throw new NotSupportedException();
+        public int SucceedMessageExpiredAfter { get; set; }
 
         /// <summary>
-		/// Registers an extension that will be executed when building services.
-		/// </summary>
-		/// <param name="extension"></param>
-		public void RegisterExtension(ICapOptionsExtension extension)
+        /// Failed messages polling delay time.
+        /// Default is 60 seconds.
+        /// </summary>
+        public int FailedRetryInterval { get; set; }
+
+        /// <summary>
+        /// We’ll invoke this call-back with message type,name,content when retry failed (send or executed) messages equals <see cref="FailedRetryCount"/> times.
+        /// </summary>
+        public Action<MessageType, string, string> FailedThresholdCallback { get; set; }
+
+        /// <summary>
+        /// The number of message retries, the retry will stop when the threshold is reached.
+        /// Default is 50 times.
+        /// </summary>
+        public int FailedRetryCount { get; set; }
+
+        /// <summary>
+        /// Registers an extension that will be executed when building services.
+        /// </summary>
+        /// <param name="extension"></param>
+        public void RegisterExtension(ICapOptionsExtension extension)
         {
             if (extension == null)
+            {
                 throw new ArgumentNullException(nameof(extension));
+            }
 
             Extensions.Add(extension);
         }
-    }
-
-    public class WebHook
-    {
-        public string PayloadUrl { get; set; }
-
-        public string Secret { get; set; }
     }
 }

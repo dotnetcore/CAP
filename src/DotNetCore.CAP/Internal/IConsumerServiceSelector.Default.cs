@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -8,23 +11,27 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Internal
 {
+    /// <inheritdoc />
     /// <summary>
-    ///  A default <see cref="IConsumerServiceSelector"/> implementation.
+    /// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
     /// </summary>
-    public class DefaultConsumerServiceSelector : IConsumerServiceSelector
+    internal class DefaultConsumerServiceSelector : IConsumerServiceSelector
     {
+        private readonly CapOptions _capOptions;
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// Creates a new <see cref="DefaultConsumerServiceSelector"/>.
+        /// Creates a new <see cref="DefaultConsumerServiceSelector" />.
         /// </summary>
-        public DefaultConsumerServiceSelector(IServiceProvider serviceProvider)
+        public DefaultConsumerServiceSelector(IServiceProvider serviceProvider, CapOptions capOptions)
         {
             _serviceProvider = serviceProvider;
+            _capOptions = capOptions;
         }
 
         /// <summary>
-        /// Selects the best <see cref="ConsumerExecutorDescriptor"/> candidate from <paramref name="executeDescriptor"/> for the
+        /// Selects the best <see cref="ConsumerExecutorDescriptor" /> candidate from <paramref name="executeDescriptor" /> for
+        /// the
         /// current message associated.
         /// </summary>
         public ConsumerExecutorDescriptor SelectBestCandidate(string key,
@@ -33,65 +40,80 @@ namespace DotNetCore.CAP.Internal
             return executeDescriptor.FirstOrDefault(x => x.Attribute.Name == key);
         }
 
-        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates(IServiceProvider provider)
+        public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates()
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
-            executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(provider));
+            executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(_serviceProvider));
 
-            executorDescriptorList.AddRange(FindConsumersFromControllerTypes(provider));
+            executorDescriptorList.AddRange(FindConsumersFromControllerTypes());
 
             return executorDescriptorList;
         }
 
-        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
+        private IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
-            var consumerServices = provider.GetServices<ICapSubscribe>();
-            foreach (var service in consumerServices)
+            using (var scoped = provider.CreateScope())
             {
-                var typeInfo = service.GetType().GetTypeInfo();
-                if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
+                var scopedProvider = scoped.ServiceProvider;
+                var consumerServices = scopedProvider.GetServices<ICapSubscribe>();
+                foreach (var service in consumerServices)
+                {
+                    var typeInfo = service.GetType().GetTypeInfo();
+                    if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
+                    {
+                        continue;
+                    }
+
+                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                }
+
+                return executorDescriptorList;
+            }
+        }
+
+        private IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
+        {
+            var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
+
+            var types = Assembly.GetEntryAssembly().ExportedTypes;
+            foreach (var type in types)
+            {
+                var typeInfo = type.GetTypeInfo();
+                if (Helper.IsController(typeInfo))
+                {
+                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                }
+            }
+
+            return executorDescriptorList;
+        }
+
+        private IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo)
+        {
+            foreach (var method in typeInfo.DeclaredMethods)
+            {
+                var topicAttr = method.GetCustomAttributes<TopicAttribute>(true);
+                var topicAttributes = topicAttr as IList<TopicAttribute> ?? topicAttr.ToList();
+
+                if (!topicAttributes.Any())
                 {
                     continue;
                 }
 
-                foreach (var method in typeInfo.DeclaredMethods)
+                foreach (var attr in topicAttributes)
                 {
-                    var topicAttr = method.GetCustomAttribute<TopicAttribute>(true);
-                    if (topicAttr == null) continue;
+                    if (attr.Group == null)
+                    {
+                        attr.Group = _capOptions.DefaultGroup;
+                    }
 
-                    executorDescriptorList.Add(InitDescriptor(topicAttr, method, typeInfo));
+                    yield return InitDescriptor(attr, method, typeInfo);
                 }
             }
-            return executorDescriptorList;
-        }
-
-        private static IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes(
-            IServiceProvider provider)
-        {
-            var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
-            // at cap startup time, find all Controller into the DI container,the type is object.
-            var controllers = provider.GetServices<object>();
-            foreach (var controller in controllers)
-            {
-                var typeInfo = controller.GetType().GetTypeInfo();
-
-                //double check
-                if (!Helper.IsController(typeInfo)) continue;
-
-                foreach (var method in typeInfo.DeclaredMethods)
-                {
-                    var topicAttr = method.GetCustomAttribute<TopicAttribute>(true);
-                    if (topicAttr == null) continue;
-
-                    executorDescriptorList.Add(InitDescriptor(topicAttr, method, typeInfo));
-                }
-            }
-
-            return executorDescriptorList;
         }
 
         private static ConsumerExecutorDescriptor InitDescriptor(
@@ -99,7 +121,7 @@ namespace DotNetCore.CAP.Internal
             MethodInfo methodInfo,
             TypeInfo implType)
         {
-            var descriptor = new ConsumerExecutorDescriptor()
+            var descriptor = new ConsumerExecutorDescriptor
             {
                 Attribute = attr,
                 MethodInfo = methodInfo,

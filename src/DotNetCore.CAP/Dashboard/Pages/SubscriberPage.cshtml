@@ -1,0 +1,66 @@
+﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
+@using DotNetCore.CAP.Dashboard.Pages
+@using DotNetCore.CAP.Dashboard.Resources
+@using DotNetCore.CAP.Internal
+@inherits DotNetCore.CAP.Dashboard.RazorPage
+@{
+    Layout = new LayoutPage(Strings.SubscribersPage_Title);
+
+    var cache = RequestServices.GetService(typeof(MethodMatcherCache)) as MethodMatcherCache;
+    var subscribers = cache.GetCandidatesMethodsOfGroupNameGrouped();
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <h1 class="page-header">@Strings.SubscribersPage_Title</h1>
+
+        @if (subscribers.Count == 0)
+        {
+            <div class="alert alert-warning">
+                @Strings.SubscribersPage_NoSubscribers
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table subscribe-table">
+                    <thead>
+                    <tr>
+                        <th width="20%">@Strings.Common_Group</th>
+                        <th width="40%">
+                            @Strings.Common_Name
+                        </th>
+                        <th>@Strings.Common_Method</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var subscriber in subscribers)
+                    {
+                        var i = 0;
+                        var rowCount = subscriber.Value.Count;
+                        foreach (var column in subscriber.Value)
+                        {
+                            <tr>
+                                @if (i == 0)
+                                {
+                                    <td rowspan="@rowCount">@subscriber.Key</td>
+                                }
+                                <td>@column.Attribute.Name</td>
+                                <td>
+                                    <span style="color: #00bcd4">@column.ImplTypeInfo.Name</span>：
+                                    <div class="job-snippet-code">
+                                        <code>
+                                            <pre>@Html.MethodEscaped(column.MethodInfo)</pre>
+                                        </code>
+                                    </div>
+                                </td>
+                            </tr>
+                            i++;
+                        }
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>

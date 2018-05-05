@@ -34,3 +34,8 @@ bin/
 /.idea/.idea.CAP
 /.idea
 Properties
+/pack.bat
+/src/DotNetCore.CAP/project.json
+/src/DotNetCore.CAP/packages.config
+/src/DotNetCore.CAP/DotNetCore.CAP.Net47.csproj
+/NuGet.config

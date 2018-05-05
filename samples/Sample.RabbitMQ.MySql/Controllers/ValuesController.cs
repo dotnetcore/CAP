@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +20,16 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [Route("~/publish")]
         public IActionResult PublishMessage()
         {
-            _capBus.Publish("sample.kafka.sqlserver", "");
+            _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+
+            return Ok();
+        }
+
+
+        [Route("~/publish2")]
+        public IActionResult PublishMessage2()
+        {
+            _capBus.Publish("sample.kafka.sqlserver4", DateTime.Now);
 
             return Ok();
         }
@@ -34,6 +40,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
             using (var trans = await _dbContext.Database.BeginTransactionAsync())
             {
                 await _capBus.PublishAsync("sample.kafka.sqlserver", "");
+
                 trans.Commit();
             }
             return Ok();
@@ -41,10 +48,9 @@ namespace Sample.RabbitMQ.MySql.Controllers
 
         [NonAction]
         [CapSubscribe("sample.rabbitmq.mysql")]
-        public void ReceiveMessage()
+        public void ReceiveMessage(DateTime time)
         {
-            Console.WriteLine("[sample.rabbitmq.mysql] message received");
-            Debug.WriteLine("[sample.rabbitmq.mysql] message received");
+            Console.WriteLine("[sample.rabbitmq.mysql] message received: " + DateTime.Now + ",sent time: " + time);
         }
     }
 }

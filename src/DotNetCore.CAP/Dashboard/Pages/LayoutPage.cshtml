@@ -1,0 +1,83 @@
+﻿@* Generator: Template TypeVisibility: Public GeneratePrettyNames: True *@
+@using System
+@using System.Globalization
+@using System.Reflection
+@using DotNetCore.CAP.Dashboard.Pages
+@using DotNetCore.CAP.Dashboard.Resources
+@inherits DotNetCore.CAP.Dashboard.RazorPage
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
+<head>
+    <title>@Title - CAP</title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @{ var version = GetType().GetTypeInfo().Assembly.GetName().Version; }
+    <link rel="stylesheet" href="@Url.To($"/css{version.Major}{version.Minor}{version.Build}")">
+</head>
+<body>
+<!-- Wrap all page content here -->
+<div id="wrap">
+
+    <!-- Fixed navbar -->
+    <div class="navbar navbar-default navbar-fixed-top">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="@Url.Home()">CAP Dashboard</a>
+            </div>
+            <div class="collapse navbar-collapse">
+                @Html.RenderPartial(new Navigation())
+                @if (AppPath != null)
+                {
+                    <ul class="nav navbar-nav navbar-right">
+                        <li>
+                            <a href="@AppPath">
+                                <span class="glyphicon glyphicon-log-out"></span>
+                                @Strings.LayoutPage_Back
+                            </a>
+                        </li>
+                    </ul>
+                }
+            </div>
+            <!--/.nav-collapse -->
+        </div>
+    </div>
+
+    <!-- Begin page content -->
+    <div class="container" style="margin-bottom: 20px;">
+        @RenderBody()
+    </div>
+</div>
+
+<div id="footer">
+    <div class="container">
+        <ul class="list-inline credit">
+            <li>
+                <a href="https://github.com/dotnetcore/cap/" target="_blank">
+                    CAP @($"{version.Major}.{version.Minor}.{version.Build}")
+                </a>
+            </li>
+            <li>@Storage</li>
+            <li>@Strings.LayoutPage_Footer_Time @Html.LocalTime(DateTime.UtcNow)</li>
+            <li>@string.Format(Strings.LayoutPage_Footer_Generatedms, GenerationTime.Elapsed.TotalMilliseconds.ToString("N"))</li>
+            @if (NodeName != null)
+            {
+                <li>@string.Format(Strings.LayoutPage_Footer_NodeCurrent, NodeName)</li>
+            }
+        </ul>
+    </div>
+</div>
+
+<div id="capConfig"
+     data-pollinterval="@StatsPollingInterval"
+     data-pollurl="@(Url.To("/stats"))">
+</div>
+
+<script src="@Url.To($"/js{version.Major}{version.Minor}{version.Build}")"></script>
+</body>
+</html>

@@ -1,70 +1,73 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
 {
-    public class ConsumerHandler : IConsumerHandler, IDisposable
+    internal class ConsumerHandler : IConsumerHandler
     {
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IConsumerInvokerFactory _consumerInvokerFactory;
+        private readonly IStorageConnection _connection;
         private readonly IConsumerClientFactory _consumerClientFactory;
-        private readonly ILogger _logger;
-
         private readonly CancellationTokenSource _cts;
-        private readonly MethodMatcherCache _selector;
-        private readonly CapOptions _options;
-
+        private readonly IDispatcher _dispatcher;
+        private readonly ILogger _logger;
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
+        private readonly MethodMatcherCache _selector;
 
+        private string _serverAddress;
         private Task _compositeTask;
         private bool _disposed;
 
-        public ConsumerHandler(
-            IServiceProvider serviceProvider,
-            IConsumerInvokerFactory consumerInvokerFactory,
-            IConsumerClientFactory consumerClientFactory,
+        // diagnostics listener
+        // ReSharper disable once InconsistentNaming
+        private static readonly DiagnosticListener s_diagnosticListener =
+            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
+
+        public ConsumerHandler(IConsumerClientFactory consumerClientFactory,
+            IDispatcher dispatcher,
+            IStorageConnection connection,
             ILogger<ConsumerHandler> logger,
-            MethodMatcherCache selector,
-            IOptions<CapOptions> options)
+            MethodMatcherCache selector)
         {
             _selector = selector;
             _logger = logger;
-            _serviceProvider = serviceProvider;
-            _consumerInvokerFactory = consumerInvokerFactory;
             _consumerClientFactory = consumerClientFactory;
-            _options = options.Value;
+            _dispatcher = dispatcher;
+            _connection = connection;
             _cts = new CancellationTokenSource();
         }
 
         public void Start()
         {
-            var groupingMatchs = _selector.GetCandidatesMethodsOfGroupNameGrouped(_serviceProvider);
+            var groupingMatches = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
-            foreach (var matchGroup in groupingMatchs)
+            foreach (var matchGroup in groupingMatches)
             {
                 Task.Factory.StartNew(() =>
                 {
                     using (var client = _consumerClientFactory.Create(matchGroup.Key))
                     {
+                        _serverAddress = client.ServersAddress;
+
                         RegisterMessageProcessor(client);
 
-                        foreach (var item in matchGroup.Value)
-                        {
-                            client.Subscribe(item.Attribute.Name);
-                        }
+                        client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
 
                         client.Listening(_pollingDelay, _cts.Token);
                     }
                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
+
             _compositeTask = Task.CompletedTask;
         }
 
@@ -74,14 +77,12 @@ namespace DotNetCore.CAP
             {
                 return;
             }
+
             _disposed = true;
-
-            _logger.ServerShuttingDown();
             _cts.Cancel();
-
             try
             {
-                _compositeTask.Wait(TimeSpan.FromSeconds(60));
+                _compositeTask.Wait(TimeSpan.FromSeconds(2));
             }
             catch (AggregateException ex)
             {
@@ -93,41 +94,133 @@ namespace DotNetCore.CAP
             }
         }
 
-        private void RegisterMessageProcessor(IConsumerClient client)
-        {
-            client.OnMessageReceieved += (sender, message) =>
-            {
-                _logger.EnqueuingReceivedMessage(message.Name, message.Content);
-
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    var receviedMessage = StoreMessage(scope, message);
-                    client.Commit();
-                }
-                Pulse();
-            };
-
-            client.OnError += (sender, reason) =>
-            {
-                _logger.LogError(reason);
-            };
-        }
-
-        private CapReceivedMessage StoreMessage(IServiceScope serviceScope, MessageContext messageContext)
-        {
-            var provider = serviceScope.ServiceProvider;
-            var messageStore = provider.GetRequiredService<IStorageConnection>();
-            var receivedMessage = new CapReceivedMessage(messageContext)
-            {
-                StatusName = StatusName.Scheduled,
-            };
-            messageStore.StoreReceivedMessageAsync(receivedMessage).Wait();
-            return receivedMessage;
-        }
-
         public void Pulse()
         {
-            SubscribeQueuer.PulseEvent.Set();
+            //ignore
+        }
+
+        private void RegisterMessageProcessor(IConsumerClient client)
+        {
+            client.OnMessageReceived += (sender, messageContext) =>
+            {
+                var startTime = DateTimeOffset.UtcNow;
+                var stopwatch = Stopwatch.StartNew();
+
+                var tracingResult = TracingBefore(messageContext.Name, messageContext.Content);
+                var operationId = tracingResult.Item1;
+                var messageBody = tracingResult.Item2;
+
+                var receivedMessage = new CapReceivedMessage(messageContext)
+                {
+                    StatusName = StatusName.Scheduled,
+                    Content = messageBody
+                };
+
+                try
+                {
+                    StoreMessage(receivedMessage);
+
+                    client.Commit();
+
+                    TracingAfter(operationId, receivedMessage.Name, receivedMessage.Content, startTime,
+                        stopwatch.Elapsed);
+
+                    _dispatcher.EnqueueToExecute(receivedMessage);
+                }
+                catch (Exception e)
+                {
+                    _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.", messageContext);
+
+                    client.Reject();
+
+                    TracingError(operationId, receivedMessage.Name, receivedMessage.Content, e, startTime,
+                        stopwatch.Elapsed);
+                }
+            };
+
+            client.OnLog += WriteLog;
+        }
+
+        private void WriteLog(object sender, LogMessageEventArgs logmsg)
+        {
+            switch (logmsg.LogType)
+            {
+                case MqLogType.ConsumerCancelled:
+                    _logger.LogWarning("RabbitMQ consumer cancelled. reason: " + logmsg.Reason);
+                    break;
+                case MqLogType.ConsumerRegistered:
+                    _logger.LogInformation("RabbitMQ consumer registered. " + logmsg.Reason);
+                    break;
+                case MqLogType.ConsumerUnregistered:
+                    _logger.LogWarning("RabbitMQ consumer unregistered. reason: " + logmsg.Reason);
+                    break;
+                case MqLogType.ConsumerShutdown:
+                    _logger.LogWarning("RabbitMQ consumer shutdown. reason:" + logmsg.Reason);
+                    break;
+                case MqLogType.ConsumeError:
+                    _logger.LogError("Kakfa client consume error. reason:" + logmsg.Reason);
+                    break;
+                case MqLogType.ServerConnError:
+                    _logger.LogCritical("Kafka server connection error. reason:" + logmsg.Reason);
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+
+        private void StoreMessage(CapReceivedMessage receivedMessage)
+        {
+            var id = _connection.StoreReceivedMessageAsync(receivedMessage)
+                .GetAwaiter().GetResult();
+
+            receivedMessage.Id = id;
+        }
+
+        private (Guid, string) TracingBefore(string topic, string values)
+        {
+            _logger.LogDebug("CAP received topic message:" + topic);
+
+            Guid operationId = Guid.NewGuid();
+
+            var eventData = new BrokerConsumeEventData(
+                operationId, "",
+                _serverAddress,
+                topic,
+                values,
+                DateTimeOffset.UtcNow);
+
+            s_diagnosticListener.WriteConsumeBefore(eventData);
+
+            return (operationId, eventData.BrokerTopicBody);
+        }
+
+        private void TracingAfter(Guid operationId, string topic, string values, DateTimeOffset startTime, TimeSpan du)
+        {
+            var eventData = new BrokerConsumeEndEventData(
+                operationId,
+                "",
+                _serverAddress,
+                topic,
+                values,
+                startTime,
+                du);
+
+            s_diagnosticListener.WriteConsumeAfter(eventData);
+        }
+
+        private void TracingError(Guid operationId, string topic, string values, Exception ex, DateTimeOffset startTime, TimeSpan du)
+        {
+            var eventData = new BrokerConsumeErrorEventData(
+                operationId,
+                "",
+                _serverAddress,
+                topic,
+                values,
+                ex,
+                startTime,
+                du);
+
+            s_diagnosticListener.WriteConsumeError(eventData);
         }
     }
 }

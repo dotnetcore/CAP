@@ -1,7 +1,7 @@
 using System.Data;
+using System.Data.SqlClient;
 using System.Threading;
 using Dapper;
-using Microsoft.EntityFrameworkCore;
 
 namespace DotNetCore.CAP.SqlServer.Test
 {
@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.SqlServer.Test
                 var storage = GetService<SqlServerStorage>();
                 var token = new CancellationTokenSource().Token;
                 CreateDatabase();
-                storage.InitializeAsync(token).Wait();
+                storage.InitializeAsync(token).GetAwaiter().GetResult();
                 _sqlObjectInstalled = true;
             }
         }
@@ -54,21 +54,20 @@ CREATE DATABASE [{databaseName}];");
 
         private void DeleteAllData()
         {
-            using (CreateScope())
+            var conn = ConnectionUtil.GetConnectionString();
+            using (var connection = new SqlConnection(conn))
             {
-                var context = GetService<TestDbContext>();
-
-                var commands = new[]
-                {
+                var commands = new[] {
                     "DISABLE TRIGGER ALL ON ?",
                     "ALTER TABLE ? NOCHECK CONSTRAINT ALL",
                     "DELETE FROM ?",
                     "ALTER TABLE ? CHECK CONSTRAINT ALL",
                     "ENABLE TRIGGER ALL ON ?"
                 };
+
                 foreach (var command in commands)
                 {
-                    context.Database.GetDbConnection().Execute(
+                    connection.Execute(
                         "sp_MSforeachtable",
                         new { command1 = command },
                         commandType: CommandType.StoredProcedure);

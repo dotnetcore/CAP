@@ -1,94 +1,94 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
+using DotNetCore.CAP.Models;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class DefaultDispatcher : IDispatcher
+    public class Dispatcher : IDispatcher, IDisposable
     {
-        private readonly IQueueExecutorFactory _queueExecutorFactory;
-        private readonly IServiceProvider _provider;
-        private readonly ILogger _logger;
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly ISubscriberExecutor _executor;
+        private readonly ILogger<Dispatcher> _logger;
 
-        private readonly CancellationTokenSource _cts;
-        private readonly TimeSpan _pollingDelay;
+        private readonly BlockingCollection<CapPublishedMessage> _publishedMessageQueue =
+            new BlockingCollection<CapPublishedMessage>(new ConcurrentQueue<CapPublishedMessage>());
 
-        internal static readonly AutoResetEvent PulseEvent = new AutoResetEvent(true);
+        private readonly BlockingCollection<CapReceivedMessage> _receivedMessageQueue =
+            new BlockingCollection<CapReceivedMessage>(new ConcurrentQueue<CapReceivedMessage>());
 
-        public DefaultDispatcher(
-               IServiceProvider provider,
-               IQueueExecutorFactory queueExecutorFactory,
-               IOptions<CapOptions> capOptions,
-               ILogger<DefaultDispatcher> logger)
+        private readonly IPublishMessageSender _sender;
+
+        public Dispatcher(ILogger<Dispatcher> logger,
+            IPublishMessageSender sender,
+            ISubscriberExecutor executor)
         {
             _logger = logger;
-            _queueExecutorFactory = queueExecutorFactory;
-            _provider = provider;
-            _cts = new CancellationTokenSource();
-            _pollingDelay = TimeSpan.FromSeconds(capOptions.Value.PollingDelay);
+            _sender = sender;
+            _executor = executor;
+
+            Task.Factory.StartNew(Sending);
+            Task.Factory.StartNew(Processing);
         }
 
-        public bool Waiting { get; private set; }
-
-        public Task ProcessAsync(ProcessingContext context)
+        public void EnqueueToPublish(CapPublishedMessage message)
         {
-            if (context == null)
-                throw new ArgumentNullException(nameof(context));
-
-            context.ThrowIfStopping();
-
-            return ProcessCoreAsync(context);
+            _publishedMessageQueue.Add(message);
         }
 
-        public async Task ProcessCoreAsync(ProcessingContext context)
+        public void EnqueueToExecute(CapReceivedMessage message)
+        {
+            _receivedMessageQueue.Add(message);
+        }
+
+        public void Dispose()
+        {
+            _cts.Cancel();
+        }
+
+        private void Sending()
         {
             try
             {
-                var worked = await Step(context);
-
-                context.ThrowIfStopping();
-
-                Waiting = true;
-
-                if (!worked)
+                while (!_publishedMessageQueue.IsCompleted)
                 {
-                    var token = GetTokenToWaitOn(context);
-                    await WaitHandleEx.WaitAnyAsync(PulseEvent, token.WaitHandle, _pollingDelay);
-                }
-            }
-            finally
-            {
-                Waiting = false;
-            }
-        }
-
-        protected virtual CancellationToken GetTokenToWaitOn(ProcessingContext context)
-        {
-            return context.CancellationToken;
-        }
-
-        private async Task<bool> Step(ProcessingContext context)
-        {
-            var fetched = default(IFetchedMessage);
-            using (var scopedContext = context.CreateScope())
-            {
-                var provider = scopedContext.Provider;
-                var connection = provider.GetRequiredService<IStorageConnection>();
-
-                if ((fetched = await connection.FetchNextMessageAsync()) != null)
-                {
-                    using (fetched)
+                    if (_publishedMessageQueue.TryTake(out var message, 100, _cts.Token))
                     {
-                        var queueExecutor = _queueExecutorFactory.GetInstance(fetched.MessageType);
-                        await queueExecutor.ExecuteAsync(connection, fetched);
+                        try
+                        {
+                            _sender.SendAsync(message);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Topic:{message.Name}, Id:{message.Id}");
+                        }
                     }
                 }
             }
-            return fetched != null;
+            catch (OperationCanceledException)
+            {
+                // expected
+            }
+        }
+
+        private void Processing()
+        {
+            try
+            {
+                foreach (var message in _receivedMessageQueue.GetConsumingEnumerable(_cts.Token))
+                {
+                    _executor.ExecuteAsync(message);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // expected
+            }
         }
     }
 }

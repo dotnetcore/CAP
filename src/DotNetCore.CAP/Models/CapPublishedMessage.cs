@@ -1,15 +1,15 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 
 namespace DotNetCore.CAP.Models
 {
     public class CapPublishedMessage
     {
         /// <summary>
-        /// Initializes a new instance of <see cref="CapPublishedMessage"/>.
+        /// Initializes a new instance of <see cref="CapPublishedMessage" />.
         /// </summary>
-        /// <remarks>
-        /// The Id property is initialized to from a new GUID string value.
-        /// </remarks>
         public CapPublishedMessage()
         {
             Added = DateTime.Now;
@@ -34,5 +34,10 @@ namespace DotNetCore.CAP.Models
         public int Retries { get; set; }
 
         public string StatusName { get; set; }
+
+        public override string ToString()
+        {
+            return "name:" + Name + ", content:" + Content;
+        }
     }
 }

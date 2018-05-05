@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.MySql;
 using DotNetCore.CAP.Processor;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
-    public class MySqlCapOptionsExtension : ICapOptionsExtension
+    internal class MySqlCapOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<MySqlOptions> _configure;
 
@@ -18,27 +21,39 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
+            services.AddSingleton<CapDatabaseStorageMarkerService>();
             services.AddSingleton<IStorage, MySqlStorage>();
-            services.AddScoped<IStorageConnection, MySqlStorageConnection>();
+            services.AddSingleton<IStorageConnection, MySqlStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
+            services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
+            AddSingletionMySqlOptions(services);
+        }
+
+        private void AddSingletionMySqlOptions(IServiceCollection services)
+        {
             var mysqlOptions = new MySqlOptions();
+
             _configure(mysqlOptions);
 
             if (mysqlOptions.DbContextType != null)
             {
-                var provider = TempBuildService(services);
-                var dbContextObj = provider.GetService(mysqlOptions.DbContextType);
-                var dbContext = (DbContext)dbContextObj;
-                mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                services.AddSingleton(x =>
+                {
+                    using (var scope = x.CreateScope())
+                    {
+                        var provider = scope.ServiceProvider;
+                        var dbContext = (DbContext)provider.GetService(mysqlOptions.DbContextType);
+                        mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                        return mysqlOptions;
+                    }
+                });
             }
-            services.AddSingleton(mysqlOptions);
-        }
-
-        private IServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
+            else
+            {
+                services.AddSingleton(mysqlOptions);
+            }
         }
     }
 }

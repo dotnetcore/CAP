@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.SqlServer;
 using Microsoft.EntityFrameworkCore;
@@ -7,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
-    public class SqlServerCapOptionsExtension : ICapOptionsExtension
+    internal class SqlServerCapOptionsExtension : ICapOptionsExtension
     {
         private readonly Action<SqlServerOptions> _configure;
 
@@ -18,27 +21,39 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
+            services.AddSingleton<CapDatabaseStorageMarkerService>();
             services.AddSingleton<IStorage, SqlServerStorage>();
-            services.AddScoped<IStorageConnection, SqlServerStorageConnection>();
+            services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
+            services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
 
+            AddSqlServerOptions(services);
+        }
+
+        private void AddSqlServerOptions(IServiceCollection services)
+        {
             var sqlServerOptions = new SqlServerOptions();
+
             _configure(sqlServerOptions);
 
             if (sqlServerOptions.DbContextType != null)
             {
-                var provider = TempBuildService(services);
-                var dbContextObj = provider.GetService(sqlServerOptions.DbContextType);
-                var dbContext = (DbContext)dbContextObj;
-                sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                services.AddSingleton(x =>
+                {
+                    using (var scope = x.CreateScope())
+                    {
+                        var provider = scope.ServiceProvider;
+                        var dbContext = (DbContext)provider.GetService(sqlServerOptions.DbContextType);
+                        sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                        return sqlServerOptions;
+                    }
+                });
             }
-            services.AddSingleton(sqlServerOptions);
-        }
-
-        private IServiceProvider TempBuildService(IServiceCollection services)
-        {
-            return services.BuildServiceProvider();
+            else
+            {
+                services.AddSingleton(sqlServerOptions);
+            }
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -30,11 +33,12 @@ namespace DotNetCore.CAP.Internal
             else
             {
                 var count = 0;
-                foreach (object o in e)
+                foreach (var o in e)
                 {
                     Add(o);
                     count++;
                 }
+
                 Add(count);
             }
         }
@@ -54,14 +58,14 @@ namespace DotNetCore.CAP.Internal
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(string s)
         {
-            var hashCode = (s != null) ? s.GetHashCode() : 0;
+            var hashCode = s != null ? s.GetHashCode() : 0;
             Add(hashCode);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(object o)
         {
-            var hashCode = (o != null) ? o.GetHashCode() : 0;
+            var hashCode = o != null ? o.GetHashCode() : 0;
             Add(hashCode);
         }
 

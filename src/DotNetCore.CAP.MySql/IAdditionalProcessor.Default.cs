@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Processor;
@@ -7,23 +10,18 @@ using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class DefaultAdditionalProcessor : IAdditionalProcessor
+    internal class DefaultAdditionalProcessor : IAdditionalProcessor
     {
-        private readonly IServiceProvider _provider;
-        private readonly ILogger _logger;
-        private readonly MySqlOptions _options;
-
         private const int MaxBatch = 1000;
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
-        private readonly TimeSpan _waitingInterval = TimeSpan.FromHours(2);
+        private readonly ILogger _logger;
+        private readonly MySqlOptions _options;
+        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
-        public DefaultAdditionalProcessor(
-            IServiceProvider provider,
-            ILogger<DefaultAdditionalProcessor> logger,
+        public DefaultAdditionalProcessor(ILogger<DefaultAdditionalProcessor> logger,
             MySqlOptions mysqlOptions)
         {
             _logger = logger;
-            _provider = provider;
             _options = mysqlOptions;
         }
 
@@ -31,20 +29,22 @@ namespace DotNetCore.CAP.MySql
         {
             _logger.LogDebug("Collecting expired entities.");
 
-            var tables = new string[]{
+            var tables = new[]
+            {
                 $"{_options.TableNamePrefix}.published",
                 $"{_options.TableNamePrefix}.received"
             };
 
             foreach (var table in tables)
             {
-                var removedCount = 0;
+                int removedCount;
                 do
                 {
                     using (var connection = new MySqlConnection(_options.ConnectionString))
                     {
-                        removedCount = await connection.ExecuteAsync($@"DELETE FROM `{table}` WHERE ExpiresAt < @now limit @count;",
-                        new { now = DateTime.Now, count = MaxBatch });
+                        removedCount = await connection.ExecuteAsync(
+                            $@"DELETE FROM `{table}` WHERE ExpiresAt < @now limit @count;",
+                            new {now = DateTime.Now, count = MaxBatch});
                     }
 
                     if (removedCount != 0)

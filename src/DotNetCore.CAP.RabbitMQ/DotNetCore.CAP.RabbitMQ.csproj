@@ -3,8 +3,14 @@
   <Import Project="..\..\build\common.props" />
   
   <PropertyGroup>
-    <TargetFramework>netstandard1.6</TargetFramework>
-    <NetStandardImplicitPackageVersion>1.6.1</NetStandardImplicitPackageVersion>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>DotNetCore.CAP.RabbitMQ</AssemblyName>
+    <PackageTags>$(PackageTags);RabbitMQ</PackageTags>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <DocumentationFile>bin\$(Configuration)\netstandard2.0\DotNetCore.CAP.RabbitMQ.xml</DocumentationFile>
+    <NoWarn>1701;1702;1705;CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

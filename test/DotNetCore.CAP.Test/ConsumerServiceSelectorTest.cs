@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Internal;
@@ -20,7 +18,7 @@ namespace DotNetCore.CAP.Test
             services.AddScoped<IFooTest, CandidatesFooTest>();
             services.AddScoped<IBarTest, CandidatesBarTest>();
             services.AddLogging();
-            services.AddCap(x=> { });
+            services.AddCap(x => { });
             _provider = services.BuildServiceProvider();
         }
 
@@ -28,7 +26,7 @@ namespace DotNetCore.CAP.Test
         public void CanFindAllConsumerService()
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
-            var candidates = selector.SelectCandidates(_provider);
+            var candidates = selector.SelectCandidates();
 
             Assert.Equal(2, candidates.Count);
         }
@@ -37,12 +35,12 @@ namespace DotNetCore.CAP.Test
         public void CanFindSpecifiedTopic()
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
-            var candidates = selector.SelectCandidates(_provider);
+            var candidates = selector.SelectCandidates();
             var bestCandidates = selector.SelectBestCandidate("Candidates.Foo", candidates);
 
             Assert.NotNull(bestCandidates);
             Assert.NotNull(bestCandidates.MethodInfo);
-            Assert.Equal(bestCandidates.MethodInfo.ReturnType, typeof(Task));
+            Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
         }
     }
 
