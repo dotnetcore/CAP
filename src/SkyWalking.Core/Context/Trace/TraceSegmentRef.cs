@@ -154,7 +154,6 @@ namespace SkyWalking.Context.Trace
             if (_type == SegmentRefType.CrossProcess)
             {
                 traceSegmentReference.RefType = RefType.CrossProcess;
-                traceSegmentReference.ParentApplicationInstanceId = _parentApplicationInstanceId;
                 if (_peerId == DictionaryUtil.NullValue)
                 {
                     traceSegmentReference.NetworkAddress = _peerHost;
@@ -168,7 +167,7 @@ namespace SkyWalking.Context.Trace
             {
                 traceSegmentReference.RefType = RefType.CrossThread;
             }
-
+            traceSegmentReference.ParentApplicationInstanceId = _parentApplicationInstanceId;
             traceSegmentReference.EntryApplicationInstanceId = _entryApplicationInstanceId;
             traceSegmentReference.ParentTraceSegmentId = _traceSegmentId.Transform();
             traceSegmentReference.ParentSpanId = _spanId;

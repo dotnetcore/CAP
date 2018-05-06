@@ -18,19 +18,22 @@
 
 using System;
 using System.Data.Common;
+using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
+using SkyWalking.Config;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
 using SkyWalking.Context.Trace;
-using SkyWalking.NetworkProtocol.Trace;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {
     public class EntityFrameworkCoreDiagnosticProcessor : ITracingDiagnosticProcessor
     {
         private Func<CommandEventData, string> _operationNameResolver;
+        private readonly IEfCoreSpanFactory _efCoreSpanFactory;
 
         public string ListenerName => DbLoggerCategory.Name;
 
@@ -42,17 +45,25 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
             get
             {
                 return _operationNameResolver ??
-                       (_operationNameResolver = (data) => "DB " + data.ExecuteMethod.ToString());
+                       (_operationNameResolver = (data) =>
+                       {
+                           var commandType = data.Command.CommandText?.Split(' ');
+                           return "DB " + (commandType.FirstOrDefault() ?? data.ExecuteMethod.ToString());
+                       });
             }
             set => _operationNameResolver = value ?? throw new ArgumentNullException(nameof(OperationNameResolver));
         }
 
+        public EntityFrameworkCoreDiagnosticProcessor(IEfCoreSpanFactory spanFactory)
+        {
+            _efCoreSpanFactory = spanFactory;
+        }
+
         [DiagnosticName("Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting")]
-        public void CommandExecuting([Object]CommandEventData eventData)
+        public void CommandExecuting([Object] CommandEventData eventData)
         {
             var operationName = OperationNameResolver(eventData);
-            var span = ContextManager.CreateLocalSpan(operationName);
-            span.SetComponent(ComponentsDefine.EntityFrameworkCore);
+            var span = _efCoreSpanFactory.Create(operationName, eventData);
             span.SetLayer(SpanLayer.DB);
             Tags.DbType.Set(span, "Sql");
             Tags.DbInstance.Set(span, eventData.Command.Connection.Database);

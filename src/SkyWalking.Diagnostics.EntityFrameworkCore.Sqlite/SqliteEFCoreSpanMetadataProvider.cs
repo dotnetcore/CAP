@@ -16,31 +16,35 @@
  *
  */
 
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using SkyWalking.Extensions.DependencyInjection;
+using System.Data.Common;
+using Microsoft.Data.Sqlite;
+using SkyWalking.NetworkProtocol.Trace;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {
-    public static class SkyWalkingBuilderExtensions
+    public class SqliteEFCoreSpanMetadataProvider : IEfCoreSpanMetadataProvider
     {
-        public static SkyWalkingBuilder AddEntityFrameworkCore(this SkyWalkingBuilder builder, Action<DatabaseProviderBuilder> optionAction)
+        public IComponent Component { get; } = ComponentsDefine.EntityFrameworkCore_Sqlite;
+        
+        public bool Match(DbConnection connection)
         {
-            if (builder == null)
+            return connection is SqliteConnection;
+        }
+
+        public string GetPeer(DbConnection connection)
+        {
+            string dataSource;
+            switch (connection.DataSource)
             {
-                throw new ArgumentNullException(nameof(builder));
+                    case "":
+                        dataSource = "localhost";
+                        break;
+                    default:
+                        dataSource = connection.DataSource;
+                        break;
             }
 
-            builder.Services.AddSingleton<ITracingDiagnosticProcessor, EntityFrameworkCoreDiagnosticProcessor>();
-            builder.Services.AddSingleton<IEfCoreSpanFactory, EfCoreSpanFactory>();
-
-            if (optionAction != null)
-            {
-                var databaseProviderBuilder = new DatabaseProviderBuilder(builder.Services);
-                optionAction(databaseProviderBuilder);
-            }
-
-            return builder;
+            return $"{dataSource}";
         }
     }
 }

@@ -16,31 +16,24 @@
  *
  */
 
-using System;
-using Microsoft.Extensions.DependencyInjection;
-using SkyWalking.Extensions.DependencyInjection;
+using System.Data.Common;
+using Npgsql;
+using SkyWalking.NetworkProtocol.Trace;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {
-    public static class SkyWalkingBuilderExtensions
+    public class NpgsqlEFCoreSpanMetadataProvider : IEfCoreSpanMetadataProvider
     {
-        public static SkyWalkingBuilder AddEntityFrameworkCore(this SkyWalkingBuilder builder, Action<DatabaseProviderBuilder> optionAction)
+        public IComponent Component { get; } = ComponentsDefine.Npgsql_EntityFrameworkCore_PostgreSQL;
+        
+        public bool Match(DbConnection connection)
         {
-            if (builder == null)
-            {
-                throw new ArgumentNullException(nameof(builder));
-            }
+           return connection is NpgsqlConnection;
+        }
 
-            builder.Services.AddSingleton<ITracingDiagnosticProcessor, EntityFrameworkCoreDiagnosticProcessor>();
-            builder.Services.AddSingleton<IEfCoreSpanFactory, EfCoreSpanFactory>();
-
-            if (optionAction != null)
-            {
-                var databaseProviderBuilder = new DatabaseProviderBuilder(builder.Services);
-                optionAction(databaseProviderBuilder);
-            }
-
-            return builder;
+        public string GetPeer(DbConnection connection)
+        {
+            return connection.DataSource;
         }
     }
 }

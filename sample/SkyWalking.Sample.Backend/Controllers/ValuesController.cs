@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using SkyWalking.Sample.Backend.Models;
 
 namespace SkyWalking.Sample.Backend.Controllers
 {
@@ -12,15 +14,14 @@ namespace SkyWalking.Sample.Backend.Controllers
         [HttpGet]
         public IEnumerable<string> Get()
         {
-            return new string[] { "value1", "value2" };
+            return new List<string> {"value1", "value2"};
         }
 
         // GET api/values/5
         [HttpGet("{id}")]
-        public async Task<string> Get(int id)
+        public string Get(int id)
         {
-            var httpClient = new HttpClient();
-            return await httpClient.GetStringAsync("http://www.baidu.com");
+            return "value";
         }
     } 
 }

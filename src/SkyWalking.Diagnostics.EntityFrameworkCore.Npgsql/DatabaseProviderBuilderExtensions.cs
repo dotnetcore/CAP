@@ -16,30 +16,15 @@
  *
  */
 
-using System;
 using Microsoft.Extensions.DependencyInjection;
-using SkyWalking.Extensions.DependencyInjection;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {
-    public static class SkyWalkingBuilderExtensions
+    public static class DatabaseProviderBuilderExtensions
     {
-        public static SkyWalkingBuilder AddEntityFrameworkCore(this SkyWalkingBuilder builder, Action<DatabaseProviderBuilder> optionAction)
+        public static DatabaseProviderBuilder AddNpgsql(this DatabaseProviderBuilder builder)
         {
-            if (builder == null)
-            {
-                throw new ArgumentNullException(nameof(builder));
-            }
-
-            builder.Services.AddSingleton<ITracingDiagnosticProcessor, EntityFrameworkCoreDiagnosticProcessor>();
-            builder.Services.AddSingleton<IEfCoreSpanFactory, EfCoreSpanFactory>();
-
-            if (optionAction != null)
-            {
-                var databaseProviderBuilder = new DatabaseProviderBuilder(builder.Services);
-                optionAction(databaseProviderBuilder);
-            }
-
+            builder.Services.AddSingleton<IEfCoreSpanMetadataProvider, NpgsqlEFCoreSpanMetadataProvider>();
             return builder;
         }
     }
