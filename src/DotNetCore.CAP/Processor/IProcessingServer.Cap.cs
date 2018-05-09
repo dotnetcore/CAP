@@ -57,13 +57,14 @@ namespace DotNetCore.CAP.Processor
                 return;
             }
 
-            _disposed = true;
-
-            _logger.ServerShuttingDown();
-            _cts.Cancel();
             try
             {
-                _compositeTask.Wait((int) TimeSpan.FromSeconds(10).TotalMilliseconds);
+                _disposed = true;
+
+                _logger.ServerShuttingDown();
+                _cts.Cancel();
+
+                _compositeTask?.Wait((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
             }
             catch (AggregateException ex)
             {
@@ -72,6 +73,10 @@ namespace DotNetCore.CAP.Processor
                 {
                     _logger.ExpectedOperationCanceledException(innerEx);
                 }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "An exception was occured when disposing...");
             }
         }
 
