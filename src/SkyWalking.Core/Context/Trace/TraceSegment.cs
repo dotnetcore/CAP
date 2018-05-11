@@ -80,7 +80,6 @@ namespace SkyWalking.Context.Trace
             }
         }
 
-
         public void RelatedGlobalTrace(DistributedTraceId distributedTraceId)
         {
             _relatedGlobalTraces.Append(distributedTraceId);

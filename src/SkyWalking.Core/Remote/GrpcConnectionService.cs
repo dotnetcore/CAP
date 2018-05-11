@@ -25,14 +25,14 @@ namespace SkyWalking.Remote
 {
     public class GrpcConnectionService : TimerService
     {
-        protected override TimeSpan Interval { get; } = TimeSpan.FromMinutes(1);
+        protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(15);
 
         protected override async Task Execute(CancellationToken token)
         {
-            var connection = GrpcConnectionManager.Instance.GetAvailableConnection();
-            if (connection == null || !connection.CheckState())
+            if (!GrpcConnectionManager.Instance.Available)
             {
-                await GrpcConnectionManager.Instance.ConnectAsync();
+                // default timeout = 5s
+                await GrpcConnectionManager.Instance.ConnectAsync(TimeSpan.FromSeconds(5));
             }
         }
     }

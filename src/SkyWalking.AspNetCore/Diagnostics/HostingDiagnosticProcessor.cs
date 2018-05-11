@@ -39,7 +39,7 @@ namespace SkyWalking.AspNetCore.Diagnostics
             var carrier = new ContextCarrier();
             foreach (var item in carrier.Items)
                 item.HeadValue = httpContext.Request.Headers[item.HeadKey];
-            var httpRequestSpan = ContextManager.CreateEntrySpan(httpContext.Request.Path, carrier);
+            var httpRequestSpan = ContextManager.CreateEntrySpan($"{Config.AgentConfig.ApplicationCode} {httpContext.Request.Path}", carrier);
             httpRequestSpan.AsHttp();
             httpRequestSpan.SetComponent(ComponentsDefine.AspNetCore);
             Tags.Url.Set(httpRequestSpan, httpContext.Request.Path);

@@ -28,20 +28,22 @@ namespace SkyWalking.Remote
     public class GrpcConnectionManager
     {
         private static readonly ILogger _logger = LogManager.GetLogger<GrpcConnectionManager>();
-        private static readonly GrpcConnectionManager _client = new GrpcConnectionManager();
+        
         public const string NotFoundErrorMessage = "Not found available connection.";
 
-        public static GrpcConnectionManager Instance => _client;
+        public static GrpcConnectionManager Instance { get; } = new GrpcConnectionManager();
 
         private readonly Random _random = new Random();
         private readonly AsyncLock _lock = new AsyncLock();
         private GrpcConnection _connection;
+        
+        public bool Available => _connection != null && _connection.CheckState();
 
         private GrpcConnectionManager()
         {
         }
 
-        public async Task ConnectAsync()
+        public async Task ConnectAsync(TimeSpan timeout)
         {
             // using async lock
             using (await _lock.LockAsync())
@@ -51,8 +53,13 @@ namespace SkyWalking.Remote
                     return;
                 }
 
+                if (_connection != null && !_connection.CheckState())
+                {
+                    await _connection.ShutdowmAsync();
+                }
+
                 _connection = new GrpcConnection(GetServer(_connection?.Server));
-                await _connection.ConnectAsync();
+                await _connection.ConnectAsync(timeout);
             }
         }
 
