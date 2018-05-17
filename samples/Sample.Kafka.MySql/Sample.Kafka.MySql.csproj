@@ -9,9 +9,8 @@
  
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.6" />
-    <PackageReference Include="MySqlConnector" Version="0.38.0" />
+    <PackageReference Include="MySqlConnector" Version="0.40.3" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.5.2" />
-    <PackageReference Include="zipkin4net" Version="1.2.0" />
   </ItemGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="2.0.0" />
