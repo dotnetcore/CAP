@@ -17,8 +17,11 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Boot;
@@ -122,10 +125,7 @@ namespace SkyWalking.Remote
                     ProcessNo = Process.GetCurrentProcess().Id
                 };
 
-                // todo fix Device not configured
-                //var ipv4s = Dns.GetHostAddresses(hostName);          
-                //foreach (var ipAddress in ipv4s.Where(x => x.AddressFamily == AddressFamily.InterNetwork))
-                //   osInfo.Ipv4S.Add(ipAddress.ToString());
+                osInfo.Ipv4S.AddRange(GetIpV4S(hostName));
 
                 var applicationInstance = new ApplicationInstance
                 {
@@ -159,6 +159,24 @@ namespace SkyWalking.Remote
                     _logger.Warning(
                         "Register application instance fail. Server response null.");
                 }
+            }
+        }
+
+        private IEnumerable<string> GetIpV4S(string hostName)
+        {
+            try
+            {
+                
+                var ipAddresses = Dns.GetHostAddresses(hostName);
+                var ipV4S = new List<string>();
+                foreach (var ipAddress in ipAddresses.Where(x => x.AddressFamily == AddressFamily.InterNetwork))
+                    ipV4S.Add(ipAddress.ToString());
+                return ipV4S;
+            }
+            catch (Exception e)
+            {
+                _logger.Warning($"Get host addresses fail. {e.Message}");
+                return new string[0];
             }
         }
     }
