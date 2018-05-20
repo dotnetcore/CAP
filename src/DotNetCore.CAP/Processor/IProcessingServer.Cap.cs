@@ -76,7 +76,11 @@ namespace DotNetCore.CAP.Processor
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "An exception was occured when disposing...");
+                _logger.LogWarning(ex, "An exception was occured when disposing.");
+            }
+            finally
+            {
+                _logger.LogInformation("### CAP shutdown!");
             }
         }
 
@@ -90,7 +94,7 @@ namespace DotNetCore.CAP.Processor
             var returnedProcessors = new List<IProcessor>
             {
                 _provider.GetRequiredService<NeedRetryMessageProcessor>(),
-                _provider.GetRequiredService<IAdditionalProcessor>()
+                _provider.GetRequiredService<ICollectProcessor>()
             };
 
             return returnedProcessors.ToArray();
