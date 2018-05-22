@@ -26,7 +26,7 @@ namespace DotNetCore.CAP
             _serverStarting = LoggerMessage.Define(
                 LogLevel.Debug,
                 1,
-                "Starting the processing server.");
+                "Starting the processors.");
 
             _processorsStartingError = LoggerMessage.Define(
                 LogLevel.Error,
@@ -36,7 +36,7 @@ namespace DotNetCore.CAP
             _serverShuttingDown = LoggerMessage.Define(
                 LogLevel.Information,
                 2,
-                "Shutting down the processing server...");
+                "Processors is shutting down...");
 
             _expectedOperationCanceledException = LoggerMessage.Define<string>(
                 LogLevel.Warning,
@@ -60,7 +60,7 @@ namespace DotNetCore.CAP
             );
 
             _senderRetrying = LoggerMessage.Define<int, int>(
-                LogLevel.Debug,
+                LogLevel.Information,
                 3,
                 "The {Retries}th retrying send a message failed. message id: {MessageId} ");
 
@@ -72,7 +72,7 @@ namespace DotNetCore.CAP
             _consumerFailedWillRetry = LoggerMessage.Define(
                 LogLevel.Warning,
                 2,
-                "Consumer failed to execute. Will retry."); 
+                "Consumer failed to execute, it will be retry."); 
 
             _messageHasBeenSent = LoggerMessage.Define<double>(
                 LogLevel.Debug,
