@@ -25,13 +25,7 @@ A quick list of SkyWalking .NET Core Agent's capabilities
 ### Deploy SkyWalking Collector
 
 #### Requirements
-- JDK 8+
-
-#### Download
-- [apache-skywalking-for-netcore-0.1](https://github.com/OpenSkywalking/skywalking-netcore/releases)
-
-#### Deploy
-- [Deploy-backend-in-standalone-mode](https://github.com/apache/incubator-skywalking/blob/master/docs/en/Deploy-backend-in-standalone-mode.md#quick-start)
+- SkyWalking Collector 5.0.0-beta or higher. [Download](https://github.com/apache/incubator-skywalking/releases)
 
 ### Install SkyWalking .NET Core Agent
 
@@ -60,26 +54,12 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-### HttpClientFactory
-
-```
-[Route("api/[controller]")]
-public class ValuesController : Controller
-{
-    [HttpGet("{id}")]
-    public Task<string> Get(int id, [FromServices] IHttpClientFactory httpClientFactory)
-    {
-        var httpClient = httpClientFactory.CreateClient("sw-tracing");
-        return httpClient.GetStringAsync("http://api.xxx.com/values");
-    }
-}
-```
-
 # Contributing
 This section is in progress here: [Contributing to skywalking-netcore](/CONTIBUTING.md)
 
 # Roadmap
-Expect to release 0.2 compatible in May. 2018
+- Expect to release 0.2 compatible in May. 2018
+- Expect to release 0.3 compatible in June. 2018
 
 # Contact Us
 * Submit an issue
