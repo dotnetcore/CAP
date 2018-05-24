@@ -146,22 +146,22 @@ namespace DotNetCore.CAP
             switch (logmsg.LogType)
             {
                 case MqLogType.ConsumerCancelled:
-                    _logger.LogWarning("RabbitMQ consumer cancelled. reason: " + logmsg.Reason);
+                    _logger.LogWarning("RabbitMQ consumer cancelled. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ConsumerRegistered:
-                    _logger.LogInformation("RabbitMQ consumer registered. " + logmsg.Reason);
+                    _logger.LogInformation("RabbitMQ consumer registered. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ConsumerUnregistered:
-                    _logger.LogWarning("RabbitMQ consumer unregistered. reason: " + logmsg.Reason);
+                    _logger.LogWarning("RabbitMQ consumer unregistered. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ConsumerShutdown:
-                    _logger.LogWarning("RabbitMQ consumer shutdown. reason:" + logmsg.Reason);
+                    _logger.LogWarning("RabbitMQ consumer shutdown. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ConsumeError:
-                    _logger.LogError("Kakfa client consume error. reason:" + logmsg.Reason);
+                    _logger.LogError("Kakfa client consume error. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ServerConnError:
-                    _logger.LogCritical("Kafka server connection error. reason:" + logmsg.Reason);
+                    _logger.LogCritical("Kafka server connection error. --> " + logmsg.Reason);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
