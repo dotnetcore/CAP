@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +22,9 @@ namespace Microsoft.AspNetCore.Builder
         public static IApplicationBuilder UseCap(this IApplicationBuilder app)
         {
             if (app == null)
+            {
                 throw new ArgumentNullException(nameof(app));
+            }
 
             CheckRequirement(app);
 
@@ -31,7 +36,10 @@ namespace Microsoft.AspNetCore.Builder
             if (provider.GetService<DashboardOptions>() != null)
             {
                 if (provider.GetService<DiscoveryOptions>() != null)
+                {
                     app.UseMiddleware<GatewayProxyMiddleware>();
+                }
+
                 app.UseMiddleware<DashboardMiddleware>();
             }
 
@@ -42,18 +50,24 @@ namespace Microsoft.AspNetCore.Builder
         {
             var marker = app.ApplicationServices.GetService<CapMarkerService>();
             if (marker == null)
+            {
                 throw new InvalidOperationException(
                     "AddCap() must be called on the service collection.   eg: services.AddCap(...)");
+            }
 
             var messageQueueMarker = app.ApplicationServices.GetService<CapMessageQueueMakerService>();
             if (messageQueueMarker == null)
+            {
                 throw new InvalidOperationException(
                     "You must be config used message queue provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseKafka(...) })");
+            }
 
             var databaseMarker = app.ApplicationServices.GetService<CapDatabaseStorageMarkerService>();
             if (databaseMarker == null)
+            {
                 throw new InvalidOperationException(
                     "You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseSqlServer(...) })");
+            }
         }
     }
 }

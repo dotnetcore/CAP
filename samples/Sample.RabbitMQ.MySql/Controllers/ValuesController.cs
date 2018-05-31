@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
@@ -24,7 +21,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         public IActionResult PublishMessage()
         {
             _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
-            
+
             return Ok();
         }
 
@@ -53,7 +50,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [CapSubscribe("sample.rabbitmq.mysql")]
         public void ReceiveMessage(DateTime time)
         {
-            Console.WriteLine("[sample.rabbitmq.mysql] message received: "+ DateTime.Now.ToString() +" , sent time: " + time.ToString());
+            Console.WriteLine("[sample.rabbitmq.mysql] message received: " + DateTime.Now + ",sent time: " + time);
         }
     }
 }

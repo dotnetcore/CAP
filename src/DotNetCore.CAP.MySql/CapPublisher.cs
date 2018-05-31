@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
@@ -14,27 +17,31 @@ namespace DotNetCore.CAP.MySql
     public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
         private readonly DbContext _dbContext;
-        private readonly ILogger _logger;
         private readonly MySqlOptions _options;
 
-        public CapPublisher(IServiceProvider provider,
-            ILogger<CapPublisher> logger,
+        public CapPublisher(ILogger<CapPublisher> logger, IDispatcher dispatcher, IServiceProvider provider,
             MySqlOptions options)
+            : base(logger, dispatcher)
         {
             ServiceProvider = provider;
             _options = options;
-            _logger = logger;
 
-            if (_options.DbContextType == null) return;
+            if (_options.DbContextType == null)
+            {
+                return;
+            }
+
             IsUsingEF = true;
             _dbContext = (DbContext) ServiceProvider.GetService(_options.DbContextType);
         }
 
-        public async Task PublishAsync(CapPublishedMessage message)
+        public async Task PublishCallbackAsync(CapPublishedMessage message)
         {
             using (var conn = new MySqlConnection(_options.ConnectionString))
             {
-                await conn.ExecuteAsync(PrepareSql(), message);
+                var id = await conn.ExecuteScalarAsync<int>(PrepareSql(), message);
+                message.Id = id;
+                Enqueue(message);
             }
         }
 
@@ -51,25 +58,20 @@ namespace DotNetCore.CAP.MySql
                 dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
                 dbTrans = dbContextTransaction.GetDbTransaction();
             }
+
             DbTransaction = dbTrans;
         }
 
-        protected override void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected override int Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message)
         {
-            dbConnection.Execute(PrepareSql(), message, dbTransaction);
-
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
+            return dbConnection.ExecuteScalar<int>(PrepareSql(), message, dbTransaction);
         }
 
-        protected override Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+        protected override async Task<int> ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
             CapPublishedMessage message)
         {
-            dbConnection.ExecuteAsync(PrepareSql(), message, dbTransaction);
-
-            _logger.LogInformation("Published Message has been persisted in the database. name:" + message);
-
-            return Task.CompletedTask;
+            return await dbConnection.ExecuteScalarAsync<int>(PrepareSql(), message, dbTransaction);
         }
 
         #region private methods
@@ -77,7 +79,7 @@ namespace DotNetCore.CAP.MySql
         private string PrepareSql()
         {
             return
-                $"INSERT INTO `{_options.TableNamePrefix}.published` (`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName)";
+                $"INSERT INTO `{_options.TableNamePrefix}.published` (`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT LAST_INSERT_ID()";
         }
 
         #endregion private methods

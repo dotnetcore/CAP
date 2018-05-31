@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.PostgreSql;
 using DotNetCore.CAP.Processor;
 using Microsoft.EntityFrameworkCore;
@@ -23,24 +26,33 @@ namespace DotNetCore.CAP
             services.AddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
             services.AddScoped<ICallbackPublisher, CapPublisher>();
-            services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
+            services.AddTransient<ICollectProcessor, PostgreSqlCollectProcessor>();
 
+            AddSingletonPostgreSqlOptions(services);
+        }
+
+        private void AddSingletonPostgreSqlOptions(IServiceCollection services)
+        {
             var postgreSqlOptions = new PostgreSqlOptions();
             _configure(postgreSqlOptions);
 
             if (postgreSqlOptions.DbContextType != null)
+            {
                 services.AddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext)provider.GetService(postgreSqlOptions.DbContextType);
+                        var dbContext = (DbContext) provider.GetService(postgreSqlOptions.DbContextType);
                         postgreSqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return postgreSqlOptions;
                     }
                 });
+            }
             else
+            {
                 services.AddSingleton(postgreSqlOptions);
+            }
         }
     }
 }

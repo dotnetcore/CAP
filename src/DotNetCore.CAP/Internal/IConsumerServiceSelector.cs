@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System.Collections.Generic;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -19,8 +22,6 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         /// <param name="key">topic or exchange router key.</param>
         /// <param name="candidates">the set of <see cref="ConsumerExecutorDescriptor" /> candidates.</param>
-        /// <returns></returns>
-        ConsumerExecutorDescriptor
-            SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> candidates);
+        ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> candidates);
     }
 }

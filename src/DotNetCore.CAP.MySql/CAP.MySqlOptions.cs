@@ -1,4 +1,5 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
 
 namespace DotNetCore.CAP
 {
@@ -8,7 +9,5 @@ namespace DotNetCore.CAP
         /// Gets or sets the database's connection string that will be used to store database entities.
         /// </summary>
         public string ConnectionString { get; set; }
-
-        public string TableNamePrefix { get; set; } = "cap";
     }
 }

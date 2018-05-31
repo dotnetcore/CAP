@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.SqlServer;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +26,8 @@ namespace DotNetCore.CAP
             services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
             services.AddScoped<ICallbackPublisher, CapPublisher>();
-            services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
+            services.AddTransient<ICollectProcessor, SqlServerCollectProcessor>();
+
             AddSqlServerOptions(services);
         }
 
@@ -34,18 +38,22 @@ namespace DotNetCore.CAP
             _configure(sqlServerOptions);
 
             if (sqlServerOptions.DbContextType != null)
+            {
                 services.AddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext) provider.GetService(sqlServerOptions.DbContextType);
+                        var dbContext = (DbContext)provider.GetService(sqlServerOptions.DbContextType);
                         sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return sqlServerOptions;
                     }
                 });
+            }
             else
+            {
                 services.AddSingleton(sqlServerOptions);
+            }
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.Kafka;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,9 +26,9 @@ namespace DotNetCore.CAP
             services.AddSingleton(kafkaOptions);
 
             services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
-            services.AddSingleton<IQueueExecutor, PublishQueueExecutor>();
-            services.AddSingleton<IPublishExecutor, PublishQueueExecutor>();
-            services.AddSingleton<ConnectionPool>();
+            services.AddSingleton<IPublishExecutor, KafkaPublishMessageSender>();
+            services.AddSingleton<IPublishMessageSender, KafkaPublishMessageSender>();
+            services.AddSingleton<IConnectionPool,ConnectionPool>();
         }
     }
 }

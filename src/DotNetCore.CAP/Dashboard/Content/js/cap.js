@@ -371,7 +371,7 @@
                     receivedSucceeded,
                     receivedFailed,
                     receivedSucceededStr,
-                    receivedFailedStr,
+                    receivedFailedStr
                 );
 
                 $(window).resize(function() {

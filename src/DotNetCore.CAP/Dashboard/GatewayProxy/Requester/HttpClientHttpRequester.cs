@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -44,7 +47,10 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
             var httpClient = _cacheHandlers.Get(cacheKey);
 
             if (httpClient == null)
+            {
                 httpClient = builder.Create();
+            }
+
             return httpClient;
         }
 

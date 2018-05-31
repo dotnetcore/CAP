@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 
 namespace DotNetCore.CAP.Dashboard
@@ -35,14 +38,21 @@ namespace DotNetCore.CAP.Dashboard
 
         public string PageUrl(int page)
         {
-            if (page < 1 || page > TotalPageCount) return "#";
+            if (page < 1 || page > TotalPageCount)
+            {
+                return "#";
+            }
 
             return BasePageUrl + "?from=" + (page - 1) * RecordsPerPage + "&count=" + RecordsPerPage;
         }
 
         public string RecordsPerPageUrl(int perPage)
         {
-            if (perPage <= 0) return "#";
+            if (perPage <= 0)
+            {
+                return "#";
+            }
+
             return BasePageUrl + "?from=0&count=" + perPage;
         }
 
@@ -51,23 +61,35 @@ namespace DotNetCore.CAP.Dashboard
             // start page index
             _startPageIndex = CurrentPage - PageItemsCount / 2;
             if (_startPageIndex + PageItemsCount > TotalPageCount)
+            {
                 _startPageIndex = TotalPageCount + 1 - PageItemsCount;
+            }
+
             if (_startPageIndex < 1)
+            {
                 _startPageIndex = 1;
+            }
 
             // end page index
             _endPageIndex = _startPageIndex + PageItemsCount - 1;
             if (_endPageIndex > TotalPageCount)
+            {
                 _endPageIndex = TotalPageCount;
+            }
 
             var pagerItems = new List<Item>();
-            if (TotalPageCount == 0) return pagerItems;
+            if (TotalPageCount == 0)
+            {
+                return pagerItems;
+            }
 
             AddPrevious(pagerItems);
 
             // first page
             if (_startPageIndex > 1)
+            {
                 pagerItems.Add(new Item(1, false, ItemType.Page));
+            }
 
             // more page before numeric page buttons
             AddMoreBefore(pagerItems);
@@ -80,7 +102,9 @@ namespace DotNetCore.CAP.Dashboard
 
             // last page
             if (_endPageIndex < TotalPageCount)
+            {
                 pagerItems.Add(new Item(TotalPageCount, false, ItemType.Page));
+            }
 
             // Next page
             AddNext(pagerItems);
@@ -99,7 +123,11 @@ namespace DotNetCore.CAP.Dashboard
             if (_startPageIndex > 2)
             {
                 var index = _startPageIndex - 1;
-                if (index < 1) index = 1;
+                if (index < 1)
+                {
+                    index = 1;
+                }
+
                 var item = new Item(index, false, ItemType.MorePage);
                 results.Add(item);
             }
@@ -110,7 +138,11 @@ namespace DotNetCore.CAP.Dashboard
             if (_endPageIndex < TotalPageCount - 1)
             {
                 var index = _startPageIndex + PageItemsCount;
-                if (index > TotalPageCount) index = TotalPageCount;
+                if (index > TotalPageCount)
+                {
+                    index = TotalPageCount;
+                }
+
                 var item = new Item(index, false, ItemType.MorePage);
                 results.Add(item);
             }

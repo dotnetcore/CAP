@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Data;
 using System.Threading;
@@ -11,10 +14,10 @@ namespace DotNetCore.CAP.MySql
 {
     public class MySqlStorage : IStorage
     {
+        private readonly CapOptions _capOptions;
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
         private readonly MySqlOptions _options;
-        private readonly CapOptions _capOptions;
 
         public MySqlStorage(ILogger<MySqlStorage> logger,
             MySqlOptions options,
@@ -37,7 +40,11 @@ namespace DotNetCore.CAP.MySql
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested) return;
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
+
             var sql = CreateDbTablesScript(_options.TableNamePrefix);
             using (var connection = new MySqlConnection(_options.ConnectionString))
             {
@@ -51,11 +58,7 @@ namespace DotNetCore.CAP.MySql
         {
             var batchSql =
                 $@"
-CREATE TABLE IF NOT EXISTS `{prefix}.queue` (
-  `MessageId` int(11) NOT NULL,
-  `MessageType` tinyint(4) NOT NULL,
-  `ProcessId` varchar(50) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE IF EXISTS `{prefix}.queue`;
 
 CREATE TABLE IF NOT EXISTS `{prefix}.received` (
   `Id` int(127) NOT NULL AUTO_INCREMENT,
@@ -102,7 +105,9 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
             var connection = _existingConnection ?? new MySqlConnection(_options.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
+            {
                 connection.Open();
+            }
 
             return connection;
         }
@@ -115,7 +120,9 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
         internal void ReleaseConnection(IDbConnection connection)
         {
             if (connection != null && !IsExistingConnection(connection))
+            {
                 connection.Dispose();
+            }
         }
     }
 }

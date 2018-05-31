@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Text.RegularExpressions;
 
 namespace DotNetCore.CAP.Dashboard
@@ -10,9 +13,20 @@ namespace DotNetCore.CAP.Dashboard
             string pathTemplate,
             Func<Match, RazorPage> pageFunc)
         {
-            if (routes == null) throw new ArgumentNullException(nameof(routes));
-            if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));
-            if (pageFunc == null) throw new ArgumentNullException(nameof(pageFunc));
+            if (routes == null)
+            {
+                throw new ArgumentNullException(nameof(routes));
+            }
+
+            if (pathTemplate == null)
+            {
+                throw new ArgumentNullException(nameof(pathTemplate));
+            }
+
+            if (pageFunc == null)
+            {
+                throw new ArgumentNullException(nameof(pageFunc));
+            }
 
             routes.Add(pathTemplate, new RazorPageDispatcher(pageFunc));
         }
@@ -22,9 +36,20 @@ namespace DotNetCore.CAP.Dashboard
             string pathTemplate,
             Func<DashboardContext, bool> command)
         {
-            if (routes == null) throw new ArgumentNullException(nameof(routes));
-            if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));
-            if (command == null) throw new ArgumentNullException(nameof(command));
+            if (routes == null)
+            {
+                throw new ArgumentNullException(nameof(routes));
+            }
+
+            if (pathTemplate == null)
+            {
+                throw new ArgumentNullException(nameof(pathTemplate));
+            }
+
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
 
             routes.Add(pathTemplate, new CommandDispatcher(command));
         }
@@ -34,9 +59,20 @@ namespace DotNetCore.CAP.Dashboard
             string pathTemplate,
             Func<DashboardContext, object> func)
         {
-            if (routes == null) throw new ArgumentNullException(nameof(routes));
-            if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));
-            if (func == null) throw new ArgumentNullException(nameof(func));
+            if (routes == null)
+            {
+                throw new ArgumentNullException(nameof(routes));
+            }
+
+            if (pathTemplate == null)
+            {
+                throw new ArgumentNullException(nameof(pathTemplate));
+            }
+
+            if (func == null)
+            {
+                throw new ArgumentNullException(nameof(func));
+            }
 
             routes.Add(pathTemplate, new JsonDispatcher(func));
         }
@@ -46,9 +82,20 @@ namespace DotNetCore.CAP.Dashboard
             string pathTemplate,
             Func<DashboardContext, string> jsonfunc)
         {
-            if (routes == null) throw new ArgumentNullException(nameof(routes));
-            if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));
-            if (jsonfunc == null) throw new ArgumentNullException(nameof(jsonfunc));
+            if (routes == null)
+            {
+                throw new ArgumentNullException(nameof(routes));
+            }
+
+            if (pathTemplate == null)
+            {
+                throw new ArgumentNullException(nameof(pathTemplate));
+            }
+
+            if (jsonfunc == null)
+            {
+                throw new ArgumentNullException(nameof(jsonfunc));
+            }
 
             routes.Add(pathTemplate, new JsonDispatcher(jsonfunc));
         }
@@ -58,9 +105,20 @@ namespace DotNetCore.CAP.Dashboard
             string pathTemplate,
             Action<DashboardContext, int> command)
         {
-            if (routes == null) throw new ArgumentNullException(nameof(routes));
-            if (pathTemplate == null) throw new ArgumentNullException(nameof(pathTemplate));
-            if (command == null) throw new ArgumentNullException(nameof(command));
+            if (routes == null)
+            {
+                throw new ArgumentNullException(nameof(routes));
+            }
+
+            if (pathTemplate == null)
+            {
+                throw new ArgumentNullException(nameof(pathTemplate));
+            }
+
+            if (command == null)
+            {
+                throw new ArgumentNullException(nameof(command));
+            }
 
             routes.Add(pathTemplate, new BatchCommandDispatcher(command));
         }

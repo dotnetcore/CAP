@@ -1,4 +1,7 @@
-﻿using System.Collections;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
@@ -10,7 +13,8 @@ namespace DotNetCore.CAP.Internal
 
         public int CombinedHash
         {
-            [MethodImpl(MethodImplOptions.AggressiveInlining)] get { return _combinedHash64.GetHashCode(); }
+            [MethodImpl(MethodImplOptions.AggressiveInlining)]
+            get { return _combinedHash64.GetHashCode(); }
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -34,6 +38,7 @@ namespace DotNetCore.CAP.Internal
                     Add(o);
                     count++;
                 }
+
                 Add(count);
             }
         }
