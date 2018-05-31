@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -94,7 +97,9 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
         public async Task SetResponseOnHttpContext(HttpContext context, HttpResponseMessage response)
         {
             foreach (var httpResponseHeader in response.Content.Headers)
+            {
                 AddHeaderIfDoesntExist(context, httpResponseHeader);
+            }
 
             var content = await response.Content.ReadAsByteArrayAsync();
 
@@ -113,7 +118,9 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             using (Stream stream = new MemoryStream(content))
             {
                 if (response.StatusCode != HttpStatusCode.NotModified)
+                {
                     await stream.CopyToAsync(context.Response.Body);
+                }
             }
         }
 
@@ -134,8 +141,10 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             KeyValuePair<string, IEnumerable<string>> httpResponseHeader)
         {
             if (!context.Response.Headers.ContainsKey(httpResponseHeader.Key))
+            {
                 context.Response.Headers.Add(httpResponseHeader.Key,
                     new StringValues(httpResponseHeader.Value.ToArray()));
+            }
         }
     }
 }

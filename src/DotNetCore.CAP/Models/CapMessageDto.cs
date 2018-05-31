@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Models
@@ -14,7 +17,7 @@ namespace DotNetCore.CAP.Models
         public virtual string CallbackName { get; set; }
     }
 
-    public sealed class CapMessageDto: CapMessage
+    public sealed class CapMessageDto : CapMessage
     {
         public CapMessageDto()
         {

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -18,10 +21,6 @@ namespace DotNetCore.CAP
         private readonly CancellationTokenRegistration _ctsRegistration;
         private readonly ILogger<DefaultBootstrapper> _logger;
         private Task _bootstrappingTask;
-
-        private IStorage Storage { get; }
-
-        private IEnumerable<IProcessingServer> Processors { get; }
 
         public DefaultBootstrapper(
             ILogger<DefaultBootstrapper> logger,
@@ -49,6 +48,10 @@ namespace DotNetCore.CAP
             });
         }
 
+        private IStorage Storage { get; }
+
+        private IEnumerable<IProcessingServer> Processors { get; }
+
         public Task BootstrapAsync()
         {
             return _bootstrappingTask = BootstrapTaskAsync();
@@ -56,27 +59,40 @@ namespace DotNetCore.CAP
 
         private async Task BootstrapTaskAsync()
         {
+            _logger.LogInformation("### CAP starting...");
+
             await Storage.InitializeAsync(_cts.Token);
 
-            if (_cts.IsCancellationRequested) return;
+            if (_cts.IsCancellationRequested)
+            {
+                return;
+            }
 
             _appLifetime.ApplicationStopping.Register(() =>
             {
                 foreach (var item in Processors)
+                {
                     item.Dispose();
+                }
             });
 
-            if (_cts.IsCancellationRequested) return;
+            if (_cts.IsCancellationRequested)
+            {
+                return;
+            }
 
             await BootstrapCoreAsync();
 
             _ctsRegistration.Dispose();
             _cts.Dispose();
+
+            _logger.LogInformation("### CAP started!");
         }
 
         protected virtual Task BootstrapCoreAsync()
         {
             foreach (var item in Processors)
+            {
                 try
                 {
                     item.Start();
@@ -85,6 +101,8 @@ namespace DotNetCore.CAP
                 {
                     _logger.ProcessorsStartedError(ex);
                 }
+            }
+
             return Task.CompletedTask;
         }
     }

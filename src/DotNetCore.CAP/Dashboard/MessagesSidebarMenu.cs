@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using DotNetCore.CAP.Dashboard.Resources;
@@ -20,13 +23,6 @@ namespace DotNetCore.CAP.Dashboard
                 Metric = DashboardMetrics.PublishedSucceededCount
             });
 
-            PublishedItems.Add(page =>
-                new MenuItem(Strings.SidebarMenu_Processing, page.Url.To("/published/processing"))
-                {
-                    Active = page.RequestPath.StartsWith("/published/processing"),
-                    Metric = DashboardMetrics.PublishedProcessingCount
-                });
-
             PublishedItems.Add(page => new MenuItem(Strings.SidebarMenu_Failed, page.Url.To("/published/failed"))
             {
                 Active = page.RequestPath.StartsWith("/published/failed"),
@@ -39,12 +35,6 @@ namespace DotNetCore.CAP.Dashboard
             {
                 Active = page.RequestPath.StartsWith("/received/succeeded"),
                 Metric = DashboardMetrics.ReceivedSucceededCount
-            });
-
-            ReceivedItems.Add(page => new MenuItem(Strings.SidebarMenu_Processing, page.Url.To("/received/processing"))
-            {
-                Active = page.RequestPath.StartsWith("/received/processing"),
-                Metric = DashboardMetrics.ReceivedProcessingCount
             });
 
             ReceivedItems.Add(page => new MenuItem(Strings.SidebarMenu_Failed, page.Url.To("/received/failed"))

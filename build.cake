@@ -68,6 +68,7 @@ Task("Pack")
 	{
 		Configuration = build.Configuration,
 		VersionSuffix = build.Version.Suffix,
+		IncludeSymbols = true,
 		OutputDirectory = "./artifacts/packages"
 	};
 	foreach (var project in build.ProjectFiles)

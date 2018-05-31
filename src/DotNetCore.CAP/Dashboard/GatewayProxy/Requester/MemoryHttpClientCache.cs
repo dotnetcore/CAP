@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Concurrent;
 
 namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
@@ -31,7 +34,10 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
         {
             IHttpClient client = null;
             if (_httpClientsCache.TryGetValue(id, out var connectionQueue))
+            {
                 connectionQueue.TryDequeue(out client);
+            }
+
             return client;
         }
 

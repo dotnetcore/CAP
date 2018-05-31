@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.Test
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
 
-            Assert.Equal(2, candidates.Count);
+            Assert.Equal(6, candidates.Count);
         }
 
         [Fact]
@@ -41,6 +41,66 @@ namespace DotNetCore.CAP.Test
             Assert.NotNull(bestCandidates);
             Assert.NotNull(bestCandidates.MethodInfo);
             Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
+        }
+
+
+        [Theory]
+        [InlineData("Candidates.Asterisk")]
+        [InlineData("candidates.Asterisk")]
+        [InlineData("AAA.BBB.Asterisk")]
+        [InlineData("aaa.bbb.Asterisk")]
+        public void CanFindAsteriskTopic(string topic)
+        {
+            var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+            var candidates = selector.SelectCandidates();
+
+            var bestCandidates = selector.SelectBestCandidate(topic, candidates);
+            Assert.NotNull(bestCandidates);
+        }
+
+        [Theory]
+        [InlineData("Candidates.Asterisk.AAA")]
+        [InlineData("AAA.BBB.CCC.Asterisk")]
+        [InlineData("aaa.BBB.ccc.Asterisk")]
+        [InlineData("Asterisk.aaa.bbb")]
+        public void CanNotFindAsteriskTopic(string topic)
+        {
+            var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+            var candidates = selector.SelectCandidates();
+
+            var bestCandidates = selector.SelectBestCandidate(topic, candidates);
+            Assert.Null(bestCandidates);
+        }
+
+        [Theory]
+        [InlineData("Candidates.Pound.AAA")]
+        [InlineData("Candidates.Pound.AAA.BBB")]
+        [InlineData("AAA.Pound")]
+        [InlineData("aaa.Pound")]
+        [InlineData("aaa.bbb.Pound")]
+        [InlineData("aaa.BBB.Pound")]
+        public void CanFindPoundTopic(string topic)
+        {
+            var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+            var candidates = selector.SelectCandidates();
+
+            var bestCandidates = selector.SelectBestCandidate(topic, candidates);
+            Assert.NotNull(bestCandidates);
+        }
+
+        [Theory]
+        [InlineData("Pound")]
+        [InlineData("aaa.Pound.AAA.BBB")]
+        [InlineData("Pound.AAA")]
+        [InlineData("Pound.aaa")]
+        [InlineData("AAA.Pound.aaa")]
+        public void CanNotFindPoundTopic(string topic)
+        {
+            var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+            var candidates = selector.SelectCandidates();
+
+            var bestCandidates = selector.SelectBestCandidate(topic, candidates);
+            Assert.Null(bestCandidates);
         }
     }
 
@@ -73,6 +133,21 @@ namespace DotNetCore.CAP.Test
         {
             Console.WriteLine("GetFoo2() method has bee excuted.");
         }
+
+        [CandidatesTopic("*.*.Asterisk")]
+        [CandidatesTopic("*.Asterisk")]
+        public void GetFooAsterisk()
+        {
+            Console.WriteLine("GetFoo2Asterisk() method has bee excuted.");
+        }
+
+        [CandidatesTopic("Candidates.Pound.#")]
+        [CandidatesTopic("#.Pound")]
+        public void GetFooPound()
+        {
+            Console.WriteLine("GetFoo2Pound() method has bee excuted.");
+        }
+
     }
 
     public class CandidatesBarTest : IBarTest

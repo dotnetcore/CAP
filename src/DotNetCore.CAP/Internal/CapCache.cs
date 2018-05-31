@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -56,6 +59,7 @@ namespace DotNetCore.CAP.Internal
                     Clear();
                     _locker.Dispose();
                 }
+
                 // Dispose unmanaged resources
             }
         }
@@ -71,7 +75,9 @@ namespace DotNetCore.CAP.Internal
                 try
                 {
                     foreach (var t in _timers.Values)
+                    {
                         t.Dispose();
+                    }
                 }
                 catch
                 {
@@ -98,9 +104,11 @@ namespace DotNetCore.CAP.Internal
             if (_timers.TryGetValue(key, out timer))
             {
                 if (restartTimerIfExists)
+                {
                     timer.Change(
                         cacheTimeout ?? Timeout.InfiniteTimeSpan,
                         Timeout.InfiniteTimeSpan);
+                }
             }
             else
             {
@@ -139,7 +147,10 @@ namespace DotNetCore.CAP.Internal
         /// </param>
         public void AddOrUpdate(K key, T cacheObject, TimeSpan? cacheTimeout, bool restartTimerIfExists = false)
         {
-            if (disposed) return;
+            if (disposed)
+            {
+                return;
+            }
 
             _locker.EnterWriteLock();
             try
@@ -147,9 +158,13 @@ namespace DotNetCore.CAP.Internal
                 CheckTimer(key, cacheTimeout, restartTimerIfExists);
 
                 if (!_cache.ContainsKey(key))
+                {
                     _cache.Add(key, cacheObject);
+                }
                 else
+                {
                     _cache[key] = cacheObject;
+                }
             }
             finally
             {
@@ -182,7 +197,10 @@ namespace DotNetCore.CAP.Internal
         /// <returns>The object from the cache or <c>default(T)</c>, if not found.</returns>
         public T Get(K key)
         {
-            if (disposed) return default(T);
+            if (disposed)
+            {
+                return default(T);
+            }
 
             _locker.EnterReadLock();
             try
@@ -227,7 +245,10 @@ namespace DotNetCore.CAP.Internal
         /// <param name="keyPattern">The key pattern to remove. The Predicate has to return true to get key removed.</param>
         public void Remove(Predicate<K> keyPattern)
         {
-            if (disposed) return;
+            if (disposed)
+            {
+                return;
+            }
 
             _locker.EnterWriteLock();
             try
@@ -245,6 +266,7 @@ namespace DotNetCore.CAP.Internal
                     catch
                     {
                     }
+
                     _timers.Remove(workKey);
                     _cache.Remove(workKey);
                 }
@@ -262,7 +284,10 @@ namespace DotNetCore.CAP.Internal
         /// <param name="key">The cache-key to remove.</param>
         public void Remove(K key)
         {
-            if (disposed) return;
+            if (disposed)
+            {
+                return;
+            }
 
             _locker.EnterWriteLock();
             try
@@ -276,6 +301,7 @@ namespace DotNetCore.CAP.Internal
                     catch
                     {
                     }
+
                     _timers.Remove(key);
                     _cache.Remove(key);
                 }
@@ -293,7 +319,10 @@ namespace DotNetCore.CAP.Internal
         /// <returns><c>True</c> if the key exists in the cache, otherwise <c>False</c>.</returns>
         public bool Exists(K key)
         {
-            if (disposed) return false;
+            if (disposed)
+            {
+                return false;
+            }
 
             _locker.EnterReadLock();
             try

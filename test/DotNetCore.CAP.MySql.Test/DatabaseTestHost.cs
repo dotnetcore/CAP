@@ -1,6 +1,5 @@
 using System.Threading;
 using Dapper;
-using Microsoft.EntityFrameworkCore;
 
 namespace DotNetCore.CAP.MySql.Test
 {
@@ -59,8 +58,7 @@ CREATE DATABASE `{databaseName}`;");
             {
                 connection.Execute($@"
 TRUNCATE TABLE `cap.published`;
-TRUNCATE TABLE `cap.received`;
-TRUNCATE TABLE `cap.queue`;");
+TRUNCATE TABLE `cap.received`;");
             }
         }
     }

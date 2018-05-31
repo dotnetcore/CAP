@@ -15,19 +15,19 @@
   
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.4" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.5.0" />
-    <PackageReference Include="MySqlConnector" Version="0.33.2" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.6.2" />
+    <PackageReference Include="MySqlConnector" Version="0.40.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
     <PackageReference Include="xunit" Version="2.3.1" />
-    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.0.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
-    <PackageReference Include="Moq" Version="4.8.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.0.0" />
+    <PackageReference Include="Moq" Version="4.8.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.FileExtensions" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="2.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="2.0.1" />
   </ItemGroup>
  
 </Project>
