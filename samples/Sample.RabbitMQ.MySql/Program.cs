@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
-using NLog.Web;
 
 namespace Sample.RabbitMQ.MySql
 {
@@ -13,12 +12,7 @@ namespace Sample.RabbitMQ.MySql
 
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .ConfigureLogging((hostingContext, builder) =>
-                {
-                    hostingContext.HostingEnvironment.ConfigureNLog("nlog.config");
-                })
-                .UseNLog()
+                .UseStartup<Startup>() 
                 .Build();
     }
 }
