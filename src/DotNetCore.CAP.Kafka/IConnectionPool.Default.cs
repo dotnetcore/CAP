@@ -6,23 +6,29 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Kafka
 {
     public class ConnectionPool : IConnectionPool, IDisposable
     {
+        private readonly ILogger<ConnectionPool> _logger;
         private readonly Func<Producer> _activator;
-        private readonly ConcurrentQueue<Producer> _pool = new ConcurrentQueue<Producer>();
+        private readonly ConcurrentQueue<Producer> _pool;
         private int _count;
-
         private int _maxSize;
 
-        public ConnectionPool(KafkaOptions options)
+        public ConnectionPool(ILogger<ConnectionPool> logger, KafkaOptions options)
         {
+            _logger = logger;
+            _pool = new ConcurrentQueue<Producer>();
             _maxSize = options.ConnectionPoolSize;
             _activator = CreateActivator(options);
-
             ServersAddress = options.Servers;
+
+            _logger.LogDebug("Kafka configuration of CAP :\r\n {0}",
+                JsonConvert.SerializeObject(options.AsKafkaConfig(), Formatting.Indented));
         }
 
         public string ServersAddress { get; }

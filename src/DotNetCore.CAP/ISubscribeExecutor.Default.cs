@@ -72,7 +72,7 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
+                _logger.LogError(ex, $"An exception occurred while executing the subscription method. Topic:{message.Name}, Id:{message.Id}");
 
                 await SetFailedState(message, ex, out bool stillRetry);
                 if (stillRetry)

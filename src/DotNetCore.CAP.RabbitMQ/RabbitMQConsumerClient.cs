@@ -93,7 +93,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _connection = _connectionChannelPool.GetConnection();
 
             _channel = _connection.CreateModel();
-
+            
             _channel.ExchangeDeclare(
                 _exchageName,
                 RabbitMQOptions.ExchangeType,
@@ -155,7 +155,7 @@ namespace DotNetCore.CAP.RabbitMQ
             var args = new LogMessageEventArgs
             {
                 LogType = MqLogType.ConsumerShutdown,
-                Reason = e.ToString()
+                Reason =  e.ReplyText
             };
             OnLog?.Invoke(sender, args);
         }

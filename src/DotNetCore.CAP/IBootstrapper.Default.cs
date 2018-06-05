@@ -59,6 +59,8 @@ namespace DotNetCore.CAP
 
         private async Task BootstrapTaskAsync()
         {
+            _logger.LogInformation("### CAP starting...");
+
             await Storage.InitializeAsync(_cts.Token);
 
             if (_cts.IsCancellationRequested)
@@ -83,6 +85,8 @@ namespace DotNetCore.CAP
 
             _ctsRegistration.Dispose();
             _cts.Dispose();
+
+            _logger.LogInformation("### CAP started!");
         }
 
         protected virtual Task BootstrapCoreAsync()

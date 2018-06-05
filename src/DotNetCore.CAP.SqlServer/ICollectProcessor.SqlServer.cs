@@ -2,30 +2,30 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.Logging;
-using Npgsql;
 
-namespace DotNetCore.CAP.PostgreSql
+namespace DotNetCore.CAP.SqlServer
 {
-    internal class DefaultAdditionalProcessor : IAdditionalProcessor
+    public class SqlServerCollectProcessor : ICollectProcessor
     {
         private const int MaxBatch = 1000;
 
         private static readonly string[] Tables =
         {
-            "published", "received"
+            "Published", "Received"
         };
 
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly ILogger _logger;
-        private readonly PostgreSqlOptions _options;
+        private readonly SqlServerOptions _options;
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
-        public DefaultAdditionalProcessor(ILogger<DefaultAdditionalProcessor> logger,
-            PostgreSqlOptions sqlServerOptions)
+        public SqlServerCollectProcessor(ILogger<SqlServerCollectProcessor> logger,
+            SqlServerOptions sqlServerOptions)
         {
             _logger = logger;
             _options = sqlServerOptions;
@@ -33,18 +33,19 @@ namespace DotNetCore.CAP.PostgreSql
 
         public async Task ProcessAsync(ProcessingContext context)
         {
-            _logger.LogDebug("Collecting expired entities.");
-
             foreach (var table in Tables)
             {
-                var removedCount = 0;
+                _logger.LogDebug($"Collecting expired data from table [{_options.Schema}].[{table}].");
+
+                int removedCount;
                 do
                 {
-                    using (var connection = new NpgsqlConnection(_options.ConnectionString))
+                    using (var connection = new SqlConnection(_options.ConnectionString))
                     {
-                        removedCount = await connection.ExecuteAsync(
-                            $"DELETE FROM \"{_options.Schema}\".\"{table}\" WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM \"{_options.Schema}\".\"{table}\" LIMIT @count);",
-                            new {now = DateTime.Now, count = MaxBatch});
+                        removedCount = await connection.ExecuteAsync($@"
+DELETE TOP (@count)
+FROM [{_options.Schema}].[{table}] WITH (readpast)
+WHERE ExpiresAt < @now;", new {now = DateTime.Now, count = MaxBatch});
                     }
 
                     if (removedCount != 0)

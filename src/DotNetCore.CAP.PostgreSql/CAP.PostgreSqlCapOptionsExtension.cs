@@ -26,7 +26,7 @@ namespace DotNetCore.CAP
             services.AddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
             services.AddScoped<ICapPublisher, CapPublisher>();
             services.AddScoped<ICallbackPublisher, CapPublisher>();
-            services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
+            services.AddTransient<ICollectProcessor, PostgreSqlCollectProcessor>();
 
             AddSingletonPostgreSqlOptions(services);
         }
