@@ -34,7 +34,7 @@ namespace Sample.Kafka.MySql.Controllers
             return Ok("publish successful!");
         }
 
-        [CapSubscribe("xxx.xxx.test2")]
+        [CapSubscribe("#.test2")]
         public void Test2(int value)
         {
             Console.WriteLine("Subscriber output message: " + value);
