@@ -36,7 +36,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{10C0818D
 		build.cake = build.cake
 		build.ps1 = build.ps1
 		build.sh = build.sh
-		build\common.props = build\common.props
 		build\index.cake = build\index.cake
 		build\util.cake = build\util.cake
 		build\version.cake = build\version.cake
