@@ -65,7 +65,7 @@ namespace DotNetCore.CAP.Processor
                         }
                         catch (Exception ex)
                         {
-                            _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
+                            _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Topic:{message.Name}, Id:{message.Id}");
                         }
                     }
                 }
@@ -82,14 +82,7 @@ namespace DotNetCore.CAP.Processor
             {
                 foreach (var message in _receivedMessageQueue.GetConsumingEnumerable(_cts.Token))
                 {
-                    try
-                    {
-                        _executor.ExecuteAsync(message);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.ExceptionOccuredWhileExecuting(message.Name, ex);
-                    }
+                    _executor.ExecuteAsync(message);
                 }
             }
             catch (OperationCanceledException)

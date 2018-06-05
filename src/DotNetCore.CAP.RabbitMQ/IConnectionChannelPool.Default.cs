@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using RabbitMQ.Client;
 
 namespace DotNetCore.CAP.RabbitMQ
@@ -15,21 +16,24 @@ namespace DotNetCore.CAP.RabbitMQ
         private const int DefaultPoolSize = 15;
         private readonly Func<IConnection> _connectionActivator;
         private readonly ILogger<ConnectionChannelPool> _logger;
-        private readonly ConcurrentQueue<IModel> _pool = new ConcurrentQueue<IModel>();
+        private readonly ConcurrentQueue<IModel> _pool;
         private IConnection _connection;
 
         private int _count;
         private int _maxSize;
 
-        public ConnectionChannelPool(ILogger<ConnectionChannelPool> logger,
-            RabbitMQOptions options)
+        public ConnectionChannelPool(ILogger<ConnectionChannelPool> logger, RabbitMQOptions options)
         {
             _logger = logger;
             _maxSize = DefaultPoolSize;
-
+            _pool = new ConcurrentQueue<IModel>();
             _connectionActivator = CreateConnection(options);
+
             HostAddress = options.HostName + ":" + options.Port;
             Exchange = options.ExchangeName;
+
+            _logger.LogDebug("RabbitMQ configuration of CAP :\r\n {0}",
+                JsonConvert.SerializeObject(options, Formatting.Indented));
         }
 
         IModel IConnectionChannelPool.Rent()
@@ -87,7 +91,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
         {
-            _logger.LogWarning($"RabbitMQ client connection closed! {e}");
+            _logger.LogWarning($"RabbitMQ client connection closed! --> {e.ReplyText}");
         }
 
         public virtual IModel Rent()

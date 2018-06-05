@@ -25,7 +25,6 @@ namespace Sample.RabbitMQ.MySql.Controllers
             return Ok();
         }
 
-
         [Route("~/publish2")]
         public IActionResult PublishMessage2()
         {
@@ -47,7 +46,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         }
 
         [NonAction]
-        [CapSubscribe("sample.rabbitmq.mysql")]
+        [CapSubscribe("#.rabbitmq.mysql")]
         public void ReceiveMessage(DateTime time)
         {
             Console.WriteLine("[sample.rabbitmq.mysql] message received: " + DateTime.Now + ",sent time: " + time);
