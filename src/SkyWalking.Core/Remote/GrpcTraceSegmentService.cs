@@ -69,6 +69,7 @@ namespace SkyWalking.Remote
                 {
                     await asyncClientStreamingCall.RequestStream.WriteAsync(segment);
                     await asyncClientStreamingCall.RequestStream.CompleteAsync();
+                    await asyncClientStreamingCall.ResponseAsync;
                 }
 
                 _logger.Debug(
