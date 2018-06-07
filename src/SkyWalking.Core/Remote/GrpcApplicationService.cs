@@ -108,7 +108,7 @@ namespace SkyWalking.Remote
 
         private async Task RegisterApplicationInstance(GrpcConnection availableConnection, CancellationToken token)
         {
-            if (DictionaryUtil.IsNull(RemoteDownstreamConfig.Agent.ApplicationInstanceId))
+            if (!DictionaryUtil.IsNull(RemoteDownstreamConfig.Agent.ApplicationId) && DictionaryUtil.IsNull(RemoteDownstreamConfig.Agent.ApplicationInstanceId))
             {
                 var instanceDiscoveryService =
                     new InstanceDiscoveryService.InstanceDiscoveryServiceClient(availableConnection.GrpcChannel);
@@ -138,14 +138,15 @@ namespace SkyWalking.Remote
                 var retry = 0;
                 var applicationInstanceId = 0;
                 while (retry++ < 5 && DictionaryUtil.IsNull(applicationInstanceId))
-                {  
-                    var applicationInstanceMapping =await instanceDiscoveryService.registerInstanceAsync(applicationInstance);
+                {
+                    var applicationInstanceMapping = await instanceDiscoveryService.registerInstanceAsync(applicationInstance);
                     applicationInstanceId = applicationInstanceMapping.ApplicationInstanceId;
                     if (!DictionaryUtil.IsNull(applicationInstanceId))
                     {
                         break;
                     }
-                    await Task.Delay(500, token);  
+
+                    await Task.Delay(500, token);
                 }
 
                 if (!DictionaryUtil.IsNull(applicationInstanceId))
