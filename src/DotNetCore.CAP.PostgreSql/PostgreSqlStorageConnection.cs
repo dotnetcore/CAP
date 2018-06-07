@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
-            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
                 $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"Added\"<'{fourMinsAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
 
