@@ -30,6 +30,7 @@ using SkyWalking.Context;
 using SkyWalking.Dictionarys;
 using SkyWalking.Logging;
 using SkyWalking.NetworkProtocol;
+using SkyWalking.Utils;
 
 namespace SkyWalking.Remote
 {
@@ -121,7 +122,7 @@ namespace SkyWalking.Remote
                 var osInfo = new OSInfo
                 {
                     Hostname = hostName,
-                    OsName = Environment.OSVersion.ToString(),
+                    OsName = PlatformInformation.GetOSName(),
                     ProcessNo = Process.GetCurrentProcess().Id
                 };
 
