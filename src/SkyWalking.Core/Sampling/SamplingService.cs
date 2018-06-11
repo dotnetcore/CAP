@@ -16,31 +16,49 @@
  *
  */
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
+using SkyWalking.Boot;
+using SkyWalking.Config;
+using SkyWalking.Utils;
 
 namespace SkyWalking.Sampling
 {
-    public class SamplingService : ISampler
+    // ReSharper disable once ClassNeverInstantiated.Global
+    public class SamplingService :TimerService, ISampler
     {
+        private readonly AtomicInteger _atomicInteger = new AtomicInteger();
+        private readonly int _sample_N_Per_3_Secs = AgentConfig.Sample_N_Per_3_Secs;
+        private readonly bool _sample_on = AgentConfig.Sample_N_Per_3_Secs > 0;
 
         public bool TrySampling()
         {
-            return true;
+            if (!_sample_on)
+            {
+                return true;
+            }
+
+            return _atomicInteger.Increment() < _sample_N_Per_3_Secs;
         }
 
         public void ForceSampled()
         {
+            if (_sample_on)
+            {
+                _atomicInteger.Increment();
+            }
         }
 
-        public void Dispose()
+        protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(3);
+        
+        protected override Task Execute(CancellationToken token)
         {
-        }
+            if (_sample_on)
+            {
+                _atomicInteger.Value = 0;
+            }
 
-        public int Order { get; } = 1;
-
-        public Task Initialize(CancellationToken token)
-        {
             return Task.CompletedTask;
         }
     }

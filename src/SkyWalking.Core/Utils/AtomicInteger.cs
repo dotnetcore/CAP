@@ -24,7 +24,11 @@ namespace SkyWalking.Utils
     {
         private int _value;
 
-        public int Value => _value;
+        public int Value
+        {
+            get => _value;
+            set => Interlocked.Exchange(ref _value, value);
+        }
 
         public AtomicInteger()
             : this(0)

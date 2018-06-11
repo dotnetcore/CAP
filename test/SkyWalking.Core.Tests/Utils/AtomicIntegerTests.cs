@@ -60,5 +60,13 @@ namespace SkyWalking.Core.Tests.Utils
             Assert.True(atomicInteger == 5);
             Assert.False(atomicInteger != 5);
         }
+
+        [Fact]
+        public void Set_Value()
+        {
+            AtomicInteger atomicInteger = 5;
+            atomicInteger.Value = 10;
+            Assert.Equal(10, atomicInteger.Value);
+        }
     }
 }

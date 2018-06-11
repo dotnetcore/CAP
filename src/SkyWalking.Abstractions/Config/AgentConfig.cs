@@ -31,7 +31,9 @@ namespace SkyWalking.Config
         public static string ApplicationCode { get; set; }
 
         /// <summary>
-        /// Negative or zeor means off ,by default. Sample_N_Per_3_Secs means sampling N TraceSegment in 10 seconds tops.
+        /// The number of sampled traces per 3 seconds
+        /// Negative number means sample traces as many as possible, most likely 100% , by default
+        /// 
         /// </summary>
         public static int Sample_N_Per_3_Secs = -1;
 

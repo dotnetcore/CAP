@@ -47,5 +47,16 @@ namespace SkyWalking.AspNetCore
             get;
             set;
         }
+
+        /// <summary>
+        /// The number of sampled traces per 3 seconds
+        /// Negative number means sample traces as many as possible, most likely 100% , by default
+        /// 
+        /// </summary>
+        public int SamplePer3Secs
+        {
+            get; 
+            set;
+        } = -1;
     }
 }

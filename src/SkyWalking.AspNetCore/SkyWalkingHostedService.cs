@@ -53,6 +53,7 @@ namespace SkyWalking.AspNetCore
             LogManager.SetLoggerFactory(loggerFactory);
             AgentConfig.ApplicationCode = options.Value.ApplicationCode;
             CollectorConfig.DirectServers = options.Value.DirectServers;
+            AgentConfig.Sample_N_Per_3_Secs = options.Value.SamplePer3Secs;
             _logger = LogManager.GetLogger<SkyWalkingHostedService>();
             _diagnosticObserver = diagnosticObserver;
         }
