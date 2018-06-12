@@ -80,7 +80,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT LAST
 
         public async Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
-            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
                 $"SELECT * FROM `{_prefix}.received` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `Added`<'{fourMinsAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
             using (var connection = new MySqlConnection(Options.ConnectionString))
