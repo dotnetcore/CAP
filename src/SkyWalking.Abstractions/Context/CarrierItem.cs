@@ -64,7 +64,7 @@ namespace SkyWalking.Context
             }
             else
             {
-                _headKey = $"{AgentConfig.Namespace}:{headKey}";
+                _headKey = $"{AgentConfig.Namespace}-{headKey}";
             }
             _headValue = headValue;
             _next = next;
