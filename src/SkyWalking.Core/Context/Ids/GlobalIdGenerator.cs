@@ -20,6 +20,7 @@ using System;
 using System.Threading;
 using SkyWalking.Config;
 using SkyWalking.Dictionarys;
+using  SkyWalking.Utils;
 
 namespace SkyWalking.Context.Ids
 {
@@ -77,6 +78,7 @@ namespace SkyWalking.Context.Ids
                         _lastRandomValue = _random.Next();
                         _runRandomTimestamp = currentTimeMillis;
                     }
+
                     return _lastRandomValue;
                 }
                 else
@@ -92,6 +94,7 @@ namespace SkyWalking.Context.Ids
                 {
                     _threadSeq = 0;
                 }
+
                 return _threadSeq++;
             }
         }

@@ -22,6 +22,7 @@ using SkyWalking.Dictionarys;
 using SkyWalking.NetworkProtocol;
 using SkyWalking.NetworkProtocol.Trace;
 using System.Linq;
+using SkyWalking.Utils;
 
 namespace SkyWalking.Context.Trace
 {

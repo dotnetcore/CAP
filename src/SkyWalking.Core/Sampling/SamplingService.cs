@@ -29,8 +29,8 @@ namespace SkyWalking.Sampling
     public class SamplingService :TimerService, ISampler
     {
         private readonly AtomicInteger _atomicInteger = new AtomicInteger();
-        private readonly int _sample_N_Per_3_Secs = AgentConfig.Sample_N_Per_3_Secs;
-        private readonly bool _sample_on = AgentConfig.Sample_N_Per_3_Secs > 0;
+        private readonly int _sample_N_Per_3_Secs = AgentConfig.SamplePer3Secs;
+        private readonly bool _sample_on = AgentConfig.SamplePer3Secs > 0;
 
         public bool TrySampling()
         {
@@ -59,7 +59,7 @@ namespace SkyWalking.Sampling
                 _atomicInteger.Value = 0;
             }
 
-            return Task.CompletedTask;
+            return TaskUtils.CompletedTask;
         }
     }
 }

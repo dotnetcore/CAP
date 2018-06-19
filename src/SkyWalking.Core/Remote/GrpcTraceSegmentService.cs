@@ -25,6 +25,7 @@ using SkyWalking.Context;
 using SkyWalking.Context.Trace;
 using SkyWalking.Logging;
 using SkyWalking.NetworkProtocol;
+using SkyWalking.Utils;
 
 namespace SkyWalking.Remote
 {
@@ -42,7 +43,7 @@ namespace SkyWalking.Remote
         public Task Initialize(CancellationToken token)
         {
             TracingContext.ListenerManager.Add(this);
-            return Task.CompletedTask;
+            return TaskUtils.CompletedTask;
         }
 
         public async void AfterFinished(ITraceSegment traceSegment)

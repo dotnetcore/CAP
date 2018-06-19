@@ -53,6 +53,8 @@ namespace SkyWalking.NetworkProtocol.Trace
         
         public static readonly OfficialComponent InMemoryDatabase = new OfficialComponent(3014, "InMemoryDatabase");
         
+        public static readonly OfficialComponent AspNet = new OfficialComponent(3015, "AspNet");
+        
         private static readonly ComponentsDefine _instance = new ComponentsDefine();
 
         public ComponentsDefine Instance => _instance;
@@ -76,6 +78,7 @@ namespace SkyWalking.NetworkProtocol.Trace
             AddComponent(Pomelo_EntityFrameworkCore_MySql);
             AddComponent(Npgsql_EntityFrameworkCore_PostgreSQL);
             AddComponent(InMemoryDatabase);
+            AddComponent(AspNet);
         }
 
         private void AddComponent(OfficialComponent component)

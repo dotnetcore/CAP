@@ -16,22 +16,19 @@
  *
  */
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using SkyWalking.Boot;
-using SkyWalking.Utils;
+using Microsoft.Web.Infrastructure.DynamicModuleHelper;
+using System.Web;
+using SkyWalking.AspNet;
 
-namespace SkyWalking.Remote
+[assembly:PreApplicationStartMethod(typeof(SkyWalkingModuleRegister), "Register")]
+
+namespace SkyWalking.AspNet
 {
-    public class GrpcRuntimeService : TimerService
+    public class SkyWalkingModuleRegister
     {
-        protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(120);
-        
-        protected override Task Execute(CancellationToken token)
+        public static void Register()
         {
-            // todo 
-            return TaskUtils.CompletedTask;
+            DynamicModuleUtility.RegisterModule(typeof(SkyWalkingModule));
         }
     }
 }

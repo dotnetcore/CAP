@@ -21,10 +21,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Boot;
 using SkyWalking.Config;
-using SkyWalking.Context;
 using SkyWalking.Dictionarys;
 using SkyWalking.Logging;
 using SkyWalking.NetworkProtocol;
+using SkyWalking.Utils;
 
 namespace SkyWalking.Remote
 {

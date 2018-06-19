@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>SkyWalking trace protocol.</Description>
     <AssemblyTitle>SkyWalking.NetworkProtocol.Trace</AssemblyTitle>
-    <TargetFrameworks>netstandard2.0;net461</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <AssemblyName>SkyWalking.NetworkProtocol.Trace</AssemblyName>
     <PackageId>SkyWalking.NetworkProtocol.Trace</PackageId>
     <PackageTags>SkyWalking</PackageTags>

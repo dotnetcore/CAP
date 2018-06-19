@@ -49,6 +49,11 @@ namespace SkyWalking.Remote
                 return;
             }
 
+            if (string.IsNullOrEmpty(AgentConfig.ApplicationCode))
+            {
+                return;
+            }
+
             if (!GrpcConnectionManager.Instance.Available)
             {
                 return;

@@ -16,22 +16,20 @@
  *
  */
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-using SkyWalking.Boot;
-using SkyWalking.Utils;
+#if NET45 || NET451
+using System.Runtime.Remoting.Messaging;
 
-namespace SkyWalking.Remote
+namespace SkyWalking.Utils
 {
-    public class GrpcRuntimeService : TimerService
+    internal class AsyncLocal<T>
     {
-        protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(120);
-        
-        protected override Task Execute(CancellationToken token)
+        private static readonly string key = "sw-" + typeof(T).FullName;
+
+        public T Value
         {
-            // todo 
-            return TaskUtils.CompletedTask;
+            get => (T) CallContext.LogicalGetData(key);
+            set => CallContext.LogicalSetData(key, value);
         }
     }
 }
+#endif

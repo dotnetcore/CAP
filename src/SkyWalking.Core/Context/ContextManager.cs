@@ -24,6 +24,7 @@ using SkyWalking.Config;
 using SkyWalking.Context.Trace;
 using SkyWalking.Dictionarys;
 using SkyWalking.Sampling;
+using SkyWalking.Utils;
 
 namespace SkyWalking.Context
 {
@@ -185,7 +186,7 @@ namespace SkyWalking.Context
         {
             TracingContext.ListenerManager.Add(this);
             IgnoredTracerContext.ListenerManager.Add(this);
-            return Task.CompletedTask;
+            return TaskUtils.CompletedTask;
         }
 
         public void AfterFinish(ITracerContext tracerContext)

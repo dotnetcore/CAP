@@ -20,6 +20,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Logging;
+using SkyWalking.Utils;
 
 namespace SkyWalking.Boot
 {
@@ -59,12 +60,12 @@ namespace SkyWalking.Boot
 
         protected virtual Task Initializing(CancellationToken token)
         {
-            return Task.CompletedTask;
+            return TaskUtils.CompletedTask;
         }
 
         protected virtual Task Starting(CancellationToken token)
         {
-            return Task.CompletedTask;
+            return TaskUtils.CompletedTask;
         }
         
         protected abstract Task Execute(CancellationToken token);

@@ -16,37 +16,36 @@
  *
  */
 
-namespace SkyWalking.Config
+namespace SkyWalking.AspNet
 {
-    public static class AgentConfig
+    public class SkyWalkingOptions
     {
-        /// <summary>
-        /// Namespace isolates headers in cross propagation. The HEADER name will be 'HeaderName:Namespace'.
-        /// </summary>
-        public static string Namespace { get; set; }
-
         /// <summary>
         /// Application code is showed in sky-walking-ui
         /// </summary>
-        public static string ApplicationCode { get; set; }
+        public string ApplicationCode { get; set; }
+
+        /// <summary>
+        /// Collector agent_gRPC/grpc service addresses.
+        /// By using this, no discovery mechanism provided. The agent only uses these addresses to uplink data.
+        /// Recommend to use this only when collector cluster IPs are unreachable from agent side. Such as:
+        /// 1. Agent and collector cluster are in different VPC in Cloud.
+        /// 2. Agent uplinks data to collector cluster through Internet.
+        /// Single collector：DirectServers="127.0.0.1:11800"
+        /// Collector cluster：DirectServers="10.2.45.126:11800,10.2.45.127:11800"
+        /// </summary>
+        public string DirectServers { get; set; }
 
         /// <summary>
         /// The number of sampled traces per 3 seconds
         /// Negative number means sample traces as many as possible, most likely 100% , by default
         /// 
         /// </summary>
-        public static int SamplePer3Secs = -1;
+        public int SamplePer3Secs { get; set; } = -1;
 
         /// <summary>
-        /// If the operation name of the first span is included in this set, this segment should be ignored.
+        /// Namespace isolates headers in cross propagation. The HEADER name will be 'HeaderName:Namespace'.
         /// </summary>
-        public static string IgnoreSuffix = ".jpg,.jpeg,.js,.css,.png,.bmp,.gif,.ico,.mp3,.mp4,.html,.svg";
-
-        /// <summary>
-        /// The max number of spans in a single segment. Through this config item, skywalking keep your application memory cost estimated.
-        /// </summary>
-        public static int SpanLimitPerSegment = 300;
-        
-        
+        public string Namespace { get; set; }
     }
 }

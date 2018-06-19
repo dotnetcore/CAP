@@ -16,22 +16,12 @@
  *
  */
 
-using System;
-using System.Threading;
 using System.Threading.Tasks;
-using SkyWalking.Boot;
-using SkyWalking.Utils;
 
-namespace SkyWalking.Remote
+namespace SkyWalking.Utils
 {
-    public class GrpcRuntimeService : TimerService
+    internal static class TaskUtils
     {
-        protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(120);
-        
-        protected override Task Execute(CancellationToken token)
-        {
-            // todo 
-            return TaskUtils.CompletedTask;
-        }
+        public static readonly Task CompletedTask = Task.FromResult(0);
     }
 }

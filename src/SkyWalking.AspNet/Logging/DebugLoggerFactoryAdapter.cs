@@ -17,21 +17,21 @@
  */
 
 using System;
-using System.Threading;
-using System.Threading.Tasks;
-using SkyWalking.Boot;
-using SkyWalking.Utils;
+using System.Diagnostics;
+using SkyWalking.Logging;
 
-namespace SkyWalking.Remote
+namespace SkyWalking.AspNet.Logging
 {
-    public class GrpcRuntimeService : TimerService
+    internal class DebugLoggerFactoryAdapter : ILoggerFactory
     {
-        protected override TimeSpan Interval { get; } = TimeSpan.FromSeconds(120);
-        
-        protected override Task Execute(CancellationToken token)
+        public DebugLoggerFactoryAdapter()
         {
-            // todo 
-            return TaskUtils.CompletedTask;
+            Debug.Listeners.Add(new TextWriterTraceListener(Console.Out));
+        }
+
+        public ILogger CreateLogger(Type type)
+        {
+            return new DebugLoggerAdapter(type);
         }
     }
 }
