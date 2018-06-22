@@ -39,3 +39,4 @@ Properties
 /src/DotNetCore.CAP/packages.config
 /src/DotNetCore.CAP/DotNetCore.CAP.Net47.csproj
 /NuGet.config
+.vscode/*
