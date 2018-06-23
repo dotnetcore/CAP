@@ -53,6 +53,11 @@ namespace SkyWalking.AspNet
             {
                 AgentConfig.SamplePer3Secs = v;
             }
+            var pendingSegmentsLimit = GetAppSetting(nameof(AgentConfig.PendingSegmentsLimit), false);
+            if(int.TryParse(pendingSegmentsLimit, out v))
+            {
+                AgentConfig.PendingSegmentsLimit = v;
+            }
         }
 
         private string GetAppSetting(string key, bool @throw)

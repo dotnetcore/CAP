@@ -46,7 +46,14 @@ namespace SkyWalking.Config
         /// The max number of spans in a single segment. Through this config item, skywalking keep your application memory cost estimated.
         /// </summary>
         public static int SpanLimitPerSegment = 300;
-        
+
+        /// <summary>
+        /// The max number of segments in the memory queue waiting to be sent to collector.
+        /// It means that when the number of queued segments reachs this limit,
+        /// any more segments enqueued into the sending queue, will leads the same number of oldest queued segments dequeued and droped.
+        /// Zero or minus value means no limit.
+        /// </summary>
+        public static int PendingSegmentsLimit = 300000;
         
     }
 }

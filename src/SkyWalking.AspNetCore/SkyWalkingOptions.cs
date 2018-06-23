@@ -58,5 +58,17 @@ namespace SkyWalking.AspNetCore
             get; 
             set;
         } = -1;
+
+        /// <summary>
+        /// The max number of segments in the memory queue waiting to be sent to collector.
+        /// It means that when the number of queued segments reachs this limit,
+        /// any more segments enqueued into the sending queue, will leads the same number of oldest queued segments dequeued and droped.
+        /// Zero or minus value means no limit.
+        /// </summary>
+        public int PendingSegmentsLimit
+        {
+            get;
+            set;
+        } = 300000;
     }
 }
