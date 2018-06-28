@@ -28,7 +28,7 @@ namespace SkyWalking.Remote
     public class GrpcConnectionManager
     {
         private static readonly ILogger _logger = LogManager.GetLogger<GrpcConnectionManager>();
-        
+
         public const string NotFoundErrorMessage = "Not found available connection.";
 
         public static GrpcConnectionManager Instance { get; } = new GrpcConnectionManager();
@@ -36,7 +36,7 @@ namespace SkyWalking.Remote
         private readonly Random _random = new Random();
         private readonly AsyncLock _lock = new AsyncLock();
         private GrpcConnection _connection;
-        
+
         public bool Available => _connection != null && _connection.CheckState();
 
         private GrpcConnectionManager()
@@ -58,7 +58,8 @@ namespace SkyWalking.Remote
                     await _connection.ShutdowmAsync();
                 }
 
-                _connection = new GrpcConnection(GetServer(_connection?.Server));
+                var metadata = GetServerMetadata(_connection?.Server);
+                _connection = new GrpcConnection(metadata.Address, metadata.CertificatePath, metadata.Token);
                 await _connection.ConnectAsync(timeout);
             }
         }
@@ -76,11 +77,17 @@ namespace SkyWalking.Remote
                 _logger.Debug(NotFoundErrorMessage);
                 return null;
             }
-            
+
             return connection;
         }
 
-        private string GetServer(string currentServer)
+        private ServerMetadata GetServerMetadata(string currentServer)
+        {
+            return new ServerMetadata(GetServerAddress(currentServer),
+                CollectorConfig.CertificatePath, CollectorConfig.Authentication);
+        }
+
+        private string GetServerAddress(string currentServer)
         {
             var servers = RemoteDownstreamConfig.Collector.gRPCServers.Distinct().ToArray();
             if (servers.Length == 1)
@@ -96,5 +103,21 @@ namespace SkyWalking.Remote
             var index = _random.Next() % servers.Length;
             return servers[index];
         }
+
+        public struct ServerMetadata
+        {
+            public string Address { get; }
+            
+            public string Token { get;  }
+            
+            public string CertificatePath { get; }
+
+            public ServerMetadata(string address, string certificate, string token)
+            {
+                Address = address;
+                CertificatePath = certificate;
+                Token = token;
+            }
+        } 
     }
 }

@@ -16,6 +16,7 @@
  *
  */
 
+using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Options;
 
 namespace SkyWalking.AspNetCore
@@ -70,5 +71,23 @@ namespace SkyWalking.AspNetCore
             get;
             set;
         } = 300000;
+
+        /// <summary>
+        /// Set your own token to active auth
+        /// </summary>
+        public string Authentication
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Set certificate path to open ssl/tls
+        /// </summary>
+        public string CertificatePath
+        {
+            get;
+            set;
+        }
     }
 }

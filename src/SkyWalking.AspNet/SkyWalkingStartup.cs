@@ -48,6 +48,8 @@ namespace SkyWalking.AspNet
             CollectorConfig.DirectServers = GetAppSetting(nameof(CollectorConfig.DirectServers), true);
             AgentConfig.ApplicationCode = GetAppSetting(nameof(AgentConfig.ApplicationCode), true);
             AgentConfig.Namespace = GetAppSetting(nameof(AgentConfig.Namespace), false);
+            CollectorConfig.CertificatePath = GetAppSetting(nameof(CollectorConfig.CertificatePath), false);
+            CollectorConfig.Authentication = GetAppSetting(nameof(CollectorConfig.Authentication), false);
             var samplePer3Secs = GetAppSetting(nameof(AgentConfig.SamplePer3Secs), false);
             if (int.TryParse(samplePer3Secs, out var v))
             {

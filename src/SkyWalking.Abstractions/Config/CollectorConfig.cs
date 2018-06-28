@@ -35,5 +35,9 @@ namespace SkyWalking.Config
         /// Collector cluster：DirectServers="10.2.45.126:11800,10.2.45.127:11800"
         /// </summary>
         public static string DirectServers { get; set; }
+        
+        public static string Authentication { get; set; }
+        
+        public static string CertificatePath { get; set; }
     }
 }

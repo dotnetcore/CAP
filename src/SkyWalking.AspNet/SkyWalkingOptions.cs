@@ -55,5 +55,23 @@ namespace SkyWalking.AspNet
         /// Zero or minus value means no limit.
         /// </summary>
         public int PendingSegmentsLimit { get; set; } = 300000;
+        
+        /// <summary>
+        /// Set your own token to active auth
+        /// </summary>
+        public string Authentication
+        {
+            get;
+            set;
+        }
+
+        /// <summary>
+        /// Set certificate path to open ssl/tls
+        /// </summary>
+        public string CertificatePath
+        {
+            get;
+            set;
+        }
     }
 }
