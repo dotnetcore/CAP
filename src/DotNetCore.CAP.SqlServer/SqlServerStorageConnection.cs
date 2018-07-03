@@ -109,6 +109,28 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT SCOP
             }
         }
 
+        public bool PublishedRequeue(int messageId)
+        {
+            var sql =
+                 $"UPDATE [{Options.Schema}].[Published] SET Retries=0,ExpiresAt=NULL,StatusName = '{StatusName.Scheduled}' WHERE Id={messageId}";
+
+            using (var connection = new SqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
+        public bool ReceivedRequeue(int messageId)
+        {
+            var sql =
+                $"UPDATE [{Options.Schema}].[Received] SET Retries=0,ExpiresAt=NULL,StatusName = '{StatusName.Scheduled}' WHERE Id={messageId}";
+
+            using (var connection = new SqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
         public void Dispose()
         {
         }

@@ -63,5 +63,19 @@ namespace DotNetCore.CAP
         /// <param name="messageId">Message id</param>
         /// <param name="state">State name</param>
         bool ChangeReceivedState(int messageId, string state);
+
+        /// <summary>
+        ///  Requeue specified fail received message to retry
+        /// </summary>
+        /// <param name="messageId"></param>
+        /// <returns></returns>
+        bool ReceivedRequeue(int messageId);
+
+        /// <summary>
+        ///  Requeue specified fail published message to retry
+        /// </summary>
+        /// <param name="messageId"></param>
+        /// <returns></returns>
+        bool PublishedRequeue(int messageId);
     }
 }
