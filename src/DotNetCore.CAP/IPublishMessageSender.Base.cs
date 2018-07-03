@@ -75,9 +75,23 @@ namespace DotNetCore.CAP
                 {
                     _logger.SenderRetrying(message.Id, message.Retries);
 
-                    await SendAsync(message);
+                    return await SendAsync(message);
                 }
-                return OperateResult.Failed(result.Exception);
+                else
+                {
+                    _logger.LogError($"The message still sent failed after {_options.FailedRetryCount} retries. We will stop retrying the message. " +
+                                     "MessageId:" + message.Id);
+
+                    try
+                    {
+                        _options.FailedThresholdCallback?.Invoke(MessageType.Publish, message.Name, message.Content);
+                    }
+                    catch (Exception ex_FailedCallback)
+                    {
+                        _logger.LogWarning("Failed call-back method raised an exception:" + ex_FailedCallback.Message);
+                    }
+                    return OperateResult.Failed(result.Exception);
+                }               
             }
         }
 

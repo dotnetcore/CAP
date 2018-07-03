@@ -72,15 +72,28 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An exception occurred while executing the subscription method. Topic:{message.Name}, Id:{message.Id}");
+                _logger.LogError(ex, $"An exception occurred while executing the subscription method. Topic:{message.Name}, Id:{message.Id},Exception:{ex}");
 
                 await SetFailedState(message, ex, out bool stillRetry);
                 if (stillRetry)
                 {
-                    await ExecuteAsync(message);
+                    return await ExecuteAsync(message);
                 }
-
-                return OperateResult.Failed(ex);
+                else
+                {
+                    _logger.LogError($"[Subscriber]The message still executed failed after {_options.FailedRetryCount} retries. " +
+                                             "We will stop retrying to execute the message. message id:" + message.Id);
+                    try
+                    {
+                        _options.FailedThresholdCallback?.Invoke(MessageType.Publish, message.Name, message.Content);
+                    }
+                    catch (Exception ex_FailedCallback)
+                    {
+                        _logger.LogWarning("Failed call-back method raised an exception:" + ex_FailedCallback.Message);
+                    }
+                    
+                    return OperateResult.Failed(ex);
+                }
             }
         }
 
