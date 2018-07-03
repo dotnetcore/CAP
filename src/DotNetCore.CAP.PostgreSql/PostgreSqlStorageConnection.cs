@@ -86,6 +86,8 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
+        
+
         public void Dispose()
         {
         }
@@ -105,6 +107,28 @@ namespace DotNetCore.CAP.PostgreSql
         {
             var sql =
                 $"UPDATE \"{Options.Schema}\".\"received\" SET \"Retries\"=\"Retries\"+1,\"ExpiresAt\"=NULL,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";
+
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
+        public bool PublishedRequeue(int messageId)
+        {
+            var sql =
+                $"UPDATE \"{Options.Schema}\".\"published\" SET \"Retries\"=0,\"ExpiresAt\"=NULL,\"StatusName\" = '{StatusName.Scheduled}' WHERE \"Id\"={messageId}";
+
+            using (var connection = new NpgsqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
+        public bool ReceivedRequeue(int messageId)
+        {
+            var sql =
+                $"UPDATE \"{Options.Schema}\".\"received\" SET \"Retries\"=0,\"ExpiresAt\"=NULL,\"StatusName\" = '{StatusName.Scheduled}' WHERE \"Id\"={messageId}";
 
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {

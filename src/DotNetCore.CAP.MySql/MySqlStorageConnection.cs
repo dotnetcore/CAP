@@ -100,6 +100,28 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT LAST
             }
         }
 
+        public bool PublishedRequeue(int messageId)
+        {
+            var sql =
+                $"UPDATE `{_prefix}.published` SET `Retries`=0,`ExpiresAt`=NULL,`StatusName` = '{StatusName.Scheduled}' WHERE `Id`={messageId}";
+
+            using (var connection = new MySqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
+        public bool ReceivedRequeue(int messageId)
+        {
+            var sql =
+                $"UPDATE `{_prefix}.received` SET `Retries`=0,`ExpiresAt`=NULL,`StatusName` = '{StatusName.Scheduled}' WHERE `Id`={messageId}";
+
+            using (var connection = new MySqlConnection(Options.ConnectionString))
+            {
+                return connection.Execute(sql) > 0;
+            }
+        }
+
         public bool ChangeReceivedState(int messageId, string state)
         {
             var sql =

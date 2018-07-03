@@ -96,11 +96,11 @@ namespace DotNetCore.CAP.Dashboard
             Routes.AddPublishBatchCommand(
                 "/published/requeue",
                 (client, messageId) =>
-                    client.Storage.GetConnection().ChangePublishedState(messageId, StatusName.Scheduled));
+                    client.Storage.GetConnection().PublishedRequeue(messageId));
             Routes.AddPublishBatchCommand(
                 "/received/requeue",
-                (client, messageId) =>
-                    client.Storage.GetConnection().ChangeReceivedState(messageId, StatusName.Scheduled));
+                (client, messageId) => 
+                    client.Storage.GetConnection().ReceivedRequeue(messageId));
 
             Routes.AddRazorPage(
                 "/published/(?<StatusName>.+)",
