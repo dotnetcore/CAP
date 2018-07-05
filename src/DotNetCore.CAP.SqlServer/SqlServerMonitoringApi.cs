@@ -159,15 +159,15 @@ select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
             string statusName,
             IDictionary<string, DateTime> keyMaps)
         {
-            //SQL Server 2012+
+            //SQL Server 2012+ 
             var sqlQuery =
                 $@"
 with aggr as (
-    select FORMAT(Added,'yyyy-MM-dd-HH') as [Key],
+    select replace(convert(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added)) as [Key],
         count(id) [Count]
     from  [{_options.Schema}].{tableName}
     where StatusName = @statusName
-    group by FORMAT(Added,'yyyy-MM-dd-HH')
+    group by replace(convert(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added))
 )
 select [Key], [Count] from aggr with (nolock) where [Key] in @keys;";
 
