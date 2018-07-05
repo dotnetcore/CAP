@@ -16,6 +16,7 @@
  *
  */
 
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using SkyWalking.Context.Trace;
@@ -48,6 +49,8 @@ namespace SkyWalking.Context
                 return span;
             }
         }
+
+        public IDictionary<string, object> Properties { get; } = new Dictionary<string, object>();
 
         public void Continued(IContextSnapshot snapshot)
         {
@@ -83,6 +86,13 @@ namespace SkyWalking.Context
             if (_spans.Count == 0)
             {
                 ListenerManager.NotifyFinish(this);
+                foreach (var item in Properties)
+                {
+                    if (item.Value is IDisposable disposable)
+                    {
+                        disposable.Dispose();
+                    }
+                }
             }
         }
 

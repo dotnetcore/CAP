@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Boot;
@@ -97,6 +98,8 @@ namespace SkyWalking.Context
         }
 
         public static IContextSnapshot Capture => _context.Value?.Capture;
+
+        public static IDictionary<string, object> ContextProperties => _context.Value?.Properties;
 
         public static ISpan CreateEntrySpan(string operationName, IContextCarrier carrier)
         {

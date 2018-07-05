@@ -9,10 +9,8 @@ namespace SkyWalking.Sample.AspNet.Controllers
     {
         public async Task<IHttpActionResult> Get()
         {
-//            var httpClient = new HttpClient(new HttpTracingHandler());
-//            var values = await httpClient.GetStringAsync("http://localhost:5002/api/values");
-
-            var values = 1;
+            var httpClient = new HttpClient(new HttpTracingHandler());
+            var values = await httpClient.GetStringAsync("http://localhost:5001/api/values");
             return Json(values);
         }
     }

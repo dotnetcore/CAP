@@ -32,6 +32,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {
     public class EntityFrameworkCoreDiagnosticProcessor : ITracingDiagnosticProcessor
     {
+        private const string TRACE_ORM = "TRACE_ORM";
         private Func<CommandEventData, string> _operationNameResolver;
         private readonly IEfCoreSpanFactory _efCoreSpanFactory;
 
@@ -69,12 +70,14 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
             Tags.DbInstance.Set(span, eventData.Command.Connection.Database);
             Tags.DbStatement.Set(span, eventData.Command.CommandText);
             Tags.DbBindVariables.Set(span, BuildParameterVariables(eventData.Command.Parameters));
+            ContextManager.ContextProperties[TRACE_ORM] = true;
         }
 
         [DiagnosticName("Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted")]
         public void CommandExecuted()
         {
             ContextManager.StopSpan();
+            ContextManager.ContextProperties.Remove(TRACE_ORM);
         }
 
         [DiagnosticName("Microsoft.EntityFrameworkCore.Database.Command.CommandError")]
@@ -92,6 +95,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
             }
             span.ErrorOccurred();
             ContextManager.StopSpan(span);
+            ContextManager.ContextProperties.Remove(TRACE_ORM);
         }
 
         private string BuildParameterVariables(DbParameterCollection dbParameters)

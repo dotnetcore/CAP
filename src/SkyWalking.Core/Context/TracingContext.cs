@@ -121,6 +121,8 @@ namespace SkyWalking.Context
         public IContextSnapshot Capture => InternalCapture();
 
         public ISpan ActiveSpan => InternalActiveSpan();
+        
+        public IDictionary<string, object> Properties { get; } = new Dictionary<string, object>();
 
         public void Continued(IContextSnapshot snapshot)
         {
@@ -288,6 +290,14 @@ namespace SkyWalking.Context
             }
 
             ListenerManager.NotifyFinish(finishedSegment);
+
+            foreach (var item in Properties)
+            {
+                if (item.Value is IDisposable disposable)
+                {
+                    disposable.Dispose();
+                }
+            }
         }
 
         private ISpan InternalActiveSpan()

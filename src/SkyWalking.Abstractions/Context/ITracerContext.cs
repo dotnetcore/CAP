@@ -16,6 +16,7 @@
  *
  */
 
+using System.Collections.Generic;
 using SkyWalking.Context.Trace;
 
 namespace SkyWalking.Context
@@ -29,6 +30,8 @@ namespace SkyWalking.Context
         IContextSnapshot Capture { get; }
         
         ISpan ActiveSpan { get; }
+        
+        IDictionary<string,object> Properties { get; }
 
         void Continued(IContextSnapshot snapshot);
 
