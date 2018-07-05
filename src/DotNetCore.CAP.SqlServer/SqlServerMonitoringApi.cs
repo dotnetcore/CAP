@@ -90,7 +90,11 @@ select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
             }
 
             var sqlQuery =
-                $"select * from [{_options.Schema}].{tableName} where 1=1 {where} order by Added desc offset @Offset rows fetch next @Limit rows only";
+                $@"select * from 
+                (SELECT t.*, ROW_NUMBER() OVER(order by t.Added desc) AS rownumber
+                    from [{_options.Schema}].{tableName} as t
+                    where 1=1 {where}) as tbl
+                where tbl.rownumber between @offset and @offset + @limit";
 
             return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
