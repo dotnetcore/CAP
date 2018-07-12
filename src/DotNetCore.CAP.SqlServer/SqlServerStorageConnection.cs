@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.SqlServer
 
         public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
-            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
                 $"SELECT TOP (200) * FROM [{Options.Schema}].[Published] WITH (readpast) WHERE Retries<{_capOptions.FailedRetryCount} AND Added<'{fourMinsAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
 
@@ -78,7 +78,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT SCOP
 
         public async Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
-            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
                 $"SELECT TOP (200) * FROM [{Options.Schema}].[Received] WITH (readpast) WHERE Retries<{_capOptions.FailedRetryCount} AND Added<'{fourMinsAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
             using (var connection = new SqlConnection(Options.ConnectionString))

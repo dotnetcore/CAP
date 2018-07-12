@@ -9,26 +9,27 @@ namespace DotNetCore.CAP.Dashboard
     {
         public bool Authorize(DashboardContext context)
         {
+            var ipAddress = context.Request.RemoteIpAddress;
             // if unknown, assume not local
-            if (string.IsNullOrEmpty(context.Request.RemoteIpAddress))
+            if (string.IsNullOrEmpty(ipAddress))
             {
                 return false;
             }
 
             // check if localhost
-            if (context.Request.RemoteIpAddress == "127.0.0.1" || context.Request.RemoteIpAddress == "::1")
+            if (ipAddress == "127.0.0.1" || ipAddress == "0.0.0.1")
             {
                 return true;
             }
 
             // compare with local address
-            if (context.Request.RemoteIpAddress == context.Request.LocalIpAddress)
+            if (ipAddress == context.Request.LocalIpAddress)
             {
                 return true;
             }
 
             // check if private ip
-            if (Helper.IsInnerIP(context.Request.RemoteIpAddress))
+            if (Helper.IsInnerIP(ipAddress))
             {
                 return true;
             }

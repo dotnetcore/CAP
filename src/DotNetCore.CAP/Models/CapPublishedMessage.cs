@@ -15,12 +15,6 @@ namespace DotNetCore.CAP.Models
             Added = DateTime.Now;
         }
 
-        public CapPublishedMessage(MessageContext message)
-        {
-            Name = message.Name;
-            Content = message.Content;
-        }
-
         public int Id { get; set; }
 
         public string Name { get; set; }
