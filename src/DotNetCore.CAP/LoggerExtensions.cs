@@ -15,7 +15,7 @@ namespace DotNetCore.CAP
         private static readonly Action<ILogger, Exception> _serverShuttingDown;
         private static readonly Action<ILogger, string, Exception> _expectedOperationCanceledException;
         private static readonly Action<ILogger, string, string, string, Exception> _modelBinderFormattingException;
-        private static readonly Action<ILogger, Exception> _consumerFailedWillRetry;
+        private static readonly Action<ILogger, int, int, Exception> _consumerFailedWillRetry;
         private static readonly Action<ILogger, double, Exception> _consumerExecuted;
         private static readonly Action<ILogger, int, int, Exception> _senderRetrying;
         private static readonly Action<ILogger, string, Exception> _exceptionOccuredWhileExecuting;
@@ -61,7 +61,7 @@ namespace DotNetCore.CAP
             );
 
             _senderRetrying = LoggerMessage.Define<int, int>(
-                LogLevel.Debug,
+                LogLevel.Warning,
                 3,
                 "The {Retries}th retrying send a message failed. message id: {MessageId} ");
 
@@ -70,10 +70,10 @@ namespace DotNetCore.CAP
                 4,
                 "Consumer executed. Took: {Seconds} secs.");
 
-            _consumerFailedWillRetry = LoggerMessage.Define(
+            _consumerFailedWillRetry = LoggerMessage.Define<int, int>(
                 LogLevel.Warning,
                 2,
-                "Consumer failed to execute. Will retry.");
+                "The {Retries}th retrying consume a message failed. message id: {MessageId}");
 
             _exceptionOccuredWhileExecuting = LoggerMessage.Define<string>(
                 LogLevel.Error,
@@ -91,9 +91,9 @@ namespace DotNetCore.CAP
                 "An exception occured while publishing a message, reason:{Reason}. message id:{MessageId}");
         }
 
-        public static void ConsumerExecutionFailedWillRetry(this ILogger logger, Exception ex)
+        public static void ConsumerExecutionRetrying(this ILogger logger, int messageId, int retries)
         {
-            _consumerFailedWillRetry(logger, ex);
+            _consumerFailedWillRetry(logger, messageId, retries, null);
         }
 
         public static void SenderRetrying(this ILogger logger, int messageId, int retries)
