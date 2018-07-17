@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using MongoDB.Driver;
 
@@ -44,9 +46,16 @@ namespace DotNetCore.CAP.MongoDB
             return await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
         }
 
-        public Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
+        public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
-            throw new System.NotImplementedException();
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
+            var collection = _client.GetDatabase(_options.Database).GetCollection<CapPublishedMessage>(_options.Published);
+            return await
+            collection.Find(x =>
+            x.Retries < _capOptions.FailedRetryCount
+            && x.Added < fourMinsAgo
+            && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
+            .ToListAsync();
         }
 
         public Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
