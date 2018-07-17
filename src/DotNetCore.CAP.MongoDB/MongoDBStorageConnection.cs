@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
@@ -91,6 +92,7 @@ namespace DotNetCore.CAP.MongoDB
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
             var collection = _database.GetCollection<CapReceivedMessage>(_options.Received);
+
             return await
             collection.Find(x =>
             x.Retries < _capOptions.FailedRetryCount
@@ -99,9 +101,34 @@ namespace DotNetCore.CAP.MongoDB
             ).Limit(200).ToListAsync();
         }
 
-        public Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
+        public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
         {
-            throw new System.NotImplementedException();
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+            var collection = _database.GetCollection<CapReceivedMessage>(_options.Received);
+
+            message.Id = await GetNextSequenceValue();
+
+            collection.InsertOne(message);
+
+            return message.Id;
+        }
+
+        private async Task<int> GetNextSequenceValue()
+        {
+            //https://www.tutorialspoint.com/mongodb/mongodb_autoincrement_sequence.htm
+            var collection = _database.GetCollection<BsonDocument>("Counter");
+
+            var updateDef = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
+            var result = await
+            collection.FindOneAndUpdateAsync(new BsonDocument { { "_id", "received_id" } }, updateDef);
+            if (result.TryGetValue("sequence_value", out var value))
+            {
+                return value.ToInt32();
+            }
+            throw new Exception("Unable to get next sequence value.");
         }
     }
 }
