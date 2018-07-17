@@ -12,12 +12,14 @@ namespace DotNetCore.CAP.MongoDB
         private CapOptions _capOptions;
         private MongoDBOptions _options;
         private readonly IMongoClient _client;
+        private readonly IMongoDatabase _database;
 
         public MongoDBStorageConnection(CapOptions capOptions, MongoDBOptions options, IMongoClient client)
         {
             _capOptions = capOptions;
             _options = options;
             _client = client;
+            _database = _client.GetDatabase(_options.Database);
         }
 
         public bool ChangePublishedState(int messageId, string state)
@@ -42,30 +44,39 @@ namespace DotNetCore.CAP.MongoDB
 
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
         {
-            var collection = _client.GetDatabase(_options.Database).GetCollection<CapPublishedMessage>(_options.Published);
+            var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
             return await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
-            var collection = _client.GetDatabase(_options.Database).GetCollection<CapPublishedMessage>(_options.Published);
+            var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
             return await
             collection.Find(x =>
             x.Retries < _capOptions.FailedRetryCount
             && x.Added < fourMinsAgo
             && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
+            .Limit(200)
             .ToListAsync();
         }
 
-        public Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
+        public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
         {
-            throw new System.NotImplementedException();
+            var collection = _database.GetCollection<CapReceivedMessage>(_options.Received);
+            return await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
         }
 
-        public Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
+        public async Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
-            throw new System.NotImplementedException();
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4);
+            var collection = _database.GetCollection<CapReceivedMessage>(_options.Received);
+            return await
+            collection.Find(x =>
+            x.Retries < _capOptions.FailedRetryCount
+            && x.Added < fourMinsAgo
+            && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled)
+            ).Limit(200).ToListAsync();
         }
 
         public Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
