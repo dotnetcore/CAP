@@ -48,18 +48,19 @@ namespace DotNetCore.CAP
             OperateResult result;
             do
             {
-                result = await SendWithoutRetryAsync(message);
+                var executedResult = await SendWithoutRetryAsync(message);
+                result = executedResult.Item2;
                 if (result == OperateResult.Success)
                 {
                     return result;
                 }
-                retry = UpdateMessageForRetry(message);
+                retry = executedResult.Item1;
             } while (retry);
 
             return result;
         }
 
-        private async Task<OperateResult> SendWithoutRetryAsync(CapPublishedMessage message)
+        private async Task<(bool, OperateResult)> SendWithoutRetryAsync(CapPublishedMessage message)
         {
             var startTime = DateTimeOffset.UtcNow;
             var stopwatch = Stopwatch.StartNew();
@@ -80,34 +81,17 @@ namespace DotNetCore.CAP
 
                 TracingAfter(operationId, message.Name, sendValues, startTime, stopwatch.Elapsed);
 
-                return OperateResult.Success;
+                return (false, OperateResult.Success);
             }
             else
             {
                 TracingError(operationId, message, result, startTime, stopwatch.Elapsed);
 
-                await SetFailedState(message, result.Exception);
-
-                return OperateResult.Failed(result.Exception);
+                var needRetry = await SetFailedState(message, result.Exception);
+                return (needRetry, OperateResult.Failed(result.Exception));
             }
         }
 
-        private bool UpdateMessageForRetry(CapPublishedMessage message)
-        {
-            var retryBehavior = RetryBehavior.DefaultRetry;
-            var retries = ++message.Retries;
-            if (retries >= retryBehavior.RetryCount)
-            {
-                return false;
-            }
-
-            _logger.SenderRetrying(message.Id, retries);
-
-            var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
-            message.ExpiresAt = due;
-
-            return true;
-        }
 
         private Task SetSuccessfulState(CapPublishedMessage message)
         {
@@ -115,15 +99,51 @@ namespace DotNetCore.CAP
             return _stateChanger.ChangeStateAsync(message, succeededState, _connection);
         }
 
-        private Task SetFailedState(CapPublishedMessage message, Exception ex)
+        private async Task<bool> SetFailedState(CapPublishedMessage message, Exception ex)
         {
             AddErrorReasonToContent(message, ex);
-            return _stateChanger.ChangeStateAsync(message, new FailedState(), _connection);
+
+            var needRetry = UpdateMessageForRetry(message);
+
+            await _stateChanger.ChangeStateAsync(message, new FailedState(), _connection);
+
+            return needRetry;
         }
 
         private static void AddErrorReasonToContent(CapPublishedMessage message, Exception exception)
         {
             message.Content = Helper.AddExceptionProperty(message.Content, exception);
+        }
+
+        private bool UpdateMessageForRetry(CapPublishedMessage message)
+        {
+            var retryBehavior = RetryBehavior.DefaultRetry;
+
+            var retries = ++message.Retries;
+            message.ExpiresAt = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
+
+            var retryCount = Math.Min(_options.FailedRetryCount, retryBehavior.RetryCount);
+            if (retries >= retryCount)
+            {
+                if (retries == _options.FailedRetryCount)
+                {
+                    try
+                    {
+                        _options.FailedThresholdCallback?.Invoke(MessageType.Subscribe, message.Name, message.Content);
+
+                        _logger.SenderAfterThreshold(message.Id, _options.FailedRetryCount);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.ExecutedThresholdCallbackFailed(ex);
+                    }
+                }
+                return false;
+            }
+
+            _logger.SenderRetrying(message.Id, retries);
+
+            return true;
         }
 
         private (Guid, TracingHeaders) TracingBefore(string topic, string values)
