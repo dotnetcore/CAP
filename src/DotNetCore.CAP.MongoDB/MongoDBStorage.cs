@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.MongoDB
 
         public IStorageConnection GetConnection()
         {
-            throw new System.NotImplementedException();
+            return new MongoDBStorageConnection(_capOptions, _options, _client);
         }
 
         public IMonitoringApi GetMonitoringApi()
@@ -46,13 +46,13 @@ namespace DotNetCore.CAP.MongoDB
             var database = _client.GetDatabase(_options.Database);
             var names = (await database.ListCollectionNamesAsync())?.ToList();
 
-            if (!names.Any(n => n == "Received"))
+            if (!names.Any(n => n == _options.Received))
             {
-                await database.CreateCollectionAsync("Received");
+                await database.CreateCollectionAsync(_options.Received);
             }
-            if (!names.Any(n => n == "Published"))
+            if (!names.Any(n => n == _options.Published))
             {
-                await database.CreateCollectionAsync("Published");
+                await database.CreateCollectionAsync(_options.Published);
             }
         }
     }

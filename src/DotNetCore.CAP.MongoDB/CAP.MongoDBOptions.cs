@@ -11,5 +11,9 @@ namespace DotNetCore.CAP.MongoDB
         /// Default is <see cref="DefaultDatabase" />.
         /// </summary>
         public string Database { get; set; } = DefaultDatabase;
+
+        public string Received { get; } = "Received";
+
+        public string Published { get; } = "Published";
     }
 }
