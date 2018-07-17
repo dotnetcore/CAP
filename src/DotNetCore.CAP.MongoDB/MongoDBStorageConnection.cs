@@ -24,7 +24,17 @@ namespace DotNetCore.CAP.MongoDB
 
         public bool ChangePublishedState(int messageId, string state)
         {
-            throw new System.NotImplementedException();
+            var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
+
+            var updateDef = Builders<CapPublishedMessage>
+            .Update.Inc(x => x.Retries, 1)
+            .Set(x => x.ExpiresAt, null)
+            .Set(x => x.StatusName, state);
+
+            var result =
+            collection.UpdateOne(x => x.Id == messageId, updateDef);
+
+            return result.ModifiedCount > 0;
         }
 
         public bool ChangeReceivedState(int messageId, string state)
