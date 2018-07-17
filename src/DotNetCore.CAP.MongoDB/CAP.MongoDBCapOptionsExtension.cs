@@ -15,7 +15,9 @@ namespace DotNetCore.CAP.MongoDB
 
         public void AddServices(IServiceCollection services)
         {
-            throw new NotImplementedException();
+            services.AddSingleton<CapDatabaseStorageMarkerService>();
+            services.AddSingleton<IStorage, MongoDBStorage>();
+            services.AddSingleton<IStorageConnection, MongoDBStorageConnection>();
         }
     }
 }

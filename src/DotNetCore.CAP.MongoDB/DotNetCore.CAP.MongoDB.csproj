@@ -8,4 +8,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="MongoDB.Bson" Version="2.7.0" />
+    <PackageReference Include="MongoDB.Driver" Version="2.7.0" />
+    <PackageReference Include="MongoDB.Driver.Core" Version="2.7.0" />
+  </ItemGroup>
+
 </Project>
