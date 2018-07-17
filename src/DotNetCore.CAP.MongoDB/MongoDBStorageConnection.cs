@@ -39,7 +39,17 @@ namespace DotNetCore.CAP.MongoDB
 
         public bool ChangeReceivedState(int messageId, string state)
         {
-            throw new System.NotImplementedException();
+            var collection = _database.GetCollection<CapReceivedMessage>(_options.Received);
+
+            var updateDef = Builders<CapReceivedMessage>
+            .Update.Inc(x => x.Retries, 1)
+            .Set(x => x.ExpiresAt, null)
+            .Set(x => x.StatusName, state);
+
+            var result =
+            collection.UpdateOne(x => x.Id == messageId, updateDef);
+
+            return result.ModifiedCount > 0;
         }
 
         public IStorageTransaction CreateTransaction()
