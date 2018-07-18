@@ -129,6 +129,11 @@ namespace DotNetCore.CAP.Test
                 throw new NotImplementedException();
             }
 
+            public void Publish<T>(string name, T contentObj, object mongoSession, string callbackName = null)
+            {
+                throw new NotImplementedException();
+            }
+
             public Task PublishAsync(string topic, string content)
             {
                 throw new NotImplementedException();
@@ -160,6 +165,11 @@ namespace DotNetCore.CAP.Test
             }
 
             public Task PublishAsync<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PublishAsync<T>(string name, T contentObj, object mongoSession, string callbackName = null)
             {
                 throw new NotImplementedException();
             }
