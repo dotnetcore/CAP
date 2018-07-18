@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.MongoDB.Test
         public void GetNextSequenceValue_Concurrency_Test()
         {
             var dic = new ConcurrentDictionary<int, int>();
-            var result = Parallel.For(0, 30, (x) =>
+            Parallel.For(0, 30, (x) =>
              {
                  var id = new MongoDBHelper().GetNextSequenceValue(_database, _recieved);
                  id.Should().BeGreaterThan(0);
