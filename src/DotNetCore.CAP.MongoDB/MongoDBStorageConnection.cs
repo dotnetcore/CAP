@@ -55,12 +55,11 @@ namespace DotNetCore.CAP.MongoDB
 
         public IStorageTransaction CreateTransaction()
         {
-            throw new System.NotImplementedException();
+            return new MongoDBStorageTransaction(_client, _options);
         }
 
         public void Dispose()
         {
-            throw new System.NotImplementedException();
         }
 
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
