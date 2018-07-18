@@ -18,6 +18,7 @@ namespace DotNetCore.CAP.MongoDB
             services.AddSingleton<CapDatabaseStorageMarkerService>();
             services.AddSingleton<IStorage, MongoDBStorage>();
             services.AddSingleton<IStorageConnection, MongoDBStorageConnection>();
+            services.AddScoped<ICapPublisher, CapPublisher>();
         }
     }
 }

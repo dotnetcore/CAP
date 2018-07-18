@@ -108,26 +108,11 @@ namespace DotNetCore.CAP.MongoDB
             }
             var collection = _database.GetCollection<CapReceivedMessage>(_options.Received);
 
-            message.Id = await GetNextSequenceValue();
+            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync<CapReceivedMessage>(_database);
 
             collection.InsertOne(message);
 
             return message.Id;
-        }
-
-        private async Task<int> GetNextSequenceValue()
-        {
-            //https://www.tutorialspoint.com/mongodb/mongodb_autoincrement_sequence.htm
-            var collection = _database.GetCollection<BsonDocument>("Counter");
-
-            var updateDef = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
-            var result = await
-            collection.FindOneAndUpdateAsync(new BsonDocument { { "_id", "received_id" } }, updateDef);
-            if (result.TryGetValue("sequence_value", out var value))
-            {
-                return value.ToInt32();
-            }
-            throw new Exception("Unable to get next sequence value.");
         }
     }
 }
