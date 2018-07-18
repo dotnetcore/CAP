@@ -22,6 +22,10 @@ namespace DotNetCore.CAP.MongoDB
             services.AddScoped<ICapPublisher, CapPublisher>();
             services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<ICollectProcessor, MongoDBCollectProcessor>();
+
+            var options = new MongoDBOptions();
+            _configure(options);
+            services.AddSingleton(options);
         }
     }
 }
