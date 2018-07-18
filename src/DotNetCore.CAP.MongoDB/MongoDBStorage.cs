@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.MongoDB
 
         public IMonitoringApi GetMonitoringApi()
         {
-            throw new System.NotImplementedException();
+            return new MongoDBMonitoringApi(_client, _options);
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
