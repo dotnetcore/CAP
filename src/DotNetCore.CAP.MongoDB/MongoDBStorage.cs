@@ -54,6 +54,16 @@ namespace DotNetCore.CAP.MongoDB
             {
                 await database.CreateCollectionAsync(_options.Published);
             }
+            if (!names.Any(n => n == "Counter"))
+            {
+                await database.CreateCollectionAsync("Counter");
+                var collection = database.GetCollection<BsonDocument>("Counter");
+                await collection.InsertManyAsync(new BsonDocument[]
+                {
+                    new BsonDocument{{"_id", _options.Published}, {"sequence_value", 0}},
+                    new BsonDocument{{"_id", _options.Received}, {"sequence_value", 0}}
+                });
+            }
         }
     }
 }

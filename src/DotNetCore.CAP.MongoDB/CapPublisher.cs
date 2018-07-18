@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.MongoDB
         public async Task PublishCallbackAsync(CapPublishedMessage message)
         {
             var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
-            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync<CapPublishedMessage>(_database);
+            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync(_database, _options.Published);
             collection.InsertOne(message);
             Enqueue(message);
         }
@@ -107,7 +107,7 @@ namespace DotNetCore.CAP.MongoDB
         private int Execute(IClientSessionHandle session, CapPublishedMessage message)
         {
             var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
-            message.Id = new MongoDBHelper().GetNextSequenceValue<CapPublishedMessage>(_database);
+            message.Id = new MongoDBHelper().GetNextSequenceValue(_database, _options.Published);
             collection.InsertOne(session, message);
             return message.Id;
         }
@@ -153,7 +153,7 @@ namespace DotNetCore.CAP.MongoDB
         private async Task<int> ExecuteAsync(IClientSessionHandle session, CapPublishedMessage message)
         {
             var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
-            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync<CapPublishedMessage>(_database);
+            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync(_database, _options.Published);
             await collection.InsertOneAsync(session, message);
             return message.Id;
         }

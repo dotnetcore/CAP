@@ -108,7 +108,7 @@ namespace DotNetCore.CAP.MongoDB
             }
             var collection = _database.GetCollection<CapReceivedMessage>(_options.Received);
 
-            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync<CapReceivedMessage>(_database);
+            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync(_database, _options.Received);
 
             collection.InsertOne(message);
 

@@ -7,14 +7,18 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBHelper
     {
-        public async Task<int> GetNextSequenceValueAsync<TCollection>(IMongoDatabase database)
+        FindOneAndUpdateOptions<BsonDocument> _options = new FindOneAndUpdateOptions<BsonDocument>()
+        {
+            ReturnDocument = ReturnDocument.After
+        };
+        public async Task<int> GetNextSequenceValueAsync(IMongoDatabase database, string collectionName)
         {
             //https://www.tutorialspoint.com/mongodb/mongodb_autoincrement_sequence.htm
             var collection = database.GetCollection<BsonDocument>("Counter");
 
             var updateDef = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
             var result = await
-            collection.FindOneAndUpdateAsync(new BsonDocument { { "_id", nameof(TCollection) } }, updateDef);
+            collection.FindOneAndUpdateAsync(new BsonDocument { { "_id", collectionName } }, updateDef, _options);
             if (result.TryGetValue("sequence_value", out var value))
             {
                 return value.ToInt32();
@@ -22,12 +26,12 @@ namespace DotNetCore.CAP.MongoDB
             throw new Exception("Unable to get next sequence value.");
         }
 
-        public int GetNextSequenceValue<TCollection>(IMongoDatabase database)
+        public int GetNextSequenceValue(IMongoDatabase database, string collectionName)
         {
             var collection = database.GetCollection<BsonDocument>("Counter");
 
             var updateDef = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
-            var result = collection.FindOneAndUpdate(new BsonDocument { { "_id", nameof(TCollection) } }, updateDef);
+            var result = collection.FindOneAndUpdate(new BsonDocument { { "_id", collectionName } }, updateDef, _options);
             if (result.TryGetValue("sequence_value", out var value))
             {
                 return value.ToInt32();

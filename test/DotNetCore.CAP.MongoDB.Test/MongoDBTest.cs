@@ -12,7 +12,7 @@ namespace DotNetCore.CAP.MongoDB.Test
 
         public MongoDBTest()
         {
-            _client = new MongoClient("mongodb://mongo1:27017,mongo2:27018,mongo3:27019/?replicaSet=my-mongo-set");
+            _client = new MongoClient(CommonHelper.ConnectionString);
         }
 
         [Fact]
