@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DotNetCore.CAP;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
@@ -29,7 +30,16 @@ namespace Sample.RabbitMQ.MongoDB
             services.AddCap(x =>
             {
                 x.UseMongoDB();
-                x.UseRabbitMQ("localhost");
+
+                var mq = new RabbitMQOptions();
+                Configuration.GetSection("RabbitMQ").Bind(mq);
+                x.UseRabbitMQ(cfg =>
+                {
+                    cfg.HostName = mq.HostName;
+                    cfg.Port = mq.Port;
+                    cfg.UserName = mq.UserName;
+                    cfg.Password = mq.Password;
+                });
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
