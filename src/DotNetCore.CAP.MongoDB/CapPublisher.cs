@@ -16,13 +16,14 @@ namespace DotNetCore.CAP.MongoDB
         private readonly MongoDBOptions _options;
         private readonly IMongoDatabase _database;
 
-        protected CapPublisher(ILogger<CapPublisherBase> logger, IDispatcher dispatcher,
-        IMongoClient client, MongoDBOptions options)
+        public CapPublisher(ILogger<CapPublisherBase> logger, IDispatcher dispatcher,
+        IMongoClient client, MongoDBOptions options, IServiceProvider provider)
         : base(logger, dispatcher)
         {
             _client = client;
             _options = options;
             _database = client.GetDatabase(_options.Database);
+            ServiceProvider = provider;
         }
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)
