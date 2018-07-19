@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.MongoDB.Test
 
         public MongoDBHelperTest()
         {
-            _client = new MongoClient(CommonHelper.ConnectionString);
+            _client = new MongoClient(ConnectionUtil.ConnectionString);
             _database = _client.GetDatabase("CAP_Test");
 
             //Initialize MongoDB

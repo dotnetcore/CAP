@@ -13,7 +13,7 @@ namespace DotNetCore.CAP.MongoDB.Test
 
         public MongoDBStorageTest()
         {
-            _client = new MongoClient(CommonHelper.ConnectionString);
+            _client = new MongoClient(ConnectionUtil.ConnectionString);
         }
 
         [Fact]
