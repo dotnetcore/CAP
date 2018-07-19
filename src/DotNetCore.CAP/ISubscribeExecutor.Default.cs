@@ -77,7 +77,7 @@ namespace DotNetCore.CAP
                 await SetFailedState(message, ex, out bool stillRetry);
                 if (stillRetry)
                 {
-                    await ExecuteAsync(message);
+                   return await ExecuteAsync(message);
                 }
 
                 return OperateResult.Failed(ex);
