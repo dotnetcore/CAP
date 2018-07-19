@@ -9,13 +9,13 @@ using Xunit;
 
 namespace DotNetCore.CAP.MongoDB.Test
 {
-    public class MongoDBHelperTest
+    public class MongoDBUtilTest
     {
         private readonly MongoClient _client;
         private readonly IMongoDatabase _database;
         string _recieved = "ReceivedTest";
 
-        public MongoDBHelperTest()
+        public MongoDBUtilTest()
         {
             _client = new MongoClient(ConnectionUtil.ConnectionString);
             _database = _client.GetDatabase("CAP_Test");
