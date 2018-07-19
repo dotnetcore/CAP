@@ -10,141 +10,70 @@ namespace DotNetCore.CAP
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static class LoggerExtensions
     {
-        private static readonly Action<ILogger, Exception> _serverStarting;
-        private static readonly Action<ILogger, Exception> _processorsStartingError;
-        private static readonly Action<ILogger, Exception> _serverShuttingDown;
-        private static readonly Action<ILogger, string, Exception> _expectedOperationCanceledException;
-        private static readonly Action<ILogger, string, string, string, Exception> _modelBinderFormattingException;
-        private static readonly Action<ILogger, Exception> _consumerFailedWillRetry;
-        private static readonly Action<ILogger, double, Exception> _consumerExecuted;
-        private static readonly Action<ILogger, int, int, Exception> _senderRetrying;
-        private static readonly Action<ILogger, string, Exception> _exceptionOccuredWhileExecuting;
-        private static readonly Action<ILogger, double, Exception> _messageHasBeenSent;
-        private static readonly Action<ILogger, int, string, Exception> _messagePublishException;
-
-        static LoggerExtensions()
+        public static void ConsumerExecutedAfterThreshold(this ILogger logger, int messageId, int retries)
         {
-            _serverStarting = LoggerMessage.Define(
-                LogLevel.Debug,
-                1,
-                "Starting the processing server.");
-
-            _processorsStartingError = LoggerMessage.Define(
-                LogLevel.Error,
-                5,
-                "Starting the processors throw an exception.");
-
-            _serverShuttingDown = LoggerMessage.Define(
-                LogLevel.Information,
-                2,
-                "Shutting down the processing server...");
-
-            _expectedOperationCanceledException = LoggerMessage.Define<string>(
-                LogLevel.Warning,
-                3,
-                "Expected an OperationCanceledException, but found '{ExceptionMessage}'.");
-
-            LoggerMessage.Define<string>(
-                LogLevel.Error,
-                5,
-                "Consumer method '{methodName}' failed to execute.");
-
-            LoggerMessage.Define<string>(
-                LogLevel.Error,
-                5,
-                "Received message topic method '{topicName}' failed to execute.");
-
-            _modelBinderFormattingException = LoggerMessage.Define<string, string, string>(
-                LogLevel.Error,
-                5,
-                "When call subscribe method, a parameter format conversion exception occurs. MethodName:'{MethodName}' ParameterName:'{ParameterName}' Content:'{Content}'."
-            );
-
-            _senderRetrying = LoggerMessage.Define<int, int>(
-                LogLevel.Debug,
-                3,
-                "The {Retries}th retrying send a message failed. message id: {MessageId} ");
-
-            _consumerExecuted = LoggerMessage.Define<double>(
-                LogLevel.Debug,
-                4,
-                "Consumer executed. Took: {Seconds} secs.");
-
-            _consumerFailedWillRetry = LoggerMessage.Define(
-                LogLevel.Warning,
-                2,
-                "Consumer failed to execute. Will retry.");
-
-            _exceptionOccuredWhileExecuting = LoggerMessage.Define<string>(
-                LogLevel.Error,
-                6,
-                "An exception occured while trying to store a message. message id: {MessageId}");
-
-            _messageHasBeenSent = LoggerMessage.Define<double>(
-                LogLevel.Debug,
-                4,
-                "Message published. Took: {Seconds} secs.");
-
-            _messagePublishException = LoggerMessage.Define<int, string>(
-                LogLevel.Error,
-                6,
-                "An exception occured while publishing a message, reason:{Reason}. message id:{MessageId}");
+            logger.LogWarning($"The Subscriber of the message({messageId}) still fails after {retries}th executions and we will stop retrying.");
         }
 
-        public static void ConsumerExecutionFailedWillRetry(this ILogger logger, Exception ex)
+        public static void SenderAfterThreshold(this ILogger logger, int messageId, int retries)
         {
-            _consumerFailedWillRetry(logger, ex);
+            logger.LogWarning($"The Publisher of the message({messageId}) still fails after {retries}th sends and we will stop retrying.");
+        }
+
+        public static void ExecutedThresholdCallbackFailed(this ILogger logger, Exception ex)
+        {
+            logger.LogWarning(ex, "FailedThresholdCallback action raised an exception:" + ex.Message);
+        }
+
+        public static void ConsumerExecutionRetrying(this ILogger logger, int messageId, int retries)
+        {
+            logger.LogWarning($"The {retries}th retrying consume a message failed. message id: {messageId}");
         }
 
         public static void SenderRetrying(this ILogger logger, int messageId, int retries)
         {
-            _senderRetrying(logger, messageId, retries, null);
+            logger.LogWarning($"The {retries}th retrying send a message failed. message id: {messageId} ");
         }
 
         public static void MessageHasBeenSent(this ILogger logger, double seconds)
         {
-            _messageHasBeenSent(logger, seconds, null);
+            logger.LogDebug($"Message published. Took: {seconds} secs.");
         }
 
         public static void MessagePublishException(this ILogger logger, int messageId, string reason, Exception ex)
         {
-            _messagePublishException(logger, messageId, reason, ex);
+            logger.LogError(ex, $"An exception occured while publishing a message, reason:{reason}. message id:{messageId}");
         }
 
         public static void ConsumerExecuted(this ILogger logger, double seconds)
         {
-            _consumerExecuted(logger, seconds, null);
+            logger.LogDebug($"Consumer executed. Took: {seconds} secs.");
         }
 
         public static void ServerStarting(this ILogger logger)
         {
-            _serverStarting(logger, null);
+            logger.LogInformation("Starting the processing server.");
         }
 
         public static void ProcessorsStartedError(this ILogger logger, Exception ex)
         {
-            _processorsStartingError(logger, ex);
+            logger.LogError(ex, "Starting the processors throw an exception.");
         }
 
         public static void ServerShuttingDown(this ILogger logger)
         {
-            _serverShuttingDown(logger, null);
+            logger.LogInformation("Shutting down the processing server...");
         }
 
         public static void ExpectedOperationCanceledException(this ILogger logger, Exception ex)
         {
-            _expectedOperationCanceledException(logger, ex.Message, ex);
-        }
-
-        public static void ExceptionOccuredWhileExecuting(this ILogger logger, string messageId, Exception ex)
-        {
-            _exceptionOccuredWhileExecuting(logger, messageId, ex);
+            logger.LogWarning(ex, $"Expected an OperationCanceledException, but found '{ex.Message}'.");
         }
 
         public static void ModelBinderFormattingException(this ILogger logger, string methodName, string parameterName,
             string content, Exception ex)
         {
-            _modelBinderFormattingException(logger, methodName, parameterName, content, ex);
+            logger.LogError(ex, $"When call subscribe method, a parameter format conversion exception occurs. MethodName:'{methodName}' ParameterName:'{parameterName}' Content:'{content}'.");
         }
     }
 }
