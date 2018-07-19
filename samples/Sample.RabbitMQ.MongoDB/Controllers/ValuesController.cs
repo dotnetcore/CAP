@@ -56,5 +56,19 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
                 }
             }
         }
+
+        [Route("~/publish_without_session")]
+        public IActionResult PublishWithoutSession()
+        {
+            _capPublisher.PublishWithMongoSession("sample.rabbitmq.mongodb", DateTime.Now);
+            return Ok();
+        }
+
+        [NonAction]
+        [CapSubscribe("sample.rabbitmq.mongodb")]
+        public void ReceiveMessage(DateTime time)
+        {
+            Console.WriteLine("[sample.rabbitmq.mongodb] message received: " + DateTime.Now + ",sent time: " + time);
+        }
     }
 }
