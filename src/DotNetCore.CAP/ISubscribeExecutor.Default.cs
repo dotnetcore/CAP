@@ -51,6 +51,23 @@ namespace DotNetCore.CAP
 
         public async Task<OperateResult> ExecuteAsync(CapReceivedMessage message)
         {
+            bool retry;
+            OperateResult result;
+            do
+            {
+                result = await ExecuteWithoutRetryAsync(message);
+                if (result == OperateResult.Success)
+                {
+                    return result;
+                }
+                retry = UpdateMessageForRetry(message);
+            } while (retry);
+
+            return result;
+        }
+
+        private async Task<OperateResult> ExecuteWithoutRetryAsync(CapReceivedMessage message)
+        {
             if (message == null)
             {
                 throw new ArgumentNullException(nameof(message));
@@ -74,11 +91,7 @@ namespace DotNetCore.CAP
             {
                 _logger.LogError(ex, $"An exception occurred while executing the subscription method. Topic:{message.Name}, Id:{message.Id}");
 
-                await SetFailedState(message, ex, out bool stillRetry);
-                if (stillRetry)
-                {
-                   return await ExecuteAsync(message);
-                }
+                await SetFailedState(message, ex);
 
                 return OperateResult.Failed(ex);
             }
@@ -91,43 +104,31 @@ namespace DotNetCore.CAP
             return _stateChanger.ChangeStateAsync(message, succeededState, _connection);
         }
 
-        private Task SetFailedState(CapReceivedMessage message, Exception ex, out bool stillRetry)
+        private Task SetFailedState(CapReceivedMessage message, Exception ex)
         {
-            IState newState = new FailedState();
-
             if (ex is SubscriberNotFoundException)
             {
-                stillRetry = false;
                 message.Retries = _options.FailedRetryCount; // not retry if SubscriberNotFoundException
-            }
-            else
-            {
-                stillRetry = UpdateMessageForRetry(message);
-                if (stillRetry)
-                {
-                    _logger.ConsumerExecutionFailedWillRetry(ex);
-                    return Task.CompletedTask;
-                }
             }
 
             AddErrorReasonToContent(message, ex);
 
-            return _stateChanger.ChangeStateAsync(message, newState, _connection);
+            return _stateChanger.ChangeStateAsync(message, new FailedState(), _connection);
         }
 
-        private static bool UpdateMessageForRetry(CapReceivedMessage message)
+        private bool UpdateMessageForRetry(CapReceivedMessage message)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
             var retries = ++message.Retries;
-            if (retries >= retryBehavior.RetryCount)
+            var retryCount = Math.Min(_options.FailedRetryCount, retryBehavior.RetryCount);
+            if (retries >= retryCount)
             {
                 return false;
             }
-
+            _logger.ConsumerExecutionRetrying(message.Id, retries);
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
             message.ExpiresAt = due;
-
             return true;
         }
 
