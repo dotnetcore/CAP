@@ -75,7 +75,7 @@ namespace DotNetCore.CAP
                 {
                     _logger.SenderRetrying(message.Id, message.Retries);
 
-                    await SendAsync(message);
+                    return await SendAsync(message);
                 }
                 return OperateResult.Failed(result.Exception);
             }
