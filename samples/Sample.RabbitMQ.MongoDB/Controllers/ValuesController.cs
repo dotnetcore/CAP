@@ -29,13 +29,32 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
             {
                 session.StartTransaction();
                 var collection = _client.GetDatabase("TEST").GetCollection<BsonDocument>("test");
-                collection.InsertOne(new BsonDocument { { "hello", "world" } });
+                collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
 
-                _capPublisher.Publish("sample.rabbitmq.mongodb", DateTime.Now, session);
+                _capPublisher.PublishWithMongoSession("sample.rabbitmq.mongodb", DateTime.Now, session);
 
                 session.CommitTransaction();
             }
             return Ok();
+        }
+
+        [Route("~/publish_rollback")]
+        public IActionResult PublishRollback()
+        {
+            using (var session = _client.StartSession())
+            {
+                try
+                {
+                    session.StartTransaction();
+                    _capPublisher.PublishWithMongoSession("sample.rabbitmq.mongodb", DateTime.Now, session);
+                    throw new Exception("Foo");
+                }
+                catch (System.Exception ex)
+                {
+                    session.AbortTransaction();
+                    return StatusCode(500, ex.Message);
+                }
+            }
         }
     }
 }
