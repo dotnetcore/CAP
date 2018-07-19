@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.MongoDB.Test
 
         private void Init()
         {
-            var helper = new MongoDBHelper();
+            var helper = new MongoDBUtil();
             var database = _client.GetDatabase(_options.Database);
             var collection = database.GetCollection<CapPublishedMessage>(_options.Published);
             collection.InsertMany(new CapPublishedMessage[]

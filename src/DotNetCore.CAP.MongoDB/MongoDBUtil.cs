@@ -5,7 +5,7 @@ using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
 {
-    public class MongoDBHelper
+    public class MongoDBUtil
     {
         FindOneAndUpdateOptions<BsonDocument> _options = new FindOneAndUpdateOptions<BsonDocument>()
         {

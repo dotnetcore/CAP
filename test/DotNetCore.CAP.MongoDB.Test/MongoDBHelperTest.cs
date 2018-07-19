@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.MongoDB.Test
         [Fact]
         public async void GetNextSequenceValueAsync_Test()
         {
-            var id = await new MongoDBHelper().GetNextSequenceValueAsync(_database, _recieved);
+            var id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _recieved);
             id.Should().BeGreaterThan(0);
         }
 
@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.MongoDB.Test
             var dic = new ConcurrentDictionary<int, int>();
             Parallel.For(0, 30, (x) =>
              {
-                 var id = new MongoDBHelper().GetNextSequenceValue(_database, _recieved);
+                 var id = new MongoDBUtil().GetNextSequenceValue(_database, _recieved);
                  id.Should().BeGreaterThan(0);
                  dic.TryAdd(id, x).Should().BeTrue(); //The id shouldn't be same.
              });

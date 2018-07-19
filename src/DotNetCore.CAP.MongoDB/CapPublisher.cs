@@ -30,7 +30,7 @@ namespace DotNetCore.CAP.MongoDB
         public async Task PublishCallbackAsync(CapPublishedMessage message)
         {
             var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
-            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync(_database, _options.Published);
+            message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.Published);
             collection.InsertOne(message);
             Enqueue(message);
         }
@@ -108,7 +108,7 @@ namespace DotNetCore.CAP.MongoDB
 
         private int Execute(IClientSessionHandle session, CapPublishedMessage message)
         {
-            message.Id = new MongoDBHelper().GetNextSequenceValue(_database, _options.Published, session);
+            message.Id = new MongoDBUtil().GetNextSequenceValue(_database, _options.Published, session);
 
             var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
             if (_isInTransaction)
@@ -162,7 +162,7 @@ namespace DotNetCore.CAP.MongoDB
 
         private async Task<int> ExecuteAsync(IClientSessionHandle session, CapPublishedMessage message)
         {
-            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync(_database, _options.Published, session);
+            message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.Published, session);
             var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
             if (_isInTransaction)
             {
