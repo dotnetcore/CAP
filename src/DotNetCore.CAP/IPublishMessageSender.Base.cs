@@ -44,6 +44,23 @@ namespace DotNetCore.CAP
 
         public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
+            bool retry;
+            OperateResult result;
+            do
+            {
+                result = await SendWithoutRetryAsync(message);
+                if (result == OperateResult.Success)
+                {
+                    return result;
+                }
+                retry = UpdateMessageForRetry(message);
+            } while (retry);
+
+            return result;
+        }
+
+        private async Task<OperateResult> SendWithoutRetryAsync(CapPublishedMessage message)
+        {
             var startTime = DateTimeOffset.UtcNow;
             var stopwatch = Stopwatch.StartNew();
 
@@ -69,27 +86,22 @@ namespace DotNetCore.CAP
             {
                 TracingError(operationId, message, result, startTime, stopwatch.Elapsed);
 
-                await SetFailedState(message, result.Exception, out bool stillRetry);
+                await SetFailedState(message, result.Exception);
 
-                if (stillRetry)
-                {
-                    _logger.SenderRetrying(message.Id, message.Retries);
-
-                    return await SendAsync(message);
-                }
                 return OperateResult.Failed(result.Exception);
             }
         }
 
-        private static bool UpdateMessageForRetryAsync(CapPublishedMessage message)
+        private bool UpdateMessageForRetry(CapPublishedMessage message)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
-
             var retries = ++message.Retries;
             if (retries >= retryBehavior.RetryCount)
             {
                 return false;
             }
+
+            _logger.SenderRetrying(message.Id, retries);
 
             var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
             message.ExpiresAt = due;
@@ -100,23 +112,13 @@ namespace DotNetCore.CAP
         private Task SetSuccessfulState(CapPublishedMessage message)
         {
             var succeededState = new SucceededState(_options.SucceedMessageExpiredAfter);
-
             return _stateChanger.ChangeStateAsync(message, succeededState, _connection);
         }
 
-        private Task SetFailedState(CapPublishedMessage message, Exception ex, out bool stillRetry)
+        private Task SetFailedState(CapPublishedMessage message, Exception ex)
         {
-            IState newState = new FailedState();
-            stillRetry = UpdateMessageForRetryAsync(message);
-            if (stillRetry)
-            {
-                _logger.ConsumerExecutionFailedWillRetry(ex);
-                return Task.CompletedTask;
-            }
-
             AddErrorReasonToContent(message, ex);
-
-            return _stateChanger.ChangeStateAsync(message, newState, _connection);
+            return _stateChanger.ChangeStateAsync(message, new FailedState(), _connection);
         }
 
         private static void AddErrorReasonToContent(CapPublishedMessage message, Exception exception)
