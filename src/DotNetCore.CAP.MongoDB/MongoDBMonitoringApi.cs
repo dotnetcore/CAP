@@ -1,14 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
 {
-    internal class MongoDBMonitoringApi : IMonitoringApi
+    public class MongoDBMonitoringApi : IMonitoringApi
     {
         private IMongoClient _client;
         private MongoDBOptions _options;
@@ -51,7 +53,46 @@ namespace DotNetCore.CAP.MongoDB
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
-            throw new NotImplementedException();
+            var groupby = new BsonDocument {
+                { "_id", new BsonDocument {
+                            { "Key", new BsonDocument {
+                                { "$dateToString", new BsonDocument {
+                                    { "format", "%Y-%m-%d %H:00:00"},
+                                    { "date", "$Added"}
+                                }}
+                            }}
+                        }
+                },
+                { "Count", new BsonDocument{
+                    { "$sum", 1}
+                }}
+            };
+
+            var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
+
+            var result =
+            collection.Aggregate()
+            .Match(x => x.Added > DateTime.UtcNow.AddHours(-24))
+            .Group(groupby)
+            .ToList();
+
+            var endDate = DateTime.UtcNow;
+            var dic = new Dictionary<DateTime, int>();
+            for (var i = 0; i < 24; i++)
+            {
+                dic.Add(DateTime.Parse(endDate.ToString("yyyy-MM-dd HH:00:00")), 0);
+                endDate = endDate.AddHours(-1);
+            }
+            result.ForEach(d =>
+            {
+                var key = d["_id"].AsBsonDocument["Key"].AsString;
+                if (DateTime.TryParse(key, out var dateTime))
+                {
+                    dic[dateTime] = d["Count"].AsInt32;
+                }
+            });
+
+            return dic;
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
