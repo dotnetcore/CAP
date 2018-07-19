@@ -15,13 +15,13 @@ namespace DotNetCore.CAP.Test
         public void CanCreateInstanceAndGetService()
         {
             var services = new ServiceCollection();
-           
+
             services.AddSingleton<ICapPublisher, MyProducerService>();
             var builder = new CapBuilder(services);
             Assert.NotNull(builder);
 
             var count = builder.Services.Count;
-            Assert.Equal(1, count); 
+            Assert.Equal(1, count);
 
             var provider = services.BuildServiceProvider();
             var capPublisher = provider.GetService<ICapPublisher>();
@@ -169,7 +169,12 @@ namespace DotNetCore.CAP.Test
                 throw new NotImplementedException();
             }
 
-            public Task PublishAsync<T>(string name, T contentObj, object mongoSession, string callbackName = null)
+            public void PublishWithMongoSession<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PublishWithMongoSessionAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
             {
                 throw new NotImplementedException();
             }

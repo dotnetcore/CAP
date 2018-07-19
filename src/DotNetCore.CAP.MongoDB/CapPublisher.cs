@@ -15,6 +15,7 @@ namespace DotNetCore.CAP.MongoDB
         private readonly IMongoClient _client;
         private readonly MongoDBOptions _options;
         private readonly IMongoDatabase _database;
+        private bool _isInTransaction = true;
 
         public CapPublisher(ILogger<CapPublisherBase> logger, IDispatcher dispatcher,
         IMongoClient client, MongoDBOptions options, IServiceProvider provider)
@@ -49,23 +50,23 @@ namespace DotNetCore.CAP.MongoDB
             throw new System.NotImplementedException("Not work for MongoDB");
         }
 
-        public override void Publish<T>(string name, T contentObj, object mongoSession, string callbackName = null)
+        public override void PublishWithMongoSession<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
         {
             var session = mongoSession as IClientSessionHandle;
             if (session == null)
             {
-                throw new ArgumentNullException(nameof(mongoSession));
+                _isInTransaction = false;
             }
 
             PublishWithSession<T>(name, contentObj, session, callbackName);
         }
 
-        public override async Task PublishAsync<T>(string name, T contentObj, object mongoSession, string callbackName = null)
+        public override async Task PublishWithMongoSessionAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
         {
             var session = mongoSession as IClientSessionHandle;
             if (session == null)
             {
-                throw new ArgumentNullException(nameof(mongoSession));
+                _isInTransaction = false;
             }
 
             await PublishWithSessionAsync<T>(name, contentObj, session, callbackName);
@@ -89,7 +90,7 @@ namespace DotNetCore.CAP.MongoDB
                 operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
                 var id = Execute(session, message);
 
-                if (id > 0)
+                if (!_isInTransaction && id > 0)
                 {
                     _logger.LogInformation($"message [{message}] has been persisted in the database.");
                     s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
@@ -107,9 +108,17 @@ namespace DotNetCore.CAP.MongoDB
 
         private int Execute(IClientSessionHandle session, CapPublishedMessage message)
         {
+            message.Id = new MongoDBHelper().GetNextSequenceValue(_database, _options.Published, session);
+
             var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
-            message.Id = new MongoDBHelper().GetNextSequenceValue(_database, _options.Published);
-            collection.InsertOne(session, message);
+            if (_isInTransaction)
+            {
+                collection.InsertOne(session, message);
+            }
+            else
+            {
+                collection.InsertOne(message);
+            }
             return message.Id;
         }
 
@@ -132,7 +141,7 @@ namespace DotNetCore.CAP.MongoDB
 
                 var id = await ExecuteAsync(session, message);
 
-                if (id > 0)
+                if (!_isInTransaction && id > 0)
                 {
                     _logger.LogInformation($"message [{message}] has been persisted in the database.");
                     s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
@@ -153,9 +162,16 @@ namespace DotNetCore.CAP.MongoDB
 
         private async Task<int> ExecuteAsync(IClientSessionHandle session, CapPublishedMessage message)
         {
+            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync(_database, _options.Published, session);
             var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
-            message.Id = await new MongoDBHelper().GetNextSequenceValueAsync(_database, _options.Published);
-            await collection.InsertOneAsync(session, message);
+            if (_isInTransaction)
+            {
+                await collection.InsertOneAsync(session, message);
+            }
+            else
+            {
+                await collection.InsertOneAsync(message);
+            }
             return message.Id;
         }
     }

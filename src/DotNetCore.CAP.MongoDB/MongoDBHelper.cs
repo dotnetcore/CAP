@@ -11,14 +11,24 @@ namespace DotNetCore.CAP.MongoDB
         {
             ReturnDocument = ReturnDocument.After
         };
-        public async Task<int> GetNextSequenceValueAsync(IMongoDatabase database, string collectionName)
+        public async Task<int> GetNextSequenceValueAsync(IMongoDatabase database, string collectionName, IClientSessionHandle session = null)
         {
             //https://www.tutorialspoint.com/mongodb/mongodb_autoincrement_sequence.htm
             var collection = database.GetCollection<BsonDocument>("Counter");
 
             var updateDef = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
-            var result = await
-            collection.FindOneAndUpdateAsync(new BsonDocument { { "_id", collectionName } }, updateDef, _options);
+            var filter = new BsonDocument { { "_id", collectionName } };
+
+            BsonDocument result;
+            if (session == null)
+            {
+                result = await collection.FindOneAndUpdateAsync(filter, updateDef, _options);
+            }
+            else
+            {
+                result = await collection.FindOneAndUpdateAsync(session, filter, updateDef, _options);
+            }
+
             if (result.TryGetValue("sequence_value", out var value))
             {
                 return value.ToInt32();
@@ -26,12 +36,23 @@ namespace DotNetCore.CAP.MongoDB
             throw new Exception("Unable to get next sequence value.");
         }
 
-        public int GetNextSequenceValue(IMongoDatabase database, string collectionName)
+        public int GetNextSequenceValue(IMongoDatabase database, string collectionName, IClientSessionHandle session = null)
         {
             var collection = database.GetCollection<BsonDocument>("Counter");
 
+            var filter = new BsonDocument { { "_id", collectionName } };
             var updateDef = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
-            var result = collection.FindOneAndUpdate(new BsonDocument { { "_id", collectionName } }, updateDef, _options);
+
+            BsonDocument result;
+            if (session == null)
+            {
+                result = collection.FindOneAndUpdate(filter, updateDef, _options);
+            }
+            else
+            {
+                result = collection.FindOneAndUpdate(session, filter, updateDef, _options);
+            }
+
             if (result.TryGetValue("sequence_value", out var value))
             {
                 return value.ToInt32();
