@@ -53,14 +53,12 @@ namespace DotNetCore.CAP.MongoDB
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
-            var name = type == MessageType.Publish ? _options.Published : _options.Received;
-            return GetHourlyTimelineStats(name, StatusName.Failed);
+            return GetHourlyTimelineStats(type, StatusName.Failed);
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
-            var name = type == MessageType.Publish ? _options.Published : _options.Received;
-            return GetHourlyTimelineStats(name, StatusName.Succeeded);
+            return GetHourlyTimelineStats(type, StatusName.Succeeded);
         }
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
@@ -88,8 +86,9 @@ namespace DotNetCore.CAP.MongoDB
             throw new NotImplementedException();
         }
 
-        private IDictionary<DateTime, int> GetHourlyTimelineStats(string collectionName, string statusName)
+        private IDictionary<DateTime, int> GetHourlyTimelineStats(MessageType type, string statusName)
         {
+            var collectionName = type == MessageType.Publish ? _options.Published : _options.Received;
             var endDate = DateTime.UtcNow;
 
             var groupby = new BsonDocument {
