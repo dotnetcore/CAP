@@ -13,6 +13,7 @@ namespace DotNetCore.CAP.MongoDB
         private readonly MongoDBOptions _options;
         private readonly ILogger _logger;
         private readonly IMongoDatabase _database;
+        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
         public MongoDBCollectProcessor(IMongoClient client, MongoDBOptions options,
         ILogger<MongoDBCollectProcessor> logger)
@@ -39,6 +40,7 @@ namespace DotNetCore.CAP.MongoDB
                 new DeleteManyModel<CapReceivedMessage>(Builders<CapReceivedMessage>.Filter.Lt(x => x.ExpiresAt, DateTime.Now))
             });
 
+            await context.WaitAsync(_waitingInterval);
         }
     }
 }
