@@ -182,7 +182,7 @@ namespace DotNetCore.CAP.Abstractions
             }
             catch (Exception e)
             {
-                _logger.LogError("An exception was occurred when publish message. exception message:" + e.Message, e);
+                _logger.LogError(e, "An exception was occurred when publish message async. exception message:" + name);
                 s_diagnosticListener.WritePublishMessageStoreError(operationId, message, e);
                 Console.WriteLine(e);
                 throw;
@@ -204,10 +204,11 @@ namespace DotNetCore.CAP.Abstractions
 
             try
             {
-                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
+                Console.WriteLine("================22222222222222=====================");
+                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);               
 
                 var id = Execute(DbConnection, DbTransaction, message);
-
+                Console.WriteLine("================777777777777777777777=====================");
                 ClosedCap();
 
                 if (id > 0)
@@ -220,7 +221,7 @@ namespace DotNetCore.CAP.Abstractions
             }
             catch (Exception e)
             {
-                _logger.LogError("An exception was occurred when publish message. exception message:" + e.Message, e);
+                _logger.LogError(e, "An exception was occurred when publish message. message:" + name);
                 s_diagnosticListener.WritePublishMessageStoreError(operationId, message, e);
                 Console.WriteLine(e);
                 throw;
