@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.MongoDB
             services.AddTransient<ICollectProcessor, MongoDBCollectProcessor>();
 
             var options = new MongoDBOptions();
-            _configure(options);
+            _configure?.Invoke(options);
             services.AddSingleton(options);
         }
     }
