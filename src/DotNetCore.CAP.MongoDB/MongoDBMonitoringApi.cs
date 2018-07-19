@@ -53,8 +53,11 @@ namespace DotNetCore.CAP.MongoDB
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
+            var endDate = DateTime.UtcNow;
+
             var groupby = new BsonDocument {
-                { "_id", new BsonDocument {
+                { "$group", new BsonDocument{
+                    { "_id", new BsonDocument {
                             { "Key", new BsonDocument {
                                 { "$dateToString", new BsonDocument {
                                     { "format", "%Y-%m-%d %H:00:00"},
@@ -66,17 +69,15 @@ namespace DotNetCore.CAP.MongoDB
                 { "Count", new BsonDocument{
                     { "$sum", 1}
                 }}
+                }}
             };
 
-            var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
+            var match = new BsonDocument { { "$match", new BsonDocument { { "Added", new BsonDocument { { "$gt", endDate.AddHours(-24) } } } } } };
+            var pipeline = new BsonDocument[] { match, groupby };
 
-            var result =
-            collection.Aggregate()
-            .Match(x => x.Added > DateTime.UtcNow.AddHours(-24))
-            .Group(groupby)
-            .ToList();
+            var collection = _database.GetCollection<BsonDocument>(_options.Published);
+            var result = collection.Aggregate<BsonDocument>(pipeline: pipeline).ToList();
 
-            var endDate = DateTime.UtcNow;
             var dic = new Dictionary<DateTime, int>();
             for (var i = 0; i < 24; i++)
             {
@@ -84,13 +85,13 @@ namespace DotNetCore.CAP.MongoDB
                 endDate = endDate.AddHours(-1);
             }
             result.ForEach(d =>
-            {
-                var key = d["_id"].AsBsonDocument["Key"].AsString;
-                if (DateTime.TryParse(key, out var dateTime))
-                {
-                    dic[dateTime] = d["Count"].AsInt32;
-                }
-            });
+                        {
+                            var key = d["_id"].AsBsonDocument["Key"].AsString;
+                            if (DateTime.TryParse(key, out var dateTime))
+                            {
+                                dic[dateTime] = d["Count"].AsInt32;
+                            }
+                        });
 
             return dic;
         }
