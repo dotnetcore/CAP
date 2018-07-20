@@ -37,7 +37,10 @@ namespace DotNetCore.CAP
         /// <summary> The topic exchange type. </summary>
         public const string ExchangeType = "topic";
 
-        /// <summary>The host to connect to.</summary>
+        /// <summary>
+        /// The host to connect to.
+        /// If you want connect to the cluster, you can assign like “192.168.1.111,192.168.1.112”
+        /// </summary>
         public string HostName { get; set; } = "localhost";
 
         /// <summary>

@@ -76,7 +76,6 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             var factory = new ConnectionFactory
             {
-                HostName = options.HostName,
                 UserName = options.UserName,
                 Port = options.Port,
                 Password = options.Password,
@@ -86,6 +85,13 @@ namespace DotNetCore.CAP.RabbitMQ
                 SocketWriteTimeout = options.SocketWriteTimeout
             };
 
+            if (options.HostName.Contains(","))
+            {
+                return () => factory.CreateConnection(
+                    options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+            }
+
+            factory.HostName = options.HostName;
             return () => factory.CreateConnection();
         }
 
