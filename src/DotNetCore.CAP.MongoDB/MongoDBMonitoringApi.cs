@@ -96,22 +96,29 @@ namespace DotNetCore.CAP.MongoDB
 
         public int PublishedFailedCount()
         {
-            throw new NotImplementedException();
+            return GetNumberOfMessage(_options.Published, StatusName.Failed);
         }
 
         public int PublishedSucceededCount()
         {
-            throw new NotImplementedException();
+            return GetNumberOfMessage(_options.Published, StatusName.Succeeded);
         }
 
         public int ReceivedFailedCount()
         {
-            throw new NotImplementedException();
+            return GetNumberOfMessage(_options.Received, StatusName.Failed);
         }
 
         public int ReceivedSucceededCount()
         {
-            throw new NotImplementedException();
+            return GetNumberOfMessage(_options.Received, StatusName.Succeeded);
+        }
+
+        private int GetNumberOfMessage(string collectionName, string statusName)
+        {
+            var collection = _database.GetCollection<BsonDocument>(collectionName);
+            var count = collection.CountDocuments(new BsonDocument { { "StatusName", statusName } });
+            return int.Parse(count.ToString());
         }
 
         private IDictionary<DateTime, int> GetHourlyTimelineStats(MessageType type, string statusName)

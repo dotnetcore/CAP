@@ -72,5 +72,12 @@ namespace DotNetCore.CAP.MongoDB.Test
             messages.Should().HaveCount(1);
             messages.First().Content.Should().Contain("b");
         }
+
+        [Fact]
+        public void PublishedFailedCount_Test()
+        {
+            var count = _api.PublishedFailedCount();
+            count.Should().BeGreaterThan(1);
+        }
     }
 }
