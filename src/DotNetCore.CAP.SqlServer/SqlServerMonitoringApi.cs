@@ -99,8 +99,6 @@ select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
             var sqlQuery =
                 $"select * from [{_options.Schema}].{tableName} where 1=1 {where} order by Added desc offset @Offset rows fetch next @Limit rows only";
 
-
-
             return UseConnection(conn => conn.Query<MessageDto>(_options.IsSqlServer2008 ? sqlQuery2008 : sqlQuery, new
             {
                 queryDto.StatusName,
