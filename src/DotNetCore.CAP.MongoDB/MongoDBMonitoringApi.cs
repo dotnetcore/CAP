@@ -67,7 +67,7 @@ namespace DotNetCore.CAP.MongoDB
 
             var name = queryDto.MessageType == MessageType.Publish ? _options.Published : _options.Received;
             var collection = _database.GetCollection<MessageDto>(name);
-            
+
             var builder = Builders<MessageDto>.Filter;
             var filter = builder.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
@@ -158,7 +158,7 @@ namespace DotNetCore.CAP.MongoDB
             var dic = new Dictionary<DateTime, int>();
             for (var i = 0; i < 24; i++)
             {
-                dic.Add(DateTime.Parse(endDate.ToString("yyyy-MM-dd HH:00:00")), 0);
+                dic.Add(DateTime.Parse(endDate.ToLocalTime().ToString("yyyy-MM-dd HH:00:00")), 0);
                 endDate = endDate.AddHours(-1);
             }
             result.ForEach(d =>
@@ -166,7 +166,7 @@ namespace DotNetCore.CAP.MongoDB
                 var key = d["_id"].AsBsonDocument["Key"].AsString;
                 if (DateTime.TryParse(key, out var dateTime))
                 {
-                    dic[dateTime] = d["Count"].AsInt32;
+                    dic[dateTime.ToLocalTime()] = d["Count"].AsInt32;
                 }
             });
 
