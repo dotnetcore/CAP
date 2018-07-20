@@ -20,5 +20,13 @@ namespace DotNetCore.CAP
         /// EF dbcontext type.
         /// </summary>
         internal Type DbContextType { get; set; }
+
+        internal bool IsSqlServer2008 { get; set; }
+
+        public EFOptions UseSqlServer2008()
+        {
+            IsSqlServer2008 = true;
+            return this;
+        }
     }
 }
