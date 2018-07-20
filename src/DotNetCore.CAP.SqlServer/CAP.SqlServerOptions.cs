@@ -9,5 +9,13 @@ namespace DotNetCore.CAP
         /// Gets or sets the database's connection string that will be used to store database entities.
         /// </summary>
         public string ConnectionString { get; set; }
+
+        internal bool IsSqlServer2008 { get; set; }
+
+        public SqlServerOptions UseSqlServer2008()
+        {
+            IsSqlServer2008 = true;
+            return this;
+        }
     }
 }
