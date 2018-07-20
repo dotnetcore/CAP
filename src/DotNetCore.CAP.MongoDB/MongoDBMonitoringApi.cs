@@ -63,7 +63,35 @@ namespace DotNetCore.CAP.MongoDB
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
         {
-            throw new NotImplementedException();
+            var name = queryDto.MessageType == MessageType.Publish ? _options.Published : _options.Received;
+            var collection = _database.GetCollection<MessageDto>(name);
+            var builder = Builders<MessageDto>.Filter;
+            var filter = builder.Empty;
+            if (!string.IsNullOrEmpty(queryDto.StatusName))
+            {
+                filter = filter & builder.Eq(x => x.StatusName, queryDto.StatusName);
+            }
+            if (!string.IsNullOrEmpty(queryDto.Name))
+            {
+                filter = filter & builder.Eq(x => x.Name, queryDto.Name);
+            }
+            if (!string.IsNullOrEmpty(queryDto.Group))
+            {
+                filter = filter & builder.Eq(x => x.Group, queryDto.Group);
+            }
+            if (!string.IsNullOrEmpty(queryDto.Content))
+            {
+                filter = filter & builder.Regex(x => x.Content, ".*" + queryDto.Content + ".*");
+            }
+
+            var result =
+            collection.Find(filter)
+            .SortByDescending(x => x.Added)
+            .Skip(queryDto.PageSize * queryDto.CurrentPage)
+            .Limit(queryDto.PageSize)
+            .ToList();
+
+            return result;
         }
 
         public int PublishedFailedCount()
