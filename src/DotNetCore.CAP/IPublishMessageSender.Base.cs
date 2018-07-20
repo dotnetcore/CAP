@@ -44,6 +44,24 @@ namespace DotNetCore.CAP
 
         public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
+            bool retry;
+            OperateResult result;
+            do
+            {
+                var executedResult = await SendWithoutRetryAsync(message);
+                result = executedResult.Item2;
+                if (result == OperateResult.Success)
+                {
+                    return result;
+                }
+                retry = executedResult.Item1;
+            } while (retry);
+
+            return result;
+        }
+
+        private async Task<(bool, OperateResult)> SendWithoutRetryAsync(CapPublishedMessage message)
+        {
             var startTime = DateTimeOffset.UtcNow;
             var stopwatch = Stopwatch.StartNew();
 
@@ -63,65 +81,69 @@ namespace DotNetCore.CAP
 
                 TracingAfter(operationId, message.Name, sendValues, startTime, stopwatch.Elapsed);
 
-                return OperateResult.Success;
+                return (false, OperateResult.Success);
             }
             else
             {
                 TracingError(operationId, message, result, startTime, stopwatch.Elapsed);
 
-                await SetFailedState(message, result.Exception, out bool stillRetry);
-
-                if (stillRetry)
-                {
-                    _logger.SenderRetrying(message.Id, message.Retries);
-
-                    await SendAsync(message);
-                }
-                return OperateResult.Failed(result.Exception);
+                var needRetry = await SetFailedState(message, result.Exception);
+                return (needRetry, OperateResult.Failed(result.Exception));
             }
         }
 
-        private static bool UpdateMessageForRetryAsync(CapPublishedMessage message)
-        {
-            var retryBehavior = RetryBehavior.DefaultRetry;
-
-            var retries = ++message.Retries;
-            if (retries >= retryBehavior.RetryCount)
-            {
-                return false;
-            }
-
-            var due = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
-            message.ExpiresAt = due;
-
-            return true;
-        }
 
         private Task SetSuccessfulState(CapPublishedMessage message)
         {
             var succeededState = new SucceededState(_options.SucceedMessageExpiredAfter);
-
             return _stateChanger.ChangeStateAsync(message, succeededState, _connection);
         }
 
-        private Task SetFailedState(CapPublishedMessage message, Exception ex, out bool stillRetry)
+        private async Task<bool> SetFailedState(CapPublishedMessage message, Exception ex)
         {
-            IState newState = new FailedState();
-            stillRetry = UpdateMessageForRetryAsync(message);
-            if (stillRetry)
-            {
-                _logger.ConsumerExecutionFailedWillRetry(ex);
-                return Task.CompletedTask;
-            }
-
             AddErrorReasonToContent(message, ex);
 
-            return _stateChanger.ChangeStateAsync(message, newState, _connection);
+            var needRetry = UpdateMessageForRetry(message);
+
+            await _stateChanger.ChangeStateAsync(message, new FailedState(), _connection);
+
+            return needRetry;
         }
 
         private static void AddErrorReasonToContent(CapPublishedMessage message, Exception exception)
         {
             message.Content = Helper.AddExceptionProperty(message.Content, exception);
+        }
+
+        private bool UpdateMessageForRetry(CapPublishedMessage message)
+        {
+            var retryBehavior = RetryBehavior.DefaultRetry;
+
+            var retries = ++message.Retries;
+            message.ExpiresAt = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
+
+            var retryCount = Math.Min(_options.FailedRetryCount, retryBehavior.RetryCount);
+            if (retries >= retryCount)
+            {
+                if (retries == _options.FailedRetryCount)
+                {
+                    try
+                    {
+                        _options.FailedThresholdCallback?.Invoke(MessageType.Subscribe, message.Name, message.Content);
+
+                        _logger.SenderAfterThreshold(message.Id, _options.FailedRetryCount);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.ExecutedThresholdCallbackFailed(ex);
+                    }
+                }
+                return false;
+            }
+
+            _logger.SenderRetrying(message.Id, retries);
+
+            return true;
         }
 
         private (Guid, TracingHeaders) TracingBefore(string topic, string values)
