@@ -63,8 +63,11 @@ namespace DotNetCore.CAP.MongoDB
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
         {
+            queryDto.StatusName = StatusName.Standardized(queryDto.StatusName);
+
             var name = queryDto.MessageType == MessageType.Publish ? _options.Published : _options.Received;
             var collection = _database.GetCollection<MessageDto>(name);
+            
             var builder = Builders<MessageDto>.Filter;
             var filter = builder.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))

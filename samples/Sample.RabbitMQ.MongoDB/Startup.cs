@@ -40,6 +40,8 @@ namespace Sample.RabbitMQ.MongoDB
                     cfg.UserName = mq.UserName;
                     cfg.Password = mq.Password;
                 });
+
+                x.UseDashboard();
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
         }
