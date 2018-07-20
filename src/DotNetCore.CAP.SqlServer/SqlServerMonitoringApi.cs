@@ -89,10 +89,17 @@ select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
                 where += " and content like '%@Content%'";
             }
 
+            var sqlQuery2008 =
+                $@"select * from 
+                (SELECT t.*, ROW_NUMBER() OVER(order by t.Added desc) AS rownumber
+                    from [{_options.Schema}].{tableName} as t
+                    where 1=1 {where}) as tbl
+                where tbl.rownumber between @offset and @offset + @limit";
+
             var sqlQuery =
                 $"select * from [{_options.Schema}].{tableName} where 1=1 {where} order by Added desc offset @Offset rows fetch next @Limit rows only";
 
-            return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
+            return UseConnection(conn => conn.Query<MessageDto>(_options.IsSqlServer2008 ? sqlQuery2008 : sqlQuery, new
             {
                 queryDto.StatusName,
                 queryDto.Group,
@@ -159,9 +166,18 @@ select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
             string statusName,
             IDictionary<string, DateTime> keyMaps)
         {
-            //SQL Server 2012+
-            var sqlQuery =
-                $@"
+            var sqlQuery2008 = $@"
+with aggr as (
+    select replace(convert(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added)) as [Key],
+        count(id) [Count]
+    from  [{_options.Schema}].{tableName}
+    where StatusName = @statusName
+    group by replace(convert(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added))
+)
+select [Key], [Count] from aggr with (nolock) where [Key] in @keys;";
+
+            //SQL Server 2012+ 
+            var sqlQuery = $@"
 with aggr as (
     select FORMAT(Added,'yyyy-MM-dd-HH') as [Key],
         count(id) [Count]
@@ -172,7 +188,7 @@ with aggr as (
 select [Key], [Count] from aggr with (nolock) where [Key] in @keys;";
 
             var valuesMap = connection.Query<TimelineCounter>(
-                    sqlQuery,
+                    _options.IsSqlServer2008 ? sqlQuery2008 : sqlQuery,
                     new { keys = keyMaps.Keys, statusName })
                 .ToDictionary(x => x.Key, x => x.Count);
 
