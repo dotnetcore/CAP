@@ -35,9 +35,9 @@ namespace DotNetCore.CAP
             logger.LogWarning($"The {retries}th retrying send a message failed. message id: {messageId} ");
         }
 
-        public static void MessageHasBeenSent(this ILogger logger, double seconds)
+        public static void MessageHasBeenSent(this ILogger logger, string name, string content)
         {
-            logger.LogDebug($"Message published. Took: {seconds} secs.");
+            logger.LogDebug($"Message published. name: {name}, content:{content}.");
         }
 
         public static void MessagePublishException(this ILogger logger, int messageId, string reason, Exception ex)
