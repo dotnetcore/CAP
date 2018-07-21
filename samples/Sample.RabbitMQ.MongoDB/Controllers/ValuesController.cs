@@ -31,7 +31,7 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
                 var collection = _client.GetDatabase("TEST").GetCollection<BsonDocument>("test");
                 collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
 
-                _capPublisher.PublishWithMongoSession("sample.rabbitmq.mongodb", DateTime.Now, session);
+                _capPublisher.PublishWithMongo("sample.rabbitmq.mongodb", DateTime.Now, session);
 
                 session.CommitTransaction();
             }
@@ -46,7 +46,7 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
                 try
                 {
                     session.StartTransaction();
-                    _capPublisher.PublishWithMongoSession("sample.rabbitmq.mongodb", DateTime.Now, session);
+                    _capPublisher.PublishWithMongo("sample.rabbitmq.mongodb", DateTime.Now, session);
                     throw new Exception("Foo");
                 }
                 catch (System.Exception ex)
@@ -60,7 +60,7 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
         [Route("~/publish_without_session")]
         public IActionResult PublishWithoutSession()
         {
-            _capPublisher.PublishWithMongoSession("sample.rabbitmq.mongodb", DateTime.Now);
+            _capPublisher.PublishWithMongo("sample.rabbitmq.mongodb", DateTime.Now);
             return Ok();
         }
 

@@ -55,8 +55,8 @@ namespace DotNetCore.CAP
         /// <param name="callbackName">callback subscriber name</param>
         void Publish<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null);
 
-        void PublishWithMongoSession<T>(string name, T contentObj, object mongoSession = null, string callbackName = null);
+        void PublishWithMongo<T>(string name, T contentObj, object mongoSession = null, string callbackName = null);
 
-        Task PublishWithMongoSessionAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null);
+        Task PublishWithMongoAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null);
     }
 }

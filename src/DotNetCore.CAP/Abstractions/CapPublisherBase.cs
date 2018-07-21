@@ -67,12 +67,12 @@ namespace DotNetCore.CAP.Abstractions
             return PublishWithTransAsync(name, contentObj, callbackName);
         }
 
-        public virtual void PublishWithMongoSession<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+        public virtual void PublishWithMongo<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
         {
             throw new NotImplementedException("Work for MongoDB only.");
         }
 
-        public virtual Task PublishWithMongoSessionAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+        public virtual Task PublishWithMongoAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
         {
             throw new NotImplementedException("Work for MongoDB only.");
         }

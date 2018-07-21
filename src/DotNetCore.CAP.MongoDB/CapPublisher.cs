@@ -50,7 +50,7 @@ namespace DotNetCore.CAP.MongoDB
             throw new System.NotImplementedException("Not work for MongoDB");
         }
 
-        public override void PublishWithMongoSession<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+        public override void PublishWithMongo<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
         {
             var session = mongoSession as IClientSessionHandle;
             if (session == null)
@@ -61,7 +61,7 @@ namespace DotNetCore.CAP.MongoDB
             PublishWithSession<T>(name, contentObj, session, callbackName);
         }
 
-        public override async Task PublishWithMongoSessionAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+        public override async Task PublishWithMongoAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
         {
             var session = mongoSession as IClientSessionHandle;
             if (session == null)
