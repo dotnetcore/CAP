@@ -169,12 +169,12 @@ namespace DotNetCore.CAP.Test
                 throw new NotImplementedException();
             }
 
-            public void PublishWithMongoSession<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+            public void PublishWithMongo<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
             {
                 throw new NotImplementedException();
             }
 
-            public Task PublishWithMongoSessionAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+            public Task PublishWithMongoAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
             {
                 throw new NotImplementedException();
             }
