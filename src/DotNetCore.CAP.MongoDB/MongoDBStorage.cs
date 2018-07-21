@@ -46,13 +46,13 @@ namespace DotNetCore.CAP.MongoDB
             var database = _client.GetDatabase(_options.Database);
             var names = (await database.ListCollectionNamesAsync())?.ToList();
 
-            if (!names.Any(n => n == _options.Received))
+            if (!names.Any(n => n == _options.ReceivedCollection))
             {
-                await database.CreateCollectionAsync(_options.Received);
+                await database.CreateCollectionAsync(_options.ReceivedCollection);
             }
-            if (!names.Any(n => n == _options.Published))
+            if (!names.Any(n => n == _options.PublishedCollection))
             {
-                await database.CreateCollectionAsync(_options.Published);
+                await database.CreateCollectionAsync(_options.PublishedCollection);
             }
             if (!names.Any(n => n == "Counter"))
             {
@@ -60,8 +60,8 @@ namespace DotNetCore.CAP.MongoDB
                 var collection = database.GetCollection<BsonDocument>("Counter");
                 await collection.InsertManyAsync(new BsonDocument[]
                 {
-                    new BsonDocument{{"_id", _options.Published}, {"sequence_value", 0}},
-                    new BsonDocument{{"_id", _options.Received}, {"sequence_value", 0}}
+                    new BsonDocument{{"_id", _options.PublishedCollection}, {"sequence_value", 0}},
+                    new BsonDocument{{"_id", _options.ReceivedCollection}, {"sequence_value", 0}}
                 });
             }
         }

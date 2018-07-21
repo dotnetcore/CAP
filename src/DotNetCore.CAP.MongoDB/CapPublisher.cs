@@ -29,8 +29,8 @@ namespace DotNetCore.CAP.MongoDB
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)
         {
-            var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
-            message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.Published);
+            var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
+            message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.PublishedCollection);
             collection.InsertOne(message);
             Enqueue(message);
         }
@@ -108,9 +108,9 @@ namespace DotNetCore.CAP.MongoDB
 
         private int Execute(IClientSessionHandle session, CapPublishedMessage message)
         {
-            message.Id = new MongoDBUtil().GetNextSequenceValue(_database, _options.Published, session);
+            message.Id = new MongoDBUtil().GetNextSequenceValue(_database, _options.PublishedCollection, session);
 
-            var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
+            var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
             if (_isInTransaction)
             {
                 collection.InsertOne(session, message);
@@ -162,8 +162,8 @@ namespace DotNetCore.CAP.MongoDB
 
         private async Task<int> ExecuteAsync(IClientSessionHandle session, CapPublishedMessage message)
         {
-            message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.Published, session);
-            var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
+            message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.PublishedCollection, session);
+            var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
             if (_isInTransaction)
             {
                 await collection.InsertOneAsync(session, message);

@@ -43,7 +43,7 @@ namespace DotNetCore.CAP.MongoDB.Test
         [Fact, Priority(2)]
         public void ChangeReceivedState_Test()
         {
-            var collection = _client.GetDatabase(_options.Database).GetCollection<CapReceivedMessage>(_options.Received);
+            var collection = _client.GetDatabase(_options.Database).GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
             var msg = collection.Find(x => true).FirstOrDefault();
             _connection.ChangeReceivedState(msg.Id, StatusName.Scheduled).Should().BeTrue();

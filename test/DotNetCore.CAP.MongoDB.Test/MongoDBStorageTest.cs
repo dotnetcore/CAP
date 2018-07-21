@@ -26,13 +26,13 @@ namespace DotNetCore.CAP.MongoDB.Test
             names.Should().Contain(options.Database);
 
             var collections = _client.GetDatabase(options.Database).ListCollectionNames()?.ToList();
-            collections.Should().Contain(options.Published);
-            collections.Should().Contain(options.Received);
+            collections.Should().Contain(options.PublishedCollection);
+            collections.Should().Contain(options.ReceivedCollection);
             collections.Should().Contain("Counter");
 
             var collection = _client.GetDatabase(options.Database).GetCollection<BsonDocument>("Counter");
-            collection.CountDocuments(new BsonDocument { { "_id", options.Published } }).Should().Be(1);
-            collection.CountDocuments(new BsonDocument { { "_id", options.Received } }).Should().Be(1);
+            collection.CountDocuments(new BsonDocument { { "_id", options.PublishedCollection } }).Should().Be(1);
+            collection.CountDocuments(new BsonDocument { { "_id", options.ReceivedCollection } }).Should().Be(1);
         }
     }
 }

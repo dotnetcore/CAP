@@ -26,10 +26,10 @@ namespace DotNetCore.CAP.MongoDB
 
         public async Task ProcessAsync(ProcessingContext context)
         {
-            _logger.LogDebug($"Collecting expired data from collection [{_options.Database}].[{_options.Published}].");
+            _logger.LogDebug($"Collecting expired data from collection [{_options.Database}].[{_options.PublishedCollection}].");
 
-            var publishedCollection = _database.GetCollection<CapPublishedMessage>(_options.Published);
-            var receivedCollection = _database.GetCollection<CapReceivedMessage>(_options.Received);
+            var publishedCollection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
+            var receivedCollection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
             await publishedCollection.BulkWriteAsync(new[]
             {

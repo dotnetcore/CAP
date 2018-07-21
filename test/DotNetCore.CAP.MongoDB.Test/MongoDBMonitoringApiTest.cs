@@ -29,19 +29,19 @@ namespace DotNetCore.CAP.MongoDB.Test
         {
             var helper = new MongoDBUtil();
             var database = _client.GetDatabase(_options.Database);
-            var collection = database.GetCollection<CapPublishedMessage>(_options.Published);
+            var collection = database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
             collection.InsertMany(new CapPublishedMessage[]
             {
                 new CapPublishedMessage
                 {
-                    Id = helper.GetNextSequenceValue(database,_options.Published),
+                    Id = helper.GetNextSequenceValue(database,_options.PublishedCollection),
                     Added = DateTime.Now.AddHours(-1),
                     StatusName = "Failed",
                     Content = "abc"
                 },
                 new CapPublishedMessage
                 {
-                    Id = helper.GetNextSequenceValue(database,_options.Published),
+                    Id = helper.GetNextSequenceValue(database,_options.PublishedCollection),
                     Added = DateTime.Now,
                     StatusName = "Failed",
                     Content = "bbc"

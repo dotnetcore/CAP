@@ -26,8 +26,8 @@ namespace DotNetCore.CAP.MongoDB
 
         public StatisticsDto GetStatistics()
         {
-            var publishedCollection = _database.GetCollection<CapPublishedMessage>(_options.Published);
-            var receivedCollection = _database.GetCollection<CapReceivedMessage>(_options.Received);
+            var publishedCollection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
+            var receivedCollection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
             var statistics = new StatisticsDto();
 
@@ -65,7 +65,7 @@ namespace DotNetCore.CAP.MongoDB
         {
             queryDto.StatusName = StatusName.Standardized(queryDto.StatusName);
 
-            var name = queryDto.MessageType == MessageType.Publish ? _options.Published : _options.Received;
+            var name = queryDto.MessageType == MessageType.Publish ? _options.PublishedCollection : _options.ReceivedCollection;
             var collection = _database.GetCollection<MessageDto>(name);
 
             var builder = Builders<MessageDto>.Filter;
@@ -99,22 +99,22 @@ namespace DotNetCore.CAP.MongoDB
 
         public int PublishedFailedCount()
         {
-            return GetNumberOfMessage(_options.Published, StatusName.Failed);
+            return GetNumberOfMessage(_options.PublishedCollection, StatusName.Failed);
         }
 
         public int PublishedSucceededCount()
         {
-            return GetNumberOfMessage(_options.Published, StatusName.Succeeded);
+            return GetNumberOfMessage(_options.PublishedCollection, StatusName.Succeeded);
         }
 
         public int ReceivedFailedCount()
         {
-            return GetNumberOfMessage(_options.Received, StatusName.Failed);
+            return GetNumberOfMessage(_options.ReceivedCollection, StatusName.Failed);
         }
 
         public int ReceivedSucceededCount()
         {
-            return GetNumberOfMessage(_options.Received, StatusName.Succeeded);
+            return GetNumberOfMessage(_options.ReceivedCollection, StatusName.Succeeded);
         }
 
         private int GetNumberOfMessage(string collectionName, string statusName)
@@ -126,7 +126,7 @@ namespace DotNetCore.CAP.MongoDB
 
         private IDictionary<DateTime, int> GetHourlyTimelineStats(MessageType type, string statusName)
         {
-            var collectionName = type == MessageType.Publish ? _options.Published : _options.Received;
+            var collectionName = type == MessageType.Publish ? _options.PublishedCollection : _options.ReceivedCollection;
             var endDate = DateTime.UtcNow;
 
             var groupby = new BsonDocument {

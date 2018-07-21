@@ -12,8 +12,8 @@ namespace DotNetCore.CAP.MongoDB
         /// </summary>
         public string Database { get; set; } = DefaultDatabase;
 
-        public string Received { get; } = "Received";
+        public string ReceivedCollection { get; } = "Received";
 
-        public string Published { get; } = "Published";
+        public string PublishedCollection { get; } = "Published";
     }
 }

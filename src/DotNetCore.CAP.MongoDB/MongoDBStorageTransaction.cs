@@ -38,7 +38,7 @@ namespace DotNetCore.CAP.MongoDB
                 throw new ArgumentNullException(nameof(message));
             }
 
-            var collection = _database.GetCollection<CapPublishedMessage>(_options.Published);
+            var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
 
             var updateDef = Builders<CapPublishedMessage>.Update
             .Set(x => x.Retries, message.Retries)
@@ -56,7 +56,7 @@ namespace DotNetCore.CAP.MongoDB
                 throw new ArgumentNullException(nameof(message));
             }
 
-            var collection = _database.GetCollection<CapReceivedMessage>(_options.Received);
+            var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
             var updateDef = Builders<CapReceivedMessage>.Update
             .Set(x => x.Retries, message.Retries)
