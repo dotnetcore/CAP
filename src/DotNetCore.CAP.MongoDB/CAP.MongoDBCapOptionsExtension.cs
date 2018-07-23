@@ -1,5 +1,6 @@
 using System;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,8 @@ namespace DotNetCore.CAP.MongoDB
             services.AddScoped<ICapPublisher, CapPublisher>();
             services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<ICollectProcessor, MongoDBCollectProcessor>();
+
+            services.AddTransient<IMongoTransaction, MongoTransaction>();
 
             var options = new MongoDBOptions();
             _configure?.Invoke(options);

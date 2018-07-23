@@ -12,16 +12,14 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
-        private readonly IMongoClient _client;
         private readonly MongoDBOptions _options;
         private readonly IMongoDatabase _database;
-        private bool _isInTransaction = true;
+        private bool _usingTransaction = true;
 
         public CapPublisher(ILogger<CapPublisherBase> logger, IDispatcher dispatcher,
         IMongoClient client, MongoDBOptions options, IServiceProvider provider)
         : base(logger, dispatcher)
         {
-            _client = client;
             _options = options;
             _database = client.GetDatabase(_options.Database);
             ServiceProvider = provider;
@@ -50,29 +48,29 @@ namespace DotNetCore.CAP.MongoDB
             throw new System.NotImplementedException("Not work for MongoDB");
         }
 
-        public override void PublishWithMongo<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+        public override void PublishWithMongo<T>(string name, T contentObj, IMongoTransaction mongoTransaction = null, string callbackName = null)
         {
-            var session = mongoSession as IClientSessionHandle;
-            if (session == null)
+            if (mongoTransaction == null)
             {
-                _isInTransaction = false;
+                _usingTransaction = false;
+                mongoTransaction = new NullMongoTransaction();
             }
 
-            PublishWithSession<T>(name, contentObj, session, callbackName);
+            PublishWithTransaction<T>(name, contentObj, mongoTransaction, callbackName);
         }
 
-        public override async Task PublishWithMongoAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+        public override async Task PublishWithMongoAsync<T>(string name, T contentObj, IMongoTransaction mongoTransaction = null, string callbackName = null)
         {
-            var session = mongoSession as IClientSessionHandle;
-            if (session == null)
+            if (mongoTransaction == null)
             {
-                _isInTransaction = false;
+                _usingTransaction = false;
+                mongoTransaction = new NullMongoTransaction();
             }
 
-            await PublishWithSessionAsync<T>(name, contentObj, session, callbackName);
+            await PublishWithSessionAsync<T>(name, contentObj, mongoTransaction, callbackName);
         }
 
-        private void PublishWithSession<T>(string name, T contentObj, IClientSessionHandle session, string callbackName)
+        private void PublishWithTransaction<T>(string name, T contentObj, IMongoTransaction transaction, string callbackName)
         {
             Guid operationId = default(Guid);
 
@@ -85,12 +83,19 @@ namespace DotNetCore.CAP.MongoDB
                 StatusName = StatusName.Scheduled
             };
 
+            var session = transaction.GetSession();
+
             try
             {
                 operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
                 var id = Execute(session, message);
 
-                if (!_isInTransaction && id > 0)
+                if (transaction.AutoCommit)
+                {
+                    session.CommitTransaction();
+                }
+
+                if (!_usingTransaction || (transaction.AutoCommit && id > 0))
                 {
                     _logger.LogInformation($"message [{message}] has been persisted in the database.");
                     s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
@@ -111,7 +116,7 @@ namespace DotNetCore.CAP.MongoDB
             message.Id = new MongoDBUtil().GetNextSequenceValue(_database, _options.PublishedCollection, session);
 
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
-            if (_isInTransaction)
+            if (_usingTransaction)
             {
                 collection.InsertOne(session, message);
             }
@@ -123,7 +128,7 @@ namespace DotNetCore.CAP.MongoDB
         }
 
 
-        private async Task PublishWithSessionAsync<T>(string name, T contentObj, IClientSessionHandle session, string callbackName)
+        private async Task PublishWithSessionAsync<T>(string name, T contentObj, IMongoTransaction transaction, string callbackName)
         {
             Guid operationId = default(Guid);
             var content = Serialize(contentObj, callbackName);
@@ -135,13 +140,20 @@ namespace DotNetCore.CAP.MongoDB
                 StatusName = StatusName.Scheduled
             };
 
+            var session = transaction.GetSession();
+
             try
             {
                 operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
 
                 var id = await ExecuteAsync(session, message);
 
-                if (!_isInTransaction && id > 0)
+                if (transaction.AutoCommit)
+                {
+                    await session.CommitTransactionAsync();
+                }
+
+                if (!_usingTransaction || (transaction.AutoCommit && id > 0))
                 {
                     _logger.LogInformation($"message [{message}] has been persisted in the database.");
                     s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
@@ -164,7 +176,7 @@ namespace DotNetCore.CAP.MongoDB
         {
             message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.PublishedCollection, session);
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
-            if (_isInTransaction)
+            if (_usingTransaction)
             {
                 await collection.InsertOneAsync(session, message);
             }
