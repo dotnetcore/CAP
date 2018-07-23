@@ -76,7 +76,7 @@ namespace DotNetCore.CAP.MongoDB
                 mongoTransaction = new NullMongoTransaction();
             }
 
-            await PublishWithSessionAsync<T>(name, contentObj, mongoTransaction, callbackName);
+            await PublishWithTransactionAsync<T>(name, contentObj, mongoTransaction, callbackName);
         }
 
         private void PublishWithTransaction<T>(string name, T contentObj, IMongoTransaction transaction, string callbackName)
@@ -137,7 +137,8 @@ namespace DotNetCore.CAP.MongoDB
             return message.Id;
         }
 
-        private async Task PublishWithSessionAsync<T>(string name, T contentObj, IMongoTransaction transaction, string callbackName)
+
+        private async Task PublishWithTransactionAsync<T>(string name, T contentObj, IMongoTransaction transaction, string callbackName)
         {
             var operationId = default(Guid);
             var content = Serialize(contentObj, callbackName);
