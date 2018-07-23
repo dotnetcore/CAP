@@ -39,3 +39,5 @@ Properties
 /src/DotNetCore.CAP/packages.config
 /src/DotNetCore.CAP/DotNetCore.CAP.Net47.csproj
 /NuGet.config
+.vscode/*
+samples/Sample.RabbitMQ.MongoDB/appsettings.Development.json
