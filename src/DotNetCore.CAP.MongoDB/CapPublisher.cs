@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.MongoDB
             : base(logger, dispatcher)
         {
             _options = options;
-            _database = client.GetDatabase(_options.Database);
+            _database = client.GetDatabase(_options.DatabaseName);
             ServiceProvider = provider;
         }
 

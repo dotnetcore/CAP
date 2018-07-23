@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.MongoDB
         public MongoDBStorageTransaction(IMongoClient client, MongoDBOptions options)
         {
             _options = options;
-            _database = client.GetDatabase(options.Database);
+            _database = client.GetDatabase(options.DatabaseName);
             _session = client.StartSession();
             _session.StartTransaction();
         }

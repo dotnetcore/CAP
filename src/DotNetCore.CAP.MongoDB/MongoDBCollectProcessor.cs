@@ -23,13 +23,13 @@ namespace DotNetCore.CAP.MongoDB
         {
             _options = options;
             _logger = logger;
-            _database = client.GetDatabase(_options.Database);
+            _database = client.GetDatabase(_options.DatabaseName);
         }
 
         public async Task ProcessAsync(ProcessingContext context)
         {
             _logger.LogDebug(
-                $"Collecting expired data from collection [{_options.Database}].[{_options.PublishedCollection}].");
+                $"Collecting expired data from collection [{_options.PublishedCollection}].");
 
             var publishedCollection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
             var receivedCollection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);

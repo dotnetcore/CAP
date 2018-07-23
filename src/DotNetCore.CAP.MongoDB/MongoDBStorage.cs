@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.MongoDB
                 return;
             }
 
-            var database = _client.GetDatabase(_options.Database);
+            var database = _client.GetDatabase(_options.DatabaseName);
             var names = (await database.ListCollectionNamesAsync(cancellationToken: cancellationToken))?.ToList();
 
             if (!names.Any(n => n == _options.ReceivedCollection))
@@ -60,10 +60,10 @@ namespace DotNetCore.CAP.MongoDB
                     cancellationToken: cancellationToken);
             }
 
-            if (names.All(n => n != "Counter"))
+            if (names.All(n => n != MongoDBOptions.CounterCollection))
             {
-                await database.CreateCollectionAsync("Counter", cancellationToken: cancellationToken);
-                var collection = database.GetCollection<BsonDocument>("Counter");
+                await database.CreateCollectionAsync(MongoDBOptions.CounterCollection, cancellationToken: cancellationToken);
+                var collection = database.GetCollection<BsonDocument>(MongoDBOptions.CounterCollection);
                 await collection.InsertManyAsync(new[]
                 {
                     new BsonDocument {{"_id", _options.PublishedCollection}, {"sequence_value", 0}},
