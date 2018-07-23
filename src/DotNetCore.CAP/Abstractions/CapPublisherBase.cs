@@ -15,11 +15,11 @@ namespace DotNetCore.CAP.Abstractions
     public abstract class CapPublisherBase : ICapPublisher, IDisposable
     {
         private readonly IDispatcher _dispatcher;
-        private readonly ILogger _logger;
+        protected readonly ILogger _logger;
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
-        private static readonly DiagnosticListener s_diagnosticListener =
+        protected static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
         protected CapPublisherBase(ILogger<CapPublisherBase> logger, IDispatcher dispatcher)
@@ -65,6 +65,16 @@ namespace DotNetCore.CAP.Abstractions
             PrepareConnectionForAdo(dbTransaction);
 
             return PublishWithTransAsync(name, contentObj, callbackName);
+        }
+
+        public virtual void PublishWithMongo<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+        {
+            throw new NotImplementedException("Work for MongoDB only.");
+        }
+
+        public virtual Task PublishWithMongoAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null)
+        {
+            throw new NotImplementedException("Work for MongoDB only.");
         }
 
         protected void Enqueue(CapPublishedMessage message)
@@ -205,7 +215,7 @@ namespace DotNetCore.CAP.Abstractions
             try
             {
                 Console.WriteLine("================22222222222222=====================");
-                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);               
+                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
 
                 var id = Execute(DbConnection, DbTransaction, message);
                 Console.WriteLine("================777777777777777777777=====================");
