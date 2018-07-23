@@ -16,9 +16,9 @@ namespace DotNetCore.CAP.MongoDB
         private readonly ILogger<MongoDBStorage> _logger;
 
         public MongoDBStorage(CapOptions capOptions,
-        MongoDBOptions options,
-        IMongoClient client,
-        ILogger<MongoDBStorage> logger)
+            MongoDBOptions options,
+            IMongoClient client,
+            ILogger<MongoDBStorage> logger)
         {
             _capOptions = capOptions;
             _options = options;
@@ -44,26 +44,30 @@ namespace DotNetCore.CAP.MongoDB
             }
 
             var database = _client.GetDatabase(_options.Database);
-            var names = (await database.ListCollectionNamesAsync())?.ToList();
+            var names = (await database.ListCollectionNamesAsync(cancellationToken: cancellationToken))?.ToList();
 
             if (!names.Any(n => n == _options.ReceivedCollection))
             {
-                await database.CreateCollectionAsync(_options.ReceivedCollection);
+                await database.CreateCollectionAsync(_options.ReceivedCollection, cancellationToken: cancellationToken);
             }
-            if (!names.Any(n => n == _options.PublishedCollection))
+
+            if (names.All(n => n != _options.PublishedCollection))
             {
-                await database.CreateCollectionAsync(_options.PublishedCollection);
+                await database.CreateCollectionAsync(_options.PublishedCollection, cancellationToken: cancellationToken);
             }
-            if (!names.Any(n => n == "Counter"))
+
+            if (names.All(n => n != "Counter"))
             {
-                await database.CreateCollectionAsync("Counter");
+                await database.CreateCollectionAsync("Counter", cancellationToken: cancellationToken);
                 var collection = database.GetCollection<BsonDocument>("Counter");
                 await collection.InsertManyAsync(new BsonDocument[]
                 {
                     new BsonDocument{{"_id", _options.PublishedCollection}, {"sequence_value", 0}},
                     new BsonDocument{{"_id", _options.ReceivedCollection}, {"sequence_value", 0}}
-                });
+                }, cancellationToken: cancellationToken);
             }
+
+            _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
     }
 }

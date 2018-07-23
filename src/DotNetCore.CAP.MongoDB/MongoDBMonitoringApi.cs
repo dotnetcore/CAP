@@ -12,16 +12,15 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBMonitoringApi : IMonitoringApi
     {
-        private IMongoClient _client;
-        private MongoDBOptions _options;
-        private IMongoDatabase _database;
+        private readonly MongoDBOptions _options;
+        private readonly IMongoDatabase _database;
 
         public MongoDBMonitoringApi(IMongoClient client, MongoDBOptions options)
         {
-            _client = client ?? throw new ArgumentNullException(nameof(client));
+            var mongoClient = client ?? throw new ArgumentNullException(nameof(client));
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
-            _database = _client.GetDatabase(_options.Database);
+            _database = mongoClient.GetDatabase(_options.Database);
         }
 
         public StatisticsDto GetStatistics()
@@ -87,12 +86,12 @@ namespace DotNetCore.CAP.MongoDB
                 filter = filter & builder.Regex(x => x.Content, ".*" + queryDto.Content + ".*");
             }
 
-            var result =
-            collection.Find(filter)
-            .SortByDescending(x => x.Added)
-            .Skip(queryDto.PageSize * queryDto.CurrentPage)
-            .Limit(queryDto.PageSize)
-            .ToList();
+            var result = collection
+                .Find(filter)
+                .SortByDescending(x => x.Added)
+                .Skip(queryDto.PageSize * queryDto.CurrentPage)
+                .Limit(queryDto.PageSize)
+                .ToList();
 
             return result;
         }
@@ -130,30 +129,45 @@ namespace DotNetCore.CAP.MongoDB
             var endDate = DateTime.UtcNow;
 
             var groupby = new BsonDocument {
-                { "$group", new BsonDocument{
-                    { "_id", new BsonDocument {
-                            { "Key", new BsonDocument {
-                                { "$dateToString", new BsonDocument {
-                                    { "format", "%Y-%m-%d %H:00:00"},
-                                    { "date", "$Added"}
-                                }}
-                            }}
-                        }
-                },
-                { "Count", new BsonDocument{
-                    { "$sum", 1}
-                }}
-                }}
+                {
+                    "$group", new BsonDocument {
+                        { "_id", new BsonDocument {
+                                { "Key", new BsonDocument{
+                                        { "$dateToString", new BsonDocument {
+                                                { "format", "%Y-%m-%d %H:00:00"},
+                                                { "date", "$Added"}
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        { "Count", new BsonDocument{{ "$sum", 1}}}
+                    }
+                }
             };
 
-            var match = new BsonDocument { { "$match", new BsonDocument {
-                { "Added", new BsonDocument { { "$gt", endDate.AddHours(-24) } } },
-                { "StatusName", new BsonDocument { { "$eq", statusName} }
-                } } } };
-            var pipeline = new BsonDocument[] { match, groupby };
+            var match = new BsonDocument {
+                { "$match", new BsonDocument {
+                        { "Added", new BsonDocument
+                            {
+                                { "$gt", endDate.AddHours(-24) }
+                            }
+                        },
+                        { "StatusName",
+                            new BsonDocument
+                            {
+                                { "$eq", statusName}
+                            }
+                        }
+                    }
+                }
+            };
+
+            var pipeline = new[] { match, groupby };
 
             var collection = _database.GetCollection<BsonDocument>(collectionName);
-            var result = collection.Aggregate<BsonDocument>(pipeline: pipeline).ToList();
+            var result = collection.Aggregate<BsonDocument>(pipeline).ToList();
 
             var dic = new Dictionary<DateTime, int>();
             for (var i = 0; i < 24; i++)

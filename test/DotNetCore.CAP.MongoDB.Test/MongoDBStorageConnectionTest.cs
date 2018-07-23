@@ -12,10 +12,10 @@ namespace DotNetCore.CAP.MongoDB.Test
     [TestCaseOrderer(PriorityOrderer.Name, PriorityOrderer.Assembly)]
     public class MongoDBStorageConnectionTest
     {
-        private MongoClient _client;
-        private MongoDBOptions _options;
-        private MongoDBStorage _storage;
-        private IStorageConnection _connection;
+        private readonly MongoClient _client;
+        private readonly MongoDBOptions _options;
+        private readonly MongoDBStorage _storage;
+        private readonly IStorageConnection _connection;
 
         public MongoDBStorageConnectionTest()
         {

@@ -10,8 +10,8 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBStorageConnection : IStorageConnection
     {
-        private CapOptions _capOptions;
-        private MongoDBOptions _options;
+        private readonly CapOptions _capOptions;
+        private readonly MongoDBOptions _options;
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
 
@@ -58,10 +58,6 @@ namespace DotNetCore.CAP.MongoDB
             return new MongoDBStorageTransaction(_client, _options);
         }
 
-        public void Dispose()
-        {
-        }
-
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
         {
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
@@ -72,13 +68,10 @@ namespace DotNetCore.CAP.MongoDB
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
-            return await
-            collection.Find(x =>
-            x.Retries < _capOptions.FailedRetryCount
-            && x.Added < fourMinsAgo
-            && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
-            .Limit(200)
-            .ToListAsync();
+            return await collection
+                .Find(x => x.Retries < _capOptions.FailedRetryCount && x.Added < fourMinsAgo && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
+                .Limit(200)
+                .ToListAsync();
         }
 
         public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
@@ -92,12 +85,10 @@ namespace DotNetCore.CAP.MongoDB
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
             var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
-            return await
-            collection.Find(x =>
-            x.Retries < _capOptions.FailedRetryCount
-            && x.Added < fourMinsAgo
-            && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled)
-            ).Limit(200).ToListAsync();
+            return await collection
+                .Find(x => x.Retries < _capOptions.FailedRetryCount && x.Added < fourMinsAgo && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
+                .Limit(200)
+                .ToListAsync();
         }
 
         public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
@@ -113,6 +104,10 @@ namespace DotNetCore.CAP.MongoDB
             collection.InsertOne(message);
 
             return message.Id;
+        }
+        public void Dispose()
+        {
+
         }
     }
 }

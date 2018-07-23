@@ -11,17 +11,16 @@ namespace DotNetCore.CAP.MongoDB.Test
 {
     public class MongoDBUtilTest
     {
-        private readonly MongoClient _client;
         private readonly IMongoDatabase _database;
         string _recieved = "ReceivedTest";
 
         public MongoDBUtilTest()
         {
-            _client = new MongoClient(ConnectionUtil.ConnectionString);
-            _database = _client.GetDatabase("CAP_Test");
+            var client = new MongoClient(ConnectionUtil.ConnectionString);
+            _database = client.GetDatabase("CAP_Test");
 
             //Initialize MongoDB
-            if (!_database.ListCollectionNames().ToList().Any(x => x == "Counter"))
+            if (_database.ListCollectionNames().ToList().All(x => x != "Counter"))
             {
                 var collection = _database.GetCollection<BsonDocument>("Counter");
                 collection.InsertOne(new BsonDocument { { "_id", _recieved }, { "sequence_value", 0 } });
