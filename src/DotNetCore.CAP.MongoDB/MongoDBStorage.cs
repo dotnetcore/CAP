@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,9 +14,9 @@ namespace DotNetCore.CAP.MongoDB
     public class MongoDBStorage : IStorage
     {
         private readonly CapOptions _capOptions;
-        private readonly MongoDBOptions _options;
         private readonly IMongoClient _client;
         private readonly ILogger<MongoDBStorage> _logger;
+        private readonly MongoDBOptions _options;
 
         public MongoDBStorage(CapOptions capOptions,
             MongoDBOptions options,
@@ -53,17 +56,18 @@ namespace DotNetCore.CAP.MongoDB
 
             if (names.All(n => n != _options.PublishedCollection))
             {
-                await database.CreateCollectionAsync(_options.PublishedCollection, cancellationToken: cancellationToken);
+                await database.CreateCollectionAsync(_options.PublishedCollection,
+                    cancellationToken: cancellationToken);
             }
 
             if (names.All(n => n != "Counter"))
             {
                 await database.CreateCollectionAsync("Counter", cancellationToken: cancellationToken);
                 var collection = database.GetCollection<BsonDocument>("Counter");
-                await collection.InsertManyAsync(new BsonDocument[]
+                await collection.InsertManyAsync(new[]
                 {
-                    new BsonDocument{{"_id", _options.PublishedCollection}, {"sequence_value", 0}},
-                    new BsonDocument{{"_id", _options.ReceivedCollection}, {"sequence_value", 0}}
+                    new BsonDocument {{"_id", _options.PublishedCollection}, {"sequence_value", 0}},
+                    new BsonDocument {{"_id", _options.ReceivedCollection}, {"sequence_value", 0}}
                 }, cancellationToken: cancellationToken);
             }
 

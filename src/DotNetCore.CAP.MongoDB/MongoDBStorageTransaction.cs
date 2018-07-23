@@ -1,14 +1,17 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Models;
 using MongoDB.Driver;
-using System;
 
 namespace DotNetCore.CAP.MongoDB
 {
     internal class MongoDBStorageTransaction : IStorageTransaction
     {
-        private readonly MongoDBOptions _options;
         private readonly IMongoDatabase _database;
+        private readonly MongoDBOptions _options;
         private readonly IClientSessionHandle _session;
 
         public MongoDBStorageTransaction(IMongoClient client, MongoDBOptions options)
