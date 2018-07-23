@@ -5,9 +5,9 @@ using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
 {
-    public class MongoDBUtil
+    internal class MongoDBUtil
     {
-        FindOneAndUpdateOptions<BsonDocument> _options = new FindOneAndUpdateOptions<BsonDocument>()
+        readonly FindOneAndUpdateOptions<BsonDocument> _options = new FindOneAndUpdateOptions<BsonDocument>()
         {
             ReturnDocument = ReturnDocument.After
         };
@@ -43,15 +43,9 @@ namespace DotNetCore.CAP.MongoDB
             var filter = new BsonDocument { { "_id", collectionName } };
             var updateDef = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
 
-            BsonDocument result;
-            if (session == null)
-            {
-                result = collection.FindOneAndUpdate(filter, updateDef, _options);
-            }
-            else
-            {
-                result = collection.FindOneAndUpdate(session, filter, updateDef, _options);
-            }
+            var result = session == null
+                ? collection.FindOneAndUpdate(filter, updateDef, _options)
+                : collection.FindOneAndUpdate(session, filter, updateDef, _options);
 
             if (result.TryGetValue("sequence_value", out var value))
             {

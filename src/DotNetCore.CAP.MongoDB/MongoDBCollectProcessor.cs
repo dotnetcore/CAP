@@ -9,16 +9,15 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBCollectProcessor : ICollectProcessor
     {
-        private readonly IMongoClient _client;
         private readonly MongoDBOptions _options;
         private readonly ILogger _logger;
         private readonly IMongoDatabase _database;
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
-        public MongoDBCollectProcessor(IMongoClient client, MongoDBOptions options,
-        ILogger<MongoDBCollectProcessor> logger)
+        public MongoDBCollectProcessor(ILogger<MongoDBCollectProcessor> logger,
+            MongoDBOptions options,
+            IMongoClient client)
         {
-            _client = client;
             _options = options;
             _logger = logger;
             _database = client.GetDatabase(_options.Database);

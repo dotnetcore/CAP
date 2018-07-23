@@ -7,7 +7,7 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBCapOptionsExtension : ICapOptionsExtension
     {
-        private Action<MongoDBOptions> _configure;
+        private readonly Action<MongoDBOptions> _configure;
 
         public MongoDBCapOptionsExtension(Action<MongoDBOptions> configure)
         {

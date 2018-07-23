@@ -7,17 +7,15 @@ namespace DotNetCore.CAP.MongoDB
 {
     internal class MongoDBStorageTransaction : IStorageTransaction
     {
-        private IMongoClient _client;
         private readonly MongoDBOptions _options;
         private readonly IMongoDatabase _database;
         private readonly IClientSessionHandle _session;
 
         public MongoDBStorageTransaction(IMongoClient client, MongoDBOptions options)
         {
-            _client = client;
             _options = options;
             _database = client.GetDatabase(options.Database);
-            _session = _client.StartSession();
+            _session = client.StartSession();
             _session.StartTransaction();
         }
 
@@ -41,10 +39,10 @@ namespace DotNetCore.CAP.MongoDB
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
 
             var updateDef = Builders<CapPublishedMessage>.Update
-            .Set(x => x.Retries, message.Retries)
-            .Set(x => x.Content, message.Content)
-            .Set(x => x.ExpiresAt, message.ExpiresAt)
-            .Set(x => x.StatusName, message.StatusName);
+                .Set(x => x.Retries, message.Retries)
+                .Set(x => x.Content, message.Content)
+                .Set(x => x.ExpiresAt, message.ExpiresAt)
+                .Set(x => x.StatusName, message.StatusName);
 
             collection.FindOneAndUpdate(_session, x => x.Id == message.Id, updateDef);
         }
@@ -59,10 +57,10 @@ namespace DotNetCore.CAP.MongoDB
             var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
             var updateDef = Builders<CapReceivedMessage>.Update
-            .Set(x => x.Retries, message.Retries)
-            .Set(x => x.Content, message.Content)
-            .Set(x => x.ExpiresAt, message.ExpiresAt)
-            .Set(x => x.StatusName, message.StatusName);
+                .Set(x => x.Retries, message.Retries)
+                .Set(x => x.Content, message.Content)
+                .Set(x => x.ExpiresAt, message.ExpiresAt)
+                .Set(x => x.StatusName, message.StatusName);
 
             collection.FindOneAndUpdate(_session, x => x.Id == message.Id, updateDef);
         }

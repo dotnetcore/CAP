@@ -8,7 +8,7 @@ namespace DotNetCore.CAP.MongoDB.Test
 {
     public class MongoDBTest
     {
-        private MongoClient _client;
+        private readonly MongoClient _client;
 
         public MongoDBTest()
         {

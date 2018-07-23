@@ -12,9 +12,9 @@ namespace DotNetCore.CAP.MongoDB.Test
 {
     public class MongoDBMonitoringApiTest
     {
-        private MongoClient _client;
-        private MongoDBOptions _options;
-        private MongoDBMonitoringApi _api;
+        private readonly MongoClient _client;
+        private readonly MongoDBOptions _options;
+        private readonly MongoDBMonitoringApi _api;
 
         public MongoDBMonitoringApiTest()
         {

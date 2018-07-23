@@ -12,16 +12,18 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class CapPublisher : CapPublisherBase, ICallbackPublisher
     {
-        private readonly IMongoClient _client;
         private readonly MongoDBOptions _options;
         private readonly IMongoDatabase _database;
         private bool _isInTransaction = true;
 
-        public CapPublisher(ILogger<CapPublisherBase> logger, IDispatcher dispatcher,
-        IMongoClient client, MongoDBOptions options, IServiceProvider provider)
-        : base(logger, dispatcher)
+        public CapPublisher(
+            ILogger<CapPublisherBase> logger,
+            IDispatcher dispatcher,
+            IMongoClient client,
+            MongoDBOptions options,
+            IServiceProvider provider)
+            : base(logger, dispatcher)
         {
-            _client = client;
             _options = options;
             _database = client.GetDatabase(_options.Database);
             ServiceProvider = provider;
@@ -122,7 +124,6 @@ namespace DotNetCore.CAP.MongoDB
             return message.Id;
         }
 
-
         private async Task PublishWithSessionAsync<T>(string name, T contentObj, IClientSessionHandle session, string callbackName)
         {
             Guid operationId = default(Guid);
@@ -159,7 +160,6 @@ namespace DotNetCore.CAP.MongoDB
                 throw;
             }
         }
-
         private async Task<int> ExecuteAsync(IClientSessionHandle session, CapPublishedMessage message)
         {
             message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.PublishedCollection, session);

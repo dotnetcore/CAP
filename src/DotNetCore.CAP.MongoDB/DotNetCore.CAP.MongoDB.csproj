@@ -1,12 +1,19 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>DotNetCore.CAP.MongoDB</AssemblyName>
+    <PackageTags>$(PackageTags);MongoDB</PackageTags>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <DocumentationFile>bin\$(Configuration)\netstandard2.0\DotNetCore.CAP.MongoDB.xml</DocumentationFile>
+    <NoWarn>1701;1702;1705;CS1591</NoWarn>
+  </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
   </ItemGroup>
-
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="MongoDB.Bson" Version="2.7.0" />
