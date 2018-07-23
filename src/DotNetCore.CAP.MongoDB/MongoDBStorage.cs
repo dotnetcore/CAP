@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,14 +14,14 @@ namespace DotNetCore.CAP.MongoDB
     public class MongoDBStorage : IStorage
     {
         private readonly CapOptions _capOptions;
-        private readonly MongoDBOptions _options;
         private readonly IMongoClient _client;
         private readonly ILogger<MongoDBStorage> _logger;
+        private readonly MongoDBOptions _options;
 
         public MongoDBStorage(CapOptions capOptions,
-        MongoDBOptions options,
-        IMongoClient client,
-        ILogger<MongoDBStorage> logger)
+            MongoDBOptions options,
+            IMongoClient client,
+            ILogger<MongoDBStorage> logger)
         {
             _capOptions = capOptions;
             _options = options;
@@ -43,27 +46,32 @@ namespace DotNetCore.CAP.MongoDB
                 return;
             }
 
-            var database = _client.GetDatabase(_options.Database);
-            var names = (await database.ListCollectionNamesAsync())?.ToList();
+            var database = _client.GetDatabase(_options.DatabaseName);
+            var names = (await database.ListCollectionNamesAsync(cancellationToken: cancellationToken))?.ToList();
 
             if (!names.Any(n => n == _options.ReceivedCollection))
             {
-                await database.CreateCollectionAsync(_options.ReceivedCollection);
+                await database.CreateCollectionAsync(_options.ReceivedCollection, cancellationToken: cancellationToken);
             }
-            if (!names.Any(n => n == _options.PublishedCollection))
+
+            if (names.All(n => n != _options.PublishedCollection))
             {
-                await database.CreateCollectionAsync(_options.PublishedCollection);
+                await database.CreateCollectionAsync(_options.PublishedCollection,
+                    cancellationToken: cancellationToken);
             }
-            if (!names.Any(n => n == "Counter"))
+
+            if (names.All(n => n != MongoDBOptions.CounterCollection))
             {
-                await database.CreateCollectionAsync("Counter");
-                var collection = database.GetCollection<BsonDocument>("Counter");
-                await collection.InsertManyAsync(new BsonDocument[]
+                await database.CreateCollectionAsync(MongoDBOptions.CounterCollection, cancellationToken: cancellationToken);
+                var collection = database.GetCollection<BsonDocument>(MongoDBOptions.CounterCollection);
+                await collection.InsertManyAsync(new[]
                 {
-                    new BsonDocument{{"_id", _options.PublishedCollection}, {"sequence_value", 0}},
-                    new BsonDocument{{"_id", _options.ReceivedCollection}, {"sequence_value", 0}}
-                });
+                    new BsonDocument {{"_id", _options.PublishedCollection}, {"sequence_value", 0}},
+                    new BsonDocument {{"_id", _options.ReceivedCollection}, {"sequence_value", 0}}
+                }, cancellationToken: cancellationToken);
             }
+
+            _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
     }
 }

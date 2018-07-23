@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Abstractions;
@@ -8,7 +11,7 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBCapOptionsExtension : ICapOptionsExtension
     {
-        private Action<MongoDBOptions> _configure;
+        private readonly Action<MongoDBOptions> _configure;
 
         public MongoDBCapOptionsExtension(Action<MongoDBOptions> configure)
         {

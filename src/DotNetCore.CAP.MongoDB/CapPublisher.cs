@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Data;
 using System.Threading.Tasks;
@@ -16,12 +19,16 @@ namespace DotNetCore.CAP.MongoDB
         private readonly IMongoDatabase _database;
         private bool _usingTransaction = true;
 
-        public CapPublisher(ILogger<CapPublisherBase> logger, IDispatcher dispatcher,
-        IMongoClient client, MongoDBOptions options, IServiceProvider provider)
-        : base(logger, dispatcher)
+        public CapPublisher(
+            ILogger<CapPublisherBase> logger,
+            IDispatcher dispatcher,
+            IMongoClient client,
+            MongoDBOptions options,
+            IServiceProvider provider)
+            : base(logger, dispatcher)
         {
             _options = options;
-            _database = client.GetDatabase(_options.Database);
+            _database = client.GetDatabase(_options.DatabaseName);
             ServiceProvider = provider;
         }
 
@@ -33,19 +40,21 @@ namespace DotNetCore.CAP.MongoDB
             Enqueue(message);
         }
 
-        protected override int Execute(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
+        protected override int Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
+            CapPublishedMessage message)
         {
-            throw new System.NotImplementedException("Not work for MongoDB");
+            throw new NotImplementedException("Not work for MongoDB");
         }
 
-        protected override Task<int> ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction, CapPublishedMessage message)
+        protected override Task<int> ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
+            CapPublishedMessage message)
         {
-            throw new System.NotImplementedException("Not work for MongoDB");
+            throw new NotImplementedException("Not work for MongoDB");
         }
 
         protected override void PrepareConnectionForEF()
         {
-            throw new System.NotImplementedException("Not work for MongoDB");
+            throw new NotImplementedException("Not work for MongoDB");
         }
 
         public override void PublishWithMongo<T>(string name, T contentObj, IMongoTransaction mongoTransaction = null, string callbackName = null)
@@ -72,7 +81,7 @@ namespace DotNetCore.CAP.MongoDB
 
         private void PublishWithTransaction<T>(string name, T contentObj, IMongoTransaction transaction, string callbackName)
         {
-            Guid operationId = default(Guid);
+            var operationId = default(Guid);
 
             var content = Serialize(contentObj, callbackName);
 
@@ -103,7 +112,7 @@ namespace DotNetCore.CAP.MongoDB
                     Enqueue(message);
                 }
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 _logger.LogError(e, "An exception was occurred when publish message. message:" + name);
                 s_diagnosticListener.WritePublishMessageStoreError(operationId, message, e);
@@ -124,13 +133,13 @@ namespace DotNetCore.CAP.MongoDB
             {
                 collection.InsertOne(message);
             }
+
             return message.Id;
         }
 
-
         private async Task PublishWithSessionAsync<T>(string name, T contentObj, IMongoTransaction transaction, string callbackName)
         {
-            Guid operationId = default(Guid);
+            var operationId = default(Guid);
             var content = Serialize(contentObj, callbackName);
 
             var message = new CapPublishedMessage
@@ -163,7 +172,7 @@ namespace DotNetCore.CAP.MongoDB
                     Enqueue(message);
                 }
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 _logger.LogError(e, "An exception was occurred when publish message async. exception message:" + name);
                 s_diagnosticListener.WritePublishMessageStoreError(operationId, message, e);
@@ -174,7 +183,8 @@ namespace DotNetCore.CAP.MongoDB
 
         private async Task<int> ExecuteAsync(IClientSessionHandle session, CapPublishedMessage message)
         {
-            message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.PublishedCollection, session);
+            message.Id =
+                await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.PublishedCollection, session);
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
             if (_usingTransaction)
             {
@@ -184,6 +194,7 @@ namespace DotNetCore.CAP.MongoDB
             {
                 await collection.InsertOneAsync(message);
             }
+
             return message.Id;
         }
     }

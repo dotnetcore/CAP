@@ -1,47 +1,36 @@
-using MongoDB.Driver;
-using DotNetCore.CAP.MongoDB;
-using Xunit;
 using System;
-using DotNetCore.CAP.Models;
-using FluentAssertions;
+using System.Linq;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
-using System.Linq;
+using DotNetCore.CAP.Models;
+using FluentAssertions;
+using Xunit;
 
 namespace DotNetCore.CAP.MongoDB.Test
 {
-    public class MongoDBMonitoringApiTest
+    [Collection("MongoDB")]
+    public class MongoDBMonitoringApiTest : DatabaseTestHost
     {
-        private MongoClient _client;
-        private MongoDBOptions _options;
-        private MongoDBMonitoringApi _api;
+        private readonly MongoDBMonitoringApi _api;
 
         public MongoDBMonitoringApiTest()
         {
-            _client = new MongoClient(ConnectionUtil.ConnectionString);
-            _options = new MongoDBOptions();
-            _api = new MongoDBMonitoringApi(_client, _options);
+            _api = new MongoDBMonitoringApi(MongoClient, MongoDBOptions);
 
-            Init();
-        }
-
-        private void Init()
-        {
             var helper = new MongoDBUtil();
-            var database = _client.GetDatabase(_options.Database);
-            var collection = database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
-            collection.InsertMany(new CapPublishedMessage[]
+            var collection = Database.GetCollection<CapPublishedMessage>(MongoDBOptions.PublishedCollection);
+            collection.InsertMany(new[]
             {
                 new CapPublishedMessage
                 {
-                    Id = helper.GetNextSequenceValue(database,_options.PublishedCollection),
+                    Id = helper.GetNextSequenceValue(Database,MongoDBOptions.PublishedCollection),
                     Added = DateTime.Now.AddHours(-1),
                     StatusName = "Failed",
                     Content = "abc"
                 },
                 new CapPublishedMessage
                 {
-                    Id = helper.GetNextSequenceValue(database,_options.PublishedCollection),
+                    Id = helper.GetNextSequenceValue(Database,MongoDBOptions.PublishedCollection),
                     Added = DateTime.Now,
                     StatusName = "Failed",
                     Content = "bbc"

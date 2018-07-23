@@ -1,26 +1,28 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBStorageConnection : IStorageConnection
     {
-        private CapOptions _capOptions;
-        private MongoDBOptions _options;
+        private readonly CapOptions _capOptions;
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
+        private readonly MongoDBOptions _options;
 
         public MongoDBStorageConnection(CapOptions capOptions, MongoDBOptions options, IMongoClient client)
         {
             _capOptions = capOptions;
             _options = options;
             _client = client;
-            _database = _client.GetDatabase(_options.Database);
+            _database = _client.GetDatabase(_options.DatabaseName);
         }
 
         public bool ChangePublishedState(int messageId, string state)
@@ -28,12 +30,12 @@ namespace DotNetCore.CAP.MongoDB
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
 
             var updateDef = Builders<CapPublishedMessage>
-            .Update.Inc(x => x.Retries, 1)
-            .Set(x => x.ExpiresAt, null)
-            .Set(x => x.StatusName, state);
+                .Update.Inc(x => x.Retries, 1)
+                .Set(x => x.ExpiresAt, null)
+                .Set(x => x.StatusName, state);
 
             var result =
-            collection.UpdateOne(x => x.Id == messageId, updateDef);
+                collection.UpdateOne(x => x.Id == messageId, updateDef);
 
             return result.ModifiedCount > 0;
         }
@@ -43,12 +45,12 @@ namespace DotNetCore.CAP.MongoDB
             var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
             var updateDef = Builders<CapReceivedMessage>
-            .Update.Inc(x => x.Retries, 1)
-            .Set(x => x.ExpiresAt, null)
-            .Set(x => x.StatusName, state);
+                .Update.Inc(x => x.Retries, 1)
+                .Set(x => x.ExpiresAt, null)
+                .Set(x => x.StatusName, state);
 
             var result =
-            collection.UpdateOne(x => x.Id == messageId, updateDef);
+                collection.UpdateOne(x => x.Id == messageId, updateDef);
 
             return result.ModifiedCount > 0;
         }
@@ -56,10 +58,6 @@ namespace DotNetCore.CAP.MongoDB
         public IStorageTransaction CreateTransaction()
         {
             return new MongoDBStorageTransaction(_client, _options);
-        }
-
-        public void Dispose()
-        {
         }
 
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
@@ -72,13 +70,11 @@ namespace DotNetCore.CAP.MongoDB
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
-            return await
-            collection.Find(x =>
-            x.Retries < _capOptions.FailedRetryCount
-            && x.Added < fourMinsAgo
-            && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
-            .Limit(200)
-            .ToListAsync();
+            return await collection
+                .Find(x => x.Retries < _capOptions.FailedRetryCount && x.Added < fourMinsAgo &&
+                           (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
+                .Limit(200)
+                .ToListAsync();
         }
 
         public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
@@ -92,12 +88,11 @@ namespace DotNetCore.CAP.MongoDB
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
             var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
-            return await
-            collection.Find(x =>
-            x.Retries < _capOptions.FailedRetryCount
-            && x.Added < fourMinsAgo
-            && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled)
-            ).Limit(200).ToListAsync();
+            return await collection
+                .Find(x => x.Retries < _capOptions.FailedRetryCount && x.Added < fourMinsAgo &&
+                           (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
+                .Limit(200)
+                .ToListAsync();
         }
 
         public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
@@ -106,6 +101,7 @@ namespace DotNetCore.CAP.MongoDB
             {
                 throw new ArgumentNullException(nameof(message));
             }
+
             var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
             message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.ReceivedCollection);
@@ -113,6 +109,10 @@ namespace DotNetCore.CAP.MongoDB
             collection.InsertOne(message);
 
             return message.Id;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

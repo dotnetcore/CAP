@@ -10,6 +10,7 @@ services:
   - mssql2014
   - mysql
   - postgresql
+  - mongodb
 build_script:
 - ps: ./build.ps1
 test: off
@@ -20,6 +21,6 @@ deploy:
   on:
     appveyor_repo_tag: true
   api_key:
-    secure: /gak8VxtAbZvOTqON513KwsK5BtDUmoPjjzCMu+tn2i+vkupZbjnIKq/XnP4GGgv
+    secure: 62g+D0FPQQgVHQE+VaLPri7EAoQgu8WQbtXaawwa0c8o6fLxTc2oJSx2MgcLvpzN
   skip_symbols: true
   artifact: /artifacts\/packages\/.+\.nupkg/

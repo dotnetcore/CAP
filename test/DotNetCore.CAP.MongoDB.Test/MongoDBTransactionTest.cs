@@ -6,23 +6,17 @@ using Xunit;
 
 namespace DotNetCore.CAP.MongoDB.Test
 {
-    public class MongoDBTest
+    [Collection("MongoDB")]
+    public class MongoDBTransactionTest : DatabaseTestHost
     {
-        private MongoClient _client;
-
-        public MongoDBTest()
-        {
-            _client = new MongoClient(ConnectionUtil.ConnectionString);
-        }
-
         [Fact]
         public void MongoDB_Connection_Test()
         {
-            var names = _client.ListDatabaseNames();
+            var names = MongoClient.ListDatabaseNames();
             names.ToList().Should().NotBeNullOrEmpty();
         }
 
-        [Fact]
+        [Fact(Skip = "Because of Appveyor dose not support MongoDB 4.0, so we skip this test for now.")]
         public void Transaction_Test()
         {
             var document = new BsonDocument
@@ -36,10 +30,10 @@ namespace DotNetCore.CAP.MongoDB.Test
                             { "y", 102 }
                         }}
                 };
-            var db = _client.GetDatabase("test");
+            var db = MongoClient.GetDatabase("test");
             var collection1 = db.GetCollection<BsonDocument>("test1");
             var collection2 = db.GetCollection<BsonDocument>("test2");
-            using (var sesstion = _client.StartSession())
+            using (var sesstion = MongoClient.StartSession())
             {
                 sesstion.StartTransaction();
                 collection1.InsertOne(document);
@@ -51,7 +45,7 @@ namespace DotNetCore.CAP.MongoDB.Test
             collection2.CountDocuments(filter).Should().BeGreaterThan(0);
         }
 
-        [Fact]
+        [Fact(Skip = "Because of Appveyor dose not support MongoDB 4.0, so we skip this test for now.")]
         public void Transaction_Rollback_Test()
         {
             var document = new BsonDocument
@@ -59,12 +53,12 @@ namespace DotNetCore.CAP.MongoDB.Test
                 {"name", "MongoDB"},
                 {"date", DateTimeOffset.Now.ToString()}
             };
-            var db = _client.GetDatabase("test");
+            var db = MongoClient.GetDatabase("test");
 
             var collection = db.GetCollection<BsonDocument>("test3");
             var collection4 = db.GetCollection<BsonDocument>("test4");
 
-            using (var session = _client.StartSession())
+            using (var session = MongoClient.StartSession())
             {
                 session.IsInTransaction.Should().BeFalse();
                 session.StartTransaction();
