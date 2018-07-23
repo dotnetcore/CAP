@@ -1,38 +1,29 @@
-using System.Threading;
 using FluentAssertions;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Xunit;
 
 namespace DotNetCore.CAP.MongoDB.Test
 {
-    public class MongoDBStorageTest
+    [Collection("MongoDB")]
+    public class MongoDBStorageTest : DatabaseTestHost
     {
-        private readonly MongoClient _client;
-
-        public MongoDBStorageTest()
-        {
-            _client = new MongoClient(ConnectionUtil.ConnectionString);
-        }
-
         [Fact]
-        public async void InitializeAsync_Test()
+        public void InitializeAsync_Test()
         {
-            var options = new MongoDBOptions();
-            var storage = new MongoDBStorage(new CapOptions(), options, _client, NullLogger<MongoDBStorage>.Instance);
-            await storage.InitializeAsync(default(CancellationToken));
-            var names = _client.ListDatabaseNames()?.ToList();
-            names.Should().Contain(options.Database);
+            var storage = Provider.GetService<MongoDBStorage>();
+            var names = MongoClient.ListDatabaseNames()?.ToList();
+            names.Should().Contain(MongoDBOptions.DatabaseName);
 
-            var collections = _client.GetDatabase(options.Database).ListCollectionNames()?.ToList();
-            collections.Should().Contain(options.PublishedCollection);
-            collections.Should().Contain(options.ReceivedCollection);
-            collections.Should().Contain("Counter");
+            var collections = Database.ListCollectionNames()?.ToList();
+            collections.Should().Contain(MongoDBOptions.PublishedCollection);
+            collections.Should().Contain(MongoDBOptions.ReceivedCollection);
+            collections.Should().Contain(MongoDBOptions.CounterCollection);
 
-            var collection = _client.GetDatabase(options.Database).GetCollection<BsonDocument>("Counter");
-            collection.CountDocuments(new BsonDocument { { "_id", options.PublishedCollection } }).Should().Be(1);
-            collection.CountDocuments(new BsonDocument { { "_id", options.ReceivedCollection } }).Should().Be(1);
+            var collection = Database.GetCollection<BsonDocument>(MongoDBOptions.CounterCollection);
+            collection.CountDocuments(new BsonDocument { { "_id", MongoDBOptions.PublishedCollection } }).Should().Be(1);
+            collection.CountDocuments(new BsonDocument { { "_id", MongoDBOptions.ReceivedCollection } }).Should().Be(1);
         }
     }
 }
