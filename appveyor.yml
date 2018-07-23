@@ -10,6 +10,7 @@ services:
   - mssql2014
   - mysql
   - postgresql
+  - mongodb
 build_script:
 - ps: ./build.ps1
 test: off
