@@ -1,63 +1,71 @@
-using System.Threading;
+using System;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
 using FluentAssertions;
-using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 using Xunit;
-using Xunit.Priority;
 
 namespace DotNetCore.CAP.MongoDB.Test
 {
-    [TestCaseOrderer(PriorityOrderer.Name, PriorityOrderer.Assembly)]
-    public class MongoDBStorageConnectionTest
+    [Collection("MongoDB")]
+    public class MongoDBStorageConnectionTest : DatabaseTestHost
     {
-        private readonly MongoClient _client;
-        private readonly MongoDBOptions _options;
-        private readonly MongoDBStorage _storage;
-        private readonly IStorageConnection _connection;
+        private IStorageConnection _connection => 
+            Provider.GetService<MongoDBStorage>().GetConnection();
 
-        public MongoDBStorageConnectionTest()
-        {
-            _client = new MongoClient(ConnectionUtil.ConnectionString);
-            _options = new MongoDBOptions();
-            _storage = new MongoDBStorage(new CapOptions(), _options, _client, NullLogger<MongoDBStorage>.Instance);
-            _connection = _storage.GetConnection();
-        }
-
-        [Fact, Priority(1)]
+        [Fact]
         public async void StoreReceivedMessageAsync_TestAsync()
         {
-            await _storage.InitializeAsync(default(CancellationToken));
-
-            var id = await
-            _connection.StoreReceivedMessageAsync(new CapReceivedMessage(new MessageContext
+            var id = await _connection.StoreReceivedMessageAsync(new CapReceivedMessage(new MessageContext
             {
                 Group = "test",
                 Name = "test",
                 Content = "test-content"
             }));
+
             id.Should().BeGreaterThan(0);
         }
 
-        [Fact, Priority(2)]
+        [Fact]
         public void ChangeReceivedState_Test()
         {
-            var collection = _client.GetDatabase(_options.Database).GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
+            StoreReceivedMessageAsync_TestAsync();
+            var collection = Database.GetCollection<CapReceivedMessage>(MongoDBOptions.ReceivedCollection);
 
             var msg = collection.Find(x => true).FirstOrDefault();
             _connection.ChangeReceivedState(msg.Id, StatusName.Scheduled).Should().BeTrue();
             collection.Find(x => x.Id == msg.Id).FirstOrDefault()?.StatusName.Should().Be(StatusName.Scheduled);
         }
 
-        [Fact, Priority(3)]
+        [Fact]
         public async void GetReceivedMessagesOfNeedRetry_TestAsync()
         {
             var msgs = await _connection.GetReceivedMessagesOfNeedRetry();
+
+            msgs.Should().BeEmpty();
+
+            var msg = new CapReceivedMessage
+            {
+                Group = "test",
+                Name = "test",
+                Content = "test-content",
+                StatusName = StatusName.Failed
+            };
+            var id = await _connection.StoreReceivedMessageAsync(msg);
+
+            var collection = Database.GetCollection<CapReceivedMessage>(MongoDBOptions.ReceivedCollection);
+
+            var updateDef = Builders<CapReceivedMessage>
+                .Update.Set(x => x.Added, DateTime.Now.AddMinutes(-5));
+
+            await collection.UpdateOneAsync(x => x.Id == id, updateDef);
+
+            msgs = await _connection.GetReceivedMessagesOfNeedRetry();
             msgs.Should().HaveCountGreaterThan(0);
         }
 
-        [Fact, Priority(4)]
+        [Fact]
         public void GetReceivedMessageAsync_Test()
         {
             var msg = _connection.GetReceivedMessageAsync(1);
