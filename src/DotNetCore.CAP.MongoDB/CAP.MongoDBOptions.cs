@@ -5,16 +5,30 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBOptions
     {
-        public const string DefaultDatabase = "Cap";
+        /// <summary>
+        /// Gets or sets the database name to use when creating database objects.
+        /// Default value: "cap"
+        /// </summary>
+        public string DatabaseName { get; set; } = "cap";
 
         /// <summary>
-        /// Gets or sets the database to use when creating database objects.
-        /// Default is <see cref="DefaultDatabase" />.
+        /// MongoDB database connection string.
+        /// Default value: "mongodb://localhost:27017"
         /// </summary>
-        public string Database { get; set; } = DefaultDatabase;
+        public string DatabaseConnection { get; set; } = "mongodb://localhost:27017";
 
-        public string ReceivedCollection { get; } = "Received";
+        /// <summary>
+        /// MongoDB received message collection name.
+        /// Default value: "received"
+        /// </summary>
+        public string ReceivedCollection { get; set; } = "cap.received";
 
-        public string PublishedCollection { get; } = "Published";
+        /// <summary>
+        /// MongoDB published message collection name.
+        /// Default value: "published"
+        /// </summary>
+        public string PublishedCollection { get; set; } = "cap.published";
+
+        internal const string CounterCollection = "cap.counter";
     }
 }

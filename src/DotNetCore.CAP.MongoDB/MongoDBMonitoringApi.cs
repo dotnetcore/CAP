@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.MongoDB
             var mongoClient = client ?? throw new ArgumentNullException(nameof(client));
             _options = options ?? throw new ArgumentNullException(nameof(options));
 
-            _database = mongoClient.GetDatabase(_options.Database);
+            _database = mongoClient.GetDatabase(_options.DatabaseName);
         }
 
         public StatisticsDto GetStatistics()

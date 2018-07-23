@@ -19,10 +19,10 @@ namespace DotNetCore.CAP.MongoDB
             IClientSessionHandle session = null)
         {
             //https://www.tutorialspoint.com/mongodb/mongodb_autoincrement_sequence.htm
-            var collection = database.GetCollection<BsonDocument>("Counter");
+            var collection = database.GetCollection<BsonDocument>(MongoDBOptions.CounterCollection);
 
             var updateDef = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
-            var filter = new BsonDocument {{"_id", collectionName}};
+            var filter = new BsonDocument { { "_id", collectionName } };
 
             BsonDocument result;
             if (session == null)
@@ -45,9 +45,9 @@ namespace DotNetCore.CAP.MongoDB
         public int GetNextSequenceValue(IMongoDatabase database, string collectionName,
             IClientSessionHandle session = null)
         {
-            var collection = database.GetCollection<BsonDocument>("Counter");
+            var collection = database.GetCollection<BsonDocument>(MongoDBOptions.CounterCollection);
 
-            var filter = new BsonDocument {{"_id", collectionName}};
+            var filter = new BsonDocument { { "_id", collectionName } };
             var updateDef = Builders<BsonDocument>.Update.Inc("sequence_value", 1);
 
             var result = session == null

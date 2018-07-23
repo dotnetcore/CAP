@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.MongoDB
             _capOptions = capOptions;
             _options = options;
             _client = client;
-            _database = _client.GetDatabase(_options.Database);
+            _database = _client.GetDatabase(_options.DatabaseName);
         }
 
         public bool ChangePublishedState(int messageId, string state)
