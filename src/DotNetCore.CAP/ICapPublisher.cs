@@ -3,6 +3,7 @@
 
 using System.Data;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Abstractions;
 
 namespace DotNetCore.CAP
 {
@@ -60,17 +61,17 @@ namespace DotNetCore.CAP
         /// </summary>
         /// <param name="name">the topic name or exchange router key.</param>
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
-        /// <param name="mongoSession">if seesion was set null, the message will be published directly.</param>
+        /// <param name="mongoTransaction">if transaction was set null, the message will be published directly.</param>
         /// <param name="callbackName">callback subscriber name</param>
-        void PublishWithMongo<T>(string name, T contentObj, object mongoSession = null, string callbackName = null);
+        void PublishWithMongo<T>(string name, T contentObj, IMongoTransaction mongoTransaction = null, string callbackName = null);
 
         /// <summary>
         ///  Asynchronous publish an object message with mongo.
         /// </summary>
         /// <param name="name">the topic name or exchange router key.</param>
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
-        /// <param name="mongoSession">if seesion was set null, the message will be published directly.</param>
+        /// <param name="mongoTransaction">if transaction was set null, the message will be published directly.</param>
         /// <param name="callbackName">callback subscriber name</param>
-        Task PublishWithMongoAsync<T>(string name, T contentObj, object mongoSession = null, string callbackName = null);
+        Task PublishWithMongoAsync<T>(string name, T contentObj, IMongoTransaction mongoTransaction = null, string callbackName = null);
     }
 }
