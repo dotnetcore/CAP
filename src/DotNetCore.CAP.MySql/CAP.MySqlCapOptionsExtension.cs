@@ -27,6 +27,7 @@ namespace DotNetCore.CAP
             services.AddScoped<ICapPublisher, CapPublisher>();
             services.AddScoped<ICallbackPublisher, CapPublisher>();
             services.AddTransient<ICollectProcessor, MySqlCollectProcessor>();
+            services.AddTransient<CapTransactionBase, MySqlCapTransaction>();
 
             AddSingletionMySqlOptions(services);
         }

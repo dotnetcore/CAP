@@ -3,27 +3,27 @@
 
 using System;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Logging;
 using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class CapPublisher : CapPublisherBase, ICallbackPublisher
+    public class CapPublisher : CapPublisherBase, ICallbackPublisher, IDisposable
     {
         private readonly DbContext _dbContext;
         private readonly MySqlOptions _options;
+        private readonly bool _isUsingEF;
 
-        public CapPublisher(ILogger<CapPublisher> logger, IDispatcher dispatcher, IServiceProvider provider,
-            MySqlOptions options)
-            : base(logger, dispatcher)
+        private MySqlConnection _connection;
+
+        public CapPublisher(IServiceProvider provider, MySqlOptions options) : base(provider)
         {
-            ServiceProvider = provider;
             _options = options;
 
             if (_options.DbContextType == null)
@@ -31,47 +31,41 @@ namespace DotNetCore.CAP.MySql
                 return;
             }
 
-            IsUsingEF = true;
-            _dbContext = (DbContext) ServiceProvider.GetService(_options.DbContextType);
+            _isUsingEF = true;
+            _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
         }
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)
         {
-            using (var conn = new MySqlConnection(_options.ConnectionString))
+            await PublishAsyncInternal(message);
+        }
+
+        protected override Task<int> ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
+            CancellationToken cancel = default(CancellationToken))
+        {
+            var dbTrans = transaction.DbTransaction as IDbTransaction;
+            if (dbTrans == null && transaction.DbTransaction is IDbContextTransaction dbContextTrans)
             {
-                var id = await conn.ExecuteScalarAsync<int>(PrepareSql(), message);
-                message.Id = id;
-                Enqueue(message);
+                dbTrans = dbContextTrans.GetDbTransaction();
             }
+            var conn = dbTrans?.Connection;
+            return conn.ExecuteScalarAsync<int>(PrepareSql(), message, dbTrans);
         }
 
-        protected override void PrepareConnectionForEF()
+        protected override object GetDbTransaction()
         {
-            DbConnection = _dbContext.Database.GetDbConnection();
-            var dbContextTransaction = _dbContext.Database.CurrentTransaction;
-            var dbTrans = dbContextTransaction?.GetDbTransaction();
-            //DbTransaction is dispose in original
-            if (dbTrans?.Connection == null)
+            if (_isUsingEF)
             {
-                IsCapOpenedTrans = true;
-                dbContextTransaction?.Dispose();
-                dbContextTransaction = _dbContext.Database.BeginTransaction(IsolationLevel.ReadCommitted);
-                dbTrans = dbContextTransaction.GetDbTransaction();
+                var dbContextTransaction = _dbContext.Database.CurrentTransaction;
+                if (dbContextTransaction == null)
+                {
+                    return InitDbConnection();
+                }
+
+                return dbContextTransaction;
             }
 
-            DbTransaction = dbTrans;
-        }
-
-        protected override int Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
-            CapPublishedMessage message)
-        {
-            return dbConnection.ExecuteScalar<int>(PrepareSql(), message, dbTransaction);
-        }
-
-        protected override async Task<int> ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
-            CapPublishedMessage message)
-        {
-            return await dbConnection.ExecuteScalarAsync<int>(PrepareSql(), message, dbTransaction);
+            return InitDbConnection();
         }
 
         #region private methods
@@ -82,6 +76,19 @@ namespace DotNetCore.CAP.MySql
                 $"INSERT INTO `{_options.TableNamePrefix}.published` (`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT LAST_INSERT_ID()";
         }
 
+        private IDbTransaction InitDbConnection()
+        {
+            _connection = new MySqlConnection(_options.ConnectionString);
+            _connection.Open();
+            return _connection.BeginTransaction(IsolationLevel.ReadCommitted);
+        }
+
         #endregion private methods
+
+        public void Dispose()
+        {
+            _dbContext?.Dispose();
+            _connection?.Dispose();
+        }
     }
 }

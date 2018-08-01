@@ -173,8 +173,6 @@ namespace DotNetCore.CAP
                 du);
 
             s_diagnosticListener.WritePublishAfter(eventData);
-
-            _logger.MessageHasBeenSent(du.TotalSeconds);
         }
 
         private void TracingError(Guid operationId, CapPublishedMessage message, OperateResult result, DateTimeOffset startTime, TimeSpan du)
