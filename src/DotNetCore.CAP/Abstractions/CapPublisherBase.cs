@@ -214,11 +214,10 @@ namespace DotNetCore.CAP.Abstractions
 
             try
             {
-                Console.WriteLine("================22222222222222=====================");
                 operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
 
                 var id = Execute(DbConnection, DbTransaction, message);
-                Console.WriteLine("================777777777777777777777=====================");
+
                 ClosedCap();
 
                 if (id > 0)
