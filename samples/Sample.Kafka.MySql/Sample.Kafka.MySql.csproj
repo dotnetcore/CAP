@@ -9,7 +9,6 @@
  
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="MySqlConnector" Version="0.40.4" />
   </ItemGroup> 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DotNetCore.CAP.Kafka\DotNetCore.CAP.Kafka.csproj" />
