@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Threading.Tasks;
 
@@ -12,7 +15,6 @@ namespace DotNetCore.CAP.Abstractions
         bool AutoCommit { get; set; }
 
         Task<IMongoTransaction> BegeinAsync(bool autoCommit = true);
-        
         IMongoTransaction Begein(bool autoCommit = true);
     }
 }

@@ -93,5 +93,53 @@ namespace Microsoft.Extensions.DependencyInjection
                 services.AddTransient(service.Key, service.Value);
             }
         }
+
+        public static CapBuilder AddMockCap(
+           this IServiceCollection services)
+        {
+            Action<CapOptions> setupAction = x =>
+            { };
+
+            services.TryAddSingleton<CapMarkerService>();
+            services.Configure(setupAction);
+
+            AddSubscribeServices(services);
+
+            //Serializer and model binder
+            services.TryAddSingleton<IContentSerializer, JsonContentSerializer>();
+            services.TryAddSingleton<IMessagePacker, DefaultMessagePacker>();
+            services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
+            services.TryAddSingleton<IModelBinderFactory, ModelBinderFactory>();
+
+            services.TryAddSingleton<ICallbackMessageSender, CallbackMessageSender>();
+            services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
+            services.TryAddSingleton<MethodMatcherCache>();
+
+            //Bootstrapper and Processors
+            services.AddSingleton<IProcessingServer, ConsumerHandler>();
+            services.AddSingleton<IProcessingServer, CapProcessingServer>();
+            services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
+            services.AddSingleton<IStateChanger, StateChanger>();
+
+            //Queue's message processor
+            services.AddTransient<NeedRetryMessageProcessor>();
+
+            //Sender and Executors   
+            services.AddSingleton<IDispatcher, Dispatcher>();
+            // Warning: IPublishMessageSender need to inject at extension project. 
+            services.AddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
+
+            //Options and extension service
+            var options = new CapOptions();
+            setupAction(options);
+            foreach (var serviceExtension in options.Extensions)
+            {
+                serviceExtension.AddServices(services);
+            }
+
+            services.AddSingleton(options);
+
+            return new CapBuilder(services);
+        }
     }
 }
