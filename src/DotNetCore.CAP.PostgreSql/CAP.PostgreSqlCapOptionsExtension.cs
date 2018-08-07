@@ -6,6 +6,7 @@ using DotNetCore.CAP.PostgreSql;
 using DotNetCore.CAP.Processor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -21,12 +22,12 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapDatabaseStorageMarkerService>();
-            services.AddSingleton<IStorage, PostgreSqlStorage>();
-            services.AddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
-            services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddScoped<ICallbackPublisher, CapPublisher>();
-            services.AddTransient<ICollectProcessor, PostgreSqlCollectProcessor>();
+            services.TryAddSingleton<CapDatabaseStorageMarkerService>();
+            services.TryAddSingleton<IStorage, PostgreSqlStorage>();
+            services.TryAddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
+            services.TryAddScoped<ICapPublisher, CapPublisher>();
+            services.TryAddScoped<ICallbackPublisher, CapPublisher>();
+            services.TryAddTransient<ICollectProcessor, PostgreSqlCollectProcessor>();
 
             AddSingletonPostgreSqlOptions(services);
         }

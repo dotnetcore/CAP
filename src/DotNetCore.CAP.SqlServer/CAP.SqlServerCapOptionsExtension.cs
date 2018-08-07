@@ -6,6 +6,7 @@ using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.SqlServer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -21,12 +22,12 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapDatabaseStorageMarkerService>();
-            services.AddSingleton<IStorage, SqlServerStorage>();
-            services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
-            services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddScoped<ICallbackPublisher, CapPublisher>();
-            services.AddTransient<ICollectProcessor, SqlServerCollectProcessor>();
+            services.TryAddSingleton<CapDatabaseStorageMarkerService>();
+            services.TryAddSingleton<IStorage, SqlServerStorage>();
+            services.TryAddSingleton<IStorageConnection, SqlServerStorageConnection>();
+            services.TryAddScoped<ICapPublisher, CapPublisher>();
+            services.TryAddScoped<ICallbackPublisher, CapPublisher>();
+            services.TryAddTransient<ICollectProcessor, SqlServerCollectProcessor>();
 
             AddSqlServerOptions(services);
         }

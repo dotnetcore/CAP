@@ -6,6 +6,7 @@ using DotNetCore.CAP;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DotNetCore.CAP.MongoDB
 {
@@ -20,14 +21,14 @@ namespace DotNetCore.CAP.MongoDB
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapDatabaseStorageMarkerService>();
-            services.AddSingleton<IStorage, MongoDBStorage>();
-            services.AddSingleton<IStorageConnection, MongoDBStorageConnection>();
-            services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddScoped<ICallbackPublisher, CapPublisher>();
-            services.AddTransient<ICollectProcessor, MongoDBCollectProcessor>();
+            services.TryAddSingleton<CapDatabaseStorageMarkerService>();
+            services.TryAddSingleton<IStorage, MongoDBStorage>();
+            services.TryAddSingleton<IStorageConnection, MongoDBStorageConnection>();
+            services.TryAddScoped<ICapPublisher, CapPublisher>();
+            services.TryAddScoped<ICallbackPublisher, CapPublisher>();
+            services.TryAddTransient<ICollectProcessor, MongoDBCollectProcessor>();
 
-            services.AddTransient<IMongoTransaction, MongoTransaction>();
+            services.TryAddTransient<IMongoTransaction, MongoTransaction>();
 
             var options = new MongoDBOptions();
             _configure?.Invoke(options);

@@ -4,6 +4,7 @@
 using System;
 using DotNetCore.CAP.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -23,12 +24,12 @@ namespace DotNetCore.CAP
 
             var options = new RabbitMQOptions();
             _configure?.Invoke(options);
-            services.AddSingleton(options);
+            services.TryAddSingleton(options);
 
-            services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
-            services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
-            services.AddSingleton<IPublishExecutor, RabbitMQPublishMessageSender>();
-            services.AddSingleton<IPublishMessageSender, RabbitMQPublishMessageSender>();
+            services.TryAddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
+            services.TryAddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
+            services.TryAddSingleton<IPublishExecutor, RabbitMQPublishMessageSender>();
+            services.TryAddSingleton<IPublishMessageSender, RabbitMQPublishMessageSender>();
         }
     }
 }
