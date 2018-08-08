@@ -10,7 +10,6 @@ namespace DotNetCore.CAP.MongoDB
     public class MongoTransaction : IMongoTransaction
     {
         private readonly IMongoClient _client;
-
         public MongoTransaction(IMongoClient client)
         {
             _client = client;

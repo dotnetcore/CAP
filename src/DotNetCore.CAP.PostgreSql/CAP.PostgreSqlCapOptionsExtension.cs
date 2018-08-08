@@ -6,6 +6,7 @@ using DotNetCore.CAP.PostgreSql;
 using DotNetCore.CAP.Processor;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -21,12 +22,12 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapDatabaseStorageMarkerService>();
-            services.AddSingleton<IStorage, PostgreSqlStorage>();
-            services.AddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
-            services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddScoped<ICallbackPublisher, CapPublisher>();
-            services.AddTransient<ICollectProcessor, PostgreSqlCollectProcessor>();
+            services.TryAddSingleton<CapDatabaseStorageMarkerService>();
+            services.TryAddSingleton<IStorage, PostgreSqlStorage>();
+            services.TryAddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
+            services.TryAddScoped<ICapPublisher, CapPublisher>();
+            services.TryAddScoped<ICallbackPublisher, CapPublisher>();
+            services.TryAddTransient<ICollectProcessor, PostgreSqlCollectProcessor>();
 
             AddSingletonPostgreSqlOptions(services);
         }
@@ -38,12 +39,12 @@ namespace DotNetCore.CAP
 
             if (postgreSqlOptions.DbContextType != null)
             {
-                services.AddSingleton(x =>
+                services.TryAddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext) provider.GetService(postgreSqlOptions.DbContextType);
+                        var dbContext = (DbContext)provider.GetService(postgreSqlOptions.DbContextType);
                         postgreSqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return postgreSqlOptions;
                     }
@@ -51,7 +52,7 @@ namespace DotNetCore.CAP
             }
             else
             {
-                services.AddSingleton(postgreSqlOptions);
+                services.TryAddSingleton(postgreSqlOptions);
             }
         }
     }

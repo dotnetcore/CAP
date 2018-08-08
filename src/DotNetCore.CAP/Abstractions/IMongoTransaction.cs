@@ -15,7 +15,6 @@ namespace DotNetCore.CAP.Abstractions
         bool AutoCommit { get; set; }
 
         Task<IMongoTransaction> BegeinAsync(bool autoCommit = true);
-
         IMongoTransaction Begein(bool autoCommit = true);
     }
 }

@@ -4,6 +4,7 @@
 using System;
 using DotNetCore.CAP.Kafka;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -23,12 +24,12 @@ namespace DotNetCore.CAP
 
             var kafkaOptions = new KafkaOptions();
             _configure?.Invoke(kafkaOptions);
-            services.AddSingleton(kafkaOptions);
+            services.TryAddSingleton(kafkaOptions);
 
-            services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
-            services.AddSingleton<IPublishExecutor, KafkaPublishMessageSender>();
-            services.AddSingleton<IPublishMessageSender, KafkaPublishMessageSender>();
-            services.AddSingleton<IConnectionPool,ConnectionPool>();
+            services.TryAddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
+            services.TryAddSingleton<IPublishExecutor, KafkaPublishMessageSender>();
+            services.TryAddSingleton<IPublishMessageSender, KafkaPublishMessageSender>();
+            services.TryAddSingleton<IConnectionPool,ConnectionPool>();
         }
     }
 }

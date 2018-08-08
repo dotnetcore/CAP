@@ -49,18 +49,18 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<MethodMatcherCache>();
 
             //Bootstrapper and Processors
-            services.AddSingleton<IProcessingServer, ConsumerHandler>();
-            services.AddSingleton<IProcessingServer, CapProcessingServer>();
-            services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
-            services.AddSingleton<IStateChanger, StateChanger>();
+            services.TryAddSingleton<IProcessingServer, ConsumerHandler>();
+            services.TryAddSingleton<IProcessingServer, CapProcessingServer>();
+            services.TryAddSingleton<IBootstrapper, DefaultBootstrapper>();
+            services.TryAddSingleton<IStateChanger, StateChanger>();
 
             //Queue's message processor
-            services.AddTransient<NeedRetryMessageProcessor>();
+            services.TryAddTransient<NeedRetryMessageProcessor>();
 
             //Sender and Executors   
-            services.AddSingleton<IDispatcher, Dispatcher>();
+            services.TryAddSingleton<IDispatcher, Dispatcher>();
             // Warning: IPublishMessageSender need to inject at extension project. 
-            services.AddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
+            services.TryAddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
 
             //Options and extension service
             var options = new CapOptions();
