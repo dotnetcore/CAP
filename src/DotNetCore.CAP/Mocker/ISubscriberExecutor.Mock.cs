@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using DotNetCore.CAP.Models;
 
-namespace DotNetCore.CAP.Mock
+namespace DotNetCore.CAP.Mocker
 {
     public class MockSubscriberExecutor : ISubscriberExecutor
     {

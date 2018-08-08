@@ -5,7 +5,7 @@ using System.Data;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 
-namespace DotNetCore.CAP.Mock
+namespace DotNetCore.CAP.Mocker
 {
     public class MockCapPublisher : ICapPublisher
     {

@@ -11,7 +11,7 @@ using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace DotNetCore.CAP.Mock
+namespace DotNetCore.CAP.Mocker
 {
     public static class MockServiceCollectionExtensions
     {

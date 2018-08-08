@@ -1,6 +1,6 @@
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Mock
+namespace DotNetCore.CAP.Mocker
 {
     internal class MockBootstrapper : IBootstrapper
     {

@@ -11,12 +11,12 @@ using Moq;
 using Sample.RabbitMQ.MongoDB;
 using Xunit;
 
-namespace DotNetCore.CAP.Mock.Test
+namespace DotNetCore.CAP.Mocker.Test
 {
-    public class CAPMockTest : IClassFixture<WebApplicationFactory<Startup>>
+    public class CAPMockerTest : IClassFixture<WebApplicationFactory<Startup>>
     {
         private readonly WebApplicationFactory<Startup> _factory;
-        public CAPMockTest(WebApplicationFactory<Startup> factory)
+        public CAPMockerTest(WebApplicationFactory<Startup> factory)
         {
             _factory = factory.WithWebHostBuilder(configuration =>
             {
@@ -29,7 +29,7 @@ namespace DotNetCore.CAP.Mock.Test
         }
 
         [Fact]
-        public async void MockTest()
+        public async void MockerTest()
         {
             var client = _factory.CreateClient();
             var response = await client.GetAsync("/publish");
