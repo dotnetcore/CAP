@@ -15,9 +15,19 @@ namespace DotNetCore.CAP.Mocker
 {
     public static class MockServiceCollectionExtensions
     {
-        public static CapBuilder AddMockCap(
-           this IServiceCollection services)
+        public static CapBuilder AddMockCap(this IServiceCollection services, Action<CapOptions> setupAction = null)
         {
+            if (setupAction != null)
+            {
+                var options = new CapOptions();
+                setupAction(options);
+                foreach (var serviceExtension in options.Extensions)
+                {
+                    serviceExtension.AddServices(services);
+                }
+
+                services.AddSingleton(options);
+            }
             services.TryAddSingleton<CapMarkerService>();
             services.TryAddSingleton<CapMessageQueueMakerService>();
             services.TryAddSingleton<CapDatabaseStorageMarkerService>();

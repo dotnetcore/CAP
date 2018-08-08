@@ -22,8 +22,10 @@ namespace DotNetCore.CAP.Mocker.Test
             {
                 configuration.ConfigureServices(services =>
                 {
-                    services.AddMockCap();
-                    services.AddSingleton<IMongoTransaction, NullMongoTransaction>(); //Only for MongoDB
+                    services.AddMockCap(x =>
+                    {
+                        x.UseMockMongoDB();
+                    });
                 });
             });
         }
