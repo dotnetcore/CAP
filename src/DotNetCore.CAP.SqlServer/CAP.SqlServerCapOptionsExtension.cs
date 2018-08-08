@@ -40,7 +40,7 @@ namespace DotNetCore.CAP
 
             if (sqlServerOptions.DbContextType != null)
             {
-                services.AddSingleton(x =>
+                services.TryAddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
                     {
@@ -53,7 +53,7 @@ namespace DotNetCore.CAP
             }
             else
             {
-                services.AddSingleton(sqlServerOptions);
+                services.TryAddSingleton(sqlServerOptions);
             }
         }
     }

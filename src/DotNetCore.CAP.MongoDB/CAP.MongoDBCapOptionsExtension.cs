@@ -32,7 +32,7 @@ namespace DotNetCore.CAP.MongoDB
 
             var options = new MongoDBOptions();
             _configure?.Invoke(options);
-            services.AddSingleton(options);
+            services.TryAddSingleton(options);
         }
     }
 }
