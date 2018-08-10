@@ -112,6 +112,7 @@ namespace DotNetCore.CAP
 
                 var receivedMessage = new CapReceivedMessage(messageContext)
                 {
+                    Id = SnowflakeId.Default().NextId(),
                     StatusName = StatusName.Scheduled,
                     Content = messageBody
                 };
@@ -170,10 +171,7 @@ namespace DotNetCore.CAP
 
         private void StoreMessage(CapReceivedMessage receivedMessage)
         {
-            var id = _connection.StoreReceivedMessageAsync(receivedMessage)
-                .GetAwaiter().GetResult();
-
-            receivedMessage.Id = id;
+             _connection.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
         }
 
         private (Guid, string) TracingBefore(string topic, string values)

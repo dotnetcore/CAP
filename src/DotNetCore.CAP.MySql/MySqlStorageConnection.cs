@@ -52,7 +52,7 @@ namespace DotNetCore.CAP.MySql
             }
         }
 
-        public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
+        public Task StoreReceivedMessageAsync(CapReceivedMessage message)
         {
             if (message == null)
             {
@@ -61,11 +61,11 @@ namespace DotNetCore.CAP.MySql
 
             var sql = $@"
 INSERT INTO `{_prefix}.received`(`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
-VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT LAST_INSERT_ID();";
+VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
-                return await connection.ExecuteScalarAsync<int>(sql, message);
+                return connection.ExecuteScalarAsync<int>(sql, message);
             }
         }
 

@@ -25,6 +25,7 @@ namespace DotNetCore.CAP.MySql.Test
             var sql = "INSERT INTO `cap.published`(`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT @@IDENTITY;";
             var publishMessage = new CapPublishedMessage
             {
+                Id = SnowflakeId.Default().NextId(),
                 Name = "MySqlStorageConnectionTest",
                 Content = "",
                 StatusName = StatusName.Scheduled
@@ -45,6 +46,7 @@ namespace DotNetCore.CAP.MySql.Test
         {
             var receivedMessage = new CapReceivedMessage
             {
+                Id = SnowflakeId.Default().NextId(),
                 Name = "MySqlStorageConnectionTest",
                 Content = "",
                 Group = "mygroup",
@@ -71,6 +73,7 @@ namespace DotNetCore.CAP.MySql.Test
         VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT @@IDENTITY;";
             var receivedMessage = new CapReceivedMessage
             {
+                Id = SnowflakeId.Default().NextId(),
                 Name = "MySqlStorageConnectionTest",
                 Content = "",
                 Group = "mygroup",

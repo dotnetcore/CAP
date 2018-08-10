@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Models
 {
@@ -22,7 +23,7 @@ namespace DotNetCore.CAP.Models
             Content = message.Content;
         }
 
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public string Group { get; set; }
 

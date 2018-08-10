@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.MySql
             await PublishAsyncInternal(message);
         }
 
-        protected override Task<int> ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
+        protected override Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
             CancellationToken cancel = default(CancellationToken))
         {
             var dbTrans = transaction.DbTransaction as IDbTransaction;

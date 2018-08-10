@@ -16,6 +16,7 @@ namespace DotNetCore.CAP.Test
             var fixture = Create();
             var message = new CapPublishedMessage
             {
+                Id = SnowflakeId.Default().NextId(),
                 StatusName = StatusName.Scheduled
             };
             var state = Mock.Of<IState>(s => s.Name == "s" && s.ExpiresAfter == null);
@@ -39,6 +40,7 @@ namespace DotNetCore.CAP.Test
             var fixture = Create();
             var message = new CapPublishedMessage
             {
+                Id = SnowflakeId.Default().NextId(),
                 StatusName = StatusName.Scheduled
             };
             var state = Mock.Of<IState>(s => s.Name == "s" && s.ExpiresAfter == TimeSpan.FromHours(1));

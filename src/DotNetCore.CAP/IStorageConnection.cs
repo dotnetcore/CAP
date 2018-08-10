@@ -32,7 +32,7 @@ namespace DotNetCore.CAP
         /// Stores the message.
         /// </summary>
         /// <param name="message">The message to store.</param>
-        Task<int> StoreReceivedMessageAsync(CapReceivedMessage message);
+        Task StoreReceivedMessageAsync(CapReceivedMessage message);
 
         /// <summary>
         /// Returns the message with the given id.

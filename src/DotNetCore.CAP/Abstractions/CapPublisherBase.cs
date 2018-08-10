@@ -40,6 +40,7 @@ namespace DotNetCore.CAP.Abstractions
         {
             var message = new CapPublishedMessage
             {
+                Id = SnowflakeId.Default().NextId(),
                 Name = name,
                 Content = Serialize(contentObj, callbackName),
                 StatusName = StatusName.Scheduled
@@ -53,6 +54,7 @@ namespace DotNetCore.CAP.Abstractions
         {
             var message = new CapPublishedMessage
             {
+                Id = SnowflakeId.Default().NextId(),
                 Name = name,
                 Content = Serialize(contentObj, callbackName),
                 StatusName = StatusName.Scheduled
@@ -75,13 +77,11 @@ namespace DotNetCore.CAP.Abstractions
             {
                 operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
 
-                message.Id = await ExecuteAsync(message, CapTransaction);
+                await ExecuteAsync(message, CapTransaction);
 
-                if (message.Id > 0)
-                {
-                    _capTransaction.AddToSent(message);
-                    s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
-                }
+                _capTransaction.AddToSent(message);
+
+                s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
 
                 if (NotUseTransaction || CapTransaction.AutoCommit)
                 {
@@ -105,7 +105,7 @@ namespace DotNetCore.CAP.Abstractions
 
         protected abstract object GetDbTransaction();
 
-        protected abstract Task<int> ExecuteAsync(CapPublishedMessage message,
+        protected abstract Task ExecuteAsync(CapPublishedMessage message,
             ICapTransaction transaction,
             CancellationToken cancel = default(CancellationToken));
 

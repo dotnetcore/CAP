@@ -54,6 +54,7 @@ namespace DotNetCore.CAP.Internal
 
             var publishedMessage = new CapPublishedMessage
             {
+                Id = SnowflakeId.Default().NextId(),
                 Name = topicName,
                 Content = content,
                 StatusName = StatusName.Scheduled
