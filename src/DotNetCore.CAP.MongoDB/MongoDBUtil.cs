@@ -28,6 +28,7 @@ namespace DotNetCore.CAP.MongoDB
             if (session == null)
             {
                 result = await collection.FindOneAndUpdateAsync(filter, updateDef, _options);
+               
             }
             else
             {

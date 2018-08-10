@@ -3,6 +3,7 @@
 
 namespace DotNetCore.CAP.MongoDB
 {
+    // ReSharper disable once InconsistentNaming
     public class MongoDBOptions
     {
         /// <summary>
