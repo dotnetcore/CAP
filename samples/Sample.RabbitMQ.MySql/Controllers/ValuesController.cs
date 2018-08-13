@@ -37,10 +37,14 @@ namespace Sample.RabbitMQ.MySql.Controllers
         public async Task<IActionResult> PublishMessageWithTransaction()
         {
             using (var trans = await _dbContext.Database.BeginTransactionAsync())
+            using (var capTrans = _capBus.CapTransaction.Begin(trans))
             {
-                await _capBus.PublishAsync("sample.kafka.sqlserver", "");
+                for (int i = 0; i < 10; i++)
+                {
+                    await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
+                }
 
-                trans.Commit();
+                capTrans.Commit();
             }
             return Ok();
         }
