@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.MongoDB;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -15,71 +12,48 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
     {
         private readonly IMongoClient _client;
         private readonly ICapPublisher _capPublisher;
-        private readonly IMongoTransaction _mongoTransaction;
 
-        public ValuesController(IMongoClient client, ICapPublisher capPublisher, IMongoTransaction mongoTransaction)
+        public ValuesController(IMongoClient client, ICapPublisher capPublisher)
         {
             _client = client;
             _capPublisher = capPublisher;
-            _mongoTransaction = mongoTransaction;
         }
 
         [Route("~/publish")]
-        public async Task<IActionResult> PublishWithTrans()
+        public IActionResult PublishWithTrans()
         {
-            using (var trans = await _mongoTransaction.BegeinAsync())
+            using (var session = _client.StartSession())
+            using (var trans = _capPublisher.CapTransaction.Begin(session))
             {
                 var collection = _client.GetDatabase("TEST").GetCollection<BsonDocument>("test");
-                collection.InsertOne(trans.GetSession(), new BsonDocument { { "hello", "world" } });
+                collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
 
-                await _capPublisher.PublishWithMongoAsync("sample.rabbitmq.mongodb", DateTime.Now, trans);
+                _capPublisher.Publish("sample.rabbitmq.mongodb", DateTime.Now);
+
+                trans.Commit();
             }
             return Ok();
         }
 
-        [Route("~/publish/not/autocommit")]
+        [Route("~/publish/autocommit")]
         public IActionResult PublishNotAutoCommit()
         {
-            using (var trans = _mongoTransaction.Begein(autoCommit: false))
+            using (var session = _client.StartSession())
+            using (_capPublisher.CapTransaction.Begin(session,true))
             {
-                var session = trans.GetSession();
-
                 var collection = _client.GetDatabase("TEST").GetCollection<BsonDocument>("test");
-                collection.InsertOne(session, new BsonDocument { { "Hello", "World" } });
+                collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
 
-                _capPublisher.PublishWithMongo("sample.rabbitmq.mongodb", DateTime.Now, trans);
-
-                //Do something, and commit by yourself.
-                session.CommitTransaction();
+                _capPublisher.Publish("sample.rabbitmq.mongodb", DateTime.Now);
             }
+
             return Ok();
         }
-
-        [Route("~/publish/rollback")]
-        public IActionResult PublishRollback()
-        {
-            using (var trans = _mongoTransaction.Begein(autoCommit: false))
-            {
-                var session = trans.GetSession();
-                try
-                {
-                    _capPublisher.PublishWithMongo("sample.rabbitmq.mongodb", DateTime.Now, trans);
-                    //Do something, but
-                    throw new Exception("Foo");
-                    session.CommitTransaction();
-                }
-                catch (System.Exception ex)
-                {
-                    session.AbortTransaction();
-                    return StatusCode(500, ex.Message);
-                }
-            }
-        }
-
+         
         [Route("~/publish/without/trans")]
         public IActionResult PublishWithoutTrans()
         {
-            _capPublisher.PublishWithMongo("sample.rabbitmq.mongodb", DateTime.Now);
+            _capPublisher.Publish("sample.rabbitmq.mongodb", DateTime.Now);
             return Ok();
         }
 

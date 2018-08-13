@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -28,7 +27,6 @@ namespace DotNetCore.CAP.MongoDB
             services.AddScoped<ICallbackPublisher, CapPublisher>();
 
             services.AddTransient<ICollectProcessor, MongoDBCollectProcessor>();
-            services.AddTransient<IMongoTransaction, MongoTransaction>();
 
             var options = new MongoDBOptions();
             _configure?.Invoke(options);

@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.MongoDB
             _database = _client.GetDatabase(_options.DatabaseName);
         }
 
-        public bool ChangePublishedState(int messageId, string state)
+        public bool ChangePublishedState(long messageId, string state)
         {
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
 
@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.MongoDB
             return result.ModifiedCount > 0;
         }
 
-        public bool ChangeReceivedState(int messageId, string state)
+        public bool ChangeReceivedState(long messageId, string state)
         {
             var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
@@ -60,7 +60,7 @@ namespace DotNetCore.CAP.MongoDB
             return new MongoDBStorageTransaction(_client, _options);
         }
 
-        public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
+        public async Task<CapPublishedMessage> GetPublishedMessageAsync(long id)
         {
             var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
             return await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
@@ -77,7 +77,7 @@ namespace DotNetCore.CAP.MongoDB
                 .ToListAsync();
         }
 
-        public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
+        public async Task<CapReceivedMessage> GetReceivedMessageAsync(long id)
         {
             var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
             return await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
@@ -95,7 +95,7 @@ namespace DotNetCore.CAP.MongoDB
                 .ToListAsync();
         }
 
-        public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
+        public void StoreReceivedMessage(CapReceivedMessage message)
         {
             if (message == null)
             {
@@ -104,11 +104,7 @@ namespace DotNetCore.CAP.MongoDB
 
             var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
-            message.Id = await new MongoDBUtil().GetNextSequenceValueAsync(_database, _options.ReceivedCollection);
-
             collection.InsertOne(message);
-
-            return message.Id;
         }
 
         public void Dispose()
