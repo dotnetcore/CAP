@@ -82,14 +82,14 @@ namespace DotNetCore.CAP.Dashboard
 
             Routes.AddJsonResult("/published/message/(?<Id>.+)", x =>
             {
-                var id = int.Parse(x.UriMatch.Groups["Id"].Value);
+                var id = long.Parse(x.UriMatch.Groups["Id"].Value);
                 var message = x.Storage.GetConnection().GetPublishedMessageAsync(id)
                     .GetAwaiter().GetResult();
                 return message.Content;
             });
             Routes.AddJsonResult("/received/message/(?<Id>.+)", x =>
             {
-                var id = int.Parse(x.UriMatch.Groups["Id"].Value);
+                var id = long.Parse(x.UriMatch.Groups["Id"].Value);
                 var message = x.Storage.GetConnection().GetReceivedMessageAsync(id)
                     .GetAwaiter().GetResult();
                 return message.Content;

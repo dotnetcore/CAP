@@ -81,7 +81,11 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   `ExpiresAt` datetime DEFAULT NULL,
   `StatusName` varchar(40) NOT NULL,
   PRIMARY KEY (`Id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;";
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `{prefix}.published` MODIFY Id BIGINT NOT NULL;
+ALTER TABLE `{prefix}.received` MODIFY Id BIGINT NOT NULL;
+";
             return batchSql;
         }
 

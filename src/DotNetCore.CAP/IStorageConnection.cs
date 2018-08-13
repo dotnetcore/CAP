@@ -19,7 +19,7 @@ namespace DotNetCore.CAP
         /// Returns the message with the given id.
         /// </summary>
         /// <param name="id">The message's id.</param>
-        Task<CapPublishedMessage> GetPublishedMessageAsync(int id);
+        Task<CapPublishedMessage> GetPublishedMessageAsync(long id);
 
         /// <summary>
         /// Returns executed failed messages.
@@ -32,13 +32,13 @@ namespace DotNetCore.CAP
         /// Stores the message.
         /// </summary>
         /// <param name="message">The message to store.</param>
-        Task StoreReceivedMessageAsync(CapReceivedMessage message);
+        void StoreReceivedMessage(CapReceivedMessage message);
 
         /// <summary>
         /// Returns the message with the given id.
         /// </summary>
         /// <param name="id">The message's id.</param>
-        Task<CapReceivedMessage> GetReceivedMessageAsync(int id);
+        Task<CapReceivedMessage> GetReceivedMessageAsync(long id);
 
         /// <summary>
         /// Returns executed failed message.
@@ -55,13 +55,13 @@ namespace DotNetCore.CAP
         /// </summary>
         /// <param name="messageId">Message id</param>
         /// <param name="state">State name</param>
-        bool ChangePublishedState(int messageId, string state);
+        bool ChangePublishedState(long messageId, string state);
 
         /// <summary>
         /// Change specified message's state  of received message
         /// </summary>
         /// <param name="messageId">Message id</param>
         /// <param name="state">State name</param>
-        bool ChangeReceivedState(int messageId, string state);
+        bool ChangeReceivedState(long messageId, string state);
     }
 }

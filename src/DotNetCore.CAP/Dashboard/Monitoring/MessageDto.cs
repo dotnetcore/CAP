@@ -7,7 +7,7 @@ namespace DotNetCore.CAP.Dashboard.Monitoring
 {
     public class MessageDto
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public string Group { get; set; }
 
