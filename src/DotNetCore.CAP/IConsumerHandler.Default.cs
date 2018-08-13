@@ -171,7 +171,7 @@ namespace DotNetCore.CAP
 
         private void StoreMessage(CapReceivedMessage receivedMessage)
         {
-             _connection.StoreReceivedMessageAsync(receivedMessage).GetAwaiter().GetResult();
+             _connection.StoreReceivedMessage(receivedMessage);
         }
 
         private (Guid, string) TracingBefore(string topic, string values)

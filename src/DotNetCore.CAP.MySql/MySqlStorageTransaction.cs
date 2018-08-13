@@ -14,7 +14,6 @@ namespace DotNetCore.CAP.MySql
     {
         private readonly IDbConnection _dbConnection;
 
-        //private readonly IDbTransaction _dbTransaction;
         private readonly string _prefix;
 
         public MySqlStorageTransaction(MySqlStorageConnection connection)
@@ -23,8 +22,6 @@ namespace DotNetCore.CAP.MySql
             _prefix = options.TableNamePrefix;
 
             _dbConnection = new MySqlConnection(options.ConnectionString);
-            // _dbConnection.Open();    for performance
-            // _dbTransaction = _dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
         }
 
         public void UpdateMessage(CapPublishedMessage message)
@@ -55,13 +52,11 @@ namespace DotNetCore.CAP.MySql
         {
             _dbConnection.Close();
             _dbConnection.Dispose();
-            //_dbTransaction.Commit();
             return Task.CompletedTask;
         }
 
         public void Dispose()
         {
-            //_dbTransaction.Dispose();
             _dbConnection.Dispose();
         }
     }
