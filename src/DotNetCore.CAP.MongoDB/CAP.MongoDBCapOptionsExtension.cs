@@ -27,6 +27,7 @@ namespace DotNetCore.CAP.MongoDB
             services.AddScoped<ICallbackPublisher, CapPublisher>();
 
             services.AddTransient<ICollectProcessor, MongoDBCollectProcessor>();
+            services.AddTransient<CapTransactionBase, MongoDBCapTransaction>();
 
             var options = new MongoDBOptions();
             _configure?.Invoke(options);
