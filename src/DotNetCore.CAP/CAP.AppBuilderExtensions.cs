@@ -4,6 +4,7 @@
 using System;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
@@ -12,7 +13,7 @@ namespace Microsoft.AspNetCore.Builder
     /// <summary>
     /// app extensions for <see cref="IApplicationBuilder" />
     /// </summary>
-    public static class AppBuilderExtensions
+    internal static class AppBuilderExtensions
     {
         /// <summary>
         /// Enables cap for the current application
@@ -68,6 +69,19 @@ namespace Microsoft.AspNetCore.Builder
                 throw new InvalidOperationException(
                     "You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseSqlServer(...) })");
             }
+        }
+    }
+
+    sealed class CapStartupFilter : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
+        {
+            return app =>
+            {
+                app.UseCap();
+
+                next(app);
+            };
         }
     }
 }

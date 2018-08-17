@@ -8,6 +8,8 @@ using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -24,9 +26,7 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">The services available in the application.</param>
         /// <param name="setupAction">An action to configure the <see cref="CapOptions" />.</param>
         /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
-        public static CapBuilder AddCap(
-            this IServiceCollection services,
-            Action<CapOptions> setupAction)
+        public static CapBuilder AddCap(this IServiceCollection services, Action<CapOptions> setupAction)
         {
             if (setupAction == null)
             {
@@ -36,6 +36,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<CapMarkerService>();
             services.Configure(setupAction);
 
+            //Consumer service
             AddSubscribeServices(services);
 
             //Serializer and model binder
@@ -49,18 +50,18 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<MethodMatcherCache>();
 
             //Bootstrapper and Processors
-            services.AddSingleton<IProcessingServer, ConsumerHandler>();
-            services.AddSingleton<IProcessingServer, CapProcessingServer>();
-            services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
-            services.AddSingleton<IStateChanger, StateChanger>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerHandler>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
+            services.TryAddSingleton<IBootstrapper, DefaultBootstrapper>();
+            services.TryAddSingleton<IStateChanger, StateChanger>();
 
             //Queue's message processor
-            services.AddTransient<NeedRetryMessageProcessor>();
+            services.TryAddSingleton<NeedRetryMessageProcessor>();
 
             //Sender and Executors   
-            services.AddSingleton<IDispatcher, Dispatcher>();
+            services.TryAddSingleton<IDispatcher, Dispatcher>();
             // Warning: IPublishMessageSender need to inject at extension project. 
-            services.AddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
+            services.TryAddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
 
             //Options and extension service
             var options = new CapOptions();
@@ -69,8 +70,10 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 serviceExtension.AddServices(services);
             }
-
             services.AddSingleton(options);
+
+            //Startup and Middleware
+            services.AddTransient<IStartupFilter, CapStartupFilter>();
 
             return new CapBuilder(services);
         }
@@ -90,7 +93,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             foreach (var service in consumerListenerServices)
             {
-                services.AddTransient(service.Key, service.Value);
+                services.TryAddEnumerable(ServiceDescriptor.Transient(service.Key, service.Value));
             }
         }
     }
