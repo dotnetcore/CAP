@@ -14,7 +14,7 @@ using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class CapPublisher : CapPublisherBase, ICallbackPublisher, IDisposable
+    public class MySqlPublisher : CapPublisherBase, ICallbackPublisher, IDisposable
     {
         private readonly DbContext _dbContext;
         private readonly MySqlOptions _options;
@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.MySql
 
         private MySqlConnection _connection;
 
-        public CapPublisher(IServiceProvider provider, MySqlOptions options) : base(provider)
+        public MySqlPublisher(IServiceProvider provider, MySqlOptions options) : base(provider)
         {
             _options = options;
 
@@ -49,7 +49,7 @@ namespace DotNetCore.CAP.MySql
                 dbTrans = dbContextTrans.GetDbTransaction();
             }
             var conn = dbTrans?.Connection;
-            return conn.ExecuteScalarAsync<int>(PrepareSql(), message, dbTrans);
+            return conn.ExecuteAsync(PrepareSql(), message, dbTrans);
         }
 
         protected override object GetDbTransaction()
