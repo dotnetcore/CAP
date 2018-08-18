@@ -109,10 +109,6 @@ VALUES(@Id,@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             {
                 return connection.Execute(sql) > 0;
             }
-        }
-
-        public void Dispose()
-        {
-        }
+        } 
     }
 }

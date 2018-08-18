@@ -34,7 +34,6 @@ namespace Microsoft.Extensions.DependencyInjection
             }
 
             services.TryAddSingleton<CapMarkerService>();
-            services.Configure(setupAction);
 
             //Consumer service
             AddSubscribeServices(services);

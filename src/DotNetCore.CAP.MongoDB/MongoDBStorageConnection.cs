@@ -105,10 +105,6 @@ namespace DotNetCore.CAP.MongoDB
             var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
 
             collection.InsertOne(message);
-        }
-
-        public void Dispose()
-        {
-        }
+        } 
     }
 }
