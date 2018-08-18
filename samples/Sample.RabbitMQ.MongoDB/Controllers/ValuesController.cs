@@ -22,10 +22,13 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
         [Route("~/publish")]
         public IActionResult PublishWithTrans()
         {
+            //var mycollection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
+            //mycollection.InsertOne(new BsonDocument { { "test", "test" } });
+
             using (var session = _client.StartSession())
             using (var trans = _capPublisher.CapTransaction.Begin(session))
             {
-                var collection = _client.GetDatabase("TEST").GetCollection<BsonDocument>("test");
+                var collection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
                 collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
 
                 _capPublisher.Publish("sample.rabbitmq.mongodb", DateTime.Now);
@@ -39,17 +42,17 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
         public IActionResult PublishNotAutoCommit()
         {
             using (var session = _client.StartSession())
-            using (_capPublisher.CapTransaction.Begin(session,true))
+            using (_capPublisher.CapTransaction.Begin(session, true))
             {
-                var collection = _client.GetDatabase("TEST").GetCollection<BsonDocument>("test");
-                collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
+                var collection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
+                collection.InsertOne(session, new BsonDocument { { "hello2", "world2" } });
 
                 _capPublisher.Publish("sample.rabbitmq.mongodb", DateTime.Now);
             }
 
             return Ok();
         }
-         
+
         [Route("~/publish/without/trans")]
         public IActionResult PublishWithoutTrans()
         {

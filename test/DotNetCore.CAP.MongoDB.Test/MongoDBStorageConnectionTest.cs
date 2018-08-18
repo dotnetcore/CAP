@@ -11,20 +11,23 @@ namespace DotNetCore.CAP.MongoDB.Test
     [Collection("MongoDB")]
     public class MongoDBStorageConnectionTest : DatabaseTestHost
     {
-        private IStorageConnection _connection => 
+        private IStorageConnection _connection =>
             Provider.GetService<MongoDBStorage>().GetConnection();
 
         [Fact]
-        public async void StoreReceivedMessageAsync_TestAsync()
+        public void StoreReceivedMessageAsync_TestAsync()
         {
-            var id = await _connection.StoreReceivedMessageAsync(new CapReceivedMessage(new MessageContext
+            var messageContext = new MessageContext
             {
                 Group = "test",
                 Name = "test",
                 Content = "test-content"
-            }));
+            };
 
-            id.Should().BeGreaterThan(0);
+            _connection.StoreReceivedMessage(new CapReceivedMessage(messageContext)
+            {
+                Id = SnowflakeId.Default().NextId()
+            });
         }
 
         [Fact]
@@ -45,14 +48,17 @@ namespace DotNetCore.CAP.MongoDB.Test
 
             msgs.Should().BeEmpty();
 
+            var id = SnowflakeId.Default().NextId();
+
             var msg = new CapReceivedMessage
             {
+                Id = id,
                 Group = "test",
                 Name = "test",
                 Content = "test-content",
                 StatusName = StatusName.Failed
             };
-            var id = await _connection.StoreReceivedMessageAsync(msg);
+            _connection.StoreReceivedMessage(msg);
 
             var collection = Database.GetCollection<CapReceivedMessage>(MongoDBOptions.ReceivedCollection);
 
