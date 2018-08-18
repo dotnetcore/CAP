@@ -24,9 +24,12 @@ namespace DotNetCore.CAP
             services.AddSingleton<CapDatabaseStorageMarkerService>();
             services.AddSingleton<IStorage, SqlServerStorage>();
             services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
-            services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddScoped<ICallbackPublisher, CapPublisher>();
+
+            services.AddScoped<ICapPublisher, SqlServerPublisher>();
+            services.AddScoped<ICallbackPublisher, SqlServerPublisher>();
+
             services.AddTransient<ICollectProcessor, SqlServerCollectProcessor>();
+            services.AddTransient<CapTransactionBase, SqlServerCapTransaction>();
 
             AddSqlServerOptions(services);
         }

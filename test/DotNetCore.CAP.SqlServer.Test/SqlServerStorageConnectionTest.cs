@@ -10,30 +10,31 @@ namespace DotNetCore.CAP.SqlServer.Test
     [Collection("sqlserver")]
     public class SqlServerStorageConnectionTest : DatabaseTestHost
     {
-        private SqlServerStorageConnection _storage;
+        private readonly SqlServerStorageConnection _storage;
 
         public SqlServerStorageConnectionTest()
         {
-            var options = GetService<SqlServerOptions>();
-            var capOptions = GetService<CapOptions>();
-            _storage = new SqlServerStorageConnection(options, capOptions);
+            _storage = new SqlServerStorageConnection(SqlSeverOptions, CapOptions);
         }
 
         [Fact]
         public async Task GetPublishedMessageAsync_Test()
         {
-            var sql = "INSERT INTO [Cap].[Published]([Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) OUTPUT INSERTED.Id VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = "INSERT INTO [Cap].[Published]([Id],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) VALUES(@Id,@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var insertedId = SnowflakeId.Default().NextId();
             var publishMessage = new CapPublishedMessage
             {
+                Id= insertedId,
                 Name = "SqlServerStorageConnectionTest",
                 Content = "",
                 StatusName = StatusName.Scheduled
             };
-            var insertedId = default(int);
+           
             using (var connection = ConnectionUtil.CreateConnection())
             {
-                insertedId = connection.QueryFirst<int>(sql, publishMessage);
+               await connection.ExecuteAsync(sql, publishMessage);
             }
+
             var message = await _storage.GetPublishedMessageAsync(insertedId);
             Assert.NotNull(message);
             Assert.Equal("SqlServerStorageConnectionTest", message.Name);
@@ -41,7 +42,7 @@ namespace DotNetCore.CAP.SqlServer.Test
         }
          
         [Fact]
-        public async Task StoreReceivedMessageAsync_Test()
+        public void StoreReceivedMessageAsync_Test()
         {
             var receivedMessage = new CapReceivedMessage
             {
@@ -54,7 +55,7 @@ namespace DotNetCore.CAP.SqlServer.Test
             Exception exception = null;
             try
             {
-                await _storage.StoreReceivedMessageAsync(receivedMessage);
+                _storage.StoreReceivedMessage(receivedMessage);
             }
             catch (Exception ex)
             {
@@ -66,20 +67,20 @@ namespace DotNetCore.CAP.SqlServer.Test
         [Fact]
         public async Task GetReceivedMessageAsync_Test()
         {
-            var sql = $@"
-        INSERT INTO [Cap].[Received]([Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) OUTPUT INSERTED.Id
-        VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = @"INSERT INTO [Cap].[Received]([Id],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) VALUES(@Id,@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var insertedId = SnowflakeId.Default().NextId();
             var receivedMessage = new CapReceivedMessage
             {
+                Id= insertedId,
                 Name = "SqlServerStorageConnectionTest",
                 Content = "",
                 Group = "mygroup",
                 StatusName = StatusName.Scheduled
             };
-            var insertedId = default(int);
+           
             using (var connection = ConnectionUtil.CreateConnection())
             {
-                insertedId = connection.QueryFirst<int>(sql, receivedMessage);
+               await connection.ExecuteAsync(sql, receivedMessage);
             }
 
             var message = await _storage.GetReceivedMessageAsync(insertedId);

@@ -62,29 +62,5 @@ namespace DotNetCore.CAP.SqlServer
             _dbTransaction.Dispose();
             _dbConnection.Dispose();
         }
-
-        public void EnqueueMessage(CapPublishedMessage message)
-        {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
-            var sql = $"INSERT INTO [{_schema}].[Queue] values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Publish},
-                _dbTransaction);
-        }
-
-        public void EnqueueMessage(CapReceivedMessage message)
-        {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
-            var sql = $"INSERT INTO [{_schema}].[Queue] values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Subscribe},
-                _dbTransaction);
-        }
     }
 }

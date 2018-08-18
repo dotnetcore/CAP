@@ -38,7 +38,7 @@ namespace DotNetCore.CAP.SqlServer
             return new SqlServerMonitoringApi(this, _options);
         }
 
-        public async Task InitializeAsync(CancellationToken cancellationToken)
+        public async Task InitializeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             if (cancellationToken.IsCancellationRequested)
             {
@@ -64,15 +64,10 @@ BEGIN
 	EXEC('CREATE SCHEMA [{schema}]')
 END;
 
-IF OBJECT_ID(N'[{schema}].[Queue]',N'U') IS NOT NULL
-BEGIN
-	DROP TABLE [{schema}].[Queue];
-END;
-
 IF OBJECT_ID(N'[{schema}].[Received]',N'U') IS NULL
 BEGIN
 CREATE TABLE [{schema}].[Received](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Id] [bigint] NOT NULL,
 	[Name] [nvarchar](200) NOT NULL,
 	[Group] [nvarchar](200) NULL,
 	[Content] [nvarchar](max) NULL,
@@ -90,7 +85,7 @@ END;
 IF OBJECT_ID(N'[{schema}].[Published]',N'U') IS NULL
 BEGIN
 CREATE TABLE [{schema}].[Published](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
+	[Id] [bigint] NOT NULL,
 	[Name] [nvarchar](200) NOT NULL,
 	[Content] [nvarchar](max) NULL,
 	[Retries] [int] NOT NULL,
