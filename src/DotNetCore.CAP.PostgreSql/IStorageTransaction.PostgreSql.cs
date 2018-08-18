@@ -35,9 +35,7 @@ namespace DotNetCore.CAP.PostgreSql
             }
 
             var sql =
-                $@"UPDATE ""{
-                        _schema
-                    }"".""published"" SET ""Retries""=@Retries,""Content""= @Content,""ExpiresAt""=@ExpiresAt,""StatusName""=@StatusName WHERE ""Id""=@Id;";
+                $@"UPDATE ""{_schema}"".""published"" SET ""Retries""=@Retries,""Content""= @Content,""ExpiresAt""=@ExpiresAt,""StatusName""=@StatusName WHERE ""Id""=@Id;";
             _dbConnection.Execute(sql, message, _dbTransaction);
         }
 
@@ -65,30 +63,6 @@ namespace DotNetCore.CAP.PostgreSql
         {
             _dbTransaction.Dispose();
             _dbConnection.Dispose();
-        }
-
-        public void EnqueueMessage(CapPublishedMessage message)
-        {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
-            var sql = $@"INSERT INTO ""{_schema}"".""queue"" values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Publish},
-                _dbTransaction);
-        }
-
-        public void EnqueueMessage(CapReceivedMessage message)
-        {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
-
-            var sql = $@"INSERT INTO ""{_schema}"".""queue"" values(@MessageId,@MessageType);";
-            _dbConnection.Execute(sql, new CapQueue {MessageId = message.Id, MessageType = MessageType.Subscribe},
-                _dbTransaction);
         }
     }
 }
