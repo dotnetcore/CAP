@@ -26,7 +26,7 @@ namespace Sample.Kafka.MySql.Controllers
 
                 //your business code here
 
-                await _capBus.PublishAsync("xxx.xxx.test2", 123456, transaction);
+                await _capBus.PublishAsync("xxx.xxx.test2", 123456);
 
                 transaction.Commit();
             }
