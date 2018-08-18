@@ -22,18 +22,18 @@ namespace DotNetCore.CAP.MySql.Test
         [Fact]
         public async Task GetPublishedMessageAsync_Test()
         {
-            var sql = "INSERT INTO `cap.published`(`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT @@IDENTITY;";
+            var sql = "INSERT INTO `cap.published`(`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var insertedId = SnowflakeId.Default().NextId();
             var publishMessage = new CapPublishedMessage
             {
-                Id = SnowflakeId.Default().NextId(),
+                Id = insertedId,
                 Name = "MySqlStorageConnectionTest",
                 Content = "",
                 StatusName = StatusName.Scheduled
             };
-            var insertedId = default(int);
             using (var connection = ConnectionUtil.CreateConnection())
             {
-                insertedId = connection.QueryFirst<int>(sql, publishMessage);
+                await connection.ExecuteAsync(sql, publishMessage);
             }
             var message = await _storage.GetPublishedMessageAsync(insertedId);
             Assert.NotNull(message);
@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.MySql.Test
         }
 
         [Fact]
-        public async Task StoreReceivedMessageAsync_Test()
+        public void StoreReceivedMessageAsync_Test()
         {
             var receivedMessage = new CapReceivedMessage
             {
@@ -56,7 +56,7 @@ namespace DotNetCore.CAP.MySql.Test
             Exception exception = null;
             try
             {
-                await _storage.StoreReceivedMessageAsync(receivedMessage);
+                _storage.StoreReceivedMessage(receivedMessage);
             }
             catch (Exception ex)
             {
@@ -69,24 +69,23 @@ namespace DotNetCore.CAP.MySql.Test
         public async Task GetReceivedMessageAsync_Test()
         {
             var sql = $@"
-        INSERT INTO `cap.received`(`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
-        VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT @@IDENTITY;";
+        INSERT INTO `cap.received`(`Id`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
+        VALUES(@Id,@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var insertedId = SnowflakeId.Default().NextId();
             var receivedMessage = new CapReceivedMessage
             {
-                Id = SnowflakeId.Default().NextId(),
+                Id = insertedId,
                 Name = "MySqlStorageConnectionTest",
                 Content = "",
                 Group = "mygroup",
                 StatusName = StatusName.Scheduled
             };
-            var insertedId = default(int);
             using (var connection = ConnectionUtil.CreateConnection())
             {
-                insertedId = connection.QueryFirst<int>(sql, receivedMessage);
+                await connection.ExecuteAsync(sql, receivedMessage);
             }
 
             var message = await _storage.GetReceivedMessageAsync(insertedId);
-
             Assert.NotNull(message);
             Assert.Equal(StatusName.Scheduled, message.StatusName);
             Assert.Equal("MySqlStorageConnectionTest", message.Name);
