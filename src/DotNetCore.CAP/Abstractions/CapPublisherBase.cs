@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.Abstractions
 {
     public abstract class CapPublisherBase : ICapPublisher
     {
-        private readonly CapTransactionBase _capTransaction;
+        private readonly CapTransactionBase _transaction;
         private readonly IMessagePacker _msgPacker;
         private readonly IContentSerializer _serializer;
 
@@ -27,14 +27,14 @@ namespace DotNetCore.CAP.Abstractions
         protected CapPublisherBase(IServiceProvider service)
         {
             ServiceProvider = service;
-            _capTransaction = service.GetRequiredService<CapTransactionBase>();
+            _transaction = service.GetRequiredService<CapTransactionBase>();
             _msgPacker = service.GetRequiredService<IMessagePacker>();
             _serializer = service.GetRequiredService<IContentSerializer>();
         }
 
         protected IServiceProvider ServiceProvider { get; }
 
-        public ICapTransaction CapTransaction => _capTransaction;
+        public ICapTransaction Transaction => _transaction;
 
         public void Publish<T>(string name, T contentObj, string callbackName = null)
         {
@@ -65,10 +65,10 @@ namespace DotNetCore.CAP.Abstractions
 
         protected async Task PublishAsyncInternal(CapPublishedMessage message)
         {
-            if (CapTransaction.DbTransaction == null)
+            if (Transaction.DbTransaction == null)
             {
                 NotUseTransaction = true;
-                CapTransaction.DbTransaction = GetDbTransaction();
+                Transaction.DbTransaction = GetDbTransaction();
             }
 
             Guid operationId = default(Guid);
@@ -77,15 +77,15 @@ namespace DotNetCore.CAP.Abstractions
             {
                 operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
 
-                await ExecuteAsync(message, CapTransaction);
+                await ExecuteAsync(message, Transaction);
 
-                _capTransaction.AddToSent(message);
+                _transaction.AddToSent(message);
 
                 s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
 
-                if (NotUseTransaction || CapTransaction.AutoCommit)
+                if (NotUseTransaction || Transaction.AutoCommit)
                 {
-                    _capTransaction.Commit();
+                    _transaction.Commit();
                 }
             }
             catch (Exception e)
@@ -96,9 +96,9 @@ namespace DotNetCore.CAP.Abstractions
             }
             finally
             {
-                if (NotUseTransaction || CapTransaction.AutoCommit)
+                if (NotUseTransaction || Transaction.AutoCommit)
                 {
-                    _capTransaction.Dispose();
+                    _transaction.Dispose();
                 }
             }
         }

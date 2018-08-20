@@ -119,7 +119,7 @@ namespace DotNetCore.CAP.Test
 
         private class MyProducerService : ICapPublisher
         {
-            public ICapTransaction CapTransaction { get; }
+            public ICapTransaction Transaction { get; }
 
             public Task PublishAsync<T>(string name, T contentObj, string callbackName = null,
                 CancellationToken cancellationToken = default(CancellationToken))

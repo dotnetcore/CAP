@@ -11,7 +11,7 @@ namespace DotNetCore.CAP
     /// </summary>
     public interface ICapPublisher
     {
-        ICapTransaction CapTransaction { get; }
+        ICapTransaction Transaction { get; }
 
         /// <summary>
         /// Asynchronous publish an object message.

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
+using MySql.Data.MySqlClient;
 
 namespace Sample.RabbitMQ.MySql.Controllers
 {
@@ -28,7 +29,17 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [Route("~/publish2")]
         public IActionResult PublishMessage2()
         {
-            _capBus.Publish("sample.kafka.sqlserver4", DateTime.Now);
+            using (var connection = new MySqlConnection("Server=192.168.10.110;Database=testcap;UserId=root;Password=123123;"))
+            {
+                using (var transaction = connection.BeginAndJoinToTransaction(_capBus))
+                {
+                    //your business code
+
+                    _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+
+                    transaction.Commit();
+                }
+            } 
 
             return Ok();
         }
@@ -37,7 +48,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         public async Task<IActionResult> PublishMessageWithTransaction()
         {
             using (var trans = await _dbContext.Database.BeginTransactionAsync())
-            using (var capTrans = _capBus.CapTransaction.Begin(trans))
+            using (var capTrans = _capBus.Transaction.Begin(trans))
             {
                 for (int i = 0; i < 10; i++)
                 {
@@ -48,6 +59,8 @@ namespace Sample.RabbitMQ.MySql.Controllers
             }
             return Ok();
         }
+
+
 
         [NonAction]
         [CapSubscribe("#.rabbitmq.mysql")]
