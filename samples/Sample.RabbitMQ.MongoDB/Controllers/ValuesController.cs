@@ -26,7 +26,7 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
             //mycollection.InsertOne(new BsonDocument { { "test", "test" } });
 
             using (var session = _client.StartSession())
-            using (var trans = _capPublisher.CapTransaction.Begin(session))
+            using (var trans = _capPublisher.Transaction.Begin(session))
             {
                 var collection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
                 collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
@@ -42,7 +42,7 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
         public IActionResult PublishNotAutoCommit()
         {
             using (var session = _client.StartSession())
-            using (_capPublisher.CapTransaction.Begin(session, true))
+            using (_capPublisher.Transaction.Begin(session, true))
             {
                 var collection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
                 collection.InsertOne(session, new BsonDocument { { "hello2", "world2" } });
