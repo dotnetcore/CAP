@@ -7,7 +7,9 @@ namespace DotNetCore.CAP
 {
     public class MySqlCapTransaction : CapTransactionBase
     {
-        public MySqlCapTransaction(IDispatcher dispatcher) : base(dispatcher) { }
+        public MySqlCapTransaction(IDispatcher dispatcher) : base(dispatcher)
+        {
+        }
 
         public override void Commit()
         {
@@ -50,16 +52,6 @@ namespace DotNetCore.CAP
     public static class CapTransactionExtensions
     {
         public static ICapTransaction Begin(this ICapTransaction transaction,
-            IDbTransaction dbTransaction, bool autoCommit = false)
-        {
-
-            transaction.DbTransaction = dbTransaction;
-            transaction.AutoCommit = autoCommit;
-
-            return transaction;
-        }
-
-        public static ICapTransaction Begin(this ICapTransaction transaction,
             IDbContextTransaction dbTransaction, bool autoCommit = false)
         {
 
@@ -69,5 +61,4 @@ namespace DotNetCore.CAP
             return transaction;
         }
     }
-
 }
