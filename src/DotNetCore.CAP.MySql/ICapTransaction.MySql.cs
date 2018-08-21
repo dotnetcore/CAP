@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -59,6 +60,14 @@ namespace DotNetCore.CAP
             transaction.AutoCommit = autoCommit;
 
             return transaction;
+        }
+
+        public static IDbContextTransaction BeginAndJoinToTransaction(this DatabaseFacade database,
+            ICapPublisher publisher, bool autoCommit = false)
+        {
+            var trans = database.BeginTransaction();
+            var capTrans = publisher.Transaction.Begin(trans);
+            return new CapEFDbTransaction(capTrans);
         }
     }
 }
