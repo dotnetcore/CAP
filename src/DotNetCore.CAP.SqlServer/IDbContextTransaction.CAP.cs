@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP;
 
 // ReSharper disable once CheckNamespace
@@ -11,7 +14,7 @@ namespace Microsoft.EntityFrameworkCore.Storage
         public CapEFDbTransaction(ICapTransaction transaction)
         {
             _transaction = transaction;
-            var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction;
+            var dbContextTransaction = (IDbContextTransaction) _transaction.DbTransaction;
             TransactionId = dbContextTransaction.TransactionId;
         }
 

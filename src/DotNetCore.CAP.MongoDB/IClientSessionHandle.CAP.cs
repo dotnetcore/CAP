@@ -1,4 +1,7 @@
-﻿using System.Threading;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
 using MongoDB.Bson;
@@ -9,13 +12,13 @@ namespace MongoDB.Driver
 {
     internal class CapMongoDbClientSessionHandle : IClientSessionHandle
     {
-        private readonly ICapTransaction _transaction;
         private readonly IClientSessionHandle _sessionHandle;
+        private readonly ICapTransaction _transaction;
 
         public CapMongoDbClientSessionHandle(ICapTransaction transaction)
         {
             _transaction = transaction;
-            _sessionHandle = (IClientSessionHandle)_transaction.DbTransaction;
+            _sessionHandle = (IClientSessionHandle) _transaction.DbTransaction;
         }
 
         public void Dispose()
@@ -68,6 +71,7 @@ namespace MongoDB.Driver
         public ClientSessionOptions Options => _sessionHandle.Options;
         public IServerSession ServerSession => _sessionHandle.ServerSession;
         public ICoreSessionHandle WrappedCoreSession => _sessionHandle.WrappedCoreSession;
+
         public IClientSessionHandle Fork()
         {
             return _sessionHandle.Fork();
