@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
+using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
@@ -7,37 +7,51 @@ using MySql.Data.MySqlClient;
 namespace Sample.Kafka.MySql.Controllers
 {
     [Route("api/[controller]")]
-    public class ValuesController : Controller, ICapSubscribe
+    public class ValuesController : Controller
     {
         private readonly ICapPublisher _capBus;
 
-        public ValuesController(ICapPublisher producer)
+        public ValuesController(ICapPublisher capPublisher)
         {
-            _capBus = producer;
+            _capBus = capPublisher;
         }
 
-        [Route("~/publish")]
-        public async Task<IActionResult> PublishMessage()
+        [Route("~/without/transaction")]
+        public IActionResult WithoutTransaction()
         {
-            using (var connection = new MySqlConnection("Server=192.168.10.110;Database=testcap;UserId=root;Password=123123;"))
+            _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+
+            return Ok();
+        }
+
+        [Route("~/adonet/transaction")]
+        public IActionResult AdonetWithTransaction()
+        {
+            //NOTE: Add `IgnoreCommandTransaction=true;` to your connection string, see https://github.com/mysql-net/MySqlConnector/issues/474
+            using (var connection = new MySqlConnection(Startup.ConnectionString))
             {
-                connection.Open();
-                var transaction = connection.BeginTransaction();
+                using (var transaction = connection.BeginAndJoinToTransaction(_capBus, autoCommit: false))
+                {
+                    //your business code
+                    connection.Execute("insert into test(name) values('test')", transaction);
 
-                //your business code here
+                    for (int i = 0; i < 5; i++)
+                    {
+                        _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+                    }
 
-                await _capBus.PublishAsync("xxx.xxx.test2", 123456);
-
-                transaction.Commit();
+                    transaction.Commit();
+                }
             }
 
-            return Ok("publish successful!");
+            return Ok();
         }
 
-        [CapSubscribe("#.test2")]
-        public void Test2(int value)
+        [NonAction]
+        [CapSubscribe("sample.rabbitmq.mysql")]
+        public void Subscriber(DateTime time)
         {
-            Console.WriteLine("Subscriber output message: " + value);
+            Console.WriteLine($@"{DateTime.Now}, Subscriber invoked, Sent time:{time}");
         }
     }
 }

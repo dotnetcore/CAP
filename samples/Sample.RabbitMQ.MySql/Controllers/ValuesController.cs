@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
@@ -49,7 +48,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         }
 
         [Route("~/ef/transaction")]
-        public async Task<IActionResult> EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
+        public IActionResult EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
         {
             using (var trans = dbContext.Database.BeginAndJoinToTransaction(_capBus, autoCommit: false))
             {
@@ -57,7 +56,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
 
                 for (int i = 0; i < 5; i++)
                 {
-                    await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
+                    _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
                 }
 
                 dbContext.SaveChanges();
