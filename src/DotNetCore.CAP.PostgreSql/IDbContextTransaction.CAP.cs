@@ -1,0 +1,35 @@
+﻿using System;
+using DotNetCore.CAP;
+
+// ReSharper disable once CheckNamespace
+namespace Microsoft.EntityFrameworkCore.Storage
+{
+    internal class CapEFDbTransaction : IDbContextTransaction
+    {
+        private readonly ICapTransaction _transaction;
+
+        public CapEFDbTransaction(ICapTransaction transaction)
+        {
+            _transaction = transaction;
+            var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction;
+            TransactionId = dbContextTransaction.TransactionId;
+        }
+
+        public void Dispose()
+        {
+            _transaction.Dispose();
+        }
+
+        public void Commit()
+        {
+            _transaction.Commit();
+        }
+
+        public void Rollback()
+        {
+            _transaction.Rollback();
+        }
+
+        public Guid TransactionId { get; }
+    }
+}
