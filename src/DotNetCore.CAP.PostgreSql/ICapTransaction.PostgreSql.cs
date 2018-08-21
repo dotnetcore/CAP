@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 
 // ReSharper disable once CheckNamespace
@@ -50,7 +51,7 @@ namespace DotNetCore.CAP
     public static class CapTransactionExtensions
     {
         public static ICapTransaction Begin(this ICapTransaction transaction,
-            IDbTransaction dbTransaction, bool autoCommit = false)
+            IDbContextTransaction dbTransaction, bool autoCommit = false)
         {
             transaction.DbTransaction = dbTransaction;
             transaction.AutoCommit = autoCommit;
@@ -58,14 +59,12 @@ namespace DotNetCore.CAP
             return transaction;
         }
 
-        public static ICapTransaction Begin(this ICapTransaction transaction,
-            IDbContextTransaction dbTransaction, bool autoCommit = false)
+        public static IDbContextTransaction BeginAndJoinToTransaction(this DatabaseFacade database,
+            ICapPublisher publisher, bool autoCommit = false)
         {
-
-            transaction.DbTransaction = dbTransaction;
-            transaction.AutoCommit = autoCommit;
-
-            return transaction;
+            var trans = database.BeginTransaction();
+            var capTrans = publisher.Transaction.Begin(trans, autoCommit);
+            return new CapEFDbTransaction(capTrans);
         }
     }
 

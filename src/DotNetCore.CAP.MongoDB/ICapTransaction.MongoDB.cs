@@ -1,5 +1,4 @@
-﻿using System.Data;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using MongoDB.Driver;
 
 // ReSharper disable once CheckNamespace
@@ -36,7 +35,7 @@ namespace DotNetCore.CAP
 
         public override void Dispose()
         {
-            (DbTransaction as IDbTransaction)?.Dispose();
+            (DbTransaction as IClientSessionHandle)?.Dispose();
         }
     }
 
@@ -49,11 +48,25 @@ namespace DotNetCore.CAP
             {
                 dbTransaction.StartTransaction();
             }
-           
+
             transaction.DbTransaction = dbTransaction;
             transaction.AutoCommit = autoCommit;
 
             return transaction;
-        } 
+        }
+
+        public static IClientSessionHandle BeginAndJoinToTransaction(this IClientSessionHandle clientSessionHandle,
+            ICapPublisher publisher, bool autoCommit = false)
+        {
+            var capTrans = publisher.Transaction.Begin(clientSessionHandle, autoCommit);
+            return new CapMongoDbClientSessionHandle(capTrans);
+        }
+
+        public static IClientSessionHandle StartAndJoinToTransaction(this IMongoClient client,
+            ICapPublisher publisher, bool autoCommit = false)
+        {
+            var clientSessionHandle = client.StartSession();
+            return BeginAndJoinToTransaction(clientSessionHandle, publisher, autoCommit);
+        }
     }
 }

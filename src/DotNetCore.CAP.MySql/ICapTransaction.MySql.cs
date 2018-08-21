@@ -55,7 +55,6 @@ namespace DotNetCore.CAP
         public static ICapTransaction Begin(this ICapTransaction transaction,
             IDbContextTransaction dbTransaction, bool autoCommit = false)
         {
-
             transaction.DbTransaction = dbTransaction;
             transaction.AutoCommit = autoCommit;
 
@@ -66,7 +65,7 @@ namespace DotNetCore.CAP
             ICapPublisher publisher, bool autoCommit = false)
         {
             var trans = database.BeginTransaction();
-            var capTrans = publisher.Transaction.Begin(trans);
+            var capTrans = publisher.Transaction.Begin(trans, autoCommit);
             return new CapEFDbTransaction(capTrans);
         }
     }
