@@ -4,10 +4,12 @@
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Dashboard;
+using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.SqlServer
@@ -18,12 +20,15 @@ namespace DotNetCore.CAP.SqlServer
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
         private readonly SqlServerOptions _options;
+        private readonly DiagnosticProcessorObserver _diagnosticProcessorObserver;
 
         public SqlServerStorage(ILogger<SqlServerStorage> logger,
             CapOptions capOptions,
-            SqlServerOptions options)
+            SqlServerOptions options,
+            DiagnosticProcessorObserver diagnosticProcessorObserver)
         {
             _options = options;
+            _diagnosticProcessorObserver = diagnosticProcessorObserver;
             _logger = logger;
             _capOptions = capOptions;
         }
@@ -53,6 +58,8 @@ namespace DotNetCore.CAP.SqlServer
             }
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
+
+            DiagnosticListener.AllListeners.Subscribe(_diagnosticProcessorObserver);
         }
 
         protected virtual string CreateDbTablesScript(string schema)

@@ -4,6 +4,7 @@
 using System;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.SqlServer;
+using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,6 +23,7 @@ namespace DotNetCore.CAP
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<CapDatabaseStorageMarkerService>();
+            services.AddSingleton<DiagnosticProcessorObserver>();
             services.AddSingleton<IStorage, SqlServerStorage>();
             services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
 

@@ -14,7 +14,6 @@ namespace DotNetCore.CAP.SqlServer
     {
         private readonly IDbConnection _dbConnection;
 
-        private readonly IDbTransaction _dbTransaction;
         private readonly string _schema;
 
         public SqlServerStorageTransaction(SqlServerStorageConnection connection)
@@ -24,7 +23,6 @@ namespace DotNetCore.CAP.SqlServer
 
             _dbConnection = new SqlConnection(options.ConnectionString);
             _dbConnection.Open();
-            _dbTransaction = _dbConnection.BeginTransaction(IsolationLevel.ReadCommitted);
         }
 
         public void UpdateMessage(CapPublishedMessage message)
@@ -36,7 +34,7 @@ namespace DotNetCore.CAP.SqlServer
 
             var sql =
                 $"UPDATE [{_schema}].[Published] SET [Retries] = @Retries,[Content] = @Content,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
-            _dbConnection.Execute(sql, message, _dbTransaction);
+            _dbConnection.Execute(sql, message);
         }
 
         public void UpdateMessage(CapReceivedMessage message)
@@ -48,18 +46,16 @@ namespace DotNetCore.CAP.SqlServer
 
             var sql =
                 $"UPDATE [{_schema}].[Received] SET [Retries] = @Retries,[Content] = @Content,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
-            _dbConnection.Execute(sql, message, _dbTransaction);
+            _dbConnection.Execute(sql, message);
         }
 
         public Task CommitAsync()
         {
-            _dbTransaction.Commit();
             return Task.CompletedTask;
         }
 
         public void Dispose()
         {
-            _dbTransaction.Dispose();
             _dbConnection.Dispose();
         }
     }
