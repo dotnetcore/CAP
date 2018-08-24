@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Transactions;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
@@ -30,7 +29,6 @@ namespace Sample.Kafka.MySql.Controllers
         [Route("~/adonet/transaction")]
         public IActionResult AdonetWithTransaction()
         {
-            //NOTE: Add `IgnoreCommandTransaction=true;` to your connection string, see https://github.com/mysql-net/MySqlConnector/issues/474
             using (var connection = new SqlConnection(Startup.ConnectionString))
             {
                 using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
