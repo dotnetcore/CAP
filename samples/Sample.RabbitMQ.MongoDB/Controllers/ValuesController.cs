@@ -35,7 +35,7 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
             //var mycollection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
             //mycollection.InsertOne(new BsonDocument { { "test", "test" } });
 
-            using (var session = _client.StartAndJoinToTransaction(_capBus, autoCommit: false))
+            using (var session = _client.StartTransaction(_capBus, autoCommit: false))
             {
                 var collection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
                 collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
@@ -55,7 +55,7 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
             //var mycollection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
             //mycollection.InsertOne(new BsonDocument { { "test", "test" } });
 
-            using (var session = _client.StartAndJoinToTransaction(_capBus, autoCommit: true))
+            using (var session = _client.StartTransaction(_capBus, autoCommit: true))
             {
                 var collection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
                 collection.InsertOne(session, new BsonDocument { { "hello", "world" } });

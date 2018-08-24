@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Data;
+using System.Data.SqlClient;
+using System.Transactions;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
-using MySql.Data.MySqlClient;
+//using MySql.Data.MySqlClient;
 
 namespace Sample.Kafka.MySql.Controllers
 {
@@ -28,17 +31,14 @@ namespace Sample.Kafka.MySql.Controllers
         public IActionResult AdonetWithTransaction()
         {
             //NOTE: Add `IgnoreCommandTransaction=true;` to your connection string, see https://github.com/mysql-net/MySqlConnector/issues/474
-            using (var connection = new MySqlConnection(Startup.ConnectionString))
+            using (var connection = new SqlConnection(Startup.ConnectionString))
             {
-                using (var transaction = connection.BeginAndJoinToTransaction(_capBus, autoCommit: false))
+                using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
                 {
                     //your business code
-                    connection.Execute("insert into test(name) values('test')", transaction);
+                    connection.Execute("insert into dbo.test1(tname) values('test');", transaction: (IDbTransaction)transaction.DbTransaction);
 
-                    for (int i = 0; i < 5; i++)
-                    {
-                        _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
-                    }
+                    _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
 
                     transaction.Commit();
                 }

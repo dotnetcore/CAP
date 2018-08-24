@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
@@ -30,10 +31,10 @@ namespace Sample.RabbitMQ.MySql.Controllers
             //NOTE: Add `IgnoreCommandTransaction=true;` to your connection string, see https://github.com/mysql-net/MySqlConnector/issues/474
             using (var connection = new MySqlConnection(AppDbContext.ConnectionString))
             {
-                using (var transaction = connection.BeginAndJoinToTransaction(_capBus, autoCommit: false))
+                using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
                 {
                     //your business code
-                    connection.Execute("insert into test(name) values('test')", transaction);
+                    connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
 
                     for (int i = 0; i < 5; i++)
                     {
@@ -50,7 +51,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [Route("~/ef/transaction")]
         public IActionResult EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
         {
-            using (var trans = dbContext.Database.BeginAndJoinToTransaction(_capBus, autoCommit: false))
+            using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
             {
                 dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
 
