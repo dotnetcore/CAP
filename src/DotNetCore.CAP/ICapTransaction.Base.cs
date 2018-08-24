@@ -19,7 +19,7 @@ namespace DotNetCore.CAP
 
         public object DbTransaction { get; set; }
 
-        protected internal void AddToSent(CapPublishedMessage msg)
+        protected internal virtual void AddToSent(CapPublishedMessage msg)
         {
             _bufferList.Add(msg);
         }

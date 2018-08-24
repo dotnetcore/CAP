@@ -58,18 +58,12 @@ namespace DotNetCore.CAP
             return transaction;
         }
 
-        public static IClientSessionHandle BeginAndJoinToTransaction(this IClientSessionHandle clientSessionHandle,
-            ICapPublisher publisher, bool autoCommit = false)
-        {
-            var capTrans = publisher.Transaction.Begin(clientSessionHandle, autoCommit);
-            return new CapMongoDbClientSessionHandle(capTrans);
-        }
-
-        public static IClientSessionHandle StartAndJoinToTransaction(this IMongoClient client,
+        public static IClientSessionHandle StartTransaction(this IMongoClient client,
             ICapPublisher publisher, bool autoCommit = false)
         {
             var clientSessionHandle = client.StartSession();
-            return BeginAndJoinToTransaction(clientSessionHandle, publisher, autoCommit);
+            var capTrans = publisher.Transaction.Begin(clientSessionHandle, autoCommit);
+            return new CapMongoDbClientSessionHandle(capTrans);
         }
     }
 }

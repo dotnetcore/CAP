@@ -56,6 +56,15 @@ namespace DotNetCore.CAP
     public static class CapTransactionExtensions
     {
         public static ICapTransaction Begin(this ICapTransaction transaction,
+            IDbTransaction dbTransaction, bool autoCommit = false)
+        {
+            transaction.DbTransaction = dbTransaction;
+            transaction.AutoCommit = autoCommit;
+
+            return transaction;
+        }
+
+        public static ICapTransaction Begin(this ICapTransaction transaction,
             IDbContextTransaction dbTransaction, bool autoCommit = false)
         {
             transaction.DbTransaction = dbTransaction;
@@ -64,7 +73,19 @@ namespace DotNetCore.CAP
             return transaction;
         }
 
-        public static IDbContextTransaction BeginAndJoinToTransaction(this DatabaseFacade database,
+        public static ICapTransaction BeginTransaction(this IDbConnection dbConnection,
+            ICapPublisher publisher, bool autoCommit = false)
+        {
+            if (dbConnection.State == ConnectionState.Closed)
+            {
+                dbConnection.Open();
+            }
+
+            var dbTransaction = dbConnection.BeginTransaction();
+            return publisher.Transaction.Begin(dbTransaction, autoCommit);
+        }
+
+        public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
             ICapPublisher publisher, bool autoCommit = false)
         {
             var trans = database.BeginTransaction();
