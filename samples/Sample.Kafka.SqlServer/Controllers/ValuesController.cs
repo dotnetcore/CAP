@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data.SqlClient;
+using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
@@ -17,9 +18,9 @@ namespace Sample.Kafka.SqlServer.Controllers
         }
 
         [Route("~/without/transaction")]
-        public IActionResult WithoutTransaction()
+        public async Task<IActionResult> WithoutTransaction()
         {
-            _capBus.Publish("sample.kafka.sqlserver", DateTime.Now);
+            await _capBus.PublishAsync("sample.kafka.sqlserver", DateTime.Now);
 
             return Ok();
         }
@@ -61,20 +62,32 @@ namespace Sample.Kafka.SqlServer.Controllers
         }
 
         [Route("~/ef/transaction")]
-        public IActionResult EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
+        public IActionResult EntityFrameworkWithTransaction([FromServices] AppDbContext dbContext)
         {
             using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
             {
-                dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
-
                 for (int i = 0; i < 2; i++)
                 {
                     _capBus.Publish("sample.kafka.sqlserver", DateTime.Now);
                 }
 
-                dbContext.SaveChanges();
+                dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
 
+                // We will assist you set dbcontext save changes and commit transaction
                 trans.Commit();
+            }
+
+            return Ok();
+        }
+
+        [Route("~/ef/autocommit/transaction")]
+        public IActionResult EntityFrameworkAutoCommitWithTransaction([FromServices]AppDbContext dbContext)
+        {
+            using (dbContext.Database.BeginTransaction(_capBus, autoCommit: true))
+            {
+                dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
+
+                _capBus.Publish("sample.kafka.sqlserver", DateTime.Now);
             }
             return Ok();
         }

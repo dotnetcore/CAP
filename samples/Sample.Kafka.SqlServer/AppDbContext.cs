@@ -11,7 +11,7 @@ namespace Sample.Kafka.SqlServer
 
     public class AppDbContext : DbContext
     {
-        public const string ConnectionString = "Server=localhost;Integrated Security=SSPI;Database=testcap";
+        public const string ConnectionString = "Server=localhost;Integrated Security=SSPI;Database=testcap;";
 
         public DbSet<Person> Persons { get; set; }
 
