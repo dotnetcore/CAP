@@ -19,7 +19,7 @@ namespace Sample.Kafka.SqlServer.Controllers
         [Route("~/without/transaction")]
         public IActionResult WithoutTransaction()
         {
-            _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+            _capBus.Publish("sample.kafka.sqlserver", DateTime.Now);
 
             return Ok();
         }
@@ -34,7 +34,7 @@ namespace Sample.Kafka.SqlServer.Controllers
                     //your business code
                     connection.Execute("insert into dbo.test1(tname) values('test');", transaction: transaction);
 
-                    _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+                    _capBus.Publish("sample.kafka.sqlserver", DateTime.Now);
 
                     transaction.Commit();
                 }
@@ -44,7 +44,7 @@ namespace Sample.Kafka.SqlServer.Controllers
         }
 
         [NonAction]
-        [CapSubscribe("sample.rabbitmq.mysql")]
+        [CapSubscribe("sample.kafka.sqlserver")]
         public void Subscriber(DateTime time)
         {
             Console.WriteLine($@"{DateTime.Now}, Subscriber invoked, Sent time:{time}");
