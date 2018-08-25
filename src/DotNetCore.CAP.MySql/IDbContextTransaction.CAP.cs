@@ -7,6 +7,7 @@ using DotNetCore.CAP;
 // ReSharper disable once CheckNamespace
 namespace Microsoft.EntityFrameworkCore.Storage
 {
+    // ReSharper disable once InconsistentNaming
     internal class CapEFDbTransaction : IDbContextTransaction
     {
         private readonly ICapTransaction _transaction;
