@@ -5,13 +5,13 @@ namespace Sample.Kafka.SqlServer
 {
     public class Startup
     {
-        public const string ConnectionString = "Server=localhost;Integrated Security=SSPI;Database=testcap";
-
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<AppDbContext>();
+
             services.AddCap(x =>
             {
-                x.UseSqlServer(ConnectionString);
+                x.UseEntityFramework<AppDbContext>();
                 x.UseKafka("localhost:9092");
                 x.UseDashboard();
             });

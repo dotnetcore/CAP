@@ -27,7 +27,7 @@ namespace Sample.Kafka.SqlServer.Controllers
         [Route("~/adonet/transaction")]
         public IActionResult AdonetWithTransaction()
         {
-            using (var connection = new SqlConnection(Startup.ConnectionString))
+            using (var connection = new SqlConnection(AppDbContext.ConnectionString))
             {
                 using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
                 {
@@ -40,6 +40,42 @@ namespace Sample.Kafka.SqlServer.Controllers
                 }
             }
 
+            return Ok();
+        }
+
+        [Route("~/adonet/autocommit/transaction")]
+        public IActionResult AdonetAutoCommitWithTransaction()
+        {
+            using (var connection = new SqlConnection(AppDbContext.ConnectionString))
+            {
+                using (var transaction = connection.BeginTransaction(_capBus, autoCommit: true))
+                {
+                    //your business code
+                    connection.Execute("insert into dbo.test1(tname) values('test');", transaction: transaction);
+
+                    _capBus.Publish("sample.kafka.sqlserver", DateTime.Now);
+                }
+            }
+
+            return Ok();
+        }
+
+        [Route("~/ef/transaction")]
+        public IActionResult EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
+        {
+            using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
+            {
+                dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
+
+                for (int i = 0; i < 2; i++)
+                {
+                    _capBus.Publish("sample.kafka.sqlserver", DateTime.Now);
+                }
+
+                dbContext.SaveChanges();
+
+                trans.Commit();
+            }
             return Ok();
         }
 
