@@ -7,20 +7,29 @@ using System.Data;
 using System.Data.SqlClient;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.SqlServer.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class SqlServerCapTransaction : CapTransactionBase
     {
+        private readonly DbContext _dbContext;
         private readonly DiagnosticProcessorObserver _diagnosticProcessor;
 
-        public SqlServerCapTransaction(IDispatcher dispatcher,
-            DiagnosticProcessorObserver diagnosticProcessor) : base(dispatcher)
+        public SqlServerCapTransaction(
+            IDispatcher dispatcher, 
+            SqlServerOptions sqlServerOptions,
+            IServiceProvider serviceProvider) : base(dispatcher)
         {
-            _diagnosticProcessor = diagnosticProcessor;
+            if (sqlServerOptions.DbContextType != null)
+            {
+                _dbContext = serviceProvider.GetService(sqlServerOptions.DbContextType) as DbContext;
+            }
+            _diagnosticProcessor = serviceProvider.GetRequiredService<DiagnosticProcessorObserver>();
         }
 
         protected override void AddToSent(CapPublishedMessage msg)
@@ -59,6 +68,7 @@ namespace DotNetCore.CAP
                     dbTransaction.Commit();
                     break;
                 case IDbContextTransaction dbContextTransaction:
+                    _dbContext?.SaveChanges();
                     dbContextTransaction.Commit();
                     break;
             }
@@ -79,7 +89,15 @@ namespace DotNetCore.CAP
 
         public override void Dispose()
         {
-
+            switch (DbTransaction)
+            {
+                case IDbTransaction dbTransaction:
+                    dbTransaction.Dispose();
+                    break;
+                case IDbContextTransaction dbContextTransaction:
+                    dbContextTransaction.Dispose();
+                    break;
+            }
         }
     }
 

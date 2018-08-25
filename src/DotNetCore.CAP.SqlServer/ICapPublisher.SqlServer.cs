@@ -14,7 +14,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace DotNetCore.CAP.SqlServer
 {
-    public class SqlServerPublisher : CapPublisherBase, ICallbackPublisher
+    public class SqlServerPublisher : CapPublisherBase, ICallbackPublisher, IDisposable
     {
         private readonly DbContext _dbContext;
         private readonly SqlServerOptions _options;
