@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Sample.Kafka.MySql
+namespace Sample.Kafka.SqlServer
 {
     public class Program
     {

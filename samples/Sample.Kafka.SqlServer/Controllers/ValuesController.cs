@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Data;
 using System.Data.SqlClient;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
-//using MySql.Data.MySqlClient;
 
-namespace Sample.Kafka.MySql.Controllers
+namespace Sample.Kafka.SqlServer.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
@@ -34,7 +32,7 @@ namespace Sample.Kafka.MySql.Controllers
                 using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
                 {
                     //your business code
-                    connection.Execute("insert into dbo.test1(tname) values('test');", transaction: (IDbTransaction)transaction.DbTransaction);
+                    connection.Execute("insert into dbo.test1(tname) values('test');", transaction: transaction);
 
                     _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
 
