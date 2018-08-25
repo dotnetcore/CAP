@@ -25,7 +25,21 @@ namespace DotNetCore.CAP
 
         protected override void AddToSent(CapPublishedMessage msg)
         {
-            var transactionKey = ((SqlConnection)((IDbTransaction)DbTransaction).Connection).ClientConnectionId;
+            var dbTransaction = DbTransaction as IDbTransaction;
+            if (dbTransaction == null)
+            {
+                if (DbTransaction is IDbContextTransaction dbContextTransaction)
+                {
+                    dbTransaction = dbContextTransaction.GetDbTransaction();
+                }
+
+                if (dbTransaction == null)
+                {
+                    throw new ArgumentNullException(nameof(DbTransaction));
+                }
+            }
+
+            var transactionKey = ((SqlConnection)dbTransaction.Connection).ClientConnectionId;
             if (_diagnosticProcessor.BufferList.TryGetValue(transactionKey, out var list))
             {
                 list.Add(msg);
@@ -39,12 +53,28 @@ namespace DotNetCore.CAP
 
         public override void Commit()
         {
-            throw new NotImplementedException();
+            switch (DbTransaction)
+            {
+                case IDbTransaction dbTransaction:
+                    dbTransaction.Commit();
+                    break;
+                case IDbContextTransaction dbContextTransaction:
+                    dbContextTransaction.Commit();
+                    break;
+            }
         }
 
         public override void Rollback()
         {
-            throw new NotImplementedException();
+            switch (DbTransaction)
+            {
+                case IDbTransaction dbTransaction:
+                    dbTransaction.Rollback();
+                    break;
+                case IDbContextTransaction dbContextTransaction:
+                    dbContextTransaction.Rollback();
+                    break;
+            }
         }
 
         public override void Dispose()
