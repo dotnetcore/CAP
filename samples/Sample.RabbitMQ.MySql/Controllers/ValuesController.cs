@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
@@ -18,9 +19,9 @@ namespace Sample.RabbitMQ.MySql.Controllers
         }
 
         [Route("~/without/transaction")]
-        public IActionResult WithoutTransaction()
+        public async Task<IActionResult> WithoutTransaction()
         {
-            _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+            await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
 
             return Ok();
         }
