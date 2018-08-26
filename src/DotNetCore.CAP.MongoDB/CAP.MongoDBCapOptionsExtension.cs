@@ -23,8 +23,8 @@ namespace DotNetCore.CAP.MongoDB
             services.AddSingleton<IStorage, MongoDBStorage>();
             services.AddSingleton<IStorageConnection, MongoDBStorageConnection>();
 
-            services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddScoped<ICallbackPublisher, CapPublisher>();
+            services.AddScoped<ICapPublisher, MongoDBPublisher>();
+            services.AddScoped<ICallbackPublisher, MongoDBPublisher>();
 
             services.AddTransient<ICollectProcessor, MongoDBCollectProcessor>();
             services.AddTransient<CapTransactionBase, MongoDBCapTransaction>();

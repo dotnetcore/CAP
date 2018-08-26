@@ -11,14 +11,16 @@ using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
 {
-    public class CapPublisher : CapPublisherBase, ICallbackPublisher
+    public class MongoDBPublisher : CapPublisherBase, ICallbackPublisher
     {
         private readonly MongoDBOptions _options;
+        private readonly IMongoClient _client;
 
-        public CapPublisher(IServiceProvider provider, MongoDBOptions options)
+        public MongoDBPublisher(IServiceProvider provider, MongoDBOptions options)
             : base(provider)
         {
             _options = options;
+            _client = ServiceProvider.GetRequiredService<IMongoClient>();
         }
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)
@@ -29,22 +31,26 @@ namespace DotNetCore.CAP.MongoDB
         protected override Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
             CancellationToken cancel = default(CancellationToken))
         {
-            var dbTrans = (IClientSessionHandle)transaction.DbTransaction;
+            var insertOptions = new InsertOneOptions { BypassDocumentValidation = false };
 
-            var collection = dbTrans.Client
+            var collection = _client
                 .GetDatabase(_options.DatabaseName)
                 .GetCollection<CapPublishedMessage>(_options.PublishedCollection);
 
-            var insertOptions = new InsertOneOptions { BypassDocumentValidation = false };
+            if (NotUseTransaction)
+            {
+                return collection.InsertOneAsync(message, insertOptions, cancel);
+            }
+            var dbTrans = (IClientSessionHandle)transaction.DbTransaction;
             return collection.InsertOneAsync(dbTrans, message, insertOptions, cancel);
         }
 
-        protected override object GetDbTransaction()
-        {
-            var client = ServiceProvider.GetRequiredService<IMongoClient>();
-            var session = client.StartSession(new ClientSessionOptions());
-            session.StartTransaction();
-            return session;
-        }
+        //protected override object GetDbTransaction()
+        //{
+        //    var client = ServiceProvider.GetRequiredService<IMongoClient>();
+        //    var session = client.StartSession(new ClientSessionOptions());
+        //    session.StartTransaction();
+        //    return session;
+        //}
     }
 }
