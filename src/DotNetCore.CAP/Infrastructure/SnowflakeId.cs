@@ -23,6 +23,7 @@ namespace DotNetCore.CAP.Infrastructure
         private static SnowflakeId _snowflakeId;
 
         private readonly object _lock = new object();
+        private static readonly object s_lock = new object();
         private long _lastTimestamp = -1L;
 
         private SnowflakeId(long workerId, long datacenterId, long sequence = 0L)
@@ -46,7 +47,10 @@ namespace DotNetCore.CAP.Infrastructure
 
         public static SnowflakeId Default(long datacenterId = 0)
         {
-            return _snowflakeId ?? (_snowflakeId = new SnowflakeId(AppDomain.CurrentDomain.Id, datacenterId));
+            lock (s_lock)
+            {
+                return _snowflakeId ?? (_snowflakeId = new SnowflakeId(AppDomain.CurrentDomain.Id, datacenterId));
+            }
         }
 
         public virtual long NextId()

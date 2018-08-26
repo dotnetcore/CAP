@@ -8,31 +8,20 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.SqlServer
 {
-    public class SqlServerPublisher : CapPublisherBase, ICallbackPublisher, IDisposable
+    public class SqlServerPublisher : CapPublisherBase, ICallbackPublisher
     {
-        private readonly DbContext _dbContext;
         private readonly SqlServerOptions _options;
-        private readonly bool _isUsingEF;
 
-        private SqlConnection _connection;
-
-        public SqlServerPublisher(IServiceProvider provider, SqlServerOptions options) : base(provider)
+        public SqlServerPublisher(IServiceProvider provider) : base(provider)
         {
-            _options = options;
-
-            if (_options.DbContextType == null)
-            {
-                return;
-            }
-
-            _isUsingEF = true;
-            _dbContext = (DbContext)ServiceProvider.GetService(_options.DbContextType);
+            _options = ServiceProvider.GetService<SqlServerOptions>();
         }
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)
@@ -40,54 +29,45 @@ namespace DotNetCore.CAP.SqlServer
             await PublishAsyncInternal(message);
         }
 
-        protected override Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
+        protected override async Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
             CancellationToken cancel = default(CancellationToken))
         {
+            if (NotUseTransaction)
+            {
+                using (var connection = new SqlConnection(_options.ConnectionString))
+                {
+                    await connection.OpenAsync(cancel);
+                    await connection.ExecuteAsync(PrepareSql(), message);
+                    return;
+                }
+            }
+
             var dbTrans = transaction.DbTransaction as IDbTransaction;
             if (dbTrans == null && transaction.DbTransaction is IDbContextTransaction dbContextTrans)
             {
                 dbTrans = dbContextTrans.GetDbTransaction();
             }
+
             var conn = dbTrans?.Connection;
-            return conn.ExecuteAsync(PrepareSql(), message, dbTrans);
-        }
-
-        protected override object GetDbTransaction()
-        {
-            if (_isUsingEF)
-            {
-                var dbContextTransaction = _dbContext.Database.CurrentTransaction;
-                if (dbContextTransaction == null)
-                {
-                    return InitDbConnection();
-                }
-
-                return dbContextTransaction;
-            }
-
-            return InitDbConnection();
+            await conn.ExecuteAsync(PrepareSql(), message, dbTrans);
         }
 
         #region private methods
+
         private string PrepareSql()
         {
             return
                 $"INSERT INTO {_options.Schema}.[Published] ([Id],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])VALUES(@Id,@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         }
 
-        private IDbTransaction InitDbConnection()
-        {
-            _connection = new SqlConnection(_options.ConnectionString);
-            _connection.Open();
-            return _connection.BeginTransaction(IsolationLevel.ReadCommitted);
-        }
+        //private  IDbConnection InitDbConnection()
+        //{
+        //    var conn = ;
+        //    conn.OpenAsync();
+        //    return conn;
+        //}
 
         #endregion private methods
 
-        public void Dispose()
-        {
-            _dbContext?.Dispose();
-            _connection?.Dispose();
-        }
     }
 }

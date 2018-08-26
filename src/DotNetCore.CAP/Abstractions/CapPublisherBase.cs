@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -68,7 +69,7 @@ namespace DotNetCore.CAP.Abstractions
             if (Transaction.DbTransaction == null)
             {
                 NotUseTransaction = true;
-                Transaction.DbTransaction = GetDbTransaction();
+                Transaction.DbTransaction = new NoopTransaction();
             }
 
             Guid operationId = default(Guid);
@@ -102,8 +103,6 @@ namespace DotNetCore.CAP.Abstractions
                 }
             }
         }
-
-        protected abstract object GetDbTransaction();
 
         protected abstract Task ExecuteAsync(CapPublishedMessage message,
             ICapTransaction transaction,

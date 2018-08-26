@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.EntityFrameworkCore;
@@ -34,6 +35,12 @@ namespace DotNetCore.CAP
 
         protected override void AddToSent(CapPublishedMessage msg)
         {
+            if (DbTransaction is NoopTransaction)
+            {
+                base.AddToSent(msg);
+                return;
+            }
+
             var dbTransaction = DbTransaction as IDbTransaction;
             if (dbTransaction == null)
             {
@@ -64,6 +71,9 @@ namespace DotNetCore.CAP
         {
             switch (DbTransaction)
             {
+                case NoopTransaction _:
+                    Flush();
+                    break;
                 case IDbTransaction dbTransaction:
                     dbTransaction.Commit();
                     break;
