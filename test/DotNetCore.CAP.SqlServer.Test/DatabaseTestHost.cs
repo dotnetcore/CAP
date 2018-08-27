@@ -21,10 +21,10 @@ namespace DotNetCore.CAP.SqlServer.Test
         {
             Logger = new Mock<ILogger<SqlServerStorage>>().Object;
             CapOptions = new Mock<CapOptions>().Object;
-            SqlSeverOptions = new Mock<SqlServerOptions>()
-                .SetupProperty(x => x.ConnectionString, ConnectionUtil.GetConnectionString())
-                .Object;
-
+            SqlSeverOptions = new SqlServerOptions()
+            {
+                ConnectionString = ConnectionUtil.GetConnectionString()
+            };
             DiagnosticProcessorObserver = new Mock<DiagnosticProcessorObserver>().Object;
 
             InitializeDatabase();
