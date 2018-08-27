@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.MySql.Test
         [Fact]
         public async Task GetPublishedMessageAsync_Test()
         {
-            var sql = "INSERT INTO `cap.published`(`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = "INSERT INTO `cap.published`(`Id`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             var insertedId = SnowflakeId.Default().NextId();
             var publishMessage = new CapPublishedMessage
             {
