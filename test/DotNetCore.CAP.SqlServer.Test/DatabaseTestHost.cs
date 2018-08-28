@@ -25,7 +25,8 @@ namespace DotNetCore.CAP.SqlServer.Test
             {
                 ConnectionString = ConnectionUtil.GetConnectionString()
             };
-            DiagnosticProcessorObserver = new Mock<DiagnosticProcessorObserver>().Object;
+
+            DiagnosticProcessorObserver = new DiagnosticProcessorObserver(new Mock<IDispatcher>().Object);
 
             InitializeDatabase();
         }
