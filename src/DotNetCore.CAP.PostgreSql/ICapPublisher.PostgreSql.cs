@@ -19,7 +19,7 @@ namespace DotNetCore.CAP.PostgreSql
         private readonly PostgreSqlOptions _options;
         public PostgreSqlPublisher(IServiceProvider provider) : base(provider)
         {
-            _options = provider.GetService< PostgreSqlOptions>();
+            _options = provider.GetService<PostgreSqlOptions>();
         }
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)
@@ -27,14 +27,15 @@ namespace DotNetCore.CAP.PostgreSql
             await PublishAsyncInternal(message);
         }
 
-        protected override Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
+        protected override async Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
             CancellationToken cancel = default(CancellationToken))
         {
             if (NotUseTransaction)
             {
                 using (var connection = InitDbConnection())
                 {
-                    return connection.ExecuteAsync(PrepareSql(), message);
+                    await connection.ExecuteAsync(PrepareSql(), message);
+                    return;
                 }
             }
 
@@ -44,7 +45,7 @@ namespace DotNetCore.CAP.PostgreSql
                 dbTrans = dbContextTrans.GetDbTransaction();
             }
             var conn = dbTrans?.Connection;
-            return conn.ExecuteAsync(PrepareSql(), message, dbTrans);
+            await conn.ExecuteAsync(PrepareSql(), message, dbTrans);
         }
 
         #region private methods

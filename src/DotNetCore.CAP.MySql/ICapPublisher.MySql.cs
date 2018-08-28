@@ -35,7 +35,6 @@ namespace DotNetCore.CAP.MySql
             {
                 using (var connection = new MySqlConnection(_options.ConnectionString))
                 {
-                    await connection.OpenAsync(cancel);
                     await connection.ExecuteAsync(PrepareSql(), message);
                     return;
                 }

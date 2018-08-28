@@ -36,7 +36,6 @@ namespace DotNetCore.CAP.SqlServer
             {
                 using (var connection = new SqlConnection(_options.ConnectionString))
                 {
-                    await connection.OpenAsync(cancel);
                     await connection.ExecuteAsync(PrepareSql(), message);
                     return;
                 }

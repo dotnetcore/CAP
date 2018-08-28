@@ -44,13 +44,5 @@ namespace DotNetCore.CAP.MongoDB
             var dbTrans = (IClientSessionHandle)transaction.DbTransaction;
             return collection.InsertOneAsync(dbTrans, message, insertOptions, cancel);
         }
-
-        //protected override object GetDbTransaction()
-        //{
-        //    var client = ServiceProvider.GetRequiredService<IMongoClient>();
-        //    var session = client.StartSession(new ClientSessionOptions());
-        //    session.StartTransaction();
-        //    return session;
-        //}
     }
 }
