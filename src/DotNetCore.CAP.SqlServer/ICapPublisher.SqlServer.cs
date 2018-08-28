@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -57,14 +56,7 @@ namespace DotNetCore.CAP.SqlServer
         {
             return
                 $"INSERT INTO {_options.Schema}.[Published] ([Id],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])VALUES(@Id,@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
-        }
-
-        //private  IDbConnection InitDbConnection()
-        //{
-        //    var conn = ;
-        //    conn.OpenAsync();
-        //    return conn;
-        //}
+        } 
 
         #endregion private methods
 
