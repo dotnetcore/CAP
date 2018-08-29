@@ -58,10 +58,8 @@ namespace DotNetCore.CAP.MySql
         {
             var batchSql =
                 $@"
-DROP TABLE IF EXISTS `{prefix}.queue`;
-
 CREATE TABLE IF NOT EXISTS `{prefix}.received` (
-  `Id` int(127) NOT NULL AUTO_INCREMENT,
+  `Id` bigint NOT NULL,
   `Name` varchar(400) NOT NULL,
   `Group` varchar(200) DEFAULT NULL,
   `Content` longtext,
@@ -73,7 +71,7 @@ CREATE TABLE IF NOT EXISTS `{prefix}.received` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 CREATE TABLE IF NOT EXISTS `{prefix}.published` (
-  `Id` int(127) NOT NULL AUTO_INCREMENT,
+  `Id` bigint NOT NULL,
   `Name` varchar(200) NOT NULL,
   `Content` longtext,
   `Retries` int(11) DEFAULT NULL,
@@ -82,9 +80,6 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   `StatusName` varchar(40) NOT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
-ALTER TABLE `{prefix}.published` MODIFY Id BIGINT NOT NULL;
-ALTER TABLE `{prefix}.received` MODIFY Id BIGINT NOT NULL;
 ";
             return batchSql;
         }
