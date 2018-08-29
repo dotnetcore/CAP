@@ -21,8 +21,6 @@ namespace Sample.Kafka.MySql
         public void Configure(IApplicationBuilder app)
         {
             app.UseMvc();
-
-            app.UseCap();
         }
     }
 }

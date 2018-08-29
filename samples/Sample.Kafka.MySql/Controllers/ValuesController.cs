@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Data;
 using System.Threading.Tasks;
+using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
@@ -16,23 +18,36 @@ namespace Sample.Kafka.MySql.Controllers
             _capBus = producer;
         }
 
-        [Route("~/publish")]
-        public async Task<IActionResult> PublishMessage()
+        [Route("~/without/transaction")]
+        public async Task<IActionResult> WithoutTransaction()
         {
-            using (var connection = new MySqlConnection("Server=192.168.10.110;Database=testcap;UserId=root;Password=123123;"))
+            await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
+
+            return Ok();
+        }
+
+        [Route("~/adonet/transaction")]
+        public IActionResult AdonetWithTransaction()
+        {
+            using (var connection = new MySqlConnection(""))
             {
-                connection.Open();
-                var transaction = connection.BeginTransaction();
+                using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
+                {
+                    //your business code
+                    connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
 
-                //your business code here
+                    for (int i = 0; i < 5; i++)
+                    {
+                        _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+                    }
 
-                await _capBus.PublishAsync("xxx.xxx.test2", 123456, transaction);
-
-                transaction.Commit();
+                    transaction.Commit();
+                }
             }
 
-            return Ok("publish successful!");
+            return Ok();
         }
+
 
         [CapSubscribe("#.test2")]
         public void Test2(int value)
