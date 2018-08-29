@@ -15,6 +15,11 @@ namespace Microsoft.Extensions.DependencyInjection
             return options.UseMongoDB(x => { });
         }
 
+        public static CapOptions UseMongoDB(this CapOptions options, string connectionString)
+        {
+            return options.UseMongoDB(x => { x.DatabaseConnection = connectionString; });
+        }
+
         public static CapOptions UseMongoDB(this CapOptions options, Action<MongoDBOptions> configure)
         {
             if (configure == null)

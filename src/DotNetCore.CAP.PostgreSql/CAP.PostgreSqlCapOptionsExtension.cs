@@ -24,9 +24,12 @@ namespace DotNetCore.CAP
             services.AddSingleton<CapDatabaseStorageMarkerService>();
             services.AddSingleton<IStorage, PostgreSqlStorage>();
             services.AddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
-            services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddScoped<ICallbackPublisher, CapPublisher>();
+
+            services.AddScoped<ICapPublisher, PostgreSqlPublisher>();
+            services.AddScoped<ICallbackPublisher, PostgreSqlPublisher>();
+
             services.AddTransient<ICollectProcessor, PostgreSqlCollectProcessor>();
+            services.AddTransient<CapTransactionBase, PostgreSqlCapTransaction>();
 
             AddSingletonPostgreSqlOptions(services);
         }

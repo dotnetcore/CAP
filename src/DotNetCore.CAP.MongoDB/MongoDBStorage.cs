@@ -6,7 +6,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
 using Microsoft.Extensions.Logging;
-using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
@@ -49,26 +48,14 @@ namespace DotNetCore.CAP.MongoDB
             var database = _client.GetDatabase(_options.DatabaseName);
             var names = (await database.ListCollectionNamesAsync(cancellationToken: cancellationToken))?.ToList();
 
-            if (!names.Any(n => n == _options.ReceivedCollection))
+            if (names.All(n => n != _options.ReceivedCollection))
             {
                 await database.CreateCollectionAsync(_options.ReceivedCollection, cancellationToken: cancellationToken);
             }
 
             if (names.All(n => n != _options.PublishedCollection))
             {
-                await database.CreateCollectionAsync(_options.PublishedCollection,
-                    cancellationToken: cancellationToken);
-            }
-
-            if (names.All(n => n != MongoDBOptions.CounterCollection))
-            {
-                await database.CreateCollectionAsync(MongoDBOptions.CounterCollection, cancellationToken: cancellationToken);
-                var collection = database.GetCollection<BsonDocument>(MongoDBOptions.CounterCollection);
-                await collection.InsertManyAsync(new[]
-                {
-                    new BsonDocument {{"_id", _options.PublishedCollection}, {"sequence_value", 0}},
-                    new BsonDocument {{"_id", _options.ReceivedCollection}, {"sequence_value", 0}}
-                }, cancellationToken: cancellationToken);
+                await database.CreateCollectionAsync(_options.PublishedCollection, cancellationToken: cancellationToken);
             }
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");

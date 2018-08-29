@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Threading.Tasks;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.MongoDB;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -14,72 +11,58 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
     public class ValuesController : ControllerBase
     {
         private readonly IMongoClient _client;
-        private readonly ICapPublisher _capPublisher;
-        private readonly IMongoTransaction _mongoTransaction;
+        private readonly ICapPublisher _capBus;
 
-        public ValuesController(IMongoClient client, ICapPublisher capPublisher, IMongoTransaction mongoTransaction)
+        public ValuesController(IMongoClient client, ICapPublisher capBus)
         {
             _client = client;
-            _capPublisher = capPublisher;
-            _mongoTransaction = mongoTransaction;
+            _capBus = capBus;
         }
 
-        [Route("~/publish")]
-        public async Task<IActionResult> PublishWithTrans()
+        [Route("~/without/transaction")]
+        public IActionResult WithoutTransaction()
         {
-            using (var trans = await _mongoTransaction.BegeinAsync())
-            {
-                var collection = _client.GetDatabase("TEST").GetCollection<BsonDocument>("test");
-                collection.InsertOne(trans.GetSession(), new BsonDocument { { "hello", "world" } });
+            _capBus.Publish("sample.rabbitmq.mongodb", DateTime.Now);
 
-                await _capPublisher.PublishWithMongoAsync("sample.rabbitmq.mongodb", DateTime.Now, trans);
-            }
             return Ok();
         }
 
-        [Route("~/publish/not/autocommit")]
+        [Route("~/transaction/not/autocommit")]
         public IActionResult PublishNotAutoCommit()
         {
-            using (var trans = _mongoTransaction.Begein(autoCommit: false))
+            //NOTE: before your test, your need to create database and collection at first
+            //注意：MongoDB 不能在事务中创建数据库和集合，所以你需要单独创建它们，模拟一条记录插入则会自动创建
+            //var mycollection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
+            //mycollection.InsertOne(new BsonDocument { { "test", "test" } });
+
+            using (var session = _client.StartTransaction(_capBus, autoCommit: false))
             {
-                var session = trans.GetSession();
+                var collection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
+                collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
 
-                var collection = _client.GetDatabase("TEST").GetCollection<BsonDocument>("test");
-                collection.InsertOne(session, new BsonDocument { { "Hello", "World" } });
+                _capBus.Publish("sample.rabbitmq.mongodb", DateTime.Now);
 
-                _capPublisher.PublishWithMongo("sample.rabbitmq.mongodb", DateTime.Now, trans);
-
-                //Do something, and commit by yourself.
                 session.CommitTransaction();
             }
             return Ok();
         }
 
-        [Route("~/publish/rollback")]
-        public IActionResult PublishRollback()
-        {
-            using (var trans = _mongoTransaction.Begein(autoCommit: false))
-            {
-                var session = trans.GetSession();
-                try
-                {
-                    _capPublisher.PublishWithMongo("sample.rabbitmq.mongodb", DateTime.Now, trans);
-                    //Do something, but
-                    throw new Exception("Foo");
-                    session.CommitTransaction();
-                }
-                catch (System.Exception ex)
-                {
-                    session.AbortTransaction();
-                    return StatusCode(500, ex.Message);
-                }
-            }
-        }
-
-        [Route("~/publish/without/trans")]
+        [Route("~/transaction/autocommit")]
         public IActionResult PublishWithoutTrans()
         {
-            _capPublisher.PublishWithMongo("sample.rabbitmq.mongodb", DateTime.Now);
+            //NOTE: before your test, your need to create database and collection at first
+            //注意：MongoDB 不能在事务中创建数据库和集合，所以你需要单独创建它们，模拟一条记录插入则会自动创建
+            //var mycollection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
+            //mycollection.InsertOne(new BsonDocument { { "test", "test" } });
+
+            using (var session = _client.StartTransaction(_capBus, autoCommit: true))
+            {
+                var collection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
+                collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
+
+                _capBus.Publish("sample.rabbitmq.mongodb", DateTime.Now);
+            }
+
             return Ok();
         }
 
@@ -87,7 +70,7 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
         [CapSubscribe("sample.rabbitmq.mongodb")]
         public void ReceiveMessage(DateTime time)
         {
-            Console.WriteLine("[sample.rabbitmq.mongodb] message received: " + DateTime.Now + ",sent time: " + time);
+            Console.WriteLine($@"{DateTime.Now}, Subscriber invoked, Sent time:{time}");
         }
     }
 }

@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.PostgreSql
             return new PostgreSqlStorageTransaction(this);
         }
 
-        public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
+        public async Task<CapPublishedMessage> GetPublishedMessageAsync(long id)
         {
             var sql = $"SELECT * FROM \"{Options.Schema}\".\"published\" WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
 
@@ -50,7 +50,7 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
+        public void StoreReceivedMessage(CapReceivedMessage message)
         {
             if (message == null)
             {
@@ -58,15 +58,15 @@ namespace DotNetCore.CAP.PostgreSql
             }
 
             var sql =
-                $"INSERT INTO \"{Options.Schema}\".\"received\"(\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING \"Id\";";
+                $"INSERT INTO \"{Options.Schema}\".\"received\"(\"Id\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")VALUES(@Id,@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING \"Id\";";
 
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
-                return await connection.ExecuteScalarAsync<int>(sql, message);
+                connection.Execute(sql, message);
             }
         }
 
-        public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
+        public async Task<CapReceivedMessage> GetReceivedMessageAsync(long id)
         {
             var sql = $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
@@ -90,7 +90,7 @@ namespace DotNetCore.CAP.PostgreSql
         {
         }
 
-        public bool ChangePublishedState(int messageId, string state)
+        public bool ChangePublishedState(long messageId, string state)
         {
             var sql =
                 $"UPDATE \"{Options.Schema}\".\"published\" SET \"Retries\"=\"Retries\"+1,\"ExpiresAt\"=NULL,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";
@@ -101,7 +101,7 @@ namespace DotNetCore.CAP.PostgreSql
             }
         }
 
-        public bool ChangeReceivedState(int messageId, string state)
+        public bool ChangeReceivedState(long messageId, string state)
         {
             var sql =
                 $"UPDATE \"{Options.Schema}\".\"received\" SET \"Retries\"=\"Retries\"+1,\"ExpiresAt\"=NULL,\"StatusName\" = '{state}' WHERE \"Id\"={messageId}";

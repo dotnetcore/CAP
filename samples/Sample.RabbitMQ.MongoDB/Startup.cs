@@ -1,5 +1,4 @@
-﻿using DotNetCore.CAP;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -19,21 +18,11 @@ namespace Sample.RabbitMQ.MongoDB
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton<IMongoClient>(new MongoClient(Configuration.GetConnectionString("MongoDB")));
+            services.AddSingleton<IMongoClient>(new MongoClient("mongodb://192.168.10.110:27017,192.168.10.110:27018,192.168.10.110:27019/?replicaSet=rs0"));
             services.AddCap(x =>
             {
-                x.UseMongoDB();
-
-                var mq = new RabbitMQOptions();
-                Configuration.GetSection("RabbitMQ").Bind(mq);
-                x.UseRabbitMQ(cfg =>
-                {
-                    cfg.HostName = mq.HostName;
-                    cfg.Port = mq.Port;
-                    cfg.UserName = mq.UserName;
-                    cfg.Password = mq.Password;
-                });
-
+                x.UseMongoDB("mongodb://192.168.10.110:27017,192.168.10.110:27018,192.168.10.110:27019/?replicaSet=rs0");
+                x.UseRabbitMQ("localhost");
                 x.UseDashboard();
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
@@ -46,9 +35,7 @@ namespace Sample.RabbitMQ.MongoDB
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseMvc();
-
-            app.UseCap();
+            app.UseMvc(); 
         }
     }
 }

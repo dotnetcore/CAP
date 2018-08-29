@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.Models
             Content = message.Content;
         }
 
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public string Group { get; set; }
 

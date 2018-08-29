@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.SqlServer
             return new SqlServerStorageTransaction(this);
         }
 
-        public async Task<CapPublishedMessage> GetPublishedMessageAsync(int id)
+        public async Task<CapPublishedMessage> GetPublishedMessageAsync(long id)
         {
             var sql = $@"SELECT * FROM [{Options.Schema}].[Published] WITH (readpast) WHERE Id={id}";
 
@@ -50,7 +50,7 @@ namespace DotNetCore.CAP.SqlServer
             }
         }
 
-        public async Task<int> StoreReceivedMessageAsync(CapReceivedMessage message)
+        public void StoreReceivedMessage(CapReceivedMessage message)
         {
             if (message == null)
             {
@@ -58,16 +58,16 @@ namespace DotNetCore.CAP.SqlServer
             }
 
             var sql = $@"
-INSERT INTO [{Options.Schema}].[Received]([Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])
-VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT SCOPE_IDENTITY();";
+INSERT INTO [{Options.Schema}].[Received]([Id],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])
+VALUES(@Id,@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             using (var connection = new SqlConnection(Options.ConnectionString))
             {
-                return await connection.ExecuteScalarAsync<int>(sql, message);
+                 connection.Execute(sql, message);
             }
         }
 
-        public async Task<CapReceivedMessage> GetReceivedMessageAsync(int id)
+        public async Task<CapReceivedMessage> GetReceivedMessageAsync(long id)
         {
             var sql = $@"SELECT * FROM [{Options.Schema}].[Received] WITH (readpast) WHERE Id={id}";
             using (var connection = new SqlConnection(Options.ConnectionString))
@@ -87,7 +87,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT SCOP
             }
         }
 
-        public bool ChangePublishedState(int messageId, string state)
+        public bool ChangePublishedState(long messageId, string state)
         {
             var sql =
                 $"UPDATE [{Options.Schema}].[Published] SET Retries=Retries+1,ExpiresAt=NULL,StatusName = '{state}' WHERE Id={messageId}";
@@ -98,7 +98,7 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT SCOP
             }
         }
 
-        public bool ChangeReceivedState(int messageId, string state)
+        public bool ChangeReceivedState(long messageId, string state)
         {
             var sql =
                 $"UPDATE [{Options.Schema}].[Received] SET Retries=Retries+1,ExpiresAt=NULL,StatusName = '{state}' WHERE Id={messageId}";
@@ -107,10 +107,6 @@ VALUES(@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);SELECT SCOP
             {
                 return connection.Execute(sql) > 0;
             }
-        }
-
-        public void Dispose()
-        {
         }
     }
 }

@@ -3,39 +3,39 @@
 
 using System;
 using System.Data;
-using System.Data.SqlClient;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Dashboard;
 using Microsoft.Extensions.Logging;
+using MySql.Data.MySqlClient;
 
-namespace DotNetCore.CAP.SqlServer
+namespace DotNetCore.CAP.MySql
 {
-    public class SqlServerStorage : IStorage
+    public class MySqlStorage : IStorage
     {
         private readonly CapOptions _capOptions;
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
-        private readonly SqlServerOptions _options;
+        private readonly MySqlOptions _options;
 
-        public SqlServerStorage(ILogger<SqlServerStorage> logger,
-            CapOptions capOptions,
-            SqlServerOptions options)
+        public MySqlStorage(ILogger<MySqlStorage> logger,
+            MySqlOptions options,
+            CapOptions capOptions)
         {
             _options = options;
-            _logger = logger;
             _capOptions = capOptions;
+            _logger = logger;
         }
 
         public IStorageConnection GetConnection()
         {
-            return new SqlServerStorageConnection(_options, _capOptions);
+            return new MySqlStorageConnection(_options, _capOptions);
         }
 
         public IMonitoringApi GetMonitoringApi()
         {
-            return new SqlServerMonitoringApi(this, _options);
+            return new MySqlMonitoringApi(this, _options);
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -45,9 +45,8 @@ namespace DotNetCore.CAP.SqlServer
                 return;
             }
 
-            var sql = CreateDbTablesScript(_options.Schema);
-
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            var sql = CreateDbTablesScript(_options.TableNamePrefix);
+            using (var connection = new MySqlConnection(_options.ConnectionString))
             {
                 await connection.ExecuteAsync(sql);
             }
@@ -55,54 +54,38 @@ namespace DotNetCore.CAP.SqlServer
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
 
-        protected virtual string CreateDbTablesScript(string schema)
+        protected virtual string CreateDbTablesScript(string prefix)
         {
             var batchSql =
                 $@"
-IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}')
-BEGIN
-	EXEC('CREATE SCHEMA [{schema}]')
-END;
+DROP TABLE IF EXISTS `{prefix}.queue`;
 
-IF OBJECT_ID(N'[{schema}].[Queue]',N'U') IS NOT NULL
-BEGIN
-	DROP TABLE [{schema}].[Queue];
-END;
+CREATE TABLE IF NOT EXISTS `{prefix}.received` (
+  `Id` int(127) NOT NULL AUTO_INCREMENT,
+  `Name` varchar(400) NOT NULL,
+  `Group` varchar(200) DEFAULT NULL,
+  `Content` longtext,
+  `Retries` int(11) DEFAULT NULL,
+  `Added` datetime NOT NULL,
+  `ExpiresAt` datetime DEFAULT NULL,
+  `StatusName` varchar(50) NOT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-IF OBJECT_ID(N'[{schema}].[Received]',N'U') IS NULL
-BEGIN
-CREATE TABLE [{schema}].[Received](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
-	[Name] [nvarchar](200) NOT NULL,
-	[Group] [nvarchar](200) NULL,
-	[Content] [nvarchar](max) NULL,
-	[Retries] [int] NOT NULL,
-	[Added] [datetime2](7) NOT NULL,
-    [ExpiresAt] [datetime2](7) NULL,
-	[StatusName] [nvarchar](50) NOT NULL,
- CONSTRAINT [PK_{schema}.Received] PRIMARY KEY CLUSTERED
-(
-	[Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-END;
+CREATE TABLE IF NOT EXISTS `{prefix}.published` (
+  `Id` int(127) NOT NULL AUTO_INCREMENT,
+  `Name` varchar(200) NOT NULL,
+  `Content` longtext,
+  `Retries` int(11) DEFAULT NULL,
+  `Added` datetime NOT NULL,
+  `ExpiresAt` datetime DEFAULT NULL,
+  `StatusName` varchar(40) NOT NULL,
+  PRIMARY KEY (`Id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-IF OBJECT_ID(N'[{schema}].[Published]',N'U') IS NULL
-BEGIN
-CREATE TABLE [{schema}].[Published](
-	[Id] [int] IDENTITY(1,1) NOT NULL,
-	[Name] [nvarchar](200) NOT NULL,
-	[Content] [nvarchar](max) NULL,
-	[Retries] [int] NOT NULL,
-	[Added] [datetime2](7) NOT NULL,
-    [ExpiresAt] [datetime2](7) NULL,
-	[StatusName] [nvarchar](50) NOT NULL,
- CONSTRAINT [PK_{schema}.Published] PRIMARY KEY CLUSTERED
-(
-	[Id] ASC
-)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
-) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-END;";
+ALTER TABLE `{prefix}.published` MODIFY Id BIGINT NOT NULL;
+ALTER TABLE `{prefix}.received` MODIFY Id BIGINT NOT NULL;
+";
             return batchSql;
         }
 
@@ -123,7 +106,7 @@ END;";
 
         internal IDbConnection CreateAndOpenConnection()
         {
-            var connection = _existingConnection ?? new SqlConnection(_options.ConnectionString);
+            var connection = _existingConnection ?? new MySqlConnection(_options.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
             {

@@ -1,46 +1,42 @@
+using System;
 using System.Data;
 using System.Data.SqlClient;
-using System.Threading;
 using Dapper;
+using DotNetCore.CAP.SqlServer.Diagnostics;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace DotNetCore.CAP.SqlServer.Test
 {
-    public abstract class DatabaseTestHost : TestHost
+    public abstract class DatabaseTestHost : IDisposable
     {
-        private static bool _sqlObjectInstalled;
-        public static object _lock = new object();
+        protected ILogger<SqlServerStorage> Logger;
+        protected CapOptions CapOptions;
+        protected SqlServerOptions SqlSeverOptions;
+        protected DiagnosticProcessorObserver DiagnosticProcessorObserver;
 
-        protected override void PostBuildServices()
+        public bool SqlObjectInstalled;
+
+        protected DatabaseTestHost()
         {
-            base.PostBuildServices();
-            lock (_lock)
+            Logger = new Mock<ILogger<SqlServerStorage>>().Object;
+            CapOptions = new Mock<CapOptions>().Object;
+            SqlSeverOptions = new SqlServerOptions()
             {
-                if (!_sqlObjectInstalled)
-                {
-                    InitializeDatabase();
-                }
-            }
+                ConnectionString = ConnectionUtil.GetConnectionString()
+            };
+
+            DiagnosticProcessorObserver = new DiagnosticProcessorObserver(new Mock<IDispatcher>().Object);
+
+            InitializeDatabase();
         }
 
-        public override void Dispose()
+        public void Dispose()
         {
             DeleteAllData();
-            base.Dispose();
         }
 
         private void InitializeDatabase()
-        {
-            using (CreateScope())
-            {
-                var storage = GetService<SqlServerStorage>();
-                var token = new CancellationTokenSource().Token;
-                CreateDatabase();
-                storage.InitializeAsync(token).GetAwaiter().GetResult();
-                _sqlObjectInstalled = true;
-            }
-        }
-
-        private void CreateDatabase()
         {
             var masterConn = ConnectionUtil.GetMasterConnectionString();
             var databaseName = ConnectionUtil.GetDatabaseName();
@@ -50,7 +46,11 @@ namespace DotNetCore.CAP.SqlServer.Test
 IF NOT EXISTS (SELECT * FROM sysdatabases WHERE name = N'{databaseName}')
 CREATE DATABASE [{databaseName}];");
             }
+
+            new SqlServerStorage(Logger, CapOptions, SqlSeverOptions, DiagnosticProcessorObserver).InitializeAsync().GetAwaiter().GetResult();
+            SqlObjectInstalled = true;
         }
+
 
         private void DeleteAllData()
         {

@@ -3,6 +3,7 @@
 
 namespace DotNetCore.CAP.MongoDB
 {
+    // ReSharper disable once InconsistentNaming
     public class MongoDBOptions
     {
         /// <summary>
@@ -28,7 +29,5 @@ namespace DotNetCore.CAP.MongoDB
         /// Default value: "published"
         /// </summary>
         public string PublishedCollection { get; set; } = "cap.published";
-
-        internal const string CounterCollection = "cap.counter";
     }
 }

@@ -4,7 +4,6 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
@@ -16,13 +15,13 @@ namespace DotNetCore.CAP.Processor
         private readonly TimeSpan _waitingInterval;
 
         public NeedRetryMessageProcessor(
-            IOptions<CapOptions> options,
+            CapOptions options,
             ISubscriberExecutor subscriberExecutor,
             IPublishMessageSender publishMessageSender)
         {
             _subscriberExecutor = subscriberExecutor;
             _publishMessageSender = publishMessageSender;
-            _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
+            _waitingInterval = TimeSpan.FromSeconds(options.FailedRetryInterval);
         }
 
         public async Task ProcessAsync(ProcessingContext context)
