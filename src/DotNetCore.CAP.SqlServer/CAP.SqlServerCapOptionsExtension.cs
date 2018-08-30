@@ -4,6 +4,7 @@
 using System;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.SqlServer;
+using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -22,11 +23,15 @@ namespace DotNetCore.CAP
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<CapDatabaseStorageMarkerService>();
+            services.AddSingleton<DiagnosticProcessorObserver>();
             services.AddSingleton<IStorage, SqlServerStorage>();
             services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
-            services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddScoped<ICallbackPublisher, CapPublisher>();
+
+            services.AddScoped<ICapPublisher, SqlServerPublisher>();
+            services.AddScoped<ICallbackPublisher, SqlServerPublisher>();
+
             services.AddTransient<ICollectProcessor, SqlServerCollectProcessor>();
+            services.AddTransient<CapTransactionBase, SqlServerCapTransaction>();
 
             AddSqlServerOptions(services);
         }
@@ -44,7 +49,7 @@ namespace DotNetCore.CAP
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext)provider.GetService(sqlServerOptions.DbContextType);
+                        var dbContext = (DbContext) provider.GetService(sqlServerOptions.DbContextType);
                         sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return sqlServerOptions;
                     }

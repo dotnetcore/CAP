@@ -13,12 +13,11 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="1.50.5" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.7.2" />
-    <PackageReference Include="MySqlConnector" Version="0.40.4" />
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
-    <PackageReference Include="Moq" Version="4.8.2" />
+    <PackageReference Include="Moq" Version="4.9.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="2.1.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.1.0" />
