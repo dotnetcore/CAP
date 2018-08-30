@@ -35,7 +35,7 @@ PM> Install-Package DotNetCore.CAP.Kafka
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP supports SqlServer, MySql, PostgreSql，MongoDB as event log storage. 
+CAP supports SqlServer, MySql, PostgreSql，MongoDB as event log storage.
 
 ```
 // select a database provider you are using, event log table will integrate into.
@@ -56,7 +56,7 @@ public void ConfigureServices(IServiceCollection services)
     //......
 
     services.AddDbContext<AppDbContext>(); //Options, If you are using EF as the ORM
-	services.AddSingleton<IMongoClient>(new MongoClient("")); //Options, If you are using MongoDB
+    services.AddSingleton<IMongoClient>(new MongoClient("")); //Options, If you are using MongoDB
 
     services.AddCap(x =>
     {
@@ -68,9 +68,9 @@ public void ConfigureServices(IServiceCollection services)
         x.UseMySql("Your ConnectionStrings");
         x.UsePostgreSql("Your ConnectionStrings");
 
-		// If you are using MongoDB, you need to add the configuration：
-		x.UseMongoDB("Your ConnectionStrings");  //MongoDB 4.0+ cluster
-		
+        // If you are using MongoDB, you need to add the configuration：
+        x.UseMongoDB("Your ConnectionStrings");  //MongoDB 4.0+ cluster
+
         // If you are using RabbitMQ, you need to add the configuration：
         x.UseRabbitMQ("localhost");
 
@@ -88,7 +88,7 @@ Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send 
 ```c#
 public class PublishController : Controller
 {
-	private readonly ICapPublisher _capBus;
+    private readonly ICapPublisher _capBus;
 
     public PublishController(ICapPublisher capPublisher)
     {
@@ -118,7 +118,7 @@ public class PublishController : Controller
         {
             //your business code
 
-            _capBus.Publish(""xxx.services.show.time", DateTime.Now);     
+            _capBus.Publish(""xxx.services.show.time", DateTime.Now);
         }
 
         return Ok();
@@ -147,7 +147,7 @@ public class PublishController : Controller
 
 **Service Method**
 
-If your subscribe method is not in the Controller,then your subscribe class need to Inheritance `ICapSubscribe`: 
+If your subscribe method is not in the Controller,then your subscribe class need to Inheritance `ICapSubscribe`:
 
 ```c#
 
@@ -169,14 +169,14 @@ namespace xxx.Service
 
 ```
 
-Then inject your  `ISubscriberService`  class in Startup.cs 
+Then inject your  `ISubscriberService`  class in Startup.cs
 
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
     //Note: The injection of services needs before of `services.AddCap()`
     services.AddTransient<ISubscriberService,SubscriberService>();
-	
+
     services.AddCap(x=>{});
 }
 ```
@@ -191,10 +191,10 @@ In the distributed environment, the dashboard built-in integrated [Consul](http:
 services.AddCap(x =>
 {
     //...
-    
+
     // Register Dashboard
     x.UseDashboard();
-    
+
     // Register to Consul
     x.UseDiscovery(d =>
     {
