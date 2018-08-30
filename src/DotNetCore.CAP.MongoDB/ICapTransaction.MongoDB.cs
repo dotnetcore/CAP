@@ -58,6 +58,13 @@ namespace DotNetCore.CAP
             return transaction;
         }
 
+        /// <summary>
+        /// Start the CAP transaction
+        /// </summary>
+        /// <param name="client">The <see cref="IMongoClient"/>.</param>
+        /// <param name="publisher">The <see cref="ICapPublisher"/>.</param>
+        /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+        /// <returns>The <see cref="IClientSessionHandle"/> of MongoDB transaction session object.</returns>
         public static IClientSessionHandle StartTransaction(this IMongoClient client,
             ICapPublisher publisher, bool autoCommit = false)
         {

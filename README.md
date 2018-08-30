@@ -118,7 +118,7 @@ public class PublishController : Controller
         {
             //your business code
 
-            _capBus.Publish(""xxx.services.show.time", DateTime.Now);
+            _capBus.Publish("xxx.services.show.time", DateTime.Now);
         }
 
         return Ok();

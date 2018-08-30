@@ -74,6 +74,13 @@ namespace DotNetCore.CAP
             return transaction;
         }
 
+        /// <summary>
+        /// Start the CAP transaction
+        /// </summary>
+        /// <param name="database">The <see cref="DatabaseFacade"/>.</param>
+        /// <param name="publisher">The <see cref="ICapPublisher"/>.</param>
+        /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+        /// <returns>The <see cref="IDbContextTransaction"/> of EF dbcontext transaction object.</returns>
         public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
             ICapPublisher publisher, bool autoCommit = false)
         {
@@ -82,6 +89,13 @@ namespace DotNetCore.CAP
             return new CapEFDbTransaction(capTrans);
         }
 
+        /// <summary>
+        /// Start the CAP transaction
+        /// </summary>
+        /// <param name="dbConnection">The <see cref="IDbConnection"/>.</param>
+        /// <param name="publisher">The <see cref="ICapPublisher"/>.</param>
+        /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+        /// <returns>The <see cref="ICapTransaction"/> object.</returns>
         public static ICapTransaction BeginTransaction(this IDbConnection dbConnection,
             ICapPublisher publisher, bool autoCommit = false)
         {

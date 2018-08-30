@@ -11,6 +11,9 @@ namespace DotNetCore.CAP
     /// </summary>
     public interface ICapPublisher
     {
+        /// <summary>
+        /// CAP transaction context object
+        /// </summary>
         ICapTransaction Transaction { get; }
 
         /// <summary>
