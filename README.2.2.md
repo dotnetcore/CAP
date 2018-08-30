@@ -16,7 +16,9 @@ You can also use the CAP as an EventBus. The CAP provides a simpler way to imple
 
 This is a diagram of the CAP working in the ASP.NET Core MicroService architecture:
 
-![cap.png](http://oowr92l0m.bkt.clouddn.com/cap.png)
+![](http://images2015.cnblogs.com/blog/250417/201707/250417-20170705175827128-1203291469.png)
+
+> The solid line in the figure represents the user code, and the dotted line represents the internal implementation of the CAP.
 
 ## Getting Started
 
@@ -28,22 +30,27 @@ You can run the following command to install the CAP in your project.
 PM> Install-Package DotNetCore.CAP
 ```
 
-CAP supports RabbitMQ and Kafka as message queue, select the packages you need to install:
+If you want use Kafka to send integrating event, installing by:
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka
+```
+
+If you want use RabbitMQ to send integrating event, installing by:
+
+```
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP supports SqlServer, MySql, PostgreSql，MongoDB as event log storage. 
+CAP supports SqlServer, MySql, PostgreSql as event log storage. 
 
 ```
+
 // select a database provider you are using, event log table will integrate into.
 
 PM> Install-Package DotNetCore.CAP.SqlServer
 PM> Install-Package DotNetCore.CAP.MySql
 PM> Install-Package DotNetCore.CAP.PostgreSql
-PM> Install-Package DotNetCore.CAP.MongoDB     //need MongoDB 4.0+ cluster
 ```
 
 ### Configuration
@@ -55,21 +62,18 @@ public void ConfigureServices(IServiceCollection services)
 {
     //......
 
-    services.AddDbContext<AppDbContext>(); //Options, If you are using EF as the ORM
-	services.AddSingleton<IMongoClient>(new MongoClient("")); //Options, If you are using MongoDB
+    services.AddDbContext<AppDbContext>();
 
     services.AddCap(x =>
     {
-        // If you are using EF, you need to add the configuration：
-        x.UseEntityFramework<AppDbContext>(); //Options, Notice: You don't need to config x.UseSqlServer(""") again! CAP can autodiscovery.
+        // If you are using EF, you need to add the following configuration：
+        // Notice: You don't need to config x.UseSqlServer(""") again! CAP can autodiscovery.
+        x.UseEntityFramework<AppDbContext>();
 
-        // If you are using Ado.Net, you need to add the configuration：
+        // If you are using ado.net,you need to add the configuration：
         x.UseSqlServer("Your ConnectionStrings");
         x.UseMySql("Your ConnectionStrings");
         x.UsePostgreSql("Your ConnectionStrings");
-
-		// If you are using MongoDB, you need to add the configuration：
-		x.UseMongoDB("Your ConnectionStrings");  //MongoDB 4.0+ cluster
 		
         // If you are using RabbitMQ, you need to add the configuration：
         x.UseRabbitMQ("localhost");
@@ -77,6 +81,13 @@ public void ConfigureServices(IServiceCollection services)
         // If you are using Kafka, you need to add the configuration：
         x.UseKafka("localhost");
     });
+}
+
+public void Configure(IApplicationBuilder app)
+{
+    //.....
+
+    app.UseCap();
 }
 
 ```
@@ -88,39 +99,38 @@ Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send 
 ```c#
 public class PublishController : Controller
 {
-	private readonly ICapPublisher _capBus;
-
-    public PublishController(ICapPublisher capPublisher)
+    [Route("~/publishWithTransactionUsingEF")]
+    public async Task<IActionResult> PublishMessageWithTransactionUsingEF([FromServices]AppDbContext dbContext, [FromServices]ICapPublisher publisher)
     {
-        _capBus = capPublisher;
-    }
-
-    [Route("~/adonet/transaction")]
-    public IActionResult AdonetWithTransaction()
-    {
-        using (var connection = new MySqlConnection(ConnectionString))
+        using (var trans = dbContext.Database.BeginTransaction())
         {
-            using (var transaction = connection.BeginTransaction(_capBus, autoCommit: true))
-            {
-                //your business code
+            // your business code
 
-                _capBus.Publish("xxx.services.show.time", DateTime.Now);
-            }
+            //If you are using EF, CAP will automatic discovery current environment transaction, so you do not need to explicit pass parameters.
+            //Achieving atomicity between original database operation and the publish event log thanks to a local transaction.
+            await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
+
+            trans.Commit();
         }
-
         return Ok();
     }
 
-    [Route("~/ef/transaction")]
-    public IActionResult EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
+    [Route("~/publishWithTransactionUsingAdonet")]
+    public async Task<IActionResult> PublishMessageWithTransactionUsingAdonet([FromServices]ICapPublisher publisher)
     {
-        using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: true))
+        var connectionString = "";
+        using (var sqlConnection = new SqlConnection(connectionString))
         {
-            //your business code
+            sqlConnection.Open();
+            using (var sqlTransaction = sqlConnection.BeginTransaction())
+            {
+                // your business code
 
-            _capBus.Publish(""xxx.services.show.time", DateTime.Now);     
+                publisher.Publish("xxx.services.account.check", new Person { Name = "Foo", Age = 11 }, sqlTransaction);
+
+                sqlTransaction.Commit();
+            }
         }
-
         return Ok();
     }
 }
@@ -136,10 +146,12 @@ Add the Attribute `[CapSubscribe()]` on Action to subscribe message:
 ```c#
 public class PublishController : Controller
 {
-    [CapSubscribe("xxx.services.show.time")]
-    public void CheckReceivedMessage(DateTime datetime)
+    [CapSubscribe("xxx.services.account.check")]
+    public async Task CheckReceivedMessage(Person person)
     {
-        Console.WriteLine(datetime);
+        Console.WriteLine(person.Name);
+        Console.WriteLine(person.Age);     
+        return Task.CompletedTask;
     }
 }
 
@@ -158,10 +170,11 @@ namespace xxx.Service
         public void CheckReceivedMessage(Person person);
     }
 
+
     public class SubscriberService: ISubscriberService, ICapSubscribe
     {
-        [CapSubscribe("xxx.services.show.time")]
-        public void CheckReceivedMessage(DateTime datetime)
+        [CapSubscribe("xxx.services.account.check")]
+        public void CheckReceivedMessage(Person person)
         {
         }
     }
@@ -183,7 +196,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Dashboard
 
-CAP v2.1+ provides the dashboard pages, you can easily view the sent and received messages. In addition, you can also view the  message status in real time on the dashboard.
+CAP 2.1 and above provides the dashboard pages, you can easily view the sent and received messages. In addition, you can also view the  message status in real time on the dashboard.
 
 In the distributed environment, the dashboard built-in integrated [Consul](http://consul.io) as a node discovery, while the realization of the gateway agent function, you can also easily view the node or other node data, It's like you are visiting local resources.
 
