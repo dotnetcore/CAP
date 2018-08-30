@@ -17,10 +17,10 @@ namespace DotNetCore.CAP.SqlServer
     public class SqlServerStorage : IStorage
     {
         private readonly CapOptions _capOptions;
+        private readonly DiagnosticProcessorObserver _diagnosticProcessorObserver;
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
         private readonly SqlServerOptions _options;
-        private readonly DiagnosticProcessorObserver _diagnosticProcessorObserver;
 
         public SqlServerStorage(ILogger<SqlServerStorage> logger,
             CapOptions capOptions,

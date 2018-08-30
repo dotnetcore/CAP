@@ -56,9 +56,8 @@ namespace DotNetCore.CAP.SqlServer
         {
             return
                 $"INSERT INTO {_options.Schema}.[Published] ([Id],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])VALUES(@Id,@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
-        } 
+        }
 
         #endregion private methods
-
     }
 }

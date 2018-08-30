@@ -11,16 +11,16 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
 {
     public class DiagnosticProcessorObserver : IObserver<DiagnosticListener>
     {
-        private readonly IDispatcher _dispatcher;
         public const string DiagnosticListenerName = "SqlClientDiagnosticListener";
-
-        public ConcurrentDictionary<Guid, List<CapPublishedMessage>> BufferList { get; }
+        private readonly IDispatcher _dispatcher;
 
         public DiagnosticProcessorObserver(IDispatcher dispatcher)
         {
             _dispatcher = dispatcher;
             BufferList = new ConcurrentDictionary<Guid, List<CapPublishedMessage>>();
         }
+
+        public ConcurrentDictionary<Guid, List<CapPublishedMessage>> BufferList { get; }
 
         public void OnCompleted()
         {

@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.MySql
             foreach (var table in tables)
             {
                 _logger.LogDebug($"Collecting expired data from table [{table}].");
-               
+
                 int removedCount;
                 do
                 {

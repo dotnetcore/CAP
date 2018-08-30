@@ -13,8 +13,8 @@ namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBPublisher : CapPublisherBase, ICallbackPublisher
     {
-        private readonly MongoDBOptions _options;
         private readonly IMongoClient _client;
+        private readonly MongoDBOptions _options;
 
         public MongoDBPublisher(IServiceProvider provider, MongoDBOptions options)
             : base(provider)
@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.MongoDB
         protected override Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
             CancellationToken cancel = default(CancellationToken))
         {
-            var insertOptions = new InsertOneOptions { BypassDocumentValidation = false };
+            var insertOptions = new InsertOneOptions {BypassDocumentValidation = false};
 
             var collection = _client
                 .GetDatabase(_options.DatabaseName)
@@ -41,7 +41,8 @@ namespace DotNetCore.CAP.MongoDB
             {
                 return collection.InsertOneAsync(message, insertOptions, cancel);
             }
-            var dbTrans = (IClientSessionHandle)transaction.DbTransaction;
+
+            var dbTrans = (IClientSessionHandle) transaction.DbTransaction;
             return collection.InsertOneAsync(dbTrans, message, insertOptions, cancel);
         }
     }

@@ -63,7 +63,7 @@ VALUES(@Id,@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             using (var connection = new SqlConnection(Options.ConnectionString))
             {
-                 connection.Execute(sql, message);
+                connection.Execute(sql, message);
             }
         }
 

@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.MySql
 
         public MySqlPublisher(IServiceProvider provider) : base(provider)
         {
-            _options = provider.GetService<MySqlOptions>(); 
+            _options = provider.GetService<MySqlOptions>();
         }
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)
@@ -45,6 +45,7 @@ namespace DotNetCore.CAP.MySql
             {
                 dbTrans = dbContextTrans.GetDbTransaction();
             }
+
             var conn = dbTrans?.Connection;
             await conn.ExecuteAsync(PrepareSql(), message, dbTrans);
         }
@@ -55,7 +56,7 @@ namespace DotNetCore.CAP.MySql
         {
             return
                 $"INSERT INTO `{_options.TableNamePrefix}.published` (`Id`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)VALUES(@Id,@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
-        } 
+        }
 
         #endregion private methods
     }

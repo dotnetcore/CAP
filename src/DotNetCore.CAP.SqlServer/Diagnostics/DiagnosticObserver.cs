@@ -12,8 +12,12 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
 {
     internal class DiagnosticObserver : IObserver<KeyValuePair<string, object>>
     {
-        private readonly IDispatcher _dispatcher;
+        private const string SqlClientPrefix = "System.Data.SqlClient.";
+
+        public const string SqlAfterCommitTransaction = SqlClientPrefix + "WriteTransactionCommitAfter";
+        public const string SqlErrorCommitTransaction = SqlClientPrefix + "WriteTransactionCommitError";
         private readonly ConcurrentDictionary<Guid, List<CapPublishedMessage>> _bufferList;
+        private readonly IDispatcher _dispatcher;
 
         public DiagnosticObserver(IDispatcher dispatcher,
             ConcurrentDictionary<Guid, List<CapPublishedMessage>> bufferList)
@@ -22,19 +26,12 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
             _bufferList = bufferList;
         }
 
-        private const string SqlClientPrefix = "System.Data.SqlClient.";
-
-        public const string SqlAfterCommitTransaction = SqlClientPrefix + "WriteTransactionCommitAfter";
-        public const string SqlErrorCommitTransaction = SqlClientPrefix + "WriteTransactionCommitError";
-
         public void OnCompleted()
         {
-
         }
 
         public void OnError(Exception error)
         {
-
         }
 
         public void OnNext(KeyValuePair<string, object> evt)
@@ -60,7 +57,7 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
             }
         }
 
-        static object GetProperty(object _this, string propertyName)
+        private static object GetProperty(object _this, string propertyName)
         {
             return _this.GetType().GetTypeInfo().GetDeclaredProperty(propertyName)?.GetValue(_this);
         }

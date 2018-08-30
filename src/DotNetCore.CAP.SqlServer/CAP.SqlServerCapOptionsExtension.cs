@@ -49,7 +49,7 @@ namespace DotNetCore.CAP
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext)provider.GetService(sqlServerOptions.DbContextType);
+                        var dbContext = (DbContext) provider.GetService(sqlServerOptions.DbContextType);
                         sqlServerOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return sqlServerOptions;
                     }

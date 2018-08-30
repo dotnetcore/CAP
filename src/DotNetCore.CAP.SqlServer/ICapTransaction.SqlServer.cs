@@ -22,7 +22,7 @@ namespace DotNetCore.CAP
         private readonly DiagnosticProcessorObserver _diagnosticProcessor;
 
         public SqlServerCapTransaction(
-            IDispatcher dispatcher, 
+            IDispatcher dispatcher,
             SqlServerOptions sqlServerOptions,
             IServiceProvider serviceProvider) : base(dispatcher)
         {
@@ -30,6 +30,7 @@ namespace DotNetCore.CAP
             {
                 _dbContext = serviceProvider.GetService(sqlServerOptions.DbContextType) as DbContext;
             }
+
             _diagnosticProcessor = serviceProvider.GetRequiredService<DiagnosticProcessorObserver>();
         }
 
@@ -55,14 +56,14 @@ namespace DotNetCore.CAP
                 }
             }
 
-            var transactionKey = ((SqlConnection)dbTransaction.Connection).ClientConnectionId;
+            var transactionKey = ((SqlConnection) dbTransaction.Connection).ClientConnectionId;
             if (_diagnosticProcessor.BufferList.TryGetValue(transactionKey, out var list))
             {
                 list.Add(msg);
             }
             else
             {
-                var msgList = new List<CapPublishedMessage>(1) { msg };
+                var msgList = new List<CapPublishedMessage>(1) {msg};
                 _diagnosticProcessor.BufferList.TryAdd(transactionKey, msgList);
             }
         }
@@ -134,10 +135,10 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Start the CAP transaction
         /// </summary>
-        /// <param name="dbConnection">The <see cref="IDbConnection"/>.</param>
-        /// <param name="publisher">The <see cref="ICapPublisher"/>.</param>
+        /// <param name="dbConnection">The <see cref="IDbConnection" />.</param>
+        /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
         /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-        /// <returns>The <see cref="ICapTransaction"/> object.</returns>
+        /// <returns>The <see cref="ICapTransaction" /> object.</returns>
         public static IDbTransaction BeginTransaction(this IDbConnection dbConnection,
             ICapPublisher publisher, bool autoCommit = false)
         {
@@ -148,16 +149,16 @@ namespace DotNetCore.CAP
 
             var dbTransaction = dbConnection.BeginTransaction();
             var capTransaction = publisher.Transaction.Begin(dbTransaction, autoCommit);
-            return (IDbTransaction)capTransaction.DbTransaction;
+            return (IDbTransaction) capTransaction.DbTransaction;
         }
 
         /// <summary>
         /// Start the CAP transaction
         /// </summary>
-        /// <param name="database">The <see cref="DatabaseFacade"/>.</param>
-        /// <param name="publisher">The <see cref="ICapPublisher"/>.</param>
+        /// <param name="database">The <see cref="DatabaseFacade" />.</param>
+        /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
         /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-        /// <returns>The <see cref="IDbContextTransaction"/> of EF dbcontext transaction object.</returns>
+        /// <returns>The <see cref="IDbContextTransaction" /> of EF dbcontext transaction object.</returns>
         public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
             ICapPublisher publisher, bool autoCommit = false)
         {

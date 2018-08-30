@@ -17,6 +17,7 @@ namespace DotNetCore.CAP.PostgreSql
     public class PostgreSqlPublisher : CapPublisherBase, ICallbackPublisher
     {
         private readonly PostgreSqlOptions _options;
+
         public PostgreSqlPublisher(IServiceProvider provider) : base(provider)
         {
             _options = provider.GetService<PostgreSqlOptions>();
@@ -44,6 +45,7 @@ namespace DotNetCore.CAP.PostgreSql
             {
                 dbTrans = dbContextTrans.GetDbTransaction();
             }
+
             var conn = dbTrans?.Connection;
             await conn.ExecuteAsync(PrepareSql(), message, dbTrans);
         }
@@ -62,6 +64,7 @@ namespace DotNetCore.CAP.PostgreSql
             conn.Open();
             return conn;
         }
+
         #endregion private methods
     }
 }

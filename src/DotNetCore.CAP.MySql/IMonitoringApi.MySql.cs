@@ -126,7 +126,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
         {
             var sqlQuery = $"select count(Id) from `{_prefix}.{tableName}` where StatusName = @state";
 
-            var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
+            var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
             return count;
         }
 
@@ -169,7 +169,7 @@ select aggr.* from (
 
             var valuesMap = connection.Query<TimelineCounter>(
                     sqlQuery,
-                    new { keys = keyMaps.Keys, statusName })
+                    new {keys = keyMaps.Keys, statusName})
                 .ToDictionary(x => x.Key, x => x.Count);
 
             foreach (var key in keyMaps.Keys)

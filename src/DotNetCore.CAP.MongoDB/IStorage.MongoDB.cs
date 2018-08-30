@@ -55,7 +55,8 @@ namespace DotNetCore.CAP.MongoDB
 
             if (names.All(n => n != _options.PublishedCollection))
             {
-                await database.CreateCollectionAsync(_options.PublishedCollection, cancellationToken: cancellationToken);
+                await database.CreateCollectionAsync(_options.PublishedCollection,
+                    cancellationToken: cancellationToken);
             }
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");

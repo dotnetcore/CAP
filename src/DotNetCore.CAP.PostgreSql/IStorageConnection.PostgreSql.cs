@@ -77,17 +77,13 @@ namespace DotNetCore.CAP.PostgreSql
 
         public async Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
-            var fourMinsAgo = DateTime.Now.AddMinutes(-4).ToString("O"); 
+            var fourMinsAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
                 $"SELECT * FROM \"{Options.Schema}\".\"received\" WHERE \"Retries\"<{_capOptions.FailedRetryCount} AND \"Added\"<'{fourMinsAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
             using (var connection = new NpgsqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
             }
-        }
-
-        public void Dispose()
-        {
         }
 
         public bool ChangePublishedState(long messageId, string state)
@@ -110,6 +106,10 @@ namespace DotNetCore.CAP.PostgreSql
             {
                 return connection.Execute(sql) > 0;
             }
+        }
+
+        public void Dispose()
+        {
         }
     }
 }
