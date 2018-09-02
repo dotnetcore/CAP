@@ -41,9 +41,9 @@ namespace SkyWalking.Remote
         public override void Dispose()
         {
             TracingContext.ListenerManager.Remove(this);
-            if(_traceSegments.Count > 0)
+            if (_traceSegments.Count > 0)
             {
-                BatchSendTraceSegments().GetAwaiter().GetResult();
+                BatchSendTraceSegments().ConfigureAwait(false).GetAwaiter().GetResult();
             }
             base.Dispose();
         }
@@ -58,7 +58,7 @@ namespace SkyWalking.Remote
             return base.Initializing(token);
         }
 
-        public async void AfterFinished(ITraceSegment traceSegment)
+        public void AfterFinished(ITraceSegment traceSegment)
         {
             if (traceSegment.IsIgnore)
             {
