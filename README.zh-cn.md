@@ -19,9 +19,9 @@ CAP 采用的是和当前数据库集成的本地消息表的方案来解决在�
 
 这是CAP集在ASP.NET Core 微服务架构中的一个示意图：
 
-![](http://images2015.cnblogs.com/blog/250417/201707/250417-20170705175827128-1203291469.png)
+![cap.png](http://oowr92l0m.bkt.clouddn.com/cap.png)
 
-> 图中实线部分代表用户代码，虚线部分代表CAP内部实现。
+> CAP 实现了 [eShop 电子书](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus) 中描述的发件箱模式
 
 ## Getting Started
 
