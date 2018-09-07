@@ -18,7 +18,7 @@ This is a diagram of the CAP working in the ASP.NET Core MicroService architectu
 
 ![cap.png](http://oowr92l0m.bkt.clouddn.com/cap.png)
 
-> CAP implements the Outbox Pttern described in the [eShop ebook](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus)
+> CAP implements the Outbox Pattern described in the [eShop ebook](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus)
 
 ## Getting Started
 
