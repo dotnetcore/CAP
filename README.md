@@ -18,7 +18,7 @@ This is a diagram of the CAP working in the ASP.NET Core MicroService architectu
 
 ![cap.png](http://oowr92l0m.bkt.clouddn.com/cap.png)
 
-> CAP implements the Outbox Pattern described in the [eShop ebook](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus)
+> CAP implements the Outbox Pattern described in the [eShop ebook](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus).
 
 ## Getting Started
 
@@ -65,7 +65,7 @@ public void ConfigureServices(IServiceCollection services)
         // If you are using EF, you need to add the configuration：
         x.UseEntityFramework<AppDbContext>(); //Options, Notice: You don't need to config x.UseSqlServer(""") again! CAP can autodiscovery.
 
-        // If you are using Ado.Net, you need to add the configuration：
+        // If you are using Dapper, you need to add the configuration：
         x.UseSqlServer("Your ConnectionStrings");
         x.UseMySql("Your ConnectionStrings");
         x.UsePostgreSql("Your ConnectionStrings");
@@ -131,7 +131,7 @@ public class PublishController : Controller
 
 ### Subscribe
 
-**Action Method**
+**In Action Method**
 
 Add the Attribute `[CapSubscribe()]` on Action to subscribe message:
 
@@ -147,17 +147,17 @@ public class PublishController : Controller
 
 ```
 
-**Service Method**
+**In Service Method**
 
 If your subscribe method is not in the Controller,then your subscribe class need to Inheritance `ICapSubscribe`:
 
 ```c#
 
-namespace xxx.Service
+namespace BusinessCode.Service
 {
     public interface ISubscriberService
     {
-        public void CheckReceivedMessage(Person person);
+        public void CheckReceivedMessage(DateTime person);
     }
 
     public class SubscriberService: ISubscriberService, ICapSubscribe
@@ -181,6 +181,40 @@ public void ConfigureServices(IServiceCollection services)
 
     services.AddCap(x=>{});
 }
+```
+
+#### Subscribe Group
+
+The concept of a subscription group is similar to that of a consumer group in Kafka. it is the same as the broadcast mode in the message queue, which is used to process the same message between multiple different microservice instances.
+
+When CAP startup, it will use the current assembly name as the default group name, if multiple same group subscribers subscribe the same topic name, there is only one subscriber can receive the message.
+Conversely, if subscribers are in different groups, they will all receive messages.
+
+In the same application, you can specify the `Group` property to keep they are in different consumer groups:
+
+```C#
+
+[CapSubscribe("xxx.services.show.time", Group = "group1" )]
+public void ShowTime1(DateTime datetime)
+{
+}
+
+[CapSubscribe("xxx.services.show.time", Group = "group2")]
+public void ShowTime2(DateTime datetime)
+{
+}
+
+```
+`ShowTime1` and `ShowTime2` will be called at the same time.
+
+BTW, You can specify the default group name in the configuration :
+
+```C#
+services.AddCap(x =>
+{
+    x.DefaultGroup = "default-group-name";  
+});
+
 ```
 
 ### Dashboard
