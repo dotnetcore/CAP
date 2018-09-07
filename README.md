@@ -190,7 +190,7 @@ The concept of a subscription group is similar to that of a consumer group in Ka
 When CAP startup, it will use the current assembly name as the default group name, if multiple same group subscribers subscribe the same topic name, there is only one subscriber can receive the message.
 Conversely, if subscribers are in different groups, they will all receive messages.
 
-In the same application, you can specify the `Group` property to keep they are in different consumer groups:
+In the same application, you can specify the `Group` property to keep they are in different subscribe groups:
 
 ```C#
 
