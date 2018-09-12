@@ -55,9 +55,15 @@ Task("Test")
 	.IsDependentOn("Build")
 	.Does(() =>
 {
+	var settings = new DotNetCoreTestSettings
+    {
+         Configuration = build.Configuration,
+		 NoBuild = false
+    };
+
 	foreach (var testProject in build.TestProjectFiles)
 	{
-		DotNetCoreTest(testProject.FullPath);
+		DotNetCoreTest(testProject.FullPath, settings);
 	}
 });
 
