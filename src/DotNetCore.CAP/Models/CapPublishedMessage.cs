@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 
 namespace DotNetCore.CAP.Models
 {
@@ -12,13 +15,7 @@ namespace DotNetCore.CAP.Models
             Added = DateTime.Now;
         }
 
-        public CapPublishedMessage(MessageContext message)
-        {
-            Name = message.Name;
-            Content = message.Content;
-        }
-
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public string Name { get; set; }
 

@@ -1,4 +1,7 @@
-﻿using DotNetCore.CAP.Internal;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using DotNetCore.CAP.Internal;
 
 namespace DotNetCore.CAP.Abstractions.ModelBinding
 {
@@ -42,7 +45,10 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         public override string ToString()
         {
             if (IsSuccess)
+            {
                 return $"Success '{Model}'";
+            }
+
             return "Failed";
         }
 
@@ -50,7 +56,10 @@ namespace DotNetCore.CAP.Abstractions.ModelBinding
         {
             var other = obj as ModelBindingResult?;
             if (other == null)
+            {
                 return false;
+            }
+
             return Equals(other.Value);
         }
 

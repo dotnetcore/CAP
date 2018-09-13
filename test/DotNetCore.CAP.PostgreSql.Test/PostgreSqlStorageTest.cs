@@ -6,13 +6,11 @@ namespace DotNetCore.CAP.PostgreSql.Test
     [Collection("postgresql")]
     public class SqlServerStorageTest : DatabaseTestHost
     {
-        private readonly string _dbName;
         private readonly string _masterDbConnectionString;
         private readonly string _dbConnectionString;
 
         public SqlServerStorageTest()
         {
-            _dbName = ConnectionUtil.GetDatabaseName();
             _masterDbConnectionString = ConnectionUtil.GetMasterConnectionString();
             _dbConnectionString = ConnectionUtil.GetConnectionString();
         }
@@ -32,7 +30,6 @@ namespace DotNetCore.CAP.PostgreSql.Test
 
         [Theory]
         [InlineData("cap.published")]
-        [InlineData("cap.queue")]
         [InlineData("cap.received")]
         public void DatabaseTable_IsExists(string tableName)
         {

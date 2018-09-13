@@ -1,4 +1,6 @@
-using System;
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Models;
@@ -8,7 +10,7 @@ namespace DotNetCore.CAP
     /// <summary>
     /// Represents a connection to the storage.
     /// </summary>
-    public interface IStorageConnection : IDisposable
+    public interface IStorageConnection
     {
         //Sent messages
 
@@ -16,22 +18,12 @@ namespace DotNetCore.CAP
         /// Returns the message with the given id.
         /// </summary>
         /// <param name="id">The message's id.</param>
-        Task<CapPublishedMessage> GetPublishedMessageAsync(int id);
-
-        /// <summary>
-        /// Fetches the next message to be executed.
-        /// </summary>
-        Task<IFetchedMessage> FetchNextMessageAsync();
-
-        /// <summary>
-        /// Returns the next message to be enqueued.
-        /// </summary>
-        Task<CapPublishedMessage> GetNextPublishedMessageToBeEnqueuedAsync();
+        Task<CapPublishedMessage> GetPublishedMessageAsync(long id);
 
         /// <summary>
         /// Returns executed failed messages.
         /// </summary>
-        Task<IEnumerable<CapPublishedMessage>> GetFailedPublishedMessages();
+        Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry();
 
         // Received messages
 
@@ -39,23 +31,18 @@ namespace DotNetCore.CAP
         /// Stores the message.
         /// </summary>
         /// <param name="message">The message to store.</param>
-        Task StoreReceivedMessageAsync(CapReceivedMessage message);
+        void StoreReceivedMessage(CapReceivedMessage message);
 
         /// <summary>
         /// Returns the message with the given id.
         /// </summary>
         /// <param name="id">The message's id.</param>
-        Task<CapReceivedMessage> GetReceivedMessageAsync(int id);
-
-        /// <summary>
-        /// Returns the next message to be enqueued.
-        /// </summary>
-        Task<CapReceivedMessage> GetNextReceivedMessageToBeEnqueuedAsync();
+        Task<CapReceivedMessage> GetReceivedMessageAsync(long id);
 
         /// <summary>
         /// Returns executed failed message.
         /// </summary>
-        Task<IEnumerable<CapReceivedMessage>> GetFailedReceivedMessages();
+        Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry();
 
         /// <summary>
         /// Creates and returns an <see cref="IStorageTransaction" />.
@@ -67,13 +54,13 @@ namespace DotNetCore.CAP
         /// </summary>
         /// <param name="messageId">Message id</param>
         /// <param name="state">State name</param>
-        bool ChangePublishedState(int messageId, string state);
+        bool ChangePublishedState(long messageId, string state);
 
         /// <summary>
         /// Change specified message's state  of received message
         /// </summary>
         /// <param name="messageId">Message id</param>
         /// <param name="state">State name</param>
-        bool ChangeReceivedState(int messageId, string state);
+        bool ChangeReceivedState(long messageId, string state);
     }
 }

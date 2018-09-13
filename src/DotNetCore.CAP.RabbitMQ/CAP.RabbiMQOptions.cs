@@ -1,5 +1,7 @@
-﻿// ReSharper disable once CheckNamespace
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
 
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class RabbitMQOptions
@@ -28,14 +30,17 @@ namespace DotNetCore.CAP
         public const string DefaultVHost = "/";
 
         /// <summary>
-        /// Default exchange name (value: "cap.default.topic").
+        /// Default exchange name (value: "cap.default.router").
         /// </summary>
-        public const string DefaultExchangeName = "cap.default.topic";
+        public const string DefaultExchangeName = "cap.default.router";
 
         /// <summary> The topic exchange type. </summary>
         public const string ExchangeType = "topic";
 
-        /// <summary>The host to connect to.</summary>
+        /// <summary>
+        /// The host to connect to.
+        /// If you want connect to the cluster, you can assign like “192.168.1.111,192.168.1.112”
+        /// </summary>
         public string HostName { get; set; } = "localhost";
 
         /// <summary>
@@ -56,7 +61,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Topic exchange name when declare a topic exchange.
         /// </summary>
-        public string TopicExchangeName { get; set; } = DefaultExchangeName;
+        public string ExchangeName { get; set; } = DefaultExchangeName;
 
         /// <summary>
         /// Timeout setting for connection attempts (in milliseconds).

@@ -1,6 +1,9 @@
-﻿using System.Reflection;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System.Reflection;
 using DotNetCore.CAP.Dashboard.Pages;
-using DotNetCore.CAP.Infrastructure;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -79,25 +82,35 @@ namespace DotNetCore.CAP.Dashboard
 
             Routes.AddJsonResult("/published/message/(?<Id>.+)", x =>
             {
-                var id = int.Parse(x.UriMatch.Groups["Id"].Value);
-                var message = x.Storage.GetConnection().GetPublishedMessageAsync(id).GetAwaiter().GetResult();
+                var id = long.Parse(x.UriMatch.Groups["Id"].Value);
+                var message = x.Storage.GetConnection().GetPublishedMessageAsync(id)
+                    .GetAwaiter().GetResult();
                 return message.Content;
             });
             Routes.AddJsonResult("/received/message/(?<Id>.+)", x =>
             {
-                var id = int.Parse(x.UriMatch.Groups["Id"].Value);
-                var message = x.Storage.GetConnection().GetReceivedMessageAsync(id).GetAwaiter().GetResult();
+                var id = long.Parse(x.UriMatch.Groups["Id"].Value);
+                var message = x.Storage.GetConnection().GetReceivedMessageAsync(id)
+                    .GetAwaiter().GetResult();
                 return message.Content;
             });
 
             Routes.AddPublishBatchCommand(
                 "/published/requeue",
                 (client, messageId) =>
-                    client.Storage.GetConnection().ChangePublishedState(messageId, StatusName.Scheduled));
+                {
+                    var msg = client.Storage.GetConnection().GetPublishedMessageAsync(messageId)
+                        .GetAwaiter().GetResult(); 
+                    client.RequestServices.GetService<IDispatcher>().EnqueueToPublish(msg);
+                });
             Routes.AddPublishBatchCommand(
                 "/received/requeue",
                 (client, messageId) =>
-                    client.Storage.GetConnection().ChangeReceivedState(messageId, StatusName.Scheduled));
+                {
+                    var msg = client.Storage.GetConnection().GetReceivedMessageAsync(messageId)
+                        .GetAwaiter().GetResult();
+                    client.RequestServices.GetService<IDispatcher>().EnqueueToExecute(msg);
+                }); 
 
             Routes.AddRazorPage(
                 "/published/(?<StatusName>.+)",

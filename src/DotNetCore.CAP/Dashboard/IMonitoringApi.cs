@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using DotNetCore.CAP.Dashboard.Monitoring;
@@ -13,13 +16,9 @@ namespace DotNetCore.CAP.Dashboard
 
         int PublishedFailedCount();
 
-        int PublishedProcessingCount();
-
         int PublishedSucceededCount();
 
         int ReceivedFailedCount();
-
-        int ReceivedProcessingCount();
 
         int ReceivedSucceededCount();
 

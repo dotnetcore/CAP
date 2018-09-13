@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Models;
@@ -15,13 +15,13 @@ namespace DotNetCore.CAP.Test
         public void CanCreateInstanceAndGetService()
         {
             var services = new ServiceCollection();
-           
+
             services.AddSingleton<ICapPublisher, MyProducerService>();
             var builder = new CapBuilder(services);
             Assert.NotNull(builder);
 
             var count = builder.Services.Count;
-            Assert.Equal(1, count); 
+            Assert.Equal(1, count);
 
             var provider = services.BuildServiceProvider();
             var capPublisher = provider.GetService<ICapPublisher>();
@@ -119,47 +119,15 @@ namespace DotNetCore.CAP.Test
 
         private class MyProducerService : ICapPublisher
         {
+            public ICapTransaction Transaction { get; }
+
+            public Task PublishAsync<T>(string name, T contentObj, string callbackName = null,
+                CancellationToken cancellationToken = default(CancellationToken))
+            {
+                throw new NotImplementedException();
+            }
+
             public void Publish<T>(string name, T contentObj, string callbackName = null)
-            {
-                throw new NotImplementedException();
-            }
-
-            public void Publish<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task PublishAsync(string topic, string content)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task PublishAsync<T>(string topic, T contentObj)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task PublishAsync(string topic, string content, IDbConnection dbConnection)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task PublishAsync(string topic, string content, IDbConnection dbConnection, IDbTransaction dbTransaction)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task PublishAsync<T>(string name, T contentObj, IDbConnection dbConnection, IDbTransaction dbTransaction = null)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task PublishAsync<T>(string name, T contentObj, string callbackName = null)
-            {
-                throw new NotImplementedException();
-            }
-
-            public Task PublishAsync<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
             {
                 throw new NotImplementedException();
             }

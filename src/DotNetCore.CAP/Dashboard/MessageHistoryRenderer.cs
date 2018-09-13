@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
@@ -23,18 +26,13 @@ namespace DotNetCore.CAP.Dashboard
         {
             Register(StatusName.Succeeded, SucceededRenderer);
             Register(StatusName.Failed, FailedRenderer);
-            Register(StatusName.Processing, ProcessingRenderer);
 
-            BackgroundStateColors.Add(StatusName.Enqueued, "#F5F5F5");
             BackgroundStateColors.Add(StatusName.Succeeded, "#EDF7ED");
             BackgroundStateColors.Add(StatusName.Failed, "#FAEBEA");
-            BackgroundStateColors.Add(StatusName.Processing, "#FCEFDC");
             BackgroundStateColors.Add(StatusName.Scheduled, "#E0F3F8");
 
-            ForegroundStateColors.Add(StatusName.Enqueued, "#999");
             ForegroundStateColors.Add(StatusName.Succeeded, "#5cb85c");
             ForegroundStateColors.Add(StatusName.Failed, "#d9534f");
-            ForegroundStateColors.Add(StatusName.Processing, "#f0ad4e");
             ForegroundStateColors.Add(StatusName.Scheduled, "#5bc0de");
         }
 
@@ -46,7 +44,9 @@ namespace DotNetCore.CAP.Dashboard
         public static string GetBackgroundStateColor(string stateName)
         {
             if (stateName == null || !BackgroundStateColors.ContainsKey(stateName))
+            {
                 return "inherit";
+            }
 
             return BackgroundStateColors[stateName];
         }
@@ -59,7 +59,9 @@ namespace DotNetCore.CAP.Dashboard
         public static string GetForegroundStateColor(string stateName)
         {
             if (stateName == null || !ForegroundStateColors.ContainsKey(stateName))
+            {
                 return "inherit";
+            }
 
             return ForegroundStateColors[stateName];
         }
@@ -68,9 +70,13 @@ namespace DotNetCore.CAP.Dashboard
             Func<HtmlHelper, IDictionary<string, string>, NonEscapedString> renderer)
         {
             if (!Renderers.ContainsKey(state))
+            {
                 Renderers.Add(state, renderer);
+            }
             else
+            {
                 Renderers[state] = renderer;
+            }
         }
 
         public static bool Exists(string state)
@@ -96,7 +102,10 @@ namespace DotNetCore.CAP.Dashboard
 
         public static NonEscapedString DefaultRenderer(HtmlHelper helper, IDictionary<string, string> stateData)
         {
-            if (stateData == null || stateData.Count == 0) return null;
+            if (stateData == null || stateData.Count == 0)
+            {
+                return null;
+            }
 
             var builder = new StringBuilder();
             builder.Append("<dl class=\"dl-horizontal\">");
@@ -146,7 +155,10 @@ namespace DotNetCore.CAP.Dashboard
 
             builder.Append("</dl>");
 
-            if (!itemsAdded) return null;
+            if (!itemsAdded)
+            {
+                return null;
+            }
 
             return new NonEscapedString(builder.ToString());
         }
@@ -166,9 +178,13 @@ namespace DotNetCore.CAP.Dashboard
             string serverId = null;
 
             if (stateData.ContainsKey("ServerId"))
+            {
                 serverId = stateData["ServerId"];
+            }
             else if (stateData.ContainsKey("ServerName"))
+            {
                 serverId = stateData["ServerName"];
+            }
 
             if (serverId != null)
             {

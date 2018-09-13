@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.RabbitMQ;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,9 +26,9 @@ namespace DotNetCore.CAP
             services.AddSingleton(options);
 
             services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
-            services.AddSingleton<ConnectionPool>();
-            services.AddSingleton<IQueueExecutor, PublishQueueExecutor>();
-            services.AddSingleton<IPublishExecutor, PublishQueueExecutor>();
+            services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
+            services.AddSingleton<IPublishExecutor, RabbitMQPublishMessageSender>();
+            services.AddSingleton<IPublishMessageSender, RabbitMQPublishMessageSender>();
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -45,16 +48,21 @@ namespace DotNetCore.CAP
             if (_kafkaConfig == null)
             {
                 if (string.IsNullOrWhiteSpace(Servers))
+                {
                     throw new ArgumentNullException(nameof(Servers));
+                }
 
                 MainConfig["bootstrap.servers"] = Servers;
                 MainConfig["queue.buffering.max.ms"] = "10";
                 MainConfig["socket.blocking.max.ms"] = "10";
                 MainConfig["enable.auto.commit"] = "false";
                 MainConfig["log.connection.close"] = "false";
-                
+                MainConfig["request.timeout.ms"] = "3000";
+                MainConfig["message.timeout.ms"] = "5000";
+
                 _kafkaConfig = MainConfig.AsEnumerable();
             }
+
             return _kafkaConfig;
         }
     }

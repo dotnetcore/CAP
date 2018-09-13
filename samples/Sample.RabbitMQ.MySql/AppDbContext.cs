@@ -1,17 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 
 namespace Sample.RabbitMQ.MySql
 {
+    public class Person
+    {
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
     public class AppDbContext : DbContext
     {
+        public const string ConnectionString = "Server=localhost;Database=testcap;UserId=root;Password=123123;";
+
+        public DbSet<Person> Persons { get; set; }
+
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySql("Server=localhost;Database=Sample.RabbitMQ.MySql;UserId=root;Password=123123;Allow User Variables=True");
-            //optionsBuilder.UseMySql("Server=192.168.2.206;Database=Sample.RabbitMQ.MySql;UserId=root;Password=123123;");
+            optionsBuilder.UseMySql(ConnectionString);
         }
     }
 }

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +17,11 @@ namespace Sample.RabbitMQ.MySql
                 x.UseEntityFramework<AppDbContext>();
                 x.UseRabbitMQ("localhost");
                 x.UseDashboard();
+                x.FailedRetryCount = 5;
+                x.FailedThresholdCallback = (type, name, content) =>
+                {
+                    Console.WriteLine($@"A message of type {type} failed after executing {x.FailedRetryCount} several times, requiring manual troubleshooting. Message name: {name}, message body: {content}");
+                };
             });
 
             services.AddMvc();
@@ -27,12 +29,7 @@ namespace Sample.RabbitMQ.MySql
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
-            loggerFactory.AddDebug();
-
             app.UseMvc();
-
-            app.UseCap();
         }
     }
 }

@@ -1,179 +1,131 @@
-﻿using System;
-using System.Data;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
+using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
-using DotNetCore.CAP.Processor;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Abstractions
 {
-    public abstract class CapPublisherBase : ICapPublisher, IDisposable
+    public abstract class CapPublisherBase : ICapPublisher
     {
-        protected IDbConnection DbConnection { get; set; }
-        protected IDbTransaction DbTransaction { get; set; }
-        protected bool IsCapOpenedTrans { get; set; }
-        protected bool IsCapOpenedConn { get; set; }
-        protected bool IsUsingEF { get; set; }
-        protected IServiceProvider ServiceProvider { get; set; }
+        private readonly CapTransactionBase _transaction;
+        private readonly IMessagePacker _msgPacker;
+        private readonly IContentSerializer _serializer;
+
+        protected bool NotUseTransaction;
+
+        // ReSharper disable once InconsistentNaming
+        protected static readonly DiagnosticListener s_diagnosticListener =
+            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
+
+        protected CapPublisherBase(IServiceProvider service)
+        {
+            ServiceProvider = service;
+            _transaction = service.GetRequiredService<CapTransactionBase>();
+            _msgPacker = service.GetRequiredService<IMessagePacker>();
+            _serializer = service.GetRequiredService<IContentSerializer>();
+        }
+
+        protected IServiceProvider ServiceProvider { get; }
+
+        public ICapTransaction Transaction => _transaction;
 
         public void Publish<T>(string name, T contentObj, string callbackName = null)
         {
-            CheckIsUsingEF(name);
-            PrepareConnectionForEF();
+            var message = new CapPublishedMessage
+            {
+                Id = SnowflakeId.Default().NextId(),
+                Name = name,
+                Content = Serialize(contentObj, callbackName),
+                StatusName = StatusName.Scheduled
+            };
 
-            var content = Serialize(contentObj, callbackName);
-
-            PublishWithTrans(name, content);
+            PublishAsyncInternal(message).GetAwaiter().GetResult();
         }
 
-        public Task PublishAsync<T>(string name, T contentObj, string callbackName = null)
+        public async Task PublishAsync<T>(string name, T contentObj, string callbackName = null,
+            CancellationToken cancellationToken = default(CancellationToken))
         {
-            CheckIsUsingEF(name);
-            PrepareConnectionForEF();
+            var message = new CapPublishedMessage
+            {
+                Id = SnowflakeId.Default().NextId(),
+                Name = name,
+                Content = Serialize(contentObj, callbackName),
+                StatusName = StatusName.Scheduled
+            };
 
-            var content = Serialize(contentObj, callbackName);
-
-            return PublishWithTransAsync(name, content);
+            await PublishAsyncInternal(message);
         }
 
-        public void Publish<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
+        protected async Task PublishAsyncInternal(CapPublishedMessage message)
         {
-            CheckIsAdoNet(name);
-            PrepareConnectionForAdo(dbTransaction);
+            if (Transaction.DbTransaction == null)
+            {
+                NotUseTransaction = true;
+                Transaction.DbTransaction = new NoopTransaction();
+            }
 
-            var content = Serialize(contentObj, callbackName);
+            Guid operationId = default(Guid);
 
-            PublishWithTrans(name, content);
+            try
+            {
+                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
+
+                await ExecuteAsync(message, Transaction);
+
+                _transaction.AddToSent(message);
+
+                s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
+
+                if (NotUseTransaction || Transaction.AutoCommit)
+                {
+                    _transaction.Commit();
+                }
+            }
+            catch (Exception e)
+            {
+                s_diagnosticListener.WritePublishMessageStoreError(operationId, message, e);
+
+                throw;
+            }
+            finally
+            {
+                if (NotUseTransaction || Transaction.AutoCommit)
+                {
+                    _transaction.Dispose();
+                }
+            }
         }
 
-        public Task PublishAsync<T>(string name, T contentObj, IDbTransaction dbTransaction, string callbackName = null)
-        {
-            CheckIsAdoNet(name);
-            PrepareConnectionForAdo(dbTransaction);
-
-            var content = Serialize(contentObj, callbackName);
-
-            return PublishWithTransAsync(name, content);
-        }
-
-        protected abstract void PrepareConnectionForEF();
-
-        protected abstract void Execute(IDbConnection dbConnection, IDbTransaction dbTransaction,
-            CapPublishedMessage message);
-
-        protected abstract Task ExecuteAsync(IDbConnection dbConnection, IDbTransaction dbTransaction,
-            CapPublishedMessage message);
+        protected abstract Task ExecuteAsync(CapPublishedMessage message,
+            ICapTransaction transaction,
+            CancellationToken cancel = default(CancellationToken));
 
         protected virtual string Serialize<T>(T obj, string callbackName = null)
         {
-            var packer = (IMessagePacker)ServiceProvider.GetService(typeof(IMessagePacker));
             string content;
             if (obj != null)
             {
-                if (Helper.IsComplexType(obj.GetType()))
-                {
-                    var serializer = (IContentSerializer)ServiceProvider.GetService(typeof(IContentSerializer));
-                    content = serializer.Serialize(obj);
-                }
-                else
-                {
-                    content = obj.ToString();
-                }
+                content = Helper.IsComplexType(obj.GetType())
+                    ? _serializer.Serialize(obj)
+                    : obj.ToString();
             }
             else
             {
                 content = string.Empty;
             }
-
             var message = new CapMessageDto(content)
             {
                 CallbackName = callbackName
             };
-
-            return packer.Pack(message);
+            return _msgPacker.Pack(message);
         }
-
-        #region private methods
-
-        private void PrepareConnectionForAdo(IDbTransaction dbTransaction)
-        {
-            DbTransaction = dbTransaction ?? throw new ArgumentNullException(nameof(dbTransaction));
-            DbConnection = DbTransaction.Connection;
-            if (DbConnection.State != ConnectionState.Open)
-            {
-                IsCapOpenedConn = true;
-                DbConnection.Open();
-            }
-        }
-
-        private void CheckIsUsingEF(string name)
-        {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            if (!IsUsingEF)
-                throw new InvalidOperationException(
-                    "If you are using the EntityFramework, you need to configure the DbContextType first." +
-                    " otherwise you need to use overloaded method with IDbConnection and IDbTransaction.");
-        }
-
-        private void CheckIsAdoNet(string name)
-        {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            if (IsUsingEF)
-                throw new InvalidOperationException(
-                    "If you are using the EntityFramework, you do not need to use this overloaded.");
-        }
-
-        private Task PublishWithTransAsync(string name, string content)
-        {
-            var message = new CapPublishedMessage
-            {
-                Name = name,
-                Content = content,
-                StatusName = StatusName.Scheduled
-            };
-
-            ExecuteAsync(DbConnection, DbTransaction, message);
-
-            ClosedCap();
-
-            PublishQueuer.PulseEvent.Set();
-
-            return Task.CompletedTask;
-        }
-
-        private void PublishWithTrans(string name, string content)
-        {
-            var message = new CapPublishedMessage
-            {
-                Name = name,
-                Content = content,
-                StatusName = StatusName.Scheduled
-            };
-
-            Execute(DbConnection, DbTransaction, message);
-
-            ClosedCap();
-
-            PublishQueuer.PulseEvent.Set();
-        }
-
-        private void ClosedCap()
-        {
-            if (IsCapOpenedTrans)
-            {
-                DbTransaction.Commit();
-                DbTransaction.Dispose();
-            }
-            if (IsCapOpenedConn)
-                DbConnection.Dispose();
-        }
-
-        public void Dispose()
-        {
-            DbTransaction?.Dispose();
-            DbConnection?.Dispose();
-        }
-
-        #endregion private methods
     }
 }

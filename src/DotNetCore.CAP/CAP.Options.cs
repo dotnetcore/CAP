@@ -1,5 +1,9 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
+using System.Reflection;
 using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
@@ -10,16 +14,6 @@ namespace DotNetCore.CAP
     public class CapOptions
     {
         /// <summary>
-        /// Default value for polling delay timeout, in seconds.
-        /// </summary>
-        public const int DefaultPollingDelay = 15;
-
-        /// <summary>
-        /// Default processor count to process messages of cap.queue.
-        /// </summary>
-        public const int DefaultQueueProcessorCount = 2;
-
-        /// <summary>
         /// Default succeeded message expiration time span, in seconds.
         /// </summary>
         public const int DefaultSucceedMessageExpirationAfter = 24 * 3600;
@@ -27,36 +21,29 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Failed message retry waiting interval.
         /// </summary>
-        public const int DefaultFailedMessageWaitingInterval = 600;
+        public const int DefaultFailedMessageWaitingInterval = 60;
 
         /// <summary>
         /// Failed message retry count.
         /// </summary>
-        public const int DefaultFailedRetryCount = 100;
+        public const int DefaultFailedRetryCount = 50;
+
 
         public CapOptions()
         {
-            PollingDelay = DefaultPollingDelay;
-            QueueProcessorCount = DefaultQueueProcessorCount;
             SucceedMessageExpiredAfter = DefaultSucceedMessageExpirationAfter;
             FailedRetryInterval = DefaultFailedMessageWaitingInterval;
             FailedRetryCount = DefaultFailedRetryCount;
             Extensions = new List<ICapOptionsExtension>();
+            DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly().GetName().Name.ToLower();
         }
 
         internal IList<ICapOptionsExtension> Extensions { get; }
 
         /// <summary>
-        /// Producer job polling delay time.
-        /// Default is 15 sec.
+        /// Subscriber default group name. kafka-->group name. rabbitmq --> queue name.
         /// </summary>
-        public int PollingDelay { get; set; }
-
-        /// <summary>
-        /// Gets or sets the messages queue (Cap.Queue table) processor count.
-        /// Default is 2 processor.
-        /// </summary>
-        public int QueueProcessorCount { get; set; }
+        public string DefaultGroup { get; set; }
 
         /// <summary>
         /// Sent or received succeed message after time span of due, then the message will be deleted at due time.
@@ -66,18 +53,18 @@ namespace DotNetCore.CAP
 
         /// <summary>
         /// Failed messages polling delay time.
-        /// Default is 600 seconds.
+        /// Default is 60 seconds.
         /// </summary>
         public int FailedRetryInterval { get; set; }
 
         /// <summary>
-        /// We’ll invoke this call-back with message type,name,content when requeue failed message.
+        /// We’ll invoke this call-back with message type,name,content when retry failed (send or executed) messages equals <see cref="FailedRetryCount"/> times.
         /// </summary>
-        public Action<MessageType, string, string> FailedCallback { get; set; }
+        public Action<MessageType, string, string> FailedThresholdCallback { get; set; }
 
         /// <summary>
         /// The number of message retries, the retry will stop when the threshold is reached.
-        /// Default is 100 times.
+        /// Default is 50 times.
         /// </summary>
         public int FailedRetryCount { get; set; }
 
@@ -88,7 +75,9 @@ namespace DotNetCore.CAP
         public void RegisterExtension(ICapOptionsExtension extension)
         {
             if (extension == null)
+            {
                 throw new ArgumentNullException(nameof(extension));
+            }
 
             Extensions.Add(extension);
         }

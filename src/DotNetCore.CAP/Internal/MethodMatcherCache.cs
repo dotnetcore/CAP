@@ -1,8 +1,10 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using DotNetCore.CAP.Abstractions;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -13,46 +15,60 @@ namespace DotNetCore.CAP.Internal
         public MethodMatcherCache(IConsumerServiceSelector selector)
         {
             _selector = selector;
-            Entries = new ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>>();
+            Entries = new ConcurrentDictionary<string, IReadOnlyList<ConsumerExecutorDescriptor>>();
         }
 
-        private ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>> Entries { get; }
+        private ConcurrentDictionary<string, IReadOnlyList<ConsumerExecutorDescriptor>> Entries { get; }
 
         /// <summary>
         /// Get a dictionary of candidates.In the dictionary,
         /// the Key is the CAPSubscribeAttribute Group, the Value for the current Group of candidates
         /// </summary>
-        public ConcurrentDictionary<string, IList<ConsumerExecutorDescriptor>> GetCandidatesMethodsOfGroupNameGrouped()
+        public ConcurrentDictionary<string, IReadOnlyList<ConsumerExecutorDescriptor>> GetCandidatesMethodsOfGroupNameGrouped()
         {
-            if (Entries.Count != 0) return Entries;
+            if (Entries.Count != 0)
+            {
+                return Entries;
+            }
 
             var executorCollection = _selector.SelectCandidates();
 
             var groupedCandidates = executorCollection.GroupBy(x => x.Attribute.Group);
 
             foreach (var item in groupedCandidates)
+            {
                 Entries.TryAdd(item.Key, item.ToList());
+            }
 
             return Entries;
         }
 
         /// <summary>
-        /// Get a dictionary of specify topic candidates.
-        /// The Key is Group name, the value is specify topic candidates.
+        /// Attempts to get the topic exector associated with the specified topic name and group name from the
+        /// <see cref="Entries" />.
         /// </summary>
-        /// <param name="topicName">message topic name</param>
-        public IDictionary<string, IList<ConsumerExecutorDescriptor>> GetTopicExector(string topicName)
+        /// <param name="topicName">The topic name of the value to get.</param>
+        /// <param name="groupName">The group name of the value to get.</param>
+        /// <param name="matchTopic">topic exector of the value.</param>
+        /// <returns>true if the key was found, otherwise false. </returns>
+        public bool TryGetTopicExector(string topicName, string groupName,
+            out ConsumerExecutorDescriptor matchTopic)
         {
             if (Entries == null)
-                throw new ArgumentNullException(nameof(Entries));
-
-            var dic = new Dictionary<string, IList<ConsumerExecutorDescriptor>>();
-            foreach (var item in Entries)
             {
-                var topicCandidates = item.Value.Where(x => x.Attribute.Name == topicName);
-                dic.Add(item.Key, topicCandidates.ToList());
+                throw new ArgumentNullException(nameof(Entries));
             }
-            return dic;
+
+            matchTopic = null;
+
+            if (Entries.TryGetValue(groupName, out var groupMatchTopics))
+            {
+                matchTopic =  _selector.SelectBestCandidate(topicName, groupMatchTopics);
+
+                return matchTopic != null;
+            }
+
+            return false;
         }
     }
 }

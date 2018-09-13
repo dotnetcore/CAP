@@ -1,10 +1,15 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -21,15 +26,16 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <param name="services">The services available in the application.</param>
         /// <param name="setupAction">An action to configure the <see cref="CapOptions" />.</param>
         /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
-        public static CapBuilder AddCap(
-            this IServiceCollection services,
-            Action<CapOptions> setupAction)
+        public static CapBuilder AddCap(this IServiceCollection services, Action<CapOptions> setupAction)
         {
-            if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
+            if (setupAction == null)
+            {
+                throw new ArgumentNullException(nameof(setupAction));
+            }
 
             services.TryAddSingleton<CapMarkerService>();
-            services.Configure(setupAction);
 
+            //Consumer service
             AddSubscribeServices(services);
 
             //Serializer and model binder
@@ -43,28 +49,30 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<MethodMatcherCache>();
 
             //Bootstrapper and Processors
-            services.AddSingleton<IProcessingServer, ConsumerHandler>();
-            services.AddSingleton<IProcessingServer, CapProcessingServer>();
-            services.AddSingleton<IBootstrapper, DefaultBootstrapper>();
-            services.AddSingleton<IStateChanger, StateChanger>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerHandler>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
+            services.TryAddSingleton<IBootstrapper, DefaultBootstrapper>();
+            services.TryAddSingleton<IStateChanger, StateChanger>();
 
             //Queue's message processor
-            services.AddTransient<PublishQueuer>();
-            services.AddTransient<SubscribeQueuer>();
-            services.AddTransient<FailedProcessor>();
-            services.AddTransient<IDispatcher, DefaultDispatcher>();
+            services.TryAddSingleton<NeedRetryMessageProcessor>();
 
-            //Executors
-            services.AddSingleton<IQueueExecutorFactory, QueueExecutorFactory>();
-            services.AddSingleton<IQueueExecutor, SubscribeQueueExecutor>();
+            //Sender and Executors   
+            services.TryAddSingleton<IDispatcher, Dispatcher>();
+            // Warning: IPublishMessageSender need to inject at extension project. 
             services.TryAddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
 
             //Options and extension service
             var options = new CapOptions();
             setupAction(options);
             foreach (var serviceExtension in options.Extensions)
+            {
                 serviceExtension.AddServices(services);
+            }
             services.AddSingleton(options);
+
+            //Startup and Middleware
+            services.AddTransient<IStartupFilter, CapStartupFilter>();
 
             return new CapBuilder(services);
         }
@@ -73,13 +81,19 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             var consumerListenerServices = new List<KeyValuePair<Type, Type>>();
             foreach (var rejectedServices in services)
+            {
                 if (rejectedServices.ImplementationType != null
                     && typeof(ICapSubscribe).IsAssignableFrom(rejectedServices.ImplementationType))
+                {
                     consumerListenerServices.Add(new KeyValuePair<Type, Type>(typeof(ICapSubscribe),
                         rejectedServices.ImplementationType));
+                }
+            }
 
             foreach (var service in consumerListenerServices)
-                services.AddTransient(service.Key, service.Value);
+            {
+                services.TryAddEnumerable(ServiceDescriptor.Transient(service.Key, service.Value));
+            }
         }
     }
 }

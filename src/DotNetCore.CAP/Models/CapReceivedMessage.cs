@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 
 namespace DotNetCore.CAP.Models
 {
@@ -19,7 +22,7 @@ namespace DotNetCore.CAP.Models
             Content = message.Content;
         }
 
-        public int Id { get; set; }
+        public long Id { get; set; }
 
         public string Group { get; set; }
 
@@ -47,7 +50,7 @@ namespace DotNetCore.CAP.Models
 
         public override string ToString()
         {
-            return "name:" + Name + ", content:" + Content;
+            return "name:" + Name + ", group:" + Group + ", content:" + Content;
         }
     }
 }

@@ -1,4 +1,7 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -24,17 +27,22 @@ namespace DotNetCore.CAP.Kafka
 
         public event EventHandler<MessageContext> OnMessageReceived;
 
-        public event EventHandler<string> OnError;
+        public event EventHandler<LogMessageEventArgs> OnLog;
+
+        public string ServersAddress => _kafkaOptions.Servers;
 
         public void Subscribe(IEnumerable<string> topics)
         {
             if (topics == null)
+            {
                 throw new ArgumentNullException(nameof(topics));
+            }
 
             if (_consumerClient == null)
+            {
                 InitKafkaClient();
+            }
 
-            //_consumerClient.Assign(topics.Select(x=> new TopicPartition(x, 0)));
             _consumerClient.Subscribe(topics);
         }
 
@@ -45,6 +53,7 @@ namespace DotNetCore.CAP.Kafka
                 cancellationToken.ThrowIfCancellationRequested();
                 _consumerClient.Poll(timeout);
             }
+
             // ReSharper disable once FunctionNeverReturns
         }
 
@@ -55,7 +64,7 @@ namespace DotNetCore.CAP.Kafka
 
         public void Reject()
         {
-            // Ignore, Kafka will not commit offset when not commit.
+            _consumerClient.Assign(_consumerClient.Assignment);
         }
 
         public void Dispose()
@@ -67,21 +76,28 @@ namespace DotNetCore.CAP.Kafka
 
         private void InitKafkaClient()
         {
-            _kafkaOptions.MainConfig["group.id"] = _groupId;
+            lock (_kafkaOptions)
+            {
+                _kafkaOptions.MainConfig["group.id"] = _groupId;
 
-            var config = _kafkaOptions.AsKafkaConfig();
-            _consumerClient = new Consumer<Null, string>(config, null, StringDeserializer);
-            _consumerClient.OnConsumeError += ConsumerClient_OnConsumeError;
-            _consumerClient.OnMessage += ConsumerClient_OnMessage;
-            _consumerClient.OnError += ConsumerClient_OnError;
+                var config = _kafkaOptions.AsKafkaConfig();
+                _consumerClient = new Consumer<Null, string>(config, null, StringDeserializer);
+                _consumerClient.OnConsumeError += ConsumerClient_OnConsumeError;
+                _consumerClient.OnMessage += ConsumerClient_OnMessage;
+                _consumerClient.OnError += ConsumerClient_OnError;
+            }
         }
 
         private void ConsumerClient_OnConsumeError(object sender, Message e)
         {
             var message = e.Deserialize<Null, string>(null, StringDeserializer);
-
-            OnError?.Invoke(sender, $"An error occurred during consume the message; Topic:'{e.Topic}'," +
-                $"Message:'{message.Value}', Reason:'{e.Error}'.");
+            var logArgs = new LogMessageEventArgs
+            {
+                LogType = MqLogType.ConsumeError,
+                Reason = $"An error occurred during consume the message; Topic:'{e.Topic}'," +
+                         $"Message:'{message.Value}', Reason:'{e.Error}'."
+            };
+            OnLog?.Invoke(sender, logArgs);
         }
 
         private void ConsumerClient_OnMessage(object sender, Message<Null, string> e)
@@ -98,7 +114,12 @@ namespace DotNetCore.CAP.Kafka
 
         private void ConsumerClient_OnError(object sender, Error e)
         {
-            OnError?.Invoke(sender, e.ToString());
+            var logArgs = new LogMessageEventArgs
+            {
+                LogType = MqLogType.ServerConnError,
+                Reason = e.ToString()
+            };
+            OnLog?.Invoke(sender, logArgs);
         }
 
         #endregion private methods

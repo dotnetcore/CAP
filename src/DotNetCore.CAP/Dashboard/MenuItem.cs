@@ -1,3 +1,6 @@
+// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System.Collections.Generic;
 using System.Linq;
 
@@ -23,7 +26,9 @@ namespace DotNetCore.CAP.Dashboard
             var metrics = new List<DashboardMetric> {Metric};
 
             if (Metrics != null)
+            {
                 metrics.AddRange(Metrics);
+            }
 
             return metrics.Where(x => x != null).ToList();
         }

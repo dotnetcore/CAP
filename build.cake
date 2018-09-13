@@ -55,9 +55,15 @@ Task("Test")
 	.IsDependentOn("Build")
 	.Does(() =>
 {
+	var settings = new DotNetCoreTestSettings
+    {
+         Configuration = build.Configuration,
+		 NoBuild = false
+    };
+
 	foreach (var testProject in build.TestProjectFiles)
 	{
-		DotNetCoreTest(testProject.FullPath);
+		DotNetCoreTest(testProject.FullPath, settings);
 	}
 });
 
@@ -68,6 +74,7 @@ Task("Pack")
 	{
 		Configuration = build.Configuration,
 		VersionSuffix = build.Version.Suffix,
+		IncludeSymbols = true,
 		OutputDirectory = "./artifacts/packages"
 	};
 	foreach (var project in build.ProjectFiles)

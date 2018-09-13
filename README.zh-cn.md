@@ -1,16 +1,18 @@
 # CAP 　　　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/CAP/blob/develop/README.md)
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/develop.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/4mpe0tbu7n126vyw?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/v8gfh6pe2u2laqoa?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
 [![NuGet](https://img.shields.io/nuget/v/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
 [![NuGet Preview](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg?label=nuget-pre)](https://www.nuget.org/packages/DotNetCore.CAP/)
-[![Member project of .NET China Foundation](https://img.shields.io/badge/member_project_of-.NET_CHINA-red.svg?style=flat&colorB=9E20C8)](https://github.com/dotnetcore)
+[![Member project of .NET Core Community](https://img.shields.io/badge/member%20project%20of-NCC-9e20c9.svg)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
 CAP 是一个基于 .NET Standard 的 C# 库，它是一种处理分布式事务的解决方案，同样具有 EventBus 的功能，它具有轻量级、易使用、高性能等特点。
 
 你可以在这里[CAP Wiki](https://github.com/dotnetcore/CAP/wiki)看到更多详细资料。
 
-## 预览（OverView）
+你可以在这里看到[CAP 视频教程](https://www.cnblogs.com/savorboard/p/cap-video-1.html)，学习如何在项目中集成CAP。
+
+## 预览（OverView） 
 
 在我们构建 SOA 或者 微服务系统的过程中，我们通常需要使用事件来对各个服务进行集成，在这过程中简单的使用消息队列并不能保证数据的最终一致性，
 CAP 采用的是和当前数据库集成的本地消息表的方案来解决在分布式系统互相调用的各个环节可能出现的异常，它能够保证任何情况下事件消息都是不会丢失的。
@@ -19,9 +21,9 @@ CAP 采用的是和当前数据库集成的本地消息表的方案来解决在�
 
 这是CAP集在ASP.NET Core 微服务架构中的一个示意图：
 
-![](http://images2015.cnblogs.com/blog/250417/201707/250417-20170705175827128-1203291469.png)
+![cap.png](http://oowr92l0m.bkt.clouddn.com/cap.png)
 
-> 图中实线部分代表用户代码，虚线部分代表CAP内部实现。
+> CAP 实现了 [eShop 电子书](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus) 中描述的发件箱模式
 
 ## Getting Started
 
@@ -33,25 +35,21 @@ CAP 采用的是和当前数据库集成的本地消息表的方案来解决在�
 PM> Install-Package DotNetCore.CAP
 ```
 
-如果你的消息队列使用的是 Kafka 的话，你可以：
+CAP 支持 Kafka 或者 RabbitMQ 消息队列，你可以选择下面的包进行安装：
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka
-```
-
-如果你的消息队列使用的是 RabbitMQ 的话，你可以：
-
-```
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 ```
 
-CAP 提供了 Sql Server, MySql, PostgreSQL 的扩展作为数据库存储：
+CAP 提供了 Sql Server, MySql, PostgreSQL，MongoDB 的扩展作为数据库存储：
 
 ```
 // 按需选择安装你正在使用的数据库
 PM> Install-Package DotNetCore.CAP.SqlServer
 PM> Install-Package DotNetCore.CAP.MySql
 PM> Install-Package DotNetCore.CAP.PostgreSql
+PM> Install-Package DotNetCore.CAP.MongoDB
 ```
 
 ### Configuration
@@ -67,26 +65,21 @@ public void ConfigureServices(IServiceCollection services)
 
     services.AddCap(x =>
     {
-        // 如果你的 SqlServer 使用的 EF 进行数据操作，你需要添加如下配置：
-        // 注意: 你不需要再次配置 x.UseSqlServer(""")
-        x.UseEntityFramework<AppDbContext>();
+        //如果你使用的 EF 进行数据操作，你需要添加如下配置：
+	x.UseEntityFramework<AppDbContext>();  //可选项，你不需要再次配置 x.UseSqlServer 了
 		
-        // 如果你使用的Dapper，你需要添加如下配置：
+        //如果你使用的Ado.Net，根据数据库选择进行配置：
         x.UseSqlServer("数据库连接字符串");
+        x.UseMySql("Your ConnectionStrings");
+        x.UsePostgreSql("Your ConnectionStrings");
 
-        // 如果你使用的 RabbitMQ 作为MQ，你需要添加如下配置：
+        //如果你使用的 MongoDB，你可以添加如下配置：
+        x.UseMongoDB("Your ConnectionStrings");  //注意，仅支持MongoDB 4.0+集群
+	
+        //如果你使用的 RabbitMQ 或者 Kafka 作为MQ，根据使用选择配置：
         x.UseRabbitMQ("localhost");
-
-        //如果你使用的 Kafka 作为MQ，你需要添加如下配置：
         x.UseKafka("localhost");
     });
-}
-
-public void Configure(IApplicationBuilder app)
-{
-    .....
-
-    app.UseCap();
 }
 
 ```
@@ -96,39 +89,50 @@ public void Configure(IApplicationBuilder app)
 在 Controller 中注入 `ICapPublisher` 然后使用 `ICapPublisher` 进行消息发送
 
 ```c#
+
 public class PublishController : Controller
 {
-    [Route("~/checkAccountWithTrans")]
-    public async Task<IActionResult> PublishMessageWithTransaction([FromServices]AppDbContext dbContext, [FromServices]ICapPublisher publisher)
+    private readonly ICapPublisher _capBus;
+
+    public PublishController(ICapPublisher capPublisher)
     {
-        using (var trans = dbContext.Database.BeginTransaction())
+        _capBus = capPublisher;
+    }
+    
+    //不使用事务
+    [Route("~/without/transaction")]
+    public IActionResult WithoutTransaction()
+    {
+        _capBus.Publish("xxx.services.show.time", DateTime.Now);
+	
+        return Ok();
+    }
+
+    //Ado.Net 中使用事务，自动提交
+    [Route("~/adonet/transaction")]
+    public IActionResult AdonetWithTransaction()
+    {
+        using (var connection = new MySqlConnection(ConnectionString))
         {
-            // 此处填写你的业务代码
+            using (var transaction = connection.BeginTransaction(_capBus, autoCommit: true))
+            {
+                //业务代码
 
-            //如果你使用的是EF，CAP会自动发现当前环境中的事务，所以你不必显式传递事务参数。
-            //由于本地事务, 当前数据库的业务操作和发布事件日志之间将实现原子性。
-            await publisher.PublishAsync("xxx.services.account.check", new Person { Name = "Foo", Age = 11 });
-
-            trans.Commit();
+                _capBus.Publish("xxx.services.show.time", DateTime.Now);
+            }
         }
         return Ok();
     }
 
-    [Route("~/publishWithTransactionUsingAdonet")]
-    public async Task<IActionResult> PublishMessageWithTransactionUsingAdonet([FromServices]ICapPublisher publisher)
+    //EntityFramework 中使用事务，自动提交
+    [Route("~/ef/transaction")]
+    public IActionResult EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
     {
-        var connectionString = "";
-        using (var sqlConnection = new SqlConnection(connectionString))
+        using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: true))
         {
-            sqlConnection.Open();
-            using (var sqlTransaction = sqlConnection.BeginTransaction())
-            {
-                // 此处填写你的业务代码，通常情况下，你可以将业务代码使用一个委托传递进来进行封装该区域代码。
+            //业务代码
 
-                publisher.Publish("xxx.services.account.check", new Person { Name = "Foo", Age = 11 }, sqlTransaction);
-
-                sqlTransaction.Commit();
-            }
+            _capBus.Publish("xxx.services.show.time", DateTime.Now);
         }
         return Ok();
     }
@@ -145,12 +149,10 @@ public class PublishController : Controller
 ```c#
 public class PublishController : Controller
 {
-    [CapSubscribe("xxx.services.account.check")]
-    public async Task CheckReceivedMessage(Person person)
+    [CapSubscribe("xxx.services.show.time")]
+    public void CheckReceivedMessage(DateTime datetime)
     {
-        Console.WriteLine(person.Name);
-        Console.WriteLine(person.Age);     
-        return Task.CompletedTask;
+        Console.WriteLine(datetime);
     }
 }
 
@@ -166,16 +168,14 @@ namespace xxx.Service
 {
     public interface ISubscriberService
     {
-        public void CheckReceivedMessage(Person person);
+        public void CheckReceivedMessage(DateTime datetime);
     }
-
 
     public class SubscriberService: ISubscriberService, ICapSubscribe
     {
-        [CapSubscribe("xxx.services.account.check")]
-        public void CheckReceivedMessage(Person person)
+        [CapSubscribe("xxx.services.show.time")]
+        public void CheckReceivedMessage(DateTime datetime)
         {
-			
         }
     }
 }
@@ -187,8 +187,46 @@ namespace xxx.Service
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
+    //注意: 注入的服务需要在 `services.AddCap()` 之前
     services.AddTransient<ISubscriberService,SubscriberService>();
+	
+    services.AddCap(x=>{});
 }
+```
+
+
+#### 订阅者组
+
+订阅者组的概念类似于 Kafka 中的消费者组，它和消息队列中的广播模式相同，用来处理不同微服务实例之间同时消费相同的消息。
+
+当CAP启动的时候，她将创建一个默认的消费者组，如果多个相同消费者组的消费者消费同一个Topic消息的时候，只会有一个消费者被执行。
+相反，如果消费者都位于不同的消费者组，则所有的消费者都会被执行。
+
+相同的实例中，你可以通过下面的方式来指定他们位于不同的消费者组。
+
+```C#
+
+[CapSubscribe("xxx.services.show.time", Group = "group1" )]
+public void ShowTime1(DateTime datetime)
+{
+}
+
+[CapSubscribe("xxx.services.show.time", Group = "group2")]
+public void ShowTime2(DateTime datetime)
+{
+}
+
+```
+`ShowTime1` 和 `ShowTime2` 处于不同的组，他们将会被同时调用。
+
+PS，你可以通过下面的方式来指定默认的消费者组名称：
+
+```C#
+services.AddCap(x =>
+{
+    x.DefaultGroup = "default-group-name";  
+});
+
 ```
 
 ### Dashboard
@@ -217,6 +255,8 @@ services.AddCap(x =>
     });
 });
 ```
+
+仪表盘默认的访问地址是：[http://localhost:xxx/cap](http://localhost:xxx/cap)，你可以在`d.MatchPath`配置项中修改`cap`路径后缀为其他的名字。
 
 ![dashboard](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220827302-189215107.png)
 

@@ -1,6 +1,10 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.SqlServer;
+using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -19,11 +23,16 @@ namespace DotNetCore.CAP
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<CapDatabaseStorageMarkerService>();
+            services.AddSingleton<DiagnosticProcessorObserver>();
             services.AddSingleton<IStorage, SqlServerStorage>();
             services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
-            services.AddScoped<ICapPublisher, CapPublisher>();
-            services.AddScoped<ICallbackPublisher, CapPublisher>();
-            services.AddTransient<IAdditionalProcessor, DefaultAdditionalProcessor>();
+
+            services.AddScoped<ICapPublisher, SqlServerPublisher>();
+            services.AddScoped<ICallbackPublisher, SqlServerPublisher>();
+
+            services.AddTransient<ICollectProcessor, SqlServerCollectProcessor>();
+            services.AddTransient<CapTransactionBase, SqlServerCapTransaction>();
+
             AddSqlServerOptions(services);
         }
 
@@ -34,6 +43,7 @@ namespace DotNetCore.CAP
             _configure(sqlServerOptions);
 
             if (sqlServerOptions.DbContextType != null)
+            {
                 services.AddSingleton(x =>
                 {
                     using (var scope = x.CreateScope())
@@ -44,8 +54,11 @@ namespace DotNetCore.CAP
                         return sqlServerOptions;
                     }
                 });
+            }
             else
+            {
                 services.AddSingleton(sqlServerOptions);
+            }
         }
     }
 }

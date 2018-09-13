@@ -4,14 +4,14 @@ environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
   Cap_SqlServer_ConnectionStringTemplate: Server=(local)\SQL2014;Database={0};User ID=sa;Password=Password12!
-  Cap_MySql_ConnectionStringTemplate: Server=localhost;Database={0};Uid=root;Pwd=Password12!;Allow User Variables=True
+  Cap_MySql_ConnectionStringTemplate: Server=localhost;Database={0};Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=none
   Cap_PostgreSql_ConnectionStringTemplate: Server=localhost;Database={0};UserId=postgres;Password=Password12!
 services:
   - mssql2014
   - mysql
   - postgresql
+  - mongodb
 build_script:
-- ps: ./ConfigureMSDTC.ps1
 - ps: ./build.ps1
 test: off
 artifacts:
@@ -21,6 +21,6 @@ deploy:
   on:
     appveyor_repo_tag: true
   api_key:
-    secure: /gak8VxtAbZvOTqON513KwsK5BtDUmoPjjzCMu+tn2i+vkupZbjnIKq/XnP4GGgv
+    secure: 62g+D0FPQQgVHQE+VaLPri7EAoQgu8WQbtXaawwa0c8o6fLxTc2oJSx2MgcLvpzN
   skip_symbols: true
   artifact: /artifacts\/packages\/.+\.nupkg/

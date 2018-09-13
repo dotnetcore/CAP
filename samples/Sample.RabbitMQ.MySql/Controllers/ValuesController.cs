@@ -1,48 +1,66 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
+using System.Data;
 using System.Threading.Tasks;
+using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
+using MySql.Data.MySqlClient;
 
 namespace Sample.RabbitMQ.MySql.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
-        private readonly AppDbContext _dbContext;
         private readonly ICapPublisher _capBus;
 
-        public ValuesController(AppDbContext dbContext, ICapPublisher capPublisher)
+        public ValuesController(ICapPublisher capPublisher)
         {
-            _dbContext = dbContext;
             _capBus = capPublisher;
         }
 
-        [Route("~/publish")]
-        public IActionResult PublishMessage()
+        [Route("~/without/transaction")]
+        public async Task<IActionResult> WithoutTransaction()
         {
-            _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
-            
-            return Ok();
-        }
-
-
-        [Route("~/publish2")]
-        public IActionResult PublishMessage2()
-        {
-            _capBus.Publish("sample.kafka.sqlserver4", DateTime.Now);
+            await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
 
             return Ok();
         }
 
-        [Route("~/publishWithTrans")]
-        public async Task<IActionResult> PublishMessageWithTransaction()
+        [Route("~/adonet/transaction")]
+        public IActionResult AdonetWithTransaction()
         {
-            using (var trans = await _dbContext.Database.BeginTransactionAsync())
+            using (var connection = new MySqlConnection(AppDbContext.ConnectionString))
             {
-                await _capBus.PublishAsync("sample.kafka.sqlserver", "");
+                using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
+                {
+                    //your business code
+                    connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
+
+                    for (int i = 0; i < 5; i++)
+                    {
+                        _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+                    }
+
+                    transaction.Commit();
+                }
+            }
+
+            return Ok();
+        }
+
+        [Route("~/ef/transaction")]
+        public IActionResult EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
+        {
+            using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
+            {
+                dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
+
+                for (int i = 0; i < 5; i++)
+                {
+                    _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+                }
+
+                dbContext.SaveChanges();
 
                 trans.Commit();
             }
@@ -50,10 +68,10 @@ namespace Sample.RabbitMQ.MySql.Controllers
         }
 
         [NonAction]
-        [CapSubscribe("sample.rabbitmq.mysql")]
-        public void ReceiveMessage(DateTime time)
+        [CapSubscribe("#.rabbitmq.mysql")]
+        public void Subscriber(DateTime time)
         {
-            Console.WriteLine("[sample.rabbitmq.mysql] message received: "+ DateTime.Now.ToString() +" , sent time: " + time.ToString());
+            Console.WriteLine($@"{DateTime.Now}, Subscriber invoked, Sent time:{time}");
         }
     }
 }
