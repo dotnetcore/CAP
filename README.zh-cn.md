@@ -10,6 +10,8 @@ CAP 是一个基于 .NET Standard 的 C# 库，它是一种处理分布式事务
 
 你可以在这里[CAP Wiki](https://github.com/dotnetcore/CAP/wiki)看到更多详细资料。
 
+你可以在这里看到[CAP 视频教程](https://www.cnblogs.com/savorboard/p/cap-video-1.html)，学习如何在项目中集成CAP。
+
 ## 预览（OverView） 
 
 在我们构建 SOA 或者 微服务系统的过程中，我们通常需要使用事件来对各个服务进行集成，在这过程中简单的使用消息队列并不能保证数据的最终一致性，
