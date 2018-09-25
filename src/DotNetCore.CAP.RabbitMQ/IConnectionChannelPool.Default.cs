@@ -108,7 +108,10 @@ namespace DotNetCore.CAP.RabbitMQ
 
                 Debug.Assert(_count >= 0);
 
-                return model;
+                if (model.IsOpen && model.CloseReason == null)
+                {
+                    return model;
+                }
             }
 
             model = GetConnection().CreateModel();
@@ -118,7 +121,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public virtual bool Return(IModel connection)
         {
-            if (Interlocked.Increment(ref _count) <= _maxSize)
+             if (connection.IsOpen && Interlocked.Increment(ref _count) <= _maxSize)
             {
                 _pool.Enqueue(connection);
 
