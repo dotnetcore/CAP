@@ -23,3 +23,11 @@ deploy:
   artifact: /artifacts\/packages\/.+\.nupkg/
   on:
     branch: master
+- provider: NuGet
+  server: https://api.nuget.org/v3/index.json
+  api_key:
+    secure: 6N8pLjIHa7SK3l+Lj7b1qKk7CvKdZdQyj9ZNTaUjfPSd+/SL8PuSHq+ysNKaMHAF
+  skip_symbols: true
+  artifact: /artifacts\/packages\/.+\.nupkg/
+  on:
+    appveyor_repo_tag: true

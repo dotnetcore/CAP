@@ -3,16 +3,12 @@
   <PropertyGroup>
     <Description>SkyWalking Core abstractions and interfaces for apm agent.</Description>
     <AssemblyTitle>SkyWalking.Abstractions</AssemblyTitle>
-    <TargetFrameworks>netstandard2.0;net45;net451</TargetFrameworks>
     <AssemblyName>SkyWalking.Abstractions</AssemblyName>
     <PackageId>SkyWalking.Abstractions</PackageId>
     <PackageTags>SkyWalking;APM</PackageTags>
     <PackageReleaseNotes>
     </PackageReleaseNotes>
     <RootNamespace>SkyWalking</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SkyWalking.NetworkProtocol.Trace\SkyWalking.NetworkProtocol.Trace.csproj" />
-    <ProjectReference Include="..\SkyWalking.NetworkProtocol\SkyWalking.NetworkProtocol.csproj" />
-  </ItemGroup>
 </Project>

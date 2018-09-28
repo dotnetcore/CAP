@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using SkyWalking.Diagnostics;
+using SkyWalking.Logging;
 using Xunit;
 
 namespace SkyWalking.Core.Tests.Diagnostics
@@ -12,7 +13,7 @@ namespace SkyWalking.Core.Tests.Diagnostics
         {
             var listener = new FakeDiagnosticListener();
             var fakeProcessor = new FakeTracingDiagnosticProcessor();
-            var observer = new TracingDiagnosticProcessorObserver(new ITracingDiagnosticProcessor[] {fakeProcessor});
+            var observer = new TracingDiagnosticProcessorObserver(new ITracingDiagnosticProcessor[] {fakeProcessor},new NullLoggerFactory());
             DiagnosticListener.AllListeners.Subscribe(observer);
 
             var timeStamp = DateTime.Now;
@@ -23,7 +24,7 @@ namespace SkyWalking.Core.Tests.Diagnostics
                     Timestamp = timeStamp
                 });
 
-            Assert.Equal(timeStamp, fakeProcessor.Timestamp);      
+            Assert.Equal(timeStamp, fakeProcessor.Timestamp);
         }
 
         [Fact]
@@ -31,18 +32,19 @@ namespace SkyWalking.Core.Tests.Diagnostics
         {
             var listener = new FakeDiagnosticListener();
             var fakeProcessor = new FakeTracingDiagnosticProcessor();
-            var observer = new TracingDiagnosticProcessorObserver(new ITracingDiagnosticProcessor[] {fakeProcessor});
+            var observer = new TracingDiagnosticProcessorObserver(new ITracingDiagnosticProcessor[] {fakeProcessor},
+                new NullLoggerFactory());
             DiagnosticListener.AllListeners.Subscribe(observer);
 
             var timeStamp = DateTime.Now;
-            
+
             listener.Write(FakeDiagnosticListener.Executed,
                 new FakeDiagnosticListenerData
                 {
                     Name = FakeDiagnosticListener.Executed,
                     Timestamp = timeStamp
                 });
-            
+
             Assert.Equal(timeStamp, fakeProcessor.Timestamp);
         }
     }

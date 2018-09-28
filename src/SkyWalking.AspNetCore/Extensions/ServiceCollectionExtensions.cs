@@ -17,45 +17,63 @@
  */
 
 using System;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using SkyWalking.AspNetCore.Diagnostics;
+using SkyWalking.Config;
+using SkyWalking.Context;
+using SkyWalking.Diagnostics;
+using SkyWalking.Diagnostics.EntityFrameworkCore;
 using SkyWalking.Diagnostics.HttpClient;
 using SkyWalking.Diagnostics.SqlClient;
-using SkyWalking.Extensions.DependencyInjection;
+using SkyWalking.Utilities.Configuration;
+using SkyWalking.Utilities.DependencyInjection;
+using SkyWalking.Utilities.Logging;
+using SkyWalking.Logging;
+using SkyWalking.Service;
+using SkyWalking.Transport;
+using SkyWalking.Transport.Grpc;
 
 namespace SkyWalking.AspNetCore
 {
-    public static class ServiceCollectionExtensions
+    internal static class ServiceCollectionExtensions
     {
-        public static SkyWalkingBuilder AddSkyWalking(this IServiceCollection services,
-            Action<SkyWalkingOptions> options)
-        {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
-
-            return services.Configure(options).AddSkyWalkingCore();
-        }
-
-        public static SkyWalkingBuilder AddSkyWalking(this IServiceCollection services,
-            IConfiguration configuration)
-        {
-            return services.Configure<SkyWalkingOptions>(configuration).AddSkyWalkingCore();
-        }
-
-        private static SkyWalkingBuilder AddSkyWalkingCore(this IServiceCollection services)
+        public static IServiceCollection AddSkyWalkingCore(this IServiceCollection services)
         {
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
 
-            var builder = new SkyWalkingBuilder(services);
+            services.AddSingleton<IContextCarrierFactory, ContextCarrierFactory>();
+            services.AddSingleton<ITraceDispatcher, AsyncQueueTraceDispatcher>();
+            services.AddSingleton<IExecutionService, TraceSegmentTransportService>();
+            services.AddSingleton<IExecutionService, ServiceDiscoveryService>();
+            services.AddSingleton<IExecutionService, SamplingRefreshService>();
+            services.AddSingleton<ISkyWalkingAgentStartup, SkyWalkingAgentStartup>();
+            services.AddSingleton<ISampler>(DefaultSampler.Instance);
+            services.AddSingleton(RuntimeEnvironment.Instance);
+            services.AddSingleton<TracingDiagnosticProcessorObserver>();
+            services.AddSingleton<IConfigAccessor, ConfigAccessor>();
+            services.AddSingleton<IHostedService, InstrumentationHostedService>();
+            services.AddSingleton<IEnvironmentProvider, HostingEnvironmentProvider>();
+            services.AddGrpcTransport().AddLogging();
+            services.AddSkyWalkingExtensions().AddAspNetCoreHosting().AddHttpClient().AddSqlClient().AddEntityFrameworkCore(c => c.AddSqlite().AddPomeloMysql().AddNpgsql());
+            return services;
+        }
 
-            builder.AddHosting().AddDiagnostics().AddHttpClient().AddSqlClient();
-
-            return builder;
+        private static IServiceCollection AddGrpcTransport(this IServiceCollection services)
+        {
+            services.AddSingleton<ISkyWalkingClient, GrpcClient>();
+            services.AddSingleton<ConnectionManager>();
+            services.AddSingleton<IExecutionService, GrpcStateCheckService>();
+            return services;
+        }
+        
+        private static IServiceCollection AddLogging(this IServiceCollection services)
+        {
+            services.AddSingleton<ILoggerFactory, DefaultLoggerFactory>();
+            return services;
         }
     }
 }

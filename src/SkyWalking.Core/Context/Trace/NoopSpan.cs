@@ -18,8 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using SkyWalking.NetworkProtocol.Trace;
+using SkyWalking.Components;
 
 namespace SkyWalking.Context.Trace
 {

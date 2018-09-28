@@ -21,7 +21,7 @@ namespace SkyWalking.Context
 {
     public class CarrierItemHead : CarrierItem
     {
-        public CarrierItemHead(CarrierItem next) : base(string.Empty, string.Empty, next)
+        public CarrierItemHead(CarrierItem next, string @namespace) : base(string.Empty, string.Empty, next, @namespace)
         {
         }
     }

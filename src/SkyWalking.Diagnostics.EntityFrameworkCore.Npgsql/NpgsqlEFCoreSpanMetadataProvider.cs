@@ -18,7 +18,7 @@
 
 using System.Data.Common;
 using Npgsql;
-using SkyWalking.NetworkProtocol.Trace;
+using SkyWalking.Components;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {

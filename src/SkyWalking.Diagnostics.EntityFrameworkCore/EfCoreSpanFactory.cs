@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using SkyWalking.Components;
 using SkyWalking.Context;
 using SkyWalking.Context.Trace;
-using SkyWalking.NetworkProtocol.Trace;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {

@@ -18,22 +18,22 @@
 
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using SkyWalking.Extensions.DependencyInjection;
+using SkyWalking.Utilities.DependencyInjection;
 
 namespace SkyWalking.Diagnostics.SqlClient
 {
     public static class SkyWalkingBuilderExtensions
     {
-        public static SkyWalkingBuilder AddSqlClient(this SkyWalkingBuilder builder)
+        public static SkyWalkingExtensions AddSqlClient(this SkyWalkingExtensions extensions)
         {
-            if (builder == null)
+            if (extensions == null)
             {
-                throw new ArgumentNullException(nameof(builder));
+                throw new ArgumentNullException(nameof(extensions));
             }
 
-            builder.Services.AddSingleton<ITracingDiagnosticProcessor, SqlClientDiagnosticProcessor>();
+            extensions.Services.AddSingleton<ITracingDiagnosticProcessor, SqlClientTracingDiagnosticProcessor>();
             
-            return builder;
+            return extensions;
         }
     }
 }

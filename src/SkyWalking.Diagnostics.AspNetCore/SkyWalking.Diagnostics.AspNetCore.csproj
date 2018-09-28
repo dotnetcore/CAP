@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\..\build\common.props" />
+
+    <PropertyGroup>
+        <Description>SkyWalking.Diagnostics.AspNetCore notifies Web Http requests.</Description>
+        <AssemblyTitle>SkyWalking.Diagnostics.AspNetCore</AssemblyTitle>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <AssemblyName>SkyWalking.Diagnostics.AspNetCore</AssemblyName>
+        <PackageId>SkyWalking.Diagnostics.AspNetCore</PackageId>
+        <PackageTags>SkyWalking;APM;Diagnostics;AspNetCore</PackageTags>
+        <PackageReleaseNotes>
+        </PackageReleaseNotes>
+        <RootNamespace>SkyWalking.Diagnostics.AspNetCore</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
+        <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+        <ProjectReference Include="..\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.AspNetCore.Http.Extensions" Version="2.1.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.1.0" />
+    </ItemGroup>
+</Project>

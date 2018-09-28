@@ -17,7 +17,7 @@
  */
 
 using System;
-using SkyWalking.NetworkProtocol;
+using SkyWalking.Transport;
 
 namespace SkyWalking.Context.Ids
 {
@@ -26,35 +26,18 @@ namespace SkyWalking.Context.Ids
         private readonly long _part1;
         private readonly long _part2;
         private readonly long _part3;
-        private readonly bool _isValid;
         private string _encoding;
 
-        public bool IsValid
-        {
-            get
-            {
-                return _isValid;
-            }
-        }
+        public bool IsValid { get; }
 
-        public string Encode
-        {
-            get
-            {
-                if (_encoding == null)
-                {
-                    _encoding = ToString();
-                }
-                return _encoding;
-            }
-        }
+        public string Encode => _encoding ?? (_encoding = ToString());
 
         public ID(long part1, long part2, long part3)
         {
             _part1 = part1;
             _part2 = part2;
             _part3 = part3;
-            _isValid = true;
+            IsValid = true;
         }
 
         public ID(string encodingString)
@@ -68,17 +51,17 @@ namespace SkyWalking.Context.Ids
             {
                 if (part == 0)
                 {
-                    _isValid = long.TryParse(idParts[part], out _part1);
+                    IsValid = long.TryParse(idParts[part], out _part1);
                 }
                 else if (part == 1)
                 {
-                    _isValid = long.TryParse(idParts[part], out _part2);
+                    IsValid = long.TryParse(idParts[part], out _part2);
                 }
                 else
                 {
-                    _isValid = long.TryParse(idParts[part], out _part3);
+                    IsValid = long.TryParse(idParts[part], out _part3);
                 }
-                if (!_isValid)
+                if (!IsValid)
                 {
                     break;
                 }
@@ -92,7 +75,7 @@ namespace SkyWalking.Context.Ids
 
         public override int GetHashCode()
         {
-            int result = (int)(_part1 ^ (_part1 >> 32));
+            var result = (int)(_part1 ^ (_part1 >> 32));
             result = 31 * result + (int)(_part2 ^ (_part2 >> 32));
             result = 31 * result + (int)(_part3 ^ (_part3 >> 32));
             return result;
@@ -100,7 +83,7 @@ namespace SkyWalking.Context.Ids
 
         public override bool Equals(object obj)
         {
-            ID id = obj as ID;
+            var id = obj as ID;
             return Equals(id);
         }
 
@@ -117,12 +100,9 @@ namespace SkyWalking.Context.Ids
             return _part3 == other._part3;
         }
 
-        public UniqueId Transform()
+        public UniqueIdRequest Transform()
         {
-            UniqueId uniqueId = new UniqueId();
-            uniqueId.IdParts.Add(_part1);
-            uniqueId.IdParts.Add(_part2);
-            uniqueId.IdParts.Add(_part3);
+            var uniqueId = new UniqueIdRequest {Part1 = _part1, Part2 = _part2, Part3 = _part3};
             return uniqueId;
         }
     }

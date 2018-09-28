@@ -19,10 +19,10 @@
 using System;
 using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
+using SkyWalking.Components;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
 using SkyWalking.Context.Trace;
-using SkyWalking.NetworkProtocol.Trace;
 using CapEvents = DotNetCore.CAP.Diagnostics.CapDiagnosticListenerExtensions;
 
 
@@ -31,8 +31,9 @@ namespace SkyWalking.Diagnostics.CAP
     /// <summary>
     ///  Diagnostics processor for listen and process releted events of CAP.
     /// </summary>
-    public class CapDiagnosticProcessor : ITracingDiagnosticProcessor
+    public class CapTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
+        private readonly IContextCarrierFactory _contextCarrierFactory;
         private Func<BrokerEventData, string> _brokerOperationNameResolver;
 
         public string ListenerName => CapEvents.DiagnosticListenerName;
@@ -47,11 +48,16 @@ namespace SkyWalking.Diagnostics.CAP
             set => _brokerOperationNameResolver = value ?? throw new ArgumentNullException(nameof(BrokerOperationNameResolver));
         }
 
+        public CapTracingDiagnosticProcessor(IContextCarrierFactory contextCarrierFactory)
+        {
+            _contextCarrierFactory = contextCarrierFactory;
+        }
+
         [DiagnosticName(CapEvents.CapBeforePublish)]
         public void CapBeforePublish([Object]BrokerPublishEventData eventData)
         {
             var operationName = BrokerOperationNameResolver(eventData);
-            var contextCarrier = new ContextCarrier();
+            var contextCarrier = _contextCarrierFactory.Create();
             var peer = eventData.BrokerAddress;
             var span = ContextManager.CreateExitSpan(operationName, contextCarrier, peer);
             span.SetComponent(ComponentsDefine.CAP);
@@ -86,7 +92,7 @@ namespace SkyWalking.Diagnostics.CAP
         public void CapBeforeConsume([Object]BrokerConsumeEventData eventData)
         {
             var operationName = BrokerOperationNameResolver(eventData);
-            var carrier = new ContextCarrier();
+            var carrier = _contextCarrierFactory.Create();
 
             if (Helper.TryExtractTracingHeaders(eventData.BrokerTopicBody, out var headers,
                 out var removedHeadersJson))

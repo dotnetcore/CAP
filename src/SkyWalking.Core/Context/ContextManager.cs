@@ -16,16 +16,9 @@
  *
  */
 
-using System;
 using System.Collections.Generic;
 using System.Threading;
-using System.Threading.Tasks;
-using SkyWalking.Boot;
-using SkyWalking.Config;
 using SkyWalking.Context.Trace;
-using SkyWalking.Dictionarys;
-using SkyWalking.Sampling;
-using SkyWalking.Utils;
 
 namespace SkyWalking.Context
 {
@@ -34,8 +27,15 @@ namespace SkyWalking.Context
     /// We also provide the CONTEXT propagation based on ThreadLocal mechanism.
     /// Meaning, each segment also related to singe thread.
     /// </summary>
-    public class ContextManager : ITracingContextListener, IBootService, IIgnoreTracerContextListener
+    public class ContextManager : ITracingContextListener, IIgnoreTracerContextListener
     {
+        static ContextManager()
+        {
+            var manager = new ContextManager();
+            TracingContext.ListenerManager.Add(manager);
+            IgnoredTracerContext.ListenerManager.Add(manager);
+        }
+
         private static readonly AsyncLocal<ITracerContext> _context = new AsyncLocal<ITracerContext>();
 
         private static ITracerContext GetOrCreateContext(string operationName, bool forceSampling)
@@ -50,18 +50,17 @@ namespace SkyWalking.Context
                 }
                 else
                 {
-                    if (!DictionaryUtil.IsNull(RemoteDownstreamConfig.Agent.ApplicationId) &&
-                        !DictionaryUtil.IsNull(RemoteDownstreamConfig.Agent.ApplicationInstanceId))
+                    if (RuntimeEnvironment.Instance.Initialized)
                     {
-                        var suffixIdx = operationName.LastIndexOf('.');
-                        if (suffixIdx > -1 && AgentConfig.IgnoreSuffix.Contains(operationName.Substring(suffixIdx)))
-                        {
-                            _context.Value = new IgnoredTracerContext();
-                        }
-                        else
-                        {
-                            var sampler = ServiceManager.Instance.GetService<SamplingService>();
-                            if (forceSampling || sampler.TrySampling())
+//                        var suffixIdx = operationName.LastIndexOf('.');
+//                        if (suffixIdx > -1 && AgentConfig.IgnoreSuffix.Contains(operationName.Substring(suffixIdx)))
+//                        {
+//                            _context.Value = new IgnoredTracerContext();
+//                        }
+//                        else
+//                        {
+                            var sampler = DefaultSampler.Instance;
+                            if (forceSampling || sampler.Sampled())
                             {
                                 _context.Value = new TracingContext();
                             }
@@ -69,14 +68,13 @@ namespace SkyWalking.Context
                             {
                                 _context.Value = new IgnoredTracerContext();
                             }
-                        }
+//                        }
                     }
                     else
                     {
                         _context.Value = new IgnoredTracerContext();
                     }
                 }
-
             }
 
             return _context.Value;
@@ -103,7 +101,7 @@ namespace SkyWalking.Context
 
         public static ISpan CreateEntrySpan(string operationName, IContextCarrier carrier)
         {
-            var samplingService = ServiceManager.Instance.GetService<SamplingService>();
+            var samplingService = DefaultSampler.Instance;
             if (carrier != null && carrier.IsValid)
             {
                 samplingService.ForceSampled();
@@ -115,7 +113,7 @@ namespace SkyWalking.Context
             else
             {
                 var context = GetOrCreateContext(operationName, false);
-                
+
                 return context.CreateEntrySpan(operationName);
             }
         }
@@ -133,7 +131,7 @@ namespace SkyWalking.Context
             context.Inject(carrier);
             return span;
         }
-        
+
         public static ISpan CreateExitSpan(string operationName, string remotePeer)
         {
             var context = GetOrCreateContext(operationName, false);
@@ -173,23 +171,10 @@ namespace SkyWalking.Context
         {
             Context?.StopSpan(span);
         }
-        
+
         public void AfterFinished(ITraceSegment traceSegment)
         {
             _context.Value = null;
-        }
-
-        public void Dispose()
-        {
-        }
-
-        public int Order { get; } = 1;
-
-        public Task Initialize(CancellationToken token)
-        {
-            TracingContext.ListenerManager.Add(this);
-            IgnoredTracerContext.ListenerManager.Add(this);
-            return TaskUtils.CompletedTask;
         }
 
         public void AfterFinish(ITracerContext tracerContext)

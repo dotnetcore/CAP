@@ -17,8 +17,8 @@
  */
 
 using System.Collections.Generic;
+using SkyWalking.Transport;
 using SkyWalking.Context.Ids;
-using SkyWalking.NetworkProtocol;
 
 namespace SkyWalking.Context.Trace
 {
@@ -48,6 +48,6 @@ namespace SkyWalking.Context.Trace
 
         void RelatedGlobalTrace(DistributedTraceId distributedTraceId);
 
-        UpstreamSegment Transform();
+        TraceSegmentRequest Transform();
     }
 }

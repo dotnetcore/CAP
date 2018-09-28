@@ -25,14 +25,14 @@ namespace SkyWalking.Diagnostics
     internal class TracingDiagnosticMethod
     {
         private readonly MethodInfo _method;
-        private readonly ITracingDiagnosticProcessor _diagnosticProcessor;
+        private readonly ITracingDiagnosticProcessor _tracingDiagnosticProcessor;
         private readonly string _diagnosticName;
         private readonly IParameterResolver[] _parameterResolvers;
 
-        public TracingDiagnosticMethod(ITracingDiagnosticProcessor diagnosticProcessor, MethodInfo method,
+        public TracingDiagnosticMethod(ITracingDiagnosticProcessor tracingDiagnosticProcessor, MethodInfo method,
             string diagnosticName)
         {
-            _diagnosticProcessor = diagnosticProcessor;
+            _tracingDiagnosticProcessor = tracingDiagnosticProcessor;
             _method = method;
             _diagnosticName = diagnosticName;
             _parameterResolvers = GetParameterResolvers(method).ToArray();
@@ -51,7 +51,7 @@ namespace SkyWalking.Diagnostics
                 args[i] = _parameterResolvers[i].Resolve(value);
             }
 
-            _method.Invoke(_diagnosticProcessor, args);
+            _method.Invoke(_tracingDiagnosticProcessor, args);
         }
 
         private static IEnumerable<IParameterResolver> GetParameterResolvers(MethodInfo methodInfo)

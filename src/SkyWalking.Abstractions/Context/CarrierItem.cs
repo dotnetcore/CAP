@@ -16,56 +16,33 @@
  *
  */
 
-using System;
 using System.Collections;
 using System.Collections.Generic;
-using SkyWalking.Config;
 
 namespace SkyWalking.Context
 {
     public class CarrierItem : IEnumerable<CarrierItem>
     {
-        private string _headKey;
+        private readonly string _headKey;
         private string _headValue;
-        private CarrierItem _next;
+        private readonly CarrierItem _next;
 
-        public virtual string HeadKey
-        {
-            get
-            {
-                return _headKey;
-            }
-        }
+        public virtual string HeadKey => _headKey;
 
         public virtual string HeadValue
         {
-            get
-            {
-                return _headValue;
-            }
-            set
-            {
-                _headValue = value;
-            }
+            get => _headValue;
+            set => _headValue = value;
         }
 
-        public CarrierItem(String headKey, String headValue)
+        protected CarrierItem(string headKey, string headValue, string @namespace)
+            : this(headKey, headValue, null, @namespace)
         {
-            _headKey = headKey;
-            _headValue = headValue;
-            _next = null;
         }
 
-        public CarrierItem(String headKey, String headValue, CarrierItem next)
+        protected CarrierItem(string headKey, string headValue, CarrierItem next, string @namespace)
         {
-            if (string.IsNullOrEmpty(AgentConfig.Namespace))
-            {
-                _headKey = headKey;
-            }
-            else
-            {
-                _headKey = $"{AgentConfig.Namespace}-{headKey}";
-            }
+            _headKey = string.IsNullOrEmpty(@namespace) ? headKey : $"{@namespace}-{headKey}";
             _headValue = headValue;
             _next = next;
         }
@@ -82,17 +59,16 @@ namespace SkyWalking.Context
 
         private class Enumerator : IEnumerator<CarrierItem>
         {
-            private CarrierItem _head;
-            private CarrierItem _current;
+            private readonly CarrierItem _head;
 
-            public CarrierItem Current => _current;
+            public CarrierItem Current { get; private set; }
 
-            object IEnumerator.Current => _current;
+            object IEnumerator.Current => Current;
 
             public Enumerator(CarrierItem head)
             {
                 _head = head;
-                _current = head;
+                Current = head;
             }
 
             public void Dispose()
@@ -101,18 +77,19 @@ namespace SkyWalking.Context
 
             public bool MoveNext()
             {
-                var next = _current._next;
+                var next = Current._next;
                 if (next == null)
                 {
                     return false;
                 }
-                _current = next;
+
+                Current = next;
                 return true;
             }
 
             public void Reset()
             {
-                _current = _head;
+                Current = _head;
             }
         }
     }

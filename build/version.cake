@@ -77,7 +77,15 @@ public class BuildParameters
 		var suffix = versionQuality;
 		if (!IsTagged)
 		{
-			suffix += (IsCI ? "preview-" : "dev-") + Util.CreateStamp();
+			var buildSystem = Context.BuildSystem();
+			if (buildSystem.IsRunningOnAppVeyor && buildSystem.AppVeyor.Environment.Repository.Branch == "master")
+			{
+				suffix += "prerelease-" + Util.CreateStamp();
+			} 
+			else
+			{
+				suffix += (IsCI ? "preview-" : "dev-") + Util.CreateStamp();
+			}
 		}
 		suffix = string.IsNullOrWhiteSpace(suffix) ? null : suffix;
 

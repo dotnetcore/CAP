@@ -1,6 +1,5 @@
-﻿using System;
-using System.Data.Common;
-using  SkyWalking.NetworkProtocol.Trace;
+﻿using System.Data.Common;
+using SkyWalking.Components;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {

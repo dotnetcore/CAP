@@ -26,15 +26,15 @@ namespace SkyWalking.Diagnostics
     {
         private readonly List<TracingDiagnosticMethod> _methods;
 
-        public TracingDiagnosticMethodCollection(ITracingDiagnosticProcessor diagnosticProcessor)
+        public TracingDiagnosticMethodCollection(ITracingDiagnosticProcessor tracingDiagnosticProcessor)
         {
             _methods = new List<TracingDiagnosticMethod>();
-            foreach (var method in diagnosticProcessor.GetType().GetMethods())
+            foreach (var method in tracingDiagnosticProcessor.GetType().GetMethods())
             {
                 var diagnosticName = method.GetCustomAttribute<DiagnosticName>();
                 if(diagnosticName==null)
                     continue;
-                _methods.Add(new TracingDiagnosticMethod(diagnosticProcessor, method, diagnosticName.Name));
+                _methods.Add(new TracingDiagnosticMethod(tracingDiagnosticProcessor, method, diagnosticName.Name));
             }
         }
         

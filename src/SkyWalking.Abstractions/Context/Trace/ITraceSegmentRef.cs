@@ -17,7 +17,7 @@
  */
 
 using System;
-using SkyWalking.NetworkProtocol;
+using SkyWalking.Transport;
 
 namespace SkyWalking.Context.Trace
 {
@@ -29,6 +29,6 @@ namespace SkyWalking.Context.Trace
         
         int EntryApplicationInstanceId { get; }
 
-        TraceSegmentReference Transform();
+        TraceSegmentReferenceRequest Transform();
     }
 }

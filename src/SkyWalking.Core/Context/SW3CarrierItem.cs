@@ -22,15 +22,19 @@ namespace SkyWalking.Context
 {
     public class SW3CarrierItem : CarrierItem
     {
-        public const String HEADER_NAME = "sw3";
+        private const string HEADER_NAME = "sw3";
         private readonly IContextCarrier _carrier;
 
-        public SW3CarrierItem(IContextCarrier carrier, CarrierItem next)
-            : base(HEADER_NAME, carrier.Serialize(), next)
+        public SW3CarrierItem(IContextCarrier carrier, CarrierItem next, string @namespace)
+            : base(HEADER_NAME, carrier.Serialize(), next, @namespace)
         {
             _carrier = carrier;
         }
 
-        public override string HeadValue { get => base.HeadValue; set => _carrier.Deserialize(value); }
+        public override string HeadValue
+        {
+            get => base.HeadValue;
+            set => _carrier.Deserialize(value);
+        }
     }
 }

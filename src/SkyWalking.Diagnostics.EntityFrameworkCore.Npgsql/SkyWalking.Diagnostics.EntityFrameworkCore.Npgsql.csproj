@@ -15,7 +15,7 @@
     <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
     <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
     <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore\SkyWalking.Diagnostics.EntityFrameworkCore.csproj" />
-    <ProjectReference Include="..\SkyWalking.Extensions.DependencyInjection\SkyWalking.Extensions.DependencyInjection.csproj" />
+    <ProjectReference Include="..\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.0" />

@@ -18,29 +18,29 @@
 
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using SkyWalking.Extensions.DependencyInjection;
+using SkyWalking.Utilities.DependencyInjection;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {
     public static class SkyWalkingBuilderExtensions
     {
-        public static SkyWalkingBuilder AddEntityFrameworkCore(this SkyWalkingBuilder builder, Action<DatabaseProviderBuilder> optionAction)
+        public static SkyWalkingExtensions AddEntityFrameworkCore(this SkyWalkingExtensions extensions, Action<DatabaseProviderBuilder> optionAction)
         {
-            if (builder == null)
+            if (extensions == null)
             {
-                throw new ArgumentNullException(nameof(builder));
+                throw new ArgumentNullException(nameof(extensions));
             }
 
-            builder.Services.AddSingleton<ITracingDiagnosticProcessor, EntityFrameworkCoreDiagnosticProcessor>();
-            builder.Services.AddSingleton<IEfCoreSpanFactory, EfCoreSpanFactory>();
+            extensions.Services.AddSingleton<ITracingDiagnosticProcessor, EntityFrameworkCoreTracingDiagnosticProcessor>();
+            extensions.Services.AddSingleton<IEfCoreSpanFactory, EfCoreSpanFactory>();
 
             if (optionAction != null)
             {
-                var databaseProviderBuilder = new DatabaseProviderBuilder(builder.Services);
+                var databaseProviderBuilder = new DatabaseProviderBuilder(extensions.Services);
                 optionAction(databaseProviderBuilder);
             }
 
-            return builder;
+            return extensions;
         }
     }
 }

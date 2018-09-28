@@ -19,7 +19,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using SkyWalking.Context.Ids;
-using SkyWalking.Dictionarys;
 
 namespace SkyWalking.Context
 {
@@ -39,7 +38,7 @@ namespace SkyWalking.Context
         private string _parentOperationName;
 
         private readonly DistributedTraceId _primaryDistributedTraceId;
-        private int _entryApplicationInstanceId = DictionaryUtil.NullValue;
+        private NullableValue _entryApplicationInstanceId = NullableValue.Null;
 
         public ContextSnapshot(ID traceSegmentId, int spanId, IEnumerable<DistributedTraceId> distributedTraceIds)
         {
@@ -47,7 +46,6 @@ namespace SkyWalking.Context
             _spanId = spanId;
             _primaryDistributedTraceId = distributedTraceIds?.FirstOrDefault();
         }
-
 
         public string EntryOperationName
         {
@@ -65,8 +63,8 @@ namespace SkyWalking.Context
 
         public int EntryApplicationInstanceId
         {
-            get => _entryApplicationInstanceId;
-            set => _entryApplicationInstanceId = value;
+            get => _entryApplicationInstanceId.Value;
+            set => _entryApplicationInstanceId = new NullableValue(value);
         }
 
         public int SpanId => _spanId;
@@ -75,7 +73,7 @@ namespace SkyWalking.Context
 
         public bool IsValid => _traceSegmentId != null
                                && _spanId > -1
-                               && _entryApplicationInstanceId != DictionaryUtil.NullValue
+                               && _entryApplicationInstanceId.HasValue
                                && _primaryDistributedTraceId != null
                                && string.IsNullOrEmpty(_entryOperationName)
                                && string.IsNullOrEmpty(_parentOperationName);
