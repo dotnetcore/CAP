@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Linq.Expressions;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using SkyWalking.Config;
@@ -52,7 +53,7 @@ namespace SkyWalking.Utilities.Configuration
         public T Get<T>() where T : class, new()
         {
             var config = typeof(T).GetCustomAttribute<ConfigAttribute>();
-            var instance = Activator.CreateInstance<T>();
+            var instance = New<T>.Instance();
             _configuration.GetSection(config.GetSections()).Bind(instance);
             return instance;
         }
@@ -61,6 +62,15 @@ namespace SkyWalking.Utilities.Configuration
         {
             var config = new ConfigAttribute(sections);
             return _configuration.GetSection(config.GetSections()).GetValue<T>(key);
+        }
+
+        //hign performance
+        private static class New<T> where T : new()
+        {
+            public static readonly Func<T> Instance = Expression.Lambda<Func<T>>
+            (
+                Expression.New(typeof(T))
+            ).Compile();
         }
     }
 }
