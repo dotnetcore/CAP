@@ -9,7 +9,7 @@ namespace SkyWalking.Sample.Frontend.Controllers
     public class ValuesController : Controller
     {
         // GET api/values
-        [HttpGet]
+        [HttpGet("/values")]
         public async Task<IEnumerable<string>> Get()
         {
             await new HttpClient().GetAsync("http://localhost:5002/api/values");

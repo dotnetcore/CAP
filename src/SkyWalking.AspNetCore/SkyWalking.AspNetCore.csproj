@@ -4,7 +4,7 @@
     <Description>SkyWalking ASP.NET Core Agent.</Description>
     <AssemblyTitle>SkyWalking.AspNetCore</AssemblyTitle>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>SkyWalking.AspNetCore</AssemblyName>
+    <AssemblyName>SkyWalking_AspNetCore</AssemblyName>
     <PackageId>SkyWalking.AspNetCore</PackageId>
     <PackageTags>SkyWalking;APM</PackageTags>
     <PackageReleaseNotes>
@@ -12,18 +12,22 @@
     <RootNamespace>SkyWalking.AspNetCore</RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Hosting" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Abstractions" Version="2.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
     <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+    <ProjectReference Include="..\SkyWalking.Diagnostics.AspNetCore\SkyWalking.Diagnostics.AspNetCore.csproj" />
+    <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql.csproj" />
+    <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql.csproj" />
+    <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite.csproj" />
+    <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore\SkyWalking.Diagnostics.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\SkyWalking.Diagnostics.HttpClient\SkyWalking.Diagnostics.HttpClient.csproj" />
     <ProjectReference Include="..\SkyWalking.Diagnostics.SqlClient\SkyWalking.Diagnostics.SqlClient.csproj" />
-    <ProjectReference Include="..\SkyWalking.Extensions.DependencyInjection\SkyWalking.Extensions.DependencyInjection.csproj">
-      <Project>{BF5579ED-113C-4EE6-AE03-9A9CA590C924}</Project>
-      <Name>SkyWalking.Extensions.DependencyInjection</Name>
-    </ProjectReference>
+    <ProjectReference Include="..\SkyWalking.Utilities.Configuration\SkyWalking.Utilities.Configuration.csproj" />
+    <ProjectReference Include="..\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj" />
+    <ProjectReference Include="..\SkyWalking.Utilities.Logging\SkyWalking.Utilities.Logging.csproj" />
+    <ProjectReference Include="..\SkyWalking.Transport.Grpc\SkyWalking.Transport.Grpc.csproj" />
   </ItemGroup>
 </Project>

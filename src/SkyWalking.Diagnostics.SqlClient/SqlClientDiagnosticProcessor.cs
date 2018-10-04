@@ -19,14 +19,14 @@
 using System;
 using System.Data.SqlClient;
 using System.Linq;
+using SkyWalking.Components;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
 using SkyWalking.Context.Trace;
-using SkyWalking.NetworkProtocol.Trace;
 
 namespace SkyWalking.Diagnostics.SqlClient
 {
-    public class SqlClientDiagnosticProcessor : ITracingDiagnosticProcessor
+    public class SqlClientTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
         private const string TRACE_ORM = "TRACE_ORM";
         public string ListenerName { get; } = SqlClientDiagnosticStrings.DiagnosticListenerName;

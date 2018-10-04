@@ -18,8 +18,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using SkyWalking.NetworkProtocol.Trace;
+using SkyWalking.Components;
 
 namespace SkyWalking.Context.Trace
 {
@@ -36,7 +35,7 @@ namespace SkyWalking.Context.Trace
         ISpan SetComponent(IComponent component);
 
         /// <summary>
-        /// Only use this method in explicit instrumentation, like opentracing-skywalking-bridge. It it higher recommend
+        /// Only use this method in explicit skyWalking, like opentracing-skywalking-bridge. It it higher recommend
         /// don't use this for performance consideration.
         /// </summary>
         /// <param name="componentName"></param>

@@ -26,7 +26,7 @@ namespace SkyWalking.Logging
         {
         }
 
-        public void Info(string message)
+        public void Information(string message)
         {
         }
 

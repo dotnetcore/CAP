@@ -19,18 +19,16 @@
 using System;
 using System.Data.Common;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
-using SkyWalking.Config;
 using SkyWalking.Context;
 using SkyWalking.Context.Tag;
 using SkyWalking.Context.Trace;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {
-    public class EntityFrameworkCoreDiagnosticProcessor : ITracingDiagnosticProcessor
+    public class EntityFrameworkCoreTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
         private const string TRACE_ORM = "TRACE_ORM";
         private Func<CommandEventData, string> _operationNameResolver;
@@ -55,7 +53,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
             set => _operationNameResolver = value ?? throw new ArgumentNullException(nameof(OperationNameResolver));
         }
 
-        public EntityFrameworkCoreDiagnosticProcessor(IEfCoreSpanFactory spanFactory)
+        public EntityFrameworkCoreTracingDiagnosticProcessor(IEfCoreSpanFactory spanFactory)
         {
             _efCoreSpanFactory = spanFactory;
         }

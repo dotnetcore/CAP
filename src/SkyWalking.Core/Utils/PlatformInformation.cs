@@ -23,7 +23,7 @@ namespace SkyWalking.Utils
                 return OSX;
             }
 
-            return "Unknow";
+            return "Unknown";
         }
     }
 }

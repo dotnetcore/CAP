@@ -18,22 +18,22 @@
 
 using System;
 using Microsoft.Extensions.DependencyInjection;
-using SkyWalking.Extensions.DependencyInjection;
+using SkyWalking.Utilities.DependencyInjection;
 
 namespace SkyWalking.Diagnostics.CAP
 {
     public static class SkyWalkingBuilderExtensions
     {
-        public static SkyWalkingBuilder AddCap(this SkyWalkingBuilder builder)
+        public static SkyWalkingExtensions AddCap(this SkyWalkingExtensions extensions)
         {
-            if (builder == null)
+            if (extensions == null)
             {
-                throw new ArgumentNullException(nameof(builder));
+                throw new ArgumentNullException(nameof(extensions));
             }
 
-            builder.Services.AddSingleton<ITracingDiagnosticProcessor, CapDiagnosticProcessor>();
+            extensions.Services.AddSingleton<ITracingDiagnosticProcessor, CapTracingDiagnosticProcessor>();
             
-            return builder;
+            return extensions;
         }
     }
 }

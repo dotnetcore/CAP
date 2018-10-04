@@ -18,7 +18,7 @@
 
 using System.Data.Common;
 using Microsoft.Data.Sqlite;
-using SkyWalking.NetworkProtocol.Trace;
+using SkyWalking.Components;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {

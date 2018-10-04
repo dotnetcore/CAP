@@ -24,7 +24,7 @@ namespace SkyWalking.Logging
     {
         void Debug(string message);
 
-        void Info(string message);
+        void Information(string message);
 
         void Warning(string message);
 

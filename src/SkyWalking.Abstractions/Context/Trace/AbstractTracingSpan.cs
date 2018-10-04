@@ -18,11 +18,8 @@
 
 using System;
 using System.Collections.Generic;
-using SkyWalking.Dictionarys;
-using SkyWalking.NetworkProtocol;
-using SkyWalking.NetworkProtocol.Trace;
-using System.Linq;
-using SkyWalking.Utils;
+using SkyWalking.Transport;
+using SkyWalking.Components;
 
 namespace SkyWalking.Context.Trace
 {
@@ -31,8 +28,8 @@ namespace SkyWalking.Context.Trace
     /// </summary>
     public abstract class AbstractTracingSpan : ISpan
     {
-        protected int _spanId;
-        protected int _parnetSpanId;
+        protected readonly int _spanId;
+        protected readonly int _parnetSpanId;
         protected Dictionary<string, string> _tags;
         protected string _operationName;
         protected int _operationId;
@@ -69,7 +66,6 @@ namespace SkyWalking.Context.Trace
         protected AbstractTracingSpan(int spanId, int parentSpanId, string operationName)
         {
             _operationName = operationName;
-            _operationId = DictionaryUtil.NullValue;
             _spanId = spanId;
             _parnetSpanId = parentSpanId;
         }
@@ -90,23 +86,17 @@ namespace SkyWalking.Context.Trace
 
         public virtual string OperationName
         {
-            get
-            {
-                return _operationName;
-            }
+            get => _operationName;
             set
             {
                 _operationName = value;
-                _operationId = DictionaryUtil.NullValue;
+                _operationId = 0;
             }
         }
 
         public virtual int OperationId
         {
-            get
-            {
-                return _operationId;
-            }
+            get => _operationId;
             set
             {
                 _operationId = value;
@@ -132,6 +122,7 @@ namespace SkyWalking.Context.Trace
             {
                 _tags = new Dictionary<string, string>();
             }
+
             _tags.Add(key, value);
             return this;
         }
@@ -166,11 +157,12 @@ namespace SkyWalking.Context.Trace
         public virtual ISpan Log(long timestamp, IDictionary<string, object> events)
         {
             EnsureLogs();
-            LogDataEntity.Builder builder = new LogDataEntity.Builder();
+            var builder = new LogDataEntity.Builder();
             foreach (var @event in events)
             {
                 builder.Add(@event.Key, @event.Value.ToString());
             }
+
             _logs.Add(builder.Build(timestamp));
             return this;
         }
@@ -193,6 +185,7 @@ namespace SkyWalking.Context.Trace
             {
                 _refs = new List<ITraceSegmentRef>();
             }
+
             if (!_refs.Contains(traceSegmentRef))
             {
                 _refs.Add(traceSegmentRef);
@@ -211,69 +204,58 @@ namespace SkyWalking.Context.Trace
             return true;
         }
 
-        public virtual SpanObject Transform()
+        public virtual SpanRequest Transform()
         {
-            SpanObject spanObject = new SpanObject();
-
-            spanObject.SpanId = _spanId;
-            spanObject.ParentSpanId = _parnetSpanId;
-            spanObject.StartTime = _startTime;
-            spanObject.EndTime = _endTime;
-
-            if (_operationId != DictionaryUtil.NullValue)
+            var spanRequest = new SpanRequest
             {
-                spanObject.OperationNameId = _operationId;
-            }
-            else
-            {
-                spanObject.OperationName = _operationName;
-            }
+                SpanId = _spanId,
+                ParentSpanId = _parnetSpanId,
+                StartTime = _startTime,
+                EndTime = _endTime,
+                OperationName = new StringOrIntValue(_operationId, _operationName),
+                Component = new StringOrIntValue(_componentId, _componentName),
+                IsError = _errorOccurred
+            };
 
             if (IsEntry)
             {
-                spanObject.SpanType = SpanType.Entry;
+                spanRequest.SpanType = 0;
             }
             else if (IsExit)
             {
-                spanObject.SpanType = SpanType.Exit;
+                spanRequest.SpanType = 1;
             }
             else
             {
-                spanObject.SpanType = SpanType.Local;
+                spanRequest.SpanType = 2;
             }
 
             if (_layer.HasValue)
             {
-                spanObject.SpanLayer = (NetworkProtocol.SpanLayer)((int)_layer.Value);
+                spanRequest.SpanLayer = (int) _layer.Value;
             }
 
-            if (_componentId != DictionaryUtil.NullValue)
-            {
-                spanObject.ComponentId = _componentId;
-            }
-            else
-            {
-                spanObject.Component = _componentName;
-            }
 
-            spanObject.IsError = _errorOccurred;
-
-            if (_tags != null)
+            foreach (var tag in _tags)
             {
-                spanObject.Tags.Add(_tags.Select(x => new KeyWithStringValue { Key = x.Key, Value = x.Value }));
+                spanRequest.Tags.Add(new KeyValuePair<string, string>(tag.Key, tag.Value));
             }
 
             if (_logs != null)
             {
-                spanObject.Logs.Add(_logs.Select(x => x.Transform()));
+                foreach (var logDataEntity in _logs)
+                {
+                    spanRequest.Logs.Add(logDataEntity.Transform());
+                }
             }
 
-            if (_refs != null)
+            if (_refs == null) return spanRequest;
+            foreach (var traceSegmentRef in _refs)
             {
-                spanObject.Refs.Add(_refs.Select(x => x.Transform()));
+                spanRequest.References.Add(traceSegmentRef.Transform());
             }
 
-            return spanObject;
+            return spanRequest;
         }
 
         private void EnsureLogs()

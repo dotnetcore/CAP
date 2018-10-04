@@ -18,14 +18,14 @@
 
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using SkyWalking.NetworkProtocol;
+using SkyWalking.Transport;
 
 namespace SkyWalking.Context.Trace
 {
     public class LogDataEntity
     {
-        private long _timestamp = 0;
-        private Dictionary<string, string> _logs;
+        private readonly long _timestamp;
+        private readonly Dictionary<string, string> _logs;
 
         private LogDataEntity(long timestamp, Dictionary<string, string> logs)
         {
@@ -33,14 +33,11 @@ namespace SkyWalking.Context.Trace
             _logs = logs;
         }
 
-        public IReadOnlyDictionary<string, string> Logs
-        {
-            get { return new ReadOnlyDictionary<string, string>(_logs); }
-        }
+        public IReadOnlyDictionary<string, string> Logs => new ReadOnlyDictionary<string, string>(_logs);
 
         public class Builder
         {
-            private Dictionary<string, string> _logs;
+            private readonly Dictionary<string, string> _logs;
 
             public Builder()
             {
@@ -66,13 +63,13 @@ namespace SkyWalking.Context.Trace
             }
         }
 
-        public LogMessage Transform()
+        public LogDataRequest Transform()
         {
-            LogMessage logMessage = new LogMessage();
-            logMessage.Time = _timestamp;
+            var logMessage = new LogDataRequest();
+            logMessage.Timestamp = _timestamp;
             foreach (var log in _logs)
             {
-                logMessage.Data.Add(new KeyWithStringValue {Key = log.Key, Value = log.Value});
+                logMessage.Data.Add(new KeyValuePair<string, string>(log.Key, log.Value));
             }
 
             return logMessage;

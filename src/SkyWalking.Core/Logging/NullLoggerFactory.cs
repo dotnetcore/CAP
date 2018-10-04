@@ -20,7 +20,7 @@ using System;
 
 namespace SkyWalking.Logging
 {
-    internal class NullLoggerFactory : ILoggerFactory
+    public class NullLoggerFactory : ILoggerFactory
     {
         public ILogger CreateLogger(Type type)
         {

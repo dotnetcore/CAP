@@ -16,87 +16,33 @@
  *
  */
 
-using System;
-using System.Collections.Generic;
+using CommonServiceLocator;
+using Microsoft.Extensions.DependencyInjection;
 using System.Web;
-using SkyWalking.Boot;
-using SkyWalking.Context;
-using SkyWalking.Context.Tag;
-using SkyWalking.Context.Trace;
-using SkyWalking.NetworkProtocol.Trace;
-using SkyWalking.Remote;
-using SkyWalking.Utils;
+using SkyWalking.AspNet.Extensions;
 
 namespace SkyWalking.AspNet
 {
     public class SkyWalkingModule : IHttpModule
     {
-        private readonly SkyWalkingStartup _skyWalkingStartup = new SkyWalkingStartup();
-        
-        public void Dispose()
+        public SkyWalkingModule()
         {
-            _skyWalkingStartup.Dispose();
+            var serviceProvider = new ServiceCollection().AddSkyWalkingCore().BuildServiceProvider();
+            var serviceLocatorProvider = new ServiceProviderLocator(serviceProvider);
+            ServiceLocator.SetLocatorProvider(() => serviceLocatorProvider);
         }
 
         public void Init(HttpApplication application)
         {
-            _skyWalkingStartup.Start();
-            application.BeginRequest += ApplicationOnBeginRequest;
-            application.EndRequest += ApplicationOnEndRequest;
+            var startup = ServiceLocator.Current.GetInstance<ISkyWalkingAgentStartup>();
+            AsyncContext.Run(() => startup.StartAsync());
+            var requestCallback = ServiceLocator.Current.GetInstance<SkyWalkingApplicationRequestCallback>();
+            application.BeginRequest += requestCallback.ApplicationOnBeginRequest;
+            application.EndRequest += requestCallback.ApplicationOnEndRequest;
         }
 
-        private void ApplicationOnBeginRequest(object sender, EventArgs e)
+        public void Dispose()
         {
-            var httpApplication = sender as HttpApplication;
-            var httpContext = httpApplication.Context;
-            var carrier = new ContextCarrier();
-            foreach (var item in carrier.Items)
-                item.HeadValue = httpContext.Request.Headers[item.HeadKey];
-            var httpRequestSpan = ContextManager.CreateEntrySpan($"{Config.AgentConfig.ApplicationCode} {httpContext.Request.Path}", carrier);
-            httpRequestSpan.AsHttp();
-            httpRequestSpan.SetComponent(ComponentsDefine.AspNet);
-            Tags.Url.Set(httpRequestSpan, httpContext.Request.Path);
-            Tags.HTTP.Method.Set(httpRequestSpan, httpContext.Request.HttpMethod);
-            httpRequestSpan.Log(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                new Dictionary<string, object>
-                {
-                    {"event", "AspNet BeginRequest"},
-                    {"message", $"Request starting {httpContext.Request.Url.Scheme} {httpContext.Request.HttpMethod} {httpContext.Request.Url.OriginalString}"}
-                });
-        }
-        
-        private void ApplicationOnEndRequest(object sender, EventArgs e)
-        {
-            var httpRequestSpan = ContextManager.ActiveSpan;
-            if (httpRequestSpan == null)
-            {
-                return;
-            }
-
-            var httpApplication = sender as HttpApplication;
-            var httpContext = httpApplication.Context;
-            
-            var statusCode = httpContext.Response.StatusCode;
-            if (statusCode >= 400)
-            {
-                httpRequestSpan.ErrorOccurred();
-            }
-
-            Tags.StatusCode.Set(httpRequestSpan, statusCode.ToString());
-
-            var exception = httpContext.Error;
-            if (exception != null)
-            {
-                httpRequestSpan.ErrorOccurred().Log(exception);
-            }
-            
-            httpRequestSpan.Log(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                new Dictionary<string, object>
-                {
-                    {"event", "AspNetCore Hosting EndRequest"},
-                    {"message", $"Request finished {httpContext.Response.StatusCode} {httpContext.Response.ContentType}"}
-                });
-            ContextManager.StopSpan(httpRequestSpan);
         }
     }
 }

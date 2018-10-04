@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
-    <TargetFrameworks>net45;net451;net452;net46;net461;net462;net47;net471</TargetFrameworks>
+    <TargetFrameworks>net461;net462;net47;net471</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup>
     <AssemblyName>SkyWalking.AspNet</AssemblyName>
@@ -13,13 +13,20 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+    <ProjectReference Include="..\SkyWalking.Transport.Grpc\SkyWalking.Transport.Grpc.csproj" />
+    <ProjectReference Include="..\SkyWalking.Utilities.Configuration\SkyWalking.Utilities.Configuration.csproj" />
+    <ProjectReference Include="..\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj" />
+    <ProjectReference Include="..\SkyWalking.Utilities.Logging\SkyWalking.Utilities.Logging.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Configuration" />
     <Reference Include="System.Web" />
-    <Reference Include="System.Net.Http"/>
+    <Reference Include="System.Net.Http" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="CommonServiceLocator" Version="2.0.4" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="2.2.0-preview2-35157" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.1.0" />
     <PackageReference Include="Microsoft.Web.Infrastructure" Version="1.0.0" />
   </ItemGroup>
 </Project>

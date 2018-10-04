@@ -18,11 +18,12 @@
 
 
 using System;
-using SkyWalking.NetworkProtocol;
+using SkyWalking.Transport;
 
 namespace SkyWalking.Context.Ids
 {
 
+    /// <inheritdoc />
     /// <summary>
     /// The <code>DistributedTraceId</code> presents a distributed call chain.
     /// This call chain has an unique (service) entrance,
@@ -34,50 +35,35 @@ namespace SkyWalking.Context.Ids
     {
         private readonly ID _id;
 
-        public DistributedTraceId(ID id)
+        protected DistributedTraceId(ID id)
         {
             _id = id;
         }
 
-        public DistributedTraceId(string id)
+        protected DistributedTraceId(string id)
         {
             _id = new ID(id);
         }
 
-        public string Encode
-        {
-            get
-            {
-                return _id?.Encode;
-            }
-        }
+        public string Encode => _id?.Encode;
 
-        public UniqueId ToUniqueId()
-        {
-            return _id?.Transform();
-        }
+        public UniqueIdRequest ToUniqueId() => _id?.Transform();
 
         public bool Equals(DistributedTraceId other)
         {
             if (other == null)
                 return false;
-            return _id != null ? _id.Equals(other._id) : other._id == null;
+            return _id?.Equals(other._id) ?? other._id == null;
         }
 
         public override bool Equals(object obj)
         {
-            DistributedTraceId id = obj as DistributedTraceId;
+            var id = obj as DistributedTraceId;
             return Equals(id);
         }
 
-        public override int GetHashCode()
-        {
-            return _id != null ? _id.GetHashCode() : 0;
-        }
+        public override int GetHashCode() => _id != null ? _id.GetHashCode() : 0;
 
-        public override string ToString()
-        {
-            return _id?.ToString();
-        }
+        public override string ToString() => _id?.ToString();
     }
 }

@@ -16,16 +16,14 @@
  *
  */
 
-using System;
-
 namespace SkyWalking.Context
 {
     public class TraceContextCarrierItem : CarrierItem
     {
         private const string HEAD_NAME = "Trace-Context";
 
-        public TraceContextCarrierItem(String headValue, CarrierItem next)
-        : base(HEAD_NAME, headValue, next)
+        public TraceContextCarrierItem(string headValue, CarrierItem next, string @namespace)
+            : base(HEAD_NAME, headValue, next, @namespace)
         {
         }
     }

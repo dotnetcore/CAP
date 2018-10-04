@@ -20,10 +20,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using SkyWalking.Boot;
 using SkyWalking.Context.Trace;
-using SkyWalking.Dictionarys;
-using SkyWalking.Sampling;
 using SkyWalking.Utils;
 
 namespace SkyWalking.Context
@@ -38,7 +35,7 @@ namespace SkyWalking.Context
 
         public TracingContext()
         {
-            _sampler = ServiceManager.Instance.GetService<SamplingService>();
+            _sampler = DefaultSampler.Instance;
             _segment = new TraceSegment();
             _activeSpanStacks = new Stack<ISpan>();
         }
@@ -62,7 +59,7 @@ namespace SkyWalking.Context
             carrier.SpanId = span.SpanId;
             carrier.ParentApplicationInstanceId = _segment.ApplicationInstanceId;
 
-            if (DictionaryUtil.IsNull(peerId))
+            if (peerId == 0)
             {
                 carrier.PeerHost = peer;
             }
@@ -78,7 +75,7 @@ namespace SkyWalking.Context
 
             carrier.EntryApplicationInstanceId = metaValue.entryApplicationInstanceId;
 
-            if (DictionaryUtil.IsNull(metaValue.operationId))
+            if (metaValue.operationId == 0)
             {
                 carrier.EntryOperationName = metaValue.operationName;
             }
@@ -88,7 +85,7 @@ namespace SkyWalking.Context
             }
 
             var parentOperationId = firstSpan.OperationId;
-            if (DictionaryUtil.IsNull(parentOperationId))
+            if (parentOperationId == 0)
             {
                 carrier.ParentOperationName = firstSpan.OperationName;
             }
@@ -121,7 +118,7 @@ namespace SkyWalking.Context
         public IContextSnapshot Capture => InternalCapture();
 
         public ISpan ActiveSpan => InternalActiveSpan();
-        
+
         public IDictionary<string, object> Properties { get; } = new Dictionary<string, object>();
 
         public void Continued(IContextSnapshot snapshot)
@@ -152,26 +149,15 @@ namespace SkyWalking.Context
 
             if (parentSpan != null && parentSpan.IsEntry)
             {
-                var entrySpan = (ISpan) DictionaryManager.OperationName.FindOnly(_segment.ApplicationId, operationName)
-                    .InCondition(id =>
-                    {
-                        parentSpan.OperationId = id;
-                        return parentSpan;
-                    }, () =>
-                    {
-                        parentSpan.OperationName = operationName;
-                        return parentSpan;
-                    });
-                return entrySpan.Start();
+                parentSpan.OperationName = operationName;
+                return parentSpan.Start();
             }
             else
             {
-                var entrySpan = (ISpan) DictionaryManager.OperationName.FindOnly(_segment.ApplicationId, operationName)
-                    .InCondition(id => new EntrySpan(_spanIdGenerator++, parentSpanId, id),
-                        () => new EntrySpan(_spanIdGenerator++, parentSpanId, operationName));
+                var entrySpan = new EntrySpan(_spanIdGenerator++, parentSpanId, operationName);
 
                 entrySpan.Start();
-                
+
                 _activeSpanStacks.Push(entrySpan);
 
                 return entrySpan;
@@ -192,10 +178,7 @@ namespace SkyWalking.Context
 
             var parentSpanId = parentSpan?.SpanId ?? -1;
 
-            var span = (ISpan) DictionaryManager.OperationName
-                .FindOrPrepareForRegister(_segment.ApplicationId, operationName, false, false)
-                .InCondition(id => new LocalSpan(_spanIdGenerator++, parentSpanId, operationName),
-                    () => new LocalSpan(_spanIdGenerator++, parentSpanId, operationName));
+            var span = new LocalSpan(_spanIdGenerator++, parentSpanId, operationName);
             span.Start();
             _activeSpanStacks.Push(span);
             return span;
@@ -214,30 +197,7 @@ namespace SkyWalking.Context
             else
             {
                 var parentSpanId = parentSpan?.SpanId ?? -1;
-                var exitSpan = (ISpan) DictionaryManager.NetworkAddress.Find(remotePeer)
-                    .InCondition(peerId =>
-                        {
-                            if (IsLimitMechanismWorking())
-                            {
-                                return new NoopExitSpan(peerId);
-                            }
-
-                            return DictionaryManager.OperationName.FindOnly(_segment.ApplicationId, operationName)
-                                .InCondition(id => new ExitSpan(_spanIdGenerator++, parentSpanId, id, peerId),
-                                    () => new ExitSpan(_spanIdGenerator++, parentSpanId, operationName, peerId));
-                        },
-                        () =>
-                        {
-                            if (IsLimitMechanismWorking())
-                            {
-                                return new NoopExitSpan(remotePeer);
-                            }
-
-                            return DictionaryManager.OperationName.FindOnly(_segment.ApplicationId, operationName)
-                                .InCondition(id => new ExitSpan(_spanIdGenerator++, parentSpanId, id, remotePeer),
-                                    () => new ExitSpan(_spanIdGenerator++, parentSpanId, operationName,
-                                        remotePeer));
-                        });
+                var exitSpan = IsLimitMechanismWorking() ? (ISpan)new NoopExitSpan(remotePeer) : new ExitSpan(_spanIdGenerator++, parentSpanId, operationName, remotePeer);
                 _activeSpanStacks.Push(exitSpan);
                 return exitSpan.Start();
             }
@@ -263,7 +223,6 @@ namespace SkyWalking.Context
                 {
                     _activeSpanStacks.Pop();
                 }
-                
             }
             else
             {
@@ -283,7 +242,7 @@ namespace SkyWalking.Context
 
             if (!_segment.HasRef && _segment.IsSingleSpanSegment)
             {
-                if (!_sampler.TrySampling())
+                if (!_sampler.Sampled())
                 {
                     finishedSegment.IsIgnore = true;
                 }
@@ -321,7 +280,7 @@ namespace SkyWalking.Context
 
             snapshot.EntryApplicationInstanceId = metaValue.entryApplicationInstanceId;
 
-            if (DictionaryUtil.IsNull(metaValue.operationId))
+            if (metaValue.operationId == 0)
             {
                 snapshot.EntryOperationName = metaValue.operationName;
             }
@@ -332,7 +291,7 @@ namespace SkyWalking.Context
 
             var parentSpan = _activeSpanStacks.Last();
 
-            if (DictionaryUtil.IsNull(parentSpan.OperationId))
+            if (parentSpan.OperationId == 0)
             {
                 snapshot.ParentOperationName = parentSpan.OperationName;
             }
@@ -362,7 +321,7 @@ namespace SkyWalking.Context
 
         private bool IsLimitMechanismWorking()
         {
-            if (_spanIdGenerator < Config.AgentConfig.SpanLimitPerSegment)
+            if (_spanIdGenerator < 300)
             {
                 return false;
             }
@@ -388,11 +347,11 @@ namespace SkyWalking.Context
             }
 
             noopSpan = null;
-            
+
             return true;
         }
-        
-        
+
+
         public static class ListenerManager
         {
             private static readonly IList<ITracingContextListener> _listeners = new List<ITracingContextListener>();

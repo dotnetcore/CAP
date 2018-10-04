@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 
 namespace SkyWalking.AspNet
 {
-    internal class AsyncContext
+    internal static class AsyncContext
     {
         public static void Run(Func<Task> task)
         {
