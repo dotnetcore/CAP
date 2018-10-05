@@ -2,6 +2,7 @@
 // An object that generates IDs. This is broken into a separate class in case we ever want to support multiple worker threads per process
 
 using System;
+using System.Threading;
 
 namespace DotNetCore.CAP.Infrastructure
 {
@@ -49,7 +50,7 @@ namespace DotNetCore.CAP.Infrastructure
         {
             lock (s_lock)
             {
-                return _snowflakeId ?? (_snowflakeId = new SnowflakeId(AppDomain.CurrentDomain.Id, datacenterId));
+                return _snowflakeId ?? (_snowflakeId = new SnowflakeId(Thread.CurrentThread.ManagedThreadId, datacenterId));
             }
         }
 
