@@ -34,7 +34,7 @@ using SkyWalking.Service;
 using SkyWalking.Transport;
 using SkyWalking.Transport.Grpc;
 
-namespace SkyWalking.AspNetCore
+namespace SkyWalking.Agent.AspNetCore
 {
     internal static class ServiceCollectionExtensions
     {

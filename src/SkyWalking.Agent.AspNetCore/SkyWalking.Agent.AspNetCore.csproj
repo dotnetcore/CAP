@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\build\common.props" />
+    <PropertyGroup>
+        <Description>SkyWalking ASP.NET Core Agent.</Description>
+        <AssemblyTitle>SkyWalking.Agent.AspNetCore</AssemblyTitle>
+        <PackageId>SkyWalking.Agent.AspNetCore</PackageId>
+        <PackageTags>SkyWalking;APM</PackageTags>
+        <PackageReleaseNotes>
+        </PackageReleaseNotes>
+        <RootNamespace>SkyWalking.Agent.AspNetCore</RootNamespace>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.1.0" />
+        <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.1.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
+        <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+        <ProjectReference Include="..\SkyWalking.Diagnostics.AspNetCore\SkyWalking.Diagnostics.AspNetCore.csproj" />
+        <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql.csproj" />
+        <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql.csproj" />
+        <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite.csproj" />
+        <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore\SkyWalking.Diagnostics.EntityFrameworkCore.csproj" />
+        <ProjectReference Include="..\SkyWalking.Diagnostics.HttpClient\SkyWalking.Diagnostics.HttpClient.csproj" />
+        <ProjectReference Include="..\SkyWalking.Diagnostics.SqlClient\SkyWalking.Diagnostics.SqlClient.csproj" />
+        <ProjectReference Include="..\SkyWalking.Utilities.Configuration\SkyWalking.Utilities.Configuration.csproj" />
+        <ProjectReference Include="..\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj" />
+        <ProjectReference Include="..\SkyWalking.Utilities.Logging\SkyWalking.Utilities.Logging.csproj" />
+        <ProjectReference Include="..\SkyWalking.Transport.Grpc\SkyWalking.Transport.Grpc.csproj" />
+    </ItemGroup>
+</Project>

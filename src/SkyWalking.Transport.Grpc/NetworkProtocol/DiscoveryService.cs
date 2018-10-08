@@ -98,7 +98,7 @@ namespace SkyWalking.NetworkProtocol {
       applicationId_ = other.applicationId_;
       agentUUID_ = other.agentUUID_;
       registerTime_ = other.registerTime_;
-      Osinfo = other.osinfo_ != null ? other.Osinfo.Clone() : null;
+      osinfo_ = other.osinfo_ != null ? other.osinfo_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -474,7 +474,7 @@ namespace SkyWalking.NetworkProtocol {
       applicationId_ = other.applicationId_;
       applicationInstanceId_ = other.applicationInstanceId_;
       registerTime_ = other.registerTime_;
-      Osinfo = other.osinfo_ != null ? other.Osinfo.Clone() : null;
+      osinfo_ = other.osinfo_ != null ? other.osinfo_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1295,7 +1295,7 @@ namespace SkyWalking.NetworkProtocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ServiceNameMappingElement(ServiceNameMappingElement other) : this() {
       serviceId_ = other.serviceId_;
-      Element = other.element_ != null ? other.Element.Clone() : null;
+      element_ = other.element_ != null ? other.element_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
