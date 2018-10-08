@@ -104,7 +104,7 @@ public class PublishController : Controller
         {
             using (var transaction = connection.BeginTransaction(_capBus, autoCommit: true))
             {
-                //your business code
+                //your business logic code
 
                 _capBus.Publish("xxx.services.show.time", DateTime.Now);
             }
@@ -118,7 +118,7 @@ public class PublishController : Controller
     {
         using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: true))
         {
-            //your business code
+            //your business logic code
 
             _capBus.Publish("xxx.services.show.time", DateTime.Now);
         }
@@ -131,7 +131,7 @@ public class PublishController : Controller
 
 ### Subscribe
 
-**In Action Method**
+**In Controller Action**
 
 Add the Attribute `[CapSubscribe()]` on Action to subscribe message:
 
@@ -147,7 +147,7 @@ public class PublishController : Controller
 
 ```
 
-**In Service Method**
+**In Business Logic Service**
 
 If your subscribe method is not in the Controller,then your subscribe class need to Inheritance `ICapSubscribe`:
 
@@ -179,7 +179,10 @@ public void ConfigureServices(IServiceCollection services)
     //Note: The injection of services needs before of `services.AddCap()`
     services.AddTransient<ISubscriberService,SubscriberService>();
 
-    services.AddCap(x=>{});
+    services.AddCap(x=>
+    {
+        //...
+    });
 }
 ```
 
