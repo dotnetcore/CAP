@@ -35,7 +35,7 @@ namespace SkyWalking.DotNet.CLI.Utils
             () => "/tmp");
 
         public string DotnetDirectory => _platformInformation.GetValue(
-            () => Path.Combine(Environment.GetEnvironmentVariable("PROGRAMFILES"), "dotnet"),
+            () => Path.Combine("C:\\Progra~1", "dotnet"),
             () => Path.Combine("/usr/local/share", "dotnet"),
             () => Path.Combine("/usr/local/share", "dotnet"),
             () => Path.Combine("/usr/local/share", "dotnet"));
