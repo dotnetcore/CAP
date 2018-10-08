@@ -250,7 +250,7 @@ namespace SkyWalking.NetworkProtocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public JVMMetric(JVMMetric other) : this() {
       time_ = other.time_;
-      Cpu = other.cpu_ != null ? other.Cpu.Clone() : null;
+      cpu_ = other.cpu_ != null ? other.cpu_.Clone() : null;
       memory_ = other.memory_.Clone();
       memoryPool_ = other.memoryPool_.Clone();
       gc_ = other.gc_.Clone();

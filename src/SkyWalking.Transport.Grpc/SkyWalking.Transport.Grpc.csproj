@@ -14,7 +14,17 @@
     
     <ItemGroup>
       <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
-      <ProjectReference Include="..\SkyWalking.NetworkProtocol\SkyWalking.NetworkProtocol.csproj" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Folder Include="NetworkProtocol" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <PackageReference Include="Google.Protobuf" Version="3.6.1" />
+      <PackageReference Include="Google.Protobuf.Tools" Version="3.6.1" />
+      <PackageReference Include="Grpc" Version="1.15.0" />
+      <PackageReference Include="Grpc.Tools" Version="1.15.0" />
     </ItemGroup>
 
 </Project>

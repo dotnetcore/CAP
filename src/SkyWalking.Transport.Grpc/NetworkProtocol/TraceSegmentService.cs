@@ -387,7 +387,7 @@ namespace SkyWalking.NetworkProtocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public TraceSegmentObject(TraceSegmentObject other) : this() {
-      TraceSegmentId = other.traceSegmentId_ != null ? other.TraceSegmentId.Clone() : null;
+      traceSegmentId_ = other.traceSegmentId_ != null ? other.traceSegmentId_.Clone() : null;
       spans_ = other.spans_.Clone();
       applicationId_ = other.applicationId_;
       applicationInstanceId_ = other.applicationInstanceId_;
@@ -627,7 +627,7 @@ namespace SkyWalking.NetworkProtocol {
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public TraceSegmentReference(TraceSegmentReference other) : this() {
       refType_ = other.refType_;
-      ParentTraceSegmentId = other.parentTraceSegmentId_ != null ? other.ParentTraceSegmentId.Clone() : null;
+      parentTraceSegmentId_ = other.parentTraceSegmentId_ != null ? other.parentTraceSegmentId_.Clone() : null;
       parentSpanId_ = other.parentSpanId_;
       parentApplicationInstanceId_ = other.parentApplicationInstanceId_;
       networkAddress_ = other.networkAddress_;

@@ -9,10 +9,10 @@
     <PackageLicenseUrl>https://github.com/OpenSkywalking/skywalking-netcore/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/OpenSkywalking/skywalking-netcore</RepositoryUrl>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyConfigurationAttribute>True</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>True</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>True</GenerateAssemblyProductAttribute>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>False</PackageRequireLicenseAcceptance>  
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>  
   </PropertyGroup>
 </Project>

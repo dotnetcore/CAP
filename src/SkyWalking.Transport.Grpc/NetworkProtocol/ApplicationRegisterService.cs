@@ -197,7 +197,7 @@ namespace SkyWalking.NetworkProtocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ApplicationMapping(ApplicationMapping other) : this() {
-      Application = other.application_ != null ? other.Application.Clone() : null;
+      application_ = other.application_ != null ? other.application_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 

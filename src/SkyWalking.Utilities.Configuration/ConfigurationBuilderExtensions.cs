@@ -33,7 +33,7 @@ namespace SkyWalking.Utilities.Configuration
                 {"SkyWalking:ApplicationCode", "My_Application"},
                 {"SkyWalking:SpanLimitPerSegment", "300"},
                 {"SkyWalking:Sampling:SamplePer3Secs", "-1"},
-                {"SkyWalking:Logging:Level", "Info"},
+                {"SkyWalking:Logging:Level", "Information"},
                 {"SkyWalking:Logging:FilePath", defaultLogFile},
                 {"SkyWalking:Transport:Interval", "3000"},
                 {"SkyWalking:Transport:PendingSegmentLimit", "30000"},

@@ -16,29 +16,12 @@
  *
  */
 
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.CommandLineUtils;
 
-namespace SkyWalking.AspNetCore
+namespace SkyWalking.DotNet.CLI
 {
-    public class InstrumentationHostedService : IHostedService
+    public interface IAppCommandResolver
     {
-        private readonly ISkyWalkingAgentStartup _startup;
-
-        public InstrumentationHostedService(ISkyWalkingAgentStartup startup)
-        {
-            _startup = startup;
-        }
-
-        public Task StartAsync(CancellationToken cancellationToken)
-        {
-            return _startup.StartAsync(cancellationToken);
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return _startup.StopAsync(cancellationToken);
-        }
+        void Resolve(CommandLineApplication application);
     }
 }
