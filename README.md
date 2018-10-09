@@ -95,10 +95,6 @@ dotnet skywalking config sample_app 192.168.0.1:11800
 # Contributing
 This section is in progress here: [Contributing to skywalking-netcore](/CONTIBUTING.md)
 
-# Roadmap
-- Expect to release 0.2 compatible in May. 2018
-- Expect to release 0.3 compatible in June. 2018
-
 # Contact Us
 * Submit an issue
 * [Gitter](https://gitter.im/openskywalking/Lobby) English
