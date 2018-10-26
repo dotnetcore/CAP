@@ -1,18 +1,29 @@
 <Project>
 
-    <Import Project="build\version.props" />
-    
-    <PropertyGroup Label="Package">
-        <Product>CAP</Product>
-        <Authors>.NET Core Community;Savorboard</Authors>
-        <RepositoryUrl>https://github.com/dotnetcore/CAP</RepositoryUrl>
-        <RepositoryType>git</RepositoryType>
-        <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
-        <PackageIconUrl>https://avatars2.githubusercontent.com/u/19404084</PackageIconUrl>
-        <PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
-        <PackageLicenseUrl>https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt</PackageLicenseUrl>
-        <PackageTags>CAP;EventBus;Distributed Transaction</PackageTags>
-        <Description>EventBus and eventually consistency in distributed architectures.</Description>
-    </PropertyGroup>
+  <Import Project="build\version.props" />
+
+  <PropertyGroup Label="Package">
+    <Product>CAP</Product>
+    <Authors>.NET Core Community;Savorboard</Authors>
+    <RepositoryUrl>https://github.com/dotnetcore/CAP</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
+    <PackageIconUrl>https://avatars2.githubusercontent.com/u/19404084</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt</PackageLicenseUrl>
+    <PackageTags>CAP;EventBus;Distributed Transaction</PackageTags>
+    <Description>EventBus outbox integration and eventually consistency in microservice architectures.</Description>
+  </PropertyGroup>
+
+  <!-- Using SourceLink -->
+  <PropertyGroup>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-beta-63127-02" PrivateAssets="All"/>
+  </ItemGroup>
 
 </Project>
