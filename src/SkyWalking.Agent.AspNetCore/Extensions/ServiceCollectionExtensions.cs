@@ -36,7 +36,7 @@ using SkyWalking.Transport.Grpc;
 
 namespace SkyWalking.Agent.AspNetCore
 {
-    internal static class ServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddSkyWalkingCore(this IServiceCollection services)
         {
