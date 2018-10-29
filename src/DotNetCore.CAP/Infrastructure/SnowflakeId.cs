@@ -2,7 +2,6 @@
 // An object that generates IDs. This is broken into a separate class in case we ever want to support multiple worker threads per process
 
 using System;
-using System.Threading;
 
 namespace DotNetCore.CAP.Infrastructure
 {
@@ -24,10 +23,10 @@ namespace DotNetCore.CAP.Infrastructure
         private static SnowflakeId _snowflakeId;
 
         private readonly object _lock = new object();
-        private static readonly object s_lock = new object();
+        private static readonly object SLock = new object();
         private long _lastTimestamp = -1L;
 
-        private SnowflakeId(long workerId, long datacenterId, long sequence = 0L)
+        public SnowflakeId(long workerId, long datacenterId, long sequence = 0L)
         {
             WorkerId = workerId;
             DatacenterId = datacenterId;
@@ -46,11 +45,19 @@ namespace DotNetCore.CAP.Infrastructure
 
         public long Sequence { get; internal set; }
 
-        public static SnowflakeId Default(long datacenterId = 0)
+        public static SnowflakeId Default()
         {
-            lock (s_lock)
+            lock (SLock)
             {
-                return _snowflakeId ?? (_snowflakeId = new SnowflakeId(Thread.CurrentThread.ManagedThreadId, datacenterId));
+                if (_snowflakeId != null)
+                {
+                    return _snowflakeId;
+                }
+
+                var random = new Random();
+                var workerId = random.Next((int)MaxWorkerId);
+                var datacenterId = random.Next((int)MaxDatacenterId);
+                return _snowflakeId = new SnowflakeId(workerId, datacenterId);
             }
         }
 
