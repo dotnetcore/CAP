@@ -103,7 +103,7 @@ namespace DotNetCore.CAP.Dashboard
         public static void AddPublishBatchCommand(
             this RouteCollection routes,
             string pathTemplate,
-            Action<DashboardContext, int> command)
+            Action<DashboardContext, long> command)
         {
             if (routes == null)
             {

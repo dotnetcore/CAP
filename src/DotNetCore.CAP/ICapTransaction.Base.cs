@@ -23,13 +23,15 @@ namespace DotNetCore.CAP
         {
             _bufferList.Add(msg);
         }
-         
-        protected void Flush()
+
+        protected virtual void Flush()
         {
             foreach (var message in _bufferList)
             {
                 _dispatcher.EnqueueToPublish(message);
             }
+
+            _bufferList.Clear();
         }
 
         public abstract void Commit();

@@ -9,9 +9,9 @@ namespace DotNetCore.CAP.Dashboard
 {
     internal class BatchCommandDispatcher : IDashboardDispatcher
     {
-        private readonly Action<DashboardContext, int> _command;
+        private readonly Action<DashboardContext, long> _command;
 
-        public BatchCommandDispatcher(Action<DashboardContext, int> command)
+        public BatchCommandDispatcher(Action<DashboardContext, long> command)
         {
             _command = command;
         }
@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Dashboard
 
             foreach (var messageId in messageIds)
             {
-                var id = int.Parse(messageId);
+                var id = long.Parse(messageId);
                 _command(context, id);
             }
 

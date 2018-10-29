@@ -164,7 +164,7 @@ namespace DotNetCore.CAP
             if (!_selector.TryGetTopicExector(receivedMessage.Name, receivedMessage.Group,
                 out var executor))
             {
-                var error = $"message can not be found subscriber, Message:{receivedMessage},\r\n see: https://github.com/dotnetcore/CAP/issues/63";
+                var error = $"Message can not be found subscriber. {receivedMessage} \r\n see: https://github.com/dotnetcore/CAP/issues/63";
                 throw new SubscriberNotFoundException(error);
             }
 
