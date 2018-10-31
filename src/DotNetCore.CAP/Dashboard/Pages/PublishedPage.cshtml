@@ -80,7 +80,8 @@
                             <th style="width: 60px;">
                                 <input type="checkbox" class="js-jobs-list-select-all"/>
                             </th>
-                            <th>@Strings.MessagesPage_Table_Code</th>
+                            <th>@Strings.Common_Id</th>
+                            <th>@Strings.Common_Version</th>
                             <th>@Strings.MessagesPage_Table_Name</th>
                             <th class="min-width">@Strings.MessagesPage_Table_Retries</th>
                             @if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
@@ -95,10 +96,13 @@
                         {
                             <tr class="js-jobs-list-row hover">
                                 <td>
-                                    <input type="checkbox" class="js-jobs-list-checkbox" name="messages[]" value="@message.Id"/>
+                                    <input type="checkbox" class="js-jobs-list-checkbox" name="messages[]" value="@message.Id" />
                                 </td>
                                 <td class="word-break">
                                     <a href="javascript:;" data-url='@(Url.To("/published/message/") + message.Id)' class="openModal">#@message.Id</a>
+                                </td>
+                                <td>
+                                    @message.Version
                                 </td>
                                 <td>
                                     @message.Name
