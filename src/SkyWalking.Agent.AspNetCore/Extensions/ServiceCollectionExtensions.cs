@@ -36,7 +36,7 @@ using SkyWalking.Transport.Grpc;
 
 namespace SkyWalking.Agent.AspNetCore
 {
-    internal static class ServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddSkyWalkingCore(this IServiceCollection services)
         {
@@ -58,7 +58,7 @@ namespace SkyWalking.Agent.AspNetCore
             services.AddSingleton<IHostedService, InstrumentationHostedService>();
             services.AddSingleton<IEnvironmentProvider, HostingEnvironmentProvider>();
             services.AddGrpcTransport().AddLogging();
-            services.AddSkyWalkingExtensions().AddAspNetCoreHosting().AddHttpClient().AddSqlClient().AddEntityFrameworkCore(c => c.AddSqlite().AddPomeloMysql().AddNpgsql());
+            services.AddSkyWalkingExtensions().AddAspNetCoreHosting().AddHttpClient().AddSqlClient().AddEntityFrameworkCore(c => c.AddPomeloMysql().AddNpgsql());
             return services;
         }
 

@@ -20,7 +20,6 @@
         <ProjectReference Include="..\SkyWalking.Diagnostics.AspNetCore\SkyWalking.Diagnostics.AspNetCore.csproj" />
         <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql.csproj" />
         <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql.csproj" />
-        <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite.csproj" />
         <ProjectReference Include="..\SkyWalking.Diagnostics.EntityFrameworkCore\SkyWalking.Diagnostics.EntityFrameworkCore.csproj" />
         <ProjectReference Include="..\SkyWalking.Diagnostics.HttpClient\SkyWalking.Diagnostics.HttpClient.csproj" />
         <ProjectReference Include="..\SkyWalking.Diagnostics.SqlClient\SkyWalking.Diagnostics.SqlClient.csproj" />
