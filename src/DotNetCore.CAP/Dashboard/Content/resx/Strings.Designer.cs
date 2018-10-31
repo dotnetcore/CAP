@@ -185,6 +185,15 @@ namespace DotNetCore.CAP.Dashboard.Resources {
                 return ResourceManager.GetString("Common_Id", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Version.
+        /// </summary>
+        public static string Common_Version {
+            get {
+                return ResourceManager.GetString("Common_Version", resourceCulture);
+            }
+        }
         
         /// <summary>
         ///   Looks up a localized string similar to Less details....
@@ -318,24 +327,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string Common_Unknown {
             get {
                 return ResourceManager.GetString("Common_Unknown", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The queue is empty..
-        /// </summary>
-        public static string EnqueuedJobsPage_NoJobs {
-            get {
-                return ResourceManager.GetString("EnqueuedJobsPage_NoJobs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enqueued jobs.
-        /// </summary>
-        public static string EnqueuedJobsPage_Title {
-            get {
-                return ResourceManager.GetString("EnqueuedJobsPage_Title", resourceCulture);
             }
         }
         
@@ -813,60 +804,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string ReceivedPage_Title {
             get {
                 return ResourceManager.GetString("ReceivedPage_Title", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Heartbeat.
-        /// </summary>
-        public static string ServersPage_Table_Heartbeat {
-            get {
-                return ResourceManager.GetString("ServersPage_Table_Heartbeat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Name.
-        /// </summary>
-        public static string ServersPage_Table_Name {
-            get {
-                return ResourceManager.GetString("ServersPage_Table_Name", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Queues.
-        /// </summary>
-        public static string ServersPage_Table_Queues {
-            get {
-                return ResourceManager.GetString("ServersPage_Table_Queues", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Started.
-        /// </summary>
-        public static string ServersPage_Table_Started {
-            get {
-                return ResourceManager.GetString("ServersPage_Table_Started", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Workers.
-        /// </summary>
-        public static string ServersPage_Table_Workers {
-            get {
-                return ResourceManager.GetString("ServersPage_Table_Workers", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Servers.
-        /// </summary>
-        public static string ServersPage_Title {
-            get {
-                return ResourceManager.GetString("ServersPage_Title", resourceCulture);
             }
         }
         

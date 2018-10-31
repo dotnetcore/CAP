@@ -144,6 +144,9 @@
   <data name="Common_Id" xml:space="preserve">
     <value>编号</value>
   </data>
+  <data name="Common_Version" xml:space="preserve">
+    <value>版本</value>
+  </data>
   <data name="Common_LessDetails" xml:space="preserve">
     <value>收起...</value>
   </data>
@@ -174,12 +177,6 @@
   <data name="Common_Unknown" xml:space="preserve">
     <value>未知</value>
   </data>
-  <data name="EnqueuedJobsPage_NoJobs" xml:space="preserve">
-    <value>没有任何作业</value>
-  </data>
-  <data name="EnqueuedJobsPage_Title" xml:space="preserve">
-    <value>队列作业</value>
-  </data>
   <data name="HomePage_HistoryGraph" xml:space="preserve">
     <value>当日走势</value>
   </data>
@@ -209,25 +206,7 @@
   </data>
   <data name="PerPageSelector_ItemsPerPage" xml:space="preserve">
     <value>每页条数</value>
-  </data>
-  <data name="ServersPage_Table_Heartbeat" xml:space="preserve">
-    <value>心跳</value>
-  </data>
-  <data name="ServersPage_Table_Name" xml:space="preserve">
-    <value>名称</value>
-  </data>
-  <data name="ServersPage_Table_Queues" xml:space="preserve">
-    <value>队列</value>
-  </data>
-  <data name="ServersPage_Table_Started" xml:space="preserve">
-    <value>执行</value>
-  </data>
-  <data name="ServersPage_Table_Workers" xml:space="preserve">
-    <value>工作区</value>
-  </data>
-  <data name="ServersPage_Title" xml:space="preserve">
-    <value>服务器</value>
-  </data>
+  </data> 
   <data name="PublishedMessagesPage_Title" xml:space="preserve">
     <value>发送出的消息</value>
   </data>
@@ -271,7 +250,7 @@
     <value>队列</value>
   </data>
   <data name="Metrics_FailedCountOrNull" xml:space="preserve">
-    <value>{0} failed job(s) found. Retry or delete them manually.</value>
+    <value>发现了 {0} 个失败的消息</value>
   </data>
   <data name="HomePage_GraphHover_PFailed" xml:space="preserve">
     <value>发送失败</value>

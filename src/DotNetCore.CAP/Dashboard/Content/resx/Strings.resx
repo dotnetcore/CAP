@@ -123,17 +123,11 @@
   <data name="Common_Delete" xml:space="preserve">
     <value>Delete</value>
   </data>
-  <data name="Common_DeleteConfirm" xml:space="preserve">
-    <value>Do you really want to DELETE ALL selected jobs?</value>
-  </data>
   <data name="Common_Deleting" xml:space="preserve">
     <value>Deleting...</value>
   </data>
   <data name="Common_DeleteSelected" xml:space="preserve">
     <value>Delete selected</value>
-  </data>
-  <data name="Common_EnqueueButton_Text" xml:space="preserve">
-    <value>Enqueue jobs</value>
   </data>
   <data name="Common_Enqueueing" xml:space="preserve">
     <value>Enqueueing...</value>
@@ -143,6 +137,9 @@
   </data>
   <data name="Common_Id" xml:space="preserve">
     <value>Id</value>
+  </data>
+  <data name="Common_Version" xml:space="preserve">
+    <value>Version</value>
   </data>
   <data name="Common_LessDetails" xml:space="preserve">
     <value>Less details...</value>
@@ -177,12 +174,6 @@
   <data name="Common_Unknown" xml:space="preserve">
     <value>Unknown</value>
   </data>
-  <data name="EnqueuedJobsPage_NoJobs" xml:space="preserve">
-    <value>The queue is empty.</value>
-  </data>
-  <data name="EnqueuedJobsPage_Title" xml:space="preserve">
-    <value>Enqueued jobs</value>
-  </data>
   <data name="HomePage_HistoryGraph" xml:space="preserve">
     <value>24h graph</value>
   </data>
@@ -215,25 +206,7 @@
   </data>
   <data name="NodePage_NoNodes" xml:space="preserve">
     <value>There are no config distributed node discory. </value>
-  </data>
-  <data name="ServersPage_Table_Heartbeat" xml:space="preserve">
-    <value>Heartbeat</value>
-  </data>
-  <data name="ServersPage_Table_Name" xml:space="preserve">
-    <value>Name</value>
-  </data>
-  <data name="ServersPage_Table_Queues" xml:space="preserve">
-    <value>Queues</value>
-  </data>
-  <data name="ServersPage_Table_Started" xml:space="preserve">
-    <value>Started</value>
-  </data>
-  <data name="ServersPage_Table_Workers" xml:space="preserve">
-    <value>Workers</value>
-  </data>
-  <data name="ServersPage_Title" xml:space="preserve">
-    <value>Servers</value>
-  </data>
+  </data>  
   <data name="PublishedMessagesPage_Title" xml:space="preserve">
     <value>Published Messages</value>
   </data>
@@ -267,9 +240,6 @@
   <data name="Metrics_ActiveConnections" xml:space="preserve">
     <value>Active Connections</value>
   </data>
-  <data name="Metrics_DeletedJobs" xml:space="preserve">
-    <value>Deleted Jobs</value>
-  </data>
   <data name="Metrics_Retries" xml:space="preserve">
     <value>Retries</value>
   </data>
@@ -295,7 +265,7 @@
     <value>Enqueued / Queues</value>
   </data>
   <data name="Metrics_FailedCountOrNull" xml:space="preserve">
-    <value>{0} failed job(s) found. Retry or delete them manually.</value>
+    <value>{0} failed message(s) found. </value>
   </data>
   <data name="HomePage_GraphHover_PFailed" xml:space="preserve">
     <value>Publish Failed</value>
@@ -340,7 +310,7 @@
     <value>No messages found.</value>
   </data>
   <data name="PublishedPage_Title" xml:space="preserve">
-    <value>Published Jobs</value>
+    <value>Published messages</value>
   </data>
   <data name="MessagesPage_Query_MessageGroup" xml:space="preserve">
     <value>Message group</value>
