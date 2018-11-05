@@ -75,6 +75,7 @@ IF OBJECT_ID(N'[{schema}].[Received]',N'U') IS NULL
 BEGIN
 CREATE TABLE [{schema}].[Received](
 	[Id] [bigint] NOT NULL,
+    [Version] [nvarchar](20) NOT NULL,
 	[Name] [nvarchar](200) NOT NULL,
 	[Group] [nvarchar](200) NULL,
 	[Content] [nvarchar](max) NULL,
@@ -93,6 +94,7 @@ IF OBJECT_ID(N'[{schema}].[Published]',N'U') IS NULL
 BEGIN
 CREATE TABLE [{schema}].[Published](
 	[Id] [bigint] NOT NULL,
+    [Version] [nvarchar](20) NOT NULL,
 	[Name] [nvarchar](200) NOT NULL,
 	[Content] [nvarchar](max) NULL,
 	[Retries] [int] NOT NULL,

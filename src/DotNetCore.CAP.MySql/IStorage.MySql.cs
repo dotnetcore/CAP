@@ -48,7 +48,7 @@ namespace DotNetCore.CAP.MySql
             var sql = CreateDbTablesScript(_options.TableNamePrefix);
             using (var connection = new MySqlConnection(_options.ConnectionString))
             {
-                await connection.ExecuteAsync(sql);
+               await connection.ExecuteAsync(sql);
             }
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
@@ -60,6 +60,7 @@ namespace DotNetCore.CAP.MySql
                 $@"
 CREATE TABLE IF NOT EXISTS `{prefix}.received` (
   `Id` bigint NOT NULL,
+  `Version` varchar(20) DEFAULT NULL,
   `Name` varchar(400) NOT NULL,
   `Group` varchar(200) DEFAULT NULL,
   `Content` longtext,
@@ -72,6 +73,7 @@ CREATE TABLE IF NOT EXISTS `{prefix}.received` (
 
 CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   `Id` bigint NOT NULL,
+  `Version` varchar(20) DEFAULT NULL,
   `Name` varchar(200) NOT NULL,
   `Content` longtext,
   `Retries` int(11) DEFAULT NULL,

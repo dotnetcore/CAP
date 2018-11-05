@@ -4,6 +4,8 @@
 using System;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
 {
@@ -32,6 +34,9 @@ namespace DotNetCore.CAP.MongoDB
             var options = new MongoDBOptions();
             _configure?.Invoke(options);
             services.AddSingleton(options);
+
+            //Try to add IMongoClient if does not exists
+            services.TryAddSingleton<IMongoClient>(new MongoClient(options.DatabaseConnection));
         }
     }
 }

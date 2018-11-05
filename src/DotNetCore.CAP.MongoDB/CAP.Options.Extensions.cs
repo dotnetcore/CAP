@@ -27,6 +27,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(configure));
             }
 
+            configure += x => x.Version = options.Version;
+
             options.RegisterExtension(new MongoDBCapOptionsExtension(configure));
 
             return options;

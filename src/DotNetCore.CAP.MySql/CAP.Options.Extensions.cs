@@ -22,6 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(configure));
             }
 
+            configure += x => x.Version = options.Version;
 
             options.RegisterExtension(new MySqlCapOptionsExtension(configure));
 
@@ -46,6 +47,7 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 configure(x);
                 x.DbContextType = typeof(TContext);
+                x.Version = options.Version;
             }));
 
             return options;

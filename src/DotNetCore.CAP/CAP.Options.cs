@@ -52,7 +52,7 @@ namespace DotNetCore.CAP
         public string DefaultGroup { get; set; }
 
         /// <summary>
-        /// The default version of the message, configured to isolate data in the same instance.
+        /// The default version of the message, configured to isolate data in the same instance. The length must not exceed 20
         /// </summary>
         public string Version { get; set; }
 

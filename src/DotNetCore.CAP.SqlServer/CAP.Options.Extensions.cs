@@ -22,6 +22,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(configure));
             }
 
+            configure += x => x.Version = options.Version;
+
             options.RegisterExtension(new SqlServerCapOptionsExtension(configure));
 
             return options;
@@ -44,6 +46,7 @@ namespace Microsoft.Extensions.DependencyInjection
             options.RegisterExtension(new SqlServerCapOptionsExtension(x =>
             {
                 configure(x);
+                x.Version = options.Version;
                 x.DbContextType = typeof(TContext);
             }));
 
