@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.PostgreSql.Test
         [Fact]
         public async Task GetPublishedMessageAsync_Test()
         {
-            var sql = @"INSERT INTO ""cap"".""published""(""Id"",""Version"",,""Name"",""Content"",""Retries"",""Added"",""ExpiresAt"",""StatusName"") VALUES(@Id,'v1',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = @"INSERT INTO ""cap"".""published""(""Id"",""Version"",""Name"",""Content"",""Retries"",""Added"",""ExpiresAt"",""StatusName"") VALUES(@Id,'v1',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             var insertedId = SnowflakeId.Default().NextId();
             var publishMessage = new CapPublishedMessage
             {
