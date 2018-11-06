@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.SqlServer.Test
         [Fact]
         public async Task GetPublishedMessageAsync_Test()
         {
-            var sql = "INSERT INTO [Cap].[Published]([Id],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) VALUES(@Id,@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = "INSERT INTO [Cap].[Published]([Id],[Version],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) VALUES(@Id,'v1',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             var insertedId = SnowflakeId.Default().NextId();
             var publishMessage = new CapPublishedMessage
             {
@@ -67,7 +67,7 @@ namespace DotNetCore.CAP.SqlServer.Test
         [Fact]
         public async Task GetReceivedMessageAsync_Test()
         {
-            var sql = @"INSERT INTO [Cap].[Received]([Id],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) VALUES(@Id,@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = @"INSERT INTO [Cap].[Received]([Id],[Version],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName]) VALUES(@Id,'v1',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
             var insertedId = SnowflakeId.Default().NextId();
             var receivedMessage = new CapReceivedMessage
             {
