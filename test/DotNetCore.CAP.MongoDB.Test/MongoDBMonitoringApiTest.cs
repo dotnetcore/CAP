@@ -17,21 +17,23 @@ namespace DotNetCore.CAP.MongoDB.Test
         {
             _api = new MongoDBMonitoringApi(MongoClient, MongoDBOptions);
 
-            var collection = Database.GetCollection<CapPublishedMessage>(MongoDBOptions.PublishedCollection);
+            var collection = Database.GetCollection<PublishedMessage>(MongoDBOptions.PublishedCollection);
             collection.InsertMany(new[]
             {
-                new CapPublishedMessage
+                new PublishedMessage
                 {
                     Id = SnowflakeId.Default().NextId(),
                     Added = DateTime.Now.AddHours(-1),
                     StatusName = "Failed",
+                    Version = "v1",
                     Content = "abc"
                 },
-                new CapPublishedMessage
+                new PublishedMessage
                 {
                     Id =  SnowflakeId.Default().NextId(),
                     Added = DateTime.Now,
                     StatusName = "Failed",
+                    Version = "v1",
                     Content = "bbc"
                 }
             });
