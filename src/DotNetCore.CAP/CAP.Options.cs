@@ -40,8 +40,8 @@ namespace DotNetCore.CAP
             FailedRetryInterval = DefaultFailedMessageWaitingInterval;
             FailedRetryCount = DefaultFailedRetryCount;
             Extensions = new List<ICapOptionsExtension>();
-            DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly().GetName().Name.ToLower();
             Version = DefaultVersion;
+            DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly().GetName().Name.ToLower();
         }
 
         internal IList<ICapOptionsExtension> Extensions { get; }

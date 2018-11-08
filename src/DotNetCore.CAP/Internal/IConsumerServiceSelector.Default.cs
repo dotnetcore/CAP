@@ -120,7 +120,11 @@ namespace DotNetCore.CAP.Internal
                 {
                     if (attr.Group == null)
                     {
-                        attr.Group = _capOptions.DefaultGroup;
+                        attr.Group = _capOptions.DefaultGroup + "." + _capOptions.Version;
+                    }
+                    else
+                    {
+                        attr.Group = attr.Group + "." + _capOptions.Version;
                     }
 
                     yield return InitDescriptor(attr, method, typeInfo);
@@ -155,10 +159,10 @@ namespace DotNetCore.CAP.Internal
                 _asteriskList = executeDescriptor
                     .Where(x => x.Attribute.Name.IndexOf('*') >= 0)
                     .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
-                {
-                    Name = ("^" + x.Attribute.Name + "$").Replace("*", "[a-zA-Z]+").Replace(".", "\\."),
-                    Descriptor = x
-                }).ToList();
+                    {
+                        Name = ("^" + x.Attribute.Name + "$").Replace("*", "[a-zA-Z]+").Replace(".", "\\."),
+                        Descriptor = x
+                    }).ToList();
             }
             foreach (var red in _asteriskList)
             {
@@ -178,10 +182,10 @@ namespace DotNetCore.CAP.Internal
                 _poundList = executeDescriptor
                     .Where(x => x.Attribute.Name.IndexOf('#') >= 0)
                     .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
-                {
-                    Name = ("^" + x.Attribute.Name + "$").Replace("#", "[a-zA-Z\\.]+"),
-                    Descriptor = x
-                }).ToList();
+                    {
+                        Name = ("^" + x.Attribute.Name + "$").Replace("#", "[a-zA-Z\\.]+"),
+                        Descriptor = x
+                    }).ToList();
             }
 
             foreach (var red in _poundList)
