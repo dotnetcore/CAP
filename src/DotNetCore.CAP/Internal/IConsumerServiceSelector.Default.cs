@@ -160,7 +160,7 @@ namespace DotNetCore.CAP.Internal
                     .Where(x => x.Attribute.Name.IndexOf('*') >= 0)
                     .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
                     {
-                        Name = ("^" + x.Attribute.Name + "$").Replace("*", "[a-zA-Z]+").Replace(".", "\\."),
+                        Name = ("^" + x.Attribute.Name + "$").Replace("*", "[0-9_a-zA-Z]+").Replace(".", "\\."),
                         Descriptor = x
                     }).ToList();
             }
@@ -183,7 +183,7 @@ namespace DotNetCore.CAP.Internal
                     .Where(x => x.Attribute.Name.IndexOf('#') >= 0)
                     .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
                     {
-                        Name = ("^" + x.Attribute.Name + "$").Replace("#", "[a-zA-Z\\.]+"),
+                        Name = ("^" + x.Attribute.Name + "$").Replace("#", "[0-9_a-zA-Z\\.]+"),
                         Descriptor = x
                     }).ToList();
             }
