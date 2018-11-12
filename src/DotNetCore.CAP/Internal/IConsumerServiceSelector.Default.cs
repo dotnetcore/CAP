@@ -9,6 +9,7 @@ using System.Text.RegularExpressions;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Concurrent;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -20,8 +21,12 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly CapOptions _capOptions;
         private readonly IServiceProvider _serviceProvider;
-        private List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>> _asteriskList;
-        private List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>> _poundList;
+
+        /// <summary>
+        /// since this class be designed as a Singleton service,the following two list must be thread safe!!!
+        /// </summary>
+        private ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _asteriskList;
+        private ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _poundList;
 
         /// <summary>
         /// Creates a new <see cref="DefaultConsumerServiceSelector" />.
@@ -30,6 +35,9 @@ namespace DotNetCore.CAP.Internal
         {
             _serviceProvider = serviceProvider;
             _capOptions = capOptions;
+
+            _asteriskList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
+            _poundList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
         }
 
         public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates()
@@ -154,17 +162,20 @@ namespace DotNetCore.CAP.Internal
 
         private ConsumerExecutorDescriptor MatchAsteriskUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
-            if (_asteriskList == null)
+            var group = executeDescriptor.FirstOrDefault().Attribute.Group;
+            List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>> tmpList = null;
+            if (_asteriskList.TryGetValue(group, out tmpList) == false)
             {
-                _asteriskList = executeDescriptor
-                    .Where(x => x.Attribute.Name.IndexOf('*') >= 0)
+                tmpList = executeDescriptor.Where(x => x.Attribute.Name.IndexOf('*') >= 0)
                     .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
                     {
                         Name = ("^" + x.Attribute.Name + "$").Replace("*", "[0-9_a-zA-Z]+").Replace(".", "\\."),
                         Descriptor = x
                     }).ToList();
+                _asteriskList.TryAdd(group, tmpList);
             }
-            foreach (var red in _asteriskList)
+
+            foreach (var red in tmpList)
             {
                 if (Regex.IsMatch(key, red.Name, RegexOptions.Singleline))
                 {
@@ -177,18 +188,21 @@ namespace DotNetCore.CAP.Internal
 
         private ConsumerExecutorDescriptor MatchPoundUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
-            if (_poundList == null)
+            var group = executeDescriptor.FirstOrDefault().Attribute.Group;
+            List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>> tmpList = null;
+            if(_poundList.TryGetValue(group,out tmpList)==false)
             {
-                _poundList = executeDescriptor
+                tmpList = executeDescriptor
                     .Where(x => x.Attribute.Name.IndexOf('#') >= 0)
                     .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
                     {
                         Name = ("^" + x.Attribute.Name + "$").Replace("#", "[0-9_a-zA-Z\\.]+"),
                         Descriptor = x
                     }).ToList();
+                _poundList.TryAdd(group, tmpList);
             }
 
-            foreach (var red in _poundList)
+            foreach (var red in tmpList)
             {
                 if (Regex.IsMatch(key, red.Name, RegexOptions.Singleline))
                 {
