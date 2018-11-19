@@ -25,8 +25,8 @@ namespace DotNetCore.CAP.Internal
         /// <summary>
         /// since this class be designed as a Singleton service,the following two list must be thread safe!!!
         /// </summary>
-        private ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _asteriskList;
-        private ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _poundList;
+        private readonly ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _asteriskList;
+        private readonly ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _poundList;
 
         /// <summary>
         /// Creates a new <see cref="DefaultConsumerServiceSelector" />.
@@ -162,9 +162,8 @@ namespace DotNetCore.CAP.Internal
 
         private ConsumerExecutorDescriptor MatchAsteriskUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
-            var group = executeDescriptor.FirstOrDefault().Attribute.Group;
-            List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>> tmpList = null;
-            if (_asteriskList.TryGetValue(group, out tmpList) == false)
+            var group = executeDescriptor.First().Attribute.Group;
+            if (!_asteriskList.TryGetValue(group, out var tmpList))
             {
                 tmpList = executeDescriptor.Where(x => x.Attribute.Name.IndexOf('*') >= 0)
                     .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
@@ -188,9 +187,8 @@ namespace DotNetCore.CAP.Internal
 
         private ConsumerExecutorDescriptor MatchPoundUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
-            var group = executeDescriptor.FirstOrDefault().Attribute.Group;
-            List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>> tmpList = null;
-            if(_poundList.TryGetValue(group,out tmpList)==false)
+            var group = executeDescriptor.First().Attribute.Group;
+            if (!_poundList.TryGetValue(group, out var tmpList))
             {
                 tmpList = executeDescriptor
                     .Where(x => x.Attribute.Name.IndexOf('#') >= 0)
