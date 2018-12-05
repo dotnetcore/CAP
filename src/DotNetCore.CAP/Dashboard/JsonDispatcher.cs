@@ -34,7 +34,13 @@ namespace DotNetCore.CAP.Dashboard
                 var settings = new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                    Converters = new JsonConverter[] {new StringEnumConverter {CamelCaseText = true}}
+                    Converters = new JsonConverter[]
+                    {
+                        new StringEnumConverter
+                        {
+                            NamingStrategy = new CamelCaseNamingStrategy()
+                        }
+                    }
                 };
                 serialized = JsonConvert.SerializeObject(result, settings);
             }
