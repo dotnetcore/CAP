@@ -85,7 +85,8 @@
                             <th style="width: 60px;">
                                 <input type="checkbox" class="js-jobs-list-select-all"/>
                             </th>
-                            <th>@Strings.MessagesPage_Table_Code</th>
+                            <th>@Strings.Common_Id</th>
+                            <th>@Strings.Common_Version</th>
                             <th>@Strings.MessagesPage_Table_Group</th>
                             <th>@Strings.MessagesPage_Table_Name</th>
                             <th class="min-width">@Strings.MessagesPage_Table_Retries</th>
@@ -105,6 +106,9 @@
                                 </td>
                                 <td class="word-break">
                                     <a href="javascript:;" data-url='@(Url.To("/received/message/") + message.Id)' class="openModal">#@message.Id</a>
+                                </td>
+                                <td>
+                                    @message.Version
                                 </td>
                                 <td>
                                     @message.Group

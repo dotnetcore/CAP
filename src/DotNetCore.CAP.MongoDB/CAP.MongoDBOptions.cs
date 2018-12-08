@@ -29,5 +29,7 @@ namespace DotNetCore.CAP.MongoDB
         /// Default value: "published"
         /// </summary>
         public string PublishedCollection { get; set; } = "cap.published";
+
+        internal string Version { get; set; }
     }
 }

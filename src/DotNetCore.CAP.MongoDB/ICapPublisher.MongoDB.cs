@@ -35,15 +35,28 @@ namespace DotNetCore.CAP.MongoDB
 
             var collection = _client
                 .GetDatabase(_options.DatabaseName)
-                .GetCollection<CapPublishedMessage>(_options.PublishedCollection);
+                .GetCollection<PublishedMessage>(_options.PublishedCollection);
+
+            var store = new PublishedMessage()
+            {
+                Id = message.Id,
+                Name = message.Name,
+                Content = message.Content,
+                Added = message.Added,
+                StatusName = message.StatusName,
+                ExpiresAt = message.ExpiresAt,
+                Retries = message.Retries,
+                Version = _options.Version,
+            };
 
             if (NotUseTransaction)
             {
-                return collection.InsertOneAsync(message, insertOptions, cancel);
+
+                return collection.InsertOneAsync(store, insertOptions, cancel);
             }
 
             var dbTrans = (IClientSessionHandle) transaction.DbTransaction;
-            return collection.InsertOneAsync(dbTrans, message, insertOptions, cancel);
+            return collection.InsertOneAsync(dbTrans, store, insertOptions, cancel);
         }
     }
 }

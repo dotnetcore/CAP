@@ -8,6 +8,7 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Framing;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
@@ -33,8 +34,13 @@ namespace DotNetCore.CAP.RabbitMQ
             try
             {
                 var body = Encoding.UTF8.GetBytes(content);
+                var props = new BasicProperties()
+                {
+                    DeliveryMode = 2
+                };
+
                 channel.ExchangeDeclare(_exchange, RabbitMQOptions.ExchangeType, true);
-                channel.BasicPublish(_exchange, keyName, null, body);
+                channel.BasicPublish(_exchange, keyName, props, body);
 
                 _logger.LogDebug($"RabbitMQ topic message [{keyName}] has been published.");
 

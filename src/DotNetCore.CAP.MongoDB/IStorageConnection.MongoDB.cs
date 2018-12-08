@@ -27,9 +27,9 @@ namespace DotNetCore.CAP.MongoDB
 
         public bool ChangePublishedState(long messageId, string state)
         {
-            var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
+            var collection = _database.GetCollection<PublishedMessage>(_options.PublishedCollection);
 
-            var updateDef = Builders<CapPublishedMessage>
+            var updateDef = Builders<PublishedMessage>
                 .Update.Inc(x => x.Retries, 1)
                 .Set(x => x.ExpiresAt, null)
                 .Set(x => x.StatusName, state);
@@ -42,9 +42,9 @@ namespace DotNetCore.CAP.MongoDB
 
         public bool ChangeReceivedState(long messageId, string state)
         {
-            var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
+            var collection = _database.GetCollection<ReceivedMessage>(_options.ReceivedCollection);
 
-            var updateDef = Builders<CapReceivedMessage>
+            var updateDef = Builders<ReceivedMessage>
                 .Update.Inc(x => x.Retries, 1)
                 .Set(x => x.ExpiresAt, null)
                 .Set(x => x.StatusName, state);
@@ -62,35 +62,39 @@ namespace DotNetCore.CAP.MongoDB
 
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(long id)
         {
-            var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
+            var collection = _database.GetCollection<PublishedMessage>(_options.PublishedCollection);
             return await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<CapPublishedMessage>> GetPublishedMessagesOfNeedRetry()
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
-            var collection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
+            var collection = _database.GetCollection<PublishedMessage>(_options.PublishedCollection);
             return await collection
-                .Find(x => x.Retries < _capOptions.FailedRetryCount && x.Added < fourMinsAgo &&
-                           (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
+                .Find(x => x.Retries < _capOptions.FailedRetryCount
+                           && x.Added < fourMinsAgo
+                           && x.Version == _capOptions.Version
+                           && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
                 .Limit(200)
                 .ToListAsync();
         }
 
         public async Task<CapReceivedMessage> GetReceivedMessageAsync(long id)
         {
-            var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
+            var collection = _database.GetCollection<ReceivedMessage>(_options.ReceivedCollection);
             return await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
         }
 
         public async Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry()
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4);
-            var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
+            var collection = _database.GetCollection<ReceivedMessage>(_options.ReceivedCollection);
 
             return await collection
-                .Find(x => x.Retries < _capOptions.FailedRetryCount && x.Added < fourMinsAgo &&
-                           (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
+                .Find(x => x.Retries < _capOptions.FailedRetryCount
+                           && x.Added < fourMinsAgo
+                           && x.Version == _capOptions.Version
+                           && (x.StatusName == StatusName.Failed || x.StatusName == StatusName.Scheduled))
                 .Limit(200)
                 .ToListAsync();
         }
@@ -101,10 +105,22 @@ namespace DotNetCore.CAP.MongoDB
             {
                 throw new ArgumentNullException(nameof(message));
             }
+            var collection = _database.GetCollection<ReceivedMessage>(_options.ReceivedCollection);
 
-            var collection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
+            var store = new ReceivedMessage()
+            {
+                Id = message.Id,
+                Group = message.Group,
+                Name = message.Name,
+                Content = message.Content,
+                Added = message.Added,
+                StatusName = message.StatusName,
+                ExpiresAt = message.ExpiresAt,
+                Retries = message.Retries,
+                Version = _capOptions.Version
+            };
 
-            collection.InsertOne(message);
+            collection.InsertOne(store);
         }
     }
 }

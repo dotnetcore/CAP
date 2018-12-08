@@ -102,6 +102,7 @@ CREATE SCHEMA IF NOT EXISTS ""{schema}"";
 
 CREATE TABLE IF NOT EXISTS ""{schema}"".""received""(
 	""Id"" BIGINT PRIMARY KEY NOT NULL,
+    ""Version"" VARCHAR(20) NOT NULL,
 	""Name"" VARCHAR(200) NOT NULL,
 	""Group"" VARCHAR(200) NULL,
 	""Content"" TEXT NULL,
@@ -113,13 +114,18 @@ CREATE TABLE IF NOT EXISTS ""{schema}"".""received""(
 
 CREATE TABLE IF NOT EXISTS ""{schema}"".""published""(
 	""Id"" BIGINT PRIMARY KEY NOT NULL,
+    ""Version"" VARCHAR(20) NOT NULL,
 	""Name"" VARCHAR(200) NOT NULL,
 	""Content"" TEXT NULL,
 	""Retries"" INT NOT NULL,
 	""Added"" TIMESTAMP NOT NULL,
     ""ExpiresAt"" TIMESTAMP NULL,
 	""StatusName"" VARCHAR(50) NOT NULL
-);";
+);
+
+ALTER TABLE ""{schema}"".""received"" ADD COLUMN IF NOT EXISTS ""Version"" VARCHAR(20) NOT NULL;
+ALTER TABLE ""{schema}"".""published"" ADD COLUMN IF NOT EXISTS ""Version"" VARCHAR(20) NOT NULL;
+";
             return batchSql;
         }
     }

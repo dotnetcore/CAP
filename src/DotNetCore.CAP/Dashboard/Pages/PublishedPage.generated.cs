@@ -267,19 +267,25 @@ namespace DotNetCore.CAP.Dashboard.Pages
                             <th style=""width:60px;"">
                                 <input type=""checkbox"" class=""js-jobs-list-select-all"" />
                             </th>
-                            <th>");
+                            <th style=""width:22%;"">");
 
 
 
 #line 83 "..\..\PublishedPage.cshtml"
-                Write(Strings.MessagesPage_Table_Code);
+                Write(Strings.Common_Id);
 
 
 #line default
 #line hidden
                 WriteLiteral("</th>\r\n                            <th>");
 
+#line 84 "..\..\PublishedPage.cshtml"
+                Write(Strings.Common_Version);
 
+
+#line default
+#line hidden
+                WriteLiteral("</th>\r\n                            <th>");
 
 #line 84 "..\..\PublishedPage.cshtml"
                 Write(Strings.MessagesPage_Table_Name);
@@ -387,7 +393,14 @@ namespace DotNetCore.CAP.Dashboard.Pages
                     "                          ");
 
 
+#line 102 "..\..\PublishedPage.cshtml"
+                    Write(message.Version);
 
+
+#line default
+#line hidden
+                    WriteLiteral("</a>\r\n                            </td>\r\n                            <td>\r\n      " +
+                                 "                          ");
 #line 104 "..\..\PublishedPage.cshtml"
                     Write(message.Name);
 

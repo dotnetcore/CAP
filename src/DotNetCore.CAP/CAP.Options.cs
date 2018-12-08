@@ -28,6 +28,11 @@ namespace DotNetCore.CAP
         /// </summary>
         public const int DefaultFailedRetryCount = 50;
 
+        /// <summary>
+        /// Default version
+        /// </summary>
+        public const string DefaultVersion = "v1";
+
 
         public CapOptions()
         {
@@ -35,6 +40,7 @@ namespace DotNetCore.CAP
             FailedRetryInterval = DefaultFailedMessageWaitingInterval;
             FailedRetryCount = DefaultFailedRetryCount;
             Extensions = new List<ICapOptionsExtension>();
+            Version = DefaultVersion;
             DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly().GetName().Name.ToLower();
         }
 
@@ -44,6 +50,11 @@ namespace DotNetCore.CAP
         /// Subscriber default group name. kafka-->group name. rabbitmq --> queue name.
         /// </summary>
         public string DefaultGroup { get; set; }
+
+        /// <summary>
+        /// The default version of the message, configured to isolate data in the same instance. The length must not exceed 20
+        /// </summary>
+        public string Version { get; set; }
 
         /// <summary>
         /// Sent or received succeed message after time span of due, then the message will be deleted at due time.

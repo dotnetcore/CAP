@@ -22,7 +22,9 @@ namespace DotNetCore.CAP.RabbitMQ
         private int _count;
         private int _maxSize;
 
-        public ConnectionChannelPool(ILogger<ConnectionChannelPool> logger, RabbitMQOptions options)
+        public ConnectionChannelPool(ILogger<ConnectionChannelPool> logger,
+            CapOptions capOptions,
+            RabbitMQOptions options)
         {
             _logger = logger;
             _maxSize = DefaultPoolSize;
@@ -30,10 +32,17 @@ namespace DotNetCore.CAP.RabbitMQ
             _connectionActivator = CreateConnection(options);
 
             HostAddress = options.HostName + ":" + options.Port;
-            Exchange = options.ExchangeName;
 
-            _logger.LogDebug("RabbitMQ configuration of CAP :\r\n {0}",
-                JsonConvert.SerializeObject(options, Formatting.Indented));
+            if (CapOptions.DefaultVersion == capOptions.Version)
+            {
+                Exchange = options.ExchangeName;
+            }
+            else
+            {
+                Exchange = options.ExchangeName + "." + capOptions.Version;
+            }
+
+            _logger.LogDebug("RabbitMQ configuration of CAP :\r\n {0}", JsonConvert.SerializeObject(options, Formatting.Indented));
         }
 
         IModel IConnectionChannelPool.Rent()

@@ -297,7 +297,15 @@ namespace DotNetCore.CAP.Dashboard.Pages
 
 
 #line 88 "..\..\ReceivedPage.cshtml"
-                Write(Strings.MessagesPage_Table_Code);
+                Write(Strings.Common_Id);
+
+
+#line default
+#line hidden
+                WriteLiteral("</th>\r\n                                <th>");
+
+#line 88 "..\..\ReceivedPage.cshtml"
+                Write(Strings.Common_Version);
 
 
 #line default
@@ -422,6 +430,15 @@ namespace DotNetCore.CAP.Dashboard.Pages
                     WriteLiteral("</a>\r\n                                    </td>\r\n                                " +
                     "    <td>\r\n                                        ");
 
+
+
+#line 111 "..\..\ReceivedPage.cshtml"
+                    Write(message.Version);
+
+#line default
+#line hidden
+                    WriteLiteral("\r\n                                    </td>\r\n                                    " +
+                                 "<td>\r\n                                        ");
 
 
 #line 110 "..\..\ReceivedPage.cshtml"

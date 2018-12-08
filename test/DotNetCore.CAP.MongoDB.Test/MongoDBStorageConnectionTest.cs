@@ -24,9 +24,13 @@ namespace DotNetCore.CAP.MongoDB.Test
                 Content = "test-content"
             };
 
-            _connection.StoreReceivedMessage(new CapReceivedMessage(messageContext)
+            _connection.StoreReceivedMessage(new ReceivedMessage()
             {
-                Id = SnowflakeId.Default().NextId()
+                Id = SnowflakeId.Default().NextId(),
+                Group=messageContext.Group,
+                Content=messageContext.Content,
+                Name=messageContext.Name,
+                Version="v1"
             });
         }
 
@@ -34,7 +38,7 @@ namespace DotNetCore.CAP.MongoDB.Test
         public void ChangeReceivedState_Test()
         {
             StoreReceivedMessageAsync_TestAsync();
-            var collection = Database.GetCollection<CapReceivedMessage>(MongoDBOptions.ReceivedCollection);
+            var collection = Database.GetCollection<ReceivedMessage>(MongoDBOptions.ReceivedCollection);
 
             var msg = collection.Find(x => true).FirstOrDefault();
             _connection.ChangeReceivedState(msg.Id, StatusName.Scheduled).Should().BeTrue();
@@ -60,9 +64,9 @@ namespace DotNetCore.CAP.MongoDB.Test
             };
             _connection.StoreReceivedMessage(msg);
 
-            var collection = Database.GetCollection<CapReceivedMessage>(MongoDBOptions.ReceivedCollection);
+            var collection = Database.GetCollection<ReceivedMessage>(MongoDBOptions.ReceivedCollection);
 
-            var updateDef = Builders<CapReceivedMessage>
+            var updateDef = Builders<ReceivedMessage>
                 .Update.Set(x => x.Added, DateTime.Now.AddMinutes(-5));
 
             await collection.UpdateOneAsync(x => x.Id == id, updateDef);

@@ -23,6 +23,11 @@ namespace DotNetCore.CAP
 
         internal bool IsSqlServer2008 { get; set; }
 
+        /// <summary>
+        /// Data version
+        /// </summary>
+        internal string Version { get; set; }
+
         public EFOptions UseSqlServer2008()
         {
             IsSqlServer2008 = true;

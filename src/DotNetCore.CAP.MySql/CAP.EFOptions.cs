@@ -19,5 +19,10 @@ namespace DotNetCore.CAP
         /// EF db context type.
         /// </summary>
         internal Type DbContextType { get; set; }
+
+        /// <summary>
+        /// Data version
+        /// </summary>
+        internal string Version { get; set; }
     }
 }

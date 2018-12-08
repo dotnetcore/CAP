@@ -9,6 +9,8 @@ namespace DotNetCore.CAP.Dashboard.Monitoring
     {
         public long Id { get; set; }
 
+        public string Version { get; set; }
+
         public string Group { get; set; }
 
         public string Name { get; set; }

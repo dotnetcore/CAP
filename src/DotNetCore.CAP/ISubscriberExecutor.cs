@@ -6,6 +6,9 @@ using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
 {
+    /// <summary>
+    /// Consumer execotor
+    /// </summary>
     public interface ISubscriberExecutor
     {
         Task<OperateResult> ExecuteAsync(CapReceivedMessage message);
