@@ -1,0 +1,17 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MySql.Data" Version="6.10.7" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
+    <ProjectReference Include="..\SkyWalking.Core\SkyWalking.Core.csproj" />
+    <ProjectReference Include="..\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj" />
+  </ItemGroup>
+
+</Project>

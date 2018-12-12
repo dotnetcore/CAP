@@ -53,5 +53,7 @@ namespace SkyWalking.Components
         public static readonly IComponent InMemoryDatabase = new OfficialComponent(3014, "InMemoryDatabase");
         
         public static readonly IComponent AspNet = new OfficialComponent(3015, "AspNet");
+
+        public static readonly IComponent MySqlData = new OfficialComponent(3016, "MySql.Data");
     }
 }
