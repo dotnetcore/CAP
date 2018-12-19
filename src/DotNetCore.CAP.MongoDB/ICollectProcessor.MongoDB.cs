@@ -31,18 +31,18 @@ namespace DotNetCore.CAP.MongoDB
             _logger.LogDebug(
                 $"Collecting expired data from collection [{_options.PublishedCollection}].");
 
-            var publishedCollection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
-            var receivedCollection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
+            var publishedCollection = _database.GetCollection<PublishedMessage>(_options.PublishedCollection);
+            var receivedCollection = _database.GetCollection<ReceivedMessage>(_options.ReceivedCollection);
 
             await publishedCollection.BulkWriteAsync(new[]
             {
-                new DeleteManyModel<CapPublishedMessage>(
-                    Builders<CapPublishedMessage>.Filter.Lt(x => x.ExpiresAt, DateTime.Now))
+                new DeleteManyModel<PublishedMessage>(
+                    Builders<PublishedMessage>.Filter.Lt(x => x.ExpiresAt, DateTime.Now))
             });
             await receivedCollection.BulkWriteAsync(new[]
             {
-                new DeleteManyModel<CapReceivedMessage>(
-                    Builders<CapReceivedMessage>.Filter.Lt(x => x.ExpiresAt, DateTime.Now))
+                new DeleteManyModel<ReceivedMessage>(
+                    Builders<ReceivedMessage>.Filter.Lt(x => x.ExpiresAt, DateTime.Now))
             });
 
             await context.WaitAsync(_waitingInterval);
