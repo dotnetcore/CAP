@@ -161,7 +161,7 @@ namespace DotNetCore.CAP
 
         private async Task InvokeConsumerMethodAsync(CapReceivedMessage receivedMessage)
         {
-            if (!_selector.TryGetTopicExector(receivedMessage.Name, receivedMessage.Group,
+            if (!_selector.TryGetTopicExecutor(receivedMessage.Name, receivedMessage.Group,
                 out var executor))
             {
                 var error = $"Message can not be found subscriber. {receivedMessage} \r\n see: https://github.com/dotnetcore/CAP/issues/63";
