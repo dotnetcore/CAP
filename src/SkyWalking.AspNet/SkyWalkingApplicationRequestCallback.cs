@@ -42,6 +42,13 @@ namespace SkyWalking.AspNet
         {
             var httpApplication = sender as HttpApplication;
             var httpContext = httpApplication.Context;
+
+            if(httpContext.Request.HttpMethod == "OPTIONS")
+            {
+                //asp.net Exclude OPTIONS request
+                return;
+            }
+
             var carrier = _contextCarrierFactory.Create();
             foreach (var item in carrier.Items)
                 item.HeadValue = httpContext.Request.Headers[item.HeadKey];
@@ -60,14 +67,20 @@ namespace SkyWalking.AspNet
 
         public void ApplicationOnEndRequest(object sender, EventArgs e)
         {
+            var httpApplication = sender as HttpApplication;
+            var httpContext = httpApplication.Context;
+
+            if (httpContext.Request.HttpMethod == "OPTIONS")
+            {
+                //asp.net Exclude OPTIONS request
+                return;
+            }
+
             var httpRequestSpan = ContextManager.ActiveSpan;
             if (httpRequestSpan == null)
             {
                 return;
             }
-
-            var httpApplication = sender as HttpApplication;
-            var httpContext = httpApplication.Context;
 
             var statusCode = httpContext.Response.StatusCode;
             if (statusCode >= 400)
