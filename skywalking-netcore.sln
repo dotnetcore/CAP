@@ -7,26 +7,45 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{05BF0D4E-C82
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "solution items", "solution items", "{E38F0F6E-6E10-491D-8786-650F6A4B6698}"
 	ProjectSection(SolutionItems) = preProject
+		appveyor.yml = appveyor.yml
 		generate_protos.bat = generate_protos.bat
 		generate_protos_linux.sh = generate_protos_linux.sh
 		generate_protos_macos.sh = generate_protos_macos.sh
-		appveyor.yml = appveyor.yml
 		NuGet.config = NuGet.config
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Abstractions", "src\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj", "{C3860B5F-21D0-429F-8A00-B0C0F4573DF7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Core", "src\SkyWalking.Core\SkyWalking.Core.csproj", "{FD84A10C-C962-4AEA-BA06-86F08EB048E6}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{613F0980-91ED-4064-8E8C-168582EF4AD7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Core.Tests", "test\SkyWalking.Core.Tests\SkyWalking.Core.Tests.csproj", "{3915A2C2-7174-4651-A4F1-D45CD109916A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Components", "Components", "{79ED86A5-E9B9-49B2-9354-C911C079D03E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sample", "sample", "{844CEACD-4C85-4B15-9E2B-892B01FDA4BB}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EntityFrameworkCore", "EntityFrameworkCore", "{A4E67E09-3156-4D30-B451-F24F706E96C4}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{88AEFE60-F743-4AF3-8F55-B4B7B8079D95}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{4BD917BC-D579-4C75-9939-41BF012A4EE2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{F0B43114-3BA9-4098-952D-0FB2241691A9}"
+	ProjectSection(SolutionItems) = preProject
+		build\common.props = build\common.props
+		build\index.cake = build\index.cake
+		build\util.cake = build\util.cake
+		build\version.cake = build\version.cake
+		build\version.props = build\version.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Agent", "Agent", "{EF6194B2-9ACB-49B9-8049-DD6AFAEB0399}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cli", "cli", "{A238D227-433B-461E-8C57-73B147E0F672}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Abstractions", "src\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj", "{C3860B5F-21D0-429F-8A00-B0C0F4573DF7}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Core", "src\SkyWalking.Core\SkyWalking.Core.csproj", "{FD84A10C-C962-4AEA-BA06-86F08EB048E6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Core.Tests", "test\SkyWalking.Core.Tests\SkyWalking.Core.Tests.csproj", "{3915A2C2-7174-4651-A4F1-D45CD109916A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Sample.Backend", "sample\SkyWalking.Sample.Backend\SkyWalking.Sample.Backend.csproj", "{80A67B09-83F2-477F-907F-95FFF5B8FEAF}"
 EndProject
@@ -36,52 +55,35 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.Http
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.CAP", "src\SkyWalking.Diagnostics.CAP\SkyWalking.Diagnostics.CAP.csproj", "{55621423-19C3-4928-8B45-666FA87BF6A2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.EntityFrameworkCore", "src\SkyWalking.Diagnostics.EntityFrameworkCore\SkyWalking.Diagnostics.EntityFrameworkCore.csproj", "{CD334460-8E61-41EB-9762-62C6A342CACB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.EntityFrameworkCore", "src\SkyWalking.Diagnostics.EntityFrameworkCore\SkyWalking.Diagnostics.EntityFrameworkCore.csproj", "{CD334460-8E61-41EB-9762-62C6A342CACB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.SqlClient", "src\SkyWalking.Diagnostics.SqlClient\SkyWalking.Diagnostics.SqlClient.csproj", "{44DFFDF7-5935-475A-825F-2C0298464117}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.SqlClient", "src\SkyWalking.Diagnostics.SqlClient\SkyWalking.Diagnostics.SqlClient.csproj", "{44DFFDF7-5935-475A-825F-2C0298464117}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "EntityFrameworkCore", "EntityFrameworkCore", "{A4E67E09-3156-4D30-B451-F24F706E96C4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite", "src\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite.csproj", "{F5C529C9-23C4-46B7-84FF-E86C6D17EB3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite", "src\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite\SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite.csproj", "{F5C529C9-23C4-46B7-84FF-E86C6D17EB3E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql", "src\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql.csproj", "{7BD880F3-2886-4EE6-9569-114613AFFCBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql", "src\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql\SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql.csproj", "{7BD880F3-2886-4EE6-9569-114613AFFCBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql", "src\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql.csproj", "{F8D96C30-369C-4FCB-B5B2-02EAA74199C9}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql", "src\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql\SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql.csproj", "{F8D96C30-369C-4FCB-B5B2-02EAA74199C9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.AspNet", "src\SkyWalking.AspNet\SkyWalking.AspNet.csproj", "{3A454A8A-A1B7-4C6D-BE08-52D956F95CC1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.AspNet", "src\SkyWalking.AspNet\SkyWalking.AspNet.csproj", "{3A454A8A-A1B7-4C6D-BE08-52D956F95CC1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Sample.AspNet", "sample\SkyWalking.Sample.AspNet\SkyWalking.Sample.AspNet.csproj", "{C3649845-E458-448D-B97D-C7E231E1D040}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Transport.Grpc", "src\SkyWalking.Transport.Grpc\SkyWalking.Transport.Grpc.csproj", "{FF2FC3FB-D112-45C1-AF34-1FE37D55F682}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Transport.Grpc", "src\SkyWalking.Transport.Grpc\SkyWalking.Transport.Grpc.csproj", "{FF2FC3FB-D112-45C1-AF34-1FE37D55F682}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Diagnostics.AspNetCore", "src\SkyWalking.Diagnostics.AspNetCore\SkyWalking.Diagnostics.AspNetCore.csproj", "{CFBB522D-495F-40F9-B68F-DA25E48D9F6A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.AspNetCore", "src\SkyWalking.Diagnostics.AspNetCore\SkyWalking.Diagnostics.AspNetCore.csproj", "{CFBB522D-495F-40F9-B68F-DA25E48D9F6A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Extensions", "Extensions", "{88AEFE60-F743-4AF3-8F55-B4B7B8079D95}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Utilities.Configuration", "src\SkyWalking.Utilities.Configuration\SkyWalking.Utilities.Configuration.csproj", "{0B87C4B8-3F4F-456A-B588-28D8E9E3395A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Utilities", "Utilities", "{4BD917BC-D579-4C75-9939-41BF012A4EE2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Utilities.DependencyInjection", "src\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj", "{1812A19C-729C-410B-A90D-D5AF1404DD60}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Utilities.Configuration", "src\SkyWalking.Utilities.Configuration\SkyWalking.Utilities.Configuration.csproj", "{0B87C4B8-3F4F-456A-B588-28D8E9E3395A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Utilities.Logging", "src\SkyWalking.Utilities.Logging\SkyWalking.Utilities.Logging.csproj", "{AEB61F19-3DBB-411E-A67E-93007B96E160}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Utilities.DependencyInjection", "src\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj", "{1812A19C-729C-410B-A90D-D5AF1404DD60}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Agent.AspNetCore", "src\SkyWalking.Agent.AspNetCore\SkyWalking.Agent.AspNetCore.csproj", "{5CB2889E-33DD-4326-9403-4977849E065D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Utilities.Logging", "src\SkyWalking.Utilities.Logging\SkyWalking.Utilities.Logging.csproj", "{AEB61F19-3DBB-411E-A67E-93007B96E160}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.DotNet.CLI", "cli\SkyWalking.DotNet.CLI\SkyWalking.DotNet.CLI.csproj", "{412E5D7D-9448-4C65-8EC7-26F6D5C49865}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{F0B43114-3BA9-4098-952D-0FB2241691A9}"
-ProjectSection(SolutionItems) = preProject
-	build\common.props = build\common.props
-	build\index.cake = build\index.cake
-	build\util.cake = build\util.cake
-	build\version.cake = build\version.cake
-	build\version.props = build\version.props
-EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Agent", "Agent", "{EF6194B2-9ACB-49B9-8049-DD6AFAEB0399}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Agent.AspNetCore", "src\SkyWalking.Agent.AspNetCore\SkyWalking.Agent.AspNetCore.csproj", "{5CB2889E-33DD-4326-9403-4977849E065D}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.DotNet.CLI", "cli\SkyWalking.DotNet.CLI\SkyWalking.DotNet.CLI.csproj", "{412E5D7D-9448-4C65-8EC7-26F6D5C49865}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cli", "cli", "{A238D227-433B-461E-8C57-73B147E0F672}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.MySqlData", "src\SkyWalking.Diagnostics.MySqlData\SkyWalking.Diagnostics.MySqlData.csproj", "{A66B2179-9F35-4B52-9457-F60ED257BA60}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -173,23 +175,31 @@ Global
 		{412E5D7D-9448-4C65-8EC7-26F6D5C49865}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{412E5D7D-9448-4C65-8EC7-26F6D5C49865}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{412E5D7D-9448-4C65-8EC7-26F6D5C49865}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A66B2179-9F35-4B52-9457-F60ED257BA60}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A66B2179-9F35-4B52-9457-F60ED257BA60}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A66B2179-9F35-4B52-9457-F60ED257BA60}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A66B2179-9F35-4B52-9457-F60ED257BA60}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
+		{79ED86A5-E9B9-49B2-9354-C911C079D03E} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
+		{CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
+		{A4E67E09-3156-4D30-B451-F24F706E96C4} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
+		{88AEFE60-F743-4AF3-8F55-B4B7B8079D95} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
+		{4BD917BC-D579-4C75-9939-41BF012A4EE2} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
+		{F0B43114-3BA9-4098-952D-0FB2241691A9} = {E38F0F6E-6E10-491D-8786-650F6A4B6698}
+		{EF6194B2-9ACB-49B9-8049-DD6AFAEB0399} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
 		{C3860B5F-21D0-429F-8A00-B0C0F4573DF7} = {CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810}
 		{FD84A10C-C962-4AEA-BA06-86F08EB048E6} = {CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810}
 		{3915A2C2-7174-4651-A4F1-D45CD109916A} = {613F0980-91ED-4064-8E8C-168582EF4AD7}
-		{79ED86A5-E9B9-49B2-9354-C911C079D03E} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
-		{CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
 		{80A67B09-83F2-477F-907F-95FFF5B8FEAF} = {844CEACD-4C85-4B15-9E2B-892B01FDA4BB}
 		{2B4E350E-A1E5-4B4A-A642-BCA6D3887E5A} = {844CEACD-4C85-4B15-9E2B-892B01FDA4BB}
 		{49DEFCA8-4289-4875-B6A5-35D84B3D2290} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
 		{55621423-19C3-4928-8B45-666FA87BF6A2} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
-		{44DFFDF7-5935-475A-825F-2C0298464117} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
-		{A4E67E09-3156-4D30-B451-F24F706E96C4} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
 		{CD334460-8E61-41EB-9762-62C6A342CACB} = {A4E67E09-3156-4D30-B451-F24F706E96C4}
+		{44DFFDF7-5935-475A-825F-2C0298464117} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
 		{F5C529C9-23C4-46B7-84FF-E86C6D17EB3E} = {A4E67E09-3156-4D30-B451-F24F706E96C4}
 		{7BD880F3-2886-4EE6-9569-114613AFFCBC} = {A4E67E09-3156-4D30-B451-F24F706E96C4}
 		{F8D96C30-369C-4FCB-B5B2-02EAA74199C9} = {A4E67E09-3156-4D30-B451-F24F706E96C4}
@@ -197,15 +207,12 @@ Global
 		{C3649845-E458-448D-B97D-C7E231E1D040} = {844CEACD-4C85-4B15-9E2B-892B01FDA4BB}
 		{FF2FC3FB-D112-45C1-AF34-1FE37D55F682} = {CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810}
 		{CFBB522D-495F-40F9-B68F-DA25E48D9F6A} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
-		{88AEFE60-F743-4AF3-8F55-B4B7B8079D95} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
-		{4BD917BC-D579-4C75-9939-41BF012A4EE2} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
 		{0B87C4B8-3F4F-456A-B588-28D8E9E3395A} = {4BD917BC-D579-4C75-9939-41BF012A4EE2}
 		{1812A19C-729C-410B-A90D-D5AF1404DD60} = {4BD917BC-D579-4C75-9939-41BF012A4EE2}
 		{AEB61F19-3DBB-411E-A67E-93007B96E160} = {4BD917BC-D579-4C75-9939-41BF012A4EE2}
-		{F0B43114-3BA9-4098-952D-0FB2241691A9} = {E38F0F6E-6E10-491D-8786-650F6A4B6698}
-		{EF6194B2-9ACB-49B9-8049-DD6AFAEB0399} = {05BF0D4E-C824-4EC8-8330-36C1FC49910E}
 		{5CB2889E-33DD-4326-9403-4977849E065D} = {EF6194B2-9ACB-49B9-8049-DD6AFAEB0399}
 		{412E5D7D-9448-4C65-8EC7-26F6D5C49865} = {A238D227-433B-461E-8C57-73B147E0F672}
+		{A66B2179-9F35-4B52-9457-F60ED257BA60} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94C0DA2C-CCCB-4314-93A2-9809B5DD0583}

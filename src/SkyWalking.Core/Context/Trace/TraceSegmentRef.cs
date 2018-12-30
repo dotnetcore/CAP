@@ -92,7 +92,7 @@ namespace SkyWalking.Context.Trace
                 int.TryParse(entryOperationName, out _entryOperationId);
             }
 
-            string parentOperationName = contextSnapshot.EntryOperationName;
+            string parentOperationName = contextSnapshot.ParentOperationName;
             if (parentOperationName.First() == '#')
             {
                 _parentOperationName = parentOperationName.Substring(1);

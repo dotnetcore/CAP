@@ -1,0 +1,23 @@
+{
+  "SkyWalking": {
+    "ApplicationCode": "SkyWalking.Sample.AspNet",
+    "SpanLimitPerSegment": 300,
+    "Sampling": {
+      "SamplePer3Secs": -1
+    },
+    "Logging": {
+      "Level": "Information",
+      "FilePath": "logs\\SkyWalking-{Date}.log"
+    },
+    "Transport": {
+      "Interval": 3000,
+      "PendingSegmentLimit": 30000,
+      "PendingSegmentTimeout": 1000,
+      "gRPC": {
+        "Servers": "localhost:11800",
+        "Timeout": 2000,
+        "ConnectTimeout": 10000
+      }
+    }
+  }
+}
