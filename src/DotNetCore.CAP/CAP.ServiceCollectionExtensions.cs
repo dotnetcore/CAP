@@ -11,6 +11,7 @@ using DotNetCore.CAP.Processor.States;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -48,10 +49,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();
 
-            //Bootstrapper and Processors
+            //Processors
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerHandler>());
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
-            services.TryAddSingleton<IBootstrapper, DefaultBootstrapper>();
             services.TryAddSingleton<IStateChanger, StateChanger>();
 
             //Queue's message processor
@@ -72,6 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton(options);
 
             //Startup and Middleware
+            services.AddTransient<IHostedService, DefaultBootstrapper>();
             services.AddTransient<IStartupFilter, CapStartupFilter>();
 
             return new CapBuilder(services);

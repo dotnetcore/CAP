@@ -5,89 +5,59 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
 {
-    /// <inheritdoc />
     /// <summary>
     /// Default implement of <see cref="T:DotNetCore.CAP.IBootstrapper" />.
     /// </summary>
-    internal class DefaultBootstrapper : IBootstrapper
+    internal class DefaultBootstrapper : BackgroundService, IBootstrapper
     {
-        private readonly IApplicationLifetime _appLifetime;
-        private readonly CancellationTokenSource _cts;
-        private readonly CancellationTokenRegistration _ctsRegistration;
         private readonly ILogger<DefaultBootstrapper> _logger;
-        private Task _bootstrappingTask;
 
         public DefaultBootstrapper(
             ILogger<DefaultBootstrapper> logger,
             IStorage storage,
-            IApplicationLifetime appLifetime,
             IEnumerable<IProcessingServer> processors)
         {
             _logger = logger;
-            _appLifetime = appLifetime;
             Storage = storage;
             Processors = processors;
-
-            _cts = new CancellationTokenSource();
-            _ctsRegistration = appLifetime.ApplicationStopping.Register(() =>
-            {
-                _cts.Cancel();
-                try
-                {
-                    _bootstrappingTask?.GetAwaiter().GetResult();
-                }
-                catch (OperationCanceledException ex)
-                {
-                    _logger.ExpectedOperationCanceledException(ex);
-                }
-            });
         }
 
         private IStorage Storage { get; }
 
         private IEnumerable<IProcessingServer> Processors { get; }
 
-        public Task BootstrapAsync()
+        public async Task BootstrapAsync(CancellationToken stoppingToken)
         {
-            return _bootstrappingTask = BootstrapTaskAsync();
-        }
+            _logger.LogDebug("### CAP background task is starting.");
 
-        private async Task BootstrapTaskAsync()
-        {
-            _logger.LogInformation("### CAP starting...");
+            await Storage.InitializeAsync(stoppingToken);
 
-            await Storage.InitializeAsync(_cts.Token);
-
-            if (_cts.IsCancellationRequested)
+            stoppingToken.Register(() =>
             {
-                return;
-            }
+                _logger.LogDebug("### CAP background task is stopping.");
 
-            _appLifetime.ApplicationStopping.Register(() =>
-            {
                 foreach (var item in Processors)
                 {
-                    item.Dispose();
+                    try
+                    {
+                        item.Dispose();
+                    }
+                    catch (OperationCanceledException ex)
+                    {
+                        _logger.ExpectedOperationCanceledException(ex);
+                    }
                 }
             });
-
-            if (_cts.IsCancellationRequested)
-            {
-                return;
-            }
-
+             
             await BootstrapCoreAsync();
 
-            _ctsRegistration.Dispose();
-            _cts.Dispose();
-
             _logger.LogInformation("### CAP started!");
-        }
+        } 
 
         protected virtual Task BootstrapCoreAsync()
         {
@@ -104,6 +74,11 @@ namespace DotNetCore.CAP
             }
 
             return Task.CompletedTask;
+        }
+
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        {
+            await BootstrapAsync(stoppingToken);
         }
     }
 }
