@@ -289,7 +289,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
                     <table class=""table"">
                         <thead>
                             <tr>
-                                <th style=""width:60px;"">
+                                <th style=""width:30px;"">
                                     <input type=""checkbox"" class=""js-jobs-list-select-all"" />
                                 </th>
                                 <th>");
