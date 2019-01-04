@@ -7,11 +7,12 @@ mono: none
 
 matrix:
   include:
-  - os: linux
-    dist: trusty # Ubuntu 14.04
-    sudo: required
-  - os: osx
-    osx_image: xcode8.3 # macOS 10.12
+  - dotnet: 2.2.100
+#  - os: linux
+#    dist: trusty # Ubuntu 14.04
+#    sudo: required
+#  - os: osx
+#    osx_image: xcode8.3 # macOS 10.12
     
 # Run the build script
 script:
