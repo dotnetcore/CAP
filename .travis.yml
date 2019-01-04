@@ -1,13 +1,13 @@
 language: csharp
 sudo: required
-dist: trusty
+dist: xenial
 solution: CAP.sln
-dotnet: 2.2.100
+dotnet: 2.2
 mono: none
 
-matrix:
-  include:
-  - dotnet: 2.2.100
+#matrix:
+#  include:
+#  - dotnet: 2.2
 #  - os: linux
 #    dist: trusty # Ubuntu 14.04
 #    sudo: required
