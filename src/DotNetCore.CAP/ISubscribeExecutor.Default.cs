@@ -89,7 +89,7 @@ namespace DotNetCore.CAP
 
                 await SetSuccessfulState(message);
 
-                _logger.ConsumerExecuted(sp.Elapsed.TotalSeconds);
+                _logger.ConsumerExecuted(sp.Elapsed.TotalMilliseconds);
 
                 return (false, OperateResult.Success);
             }
