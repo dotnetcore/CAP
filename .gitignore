@@ -41,3 +41,4 @@ Properties
 /NuGet.config
 .vscode/*
 samples/Sample.RabbitMQ.MongoDB/appsettings.Development.json
+site/
