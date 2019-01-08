@@ -81,7 +81,7 @@ select count(Id) from [{0}].Received with (nolock) where StatusName = N'Failed';
 
             if (!string.IsNullOrEmpty(queryDto.Group))
             {
-                where += " and group=@Group";
+                where += " and [group]=@Group";
             }
 
             if (!string.IsNullOrEmpty(queryDto.Content))

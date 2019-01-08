@@ -22,7 +22,7 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
         [Route("~/without/transaction")]
         public IActionResult WithoutTransaction()
         {
-            _capBus.Publish("sample.rabbitmq.mongodb", DateTime.Now);
+            _capBus.PublishAsync("sample.rabbitmq.mongodb", DateTime.Now);
 
             return Ok();
         }

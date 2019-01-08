@@ -20,7 +20,7 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder" /> instance this method extends.</param>
         /// <returns>The <see cref="IApplicationBuilder" /> instance this method extends.</returns>
-        public static IApplicationBuilder UseCap(this IApplicationBuilder app)
+        public static IApplicationBuilder UseCapDashboard(this IApplicationBuilder app)
         {
             if (app == null)
             {
@@ -30,10 +30,7 @@ namespace Microsoft.AspNetCore.Builder
             CheckRequirement(app);
 
             var provider = app.ApplicationServices;
-
-            var bootstrapper = provider.GetRequiredService<IBootstrapper>();
-            bootstrapper.BootstrapAsync();
-
+             
             if (provider.GetService<DashboardOptions>() != null)
             {
                 if (provider.GetService<DiscoveryOptions>() != null)
@@ -78,7 +75,7 @@ namespace Microsoft.AspNetCore.Builder
         {
             return app =>
             {
-                app.UseCap();
+                app.UseCapDashboard();
 
                 next(app);
             };

@@ -80,7 +80,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
             if (!string.IsNullOrEmpty(queryDto.Group))
             {
-                where += " and Group=@Group";
+                where += " and `Group`=@Group";
             }
 
             if (!string.IsNullOrEmpty(queryDto.Content))

@@ -89,7 +89,7 @@ namespace DotNetCore.CAP
 
                 await SetSuccessfulState(message);
 
-                _logger.ConsumerExecuted(sp.Elapsed.TotalSeconds);
+                _logger.ConsumerExecuted(sp.Elapsed.TotalMilliseconds);
 
                 return (false, OperateResult.Success);
             }
@@ -161,7 +161,7 @@ namespace DotNetCore.CAP
 
         private async Task InvokeConsumerMethodAsync(CapReceivedMessage receivedMessage)
         {
-            if (!_selector.TryGetTopicExector(receivedMessage.Name, receivedMessage.Group,
+            if (!_selector.TryGetTopicExecutor(receivedMessage.Name, receivedMessage.Group,
                 out var executor))
             {
                 var error = $"Message can not be found subscriber. {receivedMessage} \r\n see: https://github.com/dotnetcore/CAP/issues/63";
