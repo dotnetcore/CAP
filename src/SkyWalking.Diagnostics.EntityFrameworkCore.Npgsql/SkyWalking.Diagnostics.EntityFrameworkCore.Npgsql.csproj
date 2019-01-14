@@ -18,6 +18,6 @@
     <ProjectReference Include="..\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.2" />
   </ItemGroup>
 </Project>

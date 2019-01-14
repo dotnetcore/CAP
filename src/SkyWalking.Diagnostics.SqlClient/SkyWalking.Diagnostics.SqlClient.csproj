@@ -17,6 +17,6 @@
     <ProjectReference Include="..\SkyWalking.Utilities.DependencyInjection\SkyWalking.Utilities.DependencyInjection.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="System.Data.SqlClient" Version="4.4.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.6.0" />
   </ItemGroup>
 </Project>
