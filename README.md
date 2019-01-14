@@ -27,6 +27,8 @@ A quick list of SkyWalking .NET Core Agent's capabilities
 
 #### Requirements
 - SkyWalking Collector 5.0.0-beta or higher. See SkyWalking backend deploy [docs](https://github.com/apache/incubator-skywalking/blob/5.x/docs/en/Deploy-backend-in-standalone-mode.md).
+- SkyWalking 6 backend is compatible too. The deployment doc is [here](https://github.com/apache/incubator-skywalking/blob/master/docs/en/setup/backend/backend-ui-setup.md). If you are new user, recommand you to read the 
+[whole official documents](https://github.com/apache/incubator-skywalking/blob/master/docs/README.md)
 
 ## Install SkyWalking .NET Core Agent
 
