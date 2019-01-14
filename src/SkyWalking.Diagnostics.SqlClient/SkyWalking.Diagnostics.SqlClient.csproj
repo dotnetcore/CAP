@@ -4,7 +4,7 @@
     <Description>SkyWalking.Diagnostics.SqlClient notifies outgoing SqlClient requests.</Description>
     <AssemblyTitle>SkyWalking.Diagnostics.SqlClient</AssemblyTitle>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>SSkyWalking.Diagnostics.SqlClient</AssemblyName>
+    <AssemblyName>SkyWalking.Diagnostics.SqlClient</AssemblyName>
     <PackageId>SkyWalking.Diagnostics.SqlClient</PackageId>
     <PackageTags>SkyWalking;APM;Diagnostics;SqlClient</PackageTags>
     <PackageReleaseNotes>
