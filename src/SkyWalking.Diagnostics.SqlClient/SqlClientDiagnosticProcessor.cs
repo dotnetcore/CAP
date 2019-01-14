@@ -36,14 +36,14 @@ namespace SkyWalking.Diagnostics.SqlClient
             var commandType = sqlCommand.CommandText?.Split(' ');
             return $"{SqlClientDiagnosticStrings.SqlClientPrefix}{commandType?.FirstOrDefault()}";
         }
-
+        private bool IsTraceORM()
+        {
+            return ContextManager.ContextProperties != null && ContextManager.ContextProperties.ContainsKey(TRACE_ORM);
+        }
         [DiagnosticName(SqlClientDiagnosticStrings.SqlBeforeExecuteCommand)]
         public void BeforeExecuteCommand([Property(Name = "Command")] SqlCommand sqlCommand)
         {
-            if (ContextManager.ContextProperties.ContainsKey(TRACE_ORM))
-            {
-                return;
-            }
+            if (IsTraceORM()) { return; }
             var peer = sqlCommand.Connection.DataSource;
             var span = ContextManager.CreateExitSpan(ResolveOperationName(sqlCommand), peer);
             span.SetLayer(SpanLayer.DB);
@@ -57,20 +57,14 @@ namespace SkyWalking.Diagnostics.SqlClient
         [DiagnosticName(SqlClientDiagnosticStrings.SqlAfterExecuteCommand)]
         public void AfterExecuteCommand()
         {
-            if (ContextManager.ContextProperties.ContainsKey(TRACE_ORM))
-            {
-                return;
-            }
+            if (IsTraceORM()) { return; }
             ContextManager.StopSpan();
         }
 
         [DiagnosticName(SqlClientDiagnosticStrings.SqlErrorExecuteCommand)]
         public void ErrorExecuteCommand([Property(Name = "Exception")] Exception ex)
         {
-            if (ContextManager.ContextProperties.ContainsKey(TRACE_ORM))
-            {
-                return;
-            }
+            if (IsTraceORM()) { return; }
             var span = ContextManager.ActiveSpan;
             span?.ErrorOccurred();
             span?.Log(ex);
