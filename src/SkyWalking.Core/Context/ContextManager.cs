@@ -81,6 +81,7 @@ namespace SkyWalking.Context
         }
 
         private static ITracerContext Context => _context.Value;
+        
 
         public static string GlobalTraceId
         {
@@ -167,9 +168,24 @@ namespace SkyWalking.Context
             get { return Context?.ActiveSpan; }
         }
 
-        public static void StopSpan(ISpan span)
+        public static ITracerContext ActiveContext
         {
-            Context?.StopSpan(span);
+            get
+            {
+                return Context;
+            }
+        }
+
+        public static void StopSpan(ISpan span, ITracerContext context=null)
+        {
+            if (Context != null)
+            {
+                Context.StopSpan(span);
+            }
+            else if (context != null)
+            {
+                context.StopSpan(span);
+            }
         }
 
         public void AfterFinished(ITraceSegment traceSegment)

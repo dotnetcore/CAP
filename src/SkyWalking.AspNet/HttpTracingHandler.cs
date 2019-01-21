@@ -17,6 +17,7 @@
  */
 
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -61,6 +62,17 @@ namespace SkyWalking.AspNet
                 Tags.HTTP.Method.Set(span, request.Method.ToString());
                 foreach (var item in contextCarrier.Items)
                     request.Headers.Add(item.HeadKey, item.HeadValue);
+
+                if (request.Method.Method != "GET")
+                {
+                    // record request body data
+                    if (!request.Content.Headers.ContentType?.MediaType.ToLower().Contains("multipart/form-data")??false)
+                    {
+                        string bodyStr = await request.Content.ReadAsStringAsync();
+                        span.Log(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), new Dictionary<string, object> { { "Body", bodyStr } });
+                    }
+                }
+
                 var response = await base.SendAsync(request, cancellationToken);
                 Tags.StatusCode.Set(span, response.StatusCode.ToString());
                 return response;
