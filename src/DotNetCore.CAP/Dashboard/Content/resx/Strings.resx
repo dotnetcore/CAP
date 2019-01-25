@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -205,8 +205,8 @@
     <value>Items per page</value>
   </data>
   <data name="NodePage_NoNodes" xml:space="preserve">
-    <value>There are no config distributed node discory. </value>
-  </data>  
+    <value>There are no config distributed node discory</value>
+  </data>
   <data name="PublishedMessagesPage_Title" xml:space="preserve">
     <value>Published Messages</value>
   </data>
@@ -228,35 +228,14 @@
   <data name="NavigationMenu_Servers" xml:space="preserve">
     <value>Servers</value>
   </data>
-  <data name="Common_CannotFindTargetMethod" xml:space="preserve">
-    <value>Can not find the target method.</value>
-  </data>
   <data name="Common_Enqueued" xml:space="preserve">
     <value>Enqueued</value>
-  </data>
-  <data name="Common_NoState" xml:space="preserve">
-    <value>No state</value>
-  </data>
-  <data name="Metrics_ActiveConnections" xml:space="preserve">
-    <value>Active Connections</value>
-  </data>
-  <data name="Metrics_Retries" xml:space="preserve">
-    <value>Retries</value>
   </data>
   <data name="Metrics_Servers" xml:space="preserve">
     <value>Servers</value>
   </data>
   <data name="Metrics_TotalConnections" xml:space="preserve">
     <value>Total Connections</value>
-  </data>
-  <data name="Common_Condition" xml:space="preserve">
-    <value>Condition</value>
-  </data>
-  <data name="Common_Continuations" xml:space="preserve">
-    <value>Continuations</value>
-  </data>
-  <data name="Metrics_AwaitingCount" xml:space="preserve">
-    <value>Awaiting</value>
   </data>
   <data name="Metrics_EnqueuedCountOrNull" xml:space="preserve">
     <value>Enqueued</value>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -123,17 +123,11 @@
   <data name="Common_Delete" xml:space="preserve">
     <value>删除</value>
   </data>
-  <data name="Common_DeleteConfirm" xml:space="preserve">
-    <value>您确定要删除所选的全部作业吗？</value>
-  </data>
   <data name="Common_Deleting" xml:space="preserve">
     <value>删除中...</value>
   </data>
   <data name="Common_DeleteSelected" xml:space="preserve">
     <value>删除选中</value>
-  </data>
-  <data name="Common_EnqueueButton_Text" xml:space="preserve">
-    <value>队列作业</value>
   </data>
   <data name="Common_Enqueueing" xml:space="preserve">
     <value>加入队列中...</value>
@@ -206,7 +200,7 @@
   </data>
   <data name="PerPageSelector_ItemsPerPage" xml:space="preserve">
     <value>每页条数</value>
-  </data> 
+  </data>
   <data name="PublishedMessagesPage_Title" xml:space="preserve">
     <value>发送出的消息</value>
   </data>
@@ -231,17 +225,11 @@
   <data name="Common_Enqueued" xml:space="preserve">
     <value>队列</value>
   </data>
-  <data name="Metrics_DeletedJobs" xml:space="preserve">
-    <value>删除</value>
-  </data>
   <data name="Metrics_Servers" xml:space="preserve">
     <value>服务器</value>
   </data>
   <data name="Metrics_TotalConnections" xml:space="preserve">
     <value>总连接数</value>
-  </data>
-  <data name="Metrics_AwaitingCount" xml:space="preserve">
-    <value>等待中</value>
   </data>
   <data name="Metrics_EnqueuedCountOrNull" xml:space="preserve">
     <value>队列</value>
@@ -356,5 +344,8 @@
   </data>
   <data name="LayoutPage_Footer_NodeCurrent" xml:space="preserve">
     <value>节点: {0}</value>
+  </data>
+  <data name="Common_NotAvailable" xml:space="preserve">
+    <value>N/A</value>
   </data>
 </root>

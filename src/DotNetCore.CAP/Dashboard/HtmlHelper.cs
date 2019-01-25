@@ -106,17 +106,6 @@ namespace DotNetCore.CAP.Dashboard
             return new NonEscapedString(value);
         }
 
-        public NonEscapedString StateLabel(string stateName)
-        {
-            if (string.IsNullOrWhiteSpace(stateName))
-            {
-                return Raw($"<em>{Strings.Common_NoState}</em>");
-            }
-
-            return Raw(
-                $"<span class=\"label label-default\" style=\"background-color: {MessageHistoryRenderer.GetForegroundStateColor(stateName)};\">{stateName}</span>");
-        }
-
         public NonEscapedString RelativeTime(DateTime value)
         {
             return Raw($"<span data-moment=\"{Helper.ToTimestamp(value)}\">{value}</span>");

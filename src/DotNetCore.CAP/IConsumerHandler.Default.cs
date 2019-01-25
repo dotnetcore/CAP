@@ -82,7 +82,7 @@ namespace DotNetCore.CAP
             _cts.Cancel();
             try
             {
-                _compositeTask.Wait(TimeSpan.FromSeconds(2));
+                _compositeTask?.Wait(TimeSpan.FromSeconds(2));
             }
             catch (AggregateException ex)
             {

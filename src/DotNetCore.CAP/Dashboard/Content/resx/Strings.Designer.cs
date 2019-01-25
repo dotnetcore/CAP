@@ -61,33 +61,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Can not find the target method..
-        /// </summary>
-        public static string Common_CannotFindTargetMethod {
-            get {
-                return ResourceManager.GetString("Common_CannotFindTargetMethod", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Condition.
-        /// </summary>
-        public static string Common_Condition {
-            get {
-                return ResourceManager.GetString("Common_Condition", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Continuations.
-        /// </summary>
-        public static string Common_Continuations {
-            get {
-                return ResourceManager.GetString("Common_Continuations", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Created.
         /// </summary>
         public static string Common_Created {
@@ -106,15 +79,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do you really want to DELETE ALL selected jobs?.
-        /// </summary>
-        public static string Common_DeleteConfirm {
-            get {
-                return ResourceManager.GetString("Common_DeleteConfirm", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Delete selected.
         /// </summary>
         public static string Common_DeleteSelected {
@@ -129,15 +93,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string Common_Deleting {
             get {
                 return ResourceManager.GetString("Common_Deleting", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Enqueue jobs.
-        /// </summary>
-        public static string Common_EnqueueButton_Text {
-            get {
-                return ResourceManager.GetString("Common_EnqueueButton_Text", resourceCulture);
             }
         }
         
@@ -185,15 +140,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
                 return ResourceManager.GetString("Common_Id", resourceCulture);
             }
         }
-
-        /// <summary>
-        ///   Looks up a localized string similar to Version.
-        /// </summary>
-        public static string Common_Version {
-            get {
-                return ResourceManager.GetString("Common_Version", resourceCulture);
-            }
-        }
         
         /// <summary>
         ///   Looks up a localized string similar to Less details....
@@ -228,15 +174,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string Common_Name {
             get {
                 return ResourceManager.GetString("Common_Name", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to No state.
-        /// </summary>
-        public static string Common_NoState {
-            get {
-                return ResourceManager.GetString("Common_NoState", resourceCulture);
             }
         }
         
@@ -327,6 +264,15 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         public static string Common_Unknown {
             get {
                 return ResourceManager.GetString("Common_Unknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Version.
+        /// </summary>
+        public static string Common_Version {
+            get {
+                return ResourceManager.GetString("Common_Version", resourceCulture);
             }
         }
         
@@ -565,33 +511,6 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Active Connections.
-        /// </summary>
-        public static string Metrics_ActiveConnections {
-            get {
-                return ResourceManager.GetString("Metrics_ActiveConnections", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Awaiting.
-        /// </summary>
-        public static string Metrics_AwaitingCount {
-            get {
-                return ResourceManager.GetString("Metrics_AwaitingCount", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Deleted Jobs.
-        /// </summary>
-        public static string Metrics_DeletedJobs {
-            get {
-                return ResourceManager.GetString("Metrics_DeletedJobs", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Enqueued.
         /// </summary>
         public static string Metrics_EnqueuedCountOrNull {
@@ -610,20 +529,11 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} failed job(s) found. Retry or delete them manually..
+        ///   Looks up a localized string similar to {0} failed message(s) found. .
         /// </summary>
         public static string Metrics_FailedCountOrNull {
             get {
                 return ResourceManager.GetString("Metrics_FailedCountOrNull", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Retries.
-        /// </summary>
-        public static string Metrics_Retries {
-            get {
-                return ResourceManager.GetString("Metrics_Retries", resourceCulture);
             }
         }
         
@@ -682,7 +592,7 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to There are no config distributed node discory. .
+        ///   Looks up a localized string similar to There are no config distributed node discory.
         /// </summary>
         public static string NodePage_NoNodes {
             get {
@@ -781,7 +691,7 @@ namespace DotNetCore.CAP.Dashboard.Resources {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Published Jobs.
+        ///   Looks up a localized string similar to Published messages.
         /// </summary>
         public static string PublishedPage_Title {
             get {
