@@ -58,7 +58,7 @@ namespace SkyWalking.Agent.AspNetCore
             services.AddSingleton<IHostedService, InstrumentationHostedService>();
             services.AddSingleton<IEnvironmentProvider, HostingEnvironmentProvider>();
             services.AddGrpcTransport().AddLogging();
-            services.AddSkyWalkingExtensions().AddAspNetCoreHosting().AddHttpClient().AddSqlClient().AddEntityFrameworkCore(c => c.AddPomeloMysql().AddNpgsql());
+            services.AddSkyWalkingExtensions().AddAspNetCoreHosting().AddHttpClient().AddSqlClient().AddEntityFrameworkCore(c => c.AddPomeloMysql().AddNpgsql().AddSqlite());
             return services;
         }
 
