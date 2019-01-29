@@ -94,6 +94,9 @@ Use `dotnet skywalking config [your_application_code] [your_collector_server]` t
 dotnet skywalking config sample_app 192.168.0.1:11800
 ```
 
+# Roadmap
+[What are we going to do next?](/docs/roadmap.md)
+
 # Contributing
 This section is in progress here: [Contributing to skywalking-netcore](/CONTIBUTING.md)
 
