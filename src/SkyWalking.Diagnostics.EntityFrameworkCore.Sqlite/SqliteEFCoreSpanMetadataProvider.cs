@@ -37,7 +37,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
             switch (connection.DataSource)
             {
                     case "":
-                        dataSource = "localhost";
+                        dataSource = "sqlite:memory:db";
                         break;
                     default:
                         dataSource = connection.DataSource;

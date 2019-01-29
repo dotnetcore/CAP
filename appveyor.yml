@@ -23,19 +23,11 @@ deploy:
   skip_symbols: true
   artifact: /artifacts\/packages\/.+\.nupkg/
   on:
-    branch: develop
+    branch: master
 - provider: NuGet
   server: https://www.myget.org/F/skywalking/api/v2/package
   api_key:
     secure: y93uJrdiEYaeVTFxeCduQSlCussOUF4UztOyhkxyZxFnIco73J/K2rdA2QShoEuh
-  skip_symbols: true
-  artifact: /artifacts\/packages\/.+\.nupkg/
-  on:
-    branch: master
-- provider: NuGet
-  server: https://api.nuget.org/v3/index.json
-  api_key:
-    secure: 6N8pLjIHa7SK3l+Lj7b1qKk7CvKdZdQyj9ZNTaUjfPSd+/SL8PuSHq+ysNKaMHAF
   skip_symbols: true
   artifact: /artifacts\/packages\/.+\.nupkg/
   on:
