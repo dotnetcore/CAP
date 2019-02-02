@@ -19,4 +19,6 @@ nav:
         - FAQ: user-guide-cn/faq.md
     - About: about.md
 theme: cinder
+markdown_extensions:
+  - admonition
 repo_url: "https://github.com/dotnetcore/CAP"
