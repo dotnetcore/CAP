@@ -8,7 +8,7 @@
 
 CAP 是一个基于 .NET Standard 的 C# 库，它是一种处理分布式事务的解决方案，同样具有 EventBus 的功能，它具有轻量级、易使用、高性能等特点。
 
-你可以在这里[CAP Wiki](https://github.com/dotnetcore/CAP/wiki)看到更多详细资料。
+你可以在这里[CAP docs](http://docs.dotnet-china.org/CAP/)看到更多详细资料。
 
 你可以在这里看到[CAP 视频教程](https://www.cnblogs.com/savorboard/p/cap-video-1.html)，学习如何在项目中集成CAP。
 
