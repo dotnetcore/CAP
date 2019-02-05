@@ -1,3 +1,5 @@
+## Configuration
+
 CAP uses Microsoft.Extensions.DependencyInjection for configuration injection. 
 
 ### Cap Options
