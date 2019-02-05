@@ -29,7 +29,9 @@ namespace SkyWalking.Utilities.Logging
 {
     public class DefaultLoggerFactory : ILoggerFactory
     {
-        private const string outputTemplate = @"{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{ApplicationCode}] [{Level}] {SourceContext} : {Message}{NewLine}{Exception}";
+        private const string outputTemplate =
+            @"{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{ApplicationCode}] [{Level}] {SourceContext} : {Message}{NewLine}{Exception}";
+
         private readonly MSLoggerFactory _loggerFactory;
         private readonly LoggingConfig _loggingConfig;
 
@@ -41,13 +43,12 @@ namespace SkyWalking.Utilities.Logging
 
             var level = EventLevel(_loggingConfig.Level);
 
-            _loggerFactory.AddSerilog(new LoggerConfiguration().
-                MinimumLevel.Verbose().
-                Enrich.WithProperty("SourceContext", null).
-                Enrich.WithProperty(nameof(instrumentationConfig.ApplicationCode), instrumentationConfig.ApplicationCode).
-                Enrich.FromLogContext().
-                WriteTo.RollingFile(_loggingConfig.FilePath, level, outputTemplate, null, 1073741824, 31, null, false, false, TimeSpan.FromMilliseconds(500)).
-                CreateLogger());
+            _loggerFactory.AddSerilog(new LoggerConfiguration().MinimumLevel.Verbose().Enrich
+                .WithProperty("SourceContext", null).Enrich
+                .WithProperty(nameof(instrumentationConfig.ServiceName),
+                    instrumentationConfig.ServiceName ?? instrumentationConfig.ApplicationCode).Enrich
+                .FromLogContext().WriteTo.RollingFile(_loggingConfig.FilePath, level, outputTemplate, null, 1073741824,
+                    31, null, false, false, TimeSpan.FromMilliseconds(500)).CreateLogger());
         }
 
         public ILogger CreateLogger(Type type)
@@ -57,7 +58,9 @@ namespace SkyWalking.Utilities.Logging
 
         private static LogEventLevel EventLevel(string level)
         {
-            return LogEventLevel.TryParse<LogEventLevel>(level, out var logEventLevel) ? logEventLevel : LogEventLevel.Error;
+            return LogEventLevel.TryParse<LogEventLevel>(level, out var logEventLevel)
+                ? logEventLevel
+                : LogEventLevel.Error;
         }
     }
 }

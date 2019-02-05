@@ -25,10 +25,10 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
     public class NpgsqlEFCoreSpanMetadataProvider : IEfCoreSpanMetadataProvider
     {
         public IComponent Component { get; } = ComponentsDefine.Npgsql_EntityFrameworkCore_PostgreSQL;
-        
+
         public bool Match(DbConnection connection)
         {
-           return connection is NpgsqlConnection;
+            return connection.GetType().FullName == "Npgsql.NpgsqlConnection";
         }
 
         public string GetPeer(DbConnection connection)

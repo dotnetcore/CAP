@@ -16,6 +16,8 @@
  *
  */
 
+using System;
+
 namespace SkyWalking.Config
 {
     [Config("SkyWalking")]
@@ -23,6 +25,7 @@ namespace SkyWalking.Config
     {
         public string Namespace { get; set; }
 
+        [Obsolete("Use ServiceName.")]
         public string ApplicationCode { get; set; }
         
         public string ServiceName { get; set; }

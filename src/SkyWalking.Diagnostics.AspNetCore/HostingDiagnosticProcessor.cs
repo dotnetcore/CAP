@@ -36,7 +36,8 @@ namespace SkyWalking.AspNetCore.Diagnostics
         private readonly InstrumentationConfig _config;
         private readonly IContextCarrierFactory _contextCarrierFactory;
 
-        public HostingTracingDiagnosticProcessor(IConfigAccessor configAccessor,IContextCarrierFactory contextCarrierFactory)
+        public HostingTracingDiagnosticProcessor(IConfigAccessor configAccessor,
+            IContextCarrierFactory contextCarrierFactory)
         {
             _config = configAccessor.Get<InstrumentationConfig>();
             _contextCarrierFactory = contextCarrierFactory;
@@ -48,7 +49,7 @@ namespace SkyWalking.AspNetCore.Diagnostics
             var carrier = _contextCarrierFactory.Create();
             foreach (var item in carrier.Items)
                 item.HeadValue = httpContext.Request.Headers[item.HeadKey];
-            var httpRequestSpan = ContextManager.CreateEntrySpan($"{_config.ApplicationCode} {httpContext.Request.Path}", carrier);
+            var httpRequestSpan = ContextManager.CreateEntrySpan(httpContext.Request.Path, carrier);
             httpRequestSpan.AsHttp();
             httpRequestSpan.SetComponent(ComponentsDefine.AspNetCore);
             Tags.Url.Set(httpRequestSpan, httpContext.Request.Path);
@@ -57,7 +58,10 @@ namespace SkyWalking.AspNetCore.Diagnostics
                 new Dictionary<string, object>
                 {
                     {"event", "AspNetCore Hosting BeginRequest"},
-                    {"message", $"Request starting {httpContext.Request.Protocol} {httpContext.Request.Method} {httpContext.Request.GetDisplayUrl()}"}
+                    {
+                        "message",
+                        $"Request starting {httpContext.Request.Protocol} {httpContext.Request.Method} {httpContext.Request.GetDisplayUrl()}"
+                    }
                 });
             httpContext.Items[HttpContextDiagnosticStrings.SpanKey] = httpRequestSpan;
         }
@@ -82,25 +86,28 @@ namespace SkyWalking.AspNetCore.Diagnostics
                 new Dictionary<string, object>
                 {
                     {"event", "AspNetCore Hosting EndRequest"},
-                    {"message", $"Request finished {httpContext.Response.StatusCode} {httpContext.Response.ContentType}"}
+                    {
+                        "message",
+                        $"Request finished {httpContext.Response.StatusCode} {httpContext.Response.ContentType}"
+                    }
                 });
             ContextManager.StopSpan(httpRequestSpan);
         }
 
         [DiagnosticName("Microsoft.AspNetCore.Diagnostics.UnhandledException")]
-        public void DiagnosticUnhandledException([Property]HttpContext httpContext, [Property]Exception exception)
+        public void DiagnosticUnhandledException([Property] HttpContext httpContext, [Property] Exception exception)
         {
             ContextManager.ActiveSpan?.ErrorOccurred()?.Log(exception);
         }
 
         [DiagnosticName("Microsoft.AspNetCore.Hosting.UnhandledException")]
-        public void HostingUnhandledException([Property]HttpContext httpContext, [Property]Exception exception)
+        public void HostingUnhandledException([Property] HttpContext httpContext, [Property] Exception exception)
         {
             ContextManager.ActiveSpan?.ErrorOccurred()?.Log(exception);
         }
-        
+
         //[DiagnosticName("Microsoft.AspNetCore.Mvc.BeforeAction")]
-        public void BeforeAction([Property]ActionDescriptor actionDescriptor, [Property]HttpContext httpContext)
+        public void BeforeAction([Property] ActionDescriptor actionDescriptor, [Property] HttpContext httpContext)
         {
             var span = httpContext.Items[HttpContextDiagnosticStrings.SpanKey] as ISpan;
             if (span == null)
@@ -108,12 +115,13 @@ namespace SkyWalking.AspNetCore.Diagnostics
                 return;
             }
 
-            var events = new Dictionary<string, object> {{"event", "AspNetCore.Mvc Executing action method"}, {"Action method", actionDescriptor.DisplayName}};
+            var events = new Dictionary<string, object>
+                {{"event", "AspNetCore.Mvc Executing action method"}, {"Action method", actionDescriptor.DisplayName}};
             span.Log(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), events);
         }
 
         //[DiagnosticName("Microsoft.AspNetCore.Mvc.AfterAction")]
-        public void AfterAction([Property]ActionDescriptor actionDescriptor, [Property]HttpContext httpContext)
+        public void AfterAction([Property] ActionDescriptor actionDescriptor, [Property] HttpContext httpContext)
         {
             var span = httpContext.Items[HttpContextDiagnosticStrings.SpanKey] as ISpan;
             if (span == null)

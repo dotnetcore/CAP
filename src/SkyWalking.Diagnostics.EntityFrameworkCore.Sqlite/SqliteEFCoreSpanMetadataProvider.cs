@@ -25,10 +25,10 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
     public class SqliteEFCoreSpanMetadataProvider : IEfCoreSpanMetadataProvider
     {
         public IComponent Component { get; } = ComponentsDefine.EntityFrameworkCore_Sqlite;
-        
+
         public bool Match(DbConnection connection)
         {
-            return connection is SqliteConnection;
+            return connection.GetType().FullName == "Microsoft.Data.Sqlite.SqliteConnection";
         }
 
         public string GetPeer(DbConnection connection)
@@ -36,12 +36,12 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
             string dataSource;
             switch (connection.DataSource)
             {
-                    case "":
-                        dataSource = "sqlite:memory:db";
-                        break;
-                    default:
-                        dataSource = connection.DataSource;
-                        break;
+                case "":
+                    dataSource = "sqlite:memory:db";
+                    break;
+                default:
+                    dataSource = connection.DataSource;
+                    break;
             }
 
             return $"{dataSource}";

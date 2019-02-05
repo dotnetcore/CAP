@@ -28,7 +28,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
         
         public bool Match(DbConnection connection)
         {
-            return connection is MySqlConnection;
+            return connection.GetType().FullName == "MySql.Data.MySqlClient.MySqlConnection";
         }
 
         public string GetPeer(DbConnection connection)
