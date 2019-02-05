@@ -30,9 +30,9 @@ namespace SkyWalking.Context.Trace
         private readonly DistributedTraceIdCollection _relatedGlobalTraces;
         private bool _isSizeLimited;
 
-        public int ApplicationId => RuntimeEnvironment.Instance.ApplicationId.Value;
+        public int ApplicationId => RuntimeEnvironment.Instance.ServiceId.Value;
 
-        public int ApplicationInstanceId => RuntimeEnvironment.Instance.ApplicationInstanceId.Value;
+        public int ApplicationInstanceId => RuntimeEnvironment.Instance.ServiceInstanceId.Value;
 
         public IEnumerable<ITraceSegmentRef> Refs => _refs;
 

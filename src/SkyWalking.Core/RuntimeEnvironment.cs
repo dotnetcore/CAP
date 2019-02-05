@@ -24,13 +24,13 @@ namespace SkyWalking
     {
         public static IRuntimeEnvironment Instance { get; } = new RuntimeEnvironment();
 
-        public NullableValue ApplicationId { get; internal set; }
+        public NullableValue ServiceId { get; internal set; }
 
-        public NullableValue ApplicationInstanceId { get; internal set; }
+        public NullableValue ServiceInstanceId { get; internal set; }
 
-        public bool Initialized => ApplicationId.HasValue && ApplicationInstanceId.HasValue;
+        public bool Initialized => ServiceId.HasValue && ServiceInstanceId.HasValue;
 
-        public Guid AgentUUID { get; } = Guid.NewGuid();
+        public Guid InstanceId { get; } = Guid.NewGuid();
         
         public IEnvironmentProvider Environment { get; set; }
     }

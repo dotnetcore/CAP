@@ -30,7 +30,7 @@ namespace SkyWalking.Utilities.Configuration
             var defaultConfig = new Dictionary<string, string>
             {
                 {"SkyWalking:Namespace", string.Empty},
-                {"SkyWalking:ApplicationCode", "My_Application"},
+                {"SkyWalking:ApplicationCode", "My_Service"},
                 {"SkyWalking:SpanLimitPerSegment", "300"},
                 {"SkyWalking:Sampling:SamplePer3Secs", "-1"},
                 {"SkyWalking:Logging:Level", "Information"},
@@ -40,6 +40,7 @@ namespace SkyWalking.Utilities.Configuration
                 {"SkyWalking:Transport:PendingSegmentTimeout", "1000"},
                 {"SkyWalking:Transport:gRPC:Servers", "localhost:11800"},
                 {"SkyWalking:Transport:gRPC:Timeout", "2000"},
+                {"SkyWalking:Transport:gRPC:ReportTimeout", "300000"},
                 {"SkyWalking:Transport:gRPC:ConnectTimeout", "10000"}
             };
             return builder.AddInMemoryCollection(defaultConfig);

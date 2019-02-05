@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="..\..\build\common.props" />
     
     <PropertyGroup>
@@ -14,20 +14,7 @@
     
     <ItemGroup>
       <ProjectReference Include="..\SkyWalking.Abstractions\SkyWalking.Abstractions.csproj" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <Folder Include="NetworkProtocol" />
-    </ItemGroup>
-    
-    <ItemGroup>
-      <PackageReference Include="Google.Protobuf" Version="3.6.1" />
-      <PackageReference Include="Google.Protobuf.Tools" Version="3.6.1" />
-      <PackageReference Include="Grpc" Version="1.17.0" />
-      <PackageReference Include="Grpc.Tools" Version="1.17.0">
-        <PrivateAssets>all</PrivateAssets>
-        <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-      </PackageReference>
+      <ProjectReference Include="..\SkyWalking.Transport.Grpc.Protocol\SkyWalking.Transport.Grpc.Protocol.csproj" />
     </ItemGroup>
 
 </Project>

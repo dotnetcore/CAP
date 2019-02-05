@@ -17,19 +17,18 @@
  */
 
 using System;
-using SkyWalking.Config;
 
 namespace SkyWalking
 {
     public interface IRuntimeEnvironment
     {
-        NullableValue ApplicationId { get; }
+        NullableValue ServiceId { get; }
 
-        NullableValue ApplicationInstanceId { get; }
+        NullableValue ServiceInstanceId { get; }
 
         bool Initialized { get; }
 
-        Guid AgentUUID { get; }
+        Guid InstanceId { get; }
 
         IEnvironmentProvider Environment { get; }
     }

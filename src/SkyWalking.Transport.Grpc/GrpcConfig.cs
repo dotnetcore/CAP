@@ -21,14 +21,16 @@ using SkyWalking.Config;
 
 namespace SkyWalking.Transport.Grpc
 {
-    [Config("SkyWalking", "Transport","gRPC")]
+    [Config("SkyWalking", "Transport", "gRPC")]
     public class GrpcConfig
     {
         public string Servers { get; set; }
-        
+
         public int ConnectTimeout { get; set; }
-        
+
         public int Timeout { get; set; }
+
+        public int ReportTimeout { get; set; }
     }
 
     public static class GrpcConfigExtensions
@@ -36,6 +38,16 @@ namespace SkyWalking.Transport.Grpc
         public static DateTime GetTimeout(this GrpcConfig config)
         {
             return DateTime.UtcNow.AddMilliseconds(config.Timeout);
+        }
+        
+        public static DateTime GetConnectTimeout(this GrpcConfig config)
+        {
+            return DateTime.UtcNow.AddMilliseconds(config.ConnectTimeout);
+        }
+        
+        public static DateTime GetReportTimeout(this GrpcConfig config)
+        {
+            return DateTime.UtcNow.AddMilliseconds(config.ReportTimeout);
         }
     }
 }

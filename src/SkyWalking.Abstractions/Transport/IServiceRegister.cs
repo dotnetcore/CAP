@@ -16,20 +16,19 @@
  *
  */
 
-using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using SkyWalking.Transport;
 
 namespace SkyWalking.Transport
 {
-    public class AgentOsInfoRequest
+    public interface IServiceRegister
     {
-        public string OsName { get; set; }
-
-        public string HostName { get; set; }
-
-        public int ProcessNo { get; set; }
-
-        public string[] IpAddress { get; set; }
-
-        public string Language { get; set; }
+        Task<NullableValue> RegisterServiceAsync(ServiceRequest serviceRequest,
+            CancellationToken cancellationToken = default(CancellationToken));
+        
+        Task<NullableValue> RegisterServiceInstanceAsync(ServiceInstanceRequest serviceInstanceRequest,
+            CancellationToken cancellationToken = default(CancellationToken));
     }
 }

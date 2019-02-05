@@ -10,9 +10,11 @@ environment:
 skip_commits:
   files:
     - LICENSE
+install:
+- git submodule update --init
+- dotnet build -c Release src/SkyWalking.Transport.Grpc.Protocol 
 build_script:
-- ps: ./build.ps1
-test: off
+- ps: ./scripts/build.ps1
 artifacts:
 - path: artifacts/packages/*.nupkg
 deploy:

@@ -85,6 +85,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.DotNet.CLI", "cl
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyWalking.Diagnostics.MySqlData", "src\SkyWalking.Diagnostics.MySqlData\SkyWalking.Diagnostics.MySqlData.csproj", "{A66B2179-9F35-4B52-9457-F60ED257BA60}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyWalking.Transport.Grpc.Protocol", "src\SkyWalking.Transport.Grpc.Protocol\SkyWalking.Transport.Grpc.Protocol.csproj", "{BAF5C1ED-09C4-4B32-8190-47D16265F01E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -179,6 +181,10 @@ Global
 		{A66B2179-9F35-4B52-9457-F60ED257BA60}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A66B2179-9F35-4B52-9457-F60ED257BA60}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A66B2179-9F35-4B52-9457-F60ED257BA60}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BAF5C1ED-09C4-4B32-8190-47D16265F01E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BAF5C1ED-09C4-4B32-8190-47D16265F01E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BAF5C1ED-09C4-4B32-8190-47D16265F01E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BAF5C1ED-09C4-4B32-8190-47D16265F01E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -213,6 +219,7 @@ Global
 		{5CB2889E-33DD-4326-9403-4977849E065D} = {EF6194B2-9ACB-49B9-8049-DD6AFAEB0399}
 		{412E5D7D-9448-4C65-8EC7-26F6D5C49865} = {A238D227-433B-461E-8C57-73B147E0F672}
 		{A66B2179-9F35-4B52-9457-F60ED257BA60} = {79ED86A5-E9B9-49B2-9354-C911C079D03E}
+		{BAF5C1ED-09C4-4B32-8190-47D16265F01E} = {CBFF7EE0-69D7-4D6A-9BBD-8E567FF4D810}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94C0DA2C-CCCB-4314-93A2-9809B5DD0583}

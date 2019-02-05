@@ -2,7 +2,7 @@
  * Licensed to the OpenSkywalking under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The OpenSkywalking licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
@@ -29,13 +29,14 @@ namespace SkyWalking.Transport
     {
         private readonly ILogger _logger;
         private readonly TransportConfig _config;
-        private readonly ISkyWalkingClient _skyWalkingClient;
+        private readonly ITraceReporter _traceReporter;
         private readonly ConcurrentQueue<TraceSegmentRequest> _segmentQueue;
         private readonly CancellationTokenSource _cancellation;
 
-        public AsyncQueueTraceDispatcher(IConfigAccessor configAccessor, ISkyWalkingClient client, ILoggerFactory loggerFactory)
+        public AsyncQueueTraceDispatcher(IConfigAccessor configAccessor, ITraceReporter traceReporter,
+            ILoggerFactory loggerFactory)
         {
-            _skyWalkingClient = client;
+            _traceReporter = traceReporter;
             _logger = loggerFactory.CreateLogger(typeof(AsyncQueueTraceDispatcher));
             _config = configAccessor.Get<TransportConfig>();
             _segmentQueue = new ConcurrentQueue<TraceSegmentRequest>();
@@ -71,7 +72,7 @@ namespace SkyWalking.Transport
 
             // send async
             if (segments.Count > 0)
-                _skyWalkingClient.CollectAsync(segments, token);
+                _traceReporter.ReportAsync(segments, token);
             return Task.CompletedTask;
         }
 

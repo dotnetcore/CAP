@@ -16,17 +16,14 @@
  *
  */
 
-namespace SkyWalking.Config
+namespace SkyWalking.Transport
 {
-    [Config("SkyWalking")]
-    public class InstrumentationConfig
+    public class ServiceInstanceRequest
     {
-        public string Namespace { get; set; }
-
-        public string ApplicationCode { get; set; }
+        public int ServiceId { get; set; }
         
-        public string ServiceName { get; set; }
-
-        public int SpanLimitPerSegment { get; set; } = 300;
+        public string InstanceUUID { get; set; }
+        
+        public AgentOsInfoRequest Properties { get; set; }
     }
 }

@@ -20,31 +20,40 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Logging;
+using SkyWalking.Transport;
 
-namespace SkyWalking.Transport.Grpc
+namespace SkyWalking.Service
 {
-    public class GrpcStateCheckService : ExecutionService
+    public class PingService : ExecutionService
     {
-        private readonly ConnectionManager _connectionManager;
+        private readonly IPingCaller _pingCaller;
 
-        public GrpcStateCheckService(ConnectionManager connectionManager, ISkyWalkingClient skyWalking, IRuntimeEnvironment runtimeEnvironment,
+        public PingService(IPingCaller pingCaller, IRuntimeEnvironment runtimeEnvironment,
             ILoggerFactory loggerFactory) : base(
-            skyWalking, runtimeEnvironment, loggerFactory)
+            runtimeEnvironment, loggerFactory)
         {
-            _connectionManager = connectionManager;
+            _pingCaller = pingCaller;
         }
 
-        protected override TimeSpan DueTime { get; } = TimeSpan.Zero;
-        protected override TimeSpan Period { get; } = TimeSpan.FromSeconds(15);
+        protected override TimeSpan DueTime { get; } = TimeSpan.FromSeconds(30);
+        protected override TimeSpan Period { get; } = TimeSpan.FromSeconds(60);
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            if (!_connectionManager.Ready)
+            try
             {
-                await _connectionManager.ConnectAsync();
+                await _pingCaller.PingAsync(
+                    new PingRequest
+                    {
+                        ServiceInstanceId = RuntimeEnvironment.ServiceInstanceId.Value,
+                        InstanceId = RuntimeEnvironment.InstanceId.ToString("N")
+                    }, cancellationToken);
+                Logger.Information($"Ping server @{DateTimeOffset.UtcNow}");
+            }
+            catch (Exception exception)
+            {
+                Logger.Error($"Ping server fail @{DateTimeOffset.UtcNow}", exception);
             }
         }
-
-        protected override bool CanExecute() => !_connectionManager.Ready;
     }
 }

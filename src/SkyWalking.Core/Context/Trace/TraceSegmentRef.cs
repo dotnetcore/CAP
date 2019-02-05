@@ -80,7 +80,7 @@ namespace SkyWalking.Context.Trace
             _type = SegmentRefType.CrossThread;
             _traceSegmentId = contextSnapshot.TraceSegmentId;
             _spanId = contextSnapshot.SpanId;
-            _parentApplicationInstanceId = RuntimeEnvironment.Instance.ApplicationInstanceId.Value;
+            _parentApplicationInstanceId = RuntimeEnvironment.Instance.ServiceInstanceId.Value;
             _entryApplicationInstanceId = contextSnapshot.EntryApplicationInstanceId;
             string entryOperationName = contextSnapshot.EntryOperationName;
             if (entryOperationName.First() == '#')

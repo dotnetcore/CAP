@@ -27,11 +27,14 @@ namespace SkyWalking.Diagnostics
     public class TracingDiagnosticProcessorObserver : IObserver<DiagnosticListener>
     {
         private readonly ILogger _logger;
+        private readonly ILoggerFactory _loggerFactory;
         private readonly IEnumerable<ITracingDiagnosticProcessor> _tracingDiagnosticProcessors;
 
-        public TracingDiagnosticProcessorObserver(IEnumerable<ITracingDiagnosticProcessor> tracingDiagnosticProcessors, ILoggerFactory loggerFactory)
+        public TracingDiagnosticProcessorObserver(IEnumerable<ITracingDiagnosticProcessor> tracingDiagnosticProcessors,
+            ILoggerFactory loggerFactory)
         {
             _logger = loggerFactory.CreateLogger(typeof(TracingDiagnosticProcessorObserver));
+            _loggerFactory = loggerFactory;
             _tracingDiagnosticProcessors = tracingDiagnosticProcessors ??
                                            throw new ArgumentNullException(nameof(tracingDiagnosticProcessors));
         }
@@ -60,7 +63,7 @@ namespace SkyWalking.Diagnostics
         protected virtual void Subscribe(DiagnosticListener listener,
             ITracingDiagnosticProcessor tracingDiagnosticProcessor)
         {
-            listener.Subscribe(new TracingDiagnosticObserver(tracingDiagnosticProcessor));
+            listener.Subscribe(new TracingDiagnosticObserver(tracingDiagnosticProcessor, _loggerFactory));
         }
     }
 }

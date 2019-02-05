@@ -18,16 +18,20 @@
 
 using System;
 using System.Collections.Generic;
+using SkyWalking.Logging;
 
 namespace SkyWalking.Diagnostics
 {
     internal class TracingDiagnosticObserver : IObserver<KeyValuePair<string, object>>
     {
         private readonly TracingDiagnosticMethodCollection _methodCollection;
+        private readonly ILogger _logger;
 
-        public TracingDiagnosticObserver(ITracingDiagnosticProcessor tracingDiagnosticProcessor)
+        public TracingDiagnosticObserver(ITracingDiagnosticProcessor tracingDiagnosticProcessor,
+            ILoggerFactory loggerFactory)
         {
             _methodCollection = new TracingDiagnosticMethodCollection(tracingDiagnosticProcessor);
+            _logger = loggerFactory.CreateLogger(typeof(TracingDiagnosticObserver));
         }
 
         public void OnCompleted()
@@ -42,7 +46,14 @@ namespace SkyWalking.Diagnostics
         {
             foreach (var method in _methodCollection)
             {
-                method.Invoke(value.Key, value.Value);
+                try
+                {
+                    method.Invoke(value.Key, value.Value);
+                }
+                catch (Exception exception)
+                {
+                    _logger.Error("Invoke diagnostic method exception.", exception);
+                }
             }
         }
     }

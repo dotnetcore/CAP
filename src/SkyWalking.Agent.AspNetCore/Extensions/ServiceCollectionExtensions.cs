@@ -33,6 +33,7 @@ using SkyWalking.Logging;
 using SkyWalking.Service;
 using SkyWalking.Transport;
 using SkyWalking.Transport.Grpc;
+using SkyWalking.Transport.Grpc.V6;
 
 namespace SkyWalking.Agent.AspNetCore
 {
@@ -48,28 +49,32 @@ namespace SkyWalking.Agent.AspNetCore
             services.AddSingleton<IContextCarrierFactory, ContextCarrierFactory>();
             services.AddSingleton<ITraceDispatcher, AsyncQueueTraceDispatcher>();
             services.AddSingleton<IExecutionService, TraceSegmentTransportService>();
-            services.AddSingleton<IExecutionService, ServiceDiscoveryService>();
+            services.AddSingleton<IExecutionService, RegisterService>();
+            services.AddSingleton<IExecutionService, PingService>();
             services.AddSingleton<IExecutionService, SamplingRefreshService>();
             services.AddSingleton<ISkyWalkingAgentStartup, SkyWalkingAgentStartup>();
             services.AddSingleton<ISampler>(DefaultSampler.Instance);
-            services.AddSingleton(RuntimeEnvironment.Instance);
+            services.AddSingleton<IRuntimeEnvironment>(RuntimeEnvironment.Instance);
             services.AddSingleton<TracingDiagnosticProcessorObserver>();
             services.AddSingleton<IConfigAccessor, ConfigAccessor>();
             services.AddSingleton<IHostedService, InstrumentationHostedService>();
             services.AddSingleton<IEnvironmentProvider, HostingEnvironmentProvider>();
             services.AddGrpcTransport().AddLogging();
-            services.AddSkyWalkingExtensions().AddAspNetCoreHosting().AddHttpClient().AddSqlClient().AddEntityFrameworkCore(c => c.AddPomeloMysql().AddNpgsql().AddSqlite());
+            services.AddSkyWalkingExtensions().AddAspNetCoreHosting().AddHttpClient().AddSqlClient()
+                .AddEntityFrameworkCore(c => c.AddPomeloMysql().AddNpgsql().AddSqlite());
             return services;
         }
 
         private static IServiceCollection AddGrpcTransport(this IServiceCollection services)
         {
-            services.AddSingleton<ISkyWalkingClient, GrpcClient>();
+            services.AddSingleton<ITraceReporter, TraceReporter>();
             services.AddSingleton<ConnectionManager>();
-            services.AddSingleton<IExecutionService, GrpcStateCheckService>();
+            services.AddSingleton<IPingCaller, PingCaller>();
+            services.AddSingleton<IServiceRegister, ServiceRegister>();
+            services.AddSingleton<IExecutionService, ConnectService>();
             return services;
         }
-        
+
         private static IServiceCollection AddLogging(this IServiceCollection services)
         {
             services.AddSingleton<ILoggerFactory, DefaultLoggerFactory>();

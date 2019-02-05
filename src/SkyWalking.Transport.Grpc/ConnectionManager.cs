@@ -65,20 +65,19 @@ namespace SkyWalking.Transport.Grpc
 
                 try
                 {
-                    var deadLine = DateTime.UtcNow.AddMilliseconds(_config.ConnectTimeout);
-                    await _channel.ConnectAsync(deadLine);
+                    await _channel.ConnectAsync(_config.GetConnectTimeout());
                     _state = ConnectionState.Connected;
-                    _logger.Information($"Connected collector server[{_channel.Target}].");
+                    _logger.Information($"Connected server[{_channel.Target}].");
                 }
                 catch (TaskCanceledException ex)
                 {
                     _state = ConnectionState.Failure;
-                    _logger.Error($"Connect collector timeout.", ex);
+                    _logger.Error($"Connect server timeout.", ex);
                 }
                 catch (Exception ex)
                 {
                     _state = ConnectionState.Failure;
-                    _logger.Error($"Connect collector fail.", ex);
+                    _logger.Error($"Connect server fail.", ex);
                 }
             }
         }

@@ -27,7 +27,7 @@ namespace SkyWalking.Context.Ids
 
         public static ID Generate()
         {
-            if (!RuntimeEnvironment.Instance.ApplicationInstanceId.HasValue)
+            if (!RuntimeEnvironment.Instance.ServiceInstanceId.HasValue)
             {
                 throw new InvalidOperationException();
             }
@@ -35,7 +35,7 @@ namespace SkyWalking.Context.Ids
             IDContext context = threadIdSequence.Value;
 
             return new ID(
-                RuntimeEnvironment.Instance.ApplicationInstanceId.Value,
+                RuntimeEnvironment.Instance.ServiceInstanceId.Value,
                 Thread.CurrentThread.ManagedThreadId,
                 context.NextSeq()
             );

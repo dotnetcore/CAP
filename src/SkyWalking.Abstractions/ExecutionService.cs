@@ -30,11 +30,9 @@ namespace SkyWalking
 
         protected readonly ILogger Logger;
         protected readonly IRuntimeEnvironment RuntimeEnvironment;
-        protected readonly ISkyWalkingClient SkyWalking;
 
-        protected ExecutionService(ISkyWalkingClient skyWalking, IRuntimeEnvironment runtimeEnvironment, ILoggerFactory loggerFactory)
+        protected ExecutionService(IRuntimeEnvironment runtimeEnvironment, ILoggerFactory loggerFactory)
         {
-            SkyWalking = skyWalking;
             RuntimeEnvironment = runtimeEnvironment;
             Logger = loggerFactory.CreateLogger(GetType());
         }

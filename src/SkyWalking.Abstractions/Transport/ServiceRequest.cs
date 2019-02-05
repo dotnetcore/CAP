@@ -2,7 +2,7 @@
  * Licensed to the OpenSkywalking under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The OpenSkywalking licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
@@ -16,21 +16,16 @@
  *
  */
 
-namespace SkyWalking.Transport.Grpc
+using System.Collections.Generic;
+
+namespace SkyWalking.Transport
 {
-    public struct ServerMetadata
+    public class ServiceRequest
     {
-        public string Address { get; }
+        public string ServiceName { get; set; }
 
-        public string Token { get; }
-
-        public string CertificatePath { get; }
-
-        public ServerMetadata(string address, string certificate, string token)
-        {
-            Address = address;
-            CertificatePath = certificate;
-            Token = token;
-        }
-    } 
+        public Dictionary<string, string> Tags { get; set; }
+        
+        public Dictionary<string,string> Properties { get; set; }
+    }
 }

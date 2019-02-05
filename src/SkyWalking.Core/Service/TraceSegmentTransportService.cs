@@ -33,8 +33,8 @@ namespace SkyWalking.Service
         private readonly ITraceDispatcher _dispatcher;
 
         public TraceSegmentTransportService(IConfigAccessor configAccessor, ITraceDispatcher dispatcher,
-            ISkyWalkingClient skyWalking, IRuntimeEnvironment runtimeEnvironment, ILoggerFactory loggerFactory)
-            : base(skyWalking, runtimeEnvironment, loggerFactory)
+            IRuntimeEnvironment runtimeEnvironment, ILoggerFactory loggerFactory)
+            : base(runtimeEnvironment, loggerFactory)
         {
             _dispatcher = dispatcher;
             _config = configAccessor.Get<TransportConfig>();
