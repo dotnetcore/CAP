@@ -30,7 +30,7 @@ namespace SkyWalking.Utilities.Logging
     public class DefaultLoggerFactory : ILoggerFactory
     {
         private const string outputTemplate =
-            @"{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{ApplicationCode}] [{Level}] {SourceContext} : {Message}{NewLine}{Exception}";
+            @"{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{ServiceName}] [{Level}] {SourceContext} : {Message}{NewLine}{Exception}";
 
         private readonly MSLoggerFactory _loggerFactory;
         private readonly LoggingConfig _loggingConfig;

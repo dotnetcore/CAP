@@ -19,6 +19,7 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using SkyWalking.Config;
 using SkyWalking.Logging;
 using SkyWalking.Transport;
 
@@ -27,13 +28,19 @@ namespace SkyWalking.Service
     public class PingService : ExecutionService
     {
         private readonly IPingCaller _pingCaller;
+        private readonly TransportConfig _transportConfig;
 
-        public PingService(IPingCaller pingCaller, IRuntimeEnvironment runtimeEnvironment,
+        public PingService(IConfigAccessor configAccessor, IPingCaller pingCaller,
+            IRuntimeEnvironment runtimeEnvironment,
             ILoggerFactory loggerFactory) : base(
             runtimeEnvironment, loggerFactory)
         {
             _pingCaller = pingCaller;
+            _transportConfig = configAccessor.Get<TransportConfig>();
         }
+
+        protected override bool CanExecute() =>
+            _transportConfig.ProtocolVersion == ProtocolVersions.V6 && base.CanExecute();
 
         protected override TimeSpan DueTime { get; } = TimeSpan.FromSeconds(30);
         protected override TimeSpan Period { get; } = TimeSpan.FromSeconds(60);

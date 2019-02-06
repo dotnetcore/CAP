@@ -82,20 +82,20 @@ namespace SkyWalking.Context.Trace
             _relatedGlobalTraces.Append(distributedTraceId);
         }
 
-        public TraceSegmentRequest Transform()
+        public SegmentRequest Transform()
         {
-            var upstreamSegment = new TraceSegmentRequest
+            var upstreamSegment = new SegmentRequest
             {
                 UniqueIds = _relatedGlobalTraces.GetRelatedGlobalTraces()
                     .Select(x => x.ToUniqueId()).ToArray()
             };
 
-            upstreamSegment.Segment = new TraceSegmentObjectRequest
+            upstreamSegment.Segment = new SegmentObjectRequest
             {
                 SegmentId = TraceSegmentId.Transform(),
                 Spans = _spans.Select(x => x.Transform()).ToArray(),
-                ApplicationId = ApplicationId,
-                ApplicationInstanceId = ApplicationInstanceId
+                ServiceId = ApplicationId,
+                ServiceInstanceId = ApplicationInstanceId
             };
             
             return upstreamSegment;

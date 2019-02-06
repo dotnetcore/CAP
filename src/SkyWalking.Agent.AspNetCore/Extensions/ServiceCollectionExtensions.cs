@@ -33,6 +33,7 @@ using SkyWalking.Logging;
 using SkyWalking.Service;
 using SkyWalking.Transport;
 using SkyWalking.Transport.Grpc;
+using SkyWalking.Transport.Grpc.V5;
 using SkyWalking.Transport.Grpc.V6;
 
 namespace SkyWalking.Agent.AspNetCore
@@ -47,11 +48,12 @@ namespace SkyWalking.Agent.AspNetCore
             }
 
             services.AddSingleton<IContextCarrierFactory, ContextCarrierFactory>();
-            services.AddSingleton<ITraceDispatcher, AsyncQueueTraceDispatcher>();
-            services.AddSingleton<IExecutionService, TraceSegmentTransportService>();
+            services.AddSingleton<ISegmentDispatcher, AsyncQueueSegmentDispatcher>();
+            services.AddSingleton<IExecutionService, SegmentReportService>();
             services.AddSingleton<IExecutionService, RegisterService>();
             services.AddSingleton<IExecutionService, PingService>();
             services.AddSingleton<IExecutionService, SamplingRefreshService>();
+            services.AddSingleton<IExecutionService, ServiceDiscoveryV5Service>();
             services.AddSingleton<ISkyWalkingAgentStartup, SkyWalkingAgentStartup>();
             services.AddSingleton<ISampler>(DefaultSampler.Instance);
             services.AddSingleton<IRuntimeEnvironment>(RuntimeEnvironment.Instance);
@@ -67,7 +69,8 @@ namespace SkyWalking.Agent.AspNetCore
 
         private static IServiceCollection AddGrpcTransport(this IServiceCollection services)
         {
-            services.AddSingleton<ITraceReporter, TraceReporter>();
+            services.AddSingleton<ISkyWalkingClientV5, SkyWalkingClientV5>();
+            services.AddSingleton<ISegmentReporter, SegmentReporter>();
             services.AddSingleton<ConnectionManager>();
             services.AddSingleton<IPingCaller, PingCaller>();
             services.AddSingleton<IServiceRegister, ServiceRegister>();

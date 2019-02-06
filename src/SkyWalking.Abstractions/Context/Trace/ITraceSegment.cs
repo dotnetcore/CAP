@@ -48,6 +48,6 @@ namespace SkyWalking.Context.Trace
 
         void RelatedGlobalTrace(DistributedTraceId distributedTraceId);
 
-        TraceSegmentRequest Transform();
+        SegmentRequest Transform();
     }
 }

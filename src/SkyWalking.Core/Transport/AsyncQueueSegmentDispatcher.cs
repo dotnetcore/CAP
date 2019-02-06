@@ -25,25 +25,25 @@ using SkyWalking.Logging;
 
 namespace SkyWalking.Transport
 {
-    public class AsyncQueueTraceDispatcher : ITraceDispatcher
+    public class AsyncQueueSegmentDispatcher : ISegmentDispatcher
     {
         private readonly ILogger _logger;
         private readonly TransportConfig _config;
-        private readonly ITraceReporter _traceReporter;
-        private readonly ConcurrentQueue<TraceSegmentRequest> _segmentQueue;
+        private readonly ISegmentReporter _segmentReporter;
+        private readonly ConcurrentQueue<SegmentRequest> _segmentQueue;
         private readonly CancellationTokenSource _cancellation;
 
-        public AsyncQueueTraceDispatcher(IConfigAccessor configAccessor, ITraceReporter traceReporter,
+        public AsyncQueueSegmentDispatcher(IConfigAccessor configAccessor, ISegmentReporter segmentReporter,
             ILoggerFactory loggerFactory)
         {
-            _traceReporter = traceReporter;
-            _logger = loggerFactory.CreateLogger(typeof(AsyncQueueTraceDispatcher));
+            _segmentReporter = segmentReporter;
+            _logger = loggerFactory.CreateLogger(typeof(AsyncQueueSegmentDispatcher));
             _config = configAccessor.Get<TransportConfig>();
-            _segmentQueue = new ConcurrentQueue<TraceSegmentRequest>();
+            _segmentQueue = new ConcurrentQueue<SegmentRequest>();
             _cancellation = new CancellationTokenSource();
         }
 
-        public bool Dispatch(TraceSegmentRequest segment)
+        public bool Dispatch(SegmentRequest segment)
         {
             // todo performance optimization for ConcurrentQueue
             if (_config.PendingSegmentLimit < _segmentQueue.Count || _cancellation.IsCancellationRequested)
@@ -64,7 +64,7 @@ namespace SkyWalking.Transport
             //var limit = queued <= _config.PendingSegmentLimit ? queued : _config.PendingSegmentLimit;
             var limit = _config.PendingSegmentLimit;
             var index = 0;
-            var segments = new List<TraceSegmentRequest>(limit);
+            var segments = new List<SegmentRequest>(limit);
             while (index++ < limit && _segmentQueue.TryDequeue(out var request))
             {
                 segments.Add(request);
@@ -72,7 +72,7 @@ namespace SkyWalking.Transport
 
             // send async
             if (segments.Count > 0)
-                _traceReporter.ReportAsync(segments, token);
+                _segmentReporter.ReportAsync(segments, token);
             return Task.CompletedTask;
         }
 

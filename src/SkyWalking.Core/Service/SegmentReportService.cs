@@ -2,7 +2,7 @@
  * Licensed to the OpenSkywalking under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
- * The ASF licenses this file to You under the Apache License, Version 2.0
+ * The OpenSkywalking licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
  * the License.  You may obtain a copy of the License at
  *
@@ -27,12 +27,12 @@ using SkyWalking.Transport;
 
 namespace SkyWalking.Service
 {
-    public class TraceSegmentTransportService : ExecutionService, ITracingContextListener
+    public class SegmentReportService : ExecutionService, ITracingContextListener
     {
         private readonly TransportConfig _config;
-        private readonly ITraceDispatcher _dispatcher;
+        private readonly ISegmentDispatcher _dispatcher;
 
-        public TraceSegmentTransportService(IConfigAccessor configAccessor, ITraceDispatcher dispatcher,
+        public SegmentReportService(IConfigAccessor configAccessor, ISegmentDispatcher dispatcher,
             IRuntimeEnvironment runtimeEnvironment, ILoggerFactory loggerFactory)
             : base(runtimeEnvironment, loggerFactory)
         {

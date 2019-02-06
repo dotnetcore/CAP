@@ -42,7 +42,7 @@ namespace SkyWalking
 
         public async Task StartAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            _logger.Information(Welcome());
+            _logger.Information("Initializing ...");
             foreach (var service in _services)
                 await service.StartAsync(cancellationToken);
             DiagnosticListener.AllListeners.Subscribe(_observer);

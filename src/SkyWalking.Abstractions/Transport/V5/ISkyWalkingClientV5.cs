@@ -16,30 +16,19 @@
  *
  */
 
-namespace SkyWalking.Config
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+
+namespace SkyWalking.Transport
 {
-    [Config("SkyWalking", "Transport")]
-    public class TransportConfig
+    public interface ISkyWalkingClientV5
     {
-        public int PendingSegmentLimit { get; set; } = 30000;
+        Task<NullableValue> RegisterApplicationAsync(string applicationCode, CancellationToken cancellationToken = default(CancellationToken));
 
-        /// <summary>
-        /// Flush Interval Millisecond
-        /// </summary>
-        public int Interval { get; set; } = 3000;
+        Task<NullableValue> RegisterApplicationInstanceAsync(int applicationId, Guid agentUUID, long registerTime, AgentOsInfoRequest osInfoRequest,
+            CancellationToken cancellationToken = default(CancellationToken));
 
-        /// <summary>
-        /// Data queued beyond this time will be discarded.
-        /// </summary>
-        public int PendingSegmentTimeout { get; set; } = 1000;
-
-        public string ProtocolVersion { get; set; } = ProtocolVersions.V6;
-    }
-
-    public static class ProtocolVersions
-    {
-        public static string V5 { get; } = "v5";
-        
-        public static string V6 { get; } = "v6";
+        Task HeartbeatAsync(int applicationInstance, long heartbeatTime, CancellationToken cancellationToken = default(CancellationToken));
     }
 }

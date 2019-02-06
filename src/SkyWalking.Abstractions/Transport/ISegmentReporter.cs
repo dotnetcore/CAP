@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 
 namespace SkyWalking.Transport
 {
-    public interface ITraceReporter
+    public interface ISegmentReporter
     {
-        Task ReportAsync(IReadOnlyCollection<TraceSegmentRequest> segmentRequests,
+        Task ReportAsync(IReadOnlyCollection<SegmentRequest> segmentRequests,
             CancellationToken cancellationToken = default(CancellationToken));
     }
 }

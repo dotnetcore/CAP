@@ -13,6 +13,7 @@ namespace SkyWalking.Service
     {
         private readonly InstrumentationConfig _config;
         private readonly IServiceRegister _serviceRegister;
+        private readonly TransportConfig _transportConfig;
 
         public RegisterService(IConfigAccessor configAccessor, IServiceRegister serviceRegister,
             IRuntimeEnvironment runtimeEnvironment, ILoggerFactory loggerFactory) : base(runtimeEnvironment,
@@ -20,13 +21,15 @@ namespace SkyWalking.Service
         {
             _serviceRegister = serviceRegister;
             _config = configAccessor.Get<InstrumentationConfig>();
+            _transportConfig = configAccessor.Get<TransportConfig>();
         }
 
         protected override TimeSpan DueTime { get; } = TimeSpan.Zero;
 
         protected override TimeSpan Period { get; } = TimeSpan.FromSeconds(30);
 
-        protected override bool CanExecute() => true;
+        protected override bool CanExecute() =>
+            _transportConfig.ProtocolVersion == ProtocolVersions.V6 && !RuntimeEnvironment.Initialized;
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {

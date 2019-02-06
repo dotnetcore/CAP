@@ -21,9 +21,9 @@ using System.Threading.Tasks;
 
 namespace SkyWalking.Transport
 {
-    public interface ITraceDispatcher
+    public interface ISegmentDispatcher
     {
-        bool Dispatch(TraceSegmentRequest segment);
+        bool Dispatch(SegmentRequest segment);
 
         Task Flush(CancellationToken token = default(CancellationToken));
 

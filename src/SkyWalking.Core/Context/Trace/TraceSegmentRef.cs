@@ -147,30 +147,30 @@ namespace SkyWalking.Context.Trace
 
         public int EntryApplicationInstanceId => _entryApplicationInstanceId;
 
-        public TraceSegmentReferenceRequest Transform()
+        public SegmentReferenceRequest Transform()
         {
-            TraceSegmentReferenceRequest traceSegmentReference = new TraceSegmentReferenceRequest();
+            SegmentReferenceRequest segmentReference = new SegmentReferenceRequest();
             if (_type == SegmentRefType.CrossProcess)
             {
-                traceSegmentReference.RefType = (int) SegmentRefType.CrossProcess;
-                traceSegmentReference.NetworkAddress = new StringOrIntValue(_peerId, _peerHost);
+                segmentReference.RefType = (int) SegmentRefType.CrossProcess;
+                segmentReference.NetworkAddress = new StringOrIntValue(_peerId, _peerHost);
             }
             else
             {
-                traceSegmentReference.RefType = (int) SegmentRefType.CrossThread;
-                traceSegmentReference.NetworkAddress = new StringOrIntValue();
+                segmentReference.RefType = (int) SegmentRefType.CrossThread;
+                segmentReference.NetworkAddress = new StringOrIntValue();
             }
 
-            traceSegmentReference.ParentApplicationInstanceId = _parentApplicationInstanceId;
-            traceSegmentReference.EntryApplicationInstanceId = _entryApplicationInstanceId;
-            traceSegmentReference.ParentTraceSegmentId = _traceSegmentId.Transform();
-            traceSegmentReference.ParentSpanId = _spanId;
+            segmentReference.ParentServiceInstanceId = _parentApplicationInstanceId;
+            segmentReference.EntryServiceInstanceId = _entryApplicationInstanceId;
+            segmentReference.ParentSegmentId = _traceSegmentId.Transform();
+            segmentReference.ParentSpanId = _spanId;
 
-            traceSegmentReference.EntryServiceName = new StringOrIntValue(_entryOperationId, _entryOperationName);
+            segmentReference.EntryEndpointName = new StringOrIntValue(_entryOperationId, _entryOperationName);
 
-            traceSegmentReference.ParentServiceName = new StringOrIntValue(_parentOperationId, _parentOperationName);
+            segmentReference.ParentEndpointName = new StringOrIntValue(_parentOperationId, _parentOperationName);
 
-            return traceSegmentReference;
+            return segmentReference;
         }
     }
 }

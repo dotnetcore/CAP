@@ -20,11 +20,11 @@ using System.Collections.Generic;
 
 namespace SkyWalking.Transport
 {
-    public class TraceSegmentRequest
+    public class SegmentRequest
     {
         public IEnumerable<UniqueIdRequest> UniqueIds { get; set; }
 
-        public TraceSegmentObjectRequest Segment { get; set; }
+        public SegmentObjectRequest Segment { get; set; }
     }
 
     public class UniqueIdRequest
@@ -41,13 +41,13 @@ namespace SkyWalking.Transport
         }
     }
 
-    public class TraceSegmentObjectRequest
+    public class SegmentObjectRequest
     {
         public UniqueIdRequest SegmentId { get; set; }
 
-        public int ApplicationId { get; set; }
+        public int ServiceId { get; set; }
 
-        public int ApplicationInstanceId { get; set; }
+        public int ServiceInstanceId { get; set; }
 
         public IList<SpanRequest> Spans { get; set; } = new List<SpanRequest>();
     }
@@ -74,28 +74,28 @@ namespace SkyWalking.Transport
 
         public bool IsError { get; set; }
 
-        public IList<TraceSegmentReferenceRequest> References { get; } = new List<TraceSegmentReferenceRequest>();
+        public IList<SegmentReferenceRequest> References { get; } = new List<SegmentReferenceRequest>();
 
         public IList<KeyValuePair<string, string>> Tags { get; } = new List<KeyValuePair<string, string>>();
 
         public IList<LogDataRequest> Logs { get; } = new List<LogDataRequest>();
     }
 
-    public class TraceSegmentReferenceRequest
+    public class SegmentReferenceRequest
     {
-        public UniqueIdRequest ParentTraceSegmentId { get; set; }
+        public UniqueIdRequest ParentSegmentId { get; set; }
 
-        public int ParentApplicationInstanceId { get; set; }
+        public int ParentServiceInstanceId { get; set; }
 
         public int ParentSpanId { get; set; }
 
-        public int EntryApplicationInstanceId { get; set; }
+        public int EntryServiceInstanceId { get; set; }
 
         public int RefType { get; set; }
 
-        public StringOrIntValue ParentServiceName { get; set; }
+        public StringOrIntValue ParentEndpointName { get; set; }
 
-        public StringOrIntValue EntryServiceName { get; set; }
+        public StringOrIntValue EntryEndpointName { get; set; }
 
         public StringOrIntValue NetworkAddress { get; set; }
     }
