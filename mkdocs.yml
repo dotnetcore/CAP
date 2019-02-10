@@ -5,7 +5,7 @@ nav:
         - Getting Started: user-guide/getting-started.md
         - API Interface: user-guide/api-interface.md
         - Configuration: user-guide/configuration.md
-        - Design Principle: user-guide/design-principle.md.md
+        - Design Principle: user-guide/design-principle.md
         - Implementation Mechanisms: user-guide/implementation-mechanisms.md
         - Distributed Transactions: user-guide/distributed-transactions.md
         - FAQ: user-guide/faq.md
