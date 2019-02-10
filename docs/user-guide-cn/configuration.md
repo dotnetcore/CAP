@@ -1,3 +1,5 @@
+## 配置
+
 CAP 使用 Microsoft.Extensions.DependencyInjection 进行配置的注入，你也可以依赖于 DI 从json文件中读取配置。
 
 ### Cap Options
