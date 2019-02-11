@@ -188,8 +188,8 @@ In RabbitMQ, the application will create Persistent Exchange and Queue at the **
 
 There are two ways to solve this `message lost` issue in RamitMQ:
 
-*i.* Before the deployment of your application,you can create durable Exchange and Queue in RabbitMQ by hand,the default names them are (cap.default.topic, cap.default.group).
+* Before the deployment of your application,you can create durable Exchange and Queue in RabbitMQ by hand,the default names them are (cap.default.topic, cap.default.group).
 
-*ii.* Run all instances in advance to ensure that both Exchange and Queue are initialized.
+* Run all instances in advance to ensure that both Exchange and Queue are initialized.
 
 It is highly recommanded that users adopt the second way,because it is easier to achieve.
