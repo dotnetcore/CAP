@@ -44,10 +44,11 @@ theme:
   #favicon: 'assets/images/favicon.ico'
   feature:
     tabs: true
+
 #Search
-extra:
-  search:
-    language: 'en, zh'
+# extra:
+#   search:
+#     language: 'en, zh'
 
 # Extensions
 markdown_extensions:
