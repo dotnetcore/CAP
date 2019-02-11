@@ -1,7 +1,9 @@
-SkyWalking C#/.NET instrument agent
+SkyAPM C#/.NET instrument agent
 ==========
 
-[Apache SkyWalking](https://github.com/apache/incubator-skywalking) is an APM designed for microservices, cloud native and container-based (Docker, K8s, Mesos) architectures. **SkyWalking-netcore** provides the native support agent in C# and .NETStandard platform, with the helps from Apache SkyWalking committer team.
+<img src="https://skyapmtest.github.io/page-resources/SkyAPM/skyapm.png" alt="Sky Walking logo" height="90px" align="right" />
+
+[Apache SkyWalking](https://github.com/apache/incubator-skywalking) is an APM designed for microservices, cloud native and container-based (Docker, K8s, Mesos) architectures. **SkyAPM-netcore** provides the native support agent in C# and .NETStandard platform, with the helps from Apache SkyWalking committer team.
 
 [![Twitter Follow](https://img.shields.io/twitter/follow/asfskywalking.svg?style=for-the-badge&label=Follow&logo=twitter)](https://twitter.com/AsfSkyWalking)
 
@@ -47,7 +49,7 @@ sudo dotnet skywalking install
 ```
 
 ## How to use
-Set the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` and `DOTNET_ADDITIONAL_DEPS` environment variables to support the activation of the SkyWalking .NET Core Agent. 
+Set the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` and `DOTNET_ADDITIONAL_DEPS` environment variables to support the activation of the SkyAPM .NET Core Agent. 
 
 - Add the assembly name of `SkyWalking.Agent.AspNetCore` to the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable.
 - On Windows, set the `DOTNET_ADDITIONAL_DEPS` environment variable to `%PROGRAMFILES%\dotnet\x64\additionalDeps\skywalking.agent.aspnetcore`. On macOS/Linux, set the `DOTNET_ADDITIONAL_DEPS` environment variable to `/usr/local/share/dotnet/x64/additionalDeps/skywalking.agent.aspnetcore`.
@@ -96,7 +98,7 @@ dotnet skywalking config sample_app 192.168.0.1:11800
 [What are we going to do next?](/docs/roadmap.md)
 
 # Contributing
-This section is in progress here: [Contributing to skywalking-netcore](/CONTIBUTING.md)
+This section is in progress here: [Contributing to SkyAPM-netcore](/CONTIBUTING.md)
 
 # Contact Us
 * Submit an issue
