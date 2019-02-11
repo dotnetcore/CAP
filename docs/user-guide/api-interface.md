@@ -6,7 +6,7 @@ CAP only has one interface,It is `ICapPublisher`, You can get its instance from 
 
 You can use the `Publish<T>` or `PublishAsync<T>`  methods defined in the `ICapPublisher` interface to send the event messages.
 
-```cs
+```c#
 public class PublishController : Controller
 {
     private readonly ICapPublisher _capBus;
@@ -48,7 +48,7 @@ public class PublishController : Controller
 ```
 The following is the signature of the of the PublishAsync method
 
-```cs
+```c#
 PublishAsync<T>(string name, T object)
 ```
 
@@ -58,7 +58,7 @@ and then write messages into the `Cap.Published` message table.
 In some situations,you may need a callback when a message is sent out, you can use the follwing
 overload of the `PublishAsync<T>` method:
 
-```cs
+```c#
 PublishAsync<T>(string name, T object, string callBackName)
 ```
 
@@ -80,7 +80,7 @@ The following two blocks of code snippet demonstrate how to use transactions in 
 
 ####  EntityFramework
 
-```cs
+```c#
  using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false)
 {
     // Your business logic。
@@ -99,7 +99,7 @@ During the course,the message content will be serialized as json and stored in t
 
 #### Dapper
 
-```cs
+```c#
 using (var connection = new MySqlConnection(ConnectionString))
 {
     using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
@@ -123,7 +123,7 @@ using (var connection = new MySqlConnection(ConnectionString))
 
 Use `CapSubscribe[""]` to decorate a method so that it can  subscribe messages published by CAP.
 
-```cs
+```c#
 [CapSubscribe("xxx.services.bar")]
 public void BarMessageProcessor()
 {
@@ -131,7 +131,7 @@ public void BarMessageProcessor()
 ```
 You can also use multiple `CapSubscribe[""]` to decorate a method so that you can subscribe messages from different sources accordingly.
 
-```cs
+```c#
 [CapSubscribe("xxx.services.bar")]
 [CapSubscribe("xxx.services.foo")]
 public void BarAndFooMessageProcessor()
@@ -162,7 +162,7 @@ If you do not specify any group when subscribing,CAP will put the subscriber int
 
 the following is a demo shows how to use group when subscribing.
 
-```cs
+```c#
 [CapSubscribe("xxx.services.foo", Group = "moduleA")]
 public void FooMessageProcessor()
 {

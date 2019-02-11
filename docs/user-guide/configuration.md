@@ -140,7 +140,7 @@ Note that if you are using EntityFramewrok, you do not use this configuration it
 
 CAP uses PostgreSql configuration functions for CapOptions extensions, so the configuration usage for PostgreSql is as follows:
 
-```cs
+```c#
 services.AddCap(capOptions => {
     capOptions.UsePostgreSql(postgreOptions => {
        // postgreOptions.ConnectionString

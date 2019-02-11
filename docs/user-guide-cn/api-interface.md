@@ -4,7 +4,7 @@ CAP 的 API 接口只有一个，就是 `ICapPublisher` 接口，你可以从 DI
 
 你可以使用 `ICapPublisher` 接口中的 `Publish<T>` 或者 `PublishAsync<T>` 方法来发送消息：
 
-```cs
+```c#
 public class PublishController : Controller
 {
     private readonly ICapPublisher _capBus;
@@ -109,7 +109,7 @@ public DateTime ShowPublishTimeAndReturnExecuteTime(DateTime time)
 
 * EntityFramework
 
-```cs
+```c#
 using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false)
 {
     //业务代码
@@ -128,7 +128,7 @@ using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: fals
 
 * Dapper
 
-```cs
+```c#
 using (var connection = new MySqlConnection(ConnectionString))
 {
     using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
@@ -201,7 +201,7 @@ public void BarAndFooMessageProcessor()
 
 以下是使用组进行订阅的示例：
 
-```cs
+```c#
 [CapSubscribe("xxx.services.foo", Group = "moduleA")]
 public void FooMessageProcessor()
 {

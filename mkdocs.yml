@@ -1,7 +1,17 @@
+# Project information
 site_name: CAP
+site_url: https://cap.dotnet-chain.org
+site_description: Project documentation with Markdown.
+site_author: CAP Team
+repo_name: 'dotnetcore/CAP'
+repo_url: 'https://github.com/dotnetcore/cap'
+
+# Copyright
+copyright: Copyright &copy; 2017 <a href="https://github.com/dotnetcore">.NET Core Community</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
+
 nav:
     - Home: index.md
-    - <img src="https://www.countryflags.io/us/flat/16.png">User Guide:
+    - User Guide:
         - Getting Started: user-guide/getting-started.md
         - API Interface: user-guide/api-interface.md
         - Configuration: user-guide/configuration.md
@@ -9,7 +19,7 @@ nav:
         - Implementation Mechanisms: user-guide/implementation-mechanisms.md
         - Distributed Transactions: user-guide/distributed-transactions.md
         - FAQ: user-guide/faq.md
-    - <img src="https://www.countryflags.io/cn/flat/16.png">使用指南:
+    - 使用指南:
         - 快速开始: user-guide-cn/getting-started.md
         - API 接口: user-guide-cn/api-interface.md
         - 配置: user-guide-cn/configuration.md
@@ -17,8 +27,55 @@ nav:
         - 实现: user-guide-cn/implementation-mechanisms.md
         - 分布式事务: user-guide-cn/distributed-transactions.md
         - FAQ: user-guide-cn/faq.md
-    - About: about.md
-theme: cinder
+    - About:
+        - Release Notes: about/release-notes.md
+        - Contributing: about/contributing.md
+        - Contact Us: about/contact-us.md
+
+#theme: material
+theme:
+  name: 'material'
+  palette:
+    primary: 'purple'
+    accent: 'indigo'
+  logo:
+    icon: 'cloud'
+  language: 'en'
+  #favicon: 'assets/images/favicon.ico'
+  feature:
+    tabs: true
+#Search
+extra:
+  search:
+    language: 'en, zh'
+
+# Extensions
 markdown_extensions:
-  - admonition
-repo_url: "https://github.com/dotnetcore/CAP"
+  - markdown.extensions.admonition
+  - markdown.extensions.codehilite:
+      guess_lang: true
+  - markdown.extensions.def_list
+  - markdown.extensions.footnotes
+  - markdown.extensions.meta
+  - markdown.extensions.toc:
+      permalink: true
+  - pymdownx.arithmatex
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.critic
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_generator: !!python/name:pymdownx.emoji.to_svg
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: dotnetcore
+      repo: cap
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde

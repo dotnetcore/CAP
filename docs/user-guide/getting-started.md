@@ -59,7 +59,7 @@ PM> Install-Package DotNetCore.CAP.MongoDB
 
 In an ASP.NET Core program, you can configure the services used by the CAP in the `Startup.cs` file `ConfigureServices()`:
 
-```cs
+```c#
 public void ConfigureServices(IServiceCollection services)
 {
     //......

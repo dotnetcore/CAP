@@ -16,7 +16,7 @@ defining a prefix name of table in `ConfigureServices` method。
  
 codes exsample：
 
-```cs
+```c#
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddCap(x =>
