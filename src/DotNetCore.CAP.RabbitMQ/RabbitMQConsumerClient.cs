@@ -13,7 +13,7 @@ namespace DotNetCore.CAP.RabbitMQ
     internal sealed class RabbitMQConsumerClient : IConsumerClient
     {
         private readonly IConnectionChannelPool _connectionChannelPool;
-        private readonly string _exchageName;
+        private readonly string _exchangeName;
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
         private IModel _channel;
@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _queueName = queueName;
             _connectionChannelPool = connectionChannelPool;
             _rabbitMQOptions = options;
-            _exchageName = connectionChannelPool.Exchange;
+            _exchangeName = connectionChannelPool.Exchange;
 
             InitClient();
         }
@@ -48,7 +48,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
             foreach (var topic in topics)
             {
-                _channel.QueueBind(_queueName, _exchageName, topic);
+                _channel.QueueBind(_queueName, _exchangeName, topic);
             }
         }
 
@@ -95,7 +95,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _channel = _connection.CreateModel();
             
             _channel.ExchangeDeclare(
-                _exchageName,
+                _exchangeName,
                 RabbitMQOptions.ExchangeType,
                 true);
 
