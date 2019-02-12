@@ -1,14 +1,14 @@
 <Project>
   <Import Project="version.props" />
   <PropertyGroup>
-    <Authors>SkyWalking Committer Team</Authors>
-    <Product>skywalking-netcore</Product>
-    <owners>skywalking</owners>
+    <Authors>Skyapm Team</Authors>
+    <Product>Skyapm-dotnet</Product>
+    <owners>Skyapm</owners>
     <PackageIconUrl>https://avatars2.githubusercontent.com/u/32165127</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/OpenSkywalking/skywalking-netcore</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/OpenSkywalking/skywalking-netcore/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/SkyAPM/SkyAPM-dotnet</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/SkyAPM/SkyAPM-dotnet/blob/master/LICENSE</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>https://github.com/OpenSkywalking/skywalking-netcore</RepositoryUrl>
+    <RepositoryUrl>https://github.com/SkyAPM/SkyAPM-dotnet</RepositoryUrl>
     <GenerateAssemblyConfigurationAttribute>True</GenerateAssemblyConfigurationAttribute>
     <GenerateAssemblyCompanyAttribute>True</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>True</GenerateAssemblyProductAttribute>
