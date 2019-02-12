@@ -177,12 +177,12 @@ The following situations you shoud be aware of.
 
 **① the subscription side has not started yet when publishing a message**
 
-#### Kafka:
+#### Kafka
 
 In Kafka,published messages stored in the Persistent log files,so messages will not lost.when the subscription side started,it can still consume the message.
 
 
-#### RabbitMQ:
+#### RabbitMQ
 
 In RabbitMQ, the application will create Persistent Exchange and Queue at the **first start**, CAP will create a new consumer queue for each consumer group,**because the application started but the subscription side hasn's start yet so there has no queue,thus the message can not be persited,and the published messages will lost**
 

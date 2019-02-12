@@ -8,12 +8,15 @@ In the process of building an SOA or MicroService system, we usually need to use
 
 You can also use the CAP as an EventBus. The CAP provides a simpler way to implement event publishing and subscriptions. You do not need to inherit or implement any interface during the process of subscription and sending.
 
-This is a diagram of the CAP working in the ASP.NET Core MicroService architecture:
+!!! Tip "CAP implements the Outbox Pattern described in the [eShop ebook](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus)"
+    <img src="https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/media/image24.png">
 
-![cap.png](img/architecture.png)
+    > Atomicity when publishing events to the event bus with a worker microservice
 
-!!! note
-    CAP implements the Outbox Pattern described in the [eShop ebook](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus).
+
+For detailed instructions see the [getting started guide][1].
+
+  [1]: user-guide/getting-started.md
 
 ## Contributing
 
@@ -21,9 +24,8 @@ One of the easiest ways to contribute is to participate in discussions and discu
 
 If you have any question or problems, please report them on the CAP repository:
 
-<a href="https://github.com/dotnetcore/cap/issues/new"><button class="btn btn-primary btn-lg" type="submit"><i class="fab fa-github fa-2x"></i> Report Issue</button></a>
-<a href="https://github.com/dotnetcore/cap/issues"><button class="btn btn-primary btn-lg" type="submit"> Active Issues <i class="fab fa-github fa-2x"></i></button></a>
-
+<a href="https://github.com/dotnetcore/cap/issues/new"><button data-md-color-primary="purple"><i class="fa fa-github fa-2x"></i> Report Issue</button></a>
+<a href="https://github.com/dotnetcore/cap/issues"><button data-md-color-primary="purple" type="submit"> Active Issues <i class="fa fa-github fa-2x"></i></button></a>
 ## License
 
 CAP is licensed under the [MIT license](https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt).
