@@ -1,6 +1,6 @@
 # Project information
 site_name: CAP
-site_url: https://cap.dotnet-chain.org
+site_url: https://cap.dotnet-chain.com
 site_description: Project documentation with Markdown.
 site_author: CAP Team
 repo_name: 'dotnetcore/CAP'
@@ -37,16 +37,24 @@ theme:
   name: 'material'
   palette:
     primary: 'purple'
-    accent: 'indigo'
-  logo:
-    icon: 'cloud'
+    accent: 'indigo'  
   language: 'en'
+  #logo: 'img/logo.png'
   #favicon: 'assets/images/favicon.ico'
   feature:
     tabs: true
 
-#Search
-# extra:
+#Customization
+extra:
+  manifest: 'manifest.webmanifest'
+  disqus: 'cap-1'
+  social:
+    - type: 'github'
+      link: 'https://github.com/dotnetcore/cap'
+    - type: 'twitter'
+      link: 'https://twitter.com/ncc_community'
+    - type: 'weibo'
+      link: 'https://weibo.com/dotnetcore'
 #   search:
 #     language: 'en, zh'
 
