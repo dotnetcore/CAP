@@ -10,29 +10,6 @@ Thank you for reporting an issue.
 1. 提交问题前，请先阅读 http://docs.dotnet-china.org/CAP/ 上的文档。
 2. 我们推荐如果是小问题（错别字修改，小的 bug fix）直接提交 PR。
 3. 如果是一个新需求，请提供：详细需求描述。
-4. 如果是一个 BUG，请提供：复现步骤，错误日志以及相关配置，并尽量填写下面的模板中的条目。
+4. 如果是一个 BUG，请提供：复现步骤，错误日志以及相关配置。
 6. 如果可能，请使用【英文】来提交你的问题。
 -->
-
-Please answer these questions before submitting your issue.
-
-- Why do you submit this issue?
-- [ ] Question or discussion
-- [ ] Bug
-- [ ] Requirement
-- [ ] Feature or performance improvement
-
-___
-### Question
-- What do you want to know?
-
-___
-### Bug
-- Which version of CAP, OS and .NET Core?
-
-- What happen?
-If possible, provide a way for reproducing the error. e.g. demo application, component version.
-
-___
-### Requirement or improvement
-- Please describe about your requirements or improvement suggestions.
