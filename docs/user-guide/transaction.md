@@ -1,6 +1,8 @@
+# Transaction
+
 For the processing of distributed transactions, this CAP library matches the "Asynchronous recovery events" scenario.
 
-### Asynchronous recovery events
+## Asynchronous recovery events
 
 As known as the name "native message table", this is a classic solution, originally from EBay, and referenced links about it are at the end of this section. This is also one of the most popular solutions in the business development. 
 

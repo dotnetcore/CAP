@@ -1,6 +1,7 @@
+# IMPLEMENTATION
 Users can get a ICapPublisher interface from the ASP.NET Core DI container to publish a message .It is initialized by  configurations in the `ConfigureServices` and `configure` method in the Startup.cs file,just like the way to initialize a `MiddleWare` in ASP.NET Core.
 
-### Message Table
+## Message Table
 
 After initialized, CAP will create two tables in the client side,they are `Cap.Published` and `Cap.Received`. Please noted that different databases may deal letter case differently,if you do not explicitly specify the Schema or the TableName Prefix before project startup,the default names are the ones mentioned above.
 
@@ -22,7 +23,7 @@ Version later than 2.2,  CAP will retry after 4 minutes if the status is `Schedu
 
 >Before version 2.2,CAP retry  100 times for `Failed` messages by default.
 
-### Message format5
+## Message format
 
 CAP use JSON to transfer message,the following is CAP's messaging object model:
 
@@ -52,7 +53,7 @@ CallbackName | the subscriber which is used to call back | string
 
 CAP use the same algorithms as MongoDB ObjectId's distributed Id  generation algorithms.
 
-### EventBus 
+## EventBus 
 
 EventBus adopt the publish-subscribe messaging style to communicate with different components,and there is no need to register it in component explicitly.
 
@@ -67,7 +68,7 @@ We say that CAP implement all the features in Eventbus,EventBus has two features
 
 In CAP,send a message can be regarded as an "Event",When CAP is used in an ASP.NET Core applicaiton,the application has the ablity to publish as well as receive messages.
 
-### Retry
+## Retry
 
 Retry plays a very important role in CAP's infrastructure,CAP will retry for Failed messages.CAP has the following retry  strategies:
 
@@ -83,7 +84,7 @@ As metioned above,when the retry count comes to a certain number,CAP will not re
 
 When consumer received messages,specified method in the consumer will be executed,if exceptions are thrown during this course,CAP will retry,the retry  strategy is the same as above `Retry on sending`.
 
-### Data clean out
+## Data clean out
 
 table to store messages in database has an `ExpiresAt` field to mark the expiration time of the message. CAP will set `ExpiresAt` value as **1 hour** for  `Successed` messages and **15days** for `Failed` messages.
 

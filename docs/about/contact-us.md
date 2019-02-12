@@ -1,8 +1,16 @@
 
-## Contact Us
+# Contact Us
 
-* Submit an issue
+## Authors
+
+* Author: [@yang-xiaodong](https://github.com/yang-xiaodong)
 * Email: yangxiaodong1214@126.com
+* Blogs: https://saborboard.cnblogs.com
 
-## CAP Team
+## NCC Organization
+
+* Email: dotnetcn@outlook.com
+* Twitter: https://twitter.com/ncc_community
+* Weibo: https://weibo.com/dotnetcore
+
 

@@ -1,8 +1,8 @@
-## Configuration
+# Configuration
 
 CAP uses Microsoft.Extensions.DependencyInjection for configuration injection. 
 
-### Cap Options
+## CAP Configs
 
 You can use the following methods to configure some configuration items in the CAP, for example:
 
@@ -27,7 +27,7 @@ CapOptions provides a callback function for `FailedCallback` to handle failed me
 
 The type of FailedCallback is `Action<MessageType,string,string>`. The first parameter is the message type (send or receive), the second parameter is the name of the message, and the third parameter is the content of the message.
 
-### RabbitMQ Options
+## RabbitMQ Configs
 
 The CAP uses the CapOptions extension to implement the RabbitMQ configuration function. Therefore, the configuration of the RabbitMQ is used as follows:
 
@@ -53,7 +53,7 @@ SocketReadTimeout | RabbitMQ message read timeout | int | 30,000 milliseconds
 SocketWriteTimeout | RabbitMQ message write timeout | int | 30,000 milliseconds
 QueueMessageExpires | Automatic deletion of messages in queue | int | (10 days) ms
 
-### Kafka Options
+### Kafka Configs
 
 CAP adopts Kafka's configuration function to expand CapOptions, so the configuration usage for Kafka is as follows:
 
@@ -71,7 +71,7 @@ services.AddCap(capOptions => {
 [https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
 
 
-### EntityFramework Options
+### EntityFramework Configs
 
 If you are using Entityframework as a message persistence store, then you can customize some configuration when configuring the CAP EntityFramework configuration item.
 
@@ -94,7 +94,7 @@ Schema | Cap table schema | string | Cap (SQL Server)
 Schema | Cap table schema | string | cap (PostgreSql)
 TableNamePrefix | Cap table name prefix | string | cap (MySql)
 
-### SqlServer Options
+### SqlServer Configs
 
 Note that if you are using EntityFramewrok, you do not use this configuration item.
 
@@ -114,7 +114,7 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 Schema | Cap Table Schema | string | Cap
 ConnectionString | Database connection string | string | null
 
-### MySql Options
+### MySql Configs
 
 Note that if you are using EntityFramewrok, you do not use this configuration item.
 
@@ -134,7 +134,7 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 TableNamePrefix | Cap table name prefix | string | cap
 ConnectionString | Database connection string | string | null
 
-### PostgreSql Options
+### PostgreSql Configs
 
 Note that if you are using EntityFramewrok, you do not use this configuration item.
 

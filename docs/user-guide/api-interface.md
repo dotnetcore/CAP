@@ -6,7 +6,7 @@ CAP only has one interface,It is `ICapPublisher`, You can get its instance from 
 
 You can use the `Publish<T>` or `PublishAsync<T>`  methods defined in the `ICapPublisher` interface to send the event messages.
 
-```c#
+```c# hl_lines="19 33"
 public class PublishController : Controller
 {
     private readonly ICapPublisher _capBus;
@@ -81,7 +81,7 @@ The following two blocks of code snippet demonstrate how to use transactions in 
 ####  EntityFramework
 
 ```c#
- using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false)
+using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false)
 {
     // Your business logic。
 

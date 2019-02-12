@@ -1,6 +1,4 @@
-# Introduction
-
-CAP is a library based on .Net standard, which is a solution to deal with distributed transactions, also has the function of EventBus, it is lightweight, easy to use, and efficiently.
+# Getting Stared
 
 ## Usage Scenarios
 
@@ -194,6 +192,3 @@ public void ConfigureServices(IServiceCollection services)
     });
 }
 ```
-
-
-

@@ -15,9 +15,9 @@ nav:
         - Getting Started: user-guide/getting-started.md
         - API Interface: user-guide/api-interface.md
         - Configuration: user-guide/configuration.md
-        - Design Principle: user-guide/design-principle.md
-        - Implementation Mechanisms: user-guide/implementation-mechanisms.md
-        - Distributed Transactions: user-guide/distributed-transactions.md
+        - Design Principle: user-guide/design.md
+        - Implementation Mechanisms: user-guide/implementation.md
+        - Distributed Transactions: user-guide/transaction.md
         - FAQ: user-guide/faq.md
     - 使用指南:
         - 快速开始: user-guide-cn/getting-started.md
@@ -55,6 +55,7 @@ markdown_extensions:
   - markdown.extensions.admonition
   - markdown.extensions.codehilite:
       guess_lang: true
+      linenums: true
   - markdown.extensions.def_list
   - markdown.extensions.footnotes
   - markdown.extensions.meta

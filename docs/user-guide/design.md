@@ -1,6 +1,6 @@
-## Design Principle
+# Design
 
-### Motivation
+## Motivation
 
 With the popularity of microservices architecture, more and more people are trying to use microservices to architect their systems. In this we encounter problems such as distributed transactions. To solve these problems, I did not find simplicity and Easy to use solution, so I decided to create such a library to solve this problem.
 
@@ -8,7 +8,7 @@ The original CAP was to solve the transaction problems in the distributed system
 
 Now in addition to solving distributed transaction problems, CAP's other important function is to use it as an EventBus. It has all of the features of EventBus and provides a more simplified way to handle publish/subscribe in EventBus.
 
-### Persistence
+## Persistence
 
 The CAP relies on the local database for persistence of messages. The CAP uses this method to deal with situations in which all messages are lost due to environmental or network anomalies. The reliability of messages is the cornerstone of distributed transactions, so messages cannot be lost under any circumstances.
 
@@ -28,7 +28,7 @@ For message persistence in RabbitMQ, CAP uses a consumer queue with message pers
 
 Since Kafka is inherently designed to persist messages using files, Kafka ensures that messages are correctly persisted without loss after the message enters Kafka.
 
-### Communication Data Streams
+## Communication Data Streams
 
 The flow of messages in the CAP is roughly as follows:
 
@@ -42,7 +42,7 @@ The flow of messages in the CAP is roughly as follows:
 
 In the 2.2 and later versions, we adjusted the flow of some messages. We removed the Queue table in the database and used the memory queue instead. For details, see: [Improve the implementation mechanism of queue mode](https://github.com/dotnetcore/CAP/issues/96)
  
-### Consistency
+## Consistency
 
 The CAP uses the ultimate consistency as a consistent solution. This solution follows the CAP theory. The following is the description of the CAP theory.
 

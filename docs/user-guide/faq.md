@@ -1,16 +1,16 @@
-## FAQ
+# FAQ
 
-### Any IM group(e.g Tencent QQ group) to learn and chat about CAP?
+## Any IM group(e.g Tencent QQ group) to learn and chat about CAP?
 
 None for that. Better than wasting much time in IM group, I hope developers could be capable of independent thinking more, and solve problems yourselves with referenced documents, even create issues or send emails when errors are remaining present.
 
-###  Does it require certain different databases, one each for productor and resumer in CAP?
+##  Does it require certain different databases, one each for productor and resumer in CAP?
 
 Not requird differences necessary, a given advice is that using a special database for each program.
 
 Otherwise, look at Q&A below.
 
-###  How to use the same database for different programs?
+##  How to use the same database for different programs?
 
 defining a prefix name of table in `ConfigureServices` method。
  
@@ -31,9 +31,10 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-NOTE：different prefixed names cause SLB to no effect.
+!!!NOTE
+    Different prefixed names cause SLB to no effect.
 
-###  If don't care about message missing, can message productor exist without any database, for the reason of sending message only.
+##  If don't care about message missing, can message productor exist without any database, for the reason of sending message only.
 
 Not yet.
 
