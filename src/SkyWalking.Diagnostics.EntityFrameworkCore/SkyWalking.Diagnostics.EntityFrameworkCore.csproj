@@ -4,10 +4,10 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>SkyWalking.Diagnostics.EntityFrameworkCore</AssemblyName>
-    <AssemblyTitle>SkyWalking.Diagnostics.EntityFrameworkCore</AssemblyTitle>
-    <PackageId>SkyWalking.Diagnostics.EntityFrameworkCore</PackageId>
-    <PackageTags>SkyWalking;APM;EntityFrameworkCore;EF</PackageTags>
+    <AssemblyName>$(PackagePrefix).Diagnostics.EntityFrameworkCore</AssemblyName>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.EntityFrameworkCore</AssemblyTitle>
+    <PackageId>$(PackagePrefix).Diagnostics.EntityFrameworkCore</PackageId>
+    <PackageTags>$(PackagePrefix);APM;EntityFrameworkCore;EF</PackageTags>
     <Description>SkyWalking.Diagnostics.EntityFrameworkCore notifies of EF requests.</Description>
     <RootNamespace>SkyWalking.Diagnostics.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>

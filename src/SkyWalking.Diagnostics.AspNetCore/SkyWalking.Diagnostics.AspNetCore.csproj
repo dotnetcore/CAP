@@ -3,11 +3,11 @@
     <Import Project="..\..\build\common.props" />
 
     <PropertyGroup>
-        <Description>SkyWalking.Diagnostics.AspNetCore notifies Web Http requests.</Description>
-        <AssemblyTitle>SkyWalking.Diagnostics.AspNetCore</AssemblyTitle>
+        <Description>$(PackagePrefix).Diagnostics.AspNetCore notifies Web Http requests.</Description>
+        <AssemblyTitle>$(PackagePrefix).Diagnostics.AspNetCore</AssemblyTitle>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <AssemblyName>SkyWalking.Diagnostics.AspNetCore</AssemblyName>
-        <PackageId>SkyWalking.Diagnostics.AspNetCore</PackageId>
+        <AssemblyName>$(PackagePrefix).Diagnostics.AspNetCore</AssemblyName>
+        <PackageId>$(PackagePrefix).Diagnostics.AspNetCore</PackageId>
         <PackageTags>SkyWalking;APM;Diagnostics;AspNetCore</PackageTags>
         <PackageReleaseNotes>
         </PackageReleaseNotes>

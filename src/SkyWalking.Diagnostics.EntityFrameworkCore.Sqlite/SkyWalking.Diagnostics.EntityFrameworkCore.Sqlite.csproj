@@ -4,11 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite</AssemblyName>
-    <AssemblyTitle>SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite</AssemblyTitle>
-    <PackageId>SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite</PackageId>
+    <AssemblyName>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Sqlite</AssemblyName>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Sqlite</AssemblyTitle>
+    <PackageId>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Sqlite</PackageId>
     <PackageTags>SkyWalking;APM;EntityFrameworkCore;EF</PackageTags>
-    <Description>SkyWalking.Diagnostics.EntityFrameworkCore.Sqlite notifies of EF requests.</Description>
+    <Description>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Sqlite notifies of EF requests.</Description>
     <RootNamespace>SkyWalking.Diagnostics.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

@@ -7,10 +7,10 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <Description>SkyWalking.Diagnostics.CAP notifies of CAP messages.</Description>
-    <AssemblyTitle>SkyWalking.Diagnostics.CAP</AssemblyTitle>
-    <AssemblyName>SkyWalking.Diagnostics.CAP</AssemblyName>
-    <PackageId>SkyWalking.Diagnostics.CAP</PackageId>
+    <Description>$(PackagePrefix).Diagnostics.CAP notifies of CAP messages.</Description>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.CAP</AssemblyTitle>
+    <AssemblyName>$(PackagePrefix).Diagnostics.CAP</AssemblyName>
+    <PackageId>$(PackagePrefix).Diagnostics.CAP</PackageId>
     <PackageTags>SkyWalking;APM;CAP</PackageTags>
     <RootNamespace>SkyWalking.Diagnostics.CAP</RootNamespace>
   </PropertyGroup>

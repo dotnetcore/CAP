@@ -1,9 +1,10 @@
 <Project>
   <Import Project="version.props" />
   <PropertyGroup>
-    <Authors>Skyapm Team</Authors>
-    <Product>Skyapm-dotnet</Product>
-    <owners>Skyapm</owners>
+    <Authors>SkyAPM Team</Authors>
+    <Product>SkyAPM</Product>
+    <owners>SkyAPM</owners>
+    <PackagePrefix>SkyAPM</PackagePrefix>
     <PackageIconUrl>https://avatars2.githubusercontent.com/u/32165127</PackageIconUrl>
     <PackageProjectUrl>https://github.com/SkyAPM/SkyAPM-dotnet</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/SkyAPM/SkyAPM-dotnet/blob/master/LICENSE</PackageLicenseUrl>

@@ -2,11 +2,11 @@
 
     <Import Project="..\..\build\common.props" />
     <PropertyGroup>
-        <Description>Microsoft.Utilities.Logging support for SkyWalking.</Description>
-        <AssemblyTitle>SkyWalking.Utilities.Logging</AssemblyTitle>
+        <Description>Microsoft.Utilities.Logging support for $(Product).</Description>
+        <AssemblyTitle>$(PackagePrefix).Utilities.Logging</AssemblyTitle>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <AssemblyName>SkyWalking.Utilities.Logging</AssemblyName>
-        <PackageId>SkyWalking.Utilities.Logging</PackageId>
+        <AssemblyName>$(PackagePrefix).Utilities.Logging</AssemblyName>
+        <PackageId>$(PackagePrefix).Utilities.Logging</PackageId>
         <PackageTags>SkyWalking;APM;Diagnostics</PackageTags>
         <PackageReleaseNotes>
         </PackageReleaseNotes>

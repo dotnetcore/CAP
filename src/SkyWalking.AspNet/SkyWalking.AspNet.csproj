@@ -4,11 +4,11 @@
     <TargetFrameworks>net461;net462;net47;net471</TargetFrameworks>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>SkyWalking.AspNet</AssemblyName>
-    <AssemblyTitle>SkyWalking.AspNet</AssemblyTitle>
-    <PackageId>SkyWalking.AspNet</PackageId>
+    <AssemblyName>$(PackagePrefix).AspNet</AssemblyName>
+    <AssemblyTitle>$(PackagePrefix).AspNet</AssemblyTitle>
+    <PackageId>$(PackagePrefix).AspNet</PackageId>
     <PackageTags>SkyWalking;APM;Tracing</PackageTags>
-    <Description>SkyWalking ASP.NET Agent.</Description>
+    <Description>$(PackagePrefix) ASP.NET Agent.</Description>
     <RootNamespace>SkyWalking.AspNet</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

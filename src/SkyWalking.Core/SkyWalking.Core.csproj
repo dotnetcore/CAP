@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
-    <Description>SkyWalking core components.</Description>
-    <AssemblyTitle>SkyWalking.Core</AssemblyTitle>
-    <AssemblyName>SkyWalking.Core</AssemblyName>
-    <PackageId>SkyWalking.Core</PackageId>
+    <Description>$(Product) core components.</Description>
+    <AssemblyTitle>$(PackagePrefix).Core</AssemblyTitle>
+    <AssemblyName>$(PackagePrefix).Core</AssemblyName>
+    <PackageId>$(PackagePrefix).Core</PackageId>
     <PackageTags>SkyWalking;APM</PackageTags>
     <PackageReleaseNotes>
     </PackageReleaseNotes>

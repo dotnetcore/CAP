@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
-    <Description>SkyWalking Core abstractions and interfaces for apm agent.</Description>
-    <AssemblyTitle>SkyWalking.Abstractions</AssemblyTitle>
-    <AssemblyName>SkyWalking.Abstractions</AssemblyName>
-    <PackageId>SkyWalking.Abstractions</PackageId>
+    <Description>$(Product) Core abstractions and interfaces for apm agent.</Description>
+    <AssemblyTitle>$(PackagePrefix).Abstractions</AssemblyTitle>
+    <AssemblyName>$(PackagePrefix).Abstractions</AssemblyName>
+    <PackageId>$(PackagePrefix).Abstractions</PackageId>
     <PackageTags>SkyWalking;APM</PackageTags>
     <PackageReleaseNotes>
     </PackageReleaseNotes>

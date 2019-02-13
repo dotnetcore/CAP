@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
-    <Description>SkyWalking.Diagnostics.SqlClient notifies outgoing SqlClient requests.</Description>
-    <AssemblyTitle>SkyWalking.Diagnostics.SqlClient</AssemblyTitle>
+    <Description>$(PackagePrefix).Diagnostics.SqlClient notifies outgoing SqlClient requests.</Description>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.SqlClient</AssemblyTitle>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>SkyWalking.Diagnostics.SqlClient</AssemblyName>
-    <PackageId>SkyWalking.Diagnostics.SqlClient</PackageId>
+    <AssemblyName>$(PackagePrefix).Diagnostics.SqlClient</AssemblyName>
+    <PackageId>$(PackagePrefix).Diagnostics.SqlClient</PackageId>
     <PackageTags>SkyWalking;APM;Diagnostics;SqlClient</PackageTags>
     <PackageReleaseNotes>
     </PackageReleaseNotes>

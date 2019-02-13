@@ -4,11 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql</AssemblyName>
-    <AssemblyTitle>SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql</AssemblyTitle>
-    <PackageId>SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql</PackageId>
+    <AssemblyName>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Pomelo.MySql</AssemblyName>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Pomelo.MySql</AssemblyTitle>
+    <PackageId>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Pomelo.MySql</PackageId>
     <PackageTags>SkyWalking;APM;EntityFrameworkCore;EF</PackageTags>
-    <Description>SkyWalking.Diagnostics.EntityFrameworkCore.Pomelo.MySql notifies of EF requests.</Description>
+    <Description>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Pomelo.MySql notifies of EF requests.</Description>
     <RootNamespace>SkyWalking.Diagnostics.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

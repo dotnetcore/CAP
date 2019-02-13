@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\build\common.props" />
   <PropertyGroup>
-    <Description>Microsoft.Utilities.DependencyInjection (IServiceCollection) support for SkyWalking.</Description>
-    <AssemblyTitle>SkyWalking.Utilities.DependencyInjection</AssemblyTitle>
+    <Description>Microsoft.Utilities.DependencyInjection (IServiceCollection) support for $(Product).</Description>
+    <AssemblyTitle>$(PackagePrefix).Utilities.DependencyInjection</AssemblyTitle>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>SkyWalking.Utilities.DependencyInjection</AssemblyName>
-    <PackageId>SkyWalking.Utilities.DependencyInjection</PackageId>
+    <AssemblyName>$(PackagePrefix).Utilities.DependencyInjection</AssemblyName>
+    <PackageId>$(PackagePrefix).Utilities.DependencyInjection</PackageId>
     <PackageTags>SkyWalking;APM;Diagnostics</PackageTags>
     <PackageReleaseNotes>
     </PackageReleaseNotes>

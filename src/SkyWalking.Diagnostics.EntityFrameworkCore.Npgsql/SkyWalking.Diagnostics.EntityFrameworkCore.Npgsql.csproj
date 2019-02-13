@@ -4,11 +4,11 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyName>SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql</AssemblyName>
-    <AssemblyTitle>SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql</AssemblyTitle>
-    <PackageId>SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql</PackageId>
+    <AssemblyName>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Npgsql</AssemblyName>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Npgsql</AssemblyTitle>
+    <PackageId>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Npgsql</PackageId>
     <PackageTags>SkyWalking;APM;EntityFrameworkCore;EF</PackageTags>
-    <Description>SkyWalking.Diagnostics.EntityFrameworkCore.Npgsql notifies of EF requests.</Description>
+    <Description>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Npgsql notifies of EF requests.</Description>
     <RootNamespace>SkyWalking.Diagnostics.EntityFrameworkCore</RootNamespace>
   </PropertyGroup>
   <ItemGroup>

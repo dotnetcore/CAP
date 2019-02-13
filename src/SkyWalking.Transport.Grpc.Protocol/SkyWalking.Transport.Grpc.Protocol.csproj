@@ -3,10 +3,10 @@
     <Import Project="..\..\build\common.props" />
 
     <PropertyGroup>
-        <Description>SkyWalking gRPC data transmitter.</Description>
-        <AssemblyTitle>SkyWalking.Transport.Grpc.Protocol</AssemblyTitle>
-        <AssemblyName>SkyWalking.Transport.Grpc.Protocol</AssemblyName>
-        <PackageId>SkyWalking.Transport.Grpc.Protocol</PackageId>
+        <Description>$(Product) gRPC data transmitter.</Description>
+        <AssemblyTitle>$(PackagePrefix).Transport.Grpc.Protocol</AssemblyTitle>
+        <AssemblyName>$(PackagePrefix).Transport.Grpc.Protocol</AssemblyName>
+        <PackageId>$(PackagePrefix).Transport.Grpc.Protocol</PackageId>
         <PackageTags>SkyWalking;Grpc</PackageTags>
         <PackageReleaseNotes>
         </PackageReleaseNotes>

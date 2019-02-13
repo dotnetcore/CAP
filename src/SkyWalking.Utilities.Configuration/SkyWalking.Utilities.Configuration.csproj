@@ -2,11 +2,11 @@
 
     <Import Project="..\..\build\common.props" />
     <PropertyGroup>
-        <Description>SkyWalking configuration extensions.</Description>
-        <AssemblyTitle>SkyWalking.Utilities.Configuration</AssemblyTitle>
+        <Description>$(Product) configuration extensions.</Description>
+        <AssemblyTitle>$(PackagePrefix).Utilities.Configuration</AssemblyTitle>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <AssemblyName>SkyWalking.Utilities.Configuration</AssemblyName>
-        <PackageId>SkyWalking.Utilities.Configuration</PackageId>
+        <AssemblyName>$(PackagePrefix).Utilities.Configuration</AssemblyName>
+        <PackageId>$(PackagePrefix).Utilities.Configuration</PackageId>
         <PackageTags>SkyWalking;APM;Diagnostics</PackageTags>
         <PackageReleaseNotes>
         </PackageReleaseNotes>

@@ -3,11 +3,11 @@
   <Import Project="..\..\build\common.props" />
 
   <PropertyGroup>
-    <Description>SkyWalking.Diagnostics.HttpClient notifies outgoing Http requests.</Description>
-    <AssemblyTitle>SkyWalking.Diagnostics.HttpClient</AssemblyTitle>
+    <Description>$(PackagePrefix).Diagnostics.HttpClient notifies outgoing Http requests.</Description>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.HttpClient</AssemblyTitle>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <AssemblyName>SkyWalking.Diagnostics.HttpClient</AssemblyName>
-    <PackageId>SkyWalking.Diagnostics.HttpClient</PackageId>
+    <AssemblyName>$(PackagePrefix).Diagnostics.HttpClient</AssemblyName>
+    <PackageId>$(PackagePrefix).Diagnostics.HttpClient</PackageId>
     <PackageTags>SkyWalking;APM;Diagnostics;HttpClient</PackageTags>
     <PackageReleaseNotes>
     </PackageReleaseNotes>
