@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <Import Project="..\..\build\common.props" />
     <PropertyGroup>
-        <Description>SkyWalking ASP.NET Core Agent.</Description>
-        <AssemblyTitle>SkyWalking.Agent.AspNetCore</AssemblyTitle>
-        <PackageId>SkyWalking.Agent.AspNetCore</PackageId>
+        <Description>$(Product) ASP.NET Core Agent.</Description>
+        <AssemblyTitle>$(PackagePrefix).Agent.AspNetCore</AssemblyTitle>
+        <AssemblyName>$(PackagePrefix).Agent.AspNetCore</AssemblyName>
+        <PackageId>$(PackagePrefix).Agent.AspNetCore</PackageId>
         <PackageTags>SkyWalking;APM</PackageTags>
         <PackageReleaseNotes>
         </PackageReleaseNotes>
