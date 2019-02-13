@@ -17,74 +17,88 @@
  */
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
-using SkyWalking.Components;
-using SkyWalking.Context;
-using SkyWalking.Context.Tag;
-using SkyWalking.Context.Trace;
+using CommonServiceLocator;
+using SkyWalking.Tracing;
+using SpanLayer = SkyWalking.Tracing.Segments.SpanLayer;
 
 namespace SkyWalking.AspNet
 {
     public class HttpTracingHandler : DelegatingHandler
     {
-        private readonly IContextCarrierFactory _contextCarrierFactory;
-
         public HttpTracingHandler()
             : this(new HttpClientHandler())
         {
         }
 
         public HttpTracingHandler(HttpMessageHandler innerHandler)
-            : this(innerHandler, CommonServiceLocator.ServiceLocator.Current.GetInstance<IContextCarrierFactory>())
-        {
-        }
-
-        private HttpTracingHandler(HttpMessageHandler innerHandler, IContextCarrierFactory contextCarrierFactory)
         {
             InnerHandler = innerHandler;
-            _contextCarrierFactory = contextCarrierFactory;
         }
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request,
             CancellationToken cancellationToken)
         {
-            var peer = $"{request.RequestUri.Host}:{request.RequestUri.Port}";
-            var contextCarrier = _contextCarrierFactory.Create();
-            var span = ContextManager.CreateExitSpan(request.RequestUri.ToString(), contextCarrier, peer);
+            var tracingContext = ServiceLocator.Current.GetInstance<ITracingContext>();
+            var operationName = request.RequestUri.ToString();
+            var networkAddress = $"{request.RequestUri.Host}:{request.RequestUri.Port}";
+            var context = tracingContext.CreateExitSegmentContext(operationName, networkAddress,
+                new CarrierHeaderCollection(request.Headers));
             try
             {
-                Tags.Url.Set(span, request.RequestUri.ToString());
-                span.AsHttp();
-                span.SetComponent(ComponentsDefine.HttpClient);
-                Tags.HTTP.Method.Set(span, request.Method.ToString());
-                foreach (var item in contextCarrier.Items)
-                    request.Headers.Add(item.HeadKey, item.HeadValue);
-
-                if (request.Method.Method != "GET")
+                context.Span.SpanLayer = SpanLayer.HTTP;
+                context.Span.Component = Common.Components.HTTPCLIENT;
+                context.Span.AddTag(Common.Tags.URL, request.RequestUri.ToString());
+                context.Span.AddTag(Common.Tags.PATH, request.RequestUri.PathAndQuery);
+                context.Span.AddTag(Common.Tags.HTTP_METHOD, request.Method.ToString());
+                var response = await base.SendAsync(request, cancellationToken);
+                var statusCode = (int) response.StatusCode;
+                if (statusCode >= 400)
                 {
-                    // record request body data
-                    if (!request.Content.Headers.ContentType?.MediaType.ToLower().Contains("multipart/form-data")??false)
-                    {
-                        string bodyStr = await request.Content.ReadAsStringAsync();
-                        span.Log(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), new Dictionary<string, object> { { "Body", bodyStr } });
-                    }
+                    context.Span.ErrorOccurred();
                 }
 
-                var response = await base.SendAsync(request, cancellationToken);
-                Tags.StatusCode.Set(span, response.StatusCode.ToString());
+                context.Span.AddTag(Common.Tags.STATUS_CODE, statusCode);
                 return response;
             }
-            catch (Exception e)
+            catch (Exception exception)
             {
-                span.ErrorOccurred().Log(e);
+                context.Span.ErrorOccurred(exception);
                 throw;
             }
             finally
             {
-                ContextManager.StopSpan(span);
+                tracingContext.Release(context);
+            }
+        }
+
+        private class CarrierHeaderCollection : ICarrierHeaderCollection
+        {
+            private readonly HttpRequestHeaders _headers;
+
+            public CarrierHeaderCollection(HttpRequestHeaders headers)
+            {
+                _headers = headers;
+            }
+
+            public void Add(string key, string value)
+            {
+                _headers.Add(key, value);
+            }
+
+            public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+            {
+                throw new NotImplementedException();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
             }
         }
     }

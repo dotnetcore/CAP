@@ -22,6 +22,7 @@ using System.Threading.Tasks;
 using Grpc.Core;
 using SkyWalking.Config;
 using SkyWalking.Logging;
+using SkyWalking.Transport.Grpc.Common;
 
 namespace SkyWalking.Transport.Grpc
 {

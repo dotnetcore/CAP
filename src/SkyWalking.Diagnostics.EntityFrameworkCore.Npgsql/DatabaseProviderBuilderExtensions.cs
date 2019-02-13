@@ -24,7 +24,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
     {
         public static DatabaseProviderBuilder AddNpgsql(this DatabaseProviderBuilder builder)
         {
-            builder.Services.AddSingleton<IEfCoreSpanMetadataProvider, NpgsqlEFCoreSpanMetadataProvider>();
+            builder.Services.AddSingleton<IEntityFrameworkCoreSpanMetadataProvider, NpgsqlEntityFrameworkCoreSpanMetadataProvider>();
             return builder;
         }
     }

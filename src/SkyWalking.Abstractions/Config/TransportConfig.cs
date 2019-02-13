@@ -21,7 +21,7 @@ namespace SkyWalking.Config
     [Config("SkyWalking", "Transport")]
     public class TransportConfig
     {
-        public int PendingSegmentLimit { get; set; } = 30000;
+        public int QueueSize { get; set; } = 30000;
 
         /// <summary>
         /// Flush Interval Millisecond
@@ -31,7 +31,7 @@ namespace SkyWalking.Config
         /// <summary>
         /// Data queued beyond this time will be discarded.
         /// </summary>
-        public int PendingSegmentTimeout { get; set; } = 1000;
+        public int BatchSize { get; set; } = 3000;
 
         public string ProtocolVersion { get; set; } = ProtocolVersions.V6;
     }

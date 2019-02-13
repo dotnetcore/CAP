@@ -17,6 +17,7 @@
  */
 
 using System.Collections.Generic;
+using SkyWalking.Common;
 
 namespace SkyWalking.Transport
 {

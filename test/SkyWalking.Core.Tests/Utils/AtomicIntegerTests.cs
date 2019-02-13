@@ -1,5 +1,5 @@
 ﻿using System;
-using SkyWalking.Utils;
+using SkyWalking.Common;
 using Xunit;
 
 namespace SkyWalking.Core.Tests.Utils

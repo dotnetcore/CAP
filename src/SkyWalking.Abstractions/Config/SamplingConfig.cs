@@ -22,5 +22,7 @@ namespace SkyWalking.Config
     public class SamplingConfig
     {
         public int SamplePer3Secs { get; set; } = -1;
+
+        public double Percentage { get; set; } = -1d;
     }
 }

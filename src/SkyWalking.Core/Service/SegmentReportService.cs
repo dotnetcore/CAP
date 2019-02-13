@@ -20,14 +20,12 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Config;
-using SkyWalking.Context;
-using SkyWalking.Context.Trace;
 using SkyWalking.Logging;
 using SkyWalking.Transport;
 
 namespace SkyWalking.Service
 {
-    public class SegmentReportService : ExecutionService, ITracingContextListener
+    public class SegmentReportService : ExecutionService
     {
         private readonly TransportConfig _config;
         private readonly ISegmentDispatcher _dispatcher;
@@ -39,7 +37,6 @@ namespace SkyWalking.Service
             _dispatcher = dispatcher;
             _config = configAccessor.Get<TransportConfig>();
             Period = TimeSpan.FromMilliseconds(_config.Interval);
-            TracingContext.ListenerManager.Add(this);
         }
 
         protected override TimeSpan DueTime { get; } = TimeSpan.FromSeconds(3);
@@ -54,14 +51,7 @@ namespace SkyWalking.Service
         protected override Task Stopping(CancellationToken cancellationToke)
         {
             _dispatcher.Close();
-            TracingContext.ListenerManager.Remove(this);
             return Task.CompletedTask;
-        }
-
-        public void AfterFinished(ITraceSegment traceSegment)
-        {
-            if (!traceSegment.IsIgnore)
-                _dispatcher.Dispatch(traceSegment.Transform());
         }
     }
 }

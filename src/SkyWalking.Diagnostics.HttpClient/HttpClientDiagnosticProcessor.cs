@@ -18,59 +18,68 @@
 
 using System;
 using System.Net.Http;
-using SkyWalking.Components;
-using SkyWalking.Context;
-using SkyWalking.Context.Tag;
-using SkyWalking.Context.Trace;
+using SkyWalking.Common;
+using SkyWalking.Tracing;
+using SkyWalking.Tracing.Segments;
 
 namespace SkyWalking.Diagnostics.HttpClient
 {
     public class HttpClientTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
         public string ListenerName { get; } = "HttpHandlerDiagnosticListener";
-        
-        private readonly IContextCarrierFactory _contextCarrierFactory;
 
-        public HttpClientTracingDiagnosticProcessor(IContextCarrierFactory contextCarrierFactory)
+        //private readonly IContextCarrierFactory _contextCarrierFactory;
+        private readonly ITracingContext _tracingContext;
+        private readonly IExitSegmentContextAccessor _contextAccessor;
+
+        public HttpClientTracingDiagnosticProcessor(ITracingContext tracingContext,
+            IExitSegmentContextAccessor contextAccessor)
         {
-            _contextCarrierFactory = contextCarrierFactory;
+            _tracingContext = tracingContext;
+            _contextAccessor = contextAccessor;
         }
 
         [DiagnosticName("System.Net.Http.Request")]
         public void HttpRequest([Property(Name = "Request")] HttpRequestMessage request)
         {
-            var contextCarrier = _contextCarrierFactory.Create();
-            var peer = $"{request.RequestUri.Host}:{request.RequestUri.Port}";
-            var span = ContextManager.CreateExitSpan(request.RequestUri.ToString(), contextCarrier, peer);
-            Tags.Url.Set(span, request.RequestUri.ToString());
-            span.AsHttp();
-            span.SetComponent(ComponentsDefine.HttpClient);
-            Tags.HTTP.Method.Set(span, request.Method.ToString());
-            foreach (var item in contextCarrier.Items)
-                request.Headers.Add(item.HeadKey, item.HeadValue);
+            var context = _tracingContext.CreateExitSegmentContext(request.RequestUri.ToString(),
+                $"{request.RequestUri.Host}:{request.RequestUri.Port}",
+                new HttpClientICarrierHeaderCollection(request));
+
+            context.Span.SpanLayer = SpanLayer.HTTP;
+            context.Span.Component = Common.Components.HTTPCLIENT;
+            context.Span.AddTag(Tags.URL, request.RequestUri.ToString());
+            context.Span.AddTag(Tags.HTTP_METHOD, request.Method.ToString());
         }
 
         [DiagnosticName("System.Net.Http.Response")]
         public void HttpResponse([Property(Name = "Response")] HttpResponseMessage response)
         {
-            var span = ContextManager.ActiveSpan;
-            if (span != null && response != null)
+            var context = _contextAccessor.Context;
+            if (context == null)
             {
-                Tags.StatusCode.Set(span, response.StatusCode.ToString());
+                return;
             }
 
-            ContextManager.StopSpan(span);
+            if (response != null)
+            {
+                var statusCode = (int) response.StatusCode;
+                if (statusCode >= 400)
+                {
+                    context.Span.ErrorOccurred();
+                }
+
+                context.Span.AddTag(Tags.STATUS_CODE, statusCode);
+            }
+
+            _tracingContext.Release(context);
         }
 
         [DiagnosticName("System.Net.Http.Exception")]
         public void HttpException([Property(Name = "Request")] HttpRequestMessage request,
-            [Property(Name = "Exception")] Exception ex)
+            [Property(Name = "Exception")] Exception exception)
         {
-            var span = ContextManager.ActiveSpan;
-            if (span != null && span.IsExit)
-            {
-                span.ErrorOccurred();
-            }
+            _contextAccessor.Context?.Span?.ErrorOccurred(exception);
         }
     }
 }

@@ -22,17 +22,14 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
-using SkyWalking.Context;
-using SkyWalking.Context.Tag;
-using SkyWalking.Context.Trace;
+using SkyWalking.Tracing;
 
 namespace SkyWalking.Diagnostics.EntityFrameworkCore
 {
     public class EntityFrameworkCoreTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
-        private const string TRACE_ORM = "TRACE_ORM";
         private Func<CommandEventData, string> _operationNameResolver;
-        private readonly IEfCoreSpanFactory _efCoreSpanFactory;
+        private readonly IEntityFrameworkCoreSegmentContextFactory _contextFactory;
 
         public string ListenerName => DbLoggerCategory.Name;
 
@@ -50,50 +47,57 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
                            return "DB " + (commandType.FirstOrDefault() ?? data.ExecuteMethod.ToString());
                        });
             }
-            set => _operationNameResolver = value ?? throw new ArgumentNullException(nameof(OperationNameResolver));
+            set => _operationNameResolver = value ??
+                                            throw new ArgumentNullException(nameof(OperationNameResolver));
         }
 
-        public EntityFrameworkCoreTracingDiagnosticProcessor(IEfCoreSpanFactory spanFactory)
+        public EntityFrameworkCoreTracingDiagnosticProcessor(
+            IEntityFrameworkCoreSegmentContextFactory contextFactory)
         {
-            _efCoreSpanFactory = spanFactory;
+            _contextFactory = contextFactory;
         }
 
         [DiagnosticName("Microsoft.EntityFrameworkCore.Database.Command.CommandExecuting")]
         public void CommandExecuting([Object] CommandEventData eventData)
         {
             var operationName = OperationNameResolver(eventData);
-            var span = _efCoreSpanFactory.Create(operationName, eventData);
-            span.SetLayer(SpanLayer.DB);
-            Tags.DbType.Set(span, "Sql");
-            Tags.DbInstance.Set(span, eventData.Command.Connection.Database);
-            Tags.DbStatement.Set(span, eventData.Command.CommandText);
-            Tags.DbBindVariables.Set(span, BuildParameterVariables(eventData.Command.Parameters));
-            ContextManager.ContextProperties[TRACE_ORM] = true;
+            var context = _contextFactory.Create(operationName, eventData.Command);
+            context.Span.SpanLayer = Tracing.Segments.SpanLayer.DB;
+            context.Span.AddTag(Common.Tags.DB_TYPE, "Sql");
+            context.Span.AddTag(Common.Tags.DB_INSTANCE, eventData.Command.Connection.Database);
+            context.Span.AddTag(Common.Tags.DB_STATEMENT, eventData.Command.CommandText);
+            context.Span.AddTag(Common.Tags.DB_BIND_VARIABLES, BuildParameterVariables(eventData.Command.Parameters));
         }
 
         [DiagnosticName("Microsoft.EntityFrameworkCore.Database.Command.CommandExecuted")]
-        public void CommandExecuted()
+        public void CommandExecuted([Object] CommandExecutedEventData eventData)
         {
-            ContextManager.StopSpan();
-            ContextManager.ContextProperties.Remove(TRACE_ORM);
-        }
-
-        [DiagnosticName("Microsoft.EntityFrameworkCore.Database.Command.CommandError")]
-        public void CommandError([Object]CommandErrorEventData eventData)
-        {
-            var span = ContextManager.ActiveSpan;
-            if (span == null)
+            if (eventData == null)
             {
                 return;
             }
 
-            if (eventData != null)
+            var context = _contextFactory.GetCurrentContext(eventData.Command);
+            if (context != null)
             {
-                span.Log(eventData.Exception);
+                _contextFactory.Release(context);
             }
-            span.ErrorOccurred();
-            ContextManager.StopSpan(span);
-            ContextManager.ContextProperties.Remove(TRACE_ORM);
+        }
+
+        [DiagnosticName("Microsoft.EntityFrameworkCore.Database.Command.CommandError")]
+        public void CommandError([Object] CommandErrorEventData eventData)
+        {
+            if (eventData == null)
+            {
+                return;
+            }
+
+            var context = _contextFactory.GetCurrentContext(eventData.Command);
+            if (context != null)
+            {
+                context.Span.ErrorOccurred(eventData.Exception);
+                _contextFactory.Release(context);
+            }
         }
 
         private string BuildParameterVariables(DbParameterCollection dbParameters)

@@ -24,7 +24,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
     {
         public static DatabaseProviderBuilder AddSqlite(this DatabaseProviderBuilder builder)
         {
-            builder.Services.AddSingleton<IEfCoreSpanMetadataProvider, SqliteEFCoreSpanMetadataProvider>();
+            builder.Services.AddSingleton<IEntityFrameworkCoreSpanMetadataProvider, SqliteEntityFrameworkCoreSpanMetadataProvider>();
             return builder;
         }
     }

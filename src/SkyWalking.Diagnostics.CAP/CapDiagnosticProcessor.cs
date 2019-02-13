@@ -19,12 +19,8 @@
 using System;
 using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
-using SkyWalking.Components;
-using SkyWalking.Context;
-using SkyWalking.Context.Tag;
-using SkyWalking.Context.Trace;
+using SkyWalking.Tracing;
 using CapEvents = DotNetCore.CAP.Diagnostics.CapDiagnosticListenerExtensions;
-
 
 namespace SkyWalking.Diagnostics.CAP
 {
@@ -33,9 +29,7 @@ namespace SkyWalking.Diagnostics.CAP
     /// </summary>
     public class CapTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
-        private readonly IContextCarrierFactory _contextCarrierFactory;
         private Func<BrokerEventData, string> _brokerOperationNameResolver;
-
         public string ListenerName => CapEvents.DiagnosticListenerName;
 
         public Func<BrokerEventData, string> BrokerOperationNameResolver
@@ -45,130 +39,101 @@ namespace SkyWalking.Diagnostics.CAP
                 return _brokerOperationNameResolver ??
                        (_brokerOperationNameResolver = (data) => "CAP " + data.BrokerTopicName);
             }
-            set => _brokerOperationNameResolver = value ?? throw new ArgumentNullException(nameof(BrokerOperationNameResolver));
+            set => _brokerOperationNameResolver =
+                value ?? throw new ArgumentNullException(nameof(BrokerOperationNameResolver));
         }
 
-        public CapTracingDiagnosticProcessor(IContextCarrierFactory contextCarrierFactory)
+        private readonly ITracingContext _tracingContext;
+        private readonly IEntrySegmentContextAccessor _entrySegmentContextAccessor;
+        private readonly IExitSegmentContextAccessor _exitSegmentContextAccessor;
+
+        public CapTracingDiagnosticProcessor(ITracingContext tracingContext,
+            IEntrySegmentContextAccessor entrySegmentContextAccessor,
+            IExitSegmentContextAccessor exitSegmentContextAccessor)
         {
-            _contextCarrierFactory = contextCarrierFactory;
+            _tracingContext = tracingContext;
+            _exitSegmentContextAccessor = exitSegmentContextAccessor;
+            _entrySegmentContextAccessor = entrySegmentContextAccessor;
         }
 
         [DiagnosticName(CapEvents.CapBeforePublish)]
-        public void CapBeforePublish([Object]BrokerPublishEventData eventData)
+        public void CapBeforePublish([Object] BrokerPublishEventData eventData)
         {
             var operationName = BrokerOperationNameResolver(eventData);
-            var contextCarrier = _contextCarrierFactory.Create();
-            var peer = eventData.BrokerAddress;
-            var span = ContextManager.CreateExitSpan(operationName, contextCarrier, peer);
-            span.SetComponent(ComponentsDefine.CAP);
-            span.SetLayer(SpanLayer.MQ);
-            Tags.MqTopic.Set(span, eventData.BrokerTopicName);
-            foreach (var item in contextCarrier.Items)
-            {
-                eventData.Headers.Add(item.HeadKey, item.HeadValue);
-            }
+            var context = _tracingContext.CreateExitSegmentContext(operationName, eventData.BrokerAddress,
+                new CapCarrierHeaderCollection(eventData.Headers));
+            context.Span.SpanLayer = Tracing.Segments.SpanLayer.MQ;
+            context.Span.Component = Common.Components.CAP;
+            context.Span.AddTag(Common.Tags.MQ_TOPIC, eventData.BrokerTopicName);
         }
 
         [DiagnosticName(CapEvents.CapAfterPublish)]
-        public void CapAfterPublish([Object]BrokerPublishEndEventData eventData)
+        public void CapAfterPublish([Object] BrokerPublishEndEventData eventData)
         {
-            ContextManager.StopSpan();
+            _tracingContext.Release(_exitSegmentContextAccessor.Context);
         }
 
         [DiagnosticName(CapEvents.CapErrorPublish)]
-        public void CapErrorPublish([Object]BrokerPublishErrorEventData eventData)
+        public void CapErrorPublish([Object] BrokerPublishErrorEventData eventData)
         {
-            var capSpan = ContextManager.ActiveSpan;
-            if (capSpan == null)
+            var context = _exitSegmentContextAccessor.Context;
+            if (context != null)
             {
-                return;
+                context.Span.ErrorOccurred(eventData.Exception);
+                _tracingContext.Release(context);
             }
-            capSpan.Log(eventData.Exception);
-            capSpan.ErrorOccurred();
-            ContextManager.StopSpan(capSpan);
         }
 
         [DiagnosticName(CapEvents.CapBeforeConsume)]
-        public void CapBeforeConsume([Object]BrokerConsumeEventData eventData)
+        public void CapBeforeConsume([Object] BrokerConsumeEventData eventData)
         {
             var operationName = BrokerOperationNameResolver(eventData);
-            var carrier = _contextCarrierFactory.Create();
 
+            ICarrierHeaderCollection carrierHeader = null;
             if (Helper.TryExtractTracingHeaders(eventData.BrokerTopicBody, out var headers,
                 out var removedHeadersJson))
             {
                 eventData.Headers = headers;
                 eventData.BrokerTopicBody = removedHeadersJson;
-
-                foreach (var tracingHeader in headers)
-                {
-                    foreach (var item in carrier.Items)
-                    {
-                        if (tracingHeader.Key == item.HeadKey)
-                        {
-                            item.HeadValue = tracingHeader.Value;
-                        }
-                    }
-                }
+                carrierHeader = new CapCarrierHeaderCollection(headers);
             }
-            var span = ContextManager.CreateEntrySpan(operationName, carrier);
-            span.SetComponent(ComponentsDefine.CAP);
-            span.SetLayer(SpanLayer.MQ);
-            Tags.MqTopic.Set(span, eventData.BrokerTopicName);
+
+            var context = _tracingContext.CreateEntrySegmentContext(operationName, carrierHeader);
+            context.Span.SpanLayer = Tracing.Segments.SpanLayer.MQ;
+            context.Span.Component = Common.Components.CAP;
+            context.Span.AddTag(Common.Tags.MQ_TOPIC, eventData.BrokerTopicName);
         }
 
         [DiagnosticName(CapEvents.CapAfterConsume)]
-        public void CapAfterConsume([Object]BrokerConsumeEndEventData eventData)
+        public void CapAfterConsume([Object] BrokerConsumeEndEventData eventData)
         {
-            var capSpan = ContextManager.ActiveSpan;
-            if (capSpan == null)
-            {
-                return;
-            }
-
-            ContextManager.StopSpan(capSpan);
+            _tracingContext.Release(_entrySegmentContextAccessor.Context);
         }
 
         [DiagnosticName(CapEvents.CapErrorConsume)]
-        public void CapErrorConsume([Object]BrokerConsumeErrorEventData eventData)
+        public void CapErrorConsume([Object] BrokerConsumeErrorEventData eventData)
         {
-            var capSpan = ContextManager.ActiveSpan;
-            if (capSpan == null)
+            var context = _entrySegmentContextAccessor.Context;
+            if (context != null)
             {
-                return;
+                context.Span.ErrorOccurred(eventData.Exception);
+                _tracingContext.Release(context);
             }
-
-            capSpan.Log(eventData.Exception);
-            capSpan.ErrorOccurred();
-            ContextManager.StopSpan(capSpan);
         }
 
         [DiagnosticName(CapEvents.CapBeforeSubscriberInvoke)]
-        public void CapBeforeSubscriberInvoke([Object]SubscriberInvokeEventData eventData)
+        public void CapBeforeSubscriberInvoke([Object] SubscriberInvokeEventData eventData)
         {
-            var span = ContextManager.CreateLocalSpan("Subscriber invoke");
-            span.SetComponent(ComponentsDefine.CAP);
-            span.Tag("subscriber.name", eventData.MethodName);
         }
 
         [DiagnosticName(CapEvents.CapAfterSubscriberInvoke)]
-        public void CapAfterSubscriberInvoke([Object]SubscriberInvokeEventData eventData)
+        public void CapAfterSubscriberInvoke([Object] SubscriberInvokeEventData eventData)
         {
-            ContextManager.StopSpan();
         }
 
         [DiagnosticName(CapEvents.CapErrorSubscriberInvoke)]
-        public void CapErrorSubscriberInvoke([Object]SubscriberInvokeErrorEventData eventData)
+        public void CapErrorSubscriberInvoke([Object] SubscriberInvokeErrorEventData eventData)
         {
-            var capSpan = ContextManager.ActiveSpan;
-            if (capSpan == null)
-            {
-                return;
-            }
-
-            capSpan.Log(eventData.Exception);
-            capSpan.ErrorOccurred();
-            ContextManager.StopSpan(capSpan);
         }
     }
 }

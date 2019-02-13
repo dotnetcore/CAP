@@ -17,6 +17,7 @@
  */
 
 using System;
+using SkyWalking.Common;
 
 namespace SkyWalking
 {

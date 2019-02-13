@@ -20,16 +20,16 @@ using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
+using SkyWalking.Common;
 using SkyWalking.Config;
 using SkyWalking.Logging;
 using SkyWalking.Transport;
-using SkyWalking.Utils;
 
 namespace SkyWalking.Service
 {
     public class RegisterService : ExecutionService
     {
-        private readonly InstrumentationConfig _config;
+        private readonly InstrumentConfig _config;
         private readonly IServiceRegister _serviceRegister;
         private readonly TransportConfig _transportConfig;
 
@@ -38,7 +38,7 @@ namespace SkyWalking.Service
             loggerFactory)
         {
             _serviceRegister = serviceRegister;
-            _config = configAccessor.Get<InstrumentationConfig>();
+            _config = configAccessor.Get<InstrumentConfig>();
             _transportConfig = configAccessor.Get<TransportConfig>();
         }
 

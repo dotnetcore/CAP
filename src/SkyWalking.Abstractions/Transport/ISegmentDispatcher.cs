@@ -18,12 +18,13 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using SkyWalking.Tracing.Segments;
 
 namespace SkyWalking.Transport
 {
     public interface ISegmentDispatcher
     {
-        bool Dispatch(SegmentRequest segment);
+        bool Dispatch(SegmentContext segmentContext);
 
         Task Flush(CancellationToken token = default(CancellationToken));
 

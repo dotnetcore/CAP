@@ -24,9 +24,9 @@ namespace SkyWalking.Agent.AspNetCore
 {
     internal class InstrumentationHostedService : IHostedService
     {
-        private readonly ISkyWalkingAgentStartup _startup;
+        private readonly IInstrumentStartup _startup;
 
-        public InstrumentationHostedService(ISkyWalkingAgentStartup startup)
+        public InstrumentationHostedService(IInstrumentStartup startup)
         {
             _startup = startup;
         }

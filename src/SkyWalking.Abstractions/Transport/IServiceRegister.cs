@@ -19,6 +19,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using SkyWalking.Common;
 using SkyWalking.Transport;
 
 namespace SkyWalking.Transport

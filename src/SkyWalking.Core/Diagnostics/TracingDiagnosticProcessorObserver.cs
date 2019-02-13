@@ -19,8 +19,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using SkyWalking.Common;
 using SkyWalking.Logging;
-using SkyWalking.Utils;
 
 namespace SkyWalking.Diagnostics
 {

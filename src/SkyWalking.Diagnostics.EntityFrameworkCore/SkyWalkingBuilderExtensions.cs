@@ -32,7 +32,7 @@ namespace SkyWalking.Diagnostics.EntityFrameworkCore
             }
 
             extensions.Services.AddSingleton<ITracingDiagnosticProcessor, EntityFrameworkCoreTracingDiagnosticProcessor>();
-            extensions.Services.AddSingleton<IEfCoreSpanFactory, EfCoreSpanFactory>();
+            extensions.Services.AddSingleton<IEntityFrameworkCoreSegmentContextFactory, EntityFrameworkCoreSegmentContextFactory>();
 
             if (optionAction != null)
             {

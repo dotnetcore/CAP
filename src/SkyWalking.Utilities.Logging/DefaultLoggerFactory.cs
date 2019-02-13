@@ -39,7 +39,7 @@ namespace SkyWalking.Utilities.Logging
         {
             _loggingConfig = configAccessor.Get<LoggingConfig>();
             _loggerFactory = new MSLoggerFactory();
-            var instrumentationConfig = configAccessor.Get<InstrumentationConfig>();
+            var instrumentationConfig = configAccessor.Get<InstrumentConfig>();
 
             var level = EventLevel(_loggingConfig.Level);
 

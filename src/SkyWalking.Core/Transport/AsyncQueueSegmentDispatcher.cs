@@ -22,6 +22,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using SkyWalking.Config;
 using SkyWalking.Logging;
+using SkyWalking.Tracing.Segments;
 
 namespace SkyWalking.Transport
 {
@@ -30,30 +31,41 @@ namespace SkyWalking.Transport
         private readonly ILogger _logger;
         private readonly TransportConfig _config;
         private readonly ISegmentReporter _segmentReporter;
+        private readonly ISegmentContextMapper _segmentContextMapper;
         private readonly ConcurrentQueue<SegmentRequest> _segmentQueue;
+        private readonly IRuntimeEnvironment _runtimeEnvironment;
         private readonly CancellationTokenSource _cancellation;
 
-        public AsyncQueueSegmentDispatcher(IConfigAccessor configAccessor, ISegmentReporter segmentReporter,
-            ILoggerFactory loggerFactory)
+        public AsyncQueueSegmentDispatcher(IConfigAccessor configAccessor,
+            ISegmentReporter segmentReporter, IRuntimeEnvironment runtimeEnvironment,
+            ISegmentContextMapper segmentContextMapper, ILoggerFactory loggerFactory)
         {
             _segmentReporter = segmentReporter;
+            _segmentContextMapper = segmentContextMapper;
+            _runtimeEnvironment = runtimeEnvironment;
             _logger = loggerFactory.CreateLogger(typeof(AsyncQueueSegmentDispatcher));
             _config = configAccessor.Get<TransportConfig>();
             _segmentQueue = new ConcurrentQueue<SegmentRequest>();
             _cancellation = new CancellationTokenSource();
         }
 
-        public bool Dispatch(SegmentRequest segment)
+        public bool Dispatch(SegmentContext segmentContext)
         {
-            // todo performance optimization for ConcurrentQueue
-            if (_config.PendingSegmentLimit < _segmentQueue.Count || _cancellation.IsCancellationRequested)
-            {
+            if (!_runtimeEnvironment.Initialized || segmentContext == null || !segmentContext.Sampled)
                 return false;
-            }
+
+            // todo performance optimization for ConcurrentQueue
+            if (_config.QueueSize < _segmentQueue.Count || _cancellation.IsCancellationRequested)
+                return false;
+
+            var segment = _segmentContextMapper.Map(segmentContext);
+
+            if (segment == null)
+                return false;
 
             _segmentQueue.Enqueue(segment);
 
-            _logger.Debug($"Dispatch trace segment. [SegmentId]={segment.Segment.SegmentId}.");
+            _logger.Debug($"Dispatch trace segment. [SegmentId]={segmentContext.SegmentId}.");
             return true;
         }
 
@@ -62,7 +74,7 @@ namespace SkyWalking.Transport
             // todo performance optimization for ConcurrentQueue
             //var queued = _segmentQueue.Count;
             //var limit = queued <= _config.PendingSegmentLimit ? queued : _config.PendingSegmentLimit;
-            var limit = _config.PendingSegmentLimit;
+            var limit = _config.BatchSize;
             var index = 0;
             var segments = new List<SegmentRequest>(limit);
             while (index++ < limit && _segmentQueue.TryDequeue(out var request))

@@ -16,6 +16,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.1" />
+    <PackageReference Include="System.Memory" Version="4.5.2" />
     <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 </Project>

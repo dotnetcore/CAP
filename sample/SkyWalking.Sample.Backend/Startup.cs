@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SkyWalking.Sample.Backend.Models;
+using SkyWalking.Sample.Backend.Sampling;
+using SkyWalking.Tracing;
 
 namespace SkyWalking.Sample.Backend
 {
@@ -26,6 +28,8 @@ namespace SkyWalking.Sample.Backend
             sqliteConnection.Open();
             
             services.AddEntityFrameworkSqlite().AddDbContext<SampleDbContext>(c => c.UseSqlite(sqliteConnection));
+
+            services.AddSingleton<ISamplingInterceptor, CustomSamplingInterceptor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

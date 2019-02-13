@@ -19,16 +19,22 @@
 using System;
 using System.Data.SqlClient;
 using System.Linq;
-using SkyWalking.Components;
-using SkyWalking.Context;
-using SkyWalking.Context.Tag;
-using SkyWalking.Context.Trace;
+using SkyWalking.Tracing;
 
 namespace SkyWalking.Diagnostics.SqlClient
 {
     public class SqlClientTracingDiagnosticProcessor : ITracingDiagnosticProcessor
     {
-        private const string TRACE_ORM = "TRACE_ORM";
+        private readonly ITracingContext _tracingContext;
+        private readonly IExitSegmentContextAccessor _contextAccessor;
+
+        public SqlClientTracingDiagnosticProcessor(ITracingContext tracingContext,
+            IExitSegmentContextAccessor contextAccessor)
+        {
+            _tracingContext = tracingContext;
+            _contextAccessor = contextAccessor;
+        }
+        
         public string ListenerName { get; } = SqlClientDiagnosticStrings.DiagnosticListenerName;
 
         private static string ResolveOperationName(SqlCommand sqlCommand)
@@ -36,39 +42,38 @@ namespace SkyWalking.Diagnostics.SqlClient
             var commandType = sqlCommand.CommandText?.Split(' ');
             return $"{SqlClientDiagnosticStrings.SqlClientPrefix}{commandType?.FirstOrDefault()}";
         }
-        private bool IsTraceORM()
-        {
-            return ContextManager.ContextProperties != null && ContextManager.ContextProperties.ContainsKey(TRACE_ORM);
-        }
+        
         [DiagnosticName(SqlClientDiagnosticStrings.SqlBeforeExecuteCommand)]
         public void BeforeExecuteCommand([Property(Name = "Command")] SqlCommand sqlCommand)
         {
-            if (IsTraceORM()) { return; }
-            var peer = sqlCommand.Connection.DataSource;
-            var span = ContextManager.CreateExitSpan(ResolveOperationName(sqlCommand), peer);
-            span.SetLayer(SpanLayer.DB);
-            span.SetComponent(ComponentsDefine.SqlClient);
-            Tags.DbType.Set(span, "Sql");
-            Tags.DbInstance.Set(span, sqlCommand.Connection.Database);
-            Tags.DbStatement.Set(span, sqlCommand.CommandText);
-            //todo Tags.DbBindVariables
+            var context = _tracingContext.CreateExitSegmentContext(ResolveOperationName(sqlCommand),
+                sqlCommand.Connection.DataSource);
+            context.Span.SpanLayer = Tracing.Segments.SpanLayer.DB;
+            context.Span.Component = Common.Components.SQLCLIENT;
+            context.Span.AddTag(Common.Tags.DB_TYPE, "sql");
+            context.Span.AddTag(Common.Tags.DB_INSTANCE, sqlCommand.Connection.Database);
+            context.Span.AddTag(Common.Tags.DB_STATEMENT,  sqlCommand.CommandText);
         }
 
         [DiagnosticName(SqlClientDiagnosticStrings.SqlAfterExecuteCommand)]
         public void AfterExecuteCommand()
         {
-            if (IsTraceORM()) { return; }
-            ContextManager.StopSpan();
+            var context = _contextAccessor.Context;
+            if (context != null)
+            {
+                _tracingContext.Release(context);
+            }   
         }
 
         [DiagnosticName(SqlClientDiagnosticStrings.SqlErrorExecuteCommand)]
         public void ErrorExecuteCommand([Property(Name = "Exception")] Exception ex)
         {
-            if (IsTraceORM()) { return; }
-            var span = ContextManager.ActiveSpan;
-            span?.ErrorOccurred();
-            span?.Log(ex);
-            ContextManager.StopSpan(span);
+            var context = _contextAccessor.Context;
+            if (context != null)
+            {
+                context.Span.ErrorOccurred(ex);
+                _tracingContext.Release(context);
+            }   
         }
     }
 }
