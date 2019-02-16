@@ -95,7 +95,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public void Reject()
         {
-            // _consumerClient.Assign(_consumerClient.Assignment);
+            // ignore
         }
 
         public void Dispose()
