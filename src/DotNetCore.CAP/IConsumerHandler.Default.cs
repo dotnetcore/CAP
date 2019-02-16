@@ -159,10 +159,13 @@ namespace DotNetCore.CAP
                     _logger.LogWarning("RabbitMQ consumer shutdown. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ConsumeError:
-                    _logger.LogError("Kakfa client consume error. --> " + logmsg.Reason);
+                    _logger.LogError("Kafka client consume error. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ServerConnError:
                     _logger.LogCritical("Kafka server connection error. --> " + logmsg.Reason);
+                    break;
+                case MqLogType.ExceptionReceived:
+                    _logger.LogError("AzureServiceBus subscriber received an error. --> " + logmsg.Reason);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

@@ -15,7 +15,10 @@ namespace DotNetCore.CAP
 
         //Kafka
         ConsumeError,
-        ServerConnError
+        ServerConnError,
+
+        //AzureServiceBus
+        ExceptionReceived
     }
 
     public class LogMessageEventArgs : EventArgs
