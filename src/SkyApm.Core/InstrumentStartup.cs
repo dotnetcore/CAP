@@ -46,29 +46,16 @@ namespace SkyApm
             foreach (var service in _services)
                 await service.StartAsync(cancellationToken);
             DiagnosticListener.AllListeners.Subscribe(_observer);
-            _logger.Information("Started SkyWalking .NET Core Agent.");
+            _logger.Information("Started SkyAPM .NET Core Agent.");
         }
 
         public async Task StopAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
             foreach (var service in _services)
                 await service.StopAsync(cancellationToken);
-            _logger.Information("Stopped SkyWalking .NET Core Agent.");
+            _logger.Information("Stopped SkyAPM .NET Core Agent.");
             // ReSharper disable once MethodSupportsCancellation
             await Task.Delay(TimeSpan.FromSeconds(2));
-        }
-
-        private string Welcome()
-        {
-            var builder = new StringBuilder();
-            builder.AppendLine("Initializing ...");
-            builder.AppendLine();
-            builder.AppendLine("***************************************************************");
-            builder.AppendLine("*                                                             *");
-            builder.AppendLine("*                Welcome to Apache SkyWalking                 *");
-            builder.AppendLine("*                                                             *");
-            builder.AppendLine("***************************************************************");
-            return builder.ToString();
         }
     }
 }

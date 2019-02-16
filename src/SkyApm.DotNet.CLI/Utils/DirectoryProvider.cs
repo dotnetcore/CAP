@@ -40,7 +40,7 @@ namespace SkyApm.DotNet.CLI.Utils
             () => Path.Combine("/usr/local/share", "dotnet"),
             () => Path.Combine("/usr/local/share", "dotnet"));
 
-        public string AgentPath => "skywalking.agent.aspnetcore";
+        public string AgentPath => "skyapm.agent.aspnetcore";
 
         public string AdditonalDepsRootDirectory => Path.Combine(DotnetDirectory, "x64", "additionalDeps");
 

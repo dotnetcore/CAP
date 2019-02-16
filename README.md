@@ -5,10 +5,10 @@ SkyAPM C#/.NET instrument agent
 
 [Apache SkyWalking](https://github.com/apache/incubator-skywalking) is an APM designed for microservices, cloud native and container-based (Docker, K8s, Mesos) architectures. **SkyAPM-dotnet** provides the native support agent in C# and .NETStandard platform, with the helps from Apache SkyWalking committer team.
 
-![](https://img.shields.io/github/issues-raw/skyapm/skyapm-dotnet.svg?style=flat-square)
-![](https://img.shields.io/github/issues-pr-raw/skyapm/skyapm-dotnet.svg?style=flat-square)
-![](https://img.shields.io/github/release/skyapm/skyapm-dotnet.svg?style=flat-square)
-![](https://img.shields.io/gitter/room/openskywalking/lobby.svg?style=flat-square)
+[![issues](https://img.shields.io/github/issues-raw/skyapm/skyapm-dotnet.svg?style=flat-square)](https://github.com/SkyAPM/SkyAPM-dotnet/issues)
+[![pulls](https://img.shields.io/github/issues-pr-raw/skyapm/skyapm-dotnet.svg?style=flat-square)](https://github.com/SkyAPM/SkyAPM-dotnet/pulls)
+[![releases](https://img.shields.io/github/release/skyapm/skyapm-dotnet.svg?style=flat-square)](https://github.com/SkyAPM/SkyAPM-dotnet/releases)
+[![Gitter](https://img.shields.io/gitter/room/openskywalking/lobby.svg?style=flat-square)](https://gitter.im/openskywalking/Lobby)
 [![Twitter Follow](https://img.shields.io/twitter/follow/asfskywalking.svg?style=flat-square&label=Follow&logo=twitter)](https://twitter.com/AsfSkyWalking)
 
 ## CI Build Status
@@ -19,13 +19,15 @@ SkyAPM C#/.NET instrument agent
 
 ## Nuget Packages
 
-| Package Name |  Nuget | Myget | Downloads 
+| Package Name |  NuGet | MyGet | Downloads 
 |--------------|  ------- |  ------- |  ---- 
-| SkyAPM.Agent.AspNetCore | ![](https://img.shields.io/nuget/v/SkyAPM.Agent.AspNetCore.svg?style=flat-square) | ![](https://img.shields.io/myget/skyapm-dotnet/v/SkyAPM.Agent.AspNetCore.svg?style=flat-square) | ![](https://img.shields.io/nuget/dt/SkyAPM.Agent.AspNetCore.svg?style=flat-square) 
-| SkyAPM.Agent.AspNet | ![](https://img.shields.io/nuget/v/SkyAPM.Agent.AspNet.svg?style=flat-square) | ![](https://img.shields.io/myget/skyapm-dotnet/v/SkyAPM.Agent.AspNet.svg?style=flat-square) | ![](https://img.shields.io/nuget/dt/SkyAPM.Agent.AspNet.svg?style=flat-square) 
+| SkyAPM.Agent.AspNetCore | [![nuget](https://img.shields.io/nuget/v/SkyAPM.Agent.AspNetCore.svg?style=flat-square)](https://www.nuget.org/packages/SkyAPM.Agent.AspNetCore) | [![myget](https://img.shields.io/myget/skyapm-dotnet/v/SkyAPM.Agent.AspNetCore.svg?style=flat-square)](https://www.myget.org/feed/skyapm-dotnet/package/nuget/SkyAPM.Agent.AspNetCore) | [![stats](https://img.shields.io/nuget/dt/SkyAPM.Agent.AspNetCore.svg?style=flat-square)](https://www.nuget.org/stats/packages/SkyAPM.Agent.AspNetCore?groupby=Version) 
+| SkyAPM.Agent.AspNet | [![nuget](https://img.shields.io/nuget/v/SkyAPM.Agent.AspNet.svg?style=flat-square)](https://www.nuget.org/packages/SkyAPM.Agent.AspNet) | [![myget](https://img.shields.io/myget/skyapm-dotnet/v/SkyAPM.Agent.AspNet.svg?style=flat-square)](https://www.myget.org/feed/skyapm-dotnet/package/nuget/SkyAPM.Agent.AspNet) | [![](https://img.shields.io/nuget/dt/SkyAPM.Agent.AspNet.svg?style=flat-square)](https://www.nuget.org/stats/packages/SkyAPM.Agent.AspNet?groupby=Version)  
+
+> MyGet feed URL https://www.myget.org/F/skyapm-dotnet/api/v3/index.json
 
 # Supported
-- This project currently supports apps targeting netcoreapp2.0/.net framework4.6.1 or higher.
+- This project currently supports apps targeting netcoreapp2.0/netframework4.6.1 or higher.
 - [Supported middlewares, frameworks and libraries.](docs/Supported-list.md)
 
 # Features

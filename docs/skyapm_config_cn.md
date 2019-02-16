@@ -1,37 +1,39 @@
-# SkyWalking Configuration
+# SkyAPM Config 配置说明
 
-# ServiceName
+## ServiceName
 
-Service name displayed.
+服务名称
 
 ## Sampling 
 
-Sample Configuration Section
+采样配置节点
 
-1. SamplePer3Secs, Sample Per 3 Seconds
+1. SamplePer3Secs 每3秒采样数
+
+2. Percentage 采样百分比，例如10%采样则配置为`10`
 
 ## Logging
 
-SkyWalking Logging Configuration Section
+日志配置节点
 
-1. Level, defalut:Information
-2. FilePath, defalut:logs\\SkyWalking-{Date}.log
+1. Level  日志级别
+2. FilePath 日志保存路径
 
-## Transport Section
+## Transport
 
-Transport Configuration Section
+传输配置节点
 
-1. Interval, Flush Interval Millisecond,(unit:Millisecond)
+1. Interval 每多少毫秒刷新
 
-### gRPC 
+### gRPC
 
-gRPC Configuration Section
+gRPC配置节点
 
-1. Servers, gRPC Service address,Multiple addresses separated by commas (",")
-2. Timeout, Timeout for creating a link,(unit:Millisecond)
-3. ConnectTimeout, gRPC Connectioning timed out,(unit:Millisecond)
+1. Servers gRPC地址，多个用逗号","
+2. Timeout 创建gRPC链接的超时时间，毫秒
+3. ConnectTimeout gRPC最长链接时间，毫秒
 
-# skyapm.json sample
+# skyapm.json 示例
 ```
 {
   "SkyWalking": {
