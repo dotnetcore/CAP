@@ -66,15 +66,9 @@ Set the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable to support th
 ```
 dotnet new mvc -n sampleapp
 cd sampleapp
-
 dotnet add package SkyAPM.Agent.AspNetCore
-
-// enable SkyAPM.Agent.AspNetCore
 set ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=SkyAPM.Agent.AspNetCore
-
-// set service_name
 set SKYWALKING__SERVICENAME=sample_app
-
 dotnet run
 ```
 
@@ -83,15 +77,9 @@ dotnet run
 ```
 dotnet new mvc -n sampleapp
 cd sampleapp
-
 dotnet add package SkyAPM.Agent.AspNetCore
-
-// enable SkyAPM.Agent.AspNetCore
 export ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=SkyAPM.Agent.AspNetCore
-
-// set service_name
 export SKYWALKING__SERVICENAME=sample_app
-
 dotnet run
 ```
 
@@ -103,9 +91,7 @@ Install `SkyAPM.DotNet.CLI`
 dotnet tool install -g SkyAPM.DotNet.CLI
 ```
 
-Use `dotnet skywalking config [your_service_name] [your_servers]` to generate config file. 
-
-Example
+Use `dotnet skyapm config [your_service_name] [your_servers]` to generate config file. 
 
 ```
 dotnet skyapm config sample_app 192.168.0.1:11800
