@@ -3,31 +3,36 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Azure.ServiceBus;
+using Microsoft.Azure.ServiceBus.Management;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
     internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     {
-        private readonly string _groupId;
-        private readonly IConnectionPool _connectionPool;
+        private readonly ILogger _logger;
+        private readonly string _subscriptionName;
         private readonly AzureServiceBusOptions _asbOptions;
 
         private SubscriptionClient _consumerClient;
+
         private string _lockToken;
 
-        public AzureServiceBusConsumerClient(string groupId,
-            IConnectionPool connectionPool,
+        public AzureServiceBusConsumerClient(
+            ILogger logger,
+            string subscriptionName,
             AzureServiceBusOptions options)
         {
-            _groupId = groupId;
-            _connectionPool = connectionPool;
+            _logger = logger;
+            _subscriptionName = subscriptionName;
             _asbOptions = options ?? throw new ArgumentNullException(nameof(options));
 
-            InitAzureServiceBusClient();
+            InitAzureServiceBusClient().GetAwaiter().GetResult();
         }
 
         public event EventHandler<MessageContext> OnMessageReceived;
@@ -43,21 +48,37 @@ namespace DotNetCore.CAP.AzureServiceBus
                 throw new ArgumentNullException(nameof(topics));
             }
 
-            _consumerClient.RemoveRuleAsync(RuleDescription.DefaultRuleName).Wait();
+            var allRuleNames = _consumerClient.GetRulesAsync().GetAwaiter().GetResult().Select(x => x.Name);
 
-            foreach (var topic in topics)
+            foreach (var newRule in topics.Except(allRuleNames))
             {
                 _consumerClient.AddRuleAsync(new RuleDescription
                 {
-                    Filter = new CorrelationFilter { Label = topic },
-                    Name = topic
+                    Filter = new CorrelationFilter { Label = newRule },
+                    Name = newRule
                 }).GetAwaiter().GetResult();
+
+                _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
+            }
+
+            foreach (var oldRule in allRuleNames.Except(topics))
+            {
+                _consumerClient.RemoveRuleAsync(oldRule).GetAwaiter().GetResult();
+
+                _logger.LogInformation($"Azure Service Bus remove rule: {oldRule}");
             }
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            _consumerClient.RegisterMessageHandler(OnConsumerReceived, OnExceptionReceived);
+
+            _consumerClient.RegisterMessageHandler(OnConsumerReceived,
+                new MessageHandlerOptions(OnExceptionReceived)
+                {
+                    AutoComplete = false,
+                    MaxConcurrentCalls = 10,
+                    MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
+                });
 
             while (true)
             {
@@ -84,13 +105,33 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         #region private methods
 
-        private void InitAzureServiceBusClient()
+        private async Task InitAzureServiceBusClient()
         {
-            _consumerClient = new SubscriptionClient(_connectionPool.Rent(),
-                _asbOptions.TopicPath,
-                _groupId,
-                ReceiveMode.ReceiveAndDelete,
-                RetryPolicy.Default);
+            ManagementClient mClient;
+            if (_asbOptions.ManagementTokenProvider != null)
+            {
+                mClient = new ManagementClient(new ServiceBusConnectionStringBuilder(
+                    _asbOptions.ConnectionString), _asbOptions.ManagementTokenProvider);
+            }
+            else
+            {
+                mClient = new ManagementClient(_asbOptions.ConnectionString);
+            }
+
+            if (!await mClient.TopicExistsAsync(_asbOptions.TopicPath))
+            {
+                await mClient.CreateTopicAsync(_asbOptions.TopicPath);
+                _logger.LogInformation($"Azure Service Bus created topic: {_asbOptions.TopicPath}");
+            }
+
+            if (!await mClient.SubscriptionExistsAsync(_asbOptions.TopicPath, _subscriptionName))
+            {
+                await mClient.CreateSubscriptionAsync(_asbOptions.TopicPath, _subscriptionName);
+                _logger.LogInformation($"Azure Service Bus topic {_asbOptions.TopicPath} created subscription: {_subscriptionName}");
+            }
+
+            _consumerClient = new SubscriptionClient(_asbOptions.ConnectionString, _asbOptions.TopicPath, _subscriptionName,
+                ReceiveMode.PeekLock, RetryPolicy.Default);
         }
 
         private Task OnConsumerReceived(Message message, CancellationToken token)
@@ -98,7 +139,7 @@ namespace DotNetCore.CAP.AzureServiceBus
             _lockToken = message.SystemProperties.LockToken;
             var context = new MessageContext
             {
-                Group = _groupId,
+                Group = _subscriptionName,
                 Name = message.Label,
                 Content = Encoding.UTF8.GetString(message.Body)
             };
@@ -110,10 +151,17 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private Task OnExceptionReceived(ExceptionReceivedEventArgs args)
         {
+            var context = args.ExceptionReceivedContext;
+            var exceptionMessage =
+                $"- Endpoint: {context.Endpoint}\r\n" +
+                $"- Entity Path: {context.EntityPath}\r\n" +
+                $"- Executing Action: {context.Action}\r\n" +
+                $"- Exception: {args.Exception}";
+
             var logArgs = new LogMessageEventArgs
             {
-                LogType = MqLogType.ServerConnError,
-                Reason = args.Exception.Message
+                LogType = MqLogType.ExceptionReceived,
+                Reason = exceptionMessage
             };
 
             OnLog?.Invoke(null, logArgs);

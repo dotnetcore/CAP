@@ -3,7 +3,6 @@
 
 using System;
 using DotNetCore.CAP;
-using Microsoft.Azure.ServiceBus;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -22,24 +21,22 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(connectionString));
             }
 
-            options.RegisterExtension(new AzureServiceBusOptionsExtension(x => x.ConnectionString = connectionString));
-
-            return options;
+            return options.UseAzureServiceBus(opt => { opt.ConnectionString = connectionString; });
         }
 
         /// <summary>
         /// Configuration to use Azure Service Bus in CAP.
         /// </summary>
         /// <param name="options">CAP configuration options</param>
-        /// <param name="connectionStringBuilder">Provides programmatic configuration for the Azure Service Bus.</param>
-        public static CapOptions UseAzureServiceBus(this CapOptions options, ServiceBusConnectionStringBuilder connectionStringBuilder)
+        /// <param name="configure">Provides programmatic configuration for the Azure Service Bus.</param>
+        public static CapOptions UseAzureServiceBus(this CapOptions options, Action<AzureServiceBusOptions> configure)
         {
-            if (connectionStringBuilder == null)
+            if (configure == null)
             {
-                throw new ArgumentNullException(nameof(connectionStringBuilder));
+                throw new ArgumentNullException(nameof(configure));
             }
 
-            options.RegisterExtension(new AzureServiceBusOptionsExtension(x => x.ConnectionStringBuilder = connectionStringBuilder));
+            options.RegisterExtension(new AzureServiceBusOptionsExtension(configure));
 
             return options;
         }

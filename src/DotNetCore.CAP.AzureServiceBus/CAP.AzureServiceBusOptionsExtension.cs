@@ -28,7 +28,6 @@ namespace DotNetCore.CAP
             services.AddSingleton<IConsumerClientFactory, AzureServiceBusConsumerClientFactory>();
             services.AddSingleton<IPublishExecutor, AzureServiceBusPublishMessageSender>();
             services.AddSingleton<IPublishMessageSender, AzureServiceBusPublishMessageSender>();
-            services.AddSingleton<IConnectionPool, ConnectionPool>();
         }
     }
 }

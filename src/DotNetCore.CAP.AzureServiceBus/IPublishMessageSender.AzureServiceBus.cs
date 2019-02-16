@@ -13,33 +13,31 @@ namespace DotNetCore.CAP.AzureServiceBus
 {
     internal class AzureServiceBusPublishMessageSender : BasePublishMessageSender
     {
-        private readonly IConnectionPool _connectionPool;
         private readonly ILogger _logger;
-        private readonly AzureServiceBusOptions _asbOptions;
+        private readonly ITopicClient _topicClient;
 
         public AzureServiceBusPublishMessageSender(
             ILogger<AzureServiceBusPublishMessageSender> logger,
             CapOptions options,
             AzureServiceBusOptions asbOptions,
             IStateChanger stateChanger,
-            IStorageConnection connection,
-            IConnectionPool connectionPool)
+            IStorageConnection connection)
             : base(logger, options, connection, stateChanger)
         {
             _logger = logger;
-            _asbOptions = asbOptions;
-            _connectionPool = connectionPool;
-            ServersAddress = _connectionPool.ConnectionString;
+            ServersAddress = asbOptions.ConnectionString;
+
+            _topicClient = new TopicClient(
+                ServersAddress, 
+                asbOptions.TopicPath,
+                RetryPolicy.NoRetry);
         }
 
         public override async Task<OperateResult> PublishAsync(string keyName, string content)
         {
-            var connection = _connectionPool.Rent();
-
             try
             {
                 var contentBytes = Encoding.UTF8.GetBytes(content);
-                var topicClient = new TopicClient(connection, _asbOptions.TopicPath, RetryPolicy.NoRetry);
 
                 var message = new Message
                 {
@@ -48,9 +46,9 @@ namespace DotNetCore.CAP.AzureServiceBus
                     Label = keyName,
                 };
 
-                await topicClient.SendAsync(message);
+                await _topicClient.SendAsync(message);
 
-                _logger.LogDebug($"kafka topic message [{keyName}] has been published.");
+                _logger.LogDebug($"Azure Service Bus message [{keyName}] has been published.");
 
                 return OperateResult.Success;
             }
@@ -59,14 +57,6 @@ namespace DotNetCore.CAP.AzureServiceBus
                 var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
 
                 return OperateResult.Failed(wrapperEx);
-            }
-            finally
-            {
-                var returned = _connectionPool.Return(connection);
-                if (!returned)
-                {
-                    await connection.CloseAsync();
-                }
             }
         }
     }

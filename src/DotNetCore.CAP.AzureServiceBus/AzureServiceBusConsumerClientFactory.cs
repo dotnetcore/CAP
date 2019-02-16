@@ -1,24 +1,27 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using Microsoft.Extensions.Logging;
+
 namespace DotNetCore.CAP.AzureServiceBus
 {
     internal sealed class AzureServiceBusConsumerClientFactory : IConsumerClientFactory
     {
+        private readonly ILoggerFactory _loggerFactory;
         private readonly AzureServiceBusOptions _asbOptions;
-        private readonly IConnectionPool _connectionPool;
 
         public AzureServiceBusConsumerClientFactory(
-            AzureServiceBusOptions asbOptions,
-            IConnectionPool connectionPool)
+            ILoggerFactory loggerFactory,
+            AzureServiceBusOptions asbOptions)
         {
+            _loggerFactory = loggerFactory;
             _asbOptions = asbOptions;
-            _connectionPool = connectionPool;
         }
 
         public IConsumerClient Create(string groupId)
         {
-            return new AzureServiceBusConsumerClient(groupId, _connectionPool, _asbOptions);
+            var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
+            return new AzureServiceBusConsumerClient(logger, groupId, _asbOptions);
         }
     }
 }
