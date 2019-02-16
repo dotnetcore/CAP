@@ -17,8 +17,6 @@ namespace DotNetCore.CAP
         /// </summary>
         public const string DefaultTopicPath = "cap";
 
-        public int ConnectionPoolSize { get; set; } = 10;
-
         /// <summary>
         /// Azure Service Bus Namespace connection string. Must not contain topic information.
         /// </summary>
