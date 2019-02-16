@@ -30,11 +30,12 @@ You can run the following command to install the CAP in your project.
 PM> Install-Package DotNetCore.CAP
 ```
 
-CAP supports RabbitMQ and Kafka as message queue, select the packages you need to install:
+CAP supports RabbitMQ,Kafka and AzureService as message queue, select the packages you need to install:
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka
 PM> Install-Package DotNetCore.CAP.RabbitMQ
+PM> Install-Package DotNetCore.CAP.AzureServiceBus
 ```
 
 CAP supports SqlServer, MySql, PostgreSql，MongoDB as event log storage.
@@ -65,7 +66,7 @@ public void ConfigureServices(IServiceCollection services)
         // If you are using EF, you need to add the configuration：
         x.UseEntityFramework<AppDbContext>(); //Options, Notice: You don't need to config x.UseSqlServer(""") again! CAP can autodiscovery.
 
-        // If you are using Dapper, you need to add the configuration：
+        // If you are using ADO.NET, choose to add configuration you needed：
         x.UseSqlServer("Your ConnectionStrings");
         x.UseMySql("Your ConnectionStrings");
         x.UsePostgreSql("Your ConnectionStrings");
@@ -73,11 +74,10 @@ public void ConfigureServices(IServiceCollection services)
         // If you are using MongoDB, you need to add the configuration：
         x.UseMongoDB("Your ConnectionStrings");  //MongoDB 4.0+ cluster
 
-        // If you are using RabbitMQ, you need to add the configuration：
-        x.UseRabbitMQ("localhost");
-
-        // If you are using Kafka, you need to add the configuration：
-        x.UseKafka("localhost");
+        // CAP support RabbitMQ,Kafka,AzureService as the MQ, choose to add configuration you needed：
+        x.UseRabbitMQ("ConnectionString");
+        x.UseKafka("ConnectionString");
+        x.UseAzureServiceBus("ConnectionString");
     });
 }
 

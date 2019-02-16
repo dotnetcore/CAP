@@ -35,11 +35,12 @@ CAP 采用的是和当前数据库集成的本地消息表的方案来解决在�
 PM> Install-Package DotNetCore.CAP
 ```
 
-CAP 支持 Kafka 或者 RabbitMQ 消息队列，你可以选择下面的包进行安装：
+CAP 支持 Kafka、RabbitMQ、AzureServiceBus 等消息队列，你可以按需选择下面的包进行安装：
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka
 PM> Install-Package DotNetCore.CAP.RabbitMQ
+PM> Install-Package DotNetCore.CAP.AzureServiceBus
 ```
 
 CAP 提供了 Sql Server, MySql, PostgreSQL，MongoDB 的扩展作为数据库存储：
@@ -66,19 +67,20 @@ public void ConfigureServices(IServiceCollection services)
     services.AddCap(x =>
     {
         //如果你使用的 EF 进行数据操作，你需要添加如下配置：
-	x.UseEntityFramework<AppDbContext>();  //可选项，你不需要再次配置 x.UseSqlServer 了
+        x.UseEntityFramework<AppDbContext>();  //可选项，你不需要再次配置 x.UseSqlServer 了
 		
-        //如果你使用的Ado.Net，根据数据库选择进行配置：
+        //如果你使用的ADO.NET，根据数据库选择进行配置：
         x.UseSqlServer("数据库连接字符串");
-        x.UseMySql("Your ConnectionStrings");
-        x.UsePostgreSql("Your ConnectionStrings");
+        x.UseMySql("数据库连接字符串");
+        x.UsePostgreSql("数据库连接字符串");
 
         //如果你使用的 MongoDB，你可以添加如下配置：
-        x.UseMongoDB("Your ConnectionStrings");  //注意，仅支持MongoDB 4.0+集群
+        x.UseMongoDB("ConnectionStrings");  //注意，仅支持MongoDB 4.0+集群
 	
-        //如果你使用的 RabbitMQ 或者 Kafka 作为MQ，根据使用选择配置：
-        x.UseRabbitMQ("localhost");
-        x.UseKafka("localhost");
+        //CAP支持 RabbitMQ、Kafka、AzureServiceBus 等作为MQ，根据使用选择配置：
+        x.UseRabbitMQ("ConnectionStrings");
+        x.UseKafka("ConnectionStrings");
+        x.UseAzureServiceBus("ConnectionStrings");
     });
 }
 
