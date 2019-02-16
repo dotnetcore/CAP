@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <Description>$(Product) Core abstractions and interfaces for apm agent.</Description>
+    <AssemblyTitle>$(PackagePrefix).Abstractions</AssemblyTitle>
+    <AssemblyName>$(PackagePrefix).Abstractions</AssemblyName>
+    <PackageId>$(PackagePrefix).Abstractions</PackageId>
+    <PackageTags>SkyWalking;APM</PackageTags>
+    <PackageReleaseNotes>
+    </PackageReleaseNotes>
+    <RootNamespace>SkyApm</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+</Project>

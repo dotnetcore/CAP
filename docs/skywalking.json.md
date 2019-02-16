@@ -1,12 +1,8 @@
 # SkyWalking Configuration
 
-# ApplicationCode
+# ServiceName
 
-App name displayed.
-
-# SpanLimitPerSegment
-
-"Span" Limit Per Segment Max.
+Service name displayed.
 
 ## Sampling 
 
@@ -26,8 +22,6 @@ SkyWalking Logging Configuration Section
 Transport Configuration Section
 
 1. Interval, Flush Interval Millisecond,(unit:Millisecond)
-2. PendingSegmentLimit,  PendingSegmentLimit Count
-3. PendingSegmentTimeout, Data queued beyond this time will be discarded,(unit:Millisecond)
 
 ### gRPC 
 
@@ -37,27 +31,33 @@ gRPC Configuration Section
 2. Timeout, Timeout for creating a link,(unit:Millisecond)
 3. ConnectTimeout, gRPC Connectioning timed out,(unit:Millisecond)
 
-# skywalking.json sample
+# skyapm.json sample
 ```
 {
   "SkyWalking": {
-    "ApplicationCode": "app",
-    "SpanLimitPerSegment": 300,
+    "ServiceName": "your_service_name",
+    "Namespace": "",
+    "HeaderVersions": [
+      "sw6"
+    ],
     "Sampling": {
-      "SamplePer3Secs": -1
+      "SamplePer3Secs": -1,
+      "Percentage": -1.0
     },
     "Logging": {
       "Level": "Information",
-      "FilePath": "logs\\SkyWalking-{Date}.log"
+      "FilePath": "logs/skyapm-{Date}.log"
     },
     "Transport": {
       "Interval": 3000,
-      "PendingSegmentLimit": 30000,
-      "PendingSegmentTimeout": 1000,
+      "ProtocolVersion": "v6",
+      "QueueSize": 30000,
+      "BatchSize": 3000,
       "gRPC": {
         "Servers": "localhost:11800",
-        "Timeout": 2000,
-        "ConnectTimeout": 10000
+        "Timeout": 10000,
+        "ConnectTimeout": 10000,
+        "ReportTimeout": 600000
       }
     }
   }

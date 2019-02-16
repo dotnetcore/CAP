@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\build\common.props" />
+    
+    <PropertyGroup>
+        <Description>$(Product) gRPC data transmitter.</Description>
+        <AssemblyTitle>$(PackagePrefix).Transport.Grpc</AssemblyTitle>
+        <AssemblyName>$(PackagePrefix).Transport.Grpc</AssemblyName>
+        <PackageId>$(PackagePrefix).Transport.Grpc</PackageId>
+        <PackageTags>SkyWalking;Grpc</PackageTags>
+        <PackageReleaseNotes>
+        </PackageReleaseNotes>
+        <TargetFramework>netstandard2.0</TargetFramework>
+        <RootNamespace>SkyApm.Transport.Grpc</RootNamespace>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\SkyApm.Abstractions\SkyApm.Abstractions.csproj" />
+      <ProjectReference Include="..\SkyApm.Transport.Grpc.Protocol\SkyApm.Transport.Grpc.Protocol.csproj" />
+    </ItemGroup>
+
+</Project>

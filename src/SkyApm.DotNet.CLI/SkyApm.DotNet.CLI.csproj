@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <Import Project="..\..\build\common.props" />
+
+    <PropertyGroup>
+        <Description>$(PackagePrefix) dotnet global tool.</Description>
+        <AssemblyTitle>$(PackagePrefix).DotNet.CLI</AssemblyTitle>
+        <AssemblyName>$(PackagePrefix).DotNet.CLI</AssemblyName>
+        <PackageId>$(PackagePrefix).DotNet.CLI</PackageId>
+        <PackageTags>SkyWalking;APM;CLI</PackageTags>
+        <RootNamespace>SkyApm.DotNet.CLI</RootNamespace>
+        <OutputType>Exe</OutputType>
+        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+        <IsPackable>true</IsPackable>
+        <PackAsTool>true</PackAsTool>
+        <ToolCommandName>dotnet-skyapm</ToolCommandName>
+        <TargetFramework>netcoreapp2.1</TargetFramework>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.CommandLineUtils" Version="1.1.1" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="2.0.0" />
+      <PackageReference Include="Newtonsoft.Json" Version="12.0.1" />
+    </ItemGroup>
+
+</Project>

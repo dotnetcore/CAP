@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <Description>$(PackagePrefix).Diagnostics.HttpClient notifies outgoing Http requests.</Description>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.HttpClient</AssemblyTitle>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>$(PackagePrefix).Diagnostics.HttpClient</AssemblyName>
+    <PackageId>$(PackagePrefix).Diagnostics.HttpClient</PackageId>
+    <PackageTags>SkyWalking;APM;Diagnostics;HttpClient</PackageTags>
+    <PackageReleaseNotes>
+    </PackageReleaseNotes>
+    <RootNamespace>SkyApm.Diagnostics.HttpClient</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SkyApm.Abstractions\SkyApm.Abstractions.csproj" />
+    <ProjectReference Include="..\SkyApm.Core\SkyApm.Core.csproj" />
+    <ProjectReference Include="..\SkyApm.Utilities.DependencyInjection\SkyApm.Utilities.DependencyInjection.csproj" />
+  </ItemGroup>
+</Project>

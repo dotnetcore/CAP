@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <Import Project="..\..\build\common.props" />
+    <PropertyGroup>
+        <Description>$(Product) ASP.NET Core Agent.</Description>
+        <AssemblyTitle>$(PackagePrefix).Agent.AspNetCore</AssemblyTitle>
+        <AssemblyName>$(PackagePrefix).Agent.AspNetCore</AssemblyName>
+        <PackageId>$(PackagePrefix).Agent.AspNetCore</PackageId>
+        <PackageTags>SkyWalking;APM</PackageTags>
+        <PackageReleaseNotes>
+        </PackageReleaseNotes>
+        <RootNamespace>SkyApm.Agent.AspNetCore</RootNamespace>
+        <TargetFramework>netstandard2.0</TargetFramework>
+    </PropertyGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.AspNetCore.Hosting.Abstractions" Version="2.0.0" PrivateAssets="All" />
+    </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\SkyApm.Abstractions\SkyApm.Abstractions.csproj" />
+        <ProjectReference Include="..\SkyApm.Diagnostics.AspNetCore\SkyApm.Diagnostics.AspNetCore.csproj" />
+        <ProjectReference Include="..\SkyApm.Diagnostics.EntityFrameworkCore.Npgsql\SkyApm.Diagnostics.EntityFrameworkCore.Npgsql.csproj" />
+        <ProjectReference Include="..\SkyApm.Diagnostics.EntityFrameworkCore.Pomelo.MySql\SkyApm.Diagnostics.EntityFrameworkCore.Pomelo.MySql.csproj" />
+        <ProjectReference Include="..\SkyApm.Diagnostics.EntityFrameworkCore.Sqlite\SkyApm.Diagnostics.EntityFrameworkCore.Sqlite.csproj" />
+        <ProjectReference Include="..\SkyApm.Diagnostics.EntityFrameworkCore\SkyApm.Diagnostics.EntityFrameworkCore.csproj" />
+        <ProjectReference Include="..\SkyApm.Core\SkyApm.Core.csproj" />
+        <ProjectReference Include="..\SkyApm.Diagnostics.HttpClient\SkyApm.Diagnostics.HttpClient.csproj" />
+        <ProjectReference Include="..\SkyApm.Diagnostics.SqlClient\SkyApm.Diagnostics.SqlClient.csproj" />
+        <ProjectReference Include="..\SkyApm.Transport.Grpc\SkyApm.Transport.Grpc.csproj" />
+        <ProjectReference Include="..\SkyApm.Utilities.Configuration\SkyApm.Utilities.Configuration.csproj" />
+        <ProjectReference Include="..\SkyApm.Utilities.DependencyInjection\SkyApm.Utilities.DependencyInjection.csproj" />
+        <ProjectReference Include="..\SkyApm.Utilities.Logging\SkyApm.Utilities.Logging.csproj" />
+    </ItemGroup>
+</Project>

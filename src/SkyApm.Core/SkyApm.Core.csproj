@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <Description>$(Product) core components.</Description>
+    <AssemblyTitle>$(PackagePrefix).Core</AssemblyTitle>
+    <AssemblyName>$(PackagePrefix).Core</AssemblyName>
+    <PackageId>$(PackagePrefix).Core</PackageId>
+    <PackageTags>SkyWalking;APM</PackageTags>
+    <PackageReleaseNotes>
+    </PackageReleaseNotes>
+    <RootNamespace>SkyWalking</RootNamespace>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="4.5.1" />
+    <PackageReference Include="System.Memory" Version="4.5.2" />
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SkyApm.Abstractions\SkyApm.Abstractions.csproj" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Pomelo.MySql</AssemblyName>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Pomelo.MySql</AssemblyTitle>
+    <PackageId>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Pomelo.MySql</PackageId>
+    <PackageTags>SkyWalking;APM;EntityFrameworkCore;EF</PackageTags>
+    <Description>$(PackagePrefix).Diagnostics.EntityFrameworkCore.Pomelo.MySql notifies of EF requests.</Description>
+    <RootNamespace>SkyApm.Diagnostics.EntityFrameworkCore</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SkyApm.Abstractions\SkyApm.Abstractions.csproj" />
+    <ProjectReference Include="..\SkyApm.Diagnostics.EntityFrameworkCore\SkyApm.Diagnostics.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\SkyApm.Core\SkyApm.Core.csproj" />
+    <ProjectReference Include="..\SkyApm.Utilities.DependencyInjection\SkyApm.Utilities.DependencyInjection.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="2.1.4" PrivateAssets="All" />
+  </ItemGroup>
+</Project>

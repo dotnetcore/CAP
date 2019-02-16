@@ -1,0 +1,29 @@
+{
+  "SkyWalking": {
+    "ServiceName": "asp-net-sample",
+    "Namespace": "",
+    "HeaderVersions": [
+      "sw6"
+    ],
+    "Sampling": {
+      "SamplePer3Secs": -1,
+      "Percentage": -1.0
+    },
+    "Logging": {
+      "Level": "Information",
+      "FilePath": "logs/skyapm-{Date}.log"
+    },
+    "Transport": {
+      "Interval": 3000,
+      "ProtocolVersion": "v6",
+      "QueueSize": 30000,
+      "BatchSize": 3000,
+      "gRPC": {
+        "Servers": "localhost:11800",
+        "Timeout": 10000,
+        "ConnectTimeout": 10000,
+        "ReportTimeout": 600000
+      }
+    }
+  }
+}

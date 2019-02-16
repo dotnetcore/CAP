@@ -3,14 +3,29 @@ SkyAPM C#/.NET instrument agent
 
 <img src="https://skyapmtest.github.io/page-resources/SkyAPM/skyapm.png" alt="Sky Walking logo" height="90px" align="right" />
 
-[Apache SkyWalking](https://github.com/apache/incubator-skywalking) is an APM designed for microservices, cloud native and container-based (Docker, K8s, Mesos) architectures. **SkyAPM-netcore** provides the native support agent in C# and .NETStandard platform, with the helps from Apache SkyWalking committer team.
+[Apache SkyWalking](https://github.com/apache/incubator-skywalking) is an APM designed for microservices, cloud native and container-based (Docker, K8s, Mesos) architectures. **SkyAPM-dotnet** provides the native support agent in C# and .NETStandard platform, with the helps from Apache SkyWalking committer team.
 
-[![Twitter Follow](https://img.shields.io/twitter/follow/asfskywalking.svg?style=for-the-badge&label=Follow&logo=twitter)](https://twitter.com/AsfSkyWalking)
+![](https://img.shields.io/github/issues-raw/skyapm/skyapm-dotnet.svg?style=flat-square)
+![](https://img.shields.io/github/issues-pr-raw/skyapm/skyapm-dotnet.svg?style=flat-square)
+![](https://img.shields.io/github/release/skyapm/skyapm-dotnet.svg?style=flat-square)
+![](https://img.shields.io/gitter/room/openskywalking/lobby.svg?style=flat-square)
+[![Twitter Follow](https://img.shields.io/twitter/follow/asfskywalking.svg?style=flat-square&label=Follow&logo=twitter)](https://twitter.com/AsfSkyWalking)
 
-[![Build status](https://ci.appveyor.com/api/projects/status/fl6vucwfn1vu94dv/branch/master?svg=true)](https://ci.appveyor.com/project/wu-sheng/skywalking-csharp/branch/master)
+## CI Build Status
+
+| Platform | Build Server | Master Status  |
+|--------- |------------- |---------|
+| AppVeyor |  Windows/Linux |[![Build status](https://ci.appveyor.com/api/projects/status/fl6vucwfn1vu94dv/branch/master?svg=true)](https://ci.appveyor.com/project/wu-sheng/skywalking-csharp/branch/master)|
+
+## Nuget Packages
+
+| Package Name |  Nuget | Myget | Downloads 
+|--------------|  ------- |  ------- |  ---- 
+| SkyAPM.Agent.AspNetCore | ![](https://img.shields.io/nuget/v/SkyAPM.Agent.AspNetCore.svg?style=flat-square) | ![](https://img.shields.io/myget/skyapm-dotnet/v/SkyAPM.Agent.AspNetCore.svg?style=flat-square) | ![](https://img.shields.io/nuget/dt/SkyAPM.Agent.AspNetCore.svg?style=flat-square) 
+| SkyAPM.Agent.AspNet | ![](https://img.shields.io/nuget/v/SkyAPM.Agent.AspNet.svg?style=flat-square) | ![](https://img.shields.io/myget/skyapm-dotnet/v/SkyAPM.Agent.AspNet.svg?style=flat-square) | ![](https://img.shields.io/nuget/dt/SkyAPM.Agent.AspNet.svg?style=flat-square) 
 
 # Supported
-- This project currently supports apps targeting netcoreapp2.1 or higher.
+- This project currently supports apps targeting netcoreapp2.0/.net framework4.6.1 or higher.
 - [Supported middlewares, frameworks and libraries.](docs/Supported-list.md)
 
 # Features
@@ -32,27 +47,16 @@ A quick list of SkyWalking .NET Core Agent's capabilities
 
 ## Install SkyWalking .NET Core Agent
 
-You can run the following command to install the SkyWalking .NET Core Agent in your computer.
+You can run the following command to install the SkyWalking .NET Core Agent in your project.
 
 ```
-// install SkyWalking DotNet CLI
-dotnet tool install -g SkyWalking.DotNet.CLI
-```
-On windows, run as Administrator
-```
-dotnet skywalking install
-```
-
-On macOS/Linux
-```
-sudo dotnet skywalking install
+dotnet add package SkyAPM.Agent.AspNetCore
 ```
 
 ## How to use
-Set the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` and `DOTNET_ADDITIONAL_DEPS` environment variables to support the activation of the SkyAPM .NET Core Agent. 
+Set the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable to support the activation of the SkyAPM .NET Core Agent. 
 
-- Add the assembly name of `SkyWalking.Agent.AspNetCore` to the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable.
-- On Windows, set the `DOTNET_ADDITIONAL_DEPS` environment variable to `%PROGRAMFILES%\dotnet\x64\additionalDeps\skywalking.agent.aspnetcore`. On macOS/Linux, set the `DOTNET_ADDITIONAL_DEPS` environment variable to `/usr/local/share/dotnet/x64/additionalDeps/skywalking.agent.aspnetcore`.
+- Add the assembly name of `SkyAPM.Agent.AspNetCore` to the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` environment variable.
 
 ### Examples
 - On windows
@@ -61,12 +65,13 @@ Set the `ASPNETCORE_HOSTINGSTARTUPASSEMBLIES` and `DOTNET_ADDITIONAL_DEPS` envir
 dotnet new mvc -n sampleapp
 cd sampleapp
 
-// enable SkyWalking.Agent.AspNetCore
-set ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=SkyWalking.Agent.AspNetCore
-set DOTNET_ADDITIONAL_DEPS=%PROGRAMFILES%\dotnet\x64\additionalDeps\skywalking.agent.aspnetcore
+dotnet add package SkyAPM.Agent.AspNetCore
 
-// set Application_Code
-set SKYWALKING__APPLICATIONCODE=sample_app
+// enable SkyAPM.Agent.AspNetCore
+set ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=SkyAPM.Agent.AspNetCore
+
+// set service_name
+set SKYWALKING__SERVICENAME=sample_app
 
 dotnet run
 ```
@@ -77,28 +82,38 @@ dotnet run
 dotnet new mvc -n sampleapp
 cd sampleapp
 
-// enable SkyWalking.Agent.AspNetCore
-export ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=SkyWalking.Agent.AspNetCore
-export DOTNET_ADDITIONAL_DEPS=/usr/local/share/dotnet/x64/additionalDeps/skywalking.agent.aspnetcore
+dotnet add package SkyAPM.Agent.AspNetCore
 
-// set Application_Code
-export SKYWALKING__APPLICATIONCODE=sample_app
+// enable SkyAPM.Agent.AspNetCore
+export ASPNETCORE_HOSTINGSTARTUPASSEMBLIES=SkyAPM.Agent.AspNetCore
+
+// set service_name
+export SKYWALKING__SERVICENAME=sample_app
 
 dotnet run
 ```
 
 ## Configuration
-Use `dotnet skywalking config [your_application_code] [your_collector_server]` to generate config file. Example
+
+Install `SkyAPM.DotNet.CLI`
 
 ```
-dotnet skywalking config sample_app 192.168.0.1:11800
+dotnet tool install -g SkyAPM.DotNet.CLI
+```
+
+Use `dotnet skywalking config [your_service_name] [your_servers]` to generate config file. 
+
+Example
+
+```
+dotnet skyapm config sample_app 192.168.0.1:11800
 ```
 
 # Roadmap
 [What are we going to do next?](/docs/roadmap.md)
 
 # Contributing
-This section is in progress here: [Contributing to SkyAPM-netcore](/CONTIBUTING.md)
+This section is in progress here: [Contributing to SkyAPM-dotnet](/CONTIBUTING.md)
 
 # Contact Us
 * Submit an issue
