@@ -47,7 +47,8 @@ namespace SkyApm.Agent.AspNet.Extensions
             services.AddSingleton<IConfigAccessor, ConfigAccessor>();
             services.AddSingleton<IEnvironmentProvider, HostingEnvironmentProvider>();
             services.AddSingleton<InstrumentRequestCallback>();
-            
+            services.AddSingleton<IConfigurationFactory, ConfigurationFactory>();
+
             services.AddSingleton<ITracingContext, Tracing.TracingContext>();
             services.AddSingleton<ICarrierPropagator, CarrierPropagator>();
             services.AddSingleton<ICarrierFormatter, Sw3CarrierFormatter>();
@@ -61,19 +62,19 @@ namespace SkyApm.Agent.AspNet.Extensions
             services.AddSingleton<IUniqueIdParser, UniqueIdParser>();
             services.AddSingleton<ISegmentContextMapper, SegmentContextMapper>();
             services.AddSingleton<IBase64Formatter, Base64Formatter>();
-            
+
             services.AddSingleton<SimpleCountSamplingInterceptor>();
             services.AddSingleton<ISamplingInterceptor>(p => p.GetService<SimpleCountSamplingInterceptor>());
             services.AddSingleton<IExecutionService>(p => p.GetService<SimpleCountSamplingInterceptor>());
             services.AddSingleton<ISamplingInterceptor, RandomSamplingInterceptor>();
-            
+
             services.AddSingleton<ISkyApmClientV5, SkyApmClientV5>();
             services.AddSingleton<ISegmentReporter, SegmentReporter>();
             services.AddSingleton<ConnectionManager>();
             services.AddSingleton<IPingCaller, PingCaller>();
             services.AddSingleton<IServiceRegister, ServiceRegister>();
             services.AddSingleton<IExecutionService, ConnectService>();
-            
+
             services.AddSingleton<ILoggerFactory, DefaultLoggerFactory>();
             return services;
         }

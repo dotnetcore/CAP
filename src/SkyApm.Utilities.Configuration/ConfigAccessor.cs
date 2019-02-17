@@ -22,40 +22,15 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using SkyApm.Config;
 
-// ReSharper disable StringLiteralTypo
 namespace SkyApm.Utilities.Configuration
 {
     public class ConfigAccessor : IConfigAccessor
     {
-        private const string CONFIG_FILE_PATH_COMPATIBLE = "SKYWALKING__CONFIG__PATH";
-        private const string CONFIG_FILE_PATH = "SKYAPM__CONFIG__PATH";
         private readonly IConfiguration _configuration;
 
-        public ConfigAccessor(IEnvironmentProvider environmentProvider)
+        public ConfigAccessor(IConfigurationFactory factory)
         {
-            var builder = new ConfigurationBuilder();
-
-            builder.AddSkyWalkingDefaultConfig();
-
-            builder.AddJsonFile("appsettings.json", true).AddJsonFile($"appsettings.{environmentProvider.EnvironmentName}.json", true);
-
-            builder.AddJsonFile("skywalking.json", true).AddJsonFile($"skywalking.{environmentProvider.EnvironmentName}.json", true);
-            
-            builder.AddJsonFile("skyapm.json", true).AddJsonFile($"skyapm.{environmentProvider.EnvironmentName}.json", true);
-
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(CONFIG_FILE_PATH_COMPATIBLE)))
-            {
-                builder.AddJsonFile(Environment.GetEnvironmentVariable(CONFIG_FILE_PATH_COMPATIBLE), false);
-            }
-            
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable(CONFIG_FILE_PATH)))
-            {
-                builder.AddJsonFile(Environment.GetEnvironmentVariable(CONFIG_FILE_PATH), false);
-            }
-
-            builder.AddEnvironmentVariables();
-
-            _configuration = builder.Build();
+            _configuration = factory.Create();
         }
 
         public T Get<T>() where T : class, new()
@@ -72,7 +47,9 @@ namespace SkyApm.Utilities.Configuration
             return _configuration.GetSection(config.GetSections()).GetValue<T>(key);
         }
 
-        //hign performance
+        /// <summary>
+        /// high performance
+        /// </summary>
         private static class New<T> where T : new()
         {
             public static readonly Func<T> Instance = Expression.Lambda<Func<T>>
