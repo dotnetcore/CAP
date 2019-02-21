@@ -1,24 +1,31 @@
 # Getting Stared
 
-## Usage Scenarios
+## Usage 
 
-The usage scenarios of CAP mainly include the following two:
+#### 1. Distributed transaction alternative solution in micro-service base on eventually consistency
 
-**1. The scheme of eventual consistency in distributed transactions**
+A distributed transaction is a very complex process with a lot of moving parts that can fail. Also, if these parts run on different machines or even in different data centers, the process of committing a transaction could become very long and unreliable.
 
-In the process of building an SOA or MicroService system, we usually need to use the event to integrate each services. In the process, the simple use of message queue does not guarantee the reliability. CAP is adopted the local message table program integrated with the current database to solve the exception may occur in the process of the distributed system calling each other. It can ensure that the event messages are not lost in any case.
-<br><br>
-Distributed transactions are an inevitable requirement in a distributed system, and the current solution for distributed transactions is nothing more than just a few. Before understanding the CAP's distributed transaction scenarios, you can read the following [Articles] (http://www.infoq.com/en/articles/solution-of-distributed-system-transaction-consistency).
-<br><br>
-The CAP does not use the two-phase commit (2PC) transaction mechanism, but uses the classical message implementation of the local message table + MQ, which is also called asynchronous guarantee.
+This could seriously affect the user experience and overall system bandwidth. So one of the best ways to solve the problem of distributed transactions is to avoid them completely.
 
-**2. Highly usable EventBus**
+Usually, a microservice is designed in such way as to be independent and useful on its own. It should be able to solve some atomic business task.
 
-You can also use the CAP as an EventBus. The CAP provides a simpler way to implement event publishing and subscriptions. You do not need to inherit or implement any interface during the process of subscription and sending.
-<br><br>
-CAP implements the publish and subscribe method of EventBus, which has all the features of EventBus. This means that you can use CAPs just like EventBus. In addition, CAP's EventBus is highly available. What does this mean?
-<br><br>
-The CAP uses the local message table to persist the messages in the EventBus. This ensures that the messages sent by the EventBus are reliable. When the message queue fails or fails, the messages are not lost.
+If we could split our system in such microservices, there’s a good chance we wouldn’t need to implement transactions between them at all. 
+
+By far, one of the most feasible models of handling consistency across microservices is eventual consistency. This model doesn’t enforce distributed ACID transactions across microservices. Instead, it proposes to use some mechanisms of ensuring that the system would be eventually consistent at some point in the future.
+
+CAP ia an alternative solution without transactions, it comply the eventually consistency and implement base on message queue. 
+
+#### 2. EventBus with Outbox pattern
+
+CAP is an event bus that implements the Outbox pattern, Outbox is an infrastructure feature which simulates the reliability of distributed transactions without requiring use of the Distributed Transaction Coordinator(DTC).
+
+The outbox feature can be used instead of the DTC to mimic the same level of consistency without using distributed transactions.
+
+!!! Tip "CAP implements the Outbox Pattern described in the [eShop ebook](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus)"
+    <img src="https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/media/image24.png">
+
+    > Atomicity when publishing events to the event bus with a worker microservice
 
 ## Quick Start
 
@@ -32,21 +39,18 @@ PM> Install-Package DotNetCore.CAP
 
 According to the different types of message queues used, different extension packages are introduced:
 
-```
+``` text
 PM> Install-Package DotNetCore.CAP.RabbitMQ
-
 PM> Install-Package DotNetCore.CAP.Kafka
+PM> Install-Package DotNetCore.CAP.AzureServiceBus
 ```
 
 According to the different types of databases used, different extension packages are introduced:
 
-```
+``` text
 PM> Install-Package DotNetCore.CAP.SqlServer
-
 PM> Install-Package DotNetCore.CAP.MySql
-
 PM> Install-Package DotNetCore.CAP.PostgreSql
-
 PM> Install-Package DotNetCore.CAP.MongoDB
 ```
 
