@@ -9,19 +9,11 @@ After initialized, CAP will create two tables in the client side,they are `Cap.P
 
 **Cap.Received**:Used to Store messages(subscribed by the `CapSubscribe[]`) subscribed by the MQ(message Queue) client side that CAP received.
 
-
-> Before version 2.2 ：
- **Cap.Queue**：A temporary table that CAP used to deal with published and received messages,under most circumstances(there aren't any errors),it is an empty table.
-
 Both `Published` and `Received` tables have a `StatusName` field,which is used to mark the status of the current message.Until now it has `Scheduled`，`Successed` and `Failed` statuses.
-
-> Statuses before version 2.2：`Scheduled`，`Enqueued`，`Processing`，`Successed` and `Failed`.
 
 In the process of dealing with messages,CAP will change the status from `Scheduled` to `Successed`(or `Failed` ).if the final status is `Successed`,it means that the message is sent to MQ successfully,and `Failed` means the message is failed to sent to MQ.
 
 Version later than 2.2,  CAP will retry after 4 minutes if the status is `Scheduled` or `Failed`,the retry interval is default to 60 seconds.You can change it by modify `FailedRetryInterval` in `CapOptions`.
-
->Before version 2.2,CAP retry  100 times for `Failed` messages by default.
 
 ## Message format
 
