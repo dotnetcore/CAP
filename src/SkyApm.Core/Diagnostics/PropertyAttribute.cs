@@ -16,6 +16,8 @@
  *
  */
 
+using AspectCore.Extensions.Reflection;
+
 namespace SkyApm.Diagnostics
 {
     public class PropertyAttribute : ParameterBinder
@@ -30,8 +32,8 @@ namespace SkyApm.Diagnostics
             }
 
             var property = value.GetType().GetProperty(Name);
-            
-            return property?.GetValue(value);
+
+            return property?.GetReflector()?.GetValue(value);
         }
     }
 }

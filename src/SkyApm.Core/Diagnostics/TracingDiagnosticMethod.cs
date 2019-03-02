@@ -19,21 +19,22 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using AspectCore.Extensions.Reflection;
 
 namespace SkyApm.Diagnostics
 {
     internal class TracingDiagnosticMethod
     {
-        private readonly MethodInfo _method;
         private readonly ITracingDiagnosticProcessor _tracingDiagnosticProcessor;
         private readonly string _diagnosticName;
         private readonly IParameterResolver[] _parameterResolvers;
+        private readonly MethodReflector _reflector;
 
         public TracingDiagnosticMethod(ITracingDiagnosticProcessor tracingDiagnosticProcessor, MethodInfo method,
             string diagnosticName)
         {
             _tracingDiagnosticProcessor = tracingDiagnosticProcessor;
-            _method = method;
+            _reflector = method.GetReflector();
             _diagnosticName = diagnosticName;
             _parameterResolvers = GetParameterResolvers(method).ToArray();
         }
@@ -51,7 +52,7 @@ namespace SkyApm.Diagnostics
                 args[i] = _parameterResolvers[i].Resolve(value);
             }
 
-            _method.Invoke(_tracingDiagnosticProcessor, args);
+            _reflector.Invoke(_tracingDiagnosticProcessor, args);
         }
 
         private static IEnumerable<IParameterResolver> GetParameterResolvers(MethodInfo methodInfo)

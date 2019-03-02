@@ -20,8 +20,8 @@
       "BatchSize": 3000,
       "gRPC": {
         "Servers": "localhost:11800",
-        "Timeout": 10000,
-        "ConnectTimeout": 10000,
+        "Timeout": 100000,
+        "ConnectTimeout": 100000,
         "ReportTimeout": 600000
       }
     }

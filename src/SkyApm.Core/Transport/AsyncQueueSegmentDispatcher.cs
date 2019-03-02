@@ -35,6 +35,7 @@ namespace SkyApm.Transport
         private readonly ConcurrentQueue<SegmentRequest> _segmentQueue;
         private readonly IRuntimeEnvironment _runtimeEnvironment;
         private readonly CancellationTokenSource _cancellation;
+        private int _offset;
 
         public AsyncQueueSegmentDispatcher(IConfigAccessor configAccessor,
             ISegmentReporter segmentReporter, IRuntimeEnvironment runtimeEnvironment,
@@ -55,7 +56,7 @@ namespace SkyApm.Transport
                 return false;
 
             // todo performance optimization for ConcurrentQueue
-            if (_config.QueueSize < _segmentQueue.Count || _cancellation.IsCancellationRequested)
+            if (_config.QueueSize < _offset || _cancellation.IsCancellationRequested)
                 return false;
 
             var segment = _segmentContextMapper.Map(segmentContext);
@@ -64,6 +65,8 @@ namespace SkyApm.Transport
                 return false;
 
             _segmentQueue.Enqueue(segment);
+
+            Interlocked.Increment(ref _offset);
 
             _logger.Debug($"Dispatch trace segment. [SegmentId]={segmentContext.SegmentId}.");
             return true;
@@ -80,11 +83,15 @@ namespace SkyApm.Transport
             while (index++ < limit && _segmentQueue.TryDequeue(out var request))
             {
                 segments.Add(request);
+                Interlocked.Decrement(ref _offset);
             }
 
             // send async
             if (segments.Count > 0)
                 _segmentReporter.ReportAsync(segments, token);
+
+            Interlocked.Exchange(ref _offset, _segmentQueue.Count);
+
             return Task.CompletedTask;
         }
 
