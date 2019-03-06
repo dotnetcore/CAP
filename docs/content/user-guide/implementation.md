@@ -66,7 +66,7 @@ Retry plays a very important role in CAP's infrastructure,CAP will retry for Fai
 
 **1、 Retry on sending**
 
-in the process of sending a message,when the Broker crashed or connection failed or exceptions are thrown,CAP will retry,it will retry 3 times for the first time,if still failed,then it will retry every 1 minute,the retry the retry count +1,when the retry count come to 50,CAP will not retry any more.
+in the process of sending a message,when the Broker crashed or connection failed or exceptions are thrown,CAP will retry,it will retry 3 times for the first time,if still failed,then it will retry every 1 minute after 4 minutes,the retry the retry count +1,when the retry count come to 50,CAP will not retry any more.
 
 >You can modify `FailedRetryCount` in `CapOptions` to change the default retry count.
 
