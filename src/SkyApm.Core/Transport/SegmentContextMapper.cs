@@ -37,7 +37,7 @@ namespace SkyApm.Transport
             {
                 SegmentId = MapUniqueId(segmentContext.SegmentId),
                 ServiceId = segmentContext.ServiceId,
-                ServiceInstanceId = segmentContext.ServiceId
+                ServiceInstanceId = segmentContext.ServiceInstanceId
             };
             segmentRequest.Segment = segmentObjectRequest;
             var span = new SpanRequest
