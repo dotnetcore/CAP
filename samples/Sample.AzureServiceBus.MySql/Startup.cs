@@ -9,8 +9,8 @@ namespace Sample.AzureServiceBus.MySql
         {
             services.AddCap(x =>
             {
-                x.UseMySql("Server=localhost;Database=testcap;UserId=root;Password=123123;");
-                x.UseAzureServiceBus("Endpoint=sb://testcap.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=<yourkey>");
+                x.UseInMemoryStorage();
+                x.UseAzureServiceBus("Endpoint=sb://testcap.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=<your-key>");
                 x.UseDashboard();
             });
 

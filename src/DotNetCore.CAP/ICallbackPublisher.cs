@@ -7,7 +7,7 @@ using DotNetCore.CAP.Models;
 namespace DotNetCore.CAP
 {
     /// <summary>
-    /// A callback that is sent to Productor after a successful consumer execution
+    /// A callback that is sent to Producer after a successful consumer execution
     /// </summary>
     public interface ICallbackPublisher
     {
