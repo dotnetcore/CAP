@@ -13,16 +13,16 @@ namespace DotNetCore.CAP.InMemoryStorage
 {
     internal class InMemoryMonitoringApi : IMonitoringApi
     {
-        private readonly InMemoryStorage _storage;
+        private readonly IStorage _storage;
 
         public InMemoryMonitoringApi(IStorage storage)
         {
-            _storage = storage as InMemoryStorage ?? throw new ArgumentNullException(nameof(storage));
+            _storage = storage;
         }
 
         public StatisticsDto GetStatistics()
         {
-            var connection = (InMemoryStorageConnection)_storage.GetConnection();
+            var connection = GetConnection();
             var stats = new StatisticsDto
             {
                 PublishedSucceeded = connection.PublishedMessages.Count(x => x.StatusName == StatusName.Succeeded),
@@ -62,8 +62,7 @@ namespace DotNetCore.CAP.InMemoryStorage
 
                 if (!string.IsNullOrEmpty(queryDto.Content))
                 {
-                    //TODO: StartsWith will replace with regex
-                    expression = expression.Where(x => x.Content.StartsWith(queryDto.Content));
+                    expression = expression.Where(x => x.Content.Contains(queryDto.Content));
                 }
 
                 var offset = queryDto.CurrentPage * queryDto.PageSize;
@@ -101,8 +100,7 @@ namespace DotNetCore.CAP.InMemoryStorage
 
                 if (!string.IsNullOrEmpty(queryDto.Content))
                 {
-                    //TODO: StartsWith will replace with regex
-                    expression = expression.Where(x => x.Content.StartsWith(queryDto.Content));
+                    expression = expression.Where(x => x.Content.Contains(queryDto.Content));
                 }
 
                 var offset = queryDto.CurrentPage * queryDto.PageSize;

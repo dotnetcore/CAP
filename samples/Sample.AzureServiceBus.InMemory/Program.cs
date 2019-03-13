@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace Sample.AzureServiceBus.MySql
+namespace Sample.AzureServiceBus.InMemory
 {
     public class Program
     {

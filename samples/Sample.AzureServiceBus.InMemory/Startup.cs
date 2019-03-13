@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sample.AzureServiceBus.MySql
+namespace Sample.AzureServiceBus.InMemory
 {
     public class Startup
     {

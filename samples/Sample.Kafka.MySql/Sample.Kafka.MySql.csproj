@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
-    <AssemblyName>Sample.Kafka.MySql</AssemblyName>
     <WarningsAsErrors>NU1701</WarningsAsErrors>
     <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
