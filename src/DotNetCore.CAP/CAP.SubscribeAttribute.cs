@@ -7,12 +7,19 @@ using DotNetCore.CAP.Abstractions;
 namespace DotNetCore.CAP
 {
     /// <summary>
-    /// An attribute for subscribe RabbitMQ messages.
+    /// An attribute for subscribe event bus message.
     /// </summary>
     public class CapSubscribeAttribute : TopicAttribute
     {
-        public CapSubscribeAttribute(string name) : base(name)
+        public CapSubscribeAttribute(string name)
+            : base(name)
         {
+
+        }
+
+        public override string ToString()
+        {
+            return Name;
         }
     }
 }
