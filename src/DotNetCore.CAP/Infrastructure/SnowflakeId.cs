@@ -55,8 +55,17 @@ namespace DotNetCore.CAP.Infrastructure
                 }
 
                 var random = new Random();
-                var workerId = random.Next((int)MaxWorkerId);
-                var datacenterId = random.Next((int)MaxDatacenterId);
+
+                if (!int.TryParse(Environment.GetEnvironmentVariable("CAP_WORKERID", EnvironmentVariableTarget.Machine), out var workerId))
+                {
+                    workerId = random.Next((int)MaxWorkerId);
+                }
+
+                if (!int.TryParse(Environment.GetEnvironmentVariable("CAP_DATACENTERID", EnvironmentVariableTarget.Machine), out var datacenterId))
+                {
+                    datacenterId = random.Next((int)MaxDatacenterId);
+                }
+
                 return _snowflakeId = new SnowflakeId(workerId, datacenterId);
             }
         }
