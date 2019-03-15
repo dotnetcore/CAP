@@ -130,7 +130,7 @@ namespace DotNetCore.CAP
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "An exception occurred when storage received message. Message:'{0}'.", messageContext);
+                    _logger.LogError(e, "An exception occurred when store received message. Message:'{0}'.", messageContext);
 
                     client.Reject();
 

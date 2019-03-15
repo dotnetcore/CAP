@@ -70,8 +70,8 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Execute message consumption once.
         /// </summary>
-        /// <param name="message">the message rececived of <see cref="CapReceivedMessage"/></param>
-        /// <returns>Item1 is need still restry, Item2 is executed result.</returns>
+        /// <param name="message">the message received of <see cref="CapReceivedMessage"/></param>
+        /// <returns>Item1 is need still retry, Item2 is executed result.</returns>
         private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync(CapReceivedMessage message)
         {
             if (message == null)
