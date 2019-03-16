@@ -103,7 +103,7 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 {"x-message-ttl", _rabbitMQOptions.QueueMessageExpires}
             };
-            _channel.QueueDeclare(_queueName, true, false, false, arguments);
+            _channel.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false, arguments);
         }
 
         #region events
