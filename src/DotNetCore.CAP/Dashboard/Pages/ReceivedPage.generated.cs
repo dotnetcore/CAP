@@ -302,7 +302,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
 
 #line default
 #line hidden
-                WriteLiteral("</th>\r\n                                <th>");
+                WriteLiteral("</th>\r\n                                <th style=\"width:50px;\">");
 
 #line 88 "..\..\ReceivedPage.cshtml"
                 Write(Strings.Common_Version);
@@ -371,7 +371,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
 
 #line default
 #line hidden
-                WriteLiteral("                                <th class=\"align-right\">");
+                WriteLiteral("                                <th style=\"width:75px;\" class=\"align-right\">");
 
 
 
@@ -438,7 +438,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
 #line default
 #line hidden
                     WriteLiteral("\r\n                                    </td>\r\n                                    " +
-                                 "<td>\r\n                                        ");
+                                 "<td class=\"word-break\">\r\n                                        ");
 
 
 #line 110 "..\..\ReceivedPage.cshtml"

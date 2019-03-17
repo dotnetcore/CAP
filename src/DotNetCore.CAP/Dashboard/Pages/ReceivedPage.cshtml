@@ -86,7 +86,7 @@
                                 <input type="checkbox" class="js-jobs-list-select-all"/>
                             </th>
                             <th>@Strings.Common_Id</th>
-                            <th>@Strings.Common_Version</th>
+                            <th style="width: 30px;">@Strings.Common_Version</th>
                             <th>@Strings.MessagesPage_Table_Group</th>
                             <th>@Strings.MessagesPage_Table_Name</th>
                             <th class="min-width">@Strings.MessagesPage_Table_Retries</th>
@@ -94,7 +94,7 @@
                             {
                                 <th>@Strings.MessagesPage_Table_State</th>
                             }
-                            <th class="align-right">@Strings.MessagesPage_Table_ExpiresAt</th>
+                            <th style="width: 75px;" class="align-right">@Strings.MessagesPage_Table_ExpiresAt</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -110,7 +110,7 @@
                                 <td>
                                     @message.Version
                                 </td>
-                                <td>
+                                <td class="word-break">
                                     @message.Group
                                 </td>
                                 <td>

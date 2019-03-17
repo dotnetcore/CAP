@@ -52,7 +52,7 @@ namespace DotNetCore.CAP.InMemoryStorage
 
                 if (!string.IsNullOrEmpty(queryDto.StatusName))
                 {
-                    expression = expression.Where(x => x.StatusName == queryDto.StatusName);
+                    expression = expression.Where(x => x.StatusName.ToLower() == queryDto.StatusName);
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Name))
@@ -85,7 +85,7 @@ namespace DotNetCore.CAP.InMemoryStorage
 
                 if (!string.IsNullOrEmpty(queryDto.StatusName))
                 {
-                    expression = expression.Where(x => x.StatusName == queryDto.StatusName);
+                    expression = expression.Where(x => x.StatusName.ToLower() == queryDto.StatusName);
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Name))
@@ -109,6 +109,8 @@ namespace DotNetCore.CAP.InMemoryStorage
                 return expression.Skip(offset).Take(size).Select(x => new MessageDto()
                 {
                     Added = x.Added,
+                    Group = x.Group,
+                    Version = "N/A",
                     Content = x.Content,
                     ExpiresAt = x.ExpiresAt,
                     Id = x.Id,
@@ -137,7 +139,7 @@ namespace DotNetCore.CAP.InMemoryStorage
         public int ReceivedSucceededCount()
         {
             return GetConnection().ReceivedMessages.Count(x => x.StatusName == StatusName.Succeeded);
-        } 
+        }
 
         private InMemoryStorageConnection GetConnection()
         {
