@@ -93,7 +93,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _connection = _connectionChannelPool.GetConnection();
 
             _channel = _connection.CreateModel();
-            
+
             _channel.ExchangeDeclare(
                 _exchangeName,
                 RabbitMQOptions.ExchangeType,
@@ -103,7 +103,7 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 {"x-message-ttl", _rabbitMQOptions.QueueMessageExpires}
             };
-            _channel.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false, arguments);
+            _channel.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false, arguments: arguments);
         }
 
         #region events
@@ -155,7 +155,7 @@ namespace DotNetCore.CAP.RabbitMQ
             var args = new LogMessageEventArgs
             {
                 LogType = MqLogType.ConsumerShutdown,
-                Reason =  e.ReplyText
+                Reason = e.ReplyText
             };
             OnLog?.Invoke(sender, args);
         }
