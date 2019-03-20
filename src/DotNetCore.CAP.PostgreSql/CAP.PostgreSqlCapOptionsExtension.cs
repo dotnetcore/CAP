@@ -21,7 +21,7 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapDatabaseStorageMarkerService>();
+            services.AddSingleton<CapStorageMarkerService>();
             services.AddSingleton<IStorage, PostgreSqlStorage>();
             services.AddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
 

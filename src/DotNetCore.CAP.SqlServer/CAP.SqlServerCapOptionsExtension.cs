@@ -22,7 +22,7 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapDatabaseStorageMarkerService>();
+            services.AddSingleton<CapStorageMarkerService>();
             services.AddSingleton<DiagnosticProcessorObserver>();
             services.AddSingleton<IStorage, SqlServerStorage>();
             services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();

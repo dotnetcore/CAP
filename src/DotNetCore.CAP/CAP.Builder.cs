@@ -15,9 +15,9 @@ namespace DotNetCore.CAP
     }
 
     /// <summary>
-    /// Used to verify cap database storage extension was added on a ServiceCollection
+    /// Used to verify cap storage extension was added on a ServiceCollection
     /// </summary>
-    public class CapDatabaseStorageMarkerService
+    public class CapStorageMarkerService
     {
     }
 
