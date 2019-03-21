@@ -37,5 +37,7 @@ namespace SkyApm.Common
         public static readonly StringOrIntValue NPGSQL_ENTITYFRAMEWORKCORE_POSTGRESQL = new StringOrIntValue("Npgsql.EntityFrameworkCore.PostgreSQL");
         
         public static readonly StringOrIntValue ASPNET = new StringOrIntValue("AspNet");
+
+        public static readonly StringOrIntValue SMART_SQL = new StringOrIntValue("SmartSql");
     }
 }

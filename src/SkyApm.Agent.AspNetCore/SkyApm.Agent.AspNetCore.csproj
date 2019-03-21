@@ -23,6 +23,7 @@
         <ProjectReference Include="..\SkyApm.Diagnostics.EntityFrameworkCore\SkyApm.Diagnostics.EntityFrameworkCore.csproj" />
         <ProjectReference Include="..\SkyApm.Core\SkyApm.Core.csproj" />
         <ProjectReference Include="..\SkyApm.Diagnostics.HttpClient\SkyApm.Diagnostics.HttpClient.csproj" />
+        <ProjectReference Include="..\SkyApm.Diagnostics.SmartSql\SkyApm.Diagnostics.SmartSql.csproj" />
         <ProjectReference Include="..\SkyApm.Diagnostics.SqlClient\SkyApm.Diagnostics.SqlClient.csproj" />
         <ProjectReference Include="..\SkyApm.Transport.Grpc\SkyApm.Transport.Grpc.csproj" />
         <ProjectReference Include="..\SkyApm.Utilities.Configuration\SkyApm.Utilities.Configuration.csproj" />

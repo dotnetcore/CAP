@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
   </ItemGroup>
   <ItemGroup>
+
     <ProjectReference Include="..\..\src\SkyApm.Agent.AspNetCore\SkyApm.Agent.AspNetCore.csproj" />
     <ProjectReference Include="..\..\src\SkyApm.Diagnostics.EntityFrameworkCore.Sqlite\SkyApm.Diagnostics.EntityFrameworkCore.Sqlite.csproj" />
   </ItemGroup>
@@ -14,6 +15,9 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite">
       <Version>2.1.0</Version>
     </PackageReference>
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.2.0" />
+    <PackageReference Include="SmartSql.DIExtension" Version="4.0.0-rc1" />
+
   </ItemGroup>
   <ItemGroup>
     <Content Update="appsettings.json">

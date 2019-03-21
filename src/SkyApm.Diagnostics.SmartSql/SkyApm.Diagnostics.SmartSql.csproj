@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="..\..\build\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>$(PackagePrefix).Diagnostics.SmartSql</AssemblyName>
+    <AssemblyTitle>$(PackagePrefix).Diagnostics.SmartSql</AssemblyTitle>
+    <PackageId>$(PackagePrefix).Diagnostics.SmartSql</PackageId>
+    <PackageTags>SkyWalking;APM;Diagnostics;SmartSql</PackageTags>
+    <Description>SkyApm.Diagnostics.SmartSql notifies of SmartSql requests.</Description>
+    <RootNamespace>SkyApm.Diagnostics.SmartSql</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SmartSql" Version="4.0.0-rc3" PrivateAssets="All" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SkyApm.Abstractions\SkyApm.Abstractions.csproj" />
+    <ProjectReference Include="..\SkyApm.Core\SkyApm.Core.csproj" />
+    <ProjectReference Include="..\SkyApm.Utilities.DependencyInjection\SkyApm.Utilities.DependencyInjection.csproj" />
+  </ItemGroup>
+</Project>
