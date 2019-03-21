@@ -49,7 +49,7 @@ namespace SkyApm.Tracing
 
             foreach (var formatter in _carrierFormatters)
             {
-                if (formatter.Enable){}
+                if (formatter.Enable)
                     headerCollection.Add(formatter.Key, formatter.Encode(carrier));
             }
         }
