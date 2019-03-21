@@ -32,8 +32,8 @@ namespace DotNetCore.CAP.Processor
             _sender = sender;
             _executor = executor;
 
-            Task.Factory.StartNew(Sending);
-            Task.Factory.StartNew(Processing);
+            Task.Factory.StartNew(Sending, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            Task.Factory.StartNew(Processing, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
         public void EnqueueToPublish(CapPublishedMessage message)
