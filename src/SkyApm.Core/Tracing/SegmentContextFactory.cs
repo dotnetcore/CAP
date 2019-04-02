@@ -212,7 +212,7 @@ namespace SkyApm.Tracing
                 case SpanType.Entry:
                     return null;
                 case SpanType.Local:
-                    return _entrySegmentContextAccessor.Context;
+                    //return _entrySegmentContextAccessor.Context;
                 case SpanType.Exit:
                     return _localSegmentContextAccessor.Context ?? _entrySegmentContextAccessor.Context;
                 default:
