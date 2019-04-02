@@ -26,6 +26,7 @@ If you have any question or problems, please report them on the CAP repository:
 
 <a href="https://github.com/dotnetcore/cap/issues/new"><button data-md-color-primary="purple"><i class="fa fa-github fa-2x"></i> Report Issue</button></a>
 <a href="https://github.com/dotnetcore/cap/issues"><button data-md-color-primary="purple" type="submit"> Active Issues <i class="fa fa-github fa-2x"></i></button></a>
+
 ## License
 
 CAP is licensed under the [MIT license](https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt).

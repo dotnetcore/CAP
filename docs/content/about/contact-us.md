@@ -5,7 +5,7 @@
 
 * Author: [@yang-xiaodong](https://github.com/yang-xiaodong)
 * Email: yangxiaodong1214@126.com
-* Blogs: https://saborboard.cnblogs.com
+* Blogs: https://savorboard.cnblogs.com
 
 ## NCC Organization
 

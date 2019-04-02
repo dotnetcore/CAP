@@ -1,5 +1,20 @@
 # Release Notes
 
+## Version 2.5.0 (2019-03-30)
+
+**Features:**
+
+* Support Azure Service Bus. (#307)
+* Support In-Memory Storage. (#296)
+* Upgrade Dapper to version 1.60.1
+* Support read environment variables CAP_WORKERID and CAP_DATACENTERID as the snowflake algorithm workerid and datacenterid.
+
+**Bug Fixed:**
+
+* Modify MySQL cap table encoding to utf8mb4. (#305)
+* Move CapSubscribeAttribute class to DotNetCore.CAP project.
+* Fixed multiple instance snowflake algorithm generating primary key conflicts. (#294)
+
 ## Version 2.4.2 (2019-01-08)
 
 **Features:**
