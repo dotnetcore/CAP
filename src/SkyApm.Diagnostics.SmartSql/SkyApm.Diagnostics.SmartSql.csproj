@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SmartSql" Version="4.0.0-rc3" PrivateAssets="All" />
+    <PackageReference Include="SmartSql" Version="4.0.3" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SkyApm.Abstractions\SkyApm.Abstractions.csproj" />

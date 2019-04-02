@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text;
 using SkyApm.Tracing;
@@ -196,9 +197,10 @@ namespace SkyApm.Diagnostics.SmartSql
             if (context != null)
             {
                 context.Span.AddTag("from_cache", eventData.ExecutionContext.Result.FromCache);
-                context.Span.Peer = new Common.StringOrIntValue(eventData.DbSession.Connection?.DataSource);
-                context.Span.AddTag(Common.Tags.DB_INSTANCE, eventData.DbSession.Connection?.Database);
-                context.Span.AddTag(Common.Tags.DB_STATEMENT, eventData.ExecutionContext.Request.RealSql);
+                var resultSize = eventData.ExecutionContext.Result.IsList
+                    ? (eventData.ExecutionContext.Result.GetData() as ICollection)?.Count
+                    : 1;
+                context.Span.AddTag("result_size", resultSize?.ToString());
                 _tracingContext.Release(context);
             }
         }
@@ -212,6 +214,41 @@ namespace SkyApm.Diagnostics.SmartSql
                 _tracingContext.Release(context);
             }
         }
+        #endregion
+
+        #region CommandExecuter
+
+        [DiagnosticName(SmartSqlDiagnosticListenerExtensions.SMART_SQL_BEFORE_COMMAND_EXECUTER_EXECUTE)]
+        public void BeforeCommandExecuterExecute([Object]CommandExecuterExecuteBeforeEventData eventData)
+        {
+            var context = _tracingContext.CreateLocalSegmentContext(eventData.Operation);
+            context.Span.SpanLayer = Tracing.Segments.SpanLayer.DB;
+            context.Span.Component = Common.Components.SMART_SQL;
+            context.Span.AddTag(Common.Tags.DB_TYPE, "Sql");
+        }
+        [DiagnosticName(SmartSqlDiagnosticListenerExtensions.SMART_SQL_AFTER_COMMAND_EXECUTER_EXECUTE)]
+        public void AfterCommandExecuterExecute([Object]CommandExecuterExecuteAfterEventData eventData)
+        {
+            var context = _localSegmentContextAccessor.Context;
+            if (context != null)
+            {
+                context.Span.Peer = new Common.StringOrIntValue(eventData.ExecutionContext.DbSession.Connection?.DataSource);
+                context.Span.AddTag(Common.Tags.DB_INSTANCE, eventData.ExecutionContext.DbSession.Connection?.Database);
+                context.Span.AddTag(Common.Tags.DB_STATEMENT, eventData.ExecutionContext.Request.RealSql);
+                _tracingContext.Release(context);
+            }
+        }
+        [DiagnosticName(SmartSqlDiagnosticListenerExtensions.SMART_SQL_ERROR_COMMAND_EXECUTER_EXECUTE)]
+        public void ErrorCommandExecuterExecute([Object]CommandExecuterExecuteErrorEventData eventData)
+        {
+            var context = _localSegmentContextAccessor.Context;
+            if (context != null)
+            {
+                context.Span.ErrorOccurred(eventData.Exception);
+                _tracingContext.Release(context);
+            }
+        }
+
         #endregion
     }
 }

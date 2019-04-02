@@ -1,17 +1,18 @@
 ﻿using System;
-using System.Globalization;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.Data.Sqlite;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using SkyApm.Sample.Backend.Models;
-using SkyApm.Sample.Backend.Sampling;
-using SkyApm.Tracing;
+using Microsoft.Extensions.Options;
+using SmartSql;
+using SmartSql.DataSource;
 
-namespace SkyApm.Sample.Backend
+namespace SkyApm.Sample.SmartSql
 {
     public class Startup
     {
@@ -25,14 +26,12 @@ namespace SkyApm.Sample.Backend
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
-            var sqliteConnection = new SqliteConnection("DataSource=:memory:");
-            sqliteConnection.Open();
-
-            services.AddEntityFrameworkSqlite().AddDbContext<SampleDbContext>(c => c.UseSqlite(sqliteConnection));
-
-            services.AddSingleton<ISamplingInterceptor, CustomSamplingInterceptor>();
-
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddSmartSql(sp => new SmartSqlBuilder()
+                .UseLoggerFactory(sp.GetService<ILoggerFactory>())
+                .UseDataSource(DbProvider.SQLITE, "Data Source=SmartSqlTestDB.db;Version=3;")
+                .UseCache(false)
+                .Build());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,14 +40,6 @@ namespace SkyApm.Sample.Backend
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-            }
-
-            using (var scope = app.ApplicationServices.CreateScope())
-            {
-                using (var sampleDbContext = scope.ServiceProvider.GetService<SampleDbContext>())
-                {
-                    sampleDbContext.Database.EnsureCreated();
-                }
             }
 
             app.UseMvc();

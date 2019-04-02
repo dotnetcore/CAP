@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SmartSql;
 
-namespace SkyApm.Sample.Backend.Controllers
+namespace SkyApm.Sample.SmartSql.Controllers
 {
     [Route("[controller]/[action]")]
     [ApiController]
@@ -31,7 +31,7 @@ namespace SkyApm.Sample.Backend.Controllers
         {
             return await _sqlMapper.QueryAsync<dynamic>(new RequestContext
             {
-                RealSql = "SELECT Top (1000) T.* From T_AllPrimitive T With(NoLock)"
+                RealSql = "SELECT T.* From T_User T Limit 100"
             });
         }
         [HttpGet]
@@ -39,9 +39,10 @@ namespace SkyApm.Sample.Backend.Controllers
         {
             return _sqlMapper.Query<dynamic>(new RequestContext
             {
-                RealSql = "SELECT Top (1000) T.* From T_AllPrimitive T With(NoLock)"
+                RealSql = "SELECT T.* From T_User T Limit 100"
             });
         }
+
         [HttpGet]
         public IEnumerable<dynamic> Transaction()
         {
@@ -51,7 +52,7 @@ namespace SkyApm.Sample.Backend.Controllers
 
                 var list = _sqlMapper.Query<dynamic>(new RequestContext
                 {
-                    RealSql = "SELECT Top (1000) T.* From T_AllPrimitive T With(NoLock)"
+                    RealSql = "SELECT T.* From T_User T Limit 100"
                 });
                 _sqlMapper.CommitTransaction();
                 return list;

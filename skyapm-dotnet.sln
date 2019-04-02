@@ -82,6 +82,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyApm.DotNet.CLI", "src\Sk
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyApm.Diagnostics.SmartSql", "src\SkyApm.Diagnostics.SmartSql\SkyApm.Diagnostics.SmartSql.csproj", "{B43160C8-C9E3-43F6-83E9-A9A45B32F022}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyApm.Sample.SmartSql", "sample\SkyApm.Sample.SmartSql\SkyApm.Sample.SmartSql.csproj", "{8E2B336B-8138-4179-A754-A1D0C0471654}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -176,6 +178,10 @@ Global
 		{B43160C8-C9E3-43F6-83E9-A9A45B32F022}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B43160C8-C9E3-43F6-83E9-A9A45B32F022}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B43160C8-C9E3-43F6-83E9-A9A45B32F022}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8E2B336B-8138-4179-A754-A1D0C0471654}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8E2B336B-8138-4179-A754-A1D0C0471654}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8E2B336B-8138-4179-A754-A1D0C0471654}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8E2B336B-8138-4179-A754-A1D0C0471654}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -211,6 +217,7 @@ Global
 		{2F7EEC69-35F4-4D31-B52A-7465D65E9DE0} = {A4E67E09-3156-4D30-B451-F24F706E96C4}
 		{E909EEF5-5EBF-43F3-AB4A-6B2FB56EF89B} = {1B0865AF-369E-493C-AA6F-C56D3E520A22}
 		{B43160C8-C9E3-43F6-83E9-A9A45B32F022} = {B5E677CF-2920-4B0A-A056-E73F6B2CF2BC}
+		{8E2B336B-8138-4179-A754-A1D0C0471654} = {844CEACD-4C85-4B15-9E2B-892B01FDA4BB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94C0DA2C-CCCB-4314-93A2-9809B5DD0583}
