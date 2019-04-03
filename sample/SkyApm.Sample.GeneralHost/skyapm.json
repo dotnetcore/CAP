@@ -1,0 +1,29 @@
+{
+  "SkyWalking": {
+    "ServiceName": "general-host-sample",
+    "Namespace": "",
+    "HeaderVersions": [
+      "sw6"
+    ],
+    "Sampling": {
+      "SamplePer3Secs": -1,
+      "Percentage": -1.0
+    },
+    "Logging": {
+      "Level": "Information",
+      "FilePath": "logs/skyapm-{Date}.log"
+    },
+    "Transport": {
+      "Interval": 3000,
+      "ProtocolVersion": "v6",
+      "QueueSize": 30000,
+      "BatchSize": 3000,
+      "gRPC": {
+        "Servers": "localhost:11800",
+        "Timeout": 100000,
+        "ConnectTimeout": 100000,
+        "ReportTimeout": 600000
+      }
+    }
+  }
+}
