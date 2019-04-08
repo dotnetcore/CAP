@@ -1,4 +1,5 @@
 <Project>
+  <Import Project="sign.props" />
   <Import Project="version.props" />
   <PropertyGroup>
     <Authors>SkyAPM Team</Authors>
