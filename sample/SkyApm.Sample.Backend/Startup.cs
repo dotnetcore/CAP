@@ -6,7 +6,6 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using SkyApm.Sample.Backend.Models;
 using SkyApm.Sample.Backend.Sampling;
 using SkyApm.Tracing;
@@ -32,7 +31,6 @@ namespace SkyApm.Sample.Backend
             services.AddEntityFrameworkSqlite().AddDbContext<SampleDbContext>(c => c.UseSqlite(sqliteConnection));
 
             services.AddSingleton<ISamplingInterceptor, CustomSamplingInterceptor>();
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
