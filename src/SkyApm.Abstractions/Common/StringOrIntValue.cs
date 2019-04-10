@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Licensed to the SkyAPM under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -32,7 +32,7 @@ namespace SkyApm.Common
         public bool HasValue => HasIntValue || HasStringValue;
 
         public bool HasIntValue => _intValue != 0;
-        
+
         public bool HasStringValue => _stringValue != null;
 
         public StringOrIntValue(string value)
@@ -48,9 +48,9 @@ namespace SkyApm.Common
         }
 
         public int GetIntValue() => _intValue;
-        
+
         public string GetStringValue() => _stringValue;
-        
+
         public (string, int) GetValue()
         {
             return (_stringValue, _intValue);
@@ -61,5 +61,8 @@ namespace SkyApm.Common
             if (HasIntValue) return _intValue.ToString();
             return _stringValue;
         }
+
+        public static implicit operator StringOrIntValue(string value) => new StringOrIntValue(value);
+        public static implicit operator StringOrIntValue(int value) => new StringOrIntValue(value);
     }
 }
