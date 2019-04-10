@@ -1,4 +1,4 @@
-<Project>
+﻿<Project>
   <Import Project="sign.props" />
   <Import Project="version.props" />
   <PropertyGroup>
@@ -15,6 +15,8 @@
     <GenerateAssemblyCompanyAttribute>True</GenerateAssemblyCompanyAttribute>
     <GenerateAssemblyProductAttribute>True</GenerateAssemblyProductAttribute>
     <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>  
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>1591</NoWarn>
   </PropertyGroup>
 </Project>

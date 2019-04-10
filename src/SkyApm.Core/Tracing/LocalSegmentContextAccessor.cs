@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Licensed to the SkyAPM under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -16,53 +16,32 @@
  *
  */
 
-using System.Collections.Concurrent;
-using System.Threading;
 using SkyApm.Tracing.Segments;
+using System.Runtime.CompilerServices;
+using System.Threading;
 
 namespace SkyApm.Tracing
 {
     public class LocalSegmentContextAccessor : ILocalSegmentContextAccessor
     {
-        private readonly AsyncLocal<ConcurrentStack<SegmentContext>> _segmentContextStack =
-            new AsyncLocal<ConcurrentStack<SegmentContext>>();
+        private readonly ConditionalWeakTable<SegmentContext, SegmentContext> _parent = new ConditionalWeakTable<SegmentContext, SegmentContext>();
+        private readonly AsyncLocal<SegmentContext> _segmentContext = new AsyncLocal<SegmentContext>();
 
         public SegmentContext Context
         {
-            get
-            {
-                var stack = _segmentContextStack.Value;
-                if (stack == null)
-                {
-                    return null;
-                }
-                stack.TryPeek(out var context);
-                return context;
-            }
+            get => _segmentContext.Value;
             set
             {
-                var stack = _segmentContextStack.Value;
-                if (stack == null)
+                var current = _segmentContext.Value;
+                if (value == null)
                 {
-                    if (value == null) return;
-                    stack = new ConcurrentStack<SegmentContext>();
-                    stack.Push(value);
-                    _segmentContextStack.Value = stack;
+                    if (_parent.TryGetValue(current, out var parent))
+                        _segmentContext.Value = parent;
                 }
                 else
                 {
-                    if (value == null)
-                    {
-                        stack.TryPop(out _);
-                        if (stack.IsEmpty)
-                        {
-                            _segmentContextStack.Value = null;
-                        }
-                    }
-                    else
-                    {
-                        stack.Push(value);
-                    }
+                    _parent.Add(value, current);
+                    _segmentContext.Value = value;
                 }
             }
         }
