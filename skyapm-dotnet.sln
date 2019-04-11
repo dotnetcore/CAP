@@ -86,6 +86,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyApm.Agent.GeneralHost", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SkyApm.Sample.GeneralHost", "sample\SkyApm.Sample.GeneralHost\SkyApm.Sample.GeneralHost.csproj", "{477D705E-576B-46C8-8F1E-9A86EDAE9D86}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SkyApm.Benchmark", "benchmark\SkyApm.Benchmark\SkyApm.Benchmark.csproj", "{33581FDE-ABAF-4C27-A40A-1A2743309399}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "benchmark", "benchmark", "{2B7F59E8-147F-4399-9804-E7EAEF2DCB22}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -188,6 +192,10 @@ Global
 		{477D705E-576B-46C8-8F1E-9A86EDAE9D86}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{477D705E-576B-46C8-8F1E-9A86EDAE9D86}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{477D705E-576B-46C8-8F1E-9A86EDAE9D86}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33581FDE-ABAF-4C27-A40A-1A2743309399}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33581FDE-ABAF-4C27-A40A-1A2743309399}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33581FDE-ABAF-4C27-A40A-1A2743309399}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33581FDE-ABAF-4C27-A40A-1A2743309399}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -225,6 +233,7 @@ Global
 		{B43160C8-C9E3-43F6-83E9-A9A45B32F022} = {B5E677CF-2920-4B0A-A056-E73F6B2CF2BC}
 		{4C1CF0E7-4CD3-4731-9A56-E033D5216D58} = {EF6194B2-9ACB-49B9-8049-DD6AFAEB0399}
 		{477D705E-576B-46C8-8F1E-9A86EDAE9D86} = {844CEACD-4C85-4B15-9E2B-892B01FDA4BB}
+		{33581FDE-ABAF-4C27-A40A-1A2743309399} = {2B7F59E8-147F-4399-9804-E7EAEF2DCB22}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {94C0DA2C-CCCB-4314-93A2-9809B5DD0583}

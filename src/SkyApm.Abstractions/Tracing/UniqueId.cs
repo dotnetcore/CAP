@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Licensed to the SkyAPM under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -20,7 +20,7 @@ using System;
 
 namespace SkyApm.Tracing
 {
-    public class UniqueId : IEquatable<UniqueId>
+    public struct UniqueId : IEquatable<UniqueId>
     {
         public long Part1 { get; }
 
@@ -37,26 +37,25 @@ namespace SkyApm.Tracing
 
         public override string ToString() => $"{Part1}.{Part2}.{Part3}";
 
-        public bool Equals(UniqueId other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            if (Part1 != other.Part1) return false;
-            if (Part2 != other.Part2) return false;
-            return Part3 == other.Part3;
-        }
+        public bool Equals(UniqueId other) =>
+            Part1 == other.Part1 && Part2 == other.Part2 && Part3 == other.Part3;
 
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (!(obj is UniqueId id)) return false;
-            return Equals(id);
-        }
+        public override bool Equals(object obj) =>
+            obj is UniqueId other && Equals(other);
 
         public override int GetHashCode()
         {
-            throw new NotImplementedException();
+            unchecked
+            {
+                var hashCode = Part1.GetHashCode();
+                hashCode = (hashCode * 397) ^ Part2.GetHashCode();
+                hashCode = (hashCode * 397) ^ Part3.GetHashCode();
+                return hashCode;
+            }
         }
+
+        public static bool operator ==(UniqueId left, UniqueId right) => left.Equals(right);
+
+        public static bool operator !=(UniqueId left, UniqueId right) => !left.Equals(right);
     }
 }

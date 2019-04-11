@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Licensed to the SkyAPM under one or more
  * contributor license agreements.  See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
@@ -22,7 +22,7 @@ namespace SkyApm.Tracing
     {
         public bool TryParse(string text, out UniqueId uniqueId)
         {
-            uniqueId = null;
+            uniqueId = default(UniqueId);
             if (text == null) return false;
             var parts = text.Split("\\.".ToCharArray(), 3);
             if (parts.Length < 3) return false;
