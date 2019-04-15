@@ -9,7 +9,8 @@
     <PackageReleaseNotes>
     </PackageReleaseNotes>
     <RootNamespace>SkyWalking</RootNamespace>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netcoreapp2.1</TargetFrameworks>
+    <DefineConstants Condition="'$(TargetFramework)' == 'netcoreapp2.1'">$(DefineConstants);SPAN</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="AspectCore.Extensions.Reflection" Version="1.2.0" />

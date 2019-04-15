@@ -3,7 +3,7 @@ using SkyApm.Tracing;
 
 namespace SkyApm.Benchmark
 {
-    public class UniqueId
+    public class UniqueIdGenerate
     {
         private static readonly IUniqueIdGenerator Generator = new UniqueIdGenerator(new RuntimeEnvironment());
 

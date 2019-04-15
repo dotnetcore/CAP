@@ -16,6 +16,8 @@
  *
  */
 
+using System;
+
 namespace SkyApm.Tracing
 {
     public class UniqueIdParser : IUniqueIdParser
@@ -23,14 +25,42 @@ namespace SkyApm.Tracing
         public bool TryParse(string text, out UniqueId uniqueId)
         {
             uniqueId = default(UniqueId);
-            if (text == null) return false;
+            if (string.IsNullOrEmpty(text)) return false;
+#if SPAN
+            var id = text.AsSpan();
+            var index = FindIndex(id);
+
+            if (index < 1) return false;
+            var id1 = id.Slice(0, index);
+
+            index = FindIndex(id.Slice(index + 1));
+            if (index < 1) return false;
+
+            if (!long.TryParse(id1, out var part0)) return false;
+            if (!long.TryParse(id.Slice(id1.Length + 1, index), out var part1)) return false;
+            if (!long.TryParse(id.Slice(id1.Length + index + 2), out var part2)) return false;
+#else
             var parts = text.Split("\\.".ToCharArray(), 3);
             if (parts.Length < 3) return false;
             if (!long.TryParse(parts[0], out var part0)) return false;
             if (!long.TryParse(parts[1], out var part1)) return false;
             if (!long.TryParse(parts[2], out var part2)) return false;
+#endif
             uniqueId = new UniqueId(part0, part1, part2);
             return true;
         }
+#if SPAN
+        private static int FindIndex(ReadOnlySpan<char> id)
+        {
+            var index = 0;
+            do
+            {
+                if (id[index] == '\\' || id[index] == '.')
+                    return index;
+            } while (++index < id.Length);
+
+            return -1;
+        }
+#endif
     }
 }
