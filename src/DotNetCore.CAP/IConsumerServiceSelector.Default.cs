@@ -10,6 +10,7 @@ using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
 {
@@ -31,10 +32,10 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Creates a new <see cref="DefaultConsumerServiceSelector" />.
         /// </summary>
-        public DefaultConsumerServiceSelector(IServiceProvider serviceProvider, CapOptions capOptions)
+        public DefaultConsumerServiceSelector(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _capOptions = capOptions;
+            _capOptions = serviceProvider.GetService<IOptions<CapOptions>>().Value;
 
             _asteriskList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
             _poundList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
