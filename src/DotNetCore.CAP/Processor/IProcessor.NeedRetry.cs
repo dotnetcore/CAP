@@ -48,7 +48,7 @@ namespace DotNetCore.CAP.Processor
 
         private async Task ProcessPublishedAsync(IStorageConnection connection, ProcessingContext context)
         {
-            var messages = await connection.GetPublishedMessagesOfNeedRetry();
+            var messages = await GetSafelyAsync(() => connection.GetPublishedMessagesOfNeedRetry());
 
             foreach (var message in messages)
             {
@@ -62,7 +62,7 @@ namespace DotNetCore.CAP.Processor
 
         private async Task ProcessReceivedAsync(IStorageConnection connection, ProcessingContext context)
         {
-            var messages = await connection.GetReceivedMessagesOfNeedRetry();
+            var messages = await GetSafelyAsync(() => connection.GetReceivedMessagesOfNeedRetry());
 
             foreach (var message in messages)
             {
