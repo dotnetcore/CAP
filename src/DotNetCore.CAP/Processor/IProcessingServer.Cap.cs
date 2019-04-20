@@ -94,7 +94,7 @@ namespace DotNetCore.CAP.Processor
             var returnedProcessors = new List<IProcessor>
             {
                 _provider.GetRequiredService<TransportCheckProcessor>(),
-                _provider.GetRequiredService<NeedRetryMessageProcessor>(),
+                _provider.GetRequiredService<MessageNeedToRetryProcessor>(),
                 _provider.GetRequiredService<ICollectProcessor>()
             };
 

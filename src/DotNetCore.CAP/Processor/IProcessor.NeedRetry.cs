@@ -7,27 +7,28 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class NeedRetryMessageProcessor : IProcessor
+    public class MessageNeedToRetryProcessor : IProcessor
     {
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
-        private readonly ILogger<NeedRetryMessageProcessor> _logger;
+        private readonly ILogger<MessageNeedToRetryProcessor> _logger;
         private readonly IPublishMessageSender _publishMessageSender;
         private readonly ISubscriberExecutor _subscriberExecutor;
         private readonly TimeSpan _waitingInterval;
 
-        public NeedRetryMessageProcessor(
-            CapOptions options,
-            ILogger<NeedRetryMessageProcessor> logger,
+        public MessageNeedToRetryProcessor(
+            IOptions<CapOptions> options,
+            ILogger<MessageNeedToRetryProcessor> logger,
             ISubscriberExecutor subscriberExecutor,
             IPublishMessageSender publishMessageSender)
         {
             _logger = logger;
             _subscriberExecutor = subscriberExecutor;
             _publishMessageSender = publishMessageSender;
-            _waitingInterval = TimeSpan.FromSeconds(options.FailedRetryInterval);
+            _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
         }
 
         public async Task ProcessAsync(ProcessingContext context)
