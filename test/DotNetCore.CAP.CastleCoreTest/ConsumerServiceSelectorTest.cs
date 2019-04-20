@@ -1,14 +1,14 @@
+using System;
 using Castle.DynamicProxy;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using System;
 using Xunit;
 
-namespace DotNetCore.CAP.CastleDynamicProxyTest
+namespace DotNetCore.CAP.CastleCoreTest
 {
     public class ConsumerServiceSelectorTest
     {
-        private IServiceProvider _provider;
+        private readonly IServiceProvider _provider;
 
         public ConsumerServiceSelectorTest()
         {
@@ -31,12 +31,10 @@ namespace DotNetCore.CAP.CastleDynamicProxyTest
             _provider = services.BuildServiceProvider();
         }
 
-        [Theory]
-        [InlineData("cap.castle.sub")]
-        public void CanFindCapSubscribeTopic(string topic)
+        [Fact]
+        public void CanFindCapSubscribeTopic()
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
-
             var candidates = selector.SelectCandidates();
             Assert.Equal(1, candidates.Count);
         }
