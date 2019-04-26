@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 channel.ExchangeDeclare(_exchange, RabbitMQOptions.ExchangeType, true);
                 channel.BasicPublish(_exchange, keyName, props, body);
 
-                _logger.LogDebug($"RabbitMQ topic message [{keyName}] has been published.");
+                _logger.LogDebug($"RabbitMQ topic message [{keyName}] has been published. Body: {content}");
 
                 return Task.FromResult(OperateResult.Success);
             }
