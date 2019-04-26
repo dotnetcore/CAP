@@ -20,8 +20,15 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public IConsumerClient Create(string groupId)
         {
-            var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
-            return new AzureServiceBusConsumerClient(logger, groupId, _asbOptions);
+            try
+            {
+                var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
+                return new AzureServiceBusConsumerClient(logger, groupId, _asbOptions);
+            }
+            catch (System.Exception e)
+            {
+                throw new BrokerConnectionException(e);
+            }
         }
     }
 }

@@ -21,6 +21,8 @@ namespace DotNetCore.CAP.Kafka
             _groupId = groupId;
             _kafkaOptions = options ?? throw new ArgumentNullException(nameof(options));
             StringDeserializer = new StringDeserializer(Encoding.UTF8);
+
+            InitKafkaClient();
         }
 
         public IDeserializer<string> StringDeserializer { get; set; }
@@ -36,11 +38,6 @@ namespace DotNetCore.CAP.Kafka
             if (topics == null)
             {
                 throw new ArgumentNullException(nameof(topics));
-            }
-
-            if (_consumerClient == null)
-            {
-                InitKafkaClient();
             }
 
             _consumerClient.Subscribe(topics);

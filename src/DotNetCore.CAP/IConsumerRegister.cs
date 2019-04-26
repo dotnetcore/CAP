@@ -6,7 +6,10 @@ namespace DotNetCore.CAP
     /// <summary>
     /// Handler received message of subscribed.
     /// </summary>
-    public interface IConsumerHandler : IProcessingServer
+    public interface IConsumerRegister : IProcessingServer
     {
+        bool IsHealthy();
+
+        void ReStart(bool force = false);
     }
 }

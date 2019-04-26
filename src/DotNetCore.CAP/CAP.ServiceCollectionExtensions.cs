@@ -50,12 +50,15 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<MethodMatcherCache>();
 
             //Processors
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerHandler>());
+            services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();
+
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerRegister>());
             services.TryAddSingleton<IStateChanger, StateChanger>();
 
             //Queue's message processor
             services.TryAddSingleton<NeedRetryMessageProcessor>();
+            services.TryAddSingleton<TransportCheckProcessor>();
 
             //Sender and Executors   
             services.TryAddSingleton<IDispatcher, Dispatcher>();

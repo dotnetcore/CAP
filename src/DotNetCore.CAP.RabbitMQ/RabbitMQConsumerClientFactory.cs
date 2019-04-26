@@ -8,7 +8,6 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly RabbitMQOptions _rabbitMQOptions;
 
-
         public RabbitMQConsumerClientFactory(RabbitMQOptions rabbitMQOptions, IConnectionChannelPool channelPool)
         {
             _rabbitMQOptions = rabbitMQOptions;
@@ -17,7 +16,14 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public IConsumerClient Create(string groupId)
         {
-            return new RabbitMQConsumerClient(groupId, _connectionChannelPool, _rabbitMQOptions);
+            try
+            {
+                return new RabbitMQConsumerClient(groupId, _connectionChannelPool, _rabbitMQOptions);
+            }
+            catch (System.Exception e)
+            {
+                throw new BrokerConnectionException(e);
+            }
         }
     }
 }

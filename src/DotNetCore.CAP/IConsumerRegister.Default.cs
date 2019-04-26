@@ -14,29 +14,30 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP
 {
-    internal class ConsumerHandler : IConsumerHandler
+    internal class ConsumerRegister : IConsumerRegister
     {
         private readonly IStorageConnection _connection;
         private readonly IConsumerClientFactory _consumerClientFactory;
-        private readonly CancellationTokenSource _cts;
         private readonly IDispatcher _dispatcher;
         private readonly ILogger _logger;
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly MethodMatcherCache _selector;
 
+        private CancellationTokenSource _cts;
         private string _serverAddress;
         private Task _compositeTask;
         private bool _disposed;
+        private static bool _isHealthy = true;
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
-        public ConsumerHandler(IConsumerClientFactory consumerClientFactory,
+        public ConsumerRegister(IConsumerClientFactory consumerClientFactory,
             IDispatcher dispatcher,
             IStorageConnection connection,
-            ILogger<ConsumerHandler> logger,
+            ILogger<ConsumerRegister> logger,
             MethodMatcherCache selector)
         {
             _selector = selector;
@@ -44,31 +45,61 @@ namespace DotNetCore.CAP
             _consumerClientFactory = consumerClientFactory;
             _dispatcher = dispatcher;
             _connection = connection;
-            _cts = new CancellationTokenSource();
+        }
+
+        public bool IsHealthy()
+        {
+            return _isHealthy;
         }
 
         public void Start()
         {
+            _cts = new CancellationTokenSource();
+
             var groupingMatches = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
             foreach (var matchGroup in groupingMatches)
             {
                 Task.Factory.StartNew(() =>
                 {
-                    using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                    try
                     {
-                        _serverAddress = client.ServersAddress;
+                        using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                        {
+                            _serverAddress = client.ServersAddress;
 
-                        RegisterMessageProcessor(client);
+                            RegisterMessageProcessor(client);
 
-                        client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
+                            client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
 
-                        client.Listening(_pollingDelay, _cts.Token);
+                            client.Listening(_pollingDelay, _cts.Token);
+                        }
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        //ignore
+                    }
+                    catch (BrokerConnectionException e)
+                    {
+                        _isHealthy = false;
+                        _logger.LogError(e, e.Message);
                     }
                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
 
             _compositeTask = Task.CompletedTask;
+        }
+
+        public void ReStart(bool force = false)
+        {
+            if (!IsHealthy() || force)
+            {
+                Pulse();
+
+                _isHealthy = true;
+
+                Start();
+            }
         }
 
         public void Dispose()
@@ -79,9 +110,11 @@ namespace DotNetCore.CAP
             }
 
             _disposed = true;
-            _cts.Cancel();
+
             try
             {
+                Pulse();
+
                 _compositeTask?.Wait(TimeSpan.FromSeconds(2));
             }
             catch (AggregateException ex)
@@ -96,7 +129,7 @@ namespace DotNetCore.CAP
 
         public void Pulse()
         {
-            //ignore
+            _cts?.Cancel();
         }
 
         private void RegisterMessageProcessor(IConsumerClient client)
@@ -174,7 +207,7 @@ namespace DotNetCore.CAP
 
         private void StoreMessage(CapReceivedMessage receivedMessage)
         {
-             _connection.StoreReceivedMessage(receivedMessage);
+            _connection.StoreReceivedMessage(receivedMessage);
         }
 
         private (Guid, string) TracingBefore(string topic, string values)

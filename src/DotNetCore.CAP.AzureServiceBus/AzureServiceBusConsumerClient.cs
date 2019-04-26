@@ -71,7 +71,6 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
-
             _consumerClient.RegisterMessageHandler(OnConsumerReceived,
                 new MessageHandlerOptions(OnExceptionReceived)
                 {

@@ -14,7 +14,14 @@ namespace DotNetCore.CAP.Kafka
 
         public IConsumerClient Create(string groupId)
         {
-            return new KafkaConsumerClient(groupId, _kafkaOptions);
+            try
+            {
+                return new KafkaConsumerClient(groupId, _kafkaOptions);
+            }
+            catch (System.Exception e)
+            {
+                throw new BrokerConnectionException(e);
+            }
         }
     }
 }

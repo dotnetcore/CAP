@@ -1,6 +1,6 @@
 <Project>
 
-  <Import Project="build\version.props" />
+  <Import Project="..\build\version.props" />
 
   <PropertyGroup Label="Package">
     <Product>CAP</Product>
