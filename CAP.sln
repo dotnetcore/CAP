@@ -68,6 +68,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.InMemoryStor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AzureServiceBus.InMemory", "samples\Sample.AzureServiceBus.InMemory\Sample.AzureServiceBus.InMemory.csproj", "{1E1E959C-3D0E-45C3-ABCA-DAAACE68AAB8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.CastleCoreTest", "test\DotNetCore.CAP.CastleCoreTest\DotNetCore.CAP.CastleCoreTest.csproj", "{BA499B87-77A9-43A2-98A3-89ECF5034E26}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -142,6 +144,10 @@ Global
 		{1E1E959C-3D0E-45C3-ABCA-DAAACE68AAB8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E1E959C-3D0E-45C3-ABCA-DAAACE68AAB8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E1E959C-3D0E-45C3-ABCA-DAAACE68AAB8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA499B87-77A9-43A2-98A3-89ECF5034E26}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA499B87-77A9-43A2-98A3-89ECF5034E26}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA499B87-77A9-43A2-98A3-89ECF5034E26}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA499B87-77A9-43A2-98A3-89ECF5034E26}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -165,6 +171,7 @@ Global
 		{63B2A464-FBEA-42FB-8EFA-98AFA39FC920} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{58B6E829-C6C8-457C-9DD0-C600650254DF} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{1E1E959C-3D0E-45C3-ABCA-DAAACE68AAB8} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{BA499B87-77A9-43A2-98A3-89ECF5034E26} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E70565D-94CF-40B4-BFE1-AC18D5F736AB}
