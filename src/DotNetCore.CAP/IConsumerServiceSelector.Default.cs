@@ -11,13 +11,13 @@ using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
 
-namespace DotNetCore.CAP.Internal
+namespace DotNetCore.CAP
 {
     /// <inheritdoc />
     /// <summary>
     /// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
     /// </summary>
-    internal class DefaultConsumerServiceSelector : IConsumerServiceSelector
+    public class DefaultConsumerServiceSelector : IConsumerServiceSelector
     {
         private readonly CapOptions _capOptions;
         private readonly IServiceProvider _serviceProvider;
@@ -71,7 +71,7 @@ namespace DotNetCore.CAP.Internal
             return result;
         }
 
-        private IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
+        protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
             IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
@@ -95,7 +95,7 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
+        protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
@@ -112,7 +112,7 @@ namespace DotNetCore.CAP.Internal
             return executorDescriptorList;
         }
 
-        private IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo)
+        protected IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo)
         {
             foreach (var method in typeInfo.DeclaredMethods)
             {
