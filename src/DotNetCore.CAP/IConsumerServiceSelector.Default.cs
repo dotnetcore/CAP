@@ -23,7 +23,7 @@ namespace DotNetCore.CAP
         private readonly IServiceProvider _serviceProvider;
 
         /// <summary>
-        /// since this class be designed as a Singleton service,the following two list must be thread safe!!!
+        /// since this class be designed as a Singleton service,the following two list must be thread safe!
         /// </summary>
         private readonly ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _asteriskList;
         private readonly ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _poundList;
