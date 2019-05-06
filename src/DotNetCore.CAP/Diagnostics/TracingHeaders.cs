@@ -9,7 +9,7 @@ namespace DotNetCore.CAP.Diagnostics
 {
     public class TracingHeaders : IEnumerable<KeyValuePair<string, string>>
     {
-        private List<KeyValuePair<string, string>> _dataStore;
+        private List<KeyValuePair<string, string>> _dataStore = new List<KeyValuePair<string, string>>();
 
         public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
         {
@@ -23,11 +23,6 @@ namespace DotNetCore.CAP.Diagnostics
 
         public void Add(string name, string value)
         {
-            if (_dataStore == null)
-            {
-                _dataStore = new List<KeyValuePair<string, string>>();
-            }
-
             _dataStore.Add(new KeyValuePair<string, string>(name, value));
         }
 
