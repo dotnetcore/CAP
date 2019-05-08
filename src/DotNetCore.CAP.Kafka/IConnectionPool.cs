@@ -9,8 +9,8 @@ namespace DotNetCore.CAP.Kafka
     {
         string ServersAddress { get; }
 
-        Producer Rent();
+        IProducer<Null,string> RentProducer();
 
-        bool Return(Producer context);
+        bool Return(IProducer<Null, string> producer);
     }
 }

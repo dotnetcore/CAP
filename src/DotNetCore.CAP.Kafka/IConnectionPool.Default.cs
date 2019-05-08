@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Threading;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
@@ -13,81 +12,61 @@ namespace DotNetCore.CAP.Kafka
 {
     public class ConnectionPool : IConnectionPool, IDisposable
     {
-        private readonly ILogger<ConnectionPool> _logger;
-        private readonly Func<Producer> _activator;
-        private readonly ConcurrentQueue<Producer> _pool;
-        private int _count;
+        private readonly KafkaOptions _options;
+        private readonly ConcurrentQueue<IProducer<Null, string>> _producerPool;
+        private int _pCount;
         private int _maxSize;
 
         public ConnectionPool(ILogger<ConnectionPool> logger, KafkaOptions options)
         {
-            _logger = logger;
-            _pool = new ConcurrentQueue<Producer>();
-            _maxSize = options.ConnectionPoolSize;
-            _activator = CreateActivator(options);
             ServersAddress = options.Servers;
 
-            _logger.LogDebug("Kafka configuration of CAP :\r\n {0}",
-                JsonConvert.SerializeObject(options.AsKafkaConfig(), Formatting.Indented));
+            _options = options;
+            _producerPool = new ConcurrentQueue<IProducer<Null, string>>();
+            _maxSize = options.ConnectionPoolSize;
+
+            logger.LogDebug("Kafka configuration of CAP :\r\n {0}", JsonConvert.SerializeObject(options.AsKafkaConfig(), Formatting.Indented));
         }
 
         public string ServersAddress { get; }
 
-        Producer IConnectionPool.Rent()
+        public IProducer<Null, string> RentProducer()
         {
-            return Rent();
+            if (_producerPool.TryDequeue(out var producer))
+            {
+                Interlocked.Decrement(ref _pCount);
+
+                return producer;
+            }
+
+            producer = new ProducerBuilder<Null, string>(_options.AsKafkaConfig()).Build();
+
+            return producer;
         }
 
-        bool IConnectionPool.Return(Producer connection)
+        public bool Return(IProducer<Null, string> producer)
         {
-            return Return(connection);
+            if (Interlocked.Increment(ref _pCount) <= _maxSize)
+            {
+                _producerPool.Enqueue(producer);
+
+                return true;
+            }
+
+            Interlocked.Decrement(ref _pCount);
+
+            return false;
         }
 
         public void Dispose()
         {
             _maxSize = 0;
 
-            while (_pool.TryDequeue(out var context))
+            while (_producerPool.TryDequeue(out var context))
             {
                 context.Dispose();
+
             }
-        }
-
-        private static Func<Producer> CreateActivator(KafkaOptions options)
-        {
-            return () => new Producer(options.AsKafkaConfig());
-        }
-
-        public virtual Producer Rent()
-        {
-            if (_pool.TryDequeue(out var connection))
-            {
-                Interlocked.Decrement(ref _count);
-
-                Debug.Assert(_count >= 0);
-
-                return connection;
-            }
-
-            connection = _activator();
-
-            return connection;
-        }
-
-        public virtual bool Return(Producer connection)
-        {
-            if (Interlocked.Increment(ref _count) <= _maxSize)
-            {
-                _pool.Enqueue(connection);
-
-                return true;
-            }
-
-            Interlocked.Decrement(ref _count);
-
-            Debug.Assert(_maxSize == 0 || _pool.Count <= _maxSize);
-
-            return false;
         }
     }
 }
