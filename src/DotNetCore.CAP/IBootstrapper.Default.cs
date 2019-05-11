@@ -35,7 +35,14 @@ namespace DotNetCore.CAP
         {
             _logger.LogDebug("### CAP background task is starting.");
 
-            await Storage.InitializeAsync(stoppingToken);
+            try
+            {
+                await Storage.InitializeAsync(stoppingToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Initializing the storage structure failed!");
+            }
 
             stoppingToken.Register(() =>
             {
@@ -53,11 +60,11 @@ namespace DotNetCore.CAP
                     }
                 }
             });
-             
+
             await BootstrapCoreAsync();
 
             _logger.LogInformation("### CAP started!");
-        } 
+        }
 
         protected virtual Task BootstrapCoreAsync()
         {
