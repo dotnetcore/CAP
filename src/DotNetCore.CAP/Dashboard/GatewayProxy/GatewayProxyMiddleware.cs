@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             {
                 //For performance reasons, we need to put this functionality in the else
                 var isSwitchNode = request.Cookies.TryGetValue(NodeCookieName, out var requestNodeId);
-                var isCurrentNode = discoveryOptions.NodeId.ToString() == requestNodeId;
+                var isCurrentNode = discoveryOptions.NodeId == requestNodeId;
                 var isNodesPage = request.Path.StartsWithSegments(new PathString(pathMatch + "/nodes"));
 
                 if (!isSwitchNode || isCurrentNode || isNodesPage)

@@ -72,7 +72,7 @@ namespace DotNetCore.CAP.NodeDiscovery
             {
                 return _consul.Agent.ServiceRegister(new AgentServiceRegistration
                 {
-                    ID = _options.NodeId.ToString(),
+                    ID = _options.NodeId,
                     Name = _options.NodeName,
                     Address = _options.CurrentNodeHostName,
                     Port = _options.CurrentNodePort,
