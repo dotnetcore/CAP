@@ -1,12 +1,10 @@
-# Transactions
+# 事务
 
-Document from https://github.com/rebus-org/Rebus/wiki/Transactions
+## 分布式事务?
 
-## Distributed transactions?
+CAP 不直接提供开箱即用的基于 DTC 或者 2PC 的分布式事务，相反我们提供一种可以用于解决在分布式事务遇到的问题的一种解决方案。
 
-Out of the box, Rebus will NOT use DTC. This is a deliberate design choice, because it is our opinion that data consistency and resiliency against failures are are much better handled by being conscious about how those things work and what the consequences are, instead of relying on a black box to handle it.
+在分布式环境中，由于涉及通讯的开销，使用基于2PC或DTC的分布式事务将非常昂贵，在性能方面也同样如此。另外由于基于2PC或DTC的分布式事务同样受**CAP定理**的约束，当发生网络分区时它将不得不放弃可用性(CAP中的A)。
 
-Another thing is that distributed transactions are usually quite expensive, performance-wise, because of the communication overhead involved. Also, since DTC (as everyone else) is subject to the CAP theorem, it will have to give up availability (the 'A' in CAP) when a network partition occurs.
-
-## Scenarios
+## 场景
 
