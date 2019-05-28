@@ -84,6 +84,10 @@ namespace DotNetCore.CAP
                         _isHealthy = false;
                         _logger.LogError(e, e.Message);
                     }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, e.Message);
+                    }
                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
 
