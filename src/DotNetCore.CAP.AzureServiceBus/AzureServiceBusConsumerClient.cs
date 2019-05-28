@@ -52,6 +52,8 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             foreach (var newRule in topics.Except(allRuleNames))
             {
+                CheckValidSubscriptionName(newRule);
+
                 _consumerClient.AddRuleAsync(new RuleDescription
                 {
                     Filter = new CorrelationFilter { Label = newRule },
@@ -99,7 +101,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public void Dispose()
         {
-            _consumerClient.CloseAsync().Wait();
+            _consumerClient?.CloseAsync().Wait(1500);
         }
 
         #region private methods
@@ -166,6 +168,45 @@ namespace DotNetCore.CAP.AzureServiceBus
             OnLog?.Invoke(null, logArgs);
 
             return Task.CompletedTask;
+        }
+
+        private static void CheckValidSubscriptionName(string subscriptionName)
+        {
+            const string pathDelimiter = @"/";
+            const int ruleNameMaximumLength = 50;
+            char[] invalidEntityPathCharacters = { '@', '?', '#', '*' };
+
+            if (string.IsNullOrWhiteSpace(subscriptionName))
+            {
+                throw new ArgumentNullException(subscriptionName);
+            }
+
+            // and "\" will be converted to "/" on the REST path anyway. Gateway/REST do not
+            // have to worry about the begin/end slash problem, so this is purely a client side check.
+            var tmpName = subscriptionName.Replace(@"\", pathDelimiter);
+            if (tmpName.Length > ruleNameMaximumLength)
+            {
+                throw new ArgumentOutOfRangeException(subscriptionName, $@"Subscribe name '{subscriptionName}' exceeds the '{ruleNameMaximumLength}' character limit.");
+            }
+
+            if (tmpName.StartsWith(pathDelimiter, StringComparison.OrdinalIgnoreCase) ||
+                tmpName.EndsWith(pathDelimiter, StringComparison.OrdinalIgnoreCase))
+            {
+                throw new ArgumentException($@"The subscribe name cannot contain '/' as prefix or suffix. The supplied value is '{subscriptionName}'", subscriptionName);
+            }
+
+            if (tmpName.Contains(pathDelimiter))
+            {
+                throw new ArgumentException($@"The subscribe name contains an invalid character '{pathDelimiter}'", subscriptionName);
+            }
+
+            foreach (var uriSchemeKey in invalidEntityPathCharacters)
+            {
+                if (subscriptionName.IndexOf(uriSchemeKey) >= 0)
+                {
+                    throw new ArgumentException($@"'{subscriptionName}' contains character '{uriSchemeKey}' which is not allowed because it is reserved in the Uri scheme.", subscriptionName);
+                }
+            }
         }
 
         #endregion private methods
