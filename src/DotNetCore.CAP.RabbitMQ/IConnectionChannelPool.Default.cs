@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 Exchange = options.ExchangeName + "." + capOptions.Version;
             }
 
-            _logger.LogDebug("RabbitMQ configuration of CAP :\r\n {0}", JsonConvert.SerializeObject(options, Formatting.Indented));
+            _logger.LogDebug("RabbitMQ configuration of CAP :{0} {1}", Environment.NewLine, JsonConvert.SerializeObject(options, Formatting.Indented));
         }
 
         IModel IConnectionChannelPool.Rent()
