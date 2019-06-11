@@ -54,7 +54,6 @@ namespace DotNetCore.CAP
 
                 MainConfig["bootstrap.servers"] = Servers;
                 MainConfig["queue.buffering.max.ms"] = "10";
-                MainConfig["socket.blocking.max.ms"] = "10";
                 MainConfig["enable.auto.commit"] = "false";
                 MainConfig["log.connection.close"] = "false";
                 MainConfig["request.timeout.ms"] = "3000";
