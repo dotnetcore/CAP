@@ -6,7 +6,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
 using RabbitMQ.Client;
 
 namespace DotNetCore.CAP.RabbitMQ
@@ -42,7 +41,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 Exchange = options.ExchangeName + "." + capOptions.Version;
             }
 
-            _logger.LogDebug("RabbitMQ configuration of CAP :{0} {1}", Environment.NewLine, JsonConvert.SerializeObject(options, Formatting.Indented));
+            _logger.LogDebug($"RabbitMQ configuration:'HostName:{options.HostName}, Port:{options.Port}, UserName:{options.UserName}, Password:{options.Password}, ExchangeName:{options.ExchangeName}'");
         }
 
         IModel IConnectionChannelPool.Rent()
@@ -88,19 +87,18 @@ namespace DotNetCore.CAP.RabbitMQ
                 UserName = options.UserName,
                 Port = options.Port,
                 Password = options.Password,
-                VirtualHost = options.VirtualHost,
-                RequestedConnectionTimeout = options.RequestedConnectionTimeout,
-                SocketReadTimeout = options.SocketReadTimeout,
-                SocketWriteTimeout = options.SocketWriteTimeout
+                VirtualHost = options.VirtualHost
             };
 
             if (options.HostName.Contains(","))
             {
+                options.ConnectionFactoryOptions?.Invoke(factory);
                 return () => factory.CreateConnection(
                     options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries));
             }
 
             factory.HostName = options.HostName;
+            options.ConnectionFactoryOptions?.Invoke(factory);
             return () => factory.CreateConnection();
         }
 

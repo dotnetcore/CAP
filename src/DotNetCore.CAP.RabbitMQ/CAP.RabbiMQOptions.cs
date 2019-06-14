@@ -2,15 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 // ReSharper disable once CheckNamespace
+
+using System;
+using RabbitMQ.Client;
+
 namespace DotNetCore.CAP
 {
     public class RabbitMQOptions
     {
-        /// <summary>
-        /// Default value for connection attempt timeout, in milliseconds.
-        /// </summary>
-        public const int DefaultConnectionTimeout = 30 * 1000;
-
         /// <summary>
         /// Default password (value: "guest").
         /// </summary>
@@ -64,21 +63,6 @@ namespace DotNetCore.CAP
         public string ExchangeName { get; set; } = DefaultExchangeName;
 
         /// <summary>
-        /// Timeout setting for connection attempts (in milliseconds).
-        /// </summary>
-        public int RequestedConnectionTimeout { get; set; } = DefaultConnectionTimeout;
-
-        /// <summary>
-        /// Timeout setting for socket read operations (in milliseconds).
-        /// </summary>
-        public int SocketReadTimeout { get; set; } = DefaultConnectionTimeout;
-
-        /// <summary>
-        /// Timeout setting for socket write operations (in milliseconds).
-        /// </summary>
-        public int SocketWriteTimeout { get; set; } = DefaultConnectionTimeout;
-
-        /// <summary>
         /// The port to connect on.
         /// </summary>
         public int Port { get; set; } = -1;
@@ -87,5 +71,10 @@ namespace DotNetCore.CAP
         /// Gets or sets queue message automatic deletion time (in milliseconds). Default 864000000 ms (10 days).
         /// </summary>
         public int QueueMessageExpires { get; set; } = 864000000;
+
+        /// <summary>
+        /// RabbitMQ native connection factory options
+        /// </summary>
+        public Action<ConnectionFactory> ConnectionFactoryOptions { get; set; }
     }
 }
