@@ -1,12 +1,12 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Processor
 {
@@ -48,13 +48,11 @@ namespace DotNetCore.CAP.Processor
 
         private async Task ProcessPublishedAsync(IStorageConnection connection, ProcessingContext context)
         {
-            var messages = await GetSafelyAsync(() => connection.GetPublishedMessagesOfNeedRetry());
+            var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry);
 
             foreach (var message in messages)
             {
                 await _publishMessageSender.SendAsync(message);
-
-                context.ThrowIfStopping();
 
                 await context.WaitAsync(_delay);
             }
@@ -62,7 +60,7 @@ namespace DotNetCore.CAP.Processor
 
         private async Task ProcessReceivedAsync(IStorageConnection connection, ProcessingContext context)
         {
-            var messages = await GetSafelyAsync(() => connection.GetReceivedMessagesOfNeedRetry());
+            var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry);
 
             foreach (var message in messages)
             {
