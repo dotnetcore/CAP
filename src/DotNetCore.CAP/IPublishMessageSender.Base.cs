@@ -44,23 +44,20 @@ namespace DotNetCore.CAP
 
         public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
-            return await Task.Run(async () =>
+            bool retry;
+            OperateResult result;
+            do
             {
-                bool retry;
-                OperateResult result;
-                do
+                var executedResult = await SendWithoutRetryAsync(message);
+                result = executedResult.Item2;
+                if (result == OperateResult.Success)
                 {
-                    var executedResult = await SendWithoutRetryAsync(message);
-                    result = executedResult.Item2;
-                    if (result == OperateResult.Success)
-                    {
-                        return result;
-                    }
-                    retry = executedResult.Item1;
-                } while (retry);
+                    return result;
+                }
+                retry = executedResult.Item1;
+            } while (retry);
 
-                return result;
-            });
+            return result;
         }
 
         private async Task<(bool, OperateResult)> SendWithoutRetryAsync(CapPublishedMessage message)

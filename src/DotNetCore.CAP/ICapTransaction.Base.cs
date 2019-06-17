@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using DotNetCore.CAP.Models;
 
 namespace DotNetCore.CAP
@@ -7,12 +7,12 @@ namespace DotNetCore.CAP
     {
         private readonly IDispatcher _dispatcher;
 
-        private readonly IList<CapPublishedMessage> _bufferList;
+        private readonly ConcurrentQueue<CapPublishedMessage> _bufferList;
 
         protected CapTransactionBase(IDispatcher dispatcher)
         {
             _dispatcher = dispatcher;
-            _bufferList = new List<CapPublishedMessage>(1);
+            _bufferList = new ConcurrentQueue<CapPublishedMessage>();
         }
 
         public bool AutoCommit { get; set; }
@@ -21,17 +21,16 @@ namespace DotNetCore.CAP
 
         protected internal virtual void AddToSent(CapPublishedMessage msg)
         {
-            _bufferList.Add(msg);
+            _bufferList.Enqueue(msg);
         }
 
         protected virtual void Flush()
         {
-            foreach (var message in _bufferList)
+            while (!_bufferList.IsEmpty)
             {
+                _bufferList.TryDequeue(out var message);
                 _dispatcher.EnqueueToPublish(message);
             }
-
-            _bufferList.Clear();
         }
 
         public abstract void Commit();
