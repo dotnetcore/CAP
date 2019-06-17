@@ -154,9 +154,9 @@ namespace DotNetCore.CAP.AzureServiceBus
         {
             var context = args.ExceptionReceivedContext;
             var exceptionMessage =
-                $"- Endpoint: {context.Endpoint}\r\n" +
-                $"- Entity Path: {context.EntityPath}\r\n" +
-                $"- Executing Action: {context.Action}\r\n" +
+                $"- Endpoint: {context.Endpoint}" + Environment.NewLine +
+                $"- Entity Path: {context.EntityPath}" + Environment.NewLine +
+                $"- Executing Action: {context.Action}" + Environment.NewLine +
                 $"- Exception: {args.Exception}";
 
             var logArgs = new LogMessageEventArgs
