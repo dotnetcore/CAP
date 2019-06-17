@@ -18,6 +18,7 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly ILogger<ConnectionChannelPool> _logger;
         private readonly ConcurrentQueue<IModel> _pool;
         private IConnection _connection;
+        private static readonly object s_lock = new object();
 
         private int _count;
         private int _maxSize;
@@ -47,7 +48,14 @@ namespace DotNetCore.CAP.RabbitMQ
 
         IModel IConnectionChannelPool.Rent()
         {
-            return Rent();
+            lock (s_lock)
+            {
+                while (_count > _maxSize)
+                {
+                    Thread.SpinWait(1);
+                }
+                return Rent();
+            }
         }
 
         bool IConnectionChannelPool.Return(IModel connection)
@@ -120,7 +128,16 @@ namespace DotNetCore.CAP.RabbitMQ
                 return model;
             }
 
-            model = GetConnection().CreateModel();
+            try
+            {
+                model = GetConnection().CreateModel();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e,"RabbitMQ channel model create failed!");
+                Console.WriteLine(e);
+                throw;
+            }
 
             return model;
         }
