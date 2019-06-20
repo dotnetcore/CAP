@@ -74,25 +74,13 @@ namespace DotNetCore.CAP
         protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
             IServiceProvider provider)
         {
-            var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
-
-            using (var scoped = provider.CreateScope())
-            {
-                var scopedProvider = scoped.ServiceProvider;
-                var consumerServices = scopedProvider.GetServices<ICapSubscribe>();
-                foreach (var service in consumerServices)
-                {
-                    var typeInfo = service.GetType().GetTypeInfo();
-                    if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
-                    {
-                        continue;
-                    }
-
-                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
-                }
-
-                return executorDescriptorList;
-            }
+            return ServiceCollectionExtensions.SERVICES
+                .Where(rejectedServices => rejectedServices.ImplementationType != null
+                    && typeof(ICapSubscribe).IsAssignableFrom(rejectedServices.ImplementationType))
+                .Select(o => o.ImplementationType)
+                .Distinct()
+                .SelectMany(type => GetTopicAttributesDescription(type.GetTypeInfo()))
+                .ToArray();
         }
 
         protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
