@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using DotNetCore.CAP.Models;
+// ReSharper disable InconsistentNaming
 
 namespace DotNetCore.CAP
 {
@@ -41,7 +42,7 @@ namespace DotNetCore.CAP
             FailedRetryCount = DefaultFailedRetryCount;
             Extensions = new List<ICapOptionsExtension>();
             Version = DefaultVersion;
-            DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly().GetName().Name.ToLower();
+            DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
         }
 
         internal IList<ICapOptionsExtension> Extensions { get; }
