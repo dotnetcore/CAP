@@ -21,6 +21,7 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class ServiceCollectionExtensions
     {
+        internal static IServiceCollection ServiceCollection;
         /// <summary>
         /// Adds and configures the consistence services for the consistency.
         /// </summary>
@@ -34,10 +35,9 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(setupAction));
             }
 
-            services.TryAddSingleton<CapMarkerService>();
+            ServiceCollection = services;
 
-            //Consumer service
-            AddSubscribeServices(services);
+            services.TryAddSingleton<CapMarkerService>();
 
             //Serializer and model binder
             services.TryAddSingleton<IContentSerializer, JsonContentSerializer>();
@@ -79,25 +79,6 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddTransient<IStartupFilter, CapStartupFilter>();
 
             return new CapBuilder(services);
-        }
-
-        private static void AddSubscribeServices(IServiceCollection services)
-        {
-            var consumerListenerServices = new List<KeyValuePair<Type, Type>>();
-            foreach (var rejectedServices in services)
-            {
-                if (rejectedServices.ImplementationType != null
-                    && typeof(ICapSubscribe).IsAssignableFrom(rejectedServices.ImplementationType))
-                {
-                    consumerListenerServices.Add(new KeyValuePair<Type, Type>(typeof(ICapSubscribe),
-                        rejectedServices.ImplementationType));
-                }
-            }
-
-            foreach (var service in consumerListenerServices)
-            {
-                services.TryAddEnumerable(ServiceDescriptor.Transient(service.Key, service.Value));
-            }
         }
     }
 }

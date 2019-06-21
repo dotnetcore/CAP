@@ -11,6 +11,8 @@ namespace DotNetCore.CAP
     /// </summary>
     public class ConsumerExecutorDescriptor
     {
+        public TypeInfo ServiceTypeInfo { get; set; }
+
         public MethodInfo MethodInfo { get; set; }
 
         public TypeInfo ImplTypeInfo { get; set; }

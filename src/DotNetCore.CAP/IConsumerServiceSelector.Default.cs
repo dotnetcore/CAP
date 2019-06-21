@@ -76,23 +76,21 @@ namespace DotNetCore.CAP
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
-            using (var scoped = provider.CreateScope())
+            var capSubscribeTypeInfo = typeof(ICapSubscribe).GetTypeInfo();
+
+            foreach (var service in ServiceCollectionExtensions.ServiceCollection.Where(o => o.ImplementationType != null && o.ServiceType != null))
             {
-                var scopedProvider = scoped.ServiceProvider;
-                var consumerServices = scopedProvider.GetServices<ICapSubscribe>();
-                foreach (var service in consumerServices)
+                var typeInfo = service.ImplementationType.GetTypeInfo();
+                if (!capSubscribeTypeInfo.IsAssignableFrom(typeInfo))
                 {
-                    var typeInfo = service.GetType().GetTypeInfo();
-                    if (!typeof(ICapSubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
-                    {
-                        continue;
-                    }
-
-                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                    continue;
                 }
+                var serviceTypeInfo = service.ServiceType.GetTypeInfo();
 
-                return executorDescriptorList;
+                executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo, serviceTypeInfo));
             }
+
+            return executorDescriptorList;
         }
 
         protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
@@ -112,7 +110,7 @@ namespace DotNetCore.CAP
             return executorDescriptorList;
         }
 
-        protected IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo)
+        protected IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo, TypeInfo serviceTypeInfo = null)
         {
             foreach (var method in typeInfo.DeclaredMethods)
             {
@@ -135,7 +133,7 @@ namespace DotNetCore.CAP
                         attr.Group = attr.Group + "." + _capOptions.Version;
                     }
 
-                    yield return InitDescriptor(attr, method, typeInfo);
+                    yield return InitDescriptor(attr, method, typeInfo, serviceTypeInfo);
                 }
             }
         }
@@ -143,13 +141,15 @@ namespace DotNetCore.CAP
         private static ConsumerExecutorDescriptor InitDescriptor(
             TopicAttribute attr,
             MethodInfo methodInfo,
-            TypeInfo implType)
+            TypeInfo implType,
+            TypeInfo serviceTypeInfo)
         {
             var descriptor = new ConsumerExecutorDescriptor
             {
                 Attribute = attr,
                 MethodInfo = methodInfo,
-                ImplTypeInfo = implType
+                ImplTypeInfo = implType,
+                ServiceTypeInfo = serviceTypeInfo
             };
 
             return descriptor;
