@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Reflection;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
@@ -90,6 +91,8 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private static Func<IConnection> CreateConnection(RabbitMQOptions options)
         {
+            var serviceName = Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
+
             var factory = new ConnectionFactory
             {
                 UserName = options.UserName,
@@ -97,17 +100,17 @@ namespace DotNetCore.CAP.RabbitMQ
                 Password = options.Password,
                 VirtualHost = options.VirtualHost
             };
-
+            
             if (options.HostName.Contains(","))
             {
                 options.ConnectionFactoryOptions?.Invoke(factory);
                 return () => factory.CreateConnection(
-                    options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                    options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries), serviceName);
             }
-
+           
             factory.HostName = options.HostName;
             options.ConnectionFactoryOptions?.Invoke(factory);
-            return () => factory.CreateConnection();
+            return () => factory.CreateConnection(serviceName);
         }
 
         private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
