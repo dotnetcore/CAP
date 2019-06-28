@@ -22,6 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         internal static IServiceCollection ServiceCollection;
+
         /// <summary>
         /// Adds and configures the consistence services for the consistency.
         /// </summary>

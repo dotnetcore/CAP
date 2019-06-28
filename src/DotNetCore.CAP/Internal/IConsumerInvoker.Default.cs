@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -41,18 +40,19 @@ namespace DotNetCore.CAP.Internal
             using (var scope = _serviceProvider.CreateScope())
             {
                 var provider = scope.ServiceProvider;
-                var serviceType = context.ConsumerDescriptor.ImplTypeInfo.AsType();
+                var srvType = context.ConsumerDescriptor.ServiceTypeInfo?.AsType();
+                var implType = context.ConsumerDescriptor.ImplTypeInfo.AsType();
+
                 object obj = null;
 
-                if (context.ConsumerDescriptor.ServiceTypeInfo != null)
+                if (srvType != null)
                 {
-                    obj = provider.GetServices(context.ConsumerDescriptor.ServiceTypeInfo.AsType())
-                        .FirstOrDefault(o => o.GetType() == serviceType);
+                    obj = provider.GetServices(srvType).FirstOrDefault(o => o.GetType() == implType);
                 }
 
                 if (obj == null)
                 {
-                    obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, serviceType);
+                    obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, implType);
                 }
 
                 var jsonContent = context.DeliverMessage.Content;
