@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +42,18 @@ namespace DotNetCore.CAP.Internal
             {
                 var provider = scope.ServiceProvider;
                 var serviceType = context.ConsumerDescriptor.ImplTypeInfo.AsType();
-                var obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, serviceType);
+                object obj = null;
+
+                if (context.ConsumerDescriptor.ServiceTypeInfo != null)
+                {
+                    obj = provider.GetServices(context.ConsumerDescriptor.ServiceTypeInfo.AsType())
+                        .FirstOrDefault(o => o.GetType() == serviceType);
+                }
+
+                if (obj == null)
+                {
+                    obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, serviceType);
+                }
 
                 var jsonContent = context.DeliverMessage.Content;
                 var message = _messagePacker.UnPack(jsonContent);
