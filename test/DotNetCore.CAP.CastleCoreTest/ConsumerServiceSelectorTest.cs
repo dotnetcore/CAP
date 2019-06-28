@@ -38,7 +38,7 @@ namespace DotNetCore.CAP.CastleDynamicProxyTest
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
 
             var candidates = selector.SelectCandidates();
-            Assert.Equal(2, candidates.Count);
+            Assert.Equal(1, candidates.Count);
         }
     }
 
