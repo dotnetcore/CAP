@@ -97,16 +97,17 @@ namespace DotNetCore.CAP
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
-            var types = Assembly.GetEntryAssembly().ExportedTypes;
-            foreach (var type in types)
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies().Where(o => !o.IsDynamic))
             {
-                var typeInfo = type.GetTypeInfo();
-                if (Helper.IsController(typeInfo))
+                foreach (var type in assembly.ExportedTypes)
                 {
-                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                    var typeInfo = type.GetTypeInfo();
+                    if (Helper.IsController(typeInfo))
+                    {
+                        executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                    }
                 }
             }
-
             return executorDescriptorList;
         }
 
