@@ -4,8 +4,8 @@
 using System;
 using DotNetCore.CAP.MySql;
 using DotNetCore.CAP.Processor;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -30,32 +30,9 @@ namespace DotNetCore.CAP
 
             services.AddTransient<CapTransactionBase, MySqlCapTransaction>();
 
-            AddSingletonMySqlOptions(services);
-        }
-
-        private void AddSingletonMySqlOptions(IServiceCollection services)
-        {
-            var mysqlOptions = new MySqlOptions();
-
-            _configure(mysqlOptions);
-
-            if (mysqlOptions.DbContextType != null)
-            {
-                services.AddSingleton(x =>
-                {
-                    using (var scope = x.CreateScope())
-                    {
-                        var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext)provider.GetService(mysqlOptions.DbContextType);
-                        mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
-                        return mysqlOptions;
-                    }
-                });
-            }
-            else
-            {
-                services.AddSingleton(mysqlOptions);
-            }
-        }
+            //Add MySqlOptions
+            services.Configure(_configure);
+            services.AddSingleton<IConfigureOptions<MySqlOptions>, ConfigureMySqlOptions>();
+        } 
     }
 }

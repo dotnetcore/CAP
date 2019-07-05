@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
@@ -16,10 +17,10 @@ namespace DotNetCore.CAP.MySql
         private readonly CapOptions _capOptions;
         private readonly string _prefix;
 
-        public MySqlStorageConnection(MySqlOptions options, CapOptions capOptions)
+        public MySqlStorageConnection(IOptions<MySqlOptions> options, CapOptions capOptions)
         {
             _capOptions = capOptions;
-            Options = options;
+            Options = options.Value;
             _prefix = Options.TableNamePrefix;
         }
 
