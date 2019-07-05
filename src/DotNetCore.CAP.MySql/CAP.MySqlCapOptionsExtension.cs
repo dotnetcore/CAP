@@ -24,17 +24,16 @@ namespace DotNetCore.CAP
             services.AddSingleton<CapStorageMarkerService>();
             services.AddSingleton<IStorage, MySqlStorage>();
             services.AddSingleton<IStorageConnection, MySqlStorageConnection>();
+            services.AddSingleton<ICapPublisher, MySqlPublisher>();
+            services.AddSingleton<ICallbackPublisher>(provider => (MySqlPublisher)provider.GetService<ICapPublisher>());
+            services.AddSingleton<ICollectProcessor, MySqlCollectProcessor>();
 
-            services.AddScoped<ICapPublisher, MySqlPublisher>();
-            services.AddScoped<ICallbackPublisher, MySqlPublisher>();
-
-            services.AddTransient<ICollectProcessor, MySqlCollectProcessor>();
             services.AddTransient<CapTransactionBase, MySqlCapTransaction>();
 
-            AddSingletionMySqlOptions(services);
+            AddSingletonMySqlOptions(services);
         }
 
-        private void AddSingletionMySqlOptions(IServiceCollection services)
+        private void AddSingletonMySqlOptions(IServiceCollection services)
         {
             var mysqlOptions = new MySqlOptions();
 
@@ -47,7 +46,7 @@ namespace DotNetCore.CAP
                     using (var scope = x.CreateScope())
                     {
                         var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext) provider.GetService(mysqlOptions.DbContextType);
+                        var dbContext = (DbContext)provider.GetService(mysqlOptions.DbContextType);
                         mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                         return mysqlOptions;
                     }

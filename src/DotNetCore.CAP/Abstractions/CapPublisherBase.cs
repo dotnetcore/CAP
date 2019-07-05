@@ -15,9 +15,9 @@ namespace DotNetCore.CAP.Abstractions
 {
     public abstract class CapPublisherBase : ICapPublisher
     {
-        private readonly CapTransactionBase _transaction;
         private readonly IMessagePacker _msgPacker;
         private readonly IContentSerializer _serializer;
+        private CapTransactionBase _transaction;
 
         protected bool NotUseTransaction;
 
@@ -28,14 +28,27 @@ namespace DotNetCore.CAP.Abstractions
         protected CapPublisherBase(IServiceProvider service)
         {
             ServiceProvider = service;
-            _transaction = service.GetRequiredService<CapTransactionBase>();
             _msgPacker = service.GetRequiredService<IMessagePacker>();
             _serializer = service.GetRequiredService<IContentSerializer>();
         }
 
         protected IServiceProvider ServiceProvider { get; }
 
-        public ICapTransaction Transaction => _transaction;
+        public ICapTransaction Transaction
+        {
+            get
+            {
+                if (_transaction == null)
+                {
+                    using (var scope = ServiceProvider.CreateScope())
+                    {
+                        _transaction = scope.ServiceProvider.GetRequiredService<CapTransactionBase>();
+                    }
+                }
+
+                return _transaction;
+            }
+        }
 
         public void Publish<T>(string name, T contentObj, string callbackName = null)
         {
@@ -99,7 +112,7 @@ namespace DotNetCore.CAP.Abstractions
             {
                 if (NotUseTransaction || Transaction.AutoCommit)
                 {
-                    _transaction.Dispose();
+                    _transaction?.Dispose();
                 }
             }
         }
