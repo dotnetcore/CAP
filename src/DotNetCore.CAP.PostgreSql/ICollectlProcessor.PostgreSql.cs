@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace DotNetCore.CAP.PostgreSql
@@ -25,10 +26,10 @@ namespace DotNetCore.CAP.PostgreSql
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
         public PostgreSqlCollectProcessor(ILogger<PostgreSqlCollectProcessor> logger,
-            PostgreSqlOptions sqlServerOptions)
+            IOptions<PostgreSqlOptions> sqlServerOptions)
         {
             _logger = logger;
-            _options = sqlServerOptions;
+            _options = sqlServerOptions.Value;
         }
 
         public async Task ProcessAsync(ProcessingContext context)
@@ -44,7 +45,7 @@ namespace DotNetCore.CAP.PostgreSql
                     {
                         removedCount = await connection.ExecuteAsync(
                             $"DELETE FROM \"{_options.Schema}\".\"{table}\" WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM \"{_options.Schema}\".\"{table}\" LIMIT @count);",
-                            new {now = DateTime.Now, count = MaxBatch});
+                            new { now = DateTime.Now, count = MaxBatch });
                     }
 
                     if (removedCount != 0)
