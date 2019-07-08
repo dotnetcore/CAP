@@ -3,7 +3,7 @@
 
 using System;
 
-namespace DotNetCore.CAP.Internal
+namespace DotNetCore.CAP
 {
     public class SubscriberNotFoundException : Exception
     {
