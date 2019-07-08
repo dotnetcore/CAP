@@ -25,13 +25,14 @@ namespace DotNetCore.CAP.RabbitMQ
             IStorageConnection connection,
             IConnectionChannelPool connectionChannelPool,
             IStateChanger stateChanger)
-            : base(logger, options.Value, connection, stateChanger)
+            : base(logger, options, connection, stateChanger)
         {
             _logger = logger;
             _connectionChannelPool = connectionChannelPool;
             _exchange = _connectionChannelPool.Exchange;
-            ServersAddress = _connectionChannelPool.HostAddress;
         }
+
+        protected override string ServersAddress => _connectionChannelPool.HostAddress;
 
         public override Task<OperateResult> PublishAsync(string keyName, string content)
         {

@@ -11,6 +11,7 @@ using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
 {
@@ -21,7 +22,7 @@ namespace DotNetCore.CAP
         private readonly CapOptions _options;
         private readonly IStateChanger _stateChanger;
 
-        protected string ServersAddress { get; set; }
+        protected abstract string ServersAddress { get; }
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
@@ -30,11 +31,11 @@ namespace DotNetCore.CAP
 
         protected BasePublishMessageSender(
             ILogger logger,
-            CapOptions options,
+            IOptions<CapOptions> options,
             IStorageConnection connection,
             IStateChanger stateChanger)
         {
-            _options = options;
+            _options = options.Value;
             _connection = connection;
             _stateChanger = stateChanger;
             _logger = logger;

@@ -57,6 +57,8 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
+            Connect();
+
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnConsumerReceived;
             consumer.Shutdown += OnConsumerShutdown;
