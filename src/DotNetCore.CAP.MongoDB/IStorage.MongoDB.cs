@@ -6,19 +6,21 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
 {
     public class MongoDBStorage : IStorage
     {
-        private readonly CapOptions _capOptions;
+        private readonly IOptions<CapOptions> _capOptions;
         private readonly IMongoClient _client;
         private readonly ILogger<MongoDBStorage> _logger;
-        private readonly MongoDBOptions _options;
+        private readonly IOptions<MongoDBOptions> _options;
 
-        public MongoDBStorage(CapOptions capOptions,
-            MongoDBOptions options,
+        public MongoDBStorage(
+            IOptions<CapOptions> capOptions,
+            IOptions<MongoDBOptions> options,
             IMongoClient client,
             ILogger<MongoDBStorage> logger)
         {
@@ -45,31 +47,32 @@ namespace DotNetCore.CAP.MongoDB
                 return;
             }
 
-            var database = _client.GetDatabase(_options.DatabaseName);
-            var names = (await database.ListCollectionNamesAsync(cancellationToken: cancellationToken))?.ToList();
+            var options = _options.Value;
+            var database = _client.GetDatabase(options.DatabaseName);
+            var names = (await database.ListCollectionNamesAsync(cancellationToken: cancellationToken)).ToList();
 
-            if (names.All(n => n != _options.ReceivedCollection))
+            if (names.All(n => n != options.ReceivedCollection))
             {
-                await database.CreateCollectionAsync(_options.ReceivedCollection, cancellationToken: cancellationToken);
+                await database.CreateCollectionAsync(options.ReceivedCollection, cancellationToken: cancellationToken);
             }
 
-            if (names.All(n => n != _options.PublishedCollection))
+            if (names.All(n => n != options.PublishedCollection))
             {
-                await database.CreateCollectionAsync(_options.PublishedCollection,
+                await database.CreateCollectionAsync(options.PublishedCollection,
                     cancellationToken: cancellationToken);
             }
 
-            var receivedMessageIndexNames = new string[] {
+            var receivedMessageIndexNames = new[] {
                 nameof(ReceivedMessage.Name), nameof(ReceivedMessage.Added), nameof(ReceivedMessage.ExpiresAt),
                 nameof(ReceivedMessage.StatusName), nameof(ReceivedMessage.Retries), nameof(ReceivedMessage.Version) };
 
-            var publishedMessageIndexNames = new string[] {
+            var publishedMessageIndexNames = new[] {
                 nameof(PublishedMessage.Name), nameof(PublishedMessage.Added), nameof(PublishedMessage.ExpiresAt),
                 nameof(PublishedMessage.StatusName), nameof(PublishedMessage.Retries), nameof(PublishedMessage.Version) };
 
             await Task.WhenAll(
-                TryCreateIndexesAsync<ReceivedMessage>(_options.ReceivedCollection, receivedMessageIndexNames),
-                TryCreateIndexesAsync<PublishedMessage>(_options.PublishedCollection, publishedMessageIndexNames)
+                TryCreateIndexesAsync<ReceivedMessage>(options.ReceivedCollection, receivedMessageIndexNames),
+                TryCreateIndexesAsync<PublishedMessage>(options.PublishedCollection, publishedMessageIndexNames)
                 );
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
@@ -87,15 +90,15 @@ namespace DotNetCore.CAP.MongoDB
                 if (indexNames.Any() == false)
                     return;
 
-                var indexes = indexNames.Select(index_name =>
+                var indexes = indexNames.Select(indexName =>
                 {
                     var indexOptions = new CreateIndexOptions
                     {
-                        Name = index_name,
+                        Name = indexName,
                         Background = true,
                     };
                     var indexBuilder = Builders<T>.IndexKeys;
-                    return new CreateIndexModel<T>(indexBuilder.Descending(index_name), indexOptions);
+                    return new CreateIndexModel<T>(indexBuilder.Descending(indexName), indexOptions);
                 }).ToArray();
 
                 await col.Indexes.CreateManyAsync(indexes, cancellationToken);

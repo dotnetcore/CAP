@@ -3,9 +3,9 @@
 
 using System;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
@@ -17,19 +17,19 @@ namespace DotNetCore.CAP.MongoDB
         private readonly MongoDBOptions _options;
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
-        public MongoDBCollectProcessor(ILogger<MongoDBCollectProcessor> logger,
-            MongoDBOptions options,
+        public MongoDBCollectProcessor(
+            ILogger<MongoDBCollectProcessor> logger,
+            IOptions<MongoDBOptions> options,
             IMongoClient client)
         {
-            _options = options;
+            _options = options.Value;
             _logger = logger;
             _database = client.GetDatabase(_options.DatabaseName);
         }
 
         public async Task ProcessAsync(ProcessingContext context)
         {
-            _logger.LogDebug(
-                $"Collecting expired data from collection [{_options.PublishedCollection}].");
+            _logger.LogDebug($"Collecting expired data from collection [{_options.PublishedCollection}].");
 
             var publishedCollection = _database.GetCollection<PublishedMessage>(_options.PublishedCollection);
             var receivedCollection = _database.GetCollection<ReceivedMessage>(_options.ReceivedCollection);
@@ -39,6 +39,7 @@ namespace DotNetCore.CAP.MongoDB
                 new DeleteManyModel<PublishedMessage>(
                     Builders<PublishedMessage>.Filter.Lt(x => x.ExpiresAt, DateTime.Now))
             });
+
             await receivedCollection.BulkWriteAsync(new[]
             {
                 new DeleteManyModel<ReceivedMessage>(

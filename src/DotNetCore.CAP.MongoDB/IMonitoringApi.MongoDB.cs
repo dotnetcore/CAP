@@ -7,6 +7,7 @@ using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
 
@@ -17,10 +18,10 @@ namespace DotNetCore.CAP.MongoDB
         private readonly IMongoDatabase _database;
         private readonly MongoDBOptions _options;
 
-        public MongoDBMonitoringApi(IMongoClient client, MongoDBOptions options)
+        public MongoDBMonitoringApi(IMongoClient client, IOptions<MongoDBOptions> options)
         {
             var mongoClient = client ?? throw new ArgumentNullException(nameof(client));
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
 
             _database = mongoClient.GetDatabase(_options.DatabaseName);
         }
@@ -140,7 +141,7 @@ namespace DotNetCore.CAP.MongoDB
         private int GetNumberOfMessage(string collectionName, string statusName)
         {
             var collection = _database.GetCollection<BsonDocument>(collectionName);
-            var count = collection.CountDocuments(new BsonDocument {{"StatusName", statusName}});
+            var count = collection.CountDocuments(new BsonDocument { { "StatusName", statusName } });
             return int.Parse(count.ToString());
         }
 
@@ -199,7 +200,7 @@ namespace DotNetCore.CAP.MongoDB
                 }
             };
 
-            var pipeline = new[] {match, groupby};
+            var pipeline = new[] { match, groupby };
 
             var collection = _database.GetCollection<BsonDocument>(collectionName);
             var result = collection.Aggregate<BsonDocument>(pipeline).ToList();

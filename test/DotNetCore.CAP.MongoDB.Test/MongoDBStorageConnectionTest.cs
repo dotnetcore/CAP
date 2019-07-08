@@ -38,7 +38,7 @@ namespace DotNetCore.CAP.MongoDB.Test
         public void ChangeReceivedState_Test()
         {
             StoreReceivedMessageAsync_TestAsync();
-            var collection = Database.GetCollection<ReceivedMessage>(MongoDBOptions.ReceivedCollection);
+            var collection = Database.GetCollection<ReceivedMessage>(MongoDBOptions.Value.ReceivedCollection);
 
             var msg = collection.Find(x => true).FirstOrDefault();
             _connection.ChangeReceivedState(msg.Id, StatusName.Scheduled).Should().BeTrue();
@@ -64,7 +64,7 @@ namespace DotNetCore.CAP.MongoDB.Test
             };
             _connection.StoreReceivedMessage(msg);
 
-            var collection = Database.GetCollection<ReceivedMessage>(MongoDBOptions.ReceivedCollection);
+            var collection = Database.GetCollection<ReceivedMessage>(MongoDBOptions.Value.ReceivedCollection);
 
             var updateDef = Builders<ReceivedMessage>
                 .Update.Set(x => x.Added, DateTime.Now.AddMinutes(-5));

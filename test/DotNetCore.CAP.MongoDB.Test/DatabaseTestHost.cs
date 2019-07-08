@@ -12,9 +12,9 @@ namespace DotNetCore.CAP.MongoDB.Test
 
         protected IServiceProvider Provider { get; private set; }
         protected IMongoClient MongoClient => Provider.GetService<IMongoClient>();
-        protected IMongoDatabase Database => MongoClient.GetDatabase(MongoDBOptions.DatabaseName);
+        protected IMongoDatabase Database => MongoClient.GetDatabase(MongoDBOptions.Value.DatabaseName);
         protected CapOptions CapOptions => Provider.GetService<IOptions<CapOptions>>().Value;
-        protected MongoDBOptions MongoDBOptions => Provider.GetService<MongoDBOptions>();
+        protected IOptions<MongoDBOptions> MongoDBOptions => Provider.GetService<IOptions<MongoDBOptions>>();
 
         protected DatabaseTestHost()
         {
@@ -50,7 +50,7 @@ namespace DotNetCore.CAP.MongoDB.Test
 
         public void Dispose()
         {
-            MongoClient.DropDatabase(MongoDBOptions.DatabaseName);
+            MongoClient.DropDatabase(MongoDBOptions.Value.DatabaseName);
         }
     }
 }
