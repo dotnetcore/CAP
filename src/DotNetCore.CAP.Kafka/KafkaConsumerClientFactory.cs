@@ -1,13 +1,15 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using Microsoft.Extensions.Options;
+
 namespace DotNetCore.CAP.Kafka
 {
     internal sealed class KafkaConsumerClientFactory : IConsumerClientFactory
     {
-        private readonly KafkaOptions _kafkaOptions;
+        private readonly IOptions<KafkaOptions> _kafkaOptions;
 
-        public KafkaConsumerClientFactory(KafkaOptions kafkaOptions)
+        public KafkaConsumerClientFactory(IOptions<KafkaOptions> kafkaOptions)
         {
             _kafkaOptions = kafkaOptions;
         }

@@ -5,24 +5,23 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using Confluent.Kafka;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
     internal sealed class KafkaConsumerClient : IConsumerClient
     {
+        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;
         private IConsumer<Null, string> _consumerClient;
 
-        public KafkaConsumerClient(string groupId, KafkaOptions options)
+        public KafkaConsumerClient(string groupId, IOptions<KafkaOptions> options)
         {
             _groupId = groupId;
-            _kafkaOptions = options ?? throw new ArgumentNullException(nameof(options));
-
-            InitKafkaClient();
+            _kafkaOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
-
-        public IDeserializer<string> StringDeserializer { get; set; }
 
         public event EventHandler<MessageContext> OnMessageReceived;
 
@@ -37,11 +36,15 @@ namespace DotNetCore.CAP.Kafka
                 throw new ArgumentNullException(nameof(topics));
             }
 
+            Connect();
+
             _consumerClient.Subscribe(topics);
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
+            Connect();
+
             while (true)
             {
                 var consumerResult = _consumerClient.Consume(cancellationToken);
@@ -77,17 +80,32 @@ namespace DotNetCore.CAP.Kafka
 
         #region private methods
 
-        private void InitKafkaClient()
+        private void Connect()
         {
-            lock (_kafkaOptions)
+            if (_consumerClient != null)
             {
-                _kafkaOptions.MainConfig["group.id"] = _groupId;
-                _kafkaOptions.MainConfig["auto.offset.reset"] = "earliest";
-                var config = _kafkaOptions.AsKafkaConfig();
-                _consumerClient = new ConsumerBuilder<Null, string>(config)
-                    .SetErrorHandler(ConsumerClient_OnConsumeError)
-                    .Build();
+                return;
             }
+
+            _connectionLock.Wait();
+
+            try
+            {
+                if (_consumerClient == null)
+                {
+                    _kafkaOptions.MainConfig["group.id"] = _groupId;
+                    _kafkaOptions.MainConfig["auto.offset.reset"] = "earliest";
+                    var config = _kafkaOptions.AsKafkaConfig();
+
+                    _consumerClient = new ConsumerBuilder<Null, string>(config)
+                        .SetErrorHandler(ConsumerClient_OnConsumeError)
+                        .Build();
+                }
+            }
+            finally
+            {
+                _connectionLock.Release();
+            } 
         }
 
         private void ConsumerClient_OnConsumeError(IConsumer<Null, string> consumer, Error e)

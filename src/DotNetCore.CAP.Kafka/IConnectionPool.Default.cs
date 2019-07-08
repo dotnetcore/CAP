@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Kafka
@@ -17,18 +18,16 @@ namespace DotNetCore.CAP.Kafka
         private int _pCount;
         private int _maxSize;
 
-        public ConnectionPool(ILogger<ConnectionPool> logger, KafkaOptions options)
+        public ConnectionPool(ILogger<ConnectionPool> logger, IOptions<KafkaOptions> options)
         {
-            ServersAddress = options.Servers;
-
-            _options = options;
+            _options = options.Value;
             _producerPool = new ConcurrentQueue<IProducer<Null, string>>();
-            _maxSize = options.ConnectionPoolSize;
-
-            logger.LogDebug("Kafka configuration of CAP :\r\n {0}", JsonConvert.SerializeObject(options.AsKafkaConfig(), Formatting.Indented));
+            _maxSize = _options.ConnectionPoolSize;
+             
+            logger.LogDebug("Kafka configuration of CAP :\r\n {0}", JsonConvert.SerializeObject(_options.AsKafkaConfig(), Formatting.Indented));
         }
 
-        public string ServersAddress { get; }
+        public string ServersAddress => _options.Servers;
 
         public IProducer<Null, string> RentProducer()
         {
