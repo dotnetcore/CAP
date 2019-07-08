@@ -2,17 +2,18 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
     internal sealed class AzureServiceBusConsumerClientFactory : IConsumerClientFactory
     {
         private readonly ILoggerFactory _loggerFactory;
-        private readonly AzureServiceBusOptions _asbOptions;
+        private readonly IOptions<AzureServiceBusOptions> _asbOptions;
 
         public AzureServiceBusConsumerClientFactory(
             ILoggerFactory loggerFactory,
-            AzureServiceBusOptions asbOptions)
+            IOptions<AzureServiceBusOptions> asbOptions)
         {
             _loggerFactory = loggerFactory;
             _asbOptions = asbOptions;
