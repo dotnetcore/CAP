@@ -15,12 +15,15 @@ namespace DotNetCore.CAP.MySql
 {
     public class MySqlStorage : IStorage
     {
-        private readonly CapOptions _capOptions;
+        private readonly IOptions<CapOptions> _capOptions;
+        private readonly IOptions<MySqlOptions> _options;
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
-        private readonly IOptions<MySqlOptions> _options;
 
-        public MySqlStorage(ILogger<MySqlStorage> logger, IOptions<MySqlOptions> options, CapOptions capOptions)
+        public MySqlStorage(
+            ILogger<MySqlStorage> logger,
+            IOptions<MySqlOptions> options, 
+            IOptions<CapOptions> capOptions)
         {
             _options = options;
             _capOptions = capOptions;

@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace DotNetCore.CAP.Test
@@ -81,7 +82,7 @@ namespace DotNetCore.CAP.Test
             var services = new ServiceCollection();
             services.AddCap(x => { });
             var builder = services.BuildServiceProvider();
-            var capOptions = builder.GetService<CapOptions>();
+            var capOptions = builder.GetService<IOptions<CapOptions>>().Value;
             Assert.NotNull(capOptions);
         }
 

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 
@@ -18,9 +19,13 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly ILogger _logger;
         private readonly string _exchange;
 
-        public RabbitMQPublishMessageSender(ILogger<RabbitMQPublishMessageSender> logger, CapOptions options,
-            IStorageConnection connection, IConnectionChannelPool connectionChannelPool, IStateChanger stateChanger)
-            : base(logger, options, connection, stateChanger)
+        public RabbitMQPublishMessageSender(
+            ILogger<RabbitMQPublishMessageSender> logger,
+            IOptions<CapOptions> options,
+            IStorageConnection connection,
+            IConnectionChannelPool connectionChannelPool,
+            IStateChanger stateChanger)
+            : base(logger, options.Value, connection, stateChanger)
         {
             _logger = logger;
             _connectionChannelPool = connectionChannelPool;
@@ -48,14 +53,14 @@ namespace DotNetCore.CAP.RabbitMQ
             }
             catch (Exception ex)
             {
-                var wapperEx = new PublisherSentFailedException(ex.Message, ex);
+                var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
                 var errors = new OperateError
                 {
                     Code = ex.HResult.ToString(),
                     Description = ex.Message
                 };
 
-                return Task.FromResult(OperateResult.Failed(wapperEx, errors));
+                return Task.FromResult(OperateResult.Failed(wrapperEx, errors));
             }
             finally
             {

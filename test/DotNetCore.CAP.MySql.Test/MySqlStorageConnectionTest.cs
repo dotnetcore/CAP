@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.MySql.Test
         public MySqlStorageConnectionTest()
         {
             var options = GetService<IOptions<MySqlOptions>>();
-            var capOptions = GetService<CapOptions>();
+            var capOptions = GetService<IOptions<CapOptions>>();
             _storage = new MySqlStorageConnection(options, capOptions);
         }
 

@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.PostgreSql.Test
         public PostgreSqlStorageConnectionTest()
         {
             var options = GetService<IOptions<PostgreSqlOptions>>();
-            var capOptions = GetService<CapOptions>();
+            var capOptions = GetService<IOptions<CapOptions>>();
             _storage = new PostgreSqlStorageConnection(options, capOptions);
         }
 

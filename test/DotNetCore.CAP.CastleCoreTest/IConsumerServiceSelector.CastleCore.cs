@@ -1,17 +1,15 @@
-﻿using Castle.Core;
-using Castle.DynamicProxy;
-using DotNetCore.CAP.Infrastructure;
-using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Castle.Core;
+using Castle.DynamicProxy;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetCore.CAP.CastleDynamicProxyTest
+namespace DotNetCore.CAP.CastleCoreTest
 {
     public class CastleCoreConsumerServiceSelector : DefaultConsumerServiceSelector
     {
-        public CastleCoreConsumerServiceSelector(IServiceProvider serviceProvider, CapOptions capOptions) 
-            : base(serviceProvider, capOptions)
+        public CastleCoreConsumerServiceSelector(IServiceProvider serviceProvider) : base(serviceProvider)
         {
 
         }
