@@ -17,9 +17,9 @@ namespace DotNetCore.CAP
             services.AddSingleton<IStorageConnection, InMemoryStorageConnection>();
 
             services.AddSingleton<ICapPublisher, InMemoryPublisher>();
-            services.AddSingleton<ICallbackPublisher, InMemoryPublisher>();
+            services.AddSingleton<ICallbackPublisher>(x => (InMemoryPublisher)x.GetService<ICapPublisher>());
+            services.AddSingleton<ICollectProcessor, InMemoryCollectProcessor>();
 
-            services.AddTransient<ICollectProcessor, InMemoryCollectProcessor>();
             services.AddTransient<CapTransactionBase, InMemoryCapTransaction>();
         }
     }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.InMemoryStorage
 {
@@ -15,9 +16,9 @@ namespace DotNetCore.CAP.InMemoryStorage
     {
         private readonly CapOptions _capOptions;
 
-        public InMemoryStorageConnection(CapOptions capOptions)
+        public InMemoryStorageConnection(IOptions<CapOptions> capOptions)
         {
-            _capOptions = capOptions;
+            _capOptions = capOptions.Value;
 
             PublishedMessages = new List<CapPublishedMessage>();
             ReceivedMessages = new List<CapReceivedMessage>();
