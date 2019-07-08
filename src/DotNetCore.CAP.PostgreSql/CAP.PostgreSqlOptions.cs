@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class PostgreSqlOptions : EFOptions

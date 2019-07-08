@@ -15,13 +15,13 @@ namespace DotNetCore.CAP.PostgreSql
 {
     public class PostgreSqlStorage : IStorage
     {
-        private readonly CapOptions _capOptions;
+        private readonly IOptions<CapOptions> _capOptions;
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
         private readonly IOptions<PostgreSqlOptions> _options;
 
         public PostgreSqlStorage(ILogger<PostgreSqlStorage> logger,
-            CapOptions capOptions,
+            IOptions<CapOptions> capOptions,
             IOptions<PostgreSqlOptions> options)
         {
             _options = options;

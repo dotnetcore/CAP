@@ -50,6 +50,7 @@ namespace DotNetCore.CAP
         public override void Dispose()
         {
             (DbTransaction as IDbTransaction)?.Dispose();
+            DbTransaction = null;
         }
     }
 

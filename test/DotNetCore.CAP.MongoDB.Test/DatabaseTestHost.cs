@@ -38,9 +38,9 @@ namespace DotNetCore.CAP.MongoDB.Test
             services.AddOptions();
             services.AddLogging();
             _connectionString = ConnectionUtil.ConnectionString;
-
-            services.AddSingleton(new MongoDBOptions() { DatabaseConnection = _connectionString });
-            services.ConfigureOptions<CapOptions>();
+            services.AddOptions<CapOptions>();
+            services.Configure<MongoDBOptions>(x => x.DatabaseConnection = _connectionString);
+           
             services.AddSingleton<IMongoClient>(x => new MongoClient(_connectionString));
             services.AddSingleton<MongoDBStorage>();
 
