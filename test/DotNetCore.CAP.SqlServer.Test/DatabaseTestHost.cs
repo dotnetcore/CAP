@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.SqlServer.Test
             CapOptions = new Mock<IOptions<CapOptions>>().Object;
 
             var options = new Mock<IOptions<SqlServerOptions>>();
-            options.SetupProperty(x => x.Value).SetReturnsDefault(new SqlServerOptions()
+            options.Setup(x => x.Value).Returns(new SqlServerOptions()
             {
                 ConnectionString = ConnectionUtil.GetConnectionString()
             });
