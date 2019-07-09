@@ -13,7 +13,6 @@ namespace DotNetCore.CAP.SqlServer
     public class SqlServerStorageTransaction : IStorageTransaction
     {
         private readonly IDbConnection _dbConnection;
-
         private readonly string _schema;
 
         public SqlServerStorageTransaction(SqlServerStorageConnection connection)

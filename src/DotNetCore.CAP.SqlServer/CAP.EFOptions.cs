@@ -17,7 +17,7 @@ namespace DotNetCore.CAP
         public string Schema { get; set; } = DefaultSchema;
 
         /// <summary>
-        /// EF dbcontext type.
+        /// EF DbContext
         /// </summary>
         internal Type DbContextType { get; set; }
 

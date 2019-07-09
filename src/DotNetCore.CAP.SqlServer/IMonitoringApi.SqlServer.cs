@@ -10,6 +10,7 @@ using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.SqlServer
 {
@@ -18,9 +19,9 @@ namespace DotNetCore.CAP.SqlServer
         private readonly SqlServerOptions _options;
         private readonly SqlServerStorage _storage;
 
-        public SqlServerMonitoringApi(IStorage storage, SqlServerOptions options)
+        public SqlServerMonitoringApi(IStorage storage, IOptions<SqlServerOptions> options)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _storage = storage as SqlServerStorage ?? throw new ArgumentNullException(nameof(storage));
         }
 

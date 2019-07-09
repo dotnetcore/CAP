@@ -20,12 +20,13 @@ namespace DotNetCore.CAP.SqlServer
             "Published", "Received"
         };
 
-        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly ILogger _logger;
         private readonly SqlServerOptions _options;
+        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
-        public SqlServerCollectProcessor(ILogger<SqlServerCollectProcessor> logger,
+        public SqlServerCollectProcessor(
+            ILogger<SqlServerCollectProcessor> logger,
             IOptions<SqlServerOptions> sqlServerOptions)
         {
             _logger = logger;

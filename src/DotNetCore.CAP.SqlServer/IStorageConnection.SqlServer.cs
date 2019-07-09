@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.SqlServer
 {
@@ -15,10 +16,12 @@ namespace DotNetCore.CAP.SqlServer
     {
         private readonly CapOptions _capOptions;
 
-        public SqlServerStorageConnection(SqlServerOptions options, CapOptions capOptions)
+        public SqlServerStorageConnection(
+            IOptions<SqlServerOptions> options, 
+            IOptions<CapOptions> capOptions)
         {
-            _capOptions = capOptions;
-            Options = options;
+            _capOptions = capOptions.Value;
+            Options = options.Value;
         }
 
         public SqlServerOptions Options { get; }
