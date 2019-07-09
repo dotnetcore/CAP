@@ -28,8 +28,9 @@ namespace DotNetCore.CAP.PostgreSql.Test
             services.AddLogging();
 
             _connectionString = ConnectionUtil.GetConnectionString();
-            services.AddSingleton(new PostgreSqlOptions { ConnectionString = _connectionString });
-            services.AddSingleton(new CapOptions());
+
+            services.AddOptions<CapOptions>();
+            services.Configure<PostgreSqlOptions>(x => x.ConnectionString = _connectionString);
             services.AddSingleton<PostgreSqlStorage>();
 
             _services = services;

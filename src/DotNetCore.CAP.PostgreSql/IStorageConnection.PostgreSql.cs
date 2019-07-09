@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace DotNetCore.CAP.PostgreSql
@@ -15,10 +16,12 @@ namespace DotNetCore.CAP.PostgreSql
     {
         private readonly CapOptions _capOptions;
 
-        public PostgreSqlStorageConnection(PostgreSqlOptions options, CapOptions capOptions)
+        public PostgreSqlStorageConnection(
+            IOptions<PostgreSqlOptions> options,
+            IOptions<CapOptions> capOptions)
         {
-            _capOptions = capOptions;
-            Options = options;
+            _capOptions = capOptions.Value;
+            Options = options.Value;
         }
 
         public PostgreSqlOptions Options { get; }

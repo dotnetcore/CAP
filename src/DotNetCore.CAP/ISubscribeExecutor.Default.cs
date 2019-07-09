@@ -11,6 +11,7 @@ using DotNetCore.CAP.Models;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
 {
@@ -30,7 +31,7 @@ namespace DotNetCore.CAP
 
         public DefaultSubscriberExecutor(
             ILogger<DefaultSubscriberExecutor> logger,
-            CapOptions options,
+            IOptions<CapOptions> options,
             IConsumerInvokerFactory consumerInvokerFactory,
             ICallbackMessageSender callbackMessageSender,
             IStateChanger stateChanger,
@@ -39,7 +40,7 @@ namespace DotNetCore.CAP
         {
             _selector = selector;
             _callbackMessageSender = callbackMessageSender;
-            _options = options;
+            _options = options.Value;
             _stateChanger = stateChanger;
             _connection = connection;
             _logger = logger;

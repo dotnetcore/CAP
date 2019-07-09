@@ -7,6 +7,7 @@ using Confluent.Kafka;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
@@ -16,14 +17,18 @@ namespace DotNetCore.CAP.Kafka
         private readonly ILogger _logger;
 
         public KafkaPublishMessageSender(
-            CapOptions options, IStateChanger stateChanger, IStorageConnection connection,
-            IConnectionPool connectionPool, ILogger<KafkaPublishMessageSender> logger)
+            ILogger<KafkaPublishMessageSender> logger, 
+            IOptions<CapOptions> options,
+            IStorageConnection connection,
+            IConnectionPool connectionPool, 
+            IStateChanger stateChanger)
             : base(logger, options, connection, stateChanger)
         {
             _logger = logger;
             _connectionPool = connectionPool;
-            ServersAddress = _connectionPool.ServersAddress;
         }
+
+        protected override string ServersAddress => _connectionPool.ServersAddress;
 
         public override async Task<OperateResult> PublishAsync(string keyName, string content)
         {

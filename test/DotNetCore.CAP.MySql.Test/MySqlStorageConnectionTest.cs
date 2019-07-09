@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace DotNetCore.CAP.MySql.Test
@@ -14,8 +15,8 @@ namespace DotNetCore.CAP.MySql.Test
 
         public MySqlStorageConnectionTest()
         {
-            var options = GetService<MySqlOptions>();
-            var capOptions = GetService<CapOptions>();
+            var options = GetService<IOptions<MySqlOptions>>();
+            var capOptions = GetService<IOptions<CapOptions>>();
             _storage = new MySqlStorageConnection(options, capOptions);
         }
 

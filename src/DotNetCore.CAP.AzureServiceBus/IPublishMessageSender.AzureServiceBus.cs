@@ -3,40 +3,45 @@
 
 using System;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor.States;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
     internal class AzureServiceBusPublishMessageSender : BasePublishMessageSender
     {
+        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+
         private readonly ILogger _logger;
-        private readonly ITopicClient _topicClient;
+        private readonly IOptions<AzureServiceBusOptions> _asbOptions;
+
+        private ITopicClient _topicClient;
 
         public AzureServiceBusPublishMessageSender(
             ILogger<AzureServiceBusPublishMessageSender> logger,
-            CapOptions options,
-            AzureServiceBusOptions asbOptions,
+            IOptions<CapOptions> options,
+            IOptions<AzureServiceBusOptions> asbOptions,
             IStateChanger stateChanger,
             IStorageConnection connection)
             : base(logger, options, connection, stateChanger)
         {
             _logger = logger;
-            ServersAddress = asbOptions.ConnectionString;
-
-            _topicClient = new TopicClient(
-                ServersAddress, 
-                asbOptions.TopicPath,
-                RetryPolicy.NoRetry);
+            _asbOptions = asbOptions;
         }
+
+        protected override string ServersAddress => _asbOptions.Value.ConnectionString;
 
         public override async Task<OperateResult> PublishAsync(string keyName, string content)
         {
             try
             {
+                Connect();
+
                 var contentBytes = Encoding.UTF8.GetBytes(content);
 
                 var message = new Message
@@ -57,6 +62,28 @@ namespace DotNetCore.CAP.AzureServiceBus
                 var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
 
                 return OperateResult.Failed(wrapperEx);
+            }
+        }
+
+        private void Connect()
+        {
+            if (_topicClient != null)
+            {
+                return;
+            }
+
+            _connectionLock.Wait();
+
+            try
+            {
+                if (_topicClient == null)
+                {
+                    _topicClient = new TopicClient(ServersAddress, _asbOptions.Value.TopicPath, RetryPolicy.NoRetry);
+                }
+            }
+            finally
+            {
+                _connectionLock.Release();
             }
         }
     }

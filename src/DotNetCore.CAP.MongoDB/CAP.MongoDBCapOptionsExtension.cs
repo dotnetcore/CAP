@@ -5,6 +5,7 @@ using System;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
@@ -25,18 +26,20 @@ namespace DotNetCore.CAP.MongoDB
             services.AddSingleton<IStorage, MongoDBStorage>();
             services.AddSingleton<IStorageConnection, MongoDBStorageConnection>();
 
-            services.AddScoped<ICapPublisher, MongoDBPublisher>();
-            services.AddScoped<ICallbackPublisher, MongoDBPublisher>();
+            services.AddSingleton<ICapPublisher, MongoDBPublisher>();
+            services.AddSingleton<ICallbackPublisher>(x => (MongoDBPublisher)x.GetService<ICapPublisher>());
+            services.AddSingleton<ICollectProcessor, MongoDBCollectProcessor>();
 
-            services.AddTransient<ICollectProcessor, MongoDBCollectProcessor>();
             services.AddTransient<CapTransactionBase, MongoDBCapTransaction>();
 
-            var options = new MongoDBOptions();
-            _configure?.Invoke(options);
-            services.AddSingleton(options);
+            services.Configure(_configure);
 
             //Try to add IMongoClient if does not exists
-            services.TryAddSingleton<IMongoClient>(new MongoClient(options.DatabaseConnection));
+            services.TryAddSingleton<IMongoClient>(x =>
+            {
+                var options = x.GetService<IOptions<MongoDBOptions>>().Value;
+                return new MongoClient(options.DatabaseConnection);
+            });
         }
     }
 }

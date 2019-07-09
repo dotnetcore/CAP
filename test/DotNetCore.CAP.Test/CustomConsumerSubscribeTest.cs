@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace DotNetCore.CAP.Test
@@ -48,10 +49,10 @@ namespace DotNetCore.CAP.Test
     {
         private readonly CapOptions _capOptions;
 
-        public MyConsumerServiceSelector(IServiceProvider serviceProvider, CapOptions capOptions)
-            : base(serviceProvider, capOptions)
+        public MyConsumerServiceSelector(IServiceProvider serviceProvider)
+            : base(serviceProvider)
         {
-            _capOptions = capOptions;
+            _capOptions = serviceProvider.GetService<IOptions<CapOptions>>().Value;
         }
 
         protected override IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(IServiceProvider provider)

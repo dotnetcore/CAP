@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
@@ -17,10 +18,13 @@ namespace DotNetCore.CAP.MongoDB
         private readonly IMongoDatabase _database;
         private readonly MongoDBOptions _options;
 
-        public MongoDBStorageConnection(CapOptions capOptions, MongoDBOptions options, IMongoClient client)
+        public MongoDBStorageConnection(
+            IOptions<CapOptions> capOptions,
+            IOptions<MongoDBOptions> options, 
+            IMongoClient client)
         {
-            _capOptions = capOptions;
-            _options = options;
+            _capOptions = capOptions.Value;
+            _options = options.Value;
             _client = client;
             _database = _client.GetDatabase(_options.DatabaseName);
         }

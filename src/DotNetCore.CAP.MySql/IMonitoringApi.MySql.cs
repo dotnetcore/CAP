@@ -10,6 +10,7 @@ using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.MySql
 {
@@ -18,10 +19,10 @@ namespace DotNetCore.CAP.MySql
         private readonly string _prefix;
         private readonly MySqlStorage _storage;
 
-        public MySqlMonitoringApi(IStorage storage, MySqlOptions options)
+        public MySqlMonitoringApi(IStorage storage, IOptions<MySqlOptions> options)
         {
             _storage = storage as MySqlStorage ?? throw new ArgumentNullException(nameof(storage));
-            _prefix = options?.TableNamePrefix ?? throw new ArgumentNullException(nameof(options));
+            _prefix = options.Value.TableNamePrefix ?? throw new ArgumentNullException(nameof(options));
         }
 
         public StatisticsDto GetStatistics()
@@ -126,7 +127,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
         {
             var sqlQuery = $"select count(Id) from `{_prefix}.{tableName}` where StatusName = @state";
 
-            var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
+            var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
             return count;
         }
 
@@ -169,7 +170,7 @@ select aggr.* from (
 
             var valuesMap = connection.Query<TimelineCounter>(
                     sqlQuery,
-                    new {keys = keyMaps.Keys, statusName})
+                    new { keys = keyMaps.Keys, statusName })
                 .ToDictionary(x => x.Key, x => x.Count);
 
             foreach (var key in keyMaps.Keys)

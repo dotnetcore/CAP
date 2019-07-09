@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -12,6 +13,8 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     internal sealed class RabbitMQConsumerClient : IConsumerClient
     {
+        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+
         private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly string _exchangeName;
         private readonly string _queueName;
@@ -23,14 +26,12 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public RabbitMQConsumerClient(string queueName,
             IConnectionChannelPool connectionChannelPool,
-            RabbitMQOptions options)
+            IOptions<RabbitMQOptions> options)
         {
             _queueName = queueName;
             _connectionChannelPool = connectionChannelPool;
-            _rabbitMQOptions = options;
+            _rabbitMQOptions = options.Value;
             _exchangeName = connectionChannelPool.Exchange;
-
-            InitClient();
         }
 
         public event EventHandler<MessageContext> OnMessageReceived;
@@ -46,6 +47,8 @@ namespace DotNetCore.CAP.RabbitMQ
                 throw new ArgumentNullException(nameof(topics));
             }
 
+            Connect();
+
             foreach (var topic in topics)
             {
                 _channel.QueueBind(_queueName, _exchangeName, topic);
@@ -54,6 +57,8 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
+            Connect();
+
             var consumer = new EventingBasicConsumer(_channel);
             consumer.Received += OnConsumerReceived;
             consumer.Shutdown += OnConsumerShutdown;
@@ -88,25 +93,39 @@ namespace DotNetCore.CAP.RabbitMQ
             _connection.Dispose();
         }
 
-        private void InitClient()
-        {
-            _connection = _connectionChannelPool.GetConnection();
-
-            _channel = _connection.CreateModel();
-
-            _channel.ExchangeDeclare(
-                _exchangeName,
-                RabbitMQOptions.ExchangeType,
-                true);
-
-            var arguments = new Dictionary<string, object>
-            {
-                {"x-message-ttl", _rabbitMQOptions.QueueMessageExpires}
-            };
-            _channel.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false, arguments: arguments);
-        }
-
         #region events
+
+        private void Connect()
+        {
+            if (_connection != null)
+            {
+                return;
+            }
+
+            _connectionLock.Wait();
+
+            try
+            {
+                if (_connection == null)
+                {
+                    _connection = _connectionChannelPool.GetConnection();
+
+                    _channel = _connection.CreateModel();
+
+                    _channel.ExchangeDeclare(_exchangeName, RabbitMQOptions.ExchangeType, true);
+
+                    var arguments = new Dictionary<string, object>
+                    {
+                        {"x-message-ttl", _rabbitMQOptions.QueueMessageExpires}
+                    };
+                    _channel.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false, arguments: arguments);
+                }
+            }
+            finally
+            {
+                _connectionLock.Release();
+            }
+        } 
 
         private void OnConsumerConsumerCancelled(object sender, ConsumerEventArgs e)
         {

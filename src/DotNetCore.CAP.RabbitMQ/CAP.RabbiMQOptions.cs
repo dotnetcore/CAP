@@ -6,6 +6,7 @@
 using System;
 using RabbitMQ.Client;
 
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class RabbitMQOptions

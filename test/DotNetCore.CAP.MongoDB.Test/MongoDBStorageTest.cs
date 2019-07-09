@@ -11,11 +11,11 @@ namespace DotNetCore.CAP.MongoDB.Test
         public void InitializeAsync_Test()
         {
             var names = MongoClient.ListDatabaseNames()?.ToList();
-            names.Should().Contain(MongoDBOptions.DatabaseName);
+            names.Should().Contain(MongoDBOptions.Value.DatabaseName);
 
             var collections = Database.ListCollectionNames()?.ToList();
-            collections.Should().Contain(MongoDBOptions.PublishedCollection);
-            collections.Should().Contain(MongoDBOptions.ReceivedCollection);
+            collections.Should().Contain(MongoDBOptions.Value.PublishedCollection);
+            collections.Should().Contain(MongoDBOptions.Value.ReceivedCollection);
         }
     }
 }

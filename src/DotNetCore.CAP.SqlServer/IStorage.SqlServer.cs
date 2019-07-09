@@ -11,6 +11,7 @@ using Dapper;
 using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.SqlServer
 {
@@ -23,14 +24,14 @@ namespace DotNetCore.CAP.SqlServer
         private readonly SqlServerOptions _options;
 
         public SqlServerStorage(ILogger<SqlServerStorage> logger,
-            CapOptions capOptions,
-            SqlServerOptions options,
+            IOptions<CapOptions> capOptions,
+            IOptions<SqlServerOptions> options,
             DiagnosticProcessorObserver diagnosticProcessorObserver)
         {
-            _options = options;
+            _options = options.Value;
             _diagnosticProcessorObserver = diagnosticProcessorObserver;
             _logger = logger;
-            _capOptions = capOptions;
+            _capOptions = capOptions.Value;
         }
 
         public IStorageConnection GetConnection()

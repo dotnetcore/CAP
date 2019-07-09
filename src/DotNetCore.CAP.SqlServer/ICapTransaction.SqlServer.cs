@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -23,9 +24,9 @@ namespace DotNetCore.CAP
 
         public SqlServerCapTransaction(
             IDispatcher dispatcher,
-            SqlServerOptions sqlServerOptions,
             IServiceProvider serviceProvider) : base(dispatcher)
         {
+            var sqlServerOptions = serviceProvider.GetService<IOptions<SqlServerOptions>>().Value;
             if (sqlServerOptions.DbContextType != null)
             {
                 _dbContext = serviceProvider.GetService(sqlServerOptions.DbContextType) as DbContext;
@@ -56,14 +57,14 @@ namespace DotNetCore.CAP
                 }
             }
 
-            var transactionKey = ((SqlConnection) dbTransaction.Connection).ClientConnectionId;
+            var transactionKey = ((SqlConnection)dbTransaction.Connection).ClientConnectionId;
             if (_diagnosticProcessor.BufferList.TryGetValue(transactionKey, out var list))
             {
                 list.Add(msg);
             }
             else
             {
-                var msgList = new List<CapPublishedMessage>(1) {msg};
+                var msgList = new List<CapPublishedMessage>(1) { msg };
                 _diagnosticProcessor.BufferList.TryAdd(transactionKey, msgList);
             }
         }
@@ -109,6 +110,7 @@ namespace DotNetCore.CAP
                     dbContextTransaction.Dispose();
                     break;
             }
+            DbTransaction = null;
         }
     }
 
@@ -149,7 +151,7 @@ namespace DotNetCore.CAP
 
             var dbTransaction = dbConnection.BeginTransaction();
             var capTransaction = publisher.Transaction.Begin(dbTransaction, autoCommit);
-            return (IDbTransaction) capTransaction.DbTransaction;
+            return (IDbTransaction)capTransaction.DbTransaction;
         }
 
         /// <summary>

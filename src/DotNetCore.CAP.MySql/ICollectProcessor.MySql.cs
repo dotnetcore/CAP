@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
@@ -18,11 +19,10 @@ namespace DotNetCore.CAP.MySql
         private readonly MySqlOptions _options;
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
-        public MySqlCollectProcessor(ILogger<MySqlCollectProcessor> logger,
-            MySqlOptions mysqlOptions)
+        public MySqlCollectProcessor(ILogger<MySqlCollectProcessor> logger, IOptions<MySqlOptions> mysqlOptions)
         {
             _logger = logger;
-            _options = mysqlOptions;
+            _options = mysqlOptions.Value;
         }
 
         public async Task ProcessAsync(ProcessingContext context)
@@ -44,7 +44,7 @@ namespace DotNetCore.CAP.MySql
                     {
                         removedCount = await connection.ExecuteAsync(
                             $@"DELETE FROM `{table}` WHERE ExpiresAt < @now limit @count;",
-                            new {now = DateTime.Now, count = MaxBatch});
+                            new { now = DateTime.Now, count = MaxBatch });
                     }
 
                     if (removedCount != 0)

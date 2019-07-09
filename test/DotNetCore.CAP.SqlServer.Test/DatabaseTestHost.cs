@@ -4,6 +4,7 @@ using System.Data.SqlClient;
 using Dapper;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Moq;
 
 namespace DotNetCore.CAP.SqlServer.Test
@@ -11,8 +12,8 @@ namespace DotNetCore.CAP.SqlServer.Test
     public abstract class DatabaseTestHost : IDisposable
     {
         protected ILogger<SqlServerStorage> Logger;
-        protected CapOptions CapOptions;
-        protected SqlServerOptions SqlSeverOptions;
+        protected IOptions<CapOptions> CapOptions;
+        protected IOptions<SqlServerOptions> SqlSeverOptions;
         protected DiagnosticProcessorObserver DiagnosticProcessorObserver;
 
         public bool SqlObjectInstalled;
@@ -20,11 +21,14 @@ namespace DotNetCore.CAP.SqlServer.Test
         protected DatabaseTestHost()
         {
             Logger = new Mock<ILogger<SqlServerStorage>>().Object;
-            CapOptions = new Mock<CapOptions>().Object;
-            SqlSeverOptions = new SqlServerOptions()
-            {
-                ConnectionString = ConnectionUtil.GetConnectionString()
-            };
+
+            var capOptions = new Mock<IOptions<CapOptions>>();
+            capOptions.Setup(x => x.Value).Returns(new CapOptions());
+            CapOptions = capOptions.Object;
+
+            var options = new Mock<IOptions<SqlServerOptions>>();
+            options.Setup(x => x.Value).Returns(new SqlServerOptions { ConnectionString = ConnectionUtil.GetConnectionString() });
+            SqlSeverOptions = options.Object;
 
             DiagnosticProcessorObserver = new DiagnosticProcessorObserver(new Mock<IDispatcher>().Object);
 

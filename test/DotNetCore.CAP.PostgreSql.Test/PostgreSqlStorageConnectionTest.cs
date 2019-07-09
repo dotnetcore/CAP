@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace DotNetCore.CAP.PostgreSql.Test
@@ -14,9 +15,9 @@ namespace DotNetCore.CAP.PostgreSql.Test
 
         public PostgreSqlStorageConnectionTest()
         {
-            var options = GetService<PostgreSqlOptions>();
-            var capOptions = GetService<CapOptions>();
-            _storage = new PostgreSqlStorageConnection(options,capOptions);
+            var options = GetService<IOptions<PostgreSqlOptions>>();
+            var capOptions = GetService<IOptions<CapOptions>>();
+            _storage = new PostgreSqlStorageConnection(options, capOptions);
         }
 
         [Fact]
@@ -74,13 +75,13 @@ namespace DotNetCore.CAP.PostgreSql.Test
             var insertedId = SnowflakeId.Default().NextId();
             var receivedMessage = new CapReceivedMessage
             {
-                Id= insertedId,
+                Id = insertedId,
                 Name = "PostgreSqlStorageConnectionTest",
                 Content = "",
                 Group = "mygroup",
                 StatusName = StatusName.Scheduled
             };
-           
+
             using (var connection = ConnectionUtil.CreateConnection())
             {
                 await connection.ExecuteAsync(sql, receivedMessage);

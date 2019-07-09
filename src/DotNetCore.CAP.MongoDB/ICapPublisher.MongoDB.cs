@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
@@ -16,10 +17,9 @@ namespace DotNetCore.CAP.MongoDB
         private readonly IMongoClient _client;
         private readonly MongoDBOptions _options;
 
-        public MongoDBPublisher(IServiceProvider provider, MongoDBOptions options)
-            : base(provider)
+        public MongoDBPublisher(IServiceProvider provider) : base(provider)
         {
-            _options = options;
+            _options = provider.GetService<IOptions<MongoDBOptions>>().Value;
             _client = ServiceProvider.GetRequiredService<IMongoClient>();
         }
 
@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.MongoDB
         protected override Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
             CancellationToken cancel = default(CancellationToken))
         {
-            var insertOptions = new InsertOneOptions {BypassDocumentValidation = false};
+            var insertOptions = new InsertOneOptions { BypassDocumentValidation = false };
 
             var collection = _client
                 .GetDatabase(_options.DatabaseName)
@@ -51,11 +51,10 @@ namespace DotNetCore.CAP.MongoDB
 
             if (NotUseTransaction)
             {
-
                 return collection.InsertOneAsync(store, insertOptions, cancel);
             }
 
-            var dbTrans = (IClientSessionHandle) transaction.DbTransaction;
+            var dbTrans = (IClientSessionHandle)transaction.DbTransaction;
             return collection.InsertOneAsync(dbTrans, store, insertOptions, cancel);
         }
     }

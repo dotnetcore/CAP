@@ -10,6 +10,7 @@ using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Models;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
@@ -20,7 +21,7 @@ namespace DotNetCore.CAP.MySql
 
         public MySqlPublisher(IServiceProvider provider) : base(provider)
         {
-            _options = provider.GetService<MySqlOptions>();
+            _options = provider.GetService<IOptions<MySqlOptions>>().Value;
         }
 
         public async Task PublishCallbackAsync(CapPublishedMessage message)

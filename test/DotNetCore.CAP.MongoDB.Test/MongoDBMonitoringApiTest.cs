@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.MongoDB.Test
         {
             _api = new MongoDBMonitoringApi(MongoClient, MongoDBOptions);
 
-            var collection = Database.GetCollection<PublishedMessage>(MongoDBOptions.PublishedCollection);
+            var collection = Database.GetCollection<PublishedMessage>(MongoDBOptions.Value.PublishedCollection);
             collection.InsertMany(new[]
             {
                 new PublishedMessage

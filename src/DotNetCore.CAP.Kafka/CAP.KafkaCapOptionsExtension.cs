@@ -21,9 +21,7 @@ namespace DotNetCore.CAP
         {
             services.AddSingleton<CapMessageQueueMakerService>();
 
-            var kafkaOptions = new KafkaOptions();
-            _configure?.Invoke(kafkaOptions);
-            services.AddSingleton(kafkaOptions);
+            services.Configure(_configure);
 
             services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
             services.AddSingleton<IPublishExecutor, KafkaPublishMessageSender>();

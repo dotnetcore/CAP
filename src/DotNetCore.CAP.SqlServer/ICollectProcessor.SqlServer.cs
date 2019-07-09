@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.SqlServer
 {
@@ -25,10 +26,10 @@ namespace DotNetCore.CAP.SqlServer
         private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
 
         public SqlServerCollectProcessor(ILogger<SqlServerCollectProcessor> logger,
-            SqlServerOptions sqlServerOptions)
+            IOptions<SqlServerOptions> sqlServerOptions)
         {
             _logger = logger;
-            _options = sqlServerOptions;
+            _options = sqlServerOptions.Value;
         }
 
         public async Task ProcessAsync(ProcessingContext context)

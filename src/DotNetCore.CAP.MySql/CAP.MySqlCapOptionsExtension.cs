@@ -4,8 +4,8 @@
 using System;
 using DotNetCore.CAP.MySql;
 using DotNetCore.CAP.Processor;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -24,39 +24,15 @@ namespace DotNetCore.CAP
             services.AddSingleton<CapStorageMarkerService>();
             services.AddSingleton<IStorage, MySqlStorage>();
             services.AddSingleton<IStorageConnection, MySqlStorageConnection>();
+            services.AddSingleton<ICapPublisher, MySqlPublisher>();
+            services.AddSingleton<ICallbackPublisher>(provider => (MySqlPublisher)provider.GetService<ICapPublisher>());
+            services.AddSingleton<ICollectProcessor, MySqlCollectProcessor>();
 
-            services.AddScoped<ICapPublisher, MySqlPublisher>();
-            services.AddScoped<ICallbackPublisher, MySqlPublisher>();
-
-            services.AddTransient<ICollectProcessor, MySqlCollectProcessor>();
             services.AddTransient<CapTransactionBase, MySqlCapTransaction>();
 
-            AddSingletionMySqlOptions(services);
-        }
-
-        private void AddSingletionMySqlOptions(IServiceCollection services)
-        {
-            var mysqlOptions = new MySqlOptions();
-
-            _configure(mysqlOptions);
-
-            if (mysqlOptions.DbContextType != null)
-            {
-                services.AddSingleton(x =>
-                {
-                    using (var scope = x.CreateScope())
-                    {
-                        var provider = scope.ServiceProvider;
-                        var dbContext = (DbContext) provider.GetService(mysqlOptions.DbContextType);
-                        mysqlOptions.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
-                        return mysqlOptions;
-                    }
-                });
-            }
-            else
-            {
-                services.AddSingleton(mysqlOptions);
-            }
-        }
+            //Add MySqlOptions
+            services.Configure(_configure);
+            services.AddSingleton<IConfigureOptions<MySqlOptions>, ConfigureMySqlOptions>();
+        } 
     }
 }

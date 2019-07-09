@@ -8,20 +8,21 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Dashboard;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace DotNetCore.CAP.PostgreSql
 {
     public class PostgreSqlStorage : IStorage
     {
-        private readonly CapOptions _capOptions;
+        private readonly IOptions<CapOptions> _capOptions;
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
-        private readonly PostgreSqlOptions _options;
+        private readonly IOptions<PostgreSqlOptions> _options;
 
         public PostgreSqlStorage(ILogger<PostgreSqlStorage> logger,
-            CapOptions capOptions,
-            PostgreSqlOptions options)
+            IOptions<CapOptions> capOptions,
+            IOptions<PostgreSqlOptions> options)
         {
             _options = options;
             _logger = logger;
@@ -45,9 +46,9 @@ namespace DotNetCore.CAP.PostgreSql
                 return;
             }
 
-            var sql = CreateDbTablesScript(_options.Schema);
+            var sql = CreateDbTablesScript(_options.Value.Schema);
 
-            using (var connection = new NpgsqlConnection(_options.ConnectionString))
+            using (var connection = new NpgsqlConnection(_options.Value.ConnectionString))
             {
                 await connection.ExecuteAsync(sql);
             }
@@ -72,7 +73,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         internal IDbConnection CreateAndOpenConnection()
         {
-            var connection = _existingConnection ?? new NpgsqlConnection(_options.ConnectionString);
+            var connection = _existingConnection ?? new NpgsqlConnection(_options.Value.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
             {

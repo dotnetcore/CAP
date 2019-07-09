@@ -39,6 +39,7 @@ namespace DotNetCore.CAP
         public override void Dispose()
         {
             (DbTransaction as IClientSessionHandle)?.Dispose();
+            DbTransaction = null;
         }
     }
 

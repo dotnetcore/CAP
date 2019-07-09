@@ -21,9 +21,7 @@ namespace DotNetCore.CAP
         {
             services.AddSingleton<CapMessageQueueMakerService>();
 
-            var azureServiceBusOptions = new AzureServiceBusOptions();
-            _configure?.Invoke(azureServiceBusOptions);
-            services.AddSingleton(azureServiceBusOptions);
+            services.Configure(_configure);
 
             services.AddSingleton<IConsumerClientFactory, AzureServiceBusConsumerClientFactory>();
             services.AddSingleton<IPublishExecutor, AzureServiceBusPublishMessageSender>();

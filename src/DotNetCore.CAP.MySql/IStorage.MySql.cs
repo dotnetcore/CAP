@@ -8,20 +8,22 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Dashboard;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
     public class MySqlStorage : IStorage
     {
-        private readonly CapOptions _capOptions;
+        private readonly IOptions<CapOptions> _capOptions;
+        private readonly IOptions<MySqlOptions> _options;
         private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
-        private readonly MySqlOptions _options;
 
-        public MySqlStorage(ILogger<MySqlStorage> logger,
-            MySqlOptions options,
-            CapOptions capOptions)
+        public MySqlStorage(
+            ILogger<MySqlStorage> logger,
+            IOptions<MySqlOptions> options, 
+            IOptions<CapOptions> capOptions)
         {
             _options = options;
             _capOptions = capOptions;
@@ -45,10 +47,10 @@ namespace DotNetCore.CAP.MySql
                 return;
             }
 
-            var sql = CreateDbTablesScript(_options.TableNamePrefix);
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            var sql = CreateDbTablesScript(_options.Value.TableNamePrefix);
+            using (var connection = new MySqlConnection(_options.Value.ConnectionString))
             {
-               await connection.ExecuteAsync(sql);
+                await connection.ExecuteAsync(sql);
             }
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
@@ -103,7 +105,7 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
 
         internal IDbConnection CreateAndOpenConnection()
         {
-            var connection = _existingConnection ?? new MySqlConnection(_options.ConnectionString);
+            var connection = _existingConnection ?? new MySqlConnection(_options.Value.ConnectionString);
 
             if (connection.State == ConnectionState.Closed)
             {

@@ -10,6 +10,7 @@ using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Models;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.PostgreSql
 {
@@ -18,9 +19,9 @@ namespace DotNetCore.CAP.PostgreSql
         private readonly PostgreSqlOptions _options;
         private readonly PostgreSqlStorage _storage;
 
-        public PostgreSqlMonitoringApi(IStorage storage, PostgreSqlOptions options)
+        public PostgreSqlMonitoringApi(IStorage storage, IOptions<PostgreSqlOptions> options)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _storage = storage as PostgreSqlStorage ?? throw new ArgumentNullException(nameof(storage));
         }
 
