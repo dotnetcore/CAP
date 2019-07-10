@@ -1,3 +1,7 @@
+<p align="center">
+  <img height="140" src="https://raw.githubusercontent.com/dotnetcore/CAP/master/docs/content/img/logo.svg?sanitize=true">
+</p>
+
 # CAP 　　　　　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md)
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/v8gfh6pe2u2laqoa/branch/master?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap/branch/master)
