@@ -1,3 +1,7 @@
+<p align="center">
+  <img height="140" src="https://raw.githubusercontent.com/dotnetcore/CAP/master/docs/content/img/logo.svg?sanitize=true">
+</p>
+
 # CAP 　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/CAP/blob/master/README.md)
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/develop.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/v8gfh6pe2u2laqoa?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap)
@@ -12,8 +16,6 @@ CAP 是一个基于 .NET Standard 的 C# 库，它是一种处理分布式事务
 
 你可以在这里看到[CAP 视频教程](https://www.cnblogs.com/savorboard/p/cap-video-1.html)，学习如何在项目中集成CAP。
 
-## 预览（OverView） 
-
 在我们构建 SOA 或者 微服务系统的过程中，我们通常需要使用事件来对各个服务进行集成，在这过程中简单的使用消息队列并不能保证数据的最终一致性，
 CAP 采用的是和当前数据库集成的本地消息表的方案来解决在分布式系统互相调用的各个环节可能出现的异常，它能够保证任何情况下事件消息都是不会丢失的。
 
@@ -21,7 +23,9 @@ CAP 采用的是和当前数据库集成的本地消息表的方案来解决在�
 
 这是CAP集在ASP.NET Core 微服务架构中的一个示意图：
 
-![cap.png](http://docs.dotnet-china.org/CAP/img/architecture.png)
+## 架构预览
+
+![architecture.png](https://raw.githubusercontent.com/dotnetcore/CAP/master/docs/content/img/architecture-new.png)
 
 > CAP 实现了 [eShop 电子书](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus) 中描述的发件箱模式
 
