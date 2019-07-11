@@ -17,12 +17,12 @@ copyright: Copyright &copy; 2017 <a href="https://github.com/dotnetcore">.NET Co
 theme:
   name: 'material'
   palette:
-    primary: 'purple'
+    primary: 'deep purple'
     accent: 'indigo'  
   language: 'en'
   include_sidebar: true
-  #logo: 'img/logo.png'
-  #favicon: 'assets/images/favicon.ico'
+  logo: 'img/logo.svg'
+  favicon: 'img/favicon.ico'
   feature:
     tabs: false  
   i18n:
