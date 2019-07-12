@@ -30,11 +30,6 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Represents the Azure Active Directory token provider for Azure Managed Service Identity integration.
         /// </summary>
-        public ITokenProvider ManagementTokenProvider { get; set; }
-
-        /// <summary>
-        /// Used to generate Service Bus connection strings
-        /// </summary>
-        public ServiceBusConnectionStringBuilder ConnectionStringBuilder { get; set; }
+        public ITokenProvider ManagementTokenProvider { get; set; } 
     }
 }
