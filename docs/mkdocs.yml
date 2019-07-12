@@ -1,5 +1,5 @@
 # Project information
-site_name: CAP Document
+site_name: CAP
 site_url: http://cap.dotnetcore.xyz
 site_description: Project documentation with Markdown.
 site_author: CAP Team
@@ -24,7 +24,7 @@ theme:
   logo: 'img/logo.svg'
   favicon: 'img/favicon.ico'
   feature:
-    tabs: false  
+    tabs: true  
   i18n:
     prev: 'Previous'
     next: 'Next'
@@ -44,7 +44,7 @@ markdown_extensions:
   - markdown.extensions.admonition
   - markdown.extensions.codehilite:
       guess_lang: true
-      linenums: true
+      linenums: false
   - markdown.extensions.def_list
   - markdown.extensions.footnotes
   - markdown.extensions.meta
@@ -71,57 +71,67 @@ markdown_extensions:
       custom_checkbox: true
   - pymdownx.tilde
 
-# nav:
-#     - Home: index.md
-#     - User Guide:
-#         - Getting Started: user-guide/getting-started.md
-#         - API Interface: user-guide/api-interface.md
-#         - Configuration: user-guide/configuration.md
-#         - Design Principle: user-guide/design.md
-#         - Implementation Mechanisms: user-guide/implementation.md
-#         - Distributed Transactions: user-guide/transaction.md
-#         - FAQ: user-guide/faq.md
-#     - 使用指南:
-#         - 快速开始: user-guide-cn/getting-started.md
-#         - API 接口: user-guide-cn/api-interface.md
-#         - 配置: user-guide-cn/configuration.md
-#         - 设计原理: user-guide-cn/design-principle.md
-#         - 实现: user-guide-cn/implementation.md
-#         - 分布式事务: user-guide-cn/transactions.md
-#         - FAQ: user-guide-cn/faq.md
-#     - About:
-#         - Release Notes: about/release-notes.md
-#         - Contributing: about/contributing.md
-#         - Contact Us: about/contact-us.md
-#         - License: about/license.md
 nav:
-    - Getting Stared:
-        - Quick Start: user-guide/cn/getting-started/quick-start.md
-        - Introduction: user-guide/cn/getting-started/introduction.md
-        - Contributing: user-guide/cn/getting-started/contributing.md    
-    - CAP:
-        - Configuration: user-guide/cn/cap/configuration.md
-        - Messaging: user-guide/cn/cap/messaging.md
-        - Sagas: user-guide/cn/cap/sagas.md
-        - Serialization: user-guide/cn/cap/serialization.md
-        - Transactions: user-guide/cn/cap/transactions.md
-        - Idempotence: user-guide/cn/cap/idempotence.md
-        - Upgrade Guides: user-guide/cn/cap/upgrade-guides.md
-        - License: user-guide/cn/cap/license.md
-    - Transports:
-        - General: user-guide/cn/transports/general.md
-        - RabbitMQ: user-guide/cn/transports/rabbitmq.md
-        - Kafka: user-guide/cn/transports/kafka.md
-        - Azure Service Bus: user-guide/cn/transports/azure-service-bus.md
-        - In-Memory Message Queue: user-guide/cn/transports/in-memory-queue.md
-    - Persistent:
-        - General: user-guide/cn/persistent/general.md
-        - SQL Server: user-guide/cn/persistent/sqlserver.md
-        - MySQL: user-guide/cn/persistent/mysql.md
-        - PostgreSql: user-guide/cn/persistent/postgresql.md
-        - MongoDB: user-guide/cn/persistent/mongodb.md
-        - In-Memory: user-guide/cn/persistent/in-memory-storage.md
-    - Samples:
-        - Github: user-guide/cn/samples/github.md
-        - eShopOnContainers: user-guide/cn/samples/eshoponcontainers.md
-        - FAQ: user-guide/cn/samples/faq.md
+    - Home: index.md
+    - Documentation:
+      - Getting Stared:
+          - Quick Start: user-guide/en/getting-started/quick-start.md
+          - Introduction: user-guide/en/getting-started/introduction.md
+          - Contributing: user-guide/en/getting-started/contributing.md    
+      - CAP:
+          - Configuration: user-guide/en/cap/configuration.md
+          - Messaging: user-guide/en/cap/messaging.md
+          - Sagas: user-guide/en/cap/sagas.md
+          - Serialization: user-guide/en/cap/serialization.md
+          - Transactions: user-guide/en/cap/transactions.md
+          - Idempotence: user-guide/en/cap/idempotence.md
+          - Upgrade Guides: user-guide/en/cap/upgrade-guides.md
+          - License: user-guide/en/cap/license.md
+      - Transports:
+          - General: user-guide/en/transports/general.md
+          - RabbitMQ: user-guide/en/transports/rabbitmq.md
+          - Apache Kafka®: user-guide/en/transports/kafka.md
+          - Azure Service Bus: user-guide/en/transports/azure-service-bus.md
+          - In-Memory Queue: user-guide/en/transports/in-memory-queue.md
+      - Persistent:
+          - General: user-guide/en/persistent/general.md
+          - SQL Server: user-guide/en/persistent/sqlserver.md
+          - MySQL: user-guide/en/persistent/mysql.md
+          - PostgreSql: user-guide/en/persistent/postgresql.md
+          - MongoDB: user-guide/en/persistent/mongodb.md
+          - In-Memory: user-guide/en/persistent/in-memory-storage.md
+      - Samples:
+          - Github: user-guide/en/samples/github.md
+          - eShopOnContainers: user-guide/en/samples/eshoponcontainers.md
+          - FAQ: user-guide/en/samples/faq.md
+    - 文档（中文）:
+      - 入门:
+          - 快速开始: user-guide/zh/getting-started/quick-start.md
+          - 介绍: user-guide/zh/getting-started/introduction.md
+          - 贡献: user-guide/zh/getting-started/contributing.md    
+      - CAP:
+          - 配置: user-guide/zh/cap/configuration.md
+          - 消息: user-guide/zh/cap/messaging.md
+          - Sagas: user-guide/zh/cap/sagas.md
+          - 序列化: user-guide/zh/cap/serialization.md
+          - 传输: user-guide/zh/cap/transactions.md
+          - 幂等性: user-guide/zh/cap/idempotence.md
+          - 升级指导: user-guide/zh/cap/upgrade-guides.md
+          - License: user-guide/zh/cap/license.md
+      - 传输:
+          - 简介: user-guide/zh/transports/general.md
+          - RabbitMQ: user-guide/zh/transports/rabbitmq.md
+          - Apache Kafka®: user-guide/zh/transports/kafka.md
+          - Azure Service Bus: user-guide/zh/transports/azure-service-bus.md
+          - In-Memory Queue: user-guide/zh/transports/in-memory-queue.md
+      - 持久化:
+          - 简介: user-guide/zh/persistent/general.md
+          - SQL Server: user-guide/zh/persistent/sqlserver.md
+          - MySQL: user-guide/zh/persistent/mysql.md
+          - PostgreSql: user-guide/zh/persistent/postgresql.md
+          - MongoDB: user-guide/zh/persistent/mongodb.md
+          - In-Memory: user-guide/zh/persistent/in-memory-storage.md
+      - 示例:
+          - Github: user-guide/zh/samples/github.md
+          - eShopOnContainers: user-guide/zh/samples/eshoponcontainers.md
+          - FAQ: user-guide/zh/samples/faq.md
