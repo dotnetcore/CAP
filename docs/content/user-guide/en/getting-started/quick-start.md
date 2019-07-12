@@ -1,23 +1,23 @@
-# 快速开始
+# Quick Start
 
-了解如何使用 CAP 构建微服务事件总线架构，它比直接集成消息队列提供了哪些优势，它提供了哪些开箱即用的功能。
+Learn how to build a microservices event bus architecture using CAP, which offers advantages over direct integration of message queues, and what out-of-the-box features it provides.
 
-## 安装
+## Installation
 
 ```powershell
 PM> Install-Package DotNetCore.CAP
 ```
 
-## 在 Asp.Net Core 中集成
+##  Integrated in Asp.Net Core
 
-以便于快速启动，我们使用基于内存的事件存储和消息队列。
+For quick start, we use memory-based event storage and message transport.
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.InMemoryStorage
 PM> Install-Package Savorboard.CAP.InMemoryMessageQueue
 ```
 
-在 `Startup.cs` 中，添加以下配置：
+In `Startup.cs` ，add the following configuration:
 
 ```c#
 public void ConfigureServices(IServiceCollection services)
@@ -30,7 +30,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-## 发送消息
+## Publish Message
 
 ```c#
 public class PublishController : Controller
@@ -45,7 +45,7 @@ public class PublishController : Controller
 }
 ```
 
-## 处理消息
+## Process Message
 
 ```C#
 public class ConsumerController : Controller
@@ -59,6 +59,6 @@ public class ConsumerController : Controller
 }
 ```
 
-## 摘要
+## Summary
 
-相对于直接集成消息队列，异步消息传递最强大的优势之一是可靠性，系统的一个部分中的故障不会传播，也不会导致整个系统崩溃。 在 CAP 内部会将消息进行存储，以保证消息的可靠性，并配合重试等策略以达到各个服务之间的数据最终一致性。
+One of the most powerful advantages of asynchronous messaging over direct integrated message queues is reliability, where failures in one part of the system do not propagate or cause the entire system to crash. Messages are stored inside the CAP to ensure the reliability of the message, and strategies such as retry are used to achieve the final consistency of data between services.
