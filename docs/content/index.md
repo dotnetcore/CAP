@@ -9,14 +9,14 @@ In the process of building an SOA or MicroService system, we usually need to use
 You can also use the CAP as an EventBus. The CAP provides a simpler way to implement event publishing and subscriptions. You do not need to inherit or implement any interface during the process of subscription and sending.
 
 !!! Tip "CAP implements the Outbox Pattern described in the [eShop ebook](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus)"
-    <img src="https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/media/image24.png">
+    <img src="img/architecture-eshop.png">
 
     > Atomicity when publishing events to the event bus with a worker microservice
 
 
-For detailed instructions see the [getting started guide][1].
+For detailed instructions see the [Getting Started Guide][1].
 
-  [1]: user-guide/getting-started.md
+  [1]: user-guide/en/getting-started.md
 
 ## Contributing
 

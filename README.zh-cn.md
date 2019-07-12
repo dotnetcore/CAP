@@ -12,9 +12,9 @@
 
 CAP 是一个基于 .NET Standard 的 C# 库，它是一种处理分布式事务的解决方案，同样具有 EventBus 的功能，它具有轻量级、易使用、高性能等特点。
 
-你可以在这里[CAP docs](http://cap.dotnetcore.xyz)看到更多详细资料。
+你可以在这里 [CAP docs](http://cap.dotnetcore.xyz) 看到更多详细资料。
 
-你可以在这里看到[CAP 视频教程](https://www.cnblogs.com/savorboard/p/cap-video-1.html)，学习如何在项目中集成CAP。
+你可以在这里看到 [CAP 视频教程](https://www.cnblogs.com/savorboard/p/cap-video-1.html)，学习如何在项目中集成CAP。
 
 在我们构建 SOA 或者 微服务系统的过程中，我们通常需要使用事件来对各个服务进行集成，在这过程中简单的使用消息队列并不能保证数据的最终一致性，
 CAP 采用的是和当前数据库集成的本地消息表的方案来解决在分布式系统互相调用的各个环节可能出现的异常，它能够保证任何情况下事件消息都是不会丢失的。
@@ -25,7 +25,7 @@ CAP 采用的是和当前数据库集成的本地消息表的方案来解决在�
 
 ## 架构预览
 
-![architecture.png](https://raw.githubusercontent.com/dotnetcore/CAP/master/docs/content/img/architecture-new.png)
+![architecture.png](https://cap.dotnetcore.xyz/img/architecture-new.png)
 
 > CAP 实现了 [eShop 电子书](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus) 中描述的发件箱模式
 

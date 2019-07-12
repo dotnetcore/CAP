@@ -18,7 +18,7 @@ You can also use the CAP as an EventBus. The CAP provides a simpler way to imple
 
 ## Architecture overview
 
-![cap.png](https://raw.githubusercontent.com/dotnetcore/CAP/master/docs/content/img/architecture-new.png)
+![cap.png](https://cap.dotnetcore.xyz/img/architecture-new.png)
 
 > CAP implements the Outbox Pattern described in the [eShop ebook](https://docs.microsoft.com/en-us/dotnet/standard/microservices-architecture/multi-container-microservice-net-applications/subscribe-events#designing-atomicity-and-resiliency-when-publishing-to-the-event-bus).
 
