@@ -16,7 +16,7 @@ You can also use the CAP as an EventBus. The CAP provides a simpler way to imple
 
 For detailed instructions see the [Getting Started Guide][1].
 
-  [1]: user-guide/en/getting-started.md
+  [1]: user-guide/en/getting-started/quick-start.md
 
 ## Contributing
 
