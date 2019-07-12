@@ -1,5 +1,5 @@
 <p align="center">
-  <img height="140" src="https://raw.githubusercontent.com/dotnetcore/CAP/master/docs/content/img/logo.svg?sanitize=true">
+  <img height="140" src="https://cap.dotnetcore.xyz/img/logo.svg">
 </p>
 
 # CAP 　　　　　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md)
