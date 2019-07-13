@@ -1,8 +1,8 @@
 # Azure Service Bus
 
-Azure 服务总线是一种多租户云消息服务，可用于在应用程序和服务之间发送信息。 异步操作可实现灵活的中转消息传送、结构化的先进先出 (FIFO) 消息传送以及发布/订阅功能。
+Microsoft Azure Service Bus is a fully managed enterprise integration message broker. Service Bus is most commonly used to decouple applications and services from each other, and is a reliable and secure platform for asynchronous data and state transfer. 
 
-CAP 支持使用 Azure Service Bus 作为消息传输器。
+CAP supports Azure Service Bus as a message transporter.
 
 ## Configuration
 

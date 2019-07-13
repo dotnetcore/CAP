@@ -15,10 +15,10 @@ CAP supports several transport methods:
 
  🏳‍🌈  | RabbitMQ | Kafka | Azure Service Bus | In-Memory
 :--   |   :--:    | :--: | :--:               | :--  :
-**定位** | 可靠消息传输 | 实时数据处理 | 云 | 内存型，测试
-**分布式**   | ✔   | ✔    | ✔ |❌
-**持久化** | ✔ | ✔ | ✔ | ❌
-**性能**  |  Medium  |  High | Medium | High
+**Positioning** | Reliable message transmission | Real time data processing | Cloud | In-Memory, testing
+**Distributed**   | ✔   | ✔    | ✔ |❌
+**Persistence** | ✔ | ✔ | ✔ | ❌
+**Performance**  |  Medium  |  High | Medium | High
 
 
 > `Azure Service Bus` vs `RabbitMQ` :  

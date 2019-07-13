@@ -1,11 +1,11 @@
 # MySQL
 
-MySQL 是一个开源的关系型数据库，你可以使用 MySQL 来作为 CAP 消息的持久化。
+MySQL is an open-source relational database management system. CAP has supported MySQL as persistent. 
 
 ## Configuration
 
-要使用 MySQL 存储，你需要从 NuGet 安装以下扩展包：
-
+To use MySQL storage, you need to install the following extensions from NuGet:
+ 
 ```ps
 
 Install-Package DotNetCore.CAP.MySql
@@ -35,8 +35,8 @@ public void ConfigureServices(IServiceCollection services)
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-TableNamePrefix | Cap表名前缀 | string | cap 
-ConnectionString | 数据库连接字符串 | string | null
+TableNamePrefix | CAP table name prefix | string | cap 
+ConnectionString | Database connection string | string | null
 
 ## Publish with transaction
 

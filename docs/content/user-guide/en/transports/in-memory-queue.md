@@ -1,18 +1,17 @@
 # In-Memory Queue
 
-In Memory Queue 为基于内存的消息队列，该扩展由 [社区](https://github.com/yang-xiaodong/Savorboard.CAP.InMemoryMessageQueue) 进行提供。
+In Memory Queue is a memory-based message queue provided by [Community](https://github.com/yang-xiaodong/Savorboard.CAP.InMemoryMessageQueue).
 
-## 配置
+## Configuration
 
-要使用 In Memory Queue 作为消息传输器，你需要从 NuGet 安装以下扩展包：
+To use In Memory Queue as a message transporter, you need to install the following extensions from NuGet:
 
 ```shell
 
 Install-Package Savorboard.CAP.InMemoryMessageQueue
 
 ```
-
-然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于内存的配置项。
+Then you can add memory-based configuration items to the `ConfigureServices` method of `Startup.cs`.
 
 ```csharp
 

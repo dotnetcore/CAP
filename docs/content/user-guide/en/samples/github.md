@@ -1,5 +1,5 @@
-# Github 上的示例
+# Github Samples
 
-你可以在下面的地址找到相关示例代码：
+You can find the sample code at Github repository :
 
 https://github.com/dotnetcore/CAP/tree/master/samples

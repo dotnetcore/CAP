@@ -50,6 +50,7 @@ PublishedCollection | Database published message collection name | string | cap.
 
 The following example shows how to leverage CAP and MongoDB for local transaction integration.
 
+
 ```csharp
 
 //NOTE: Before your test, your need to create database and collection at first.

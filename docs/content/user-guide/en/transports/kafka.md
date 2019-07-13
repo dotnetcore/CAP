@@ -1,12 +1,12 @@
 # Apache Kafka®
 
-[Apache Kafka®](https://kafka.apache.org/) 是一个开源流处理软件平台，由 LinkedIn 开发并捐赠给 Apache Software Foundation，用 Scala 和 Java 编写。
- 
-CAP 支持使用 Apache Kafka® 作为消息传输器。
+[Apache Kafka®](https://kafka.apache.org/)  is an open-source stream-processing software platform developed by LinkedIn and donated to the Apache Software Foundation, written in Scala and Java.
+
+CAP has supported Kafka® as message transporter. 
 
 ## Configuration
 
-要使用 Kafka 作为消息传输器，你需要从 NuGet 安装以下扩展包：
+To use Kafka transporter, you need to install the following extensions from NuGet:
 
 ```shell
 
@@ -14,7 +14,7 @@ Install-Package DotNetCore.CAP.Kafka
 
 ```
 
-然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于内存的配置项。
+Then you can add memory-based configuration items to the `ConfigureServices` method of `Startup.cs`.
 
 ```csharp
 
@@ -35,18 +35,16 @@ public void ConfigureServices(IServiceCollection services)
 
 #### Kafka Options
 
-CAP 直接对外提供的 Kafka 配置参数如下：
+The Kafka configuration parameters provided directly by the CAP are as follows:
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-Servers | Broker 地址 | string | 
-ConnectionPoolSize | 用户名 | int | 10
-
+Servers | Broker server address | string | 
+ConnectionPoolSize | connection pool size | int | 10
 
 #### Kafka MainConfig Options
 
-如果你需要 **更多** 原生 Kakfa 相关的配置项，可以通过 `MainConfig` 配置项进行设定：
-
+If you need **more** native Kakfa related configuration items, you can set it with the `MainConfig` configuration option:
 
 ```csharp
 services.AddCap(capOptions => 
@@ -59,6 +57,6 @@ services.AddCap(capOptions =>
 });
 ```
 
-MainConfig 为配置字典，你可以通过以下链接找到其支持的配置项列表。
+`MainConfig` is a configuration dictionary, you can find a list of supported configuration items through the following link.
 
 [https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)

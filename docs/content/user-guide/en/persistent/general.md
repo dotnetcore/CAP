@@ -1,30 +1,33 @@
 # General
 
-CAP 需要使用具有持久化功能的存储介质来存储事件消息，例如通过数据库或者其他NoSql设施。CAP 使用这种方式来应对一切环境或者网络异常导致消息丢失的情况，消息的可靠性是分布式事务的基石，所以在任何情况下消息都不能丢失。
+CAP need to use storage media with persistence capabilities to store event messages, such as through databases or other NoSql facilities. CAP uses this approach to deal with the loss of messages in all environments or network anomalies. The reliability of messages is the cornerstone of distributed transactions, so messages cannot be lost under any circumstances.
 
 ## Persistent
 
 ### Before sent
 
-在消息进入到消息队列之前，CAP使用本地数据库表对消息进行持久化，这样可以保证当消息队列出现异常或者网络错误时候消息是没有丢失的。
+Before the message enters the message queue, the CAP uses the local database table to persist the message, which ensures that the message is not lost when the message queue is abnormal or a network error occurs.
 
-为了保证这种机制的可靠性，CAP使用和业务代码相同的数据库事务来保证业务操作和CAP的消息在持久化的过程中是强一致的。也就是说在进行消息持久化的过程中，任何一方发生异常情况数据库都会进行回滚操作。
+To ensure the reliability of this mechanism, CAP uses the same database transactions as the business code to ensure that business operations and CAP messages are consistent in the persistence process. That is to say, in the process of message persistence, the database will be rolled back when any one of the exceptions occurs.
 
 ###  After sent
 
-消息进入到消息队列之后，CAP会启动消息队列的持久化功能，我们需要说明一下在 RabbitMQ 和 Kafka 中CAP的消息是如何持久化的。
+After the message enters the message queue, the CAP will start the persistence function of the message queue. We need to explain how the CAP message is persisted in RabbitMQ and Kafka.
 
-针对于 RabbitMQ 中的消息持久化，CAP 使用的是具有消息持久化功能的消费者队列，但是这里面可能有例外情况，参加 2.2.1 章节。
+For message persistence in RabbitMQ, CAP uses a consumer queue with message persistence, but there may be exceptions here.
 
-由于 Kafka 天生设计的就是使用文件进行的消息持久化，在所以在消息进入到Kafka之后，Kafka会保证消息能够正确被持久化而不丢失。
+!!! info "Ready for production?"
+    By default, queues registered by CAP in RabbitMQ are persistent. When used in a production environment, we recommend that you start all consumers once to create the queues with persistence, which ensures that all queues are created before the message is sent.
+
+Since Kafka is born with message persistence using files, Kafka will ensure that messages are properly persisted without loss after the message enters Kafka.
 
 ## Storage
 
-在 CAP 启动后，会向持久化介质中生成两个表，默认情况下名称为：`Cap.Published` `Cap.Received`。
+After the CAP started, two tables are generated into the persistent, by default the name is `Cap.Published` and `Cap.Received`.
 
 ### Storage Data Structure
 
-**Published** 表结构：
+Table structure of **Published** :
 
 NAME | DESCRIPTION | TYPE
 :---|:---|:---
@@ -36,8 +39,8 @@ Added | Added Time | DateTime
 ExpiresAt | Expire time | DateTime
 Retries | Retry times | int
 StatusName | Status Name | string
-
-**Received** 表结构：
+ 
+Table structure of **Received** :
 
 NAME | DESCRIPTION | TYPE
 :---|:---|:---
@@ -50,16 +53,18 @@ Added | Added Time | DateTime
 ExpiresAt | Expire time | DateTime
 Retries | Retry times | int
 StatusName | Status Name | string
-
+ 
 ### Wapper Object
 
-CAP 在进行消息发送到时候，会对原始消息对象进行一个二次包装存储到 `Content` 字段中，以下为包装 Content 的 Message 对象数据结构：
+When the CAP sends a message, it will store the original message object in a second package in the `Content` field. 
+
+The following is the **Wapper Object** data structure of Content field.
 
 NAME | DESCRIPTION | TYPE
 :---|:---|:---
-Id	| CAP生成的消息编号	| string
-Timestamp |	消息创建时间 |	string
-Content |	内容 |	string
-CallbackName |	回调的订阅者名称 | string
+Id	| Message Id	| string
+Timestamp |	Message created time |	string
+Content |	Message content |	string
+CallbackName |	Consumer callback topic name | string
 
-其中 Id 字段，CAP 采用的 MongoDB 中的 ObjectId 分布式Id生成算法生成。
+The `Id` field is generate using the mongo [objectid algorithm](https://www.mongodb.com/blog/post/generating-globally-unique-identifiers-for-use-with-mongodb).

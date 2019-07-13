@@ -10,6 +10,6 @@ eShopOnContainers is a sample application written in C# running on .NET Core usi
 
 ## eShopOnContainers with CAP
 
-你可以在下面的地址看到如何在 eShopOnContainers 中使用 CAP。
+You can see how to use caps in eShopOnContainers at the Github repository.
 
 https://github.com/yang-xiaodong/eShopOnContainers
