@@ -29,4 +29,4 @@ If you have any question or problems, please report them on the CAP repository:
 
 ## License
 
-CAP is licensed under the [MIT license](https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt).
+CAP is licensed under the [MIT license](about/license.md).

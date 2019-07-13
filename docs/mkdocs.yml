@@ -85,8 +85,6 @@ nav:
           - Serialization: user-guide/en/cap/serialization.md
           - Transactions: user-guide/en/cap/transactions.md
           - Idempotence: user-guide/en/cap/idempotence.md
-          - Upgrade Guides: user-guide/en/cap/upgrade-guides.md
-          - License: user-guide/en/cap/license.md
       - Transports:
           - General: user-guide/en/transports/general.md
           - RabbitMQ: user-guide/en/transports/rabbitmq.md
@@ -100,6 +98,9 @@ nav:
           - PostgreSql: user-guide/en/persistent/postgresql.md
           - MongoDB: user-guide/en/persistent/mongodb.md
           - In-Memory: user-guide/en/persistent/in-memory-storage.md
+      - Monitoring:
+          - Dashboard: user-guide/en/monitoring/dashboard.md
+          - Diagnostics: user-guide/en/monitoring/diagnostics.md
       - Samples:
           - Github: user-guide/en/samples/github.md
           - eShopOnContainers: user-guide/en/samples/eshoponcontainers.md
@@ -115,9 +116,7 @@ nav:
           - Sagas: user-guide/zh/cap/sagas.md
           - 序列化: user-guide/zh/cap/serialization.md
           - 传输: user-guide/zh/cap/transactions.md
-          - 幂等性: user-guide/zh/cap/idempotence.md
-          - 升级指导: user-guide/zh/cap/upgrade-guides.md
-          - License: user-guide/zh/cap/license.md
+          - 幂等性: user-guide/zh/cap/idempotence.md          
       - 传输:
           - 简介: user-guide/zh/transports/general.md
           - RabbitMQ: user-guide/zh/transports/rabbitmq.md
@@ -131,7 +130,17 @@ nav:
           - PostgreSql: user-guide/zh/persistent/postgresql.md
           - MongoDB: user-guide/zh/persistent/mongodb.md
           - In-Memory: user-guide/zh/persistent/in-memory-storage.md
+      - 监控:
+          - Consul: user-guide/zh/monitoring/consul.md
+          - Dashboard: user-guide/zh/monitoring/dashboard.md
+          - Diagnostics: user-guide/zh/monitoring/diagnostics.md
+          - 健康检查: user-guide/zh/monitoring/health-checks.md
+          - Metrics: user-guide/zh/monitoring/metrics.md
       - 示例:
           - Github: user-guide/zh/samples/github.md
           - eShopOnContainers: user-guide/zh/samples/eshoponcontainers.md
           - FAQ: user-guide/zh/samples/faq.md
+    - About:
+      - Contact Us: about/contact-us.md
+      - Release Notes: about/release-notes.md
+      - License: about/license.md
