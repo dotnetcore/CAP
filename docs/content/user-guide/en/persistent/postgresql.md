@@ -2,7 +2,7 @@
 
 PostgreSQL 是一个开源的关系型数据库，它已经变得越来越流行，你可以使用 Postgre SQL 来作为 CAP 消息的持久化。
 
-## 配置
+## Configuration
 
 要使用 PostgreSQL 存储，你需要从 NuGet 安装以下扩展包：
 

@@ -1,16 +1,16 @@
 # In-Memory Storage
 
-内存消息的持久化存储常用于开发和测试环境，如果使用基于内存的存储则你会失去本地事务消息可靠性保证。
+Persistent storage of memory messages is often used in development and test environments, and if you use memory-based storage you lose the reliability of local transaction messages.
 
-## 配置
+## Configuration
 
-如果要使用内存存储，你需要从 NuGet 安装以下扩展包：
+To use in-memory storage, you need to install the following extensions from NuGet:
 
-```
+```ps
 Install-Package DotNetCore.CAP.InMemoryStorage
 ```
 
-然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于内存的配置项。
+Next, add configuration items to the `ConfigureServices` method of `Startup.cs`.
 
 ```csharp
 
@@ -27,10 +27,8 @@ public void ConfigureServices(IServiceCollection services)
 
 ```
 
-内存中的发送成功消息，CAP 将会每 5分钟 进行一次清理。
-
+The successful message in memory, the CAP will be cleaned **every 5 minutes**.
 
 ## Publish with transaction
 
-In-Memory 存储 **不支持** 事务方式发送消息。
-
+In-Memory Storage **Not supported** Transaction mode to send messages.

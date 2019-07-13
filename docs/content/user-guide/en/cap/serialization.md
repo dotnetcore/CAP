@@ -1,12 +1,12 @@
-# 序列化
+# Serialization
 
-CAP 目前还不支持消息本身的序列化，在将消息发送到消息队列之前 CAP 使用 json 对消息对象进行序列化。
+CAP does not currently support serialization for transport messages, and CAP uses json to serialize message objects before sending them to the transport.
 
-## 内容序列化
+## Content Serialization
 
-CAP 支持对消息的 Content 字段进行序列化，你可以自定义 `IContentSerializer` 接口来做到这一点。
+The CAP supports serializing the Message's Content field, which you can do by customizing the `IContentSerializer` interface.
 
-目前由于消息对象需要进行数据库存储，所以只支持 string 的序列化和反序例化。
+Currently, since the message object needs to be stored in the database, only the serialization and reverse ordering of `string` are supported.
 
 ```csharp
 
@@ -26,13 +26,21 @@ class MyContentSerializer : IContentSerializer
 }
 ```
 
-## 消息适配器
+Configure the custom `MyContentSerializer` to the service.
 
-在异构系统中，有时候需要和其他系统进行通讯，但是其他系统使用的消息对象可能和 CAP 的[**包装器对象**](../persistent/general.md#_7)不一样，这个时候就需要对消息进行自定义适配。
+```csharp
 
-CAP 提供了 `IMessagePacker` 接口用于对 [**包装器对象**](../persistent/general.md#_7) 进行自定义，自定义的 MessagePacker 通常是将 `CapMessage` 进行打包和解包操作，在这个过程中可以添加自己的业务对象。
+services.AddCap(x =>{  }).AddContentSerializer<MyContentSerializer>();
 
-使用方法：
+```
+
+## Message Adapter
+
+In heterogeneous systems, sometimes you need to communicate with other systems, but other systems use message objects that may be different from CAP's [**Wrapper Object**](../persistent/general.md#_7). This time maybe you need to customize the message wapper.
+
+The CAP provides the `IMessagePacker` interface for customizing the [**Wrapper Object**](../persistent/general.md#_7). The custom MessagePacker usually packs and unpacks the `CapMessage` In this process you can add your own business objects.
+
+Usage :
 
 ```csharp
 
@@ -72,7 +80,7 @@ class MyMessagePacker : IMessagePacker
 }
 ```
 
-接下来，配置自定义的 `MyMessagePacker` 到服务中。
+Next, configure the custom `MyMessagePacker` to the service.
 
 ```csharp
 

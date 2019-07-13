@@ -1,95 +1,97 @@
-# 配置
+# Configuration
 
-默认情况下，你在向IoC容器中注册CAP服务的时候指定配置。
+By default, you can specify the configuration when you register the CAP service into the IoC container for ASP.NET Core project.
 
 ```c#
-services.AddCap(config=> {
+services.AddCap(config=> 
+{
     // config.XXX 
 });
 ```
 
-其中 `services` 代表的是 `IServiceCollection` 接口对象，它位于 `Microsoft.Extensions.DependencyInjection` 下面。 
+The `services` is `IServiceCollection` interface，which is under the `Microsoft.Extensions.DependencyInjection`.
 
-如果你不想使用微软的IoC容器，那么你可以查看 [ASP.NET Core 这里的文档](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.2#default-service-container-replacement) 来了解如何替换默认的容器实现。
+If you don't want to use Microsoft's IoC container, you can view ASP.NET Core documentation [here](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.2#default-service-container-replacement) to learn how to replace the default container implementation.
 
-## 什么是最低配置？
+## What is the minimum configuration?
 
-最简单的回答就是，至少你要配置一个消息队列和一个事件存储，如果你想快速开始你可以使用下面的配置：
+The simplest answer is that at least you have to configure a transport and a storage. If you want to get started quickly you can use the following configuration:
 
 ```C#
-services.AddCap(config => 
+services.AddCap(capOptions => 
 {
-     config.UseInMemoryQueue();
-     config.UseInmemoryStorage();
+     capOptions.UseInMemoryQueue();
+     capOptions.UseInmemoryStorage();
 });
 ```
 
-有关具体的消息队列的配置和存储的配置，你可以查看 Transports 章节和 Persistent 章节中具体组件提供的配置项。
+For specific transport and storage configuration, you can view the configuration items provided by the specific components in the [Transports](../transports/general.md) section and the [Persistent](../persistent/general.md) section.
 
-## CAP 中的自定义配置
+## Custom configuration
 
-在 `AddCap` 中 `CapOptions` 对象是用来存储配置相关信息，默认情况下它们都具有一些默认值，有些时候你可能需要自定义。
+The `CapOptions` is used to store configuration information. By default they have the default values, and sometimes you may need to customize them.
 
 #### DefaultGroup
 
-默认值：cap.queue.{程序集名称}
+> Default: cap.queue.{assembly name}
 
-默认的消费者组的名字，在不同的 Transports 中对应不同的名字，可以通过自定义此值来自定义不同 Transports 中的名字，以便于查看。
+The default consumer group name, corresponding to different names in different Transports, you can customize this value to customize the names in Transports for easy viewing.
 
-> 在 RabbitMQ 中映射到 [Queue Names](https://www.rabbitmq.com/queues.html#names)。  
-> 在 Apache Kafka 中映射到 Topic Name。  
-> 在 Azure Service Bus 中映射到 Subscription Name。  
+!!! info "Mapping"
+    Map to [Queue Names](https://www.rabbitmq.com/queues.html#names) in RabbitMQ.  
+    Map to Topic Name in Apache Kafka.  
+    Map to Subscription Name in Azure Service Bus.  
 
 #### Version
 
-默认值：v1
+> Default: v1
 
-这是在CAP v2.4 版本中引入的新配置项，用于给消息指定版本来隔离不同版本服务的消息，常用于A/B测试或者多服务版本的场景。以下是其应用场景：
+This is a new configuration item introduced in the CAP v2.4 version. It is used to specify a version of a message to isolate messages of different versions of the service. It is often used in A/B testing or multi-service version scenarios. The following is its application scenario:
 
-!!! info "业务快速迭代，需要向前兼容"
-    由于业务的快速迭代，在各个服务集成的过程中，消息的数据结构并不是固定不变的，有些时候我们为了适应新引入的需求，会添加或者修改一些数据结构。如果你是一套全新的系统这没有什么问题，但是如果你的系统已经部署到生产环境了并且正在服务客户，这就会导致新的功能在上线的时候和旧的数据结构发生不兼容，那么这些改变可能会导致出现严重的问题，要想解决这个问题，只能把消息队列和持久化的消息全部清空，然后才能启动应用程序，这对于生产环境来说显然是致命的。
+!!! info "Business Iterative and compatible"
+    Due to the rapid iteration of services, the data structure of the message is not fixed during each service integration process. Sometimes we add or modify certain data structures to accommodate the newly introduced requirements. If you're a brand new system, there's no problem, but if your system is deployed to a production environment and serves customers, this will cause new features to be incompatible with the old data structure when they go online, and then these changes can cause serious problems. To work around this issue, you can only clean up message queues and persistent messages before starting the application, which is obviously fatal for production environments.
 
-!!! info "多个版本的服务端"
-    有些时候，App的服务端需要提供多套接口，来支持不同版本的App，这些不同版本的App相同的接口和服务端交互的数据结构可能是不一样的，所以通常情况下服务端提供不用的路由地址来适配不同版本的App调用。
+!!! info "Multiple versions of the server"
+    Sometimes, the server's server needs to provide multiple sets of interfaces to support different versions of the app. The data structures of the same interface and server interaction of these different versions of the app may be different, so usually the server does not provide the same. Routing addresses to adapt to different versions of App calls.
 
-!!! info "不同实例，使用相同的持久化表/集合"
-    希望多个不同实例的程序可以公用相同的数据库，在 2.4 之前的版本，我们可以通过指定不同的表名来隔离不同实例的数据库表，即在CAP配置的时候通过配置不同的表名前缀来实现。
+!!! info "Using the same persistent table/collection in different instance"
+    If you want multiple different instance services to use the same database, in versions prior to 2.4, we could isolate database tables for different instances by specifying different table names. That is to say, when configuring the CAP, it is implemented by configuring different table name prefixes.
 
-> 查看博客来了解更多关于 Version 的信息： https://www.cnblogs.com/savorboard/p/cap-2-4.html
+> Check out the blog to learn more about Version feature: https://www.cnblogs.com/savorboard/p/cap-2-4.html
 
 #### FailedRetryInterval
 
-默认值：60 秒
+> Default: 60 sec
 
-在消息发送的时候，如果发送失败，CAP将会对消息进行重试，此配置项用来配置每次重试的间隔时间。
+In the process of message message sent to transport failed, the CAP will be retry to sent. This configuration item is used to configure the interval between each retry.
 
-在消息消费的过程中，如果消费失败，CAP将会对消息进行重试消费，此配置项用来配置每次重试的间隔时间。
+In the process of message consumption failed, the CAP will retry to execute. This configuration item is used to configure the interval between each retry.
 
-!!! WARNING "重试 & 间隔"
-    在默认情况下，重试将在发送和消费消息失败的 **4分钟后** 开始，这是为了避免设置消息状态延迟导致可能出现的问题。  
-    发送和消费消息的过程中失败会立即重试 3 次，在 3 次以后将进入重试轮询，此时 FailedRetryInterval 配置才会生效。
+!!! WARNING "Retry & Interval"
+    By default, retry will start after **4 minutes** of failure to send or consume, in order to avoid possible problems caused by setting message state delays.    
+    Failures in the process of sending and consuming messages will be retried 3 times immediately, and will be retried polling after 3 times, at which point the FailedRetryInterval configuration will take effect.
 
 #### FailedRetryCount
 
-默认值：50
+> Default: 50
 
-重试的最大次数。当达到此设置值时，将不会再继续重试，通过改变此参数来设置重试的最大次数。
+Maximum number of retries. When this value is reached, retry will stop and the maximum number of retries will be modified by setting this parameter.
 
 #### FailedThresholdCallback
 
-默认值：NULL
+> Default: NULL
 
-类型：`Action<MessageType, string, string>`
+Type: `Action<MessageType, string, string>`
 
 >
 T1 : Message Type  
 T2 : Message Name  
 T3 : Message Content
 
-重试阈值的失败回调。当重试达到 FailedRetryCount 设置的值的时候，将调用此 Action 回调，你可以通过指定此回调来接收失败达到最大的通知，以做出人工介入。例如发送邮件或者短信。
+Failure threshold callback. This action is called when the retry reaches the value set by `FailedRetryCount`, and you can receive the notification by specifying this parameter to make a manual intervention. For example, send an email or notify.
 
 #### SucceedMessageExpiredAfter
 
-默认值：24*3600 秒（1天后）
+> Default: 24*3600 sec (1 days)
 
-成功消息的过期时间（秒）。 当消息发送或者消费成功时候，在时间达到 `SucceedMessageExpiredAfter` 秒时候将会从 Persistent 中删除，你可以通过指定此值来设置过期的时间。
+The expiration time (in seconds) of the success message. When the message is sent or consumed successfully, it will be removed from persistent when the time reaches `SucceedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.

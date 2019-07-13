@@ -1,37 +1,41 @@
-# 消息
+# Message
 
-使用 `ICapPublisher` 接口发送出去的数据称之为 Message (`消息`)。
+The data sent by using the `ICapPublisher` interface is called `Message`.
 
-## 消息调度
+## Scheduling
 
-CAP 接收到消息之后会将消息发送到 Transport, 由 Transport 进行运输。
+After the CAP receives the message, it sends the message to Transport, which is transported by transport.
+ 
+When you send using the `ICapPublisher` interface, the CAP will dispatch the message to the corresponding Transport. Currently, bulk messaging is not supported.
 
-当你使用 `ICapPublisher` 接口发送时，CAP将会将消息调度到相应的 Transport中去，目前还不支持批量发送消息。
+For more information on transports, see the [Transports](../transports/general.md) section.
 
-有关 Transports 的更多信息，可以查看 [Transports](../transports/general.md) 章节。
+## Persistent 
 
-## 消息存储
+The CAP will storage after receiving the message. For more information on storage, see the [Persistent](../persistent/general.md) section.
 
-CAP 接收到消息之后会将消息进行 Persistent（持久化）， 有关 Persistent 的更多信息，可以查看 [Persistent](../persistent/general.md) 章节。
+## Retry
 
-## 消息重试
+Retrying plays an important role in the overall CAP architecture design, and CAPs retry for messages that fail to send or fail to execute. There are several retry strategies used throughout the CAP design process.
 
-重试在整个CAP架构设计中具有重要作用，CAP 中会针对发送失败或者执行失败的消息进行重试。在整个 CAP 的设计过程中有以下几处采用的重试策略。
+### Send retry
 
-1、 发送重试
+During the message sending process, when the broker crashes or the connection fails or an abnormality occurs, the CAP will retry the sending. Retry 3 times for the first time, retry every minute after 4 minutes, and +1 retries. When the total number of times reaches 50, the CAP will stop retrying.
 
-在消息发送过程中，当出现 Broker 宕机或者连接失败的情况亦或者出现异常的情况下，这个时候 CAP 会对发送的重试，第一次重试次数为 3，4分钟后以后每分钟重试一次，进行次数 +1，当总次数达到50次后，CAP将不对其进行重试。
+You can adjust the total number of default retries by setting `FailedRetryCount` in CapOptions.
 
-你可以在 CapOptions 中设置FailedRetryCount来调整默认重试的总次数。
+It will stop when the maximum number of times is reached. You can see the reason for the failure in Dashboard and choose whether to manually retry.
 
-当失败总次数达到默认失败总次数后，就不会进行重试了，你可以在 Dashboard 中查看消息失败的原因，然后进行人工重试处理。
+### Consumption retry
 
-2、 消费重试
+The consumer method is executed when the Consumer receives the message and will retry when an exception occurs. This retry strategy is the same as the send retry.
 
-当 Consumer 接收到消息时，会执行消费者方法，在执行消费者方法出现异常时，会进行重试。这个重试策略和上面的 发送重试 是相同的。
+## Data Cleanup
 
-## 消息数据清理
+There is an `ExpiresAt` field in the database message table indicating the expiration time of the message. When the message is sent successfully, the status will be changed to `Successed`, and `ExpiresAt` will be set to **1 hour** later. 
 
-数据库消息表中具有一个 ExpiresAt 字段表示消息的过期时间，当消息发送成功或者消费成功后，CAP会将消息状态为 Successed 的 ExpiresAt 设置为 1小时 后过期，会将消息状态为 Failed 的 ExpiresAt 设置为 15天 后过期。
+Consuming failure will change the message status to `Failed` and `ExpiresAt` will be set to **15 days** later.
 
-CAP 默认情况下会每隔一个小时将消息表的数据进行清理删除，避免数据量过多导致性能的降低。清理规则为 ExpiresAt 不为空并且小于当前时间的数据。 也就是说状态为Failed的消息（正常情况他们已经被重试了 50 次），如果你15天没有人工介入处理，同样会被清理掉。
+By default, the data of the message table is deleted **every hour** to avoid performance degradation caused by too much data. The cleanup strategy is `ExpiresAt` is not empty and is less than the current time. 
+
+That is to say, the message with the status Failed (normally they have been retried 50 times), if you do not have manual intervention for 15 days, it will **also be** cleaned up.

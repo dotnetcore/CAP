@@ -2,15 +2,17 @@
 
 MySQL 是一个开源的关系型数据库，你可以使用 MySQL 来作为 CAP 消息的持久化。
 
-## 配置
+## Configuration
 
 要使用 MySQL 存储，你需要从 NuGet 安装以下扩展包：
 
-```shell
+```ps
+
 Install-Package DotNetCore.CAP.MySql
+
 ```
 
-然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于内存的配置项。
+Next, add configuration items to the `ConfigureServices` method of `Startup.cs`.
 
 ```csharp
 

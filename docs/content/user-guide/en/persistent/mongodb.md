@@ -1,22 +1,24 @@
 # MongoDB
 
-MongoDB 是一个跨平台的面向文档型的数据库程序，它被归为 NOSQL 数据库，CAP 从 2.3 版本开始支持 MongoDB 作为消息存储。 
+MongoDB is a cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with schema.
 
-MongoDB 从 4.0 版本开始支持 ACID 事务，所以 CAP 也只支持 4.0 以上的 MongoDB，并且 MongoDB 需要部署为集群，因为 MongoDB 的 ACID 事务需要集群才可以使用。
+CAP has supported MongoDB as persistent since version 2.3 .
 
-有关开发环境如何快速搭建 MongoDB 4.0+ 集群，你可以我的参考 [这篇文章](https://www.cnblogs.com/savorboard/p/mongodb-4-cluster-install.html)。
+MongoDB supports ACID transactions since version 4.0, so CAP only supports MongoDB above 4.0, and MongoDB needs to be deployed as a cluster, because MongoDB's ACID transaction requires a cluster to be used.
 
-## 配置
+For a quick development of the MongoDB 4.0+ cluster for the development environment, you can refer to [this article](https://www.cnblogs.com/savorboard/p/mongodb-4-cluster-install.html).
 
-要使用 MongoDB 存储，你需要从 NuGet 安装以下扩展包：
+## Configuration
 
-```shell
+To use MongoDB storage, you need to install the following extensions from NuGet:
+
+```ps
 
 Install-Package DotNetCore.CAP.MongoDB
 
 ```
 
-然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于内存的配置项。
+Next, add configuration items to the `ConfigureServices` method of `Startup.cs`.
 
 ```csharp
 
@@ -35,29 +37,35 @@ public void ConfigureServices(IServiceCollection services)
 
 ```
 
-#### MongoDBOptions
+#### MongoDB Options
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-DatabaseName | 数据库名称 | string | cap 
-DatabaseConnection | 数据库连接字符串 | string | mongodb://localhost:27017
-ReceivedCollection | 接收消息集合名称 | string | cap.received
-PublishedCollection | 发送消息集合名称 | string | cap.published
+DatabaseName | Database name | string | cap 
+DatabaseConnection | Database connection string | string | mongodb://localhost:27017
+ReceivedCollection | Database received message collection name | string | cap.received
+PublishedCollection | Database published message collection name | string | cap.published
 
 ## Publish with transaction
 
-下面的示例展示了如何利用 CAP 和 MongoDB 进行本地事务集成。
+The following example shows how to leverage CAP and MongoDB for local transaction integration.
 
 ```csharp
 
-//NOTE: before your test, your need to create database and collection at first
-//注意：MongoDB 不能在事务中创建数据库和集合，所以你需要单独创建它们，模拟一条记录插入则会自动创建        
-//var mycollection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
-//mycollection.InsertOne(new BsonDocument { { "test", "test" } });
+//NOTE: Before your test, your need to create database and collection at first.
+//      Mongo can't create databases and collections in transactions automatic, 
+//      so you need to create them separately, simulating a record insert 
+//      will automatically create.
+
+// var mycollection = _client.GetDatabase("test")
+//          .GetCollection<BsonDocument>("test.collection");
+// mycollection.InsertOne(new BsonDocument { { "test", "test" } });
 
 using (var session = _client.StartTransaction(_capBus, autoCommit: false))
 {
-    var collection = _client.GetDatabase("test").GetCollection<BsonDocument>("test.collection");
+    var collection = _client.GetDatabase("test")
+            .GetCollection<BsonDocument>("test.collection");
+
     collection.InsertOne(session, new BsonDocument { { "hello", "world" } });
 
     _capBus.Publish("sample.rabbitmq.mongodb", DateTime.Now);
