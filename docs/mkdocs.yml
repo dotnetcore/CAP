@@ -6,7 +6,7 @@ site_author: CAP Team
 
 repo_name: 'GitHub'
 repo_url: 'https://github.com/dotnetcore/CAP'
-
+edit_uri: 'edit/master/docs/content'
 docs_dir: 'content'
 
 # Copyright
