@@ -8,16 +8,18 @@ namespace DotNetCore.CAP.Test
 {
     public class ConsumerServiceSelectorTest
     {
-        private IServiceProvider _provider;
+        private readonly IServiceProvider _provider;
 
         public ConsumerServiceSelectorTest()
         {
-            var services = new ServiceCollection();
-            //services.AddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
+            var services = new ServiceCollection(); 
+            ServiceCollectionExtensions.ServiceCollection = services;
+            services.AddOptions();
+            services.PostConfigure<CapOptions>(x=>{});
+            services.AddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
             services.AddScoped<IFooTest, CandidatesFooTest>();
             services.AddScoped<IBarTest, CandidatesBarTest>();
             services.AddLogging();
-            services.AddCap(x => { });
             _provider = services.BuildServiceProvider();
         }
 
