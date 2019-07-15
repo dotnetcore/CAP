@@ -6,9 +6,8 @@ MySQL is an open-source relational database management system. CAP has supported
 
 To use MySQL storage, you need to install the following extensions from NuGet:
  
-```ps
-
-Install-Package DotNetCore.CAP.MySql
+```powershell
+PM> Install-Package DotNetCore.CAP.MySql
 
 ```
 

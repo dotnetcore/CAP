@@ -1,24 +1,23 @@
 # Diagnostics
 
-Diagnostics 提供一组功能使我们能够很方便的可以记录在应用程序运行期间发生的关键性操作以及他们的执行时间等，使管理员可以查找特别是生产环境中出现问题所在的根本原因。
+Diagnostics provides a set of features that make it easy for us to document the critical operations that occur during the application's operation, their execution time, etc., allowing administrators to find the root cause of problems, especially in production environments.
 
+## Diagnostics events
 
-## CAP 中的 Diagnostics
+The CAP provides support for `DiagnosticSource` with a listener name of `CapDiagnosticListener`.
 
-在 CAP 中，对 `DiagnosticSource` 提供了支持，监听器名称为 `CapDiagnosticListener`。
+Diagnostics provides external event information as follows:
 
-Diagnostics 提供对外提供的事件信息有：
+* Before the message is persisted
+* After the message is persisted
+* Message persistence exception
+* Before the message is sent to MQ
+* After the message is sent to MQ
+* The message sends an exception to MQ.
+* Messages saved from MQ consumption before saving
+* After the message is saved from MQ consumption
+* Before the subscriber method is executed
+* After the subscriber method is executed
+* Subscriber method execution exception
 
-* 消息持久化之前
-* 消息持久化之后
-* 消息持久化异常
-* 消息向MQ发送之前
-* 消息向MQ发送之后
-* 消息向MQ发送异常
-* 消息从MQ消费保存之前
-* 消息从MQ消费保存之后
-* 订阅者方法执行之前
-* 订阅者方法执行之后
-* 订阅者方法执行异常
-
-相关涉及到的对象，你可以在 `DotNetCore.CAP.Diagnostics` 命名空间下看到。
+Related objects, you can find at the `DotNetCore.CAP.Diagnostics` namespace.

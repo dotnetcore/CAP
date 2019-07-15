@@ -6,8 +6,8 @@ Persistent storage of memory messages is often used in development and test envi
 
 To use in-memory storage, you need to install the following extensions from NuGet:
 
-```ps
-Install-Package DotNetCore.CAP.InMemoryStorage
+```powershell
+PM> Install-Package DotNetCore.CAP.InMemoryStorage
 ```
 
 Next, add configuration items to the `ConfigureServices` method of `Startup.cs`.

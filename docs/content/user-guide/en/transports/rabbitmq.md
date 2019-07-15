@@ -8,9 +8,8 @@ CAP has supported RabbitMQ as message transporter.
 
 To use RabbitMQ transporter, you need to install the following extensions from NuGet:
 
-```shell
-
-Install-Package DotNetCore.CAP.RabbitMQ
+```powershell
+PM> Install-Package DotNetCore.CAP.RabbitMQ
 
 ```
 

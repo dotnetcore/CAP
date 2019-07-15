@@ -1,10 +1,10 @@
 # Dashboard
 
-CAP 原生提供了 Dashboard 供查看消息，利用 Dashboard 提供的功能可以很方便的查看和管理消息。
+The CAP provides a Dashboard for viewing messages, and the features provided by Dashboard make it easy to view and manage messages.
 
-## 启用 Dashboard
+## Enable Dashboard
 
-默认情况下，不会启动Dashboard中间件，要开启Dashboard功能你需要在配置中添加如下代码：
+By default, Dashboard middleware will not be launched. To enable Dashboard functionality you need to add the following code to your configuration:
 
 ```C#
 services.AddCap(x =>
@@ -16,31 +16,31 @@ services.AddCap(x =>
 });
 ```
 
-默认情况下，你可以访问 `http://localhost:xxx/cap` 这个地址打开Dashboard。 
+By default, you can open the Dashboard by visiting the url `http://localhost:xxx/cap`.
 
-### Dashboard 配置项
+### Dashboard Configuration
 
 * PathMatch
 
-默认值：'/cap'
+> Default ：'/cap'
 
-你可以通过修改此配置项来更改Dashboard的访问路径。
+You can change the path of the Dashboard by modifying this configuration item.
 
 * StatsPollingInterval
 
-默认值：2000 毫秒
+> Default: 2000ms
 
-此配置项用来配置Dashboard 前端 获取状态接口(/stats)的轮询时间
+This configuration item is used to configure the Dashboard front end to get the polling time of the status interface (/stats).
 
 * Authorization
 
-此配置项用来配置访问 Dashboard 时的授权过滤器，默认过滤器允许局域网访问，当你的应用想提供外网访问时候，可以通过设置此配置来自定义认证规则。详细参看下一节
+This configuration item is used to configure the authorization filter when accessing the Dashboard. The default filter allows LAN access. When your application wants to provide external network access, you can customize the authentication rules by setting this configuration. See the next section for details.
 
-### 自定义认证
+### Custom authentication
 
-通过实现 `IDashboardAuthorizationFilter` 接口可以自定义Dashboard认证。
+Dashboard authentication can be customized by implementing the `IDashboardAuthorizationFilter` interface.
 
-以下是一个示例代码，通过从url请求参数中读取 accesskey 判断是否允许访问。
+The following is a sample code that determines if access is allowed by reading the accesskey from the url request parameter.
 
 ```C#
 public class TestAuthorizationFilter : IDashboardAuthorizationFilter
@@ -55,7 +55,7 @@ public class TestAuthorizationFilter : IDashboardAuthorizationFilter
 }
 ```
 
-然后在修改注册 Dashboard 时候配置此过滤对象。
+Then configure this filter when registration Dashboard.
 
 ```C#
 services.AddCap(x =>

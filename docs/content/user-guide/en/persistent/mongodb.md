@@ -12,9 +12,8 @@ For a quick development of the MongoDB 4.0+ cluster for the development environm
 
 To use MongoDB storage, you need to install the following extensions from NuGet:
 
-```ps
-
-Install-Package DotNetCore.CAP.MongoDB
+```powershell
+PM> Install-Package DotNetCore.CAP.MongoDB
 
 ```
 

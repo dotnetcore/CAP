@@ -8,9 +8,8 @@ CAP has supported Kafka® as message transporter.
 
 To use Kafka transporter, you need to install the following extensions from NuGet:
 
-```shell
-
-Install-Package DotNetCore.CAP.Kafka
+```powershell
+PM> Install-Package DotNetCore.CAP.Kafka
 
 ```
 

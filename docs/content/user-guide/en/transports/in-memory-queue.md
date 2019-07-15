@@ -6,9 +6,8 @@ In Memory Queue is a memory-based message queue provided by [Community](https://
 
 To use In Memory Queue as a message transporter, you need to install the following extensions from NuGet:
 
-```shell
-
-Install-Package Savorboard.CAP.InMemoryMessageQueue
+```powershell
+PM> Install-Package Savorboard.CAP.InMemoryMessageQueue
 
 ```
 Then you can add memory-based configuration items to the `ConfigureServices` method of `Startup.cs`.

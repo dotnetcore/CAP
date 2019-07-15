@@ -6,18 +6,17 @@ CAP supports Azure Service Bus as a message transporter.
 
 ## Configuration
 
-!!! warning "必要条件"
-    针对 Service Bus 定价层, CAP 要求使用 “标准” 或者 “高级” 以支持 Topic 功能。
+!!! warning "Requirement"
+    For the Service Bus pricing layer, CAP requires "standard" or "advanced" to support Topic functionality.
 
-要使用 Azure Service Bus 作为消息传输器，你需要从 NuGet 安装以下扩展包：
+To use Azure Service Bus as a message transport, you need to install the following extensions from NuGet:
 
-```shell
-
-Install-Package DotNetCore.CAP.AzureServiceBus
-
+```powershell
+PM> Install-Package DotNetCore.CAP.AzureServiceBus
 ```
 
-然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于内存的配置项。
+Then you can add memory-based configuration items to the `ConfigureServices` method of `Startup.cs`.
+
 
 ```csharp
 
@@ -39,10 +38,10 @@ public void ConfigureServices(IServiceCollection services)
 
 #### AzureServiceBus Options
 
-CAP 直接对外提供的 Kafka 配置参数如下：
+The AzureServiceBus configuration options provided directly by the CAP are as follows:
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-ConnectionString | Endpoint 地址 | string | 
+ConnectionString | Endpoint address | string | 
 TopicPath | Topic entity path | string | cap
-ManagementTokenProvider | Token提供 | ITokenProvider | null
+ManagementTokenProvider | Token provider | ITokenProvider | null

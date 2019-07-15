@@ -6,9 +6,8 @@ SQL Server is a relational database management system developed by Microsoft. CA
 
 To use SQL Server storage, you need to install the following extensions from NuGet:
 
-```shell
-
-Install-Package DotNetCore.CAP.SqlServer
+```powershell
+PM> Install-Package DotNetCore.CAP.SqlServer
 
 ```
 
