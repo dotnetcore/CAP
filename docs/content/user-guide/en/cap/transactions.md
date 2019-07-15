@@ -1,21 +1,71 @@
-# 事务
+# Transaction
 
-## 分布式事务?
+## Distributed transactions?
 
-CAP 不直接提供开箱即用的基于 DTC 或者 2PC 的分布式事务，相反我们提供一种可以用于解决在分布式事务遇到的问题的一种解决方案。
+CAP does not directly provide out-of-the-box MS DTC or 2PC-based distributed transactions, instead we provide a solution that can be used to solve problems encountered in distributed transactions.
 
-在分布式环境中，由于涉及通讯的开销，使用基于2PC或DTC的分布式事务将非常昂贵，在性能方面也同样如此。另外由于基于2PC或DTC的分布式事务同样受**CAP定理**的约束，当发生网络分区时它将不得不放弃可用性(CAP中的A)。
+In a distributed environment, using 2PC or DTC-based distributed transactions can be very expensive due to the overhead involved in communication, as is performance. In addition, since distributed transactions based on 2PC or DTC are also subject to the **CAP theorem**, it will have to give up availability (A in CAP) when network partitioning occurs.
 
-针对于分布式事务的处理，CAP 采用的是“异步确保”这种方案。
+> A distributed transaction is a very complex process with a lot of moving parts that can fail. Also, if these parts run on different machines or even in different data centers, the process of committing a transaction could become very long and unreliable.
 
-### 异步确保
+> This could seriously affect the user experience and overall system bandwidth. So **one of the best ways to solve the problem of distributed transactions is to avoid them completely**.[^1]
+ 
+For the processing of distributed transactions, CAP uses the "Eventual Consistency and Compensation" scheme.
 
-异步确保这种方案又叫做本地消息表，这是一种经典的方案，方案最初来源于 eBay，参考资料见段末链接。这种方案目前也是企业中使用最多的方案之一。
+### Eventual Consistency and Compensation [^1]
 
-相对于 TCC 或者 2PC/3PC 来说，这个方案对于分布式事务来说是最简单的，而且它是去中心化的。在TCC 或者 2PC 的方案中，必须具有事务协调器来处理每个不同服务之间的状态，而此种方案不需要事务协调器。
-另外 2PC/TCC 这种方案如果服务依赖过多，会带来管理复杂性增加和稳定性风险增大的问题。试想如果我们强依赖 10 个服务，9 个都执行成功了，最后一个执行失败了，那么是不是前面 9 个都要回滚掉？这个成本还是非常高的。
+[^1]: This chapter is quoted from: https://www.baeldung.com/transactions-across-microservices
 
-但是，并不是说 2PC 或者 TCC 这种方案不好，因为每一种方案都有其相对优势的使用场景和优缺点，这里就不做过多介绍了。
+By far, one of the most feasible models of handling consistency across microservices is [eventual consistency](https://en.wikipedia.org/wiki/Eventual_consistency).
 
-> 中文：[http://www.cnblogs.com/savorboard/p/base-an-acid-alternative.html](http://www.cnblogs.com/savorboard/p/base-an-acid-alternative.html)  
-> 英文：[http://queue.acm.org/detail.cfm?id=1394128](http://queue.acm.org/detail.cfm?id=1394128)
+This model doesn’t enforce distributed ACID transactions across microservices. Instead, it proposes to use some mechanisms of ensuring that the system would be eventually consistent at some point in the future.
+
+#### A Case for Eventual Consistency
+
+For example, suppose we need to solve the following task:
+
+* register a user profile  
+* do some automated background check that the user can actually access the system
+
+The second task is to ensure, for example, that this user wasn’t banned from our servers for some reason.
+
+But it could take time, and we’d like to extract it to a separate microservice. It wouldn’t be reasonable to keep the user waiting for so long just to know that she was registered successfully.
+
+**One way to solve it would be with a message-driven approach including compensation**. Let’s consider the following architecture:
+
+* the user microservice tasked with registering a user profile  
+* the validation microservice tasked with doing a background check  
+* the messaging platform that supports persistent queues  
+
+The messaging platform could ensure that the messages sent by the microservices are persisted. Then they would be delivered at a later time if the receiver weren’t currently available
+
+#### Happy Scenario
+
+In this architecture, a happy scenario would be:
+
+* the user microservice registers a user, saving information about her in its local database
+* the user microservice marks this user with a flag. It could signify that this user hasn’t yet been validated and doesn’t have access to full system functionality
+* a confirmation of registration is sent to the user with a warning that not all functionality of the system is accessible right away
+* the user microservice sends a message to the validation microservice to do the background check of a user
+* the validation microservice runs the background check and sends a message to the user microservice with the results of the check
+* if the results are positive, the user microservice unblocks the user
+* if the results are negative, the user microservice deletes the user account
+
+After we’ve gone through all these steps, the system should be in a consistent state. However, for some period of time, the user entity appeared to be in an incomplete state.
+
+The last step, when the user microservice removes the invalid account, is a compensation phase.
+
+#### Failure Scenarios
+
+Now let’s consider some failure scenarios:
+
+* if the validation microservice is not accessible, then the messaging platform with its persistent queue functionality ensures that the validation microservice would receive this message at some later time
+* suppose the messaging platform fails, then the user microservice tries to send the message again at some later time, for example, by scheduled batch-processing of all users that were not yet validated
+* if the validation microservice receives the message, validates the user but can’t send the answer back due to the messaging platform failure, the validation microservice also retries sending the message at some later time
+* if one of the messages got lost, or some other failure happened, the user microservice finds all non-validated users by scheduled batch-processing and sends requests for validation again
+
+Even if some of the messages were issued multiple times, this wouldn’t affect the consistency of the data in the microservices’ databases.
+
+**By carefully considering all possible failure scenarios, we can ensure that our system would satisfy the conditions of eventual consistency. At the same time, we wouldn’t need to deal with the costly distributed transactions.**
+
+But we have to be aware that ensuring eventual consistency is a complex task. It doesn’t have a single solution for all cases.

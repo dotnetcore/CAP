@@ -1,114 +1,126 @@
 # Idempotence
 
-幂等性（你可以在[Wikipedia](https://en.wikipedia.org/wiki/Idempotence)读到关于幂等性的定义），当我们谈论幂等时，一般是指可以重复处理传毒的消息，而不是产生意外的结果。
+Imdempotence (which you may read a formal definition of on [Wikipedia](https://en.wikipedia.org/wiki/Idempotence), when we are talking about messaging, is when a message redelivery can be handled without ending up in an unintended state.
 
-## 交付保证
+## Delivery guarantees[^1]
 
-在说幂等性之前，我们先来说下关于消费端的消息交付。
+[^1]: The chapter refers to the [Delivery guarantees](https://github.com/rebus-org/Rebus/wiki/Delivery-guarantees) of rebus, which I think is described very good.
 
-由于CAP不是使用的 MS DTC 或其他类型的2PC分布式事务机制，所以存在至少消息严格交付一次的问题，具体的说在基于消息的系统中，存在一下三种可能：
+Before we talk about idempotency, let's talk about the delivery of messages on the consumer side.
 
-* Exactly Once(*) （仅有一次）
-* At Most Once （最多一次）
-* At Least Once （最少一次）
+Since CAP is not a used MS DTC or other type of 2PC distributed transaction mechanism, there is a problem that at least the message is strictly delivered once. Specifically, in a message-based system, there are three possibilities:
 
-带 * 号表示在实际场景中，很难达到。
+* Exactly Once(*)  
+* At Most Once 
+* At Least Once  
+
+Exactly once has a (*) next to it, because in the general case, it is simply not possible.
 
 ### At Most Once
 
-最多一次交付保证，涵盖了保证一次或根本不接收所有消息的情况。
+The At Most Once delivery guarantee covers the case when you are guaranteed to receive all messages either once, or maybe not at all.
 
-这种类型的传递保证可能来自你的消息系统，你的代码按以下顺序执行其操作：
+This type of delivery guarantee can arise from your messaging system and your code performing its actions in the following order:
+
 
 ```
-1. 从队列移除消息
-2. 开始一个工作事务
-3. 处理消息 ( 你的代码 )
-4. 是否成功 ?
+1. Remove message from queue
+2. Start work transaction
+3. Handle message (your code)
+4. Success?
     Yes:
-        1. 提交工作事务
+        1. Commit work transaction
     No: 
-        1. 回滚工作事务
-        2. 将消息发回到队列。
+        1. Roll back work transaction
+        2. Put message back into the queue
 ```
 
-正常情况下，他们工作的很好，工作事务将被提交。
+In the sunshine scenario, this is all well and good – your messages will be received, and work transactions will be committed, and you will be happy.
 
-然而，有些时候并不能总是成功，比如在 1 之后出现异常，或者是你在将消息放回到队列中出现网络问题由或者宕机重启等情况。
+However, the sun does not always shine, and stuff tends to fail – especially if you do enough stuff. Consider e.g. what would happen if anything fails after having performed step (1), and then – when you try to execute step (4)/(2) (i.e. put the message back into the queue) – the network was temporarily unavailable, or the message broker restarted, or the host machine decided to reboot because it had installed an update.
 
-使用这个协议，你将冒着丢失消息的风险，如果可以接受，那就没有关系。
+This can be OK if it's what you want, but most things in CAP revolve around the concept of DURABLE messages, i.e. messages whose contents is just as important as the data in your database.
 
 ### At Least Once
 
-这个交付保证包含你收到至少一次的消息，当出现故障时，可能会收到多次消息。
+This delivery guarantee covers the case when you are guaranteed to receive all messages either once, or maybe more times if something has failed.
 
-它需要稍微改变我们执行步骤的顺序，它要求消息队列系统支持事务或ACK机制，比如传统的 begin-commit-rollback 协议（MSMQ是这样），或者是 receive-ack-nack 协议（RabbitMQ，Azure Service Bus等是这样的）。
+It requires a slight change to the order we are executing our steps in, and it requires that the message queue system supports transactions, either in the form of the traditional begin-commit-rollback protocol (MSMQ does this), or in the form of a receive-ack-nack protocol (RabbitMQ, Azure Service Bus, etc. do this).
 
-大致步骤如下:
+Check this out – if we do this:
 
 ```
-1. 抢占队列中的消息。
-2. 开始一个工作事务
-3. 处理消息 ( 你的代码 )
-4. 是否成功 ?
+1. Grab lease on message in queue
+2. Start work transaction
+3. Handle message (your code)
+4. Success?
     Yes: 
-        1. 提交工作事务
-        2. 从队列删除消息
+        1. Commit work transaction
+        2. Delete message from queue
     No: 
-        1. 回滚工作事务
-        2. 从队列释放抢占的消息
+        1. Roll back work transaction
+        2. Release lease on message
 ```
 
-当出现失败或者抢占消息超时的时候，我们总是能够再次接收到消息以保证我们工作事务提交成功。
+and the "lease" we grabbed on the message in step (1) is associated with an appropriate timeout, then we are guaranteed that no matter how wrong things go, we will only actually remove the message from the queue (i.e. execute step (4)/(2)) if we have successfully committed our "work transaction".
 
-### 什么是 “工作事务” ?
+### What is a "work transaction"?
 
-上面所说的“工作事务”并不是特指关系型数据库中的事务，这里的工作事务是一个概念，也就是说执行代码的原子性。
+It depends on what you're doing 😄 maybe it's a transaction in a relational database (which traditionally have pretty good support in this regard), maybe it's a transaction in a document database that happens to support transaction (like RavenDB or Postgres), or maybe it's a conceptual transaction in the form of whichever work you happen to carry out as a consequence of handling a message, e.g. update a bunch of documents in MongoDB, move some files around in the file system, or mutate some obscure in-mem data structure.
 
-比如它可以是传统的RDMS事务，也或者是 MongoDB 事务或者是一个交易等。
+The fact that the "work transaction" is just a conceptual thing is what makes it impossible to support the aforementioned Exactly Once delivery guarantee – it's just not generally possible to commit or roll back a "work transaction" and a "queue transaction" (which is what we could call the protocol carried out with the message queue systems) atomically and consistently.
 
-在这里它代表一个执行单元，这个执行单元是一个概念性的事实以支持前面提到的仅交付一次的这种问题。
+## Idempotence at CAP
 
-通常，不可能做到消息的事务和工作事务来形成原子性进行提交或者回滚。
+In the CAP, the delivery guarantees we use is **At Least Once**.
 
-## CAP 中的幂等性
+Since we have a temporary storage medium (database table), we may be able to do At Most Once, but in order to strictly guarantee that the message will not be lost, we do not provide related functions or configurations.
 
-在CAP中，我们采用的交付保证为 At Least Once。
+### Why are we not providing(achieving) idempotency ?
 
-由于我们具有临时存储介质（数据库表），也许可以做到 At Most Once, 但是为了严格保证消息不会丢失，我们没有提供相关功能或配置。
+1. The message was successfully written, but the execution of the Consumer method failed.  
 
-### 为什么没有实现幂等？
+    There are a lot of reasons why the Consumer method fails. I don't know if the specific scene is blindly retrying or not retrying is an incorrect choice.
+    For example, if the consumer is debiting service, if the execution of the debit is successful, but fails to write the debit log, the CAP will judge that the consumer failed to execute and try again. If the client does not guarantee idempotency, the framework will retry it, which will inevitably lead to serious consequences for multiple debits.
 
-1、消息写入成功了，但是此时执行Consumer方法失败了
+2. The implementation of the Consumer method succeeded, but received the same message.  
 
-执行Consumer方法失败的原因有非常多，我如果不知道具体的场景盲目进行重试或者不进行重试都是不正确的选择。
-举个例子：假如消费者为扣款服务，如果是执行扣款成功了，但是在写扣款日志的时候失败了，此时CAP会判断为消费者执行失败，进行重试。如果客户端自己没有保证幂等性，框架对其进行重试，这里势必会造成多次扣款出现严重后果。
+    The scenario is also possible here. If the Consumer has been successfully executed at the beginning, but for some reason, such as the Broker recovery, and received the same message, the CAP will consider this a new after receiving the Broker message. The message will be executed again by the Consumer. Because it is a new message, the CAP cannot be idempotent at this time.
 
-2、执行Consumer方法成功了，但是又收到了同样的消息
+3. The current data storage mode can not be idempotent.  
 
-此处场景也是可能存在的，假如开始的时候Consumer已经执行成功了，但是由于某种原因如 Broker 宕机恢复等，又收到了相同的消息，CAP 在收到Broker消息后会认为这个是一个新的消息，会对 Consumer再次执行，由于是新消息，此时 CAP 也是无法做到幂等的。
+    Since the table of the CAP message is deleted after 1 hour for the successfully consumed message, if the historical message cannot be idempotent. Historically, if the broker has maintained or manually processed some messages for some reason.
 
-3、目前的数据存储模式无法做到幂等
+4. Industry practices.
 
-由于CAP存消息的表对于成功消费的消息会于1个小时后删除，所以如果对于一些历史性消息无法做到幂等操作。 历史性指的是，假如 Broker由于某种原因维护了或者是人工处理的一些消息。
+    Many event-driven frameworks require users to ensure idempotent operations, such as ENode, RocketMQ, etc...
 
-4、业界做法
+From an implementation point of view, CAP can do some less stringent idempotence, but strict idempotent cannot.
 
-许多基于事件驱动的框架都是要求 用户 来保证幂等性操作的，比如 ENode, RocketMQ 等等...
+### Naturally idempotent message processing
 
-从实现的角度来说，CAP可以做一些比较不严格的幂等，但是严格的幂等无法做到的。
+Generally, the best way to deal with message redeliveries is to make the processing of each message naturally idempotent.
 
-### 以自然的方式处理幂等消息
+Natural idempotence arises when the processing of a message consists of calling an idempotent method on a domain object, like
 
-通常情况下，保证消息被执行多次而不会产生意外结果是很自然的一种方式是采用操作对象自带的一些幂等功能。比如：
+```
+obj.MarkAsDeleted();
 
-数据库提供的 `INSERT ON DUPLICATE KEY UPDATE` 或者是采取类型的程序判断行为。
+```
 
-### 显式处理幂等消息
+or
 
-另外一种处理幂等性的方式就是在消息传递的过程中传递ID，然后由单独的消息跟踪器来处理。 
+```
+obj.UpdatePeriod(message.NewPeriod);
+```
 
-比如你使用具有事务数据存储的 IMessageTracker 来跟踪消息ID，你的代码可能看起来像这样：
+You can use the `INSERT ON DUPLICATE KEY UPDATE` provided by the database to easily done.
+
+### Explicitly handling redeliveries
+
+Another way of making message processing idempotent, is to simply track IDs of processed messages explicitly, and then make your code handle a redelivery.
+
+Assuming that you are keeping track of message IDs by using an `IMessageTracker` that uses the same transactional data store as the rest of your work, your code might look somewhat like this:
 
 ```c#
 readonly IMessageTracker _messageTracker;
@@ -134,4 +146,4 @@ public async Task Handle(SomeMessage message)
 }
 ```
 
-至于 `IMessageTracker` 的实现，可以使用诸如Redis或者数据库等存储消息Id和对应的处理状态。
+As for the implementation of `IMessageTracker`, you can use a storage message Id such as Redis or a database and the corresponding processing state.
