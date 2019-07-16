@@ -34,21 +34,7 @@ namespace DotNetCore.CAP.Abstractions
 
         protected IServiceProvider ServiceProvider { get; }
 
-        public ICapTransaction Transaction
-        {
-            get
-            {
-                if (_transaction == null)
-                {
-                    using (var scope = ServiceProvider.CreateScope())
-                    {
-                        _transaction = scope.ServiceProvider.GetRequiredService<CapTransactionBase>();
-                    }
-                }
-
-                return _transaction;
-            }
-        }
+        public ICapTransaction Transaction => _transaction ?? (_transaction = ServiceProvider.GetRequiredService<CapTransactionBase>());
 
         public void Publish<T>(string name, T contentObj, string callbackName = null)
         {
