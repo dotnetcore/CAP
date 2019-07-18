@@ -1,7 +1,7 @@
 # Project information
 site_name: CAP
 site_url: http://cap.dotnetcore.xyz
-site_description: Project documentation with Markdown.
+site_description: A distributed transaction solution in micro-service base on eventually consistency, also an eventbus with Outbox pattern.
 site_author: CAP Team
 
 repo_name: 'GitHub'
@@ -10,7 +10,7 @@ edit_uri: 'edit/master/docs/content'
 docs_dir: 'content'
 
 # Copyright
-copyright: Copyright &copy; 2017 <a href="https://github.com/dotnetcore">.NET Core Community</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
+copyright: Copyright &copy; 2017 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
 
 
 #theme: material
