@@ -1,5 +1,24 @@
 # Release Notes
 
+## Version 2.5.1 (2019-06-21)
+
+**Features:**
+
+* Improved logs record.
+* Upgrade dependent nuget packages version. (MySqlConnector, confluent-kafka-dotnet-1.0 )
+* NodeId type change to string of DiscoveryOptions for Consul. (#314)
+* Change the IConsumerServiceSelector interface access modifier to public. (#333)
+* Improved RabbitMQOptions to provide extensions option to configure the client original configuration. (#350)
+* Add index for MongoDB CAP collections. (#353)
+
+**Bugs Fixed:**
+
+* Fixed consumer re-register transport bug. (#329)
+* Handle messages retrieval failure. (#324)
+* Fixed DiagnosticListener  null reference exception bug. (#335)
+* Add subscription name validation for the AzureServerBus. (#344)
+* Fixed thread safety issues of publisher. (#331)
+
 ## Version 2.5.0 (2019-03-30)
 
 **Features:**
