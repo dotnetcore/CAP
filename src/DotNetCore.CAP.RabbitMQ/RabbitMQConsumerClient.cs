@@ -89,8 +89,8 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public void Dispose()
         {
-            _channel.Dispose();
-            _connection.Dispose();
+            _channel?.Dispose();
+            _connection?.Dispose();
         }
 
         #region events

@@ -75,7 +75,7 @@ namespace DotNetCore.CAP.Kafka
 
         public void Dispose()
         {
-            _consumerClient.Dispose();
+            _consumerClient?.Dispose();
         }
 
         #region private methods
