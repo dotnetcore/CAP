@@ -40,15 +40,15 @@ namespace DotNetCore.CAP.Processor
 
             var connection = context.Provider.GetRequiredService<IStorageConnection>();
 
-            await Task.WhenAll(
-                ProcessPublishedAsync(connection, context),
-                ProcessReceivedAsync(connection, context));
+            await Task.WhenAll(ProcessPublishedAsync(connection, context), ProcessReceivedAsync(connection, context));
 
             await context.WaitAsync(_waitingInterval);
         }
 
         private async Task ProcessPublishedAsync(IStorageConnection connection, ProcessingContext context)
         {
+            context.ThrowIfStopping();
+
             var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry);
 
             foreach (var message in messages)
@@ -61,17 +61,17 @@ namespace DotNetCore.CAP.Processor
 
         private async Task ProcessReceivedAsync(IStorageConnection connection, ProcessingContext context)
         {
+            context.ThrowIfStopping();
+
             var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry);
 
             foreach (var message in messages)
             {
                 await _subscriberExecutor.ExecuteAsync(message);
 
-                context.ThrowIfStopping();
-
                 await context.WaitAsync(_delay);
             }
-        } 
+        }
 
         private async Task<IEnumerable<T>> GetSafelyAsync<T>(Func<Task<IEnumerable<T>>> getMessagesAsync)
         {

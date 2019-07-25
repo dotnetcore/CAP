@@ -57,11 +57,14 @@ namespace DotNetCore.CAP.Processor
             {
                 while (!_publishedMessageQueue.IsCompleted)
                 {
-                    if (_publishedMessageQueue.TryTake(out var message, 100, _cts.Token))
+                    if (_publishedMessageQueue.TryTake(out var message, 3000, _cts.Token))
                     {
                         try
                         {
-                            _sender.SendAsync(message);
+                            Task.Run(async () =>
+                            {
+                                await _sender.SendAsync(message);
+                            });
                         }
                         catch (Exception ex)
                         {
@@ -82,7 +85,7 @@ namespace DotNetCore.CAP.Processor
             {
                 foreach (var message in _receivedMessageQueue.GetConsumingEnumerable(_cts.Token))
                 {
-                    _executor.ExecuteAsync(message);
+                    _executor.ExecuteAsync(message, _cts.Token);
                 }
             }
             catch (OperationCanceledException)

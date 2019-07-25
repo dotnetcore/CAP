@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _connectionActivator = CreateConnection(options);
 
             HostAddress = $"{options.HostName}:{options.Port}";
-            Exchange = CapOptions.DefaultVersion == capOptions.Version ? options.ExchangeName : $"{options.ExchangeName}.{capOptions.Version}";
+            Exchange = "v1" == capOptions.Version ? options.ExchangeName : $"{options.ExchangeName}.{capOptions.Version}";
 
             _logger.LogDebug($"RabbitMQ configuration:'HostName:{options.HostName}, Port:{options.Port}, UserName:{options.UserName}, Password:{options.Password}, ExchangeName:{options.ExchangeName}'");
         }

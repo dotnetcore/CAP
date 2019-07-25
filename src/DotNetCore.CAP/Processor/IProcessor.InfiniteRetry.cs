@@ -30,7 +30,7 @@ namespace DotNetCore.CAP.Processor
                 }
                 catch (OperationCanceledException)
                 {
-                    return;
+                     //ignore
                 }
                 catch (Exception ex)
                 {

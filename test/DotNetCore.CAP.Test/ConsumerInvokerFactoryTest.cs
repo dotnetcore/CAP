@@ -30,7 +30,7 @@ namespace DotNetCore.CAP.Test
             services.AddSingleton(_mockSerialiser.Object);
             services.AddSingleton(_mockMessagePacker.Object);
             services.AddSingleton(_mockModelBinderFactory.Object);
-            _serviceProvider = services.BuildServiceProvider();             
+            _serviceProvider = services.BuildServiceProvider();
         }
 
         private ConsumerInvokerFactory Create() =>
@@ -74,7 +74,7 @@ namespace DotNetCore.CAP.Test
             Assert.Throws<Exception>(() =>
             {
                 invoker.InvokeAsync(context).GetAwaiter().GetResult();
-            }); 
+            });
         }
     }
 }

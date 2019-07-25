@@ -3,6 +3,7 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,8 +30,10 @@ namespace DotNetCore.CAP.Internal
             _logger = loggerFactory.CreateLogger<DefaultConsumerInvoker>();
         }
 
-        public async Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context)
+        public async Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             _logger.LogDebug("Executing consumer Topic: {0}", context.ConsumerDescriptor.MethodInfo.Name);
 
             var executor = ObjectMethodExecutor.Create(

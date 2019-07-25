@@ -3,6 +3,7 @@
 
 using System;
 using System.Diagnostics;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
@@ -50,13 +51,13 @@ namespace DotNetCore.CAP
 
         private IConsumerInvoker Invoker { get; }
 
-        public async Task<OperateResult> ExecuteAsync(CapReceivedMessage message)
+        public async Task<OperateResult> ExecuteAsync(CapReceivedMessage message, CancellationToken cancellationToken)
         {
             bool retry;
             OperateResult result;
             do
             {
-                var executedResult = await ExecuteWithoutRetryAsync(message);
+                var executedResult = await ExecuteWithoutRetryAsync(message, cancellationToken);
                 result = executedResult.Item2;
                 if (result == OperateResult.Success)
                 {
@@ -72,19 +73,22 @@ namespace DotNetCore.CAP
         /// Execute message consumption once.
         /// </summary>
         /// <param name="message">the message received of <see cref="CapReceivedMessage"/></param>
+        /// <param name="cancellationToken"></param>
         /// <returns>Item1 is need still retry, Item2 is executed result.</returns>
-        private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync(CapReceivedMessage message)
+        private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync(CapReceivedMessage message, CancellationToken cancellationToken)
         {
             if (message == null)
             {
                 throw new ArgumentNullException(nameof(message));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             try
             {
                 var sp = Stopwatch.StartNew();
 
-                await InvokeConsumerMethodAsync(message);
+                await InvokeConsumerMethodAsync(message, cancellationToken);
 
                 sp.Stop();
 
@@ -160,7 +164,7 @@ namespace DotNetCore.CAP
             message.Content = Helper.AddExceptionProperty(message.Content, exception);
         }
 
-        private async Task InvokeConsumerMethodAsync(CapReceivedMessage receivedMessage)
+        private async Task InvokeConsumerMethodAsync(CapReceivedMessage receivedMessage, CancellationToken cancellationToken)
         {
             if (!_selector.TryGetTopicExecutor(receivedMessage.Name, receivedMessage.Group,
                 out var executor))
@@ -179,14 +183,19 @@ namespace DotNetCore.CAP
             {
                 operationId = s_diagnosticListener.WriteSubscriberInvokeBefore(consumerContext);
 
-                var ret = await Invoker.InvokeAsync(consumerContext);
+                var ret = await Invoker.InvokeAsync(consumerContext, cancellationToken);
 
-                s_diagnosticListener.WriteSubscriberInvokeAfter(operationId, consumerContext, startTime, stopwatch.Elapsed);
+                s_diagnosticListener.WriteSubscriberInvokeAfter(operationId, consumerContext, startTime,
+                    stopwatch.Elapsed);
 
                 if (!string.IsNullOrEmpty(ret.CallbackName))
                 {
                     await _callbackMessageSender.SendAsync(ret.MessageId, ret.CallbackName, ret.Result);
                 }
+            }
+            catch (OperationCanceledException)
+            {
+                //ignore
             }
             catch (Exception ex)
             {
