@@ -7,7 +7,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Models;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -17,9 +16,7 @@ namespace DotNetCore.CAP.Abstractions
     {
         private readonly IMessagePacker _msgPacker;
         private readonly IContentSerializer _serializer;
-        private CapTransactionBase _transaction;
-
-        protected bool NotUseTransaction;
+        private readonly IDispatcher _dispatcher;
 
         // ReSharper disable once InconsistentNaming
         protected static readonly DiagnosticListener s_diagnosticListener =
@@ -28,13 +25,15 @@ namespace DotNetCore.CAP.Abstractions
         protected CapPublisherBase(IServiceProvider service)
         {
             ServiceProvider = service;
+            _dispatcher = service.GetRequiredService<IDispatcher>();
             _msgPacker = service.GetRequiredService<IMessagePacker>();
             _serializer = service.GetRequiredService<IContentSerializer>();
+            Transaction = new AsyncLocal<ICapTransaction>();
         }
 
-        protected IServiceProvider ServiceProvider { get; }
+        public IServiceProvider ServiceProvider { get; }
 
-        public ICapTransaction Transaction => _transaction ?? (_transaction = ServiceProvider.GetRequiredService<CapTransactionBase>());
+        public AsyncLocal<ICapTransaction> Transaction { get; }
 
         public void Publish<T>(string name, T contentObj, string callbackName = null)
         {
@@ -65,27 +64,33 @@ namespace DotNetCore.CAP.Abstractions
 
         protected async Task PublishAsyncInternal(CapPublishedMessage message)
         {
-            if (Transaction.DbTransaction == null)
-            {
-                NotUseTransaction = true;
-                Transaction.DbTransaction = new NoopTransaction();
-            }
-
-            Guid operationId = default(Guid);
+            var operationId = default(Guid);
 
             try
             {
                 operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
 
-                await ExecuteAsync(message, Transaction);
-
-                _transaction.AddToSent(message);
-
-                s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
-
-                if (NotUseTransaction || Transaction.AutoCommit)
+                if (Transaction.Value?.DbTransaction == null)
                 {
-                    _transaction.Commit();
+                    await ExecuteAsync(message);
+
+                    s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
+
+                    _dispatcher.EnqueueToPublish(message);
+                }
+                else
+                {
+                    var transaction = (CapTransactionBase)Transaction.Value;
+
+                    await ExecuteAsync(message, transaction);
+
+                    s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
+                   
+                    transaction.AddToSent(message);
+                    if (transaction.AutoCommit)
+                    {
+                        transaction.Commit();
+                    }
                 }
             }
             catch (Exception e)
@@ -94,17 +99,10 @@ namespace DotNetCore.CAP.Abstractions
 
                 throw;
             }
-            finally
-            {
-                if (NotUseTransaction || Transaction.AutoCommit)
-                {
-                    _transaction?.Dispose();
-                }
-            }
         }
 
         protected abstract Task ExecuteAsync(CapPublishedMessage message,
-            ICapTransaction transaction,
+            ICapTransaction transaction = null,
             CancellationToken cancel = default(CancellationToken));
 
         protected virtual string Serialize<T>(T obj, string callbackName = null)

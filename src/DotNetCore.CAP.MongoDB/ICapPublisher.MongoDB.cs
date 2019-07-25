@@ -28,8 +28,9 @@ namespace DotNetCore.CAP.MongoDB
             await PublishAsyncInternal(message);
         }
 
-        protected override Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
-            CancellationToken cancel = default(CancellationToken))
+        protected override Task ExecuteAsync(CapPublishedMessage message,
+            ICapTransaction transaction = null,
+            CancellationToken cancel = default)
         {
             var insertOptions = new InsertOneOptions { BypassDocumentValidation = false };
 
@@ -49,7 +50,7 @@ namespace DotNetCore.CAP.MongoDB
                 Version = _options.Version,
             };
 
-            if (NotUseTransaction)
+            if (transaction == null)
             {
                 return collection.InsertOneAsync(store, insertOptions, cancel);
             }

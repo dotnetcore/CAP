@@ -5,6 +5,7 @@ using System.Data;
 using System.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -90,7 +91,8 @@ namespace DotNetCore.CAP
             }
 
             var dbTransaction = dbConnection.BeginTransaction();
-            return publisher.Transaction.Begin(dbTransaction, autoCommit);
+            publisher.Transaction.Value = publisher.ServiceProvider.GetService<CapTransactionBase>();
+            return publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
         }
 
         /// <summary>
@@ -99,12 +101,13 @@ namespace DotNetCore.CAP
         /// <param name="database">The <see cref="DatabaseFacade" />.</param>
         /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
         /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-        /// <returns>The <see cref="IDbContextTransaction" /> of EF dbcontext transaction object.</returns>
+        /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
         public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
             ICapPublisher publisher, bool autoCommit = false)
         {
             var trans = database.BeginTransaction();
-            var capTrans = publisher.Transaction.Begin(trans, autoCommit);
+            publisher.Transaction.Value = publisher.ServiceProvider.GetService<CapTransactionBase>();
+            var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
             return new CapEFDbTransaction(capTrans);
         }
     }

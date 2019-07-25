@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.Diagnostics;
+using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
 // ReSharper disable once CheckNamespace
@@ -70,7 +71,8 @@ namespace DotNetCore.CAP
             ICapPublisher publisher, bool autoCommit = false)
         {
             var clientSessionHandle = client.StartSession();
-            var capTrans = publisher.Transaction.Begin(clientSessionHandle, autoCommit);
+            publisher.Transaction.Value = publisher.ServiceProvider.GetService<CapTransactionBase>();
+            var capTrans = publisher.Transaction.Value.Begin(clientSessionHandle, autoCommit);
             return new CapMongoDbClientSessionHandle(capTrans);
         }
     }

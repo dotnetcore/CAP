@@ -29,10 +29,10 @@ namespace DotNetCore.CAP.SqlServer
             await PublishAsyncInternal(message);
         }
 
-        protected override async Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction,
+        protected override async Task ExecuteAsync(CapPublishedMessage message, ICapTransaction transaction = null,
             CancellationToken cancel = default(CancellationToken))
         {
-            if (NotUseTransaction)
+            if (transaction == null)
             {
                 using (var connection = new SqlConnection(_options.ConnectionString))
                 {

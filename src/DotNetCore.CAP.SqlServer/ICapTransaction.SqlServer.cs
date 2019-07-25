@@ -150,7 +150,8 @@ namespace DotNetCore.CAP
             }
 
             var dbTransaction = dbConnection.BeginTransaction();
-            var capTransaction = publisher.Transaction.Begin(dbTransaction, autoCommit);
+            publisher.Transaction.Value = publisher.ServiceProvider.GetService<CapTransactionBase>();
+            var capTransaction = publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
             return (IDbTransaction)capTransaction.DbTransaction;
         }
 
@@ -165,7 +166,8 @@ namespace DotNetCore.CAP
             ICapPublisher publisher, bool autoCommit = false)
         {
             var trans = database.BeginTransaction();
-            var capTrans = publisher.Transaction.Begin(trans, autoCommit);
+            publisher.Transaction.Value = publisher.ServiceProvider.GetService<CapTransactionBase>();
+            var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
             return new CapEFDbTransaction(capTrans);
         }
     }
