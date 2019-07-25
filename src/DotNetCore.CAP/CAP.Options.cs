@@ -14,34 +14,14 @@ namespace DotNetCore.CAP
     /// </summary>
     public class CapOptions
     {
-        /// <summary>
-        /// Default succeeded message expiration time span, in seconds.
-        /// </summary>
-        public const int DefaultSucceedMessageExpirationAfter = 24 * 3600;
-
-        /// <summary>
-        /// Failed message retry waiting interval.
-        /// </summary>
-        public const int DefaultFailedMessageWaitingInterval = 60;
-
-        /// <summary>
-        /// Failed message retry count.
-        /// </summary>
-        public const int DefaultFailedRetryCount = 50;
-
-        /// <summary>
-        /// Default version
-        /// </summary>
-        public const string DefaultVersion = "v1";
-
-
         public CapOptions()
         {
-            SucceedMessageExpiredAfter = DefaultSucceedMessageExpirationAfter;
-            FailedRetryInterval = DefaultFailedMessageWaitingInterval;
-            FailedRetryCount = DefaultFailedRetryCount;
+            SucceedMessageExpiredAfter = 24 * 3600;
+            FailedRetryInterval = 60;
+            FailedRetryCount = 50;
+            ConsumerThreadCount = 1;
             Extensions = new List<ICapOptionsExtension>();
-            Version = DefaultVersion;
+            Version = "v1";
             DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
         }
 
@@ -79,6 +59,12 @@ namespace DotNetCore.CAP
         /// Default is 50 times.
         /// </summary>
         public int FailedRetryCount { get; set; }
+
+        /// <summary>
+        /// The number of consumer thread connections.
+        /// Default is 1
+        /// </summary>
+        public int ConsumerThreadCount { get; set; }
 
         /// <summary>
         /// Registers an extension that will be executed when building services.
