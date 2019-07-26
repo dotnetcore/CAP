@@ -59,17 +59,17 @@ namespace DotNetCore.CAP.Processor
                 {
                     if (_publishedMessageQueue.TryTake(out var message, 3000, _cts.Token))
                     {
-                        try
+                        Task.Run(async () =>
                         {
-                            Task.Run(async () =>
+                            try
                             {
                                 await _sender.SendAsync(message);
-                            });
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Topic:{message.Name}, Id:{message.Id}");
-                        }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Topic:{message.Name}, Id:{message.Id}");
+                            }
+                        });
                     }
                 }
             }
