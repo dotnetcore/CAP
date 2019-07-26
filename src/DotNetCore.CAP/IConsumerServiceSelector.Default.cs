@@ -195,7 +195,7 @@ namespace DotNetCore.CAP
                     .Where(x => x.Attribute.Name.IndexOf('#') >= 0)
                     .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
                     {
-                        Name = ("^" + x.Attribute.Name + "$").Replace("#", "[0-9_a-zA-Z\\.]+"),
+                        Name = ("^" + x.Attribute.Name.Replace(".", "\\.") + "$").Replace("#", "[0-9_a-zA-Z\\.]+"),
                         Descriptor = x
                     }).ToList();
                 _poundList.TryAdd(group, tmpList);
