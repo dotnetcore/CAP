@@ -68,7 +68,9 @@ namespace DotNetCore.CAP.Abstractions
 
             try
             {
-                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
+                var tracingResult = TracingBefore(message.Name, message.Content);
+                operationId = tracingResult.Item1;
+                message.Content = tracingResult.Item2;
 
                 if (Transaction.Value?.DbTransaction == null)
                 {
@@ -99,6 +101,21 @@ namespace DotNetCore.CAP.Abstractions
 
                 throw;
             }
+        }
+        
+        private (Guid, string) TracingBefore(string topic, string values)
+        {
+            Guid operationId = Guid.NewGuid();
+            
+            var eventData = new BrokerStoreEventData(
+                operationId, 
+                "",
+                topic, 
+                values);
+
+            s_diagnosticListener.WritePublishMessageStoreBefore(eventData);
+
+            return (operationId, eventData.MessageContent);
         }
 
         protected abstract Task ExecuteAsync(CapPublishedMessage message,
