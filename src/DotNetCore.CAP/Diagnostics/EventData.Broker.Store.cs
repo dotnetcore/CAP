@@ -16,5 +16,7 @@ namespace DotNetCore.CAP.Diagnostics
         
         public string MessageName { get; set; }
         public string MessageContent { get; set; }
+        
+        public TracingHeaders Headers { get; set; } 
     }
 }

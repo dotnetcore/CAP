@@ -70,7 +70,10 @@ namespace DotNetCore.CAP.Abstractions
             {
                 var tracingResult = TracingBefore(message.Name, message.Content);
                 operationId = tracingResult.Item1;
-                message.Content = tracingResult.Item2;
+                
+                message.Content = tracingResult.Item2 != null
+                    ? Helper.AddTracingHeaderProperty(message.Content, tracingResult.Item2)
+                    : message.Content;
 
                 if (Transaction.Value?.DbTransaction == null)
                 {
@@ -103,7 +106,7 @@ namespace DotNetCore.CAP.Abstractions
             }
         }
         
-        private (Guid, string) TracingBefore(string topic, string values)
+        private (Guid, TracingHeaders) TracingBefore(string topic, string values)
         {
             Guid operationId = Guid.NewGuid();
             
@@ -115,7 +118,7 @@ namespace DotNetCore.CAP.Abstractions
 
             s_diagnosticListener.WritePublishMessageStoreBefore(eventData);
 
-            return (operationId, eventData.MessageContent);
+            return (operationId, eventData.Headers);
         }
 
         protected abstract Task ExecuteAsync(CapPublishedMessage message,

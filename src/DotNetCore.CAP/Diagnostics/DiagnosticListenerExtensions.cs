@@ -42,6 +42,7 @@ namespace DotNetCore.CAP.Diagnostics
         {
             if (@this.IsEnabled(CapBeforePublishMessageStore))
             {
+                eventData.Headers = new TracingHeaders();
                 @this.Write(CapBeforePublishMessageStore, eventData);
             }
         }
