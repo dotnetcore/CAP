@@ -38,26 +38,13 @@ namespace DotNetCore.CAP.Diagnostics
         //============================================================================
         //====================  Before publish store message      ====================
         //============================================================================
-        public static Guid WritePublishMessageStoreBefore(this DiagnosticListener @this,
-            CapPublishedMessage message,
-            [CallerMemberName] string operation = "")
+        public static void WritePublishMessageStoreBefore(this DiagnosticListener @this, BrokerStoreEventData eventData)
         {
             if (@this.IsEnabled(CapBeforePublishMessageStore))
             {
-                var operationId = Guid.NewGuid();
-
-                @this.Write(CapBeforePublishMessageStore, new
-                {
-                    OperationId = operationId,
-                    Operation = operation,
-                    MessageName = message.Name,
-                    MessageContent = message.Content
-                });
-
-                return operationId;
+                eventData.Headers = new TracingHeaders();
+                @this.Write(CapBeforePublishMessageStore, eventData);
             }
-
-            return Guid.Empty;
         }
 
         public static void WritePublishMessageStoreAfter(this DiagnosticListener @this,
