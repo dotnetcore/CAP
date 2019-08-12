@@ -192,7 +192,7 @@ namespace DotNetCore.CAP.Test
             DiagnosticsWapper(() =>
             {
                 s_diagnosticListener.WriteSubscriberInvokeError(operationId, FackConsumerContext(), ex,
-                    DateTimeOffset.Now, TimeSpan.MaxValue);
+                    DateTimeOffset.Now, TimeSpan.MaxValue, default(int));
             }, kvp =>
             {
                 if (kvp.Key.Equals(CapDiagnosticListenerExtensions.CapErrorSubscriberInvoke))

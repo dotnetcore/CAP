@@ -199,7 +199,8 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                s_diagnosticListener.WriteSubscriberInvokeError(operationId, consumerContext, ex, startTime, stopwatch.Elapsed);
+                s_diagnosticListener.WriteSubscriberInvokeError(operationId, consumerContext, ex, startTime, 
+                    stopwatch.Elapsed, receivedMessage.Retries + 1);
 
                 throw new SubscriberExecutionFailedException(ex.Message, ex);
             }

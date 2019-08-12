@@ -203,6 +203,7 @@ namespace DotNetCore.CAP.Diagnostics
             Exception ex,
             DateTimeOffset startTime,
             TimeSpan duration,
+            int retries,
             [CallerMemberName] string operation = "")
         {
             if (@this.IsEnabled(CapErrorSubscriberInvoke))
@@ -214,7 +215,7 @@ namespace DotNetCore.CAP.Diagnostics
 
                 @this.Write(CapErrorSubscriberInvoke, new SubscriberInvokeErrorEventData(operationId, operation, methodName,
                     subscribeName,
-                    subscribeGroup, parameterValues, ex, startTime, duration));
+                    subscribeGroup, parameterValues, ex, startTime, duration, retries));
             }
         }
     }
