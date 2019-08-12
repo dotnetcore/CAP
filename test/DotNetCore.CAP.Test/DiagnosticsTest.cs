@@ -65,7 +65,7 @@ namespace DotNetCore.CAP.Test
             var ex = new Exception("WritePublishErrorTest");
             DiagnosticsWapper(() =>
             {
-                var eventData = new BrokerPublishErrorEventData(operationId, "", "", "", "", ex, DateTimeOffset.UtcNow, default(TimeSpan));
+                var eventData = new BrokerPublishErrorEventData(operationId, "", "", "", "", ex, DateTimeOffset.UtcNow, default(TimeSpan), default(int));
                 s_diagnosticListener.WritePublishError(eventData);
 
             }, kvp =>
