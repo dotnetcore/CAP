@@ -190,7 +190,8 @@ namespace DotNetCore.CAP
                 message.Content,
                 ex,
                 startTime,
-                du);
+                du,
+                message.Retries + 1);
 
             s_diagnosticListener.WritePublishError(eventData);
         }

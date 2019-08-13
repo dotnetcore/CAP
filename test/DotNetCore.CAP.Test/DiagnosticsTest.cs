@@ -65,7 +65,7 @@ namespace DotNetCore.CAP.Test
             var ex = new Exception("WritePublishErrorTest");
             DiagnosticsWapper(() =>
             {
-                var eventData = new BrokerPublishErrorEventData(operationId, "", "", "", "", ex, DateTimeOffset.UtcNow, default(TimeSpan));
+                var eventData = new BrokerPublishErrorEventData(operationId, "", "", "", "", ex, DateTimeOffset.UtcNow, default(TimeSpan), default(int));
                 s_diagnosticListener.WritePublishError(eventData);
 
             }, kvp =>
@@ -192,7 +192,7 @@ namespace DotNetCore.CAP.Test
             DiagnosticsWapper(() =>
             {
                 s_diagnosticListener.WriteSubscriberInvokeError(operationId, FackConsumerContext(), ex,
-                    DateTimeOffset.Now, TimeSpan.MaxValue);
+                    DateTimeOffset.Now, TimeSpan.MaxValue, default(int));
             }, kvp =>
             {
                 if (kvp.Key.Equals(CapDiagnosticListenerExtensions.CapErrorSubscriberInvoke))
