@@ -1,13 +1,16 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System.Threading.Tasks;
 using DotNetCore.CAP.Infrastructure;
 
 namespace DotNetCore.CAP.Dashboard
 {
     public class LocalRequestsOnlyAuthorizationFilter : IDashboardAuthorizationFilter
     {
-        public bool Authorize(DashboardContext context)
+#pragma warning disable 1998
+        public async Task<bool> AuthorizeAsync(DashboardContext context)
+#pragma warning restore 1998
         {
             var ipAddress = context.Request.RemoteIpAddress;
             // if unknown, assume not local

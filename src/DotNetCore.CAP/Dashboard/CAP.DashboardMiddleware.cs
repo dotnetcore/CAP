@@ -27,12 +27,13 @@ namespace DotNetCore.CAP
             _routes = routes ?? throw new ArgumentNullException(nameof(routes));
         }
 
-        public Task Invoke(HttpContext context)
+        public async Task Invoke(HttpContext context)
         {
             if (!context.Request.Path.StartsWithSegments(_options.PathMatch,
                 out var matchedPath, out var remainingPath))
             {
-                return _next(context);
+                await _next(context);
+                return;
             }
 
             // Update the path
@@ -48,23 +49,27 @@ namespace DotNetCore.CAP
 
                 if (findResult == null)
                 {
-                    return _next.Invoke(context);
+                    await _next.Invoke(context);
+                    return;
                 }
 
-                if (_options.Authorization.Any(filter => !filter.Authorize(dashboardContext)))
+                foreach (var authorizationFilter in _options.Authorization)
                 {
+                    var authenticateResult = await authorizationFilter.AuthorizeAsync(dashboardContext);
+                    if (authenticateResult) continue;
+
                     var isAuthenticated = context.User?.Identity?.IsAuthenticated;
 
                     context.Response.StatusCode = isAuthenticated == true
-                        ? (int) HttpStatusCode.Forbidden
-                        : (int) HttpStatusCode.Unauthorized;
+                        ? (int)HttpStatusCode.Forbidden
+                        : (int)HttpStatusCode.Unauthorized;
 
-                    return Task.CompletedTask;
+                    return;
                 }
 
                 dashboardContext.UriMatch = findResult.Item2;
 
-                return findResult.Item1.Dispatch(dashboardContext);
+                await findResult.Item1.Dispatch(dashboardContext);
             }
             finally
             {
