@@ -14,7 +14,7 @@ Install-Package DotNetCore.CAP.Kafka
 
 ```
 
-然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于内存的配置项。
+然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于 Kafka 的配置项。
 
 ```csharp
 
