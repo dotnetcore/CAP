@@ -1,5 +1,5 @@
 ﻿using System.Collections.Concurrent;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Persistence;
 
 namespace DotNetCore.CAP
 {
@@ -7,19 +7,19 @@ namespace DotNetCore.CAP
     {
         private readonly IDispatcher _dispatcher;
 
-        private readonly ConcurrentQueue<CapPublishedMessage> _bufferList;
+        private readonly ConcurrentQueue<MediumMessage> _bufferList;
 
         protected CapTransactionBase(IDispatcher dispatcher)
         {
             _dispatcher = dispatcher;
-            _bufferList = new ConcurrentQueue<CapPublishedMessage>();
+            _bufferList = new ConcurrentQueue<MediumMessage>();
         }
 
         public bool AutoCommit { get; set; }
 
         public object DbTransaction { get; set; }
 
-        protected internal virtual void AddToSent(CapPublishedMessage msg)
+        protected internal virtual void AddToSent(MediumMessage msg)
         {
             _bufferList.Enqueue(msg);
         }
@@ -29,6 +29,7 @@ namespace DotNetCore.CAP
             while (!_bufferList.IsEmpty)
             {
                 _bufferList.TryDequeue(out var message);
+
                 _dispatcher.EnqueueToPublish(message);
             }
         }

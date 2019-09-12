@@ -5,7 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.SqlServer.Diagnostics
 {

@@ -2,7 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Internal
 {

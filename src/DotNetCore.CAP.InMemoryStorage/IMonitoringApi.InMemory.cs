@@ -7,7 +7,7 @@ using System.Linq;
 using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.Monitoring;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.InMemoryStorage
 {

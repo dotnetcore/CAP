@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using Xunit;
 
 namespace DotNetCore.CAP.SqlServer.Test

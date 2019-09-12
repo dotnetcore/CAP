@@ -13,6 +13,7 @@ namespace Sample.RabbitMQ.MySql
         public static IWebHost BuildWebHost(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>() 
+                .UseUrls("http://*:15173")
                 .Build();
     }
 }

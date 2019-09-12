@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
@@ -15,18 +15,19 @@ namespace DotNetCore.CAP.Internal
     internal class DefaultConsumerInvoker : IConsumerInvoker
     {
         private readonly ILogger _logger;
-        private readonly IMessagePacker _messagePacker;
-        private readonly IModelBinderFactory _modelBinderFactory;
+        //private readonly IMessagePacker _messagePacker;
+        //private readonly IModelBinderFactory _modelBinderFactory;
         private readonly IServiceProvider _serviceProvider;
 
         public DefaultConsumerInvoker(ILoggerFactory loggerFactory,
-            IServiceProvider serviceProvider,
-            IMessagePacker messagePacker,
-            IModelBinderFactory modelBinderFactory)
+            IServiceProvider serviceProvider
+            //IMessagePacker messagePacker,
+            //IModelBinderFactory modelBinderFactory
+            )
         {
-            _modelBinderFactory = modelBinderFactory;
+            //_modelBinderFactory = modelBinderFactory;
             _serviceProvider = serviceProvider;
-            _messagePacker = messagePacker;
+            //_messagePacker = messagePacker;
             _logger = loggerFactory.CreateLogger<DefaultConsumerInvoker>();
         }
 
@@ -58,20 +59,21 @@ namespace DotNetCore.CAP.Internal
                     obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, implType);
                 }
 
-                var jsonContent = context.DeliverMessage.Content;
-                var message = _messagePacker.UnPack(jsonContent);
+                //var jsonContent = context.DeliverMessage.Content;
+                //var message = _messagePacker.UnPack(jsonContent);
 
+                var message = context.DeliverMessage;
                 object resultObj;
                 if (executor.MethodParameters.Length > 0)
                 {
-                    resultObj = await ExecuteWithParameterAsync(executor, obj, message.Content);
+                    resultObj = await ExecuteWithParameterAsync(executor, obj, message.Value);
                 }
                 else
                 {
                     resultObj = await ExecuteAsync(executor, obj);
                 }
 
-                return new ConsumerExecutedResult(resultObj, message.Id, message.CallbackName);
+                return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName());
             }
         }
 
@@ -85,31 +87,35 @@ namespace DotNetCore.CAP.Internal
             return executor.Execute(@class);
         }
 
-        private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor,
-            object @class, string parameterString)
+        private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor, object @class, object parameter)
         {
             var firstParameter = executor.MethodParameters[0];
             try
             {
-                var binder = _modelBinderFactory.CreateBinder(firstParameter);
-                var bindResult = await binder.BindModelAsync(parameterString);
-                if (bindResult.IsSuccess)
+                if (executor.IsMethodAsync)
                 {
-                    if (executor.IsMethodAsync)
-                    {
-                        return await executor.ExecuteAsync(@class, bindResult.Model);
-                    }
-
-                    return executor.Execute(@class, bindResult.Model);
+                    return await executor.ExecuteAsync(@class, parameter);
                 }
 
-                throw new MethodBindException(
-                    $"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameterString} ");
+                return executor.Execute(@class, parameter);
+                //var binder = _modelBinderFactory.CreateBinder(firstParameter);
+                //var bindResult = await binder.BindModelAsync(parameter);
+                //if (bindResult.IsSuccess)
+                //{
+                //    if (executor.IsMethodAsync)
+                //    {
+                //        return await executor.ExecuteAsync(@class, bindResult.Model);
+                //    }
+
+                //    return executor.Execute(@class, bindResult.Model);
+                //}
+
+                //throw new MethodBindException(
+                //    $"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameter} ");
             }
             catch (FormatException ex)
             {
-                _logger.ModelBinderFormattingException(executor.MethodInfo?.Name, firstParameter.Name, parameterString,
-                    ex);
+                //_logger.ModelBinderFormattingException(executor.MethodInfo?.Name, firstParameter.Name, parameter, ex);
                 return null;
             }
         }

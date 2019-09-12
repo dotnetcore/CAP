@@ -36,10 +36,10 @@ namespace Sample.RabbitMQ.MySql.Controllers
                     //your business code
                     connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
 
-                    for (int i = 0; i < 5; i++)
-                    {
-                        _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
-                    }
+                    //for (int i = 0; i < 5; i++)
+                    //{
+                    _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+                    //}
 
                     transaction.Commit();
                 }
@@ -68,10 +68,10 @@ namespace Sample.RabbitMQ.MySql.Controllers
         }
 
         [NonAction]
-        [CapSubscribe("#.rabbitmq.mysql")]
+        [CapSubscribe("sample.rabbitmq.mysql")]
         public void Subscriber(DateTime time)
         {
-            Console.WriteLine($@"{DateTime.Now}, Subscriber invoked, Sent time:{time}");
+            //Console.WriteLine($@"{DateTime.Now}, Subscriber invoked, Sent time:{time}");
         }
     }
 }

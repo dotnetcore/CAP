@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

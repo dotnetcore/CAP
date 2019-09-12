@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP
 {
@@ -36,7 +37,7 @@ namespace DotNetCore.CAP
         /// </summary>
         void Reject();
 
-        event EventHandler<MessageContext> OnMessageReceived;
+        event EventHandler<TransportMessage> OnMessageReceived;
 
         event EventHandler<LogMessageEventArgs> OnLog;
     }

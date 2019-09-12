@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,7 +17,7 @@ namespace DotNetCore.CAP.Processor
     {
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly ILogger<MessageNeedToRetryProcessor> _logger;
-        private readonly IPublishMessageSender _publishMessageSender;
+        private readonly IMessageSender _messageSender;
         private readonly ISubscriberExecutor _subscriberExecutor;
         private readonly TimeSpan _waitingInterval;
 
@@ -23,11 +25,11 @@ namespace DotNetCore.CAP.Processor
             IOptions<CapOptions> options,
             ILogger<MessageNeedToRetryProcessor> logger,
             ISubscriberExecutor subscriberExecutor,
-            IPublishMessageSender publishMessageSender)
+            IMessageSender messageSender)
         {
             _logger = logger;
             _subscriberExecutor = subscriberExecutor;
-            _publishMessageSender = publishMessageSender;
+            _messageSender = messageSender;
             _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
         }
 
@@ -38,14 +40,14 @@ namespace DotNetCore.CAP.Processor
                 throw new ArgumentNullException(nameof(context));
             }
 
-            var connection = context.Provider.GetRequiredService<IStorageConnection>();
+            var storage = context.Provider.GetRequiredService<IDataStorage>();
 
-            await Task.WhenAll(ProcessPublishedAsync(connection, context), ProcessReceivedAsync(connection, context));
+            await Task.WhenAll(ProcessPublishedAsync(storage, context), ProcessReceivedAsync(storage, context));
 
             await context.WaitAsync(_waitingInterval);
         }
 
-        private async Task ProcessPublishedAsync(IStorageConnection connection, ProcessingContext context)
+        private async Task ProcessPublishedAsync(IDataStorage connection, ProcessingContext context)
         {
             context.ThrowIfStopping();
 
@@ -53,13 +55,13 @@ namespace DotNetCore.CAP.Processor
 
             foreach (var message in messages)
             {
-                await _publishMessageSender.SendAsync(message);
+                await _messageSender.SendAsync(message);
 
                 await context.WaitAsync(_delay);
             }
         }
 
-        private async Task ProcessReceivedAsync(IStorageConnection connection, ProcessingContext context)
+        private async Task ProcessReceivedAsync(IDataStorage connection, ProcessingContext context)
         {
             context.ThrowIfStopping();
 

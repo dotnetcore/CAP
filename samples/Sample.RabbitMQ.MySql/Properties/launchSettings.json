@@ -21,7 +21,7 @@
       "launchBrowser": true,
       "launchUrl": "cap",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Production"
       },
       "applicationUrl": "http://localhost:57173/"
     }

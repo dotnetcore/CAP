@@ -24,7 +24,7 @@ namespace DotNetCore.CAP
             services.Configure(_configure);
 
             services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
-            services.AddSingleton<IPublishExecutor, KafkaPublishMessageSender>();
+            services.AddSingleton<ITransportPublisher, KafkaPublishMessageSender>();
             services.AddSingleton<IPublishMessageSender, KafkaPublishMessageSender>();
             services.AddSingleton<IConnectionPool,ConnectionPool>();
         }

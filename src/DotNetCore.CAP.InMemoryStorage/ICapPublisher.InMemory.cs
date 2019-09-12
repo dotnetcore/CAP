@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.InMemoryStorage

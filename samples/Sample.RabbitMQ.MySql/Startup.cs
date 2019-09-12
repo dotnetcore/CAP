@@ -15,12 +15,13 @@ namespace Sample.RabbitMQ.MySql
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ("localhost");
+                x.UseRabbitMQ("192.168.2.120");
                 x.UseDashboard();
                 x.FailedRetryCount = 5;
                 x.FailedThresholdCallback = (type, name, content) =>
                 {
-                    Console.WriteLine($@"A message of type {type} failed after executing {x.FailedRetryCount} several times, requiring manual troubleshooting. Message name: {name}, message body: {content}");
+                    Console.WriteLine(
+                        $@"A message of type {type} failed after executing {x.FailedRetryCount} several times, requiring manual troubleshooting. Message name: {name}, message body: {content}");
                 };
             });
 

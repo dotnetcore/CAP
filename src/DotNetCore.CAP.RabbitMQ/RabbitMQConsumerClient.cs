@@ -3,11 +3,13 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 using System.Threading;
+using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Headers = DotNetCore.CAP.Messages.Headers;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
@@ -34,7 +36,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _exchangeName = connectionChannelPool.Exchange;
         }
 
-        public event EventHandler<MessageContext> OnMessageReceived;
+        public event EventHandler<TransportMessage> OnMessageReceived;
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
@@ -125,7 +127,7 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 _connectionLock.Release();
             }
-        } 
+        }
 
         private void OnConsumerConsumerCancelled(object sender, ConsumerEventArgs e)
         {
@@ -160,12 +162,13 @@ namespace DotNetCore.CAP.RabbitMQ
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
             _deliveryTag = e.DeliveryTag;
-            var message = new MessageContext
-            {
-                Group = _queueName,
-                Name = e.RoutingKey,
-                Content = Encoding.UTF8.GetString(e.Body)
-            };
+
+            var header = e.BasicProperties.Headers
+                .ToDictionary(x => x.Key, x => x.Value.ToString());
+            header.Add(Headers.Group, _queueName);
+
+            var message = new TransportMessage(header, e.Body);
+
             OnMessageReceived?.Invoke(sender, message);
         }
 
@@ -176,6 +179,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 LogType = MqLogType.ConsumerShutdown,
                 Reason = e.ReplyText
             };
+
             OnLog?.Invoke(sender, args);
         }
 

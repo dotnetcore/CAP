@@ -2,15 +2,16 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Processor;
-using DotNetCore.CAP.Processor.States;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -18,10 +19,9 @@ namespace DotNetCore.CAP
 {
     internal class DefaultSubscriberExecutor : ISubscriberExecutor
     {
-        private readonly ICallbackMessageSender _callbackMessageSender;
-        private readonly IStorageConnection _connection;
+        private readonly ICapPublisher _sender;
+        private readonly IDataStorage _dataStorage;
         private readonly ILogger _logger;
-        private readonly IStateChanger _stateChanger;
         private readonly CapOptions _options;
         private readonly MethodMatcherCache _selector;
 
@@ -34,16 +34,14 @@ namespace DotNetCore.CAP
             ILogger<DefaultSubscriberExecutor> logger,
             IOptions<CapOptions> options,
             IConsumerInvokerFactory consumerInvokerFactory,
-            ICallbackMessageSender callbackMessageSender,
-            IStateChanger stateChanger,
-            IStorageConnection connection,
+            ICapPublisher sender,
+            IDataStorage dataStorage,
             MethodMatcherCache selector)
         {
             _selector = selector;
-            _callbackMessageSender = callbackMessageSender;
+            _sender = sender;
             _options = options.Value;
-            _stateChanger = stateChanger;
-            _connection = connection;
+            _dataStorage = dataStorage;
             _logger = logger;
 
             Invoker = consumerInvokerFactory.CreateInvoker();
@@ -51,7 +49,7 @@ namespace DotNetCore.CAP
 
         private IConsumerInvoker Invoker { get; }
 
-        public async Task<OperateResult> ExecuteAsync(CapReceivedMessage message, CancellationToken cancellationToken)
+        public async Task<OperateResult> ExecuteAsync(MediumMessage message, CancellationToken cancellationToken)
         {
             bool retry;
             OperateResult result;
@@ -69,13 +67,7 @@ namespace DotNetCore.CAP
             return result;
         }
 
-        /// <summary>
-        /// Execute message consumption once.
-        /// </summary>
-        /// <param name="message">the message received of <see cref="CapReceivedMessage"/></param>
-        /// <param name="cancellationToken"></param>
-        /// <returns>Item1 is need still retry, Item2 is executed result.</returns>
-        private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync(CapReceivedMessage message, CancellationToken cancellationToken)
+        private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync(MediumMessage message, CancellationToken cancellationToken)
         {
             if (message == null)
             {
@@ -100,35 +92,36 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An exception occurred while executing the subscription method. Topic:{message.Name}, Id:{message.Id}");
+                _logger.LogError(ex, $"An exception occurred while executing the subscription method. Topic:{message.Origin.GetName()}, Id:{message.DbId}");
 
                 return (await SetFailedState(message, ex), OperateResult.Failed(ex));
             }
         }
 
-        private Task SetSuccessfulState(CapReceivedMessage message)
+        private Task SetSuccessfulState(MediumMessage message)
         {
-            var succeededState = new SucceededState(_options.SucceedMessageExpiredAfter);
-            return _stateChanger.ChangeStateAsync(message, succeededState, _connection);
+            message.ExpiresAt = DateTime.Now.AddSeconds(_options.SucceedMessageExpiredAfter);
+            return _dataStorage.ChangeReceiveStateAsync(message, StatusName.Succeeded);
         }
 
-        private async Task<bool> SetFailedState(CapReceivedMessage message, Exception ex)
+        private async Task<bool> SetFailedState(MediumMessage message, Exception ex)
         {
             if (ex is SubscriberNotFoundException)
             {
                 message.Retries = _options.FailedRetryCount; // not retry if SubscriberNotFoundException
             }
 
-            AddErrorReasonToContent(message, ex);
+            //TODO: Add exception to content
+            // AddErrorReasonToContent(message, ex);
 
             var needRetry = UpdateMessageForRetry(message);
 
-            await _stateChanger.ChangeStateAsync(message, new FailedState(), _connection);
+            await _dataStorage.ChangeReceiveStateAsync(message, StatusName.Failed);
 
             return needRetry;
         }
 
-        private bool UpdateMessageForRetry(CapReceivedMessage message)
+        private bool UpdateMessageForRetry(MediumMessage message)
         {
             var retryBehavior = RetryBehavior.DefaultRetry;
 
@@ -142,9 +135,9 @@ namespace DotNetCore.CAP
                 {
                     try
                     {
-                        _options.FailedThresholdCallback?.Invoke(MessageType.Subscribe, message.Name, message.Content);
+                        _options.FailedThresholdCallback?.Invoke(MessageType.Subscribe, message.Origin);
 
-                        _logger.ConsumerExecutedAfterThreshold(message.Id, _options.FailedRetryCount);
+                        _logger.ConsumerExecutedAfterThreshold(message.DbId, _options.FailedRetryCount);
                     }
                     catch (Exception ex)
                     {
@@ -154,22 +147,24 @@ namespace DotNetCore.CAP
                 return false;
             }
 
-            _logger.ConsumerExecutionRetrying(message.Id, retries);
+            _logger.ConsumerExecutionRetrying(message.DbId, retries);
 
             return true;
         }
 
-        private static void AddErrorReasonToContent(CapReceivedMessage message, Exception exception)
-        {
-            message.Content = Helper.AddExceptionProperty(message.Content, exception);
-        }
+        //private static void AddErrorReasonToContent(CapReceivedMessage message, Exception exception)
+        //{
+        //    message.Content = Helper.AddExceptionProperty(message.Content, exception);
+        //}
 
-        private async Task InvokeConsumerMethodAsync(CapReceivedMessage receivedMessage, CancellationToken cancellationToken)
+        private async Task InvokeConsumerMethodAsync(MediumMessage message, CancellationToken cancellationToken)
         {
-            if (!_selector.TryGetTopicExecutor(receivedMessage.Name, receivedMessage.Group,
+            if (!_selector.TryGetTopicExecutor(
+                message.Origin.GetName(),
+                message.Origin.GetGroup(),
                 out var executor))
             {
-                var error = $"Message can not be found subscriber. {receivedMessage} \r\n see: https://github.com/dotnetcore/CAP/issues/63";
+                var error = $"Message can not be found subscriber. {message} \r\n see: https://github.com/dotnetcore/CAP/issues/63";
                 throw new SubscriberNotFoundException(error);
             }
 
@@ -177,20 +172,25 @@ namespace DotNetCore.CAP
             var stopwatch = Stopwatch.StartNew();
             var operationId = Guid.Empty;
 
-            var consumerContext = new ConsumerContext(executor, receivedMessage.ToMessageContext());
+            var consumerContext = new ConsumerContext(executor, message.Origin);
 
             try
             {
-                operationId = s_diagnosticListener.WriteSubscriberInvokeBefore(consumerContext);
+                // operationId = s_diagnosticListener.WriteSubscriberInvokeBefore(consumerContext);
 
                 var ret = await Invoker.InvokeAsync(consumerContext, cancellationToken);
 
-                s_diagnosticListener.WriteSubscriberInvokeAfter(operationId, consumerContext, startTime,
-                    stopwatch.Elapsed);
+                // s_diagnosticListener.WriteSubscriberInvokeAfter(operationId, consumerContext, startTime,stopwatch.Elapsed);
 
                 if (!string.IsNullOrEmpty(ret.CallbackName))
                 {
-                    await _callbackMessageSender.SendAsync(ret.MessageId, ret.CallbackName, ret.Result);
+                    var header = new Dictionary<string, string>()
+                    {
+                        [Headers.CorrelationId] = message.Origin.GetId(),
+                        [Headers.CorrelationSequence] = (message.Origin.GetCorrelationSequence() + 1).ToString()
+                    };
+
+                    await _sender.PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken);
                 }
             }
             catch (OperationCanceledException)
@@ -199,7 +199,7 @@ namespace DotNetCore.CAP
             }
             catch (Exception ex)
             {
-                s_diagnosticListener.WriteSubscriberInvokeError(operationId, consumerContext, ex, startTime, stopwatch.Elapsed);
+                // s_diagnosticListener.WriteSubscriberInvokeError(operationId, consumerContext, ex, startTime, stopwatch.Elapsed);
 
                 throw new SubscriberExecutionFailedException(ex.Message, ex);
             }

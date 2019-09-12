@@ -2,53 +2,50 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Processor.States;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
-    internal sealed class RabbitMQPublishMessageSender : BasePublishMessageSender
+    internal sealed class RabbitMQMessageSender : ITransport
     {
         private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly ILogger _logger;
         private readonly string _exchange;
 
-        public RabbitMQPublishMessageSender(
-            ILogger<RabbitMQPublishMessageSender> logger,
-            IOptions<CapOptions> options,
-            IStorageConnection connection,
-            IConnectionChannelPool connectionChannelPool,
-            IStateChanger stateChanger)
-            : base(logger, options, connection, stateChanger)
+        public RabbitMQMessageSender(
+            ILogger<RabbitMQMessageSender> logger,
+            IConnectionChannelPool connectionChannelPool)
         {
             _logger = logger;
             _connectionChannelPool = connectionChannelPool;
             _exchange = _connectionChannelPool.Exchange;
         }
 
-        protected override string ServersAddress => _connectionChannelPool.HostAddress;
+        public string Address => _connectionChannelPool.HostAddress;
 
-        public override Task<OperateResult> PublishAsync(string keyName, string content)
+        public Task<OperateResult> SendAsync(TransportMessage message)
         {
             var channel = _connectionChannelPool.Rent();
             try
             {
-                var body = Encoding.UTF8.GetBytes(content);
-                var props = new BasicProperties()
+                var props = new BasicProperties
                 {
-                    DeliveryMode = 2
+                    DeliveryMode = 2,
+                    Headers = message.Headers.ToDictionary(x => x.Key, x => (object)x.Value)
                 };
 
                 channel.ExchangeDeclare(_exchange, RabbitMQOptions.ExchangeType, true);
-                channel.BasicPublish(_exchange, keyName, props, body);
 
-                _logger.LogDebug($"RabbitMQ topic message [{keyName}] has been published. Body: {content}");
+                channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
+
+                _logger.LogDebug($"RabbitMQ topic message [{message.GetName()}] has been published.");
 
                 return Task.FromResult(OperateResult.Success);
             }
@@ -71,6 +68,6 @@ namespace DotNetCore.CAP.RabbitMQ
                     channel.Dispose();
                 }
             }
-        }
+        } 
     }
 }

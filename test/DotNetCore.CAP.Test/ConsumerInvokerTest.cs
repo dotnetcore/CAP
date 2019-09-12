@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;

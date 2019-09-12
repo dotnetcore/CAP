@@ -1,6 +1,6 @@
 ﻿using System;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using Newtonsoft.Json;
 using Xunit;
 

@@ -2,15 +2,15 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Diagnostics
 {
     public class BrokerPublishErrorEventData : BrokerPublishEndEventData, IErrorEventData
     {
         public BrokerPublishErrorEventData(Guid operationId, string operation, string brokerAddress,
-            string brokerTopicName, string brokerTopicBody, Exception exception, DateTimeOffset startTime,
-            TimeSpan duration)
-            : base(operationId, operation, brokerAddress, brokerTopicName, brokerTopicBody, startTime, duration)
+            Message message, Exception exception, DateTimeOffset startTime, TimeSpan duration)
+            : base(operationId, operation, brokerAddress, message, startTime, duration)
         {
             Exception = exception;
         }

@@ -1,43 +1,38 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
-using DotNetCore.CAP.Dashboard;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class MySqlStorage : IStorage
+    public class MySqlStorageInitializer : IStorageInitializer
     {
-        private readonly IOptions<CapOptions> _capOptions;
         private readonly IOptions<MySqlOptions> _options;
-        private readonly IDbConnection _existingConnection = null;
         private readonly ILogger _logger;
 
-        public MySqlStorage(
-            ILogger<MySqlStorage> logger,
+        public MySqlStorageInitializer(
+            ILogger<MySqlStorageInitializer> logger,
             IOptions<MySqlOptions> options, 
             IOptions<CapOptions> capOptions)
         {
             _options = options;
-            _capOptions = capOptions;
             _logger = logger;
         }
 
-        public IStorageConnection GetConnection()
+        public string GetPublishedTableName()
         {
-            return new MySqlStorageConnection(_options, _capOptions);
+            return $"{_options.Value.TableNamePrefix}.published";
         }
 
-        public IMonitoringApi GetMonitoringApi()
+        public string GetReceivedTableName()
         {
-            return new MySqlMonitoringApi(this, _options);
+            return $"{_options.Value.TableNamePrefix}.received";
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -55,6 +50,7 @@ namespace DotNetCore.CAP.MySql
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
+
 
         protected virtual string CreateDbTablesScript(string prefix)
         {
@@ -86,46 +82,6 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
             return batchSql;
-        }
-
-        internal T UseConnection<T>(Func<IDbConnection, T> func)
-        {
-            IDbConnection connection = null;
-
-            try
-            {
-                connection = CreateAndOpenConnection();
-                return func(connection);
-            }
-            finally
-            {
-                ReleaseConnection(connection);
-            }
-        }
-
-        internal IDbConnection CreateAndOpenConnection()
-        {
-            var connection = _existingConnection ?? new MySqlConnection(_options.Value.ConnectionString);
-
-            if (connection.State == ConnectionState.Closed)
-            {
-                connection.Open();
-            }
-
-            return connection;
-        }
-
-        internal bool IsExistingConnection(IDbConnection connection)
-        {
-            return connection != null && ReferenceEquals(connection, _existingConnection);
-        }
-
-        internal void ReleaseConnection(IDbConnection connection)
-        {
-            if (connection != null && !IsExistingConnection(connection))
-            {
-                connection.Dispose();
-            }
         }
     }
 }

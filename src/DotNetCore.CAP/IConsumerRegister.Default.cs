@@ -7,9 +7,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
-using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -17,9 +18,10 @@ namespace DotNetCore.CAP
 {
     internal class ConsumerRegister : IConsumerRegister
     {
-        private readonly IStorageConnection _connection;
         private readonly IConsumerClientFactory _consumerClientFactory;
         private readonly IDispatcher _dispatcher;
+        private readonly ISerializer _serializer;
+        private readonly IDataStorage _storage;
         private readonly ILogger _logger;
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly CapOptions _options;
@@ -40,7 +42,8 @@ namespace DotNetCore.CAP
             IOptions<CapOptions> options,
             IConsumerClientFactory consumerClientFactory,
             IDispatcher dispatcher,
-            IStorageConnection connection,
+            ISerializer serializer,
+            IDataStorage storage,
             ILogger<ConsumerRegister> logger,
             MethodMatcherCache selector)
         {
@@ -49,7 +52,8 @@ namespace DotNetCore.CAP
             _logger = logger;
             _consumerClientFactory = consumerClientFactory;
             _dispatcher = dispatcher;
-            _connection = connection;
+            _serializer = serializer;
+            _storage = storage;
             _cts = new CancellationTokenSource();
         }
 
@@ -144,34 +148,28 @@ namespace DotNetCore.CAP
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
-            client.OnMessageReceived += (sender, messageContext) =>
+            client.OnMessageReceived += async (sender, messageContext) =>
             {
                 _cts.Token.ThrowIfCancellationRequested();
-
-                var startTime = DateTimeOffset.UtcNow;
-                var stopwatch = Stopwatch.StartNew();
-
-                var tracingResult = TracingBefore(messageContext.Name, messageContext.Content);
-                var operationId = tracingResult.Item1;
-                var messageBody = tracingResult.Item2;
-
-                var receivedMessage = new CapReceivedMessage(messageContext)
-                {
-                    Id = SnowflakeId.Default().NextId(),
-                    StatusName = StatusName.Scheduled,
-                    Content = messageBody
-                };
-
+                Guid? operationId = null;
                 try
                 {
-                    StoreMessage(receivedMessage);
+                    operationId = TracingBefore(messageContext);
+
+                    var startTime = DateTimeOffset.UtcNow;
+                    var stopwatch = Stopwatch.StartNew();
+
+                    var message = await _serializer.DeserializeAsync(messageContext);
+                    var mediumMessage = await _storage.StoreMessageAsync(message.GetName(), message.GetGroup(), message);
 
                     client.Commit();
 
-                    TracingAfter(operationId, receivedMessage.Name, receivedMessage.Content, startTime,
-                        stopwatch.Elapsed);
+                    if (operationId != null)
+                    {
+                        TracingAfter(operationId.Value, message, startTime, stopwatch.Elapsed);
+                    }
 
-                    _dispatcher.EnqueueToExecute(receivedMessage);
+                    _dispatcher.EnqueueToExecute(mediumMessage);
                 }
                 catch (Exception e)
                 {
@@ -179,8 +177,10 @@ namespace DotNetCore.CAP
 
                     client.Reject();
 
-                    TracingError(operationId, receivedMessage.Name, receivedMessage.Content, e, startTime,
-                        stopwatch.Elapsed);
+                    if (operationId != null)
+                    {
+                        TracingError(operationId.Value, messageContext, e);
+                    }
                 }
             };
 
@@ -217,56 +217,39 @@ namespace DotNetCore.CAP
             }
         }
 
-        private void StoreMessage(CapReceivedMessage receivedMessage)
+        private Guid? TracingBefore(TransportMessage message)
         {
-            _connection.StoreReceivedMessage(receivedMessage);
+            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerExtensions.CapBeforeConsume))
+            {
+                var operationId = Guid.NewGuid();
+
+                var eventData = new BrokerConsumeEventData(operationId, _serverAddress, message, DateTimeOffset.UtcNow);
+
+                s_diagnosticListener.Write(CapDiagnosticListenerExtensions.CapBeforeConsume, eventData);
+
+                return operationId;
+            }
+
+            return null;
         }
 
-        private (Guid, string) TracingBefore(string topic, string values)
+        private void TracingAfter(Guid operationId, Message message, DateTimeOffset startTime, TimeSpan du)
         {
-            _logger.LogDebug("CAP received topic message:" + topic);
+            //if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerExtensions.CapAfterConsume))
+            //{
+            //    var eventData = new BrokerConsumeEndEventData(operationId, "", _serverAddress, message, startTime, du);
 
-            Guid operationId = Guid.NewGuid();
-
-            var eventData = new BrokerConsumeEventData(
-                operationId, "",
-                _serverAddress,
-                topic,
-                values,
-                DateTimeOffset.UtcNow);
-
-            s_diagnosticListener.WriteConsumeBefore(eventData);
-
-            return (operationId, eventData.BrokerTopicBody);
+            //    s_diagnosticListener.Write(CapDiagnosticListenerExtensions.CapAfterConsume, eventData);
+            //}
         }
 
-        private void TracingAfter(Guid operationId, string topic, string values, DateTimeOffset startTime, TimeSpan du)
+        private void TracingError(Guid operationId, TransportMessage message, Exception ex)
         {
-            var eventData = new BrokerConsumeEndEventData(
-                operationId,
-                "",
-                _serverAddress,
-                topic,
-                values,
-                startTime,
-                du);
-
-            s_diagnosticListener.WriteConsumeAfter(eventData);
-        }
-
-        private void TracingError(Guid operationId, string topic, string values, Exception ex, DateTimeOffset startTime, TimeSpan du)
-        {
-            var eventData = new BrokerConsumeErrorEventData(
-                operationId,
-                "",
-                _serverAddress,
-                topic,
-                values,
-                ex,
-                startTime,
-                du);
-
-            s_diagnosticListener.WriteConsumeError(eventData);
+            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerExtensions.CapErrorConsume))
+            {
+                var eventData = new BrokerConsumeErrorEventData(operationId, _serverAddress, message, ex);
+                s_diagnosticListener.Write(CapDiagnosticListenerExtensions.CapErrorConsume, eventData);
+            }
         }
     }
 }

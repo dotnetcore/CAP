@@ -6,7 +6,7 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Threading.Tasks;
 using Dapper;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.SqlServer
 {

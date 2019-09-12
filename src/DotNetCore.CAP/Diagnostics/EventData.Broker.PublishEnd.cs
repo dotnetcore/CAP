@@ -2,15 +2,15 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Diagnostics
 {
     public class BrokerPublishEndEventData : BrokerPublishEventData
     {
         public BrokerPublishEndEventData(Guid operationId, string operation, string brokerAddress,
-            string brokerTopicName,
-            string brokerTopicBody, DateTimeOffset startTime, TimeSpan duration)
-            : base(operationId, operation, brokerAddress, brokerTopicName, brokerTopicBody, startTime)
+             Message message, DateTimeOffset startTime, TimeSpan duration)
+            : base(operationId, operation, brokerAddress, message, startTime)
         {
             Duration = duration;
         }

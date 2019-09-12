@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -19,7 +20,7 @@ namespace DotNetCore.CAP
 
         public DefaultBootstrapper(
             ILogger<DefaultBootstrapper> logger,
-            IStorage storage,
+            IStorageInitializer storage,
             IEnumerable<IProcessingServer> processors)
         {
             _logger = logger;
@@ -27,7 +28,7 @@ namespace DotNetCore.CAP
             Processors = processors;
         }
 
-        private IStorage Storage { get; }
+        private IStorageInitializer Storage { get; }
 
         private IEnumerable<IProcessingServer> Processors { get; }
 

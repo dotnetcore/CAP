@@ -3,8 +3,6 @@
 
 using System;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Dashboard.GatewayProxy;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
@@ -20,29 +18,29 @@ namespace Microsoft.AspNetCore.Builder
         /// </summary>
         /// <param name="app">The <see cref="IApplicationBuilder" /> instance this method extends.</param>
         /// <returns>The <see cref="IApplicationBuilder" /> instance this method extends.</returns>
-        public static IApplicationBuilder UseCapDashboard(this IApplicationBuilder app)
-        {
-            if (app == null)
-            {
-                throw new ArgumentNullException(nameof(app));
-            }
+        //public static IApplicationBuilder UseCapDashboard(this IApplicationBuilder app)
+        //{
+        //    if (app == null)
+        //    {
+        //        throw new ArgumentNullException(nameof(app));
+        //    }
 
-            CheckRequirement(app);
+        //    CheckRequirement(app);
 
-            var provider = app.ApplicationServices;
+        //    var provider = app.ApplicationServices;
              
-            if (provider.GetService<DashboardOptions>() != null)
-            {
-                if (provider.GetService<DiscoveryOptions>() != null)
-                {
-                    app.UseMiddleware<GatewayProxyMiddleware>();
-                }
+        //    if (provider.GetService<DashboardOptions>() != null)
+        //    {
+        //        if (provider.GetService<DiscoveryOptions>() != null)
+        //        {
+        //            app.UseMiddleware<GatewayProxyMiddleware>();
+        //        }
 
-                app.UseMiddleware<DashboardMiddleware>();
-            }
+        //        app.UseMiddleware<DashboardMiddleware>();
+        //    }
 
-            return app;
-        }
+        //    return app;
+        //}
 
         private static void CheckRequirement(IApplicationBuilder app)
         {
@@ -69,16 +67,16 @@ namespace Microsoft.AspNetCore.Builder
         }
     }
 
-    sealed class CapStartupFilter : IStartupFilter
-    {
-        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
-        {
-            return app =>
-            {
-                app.UseCapDashboard();
+    //sealed class CapStartupFilter : IStartupFilter
+    //{
+    //    public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
+    //    {
+    //        return app =>
+    //        {
+    //            app.UseCapDashboard();
 
-                next(app);
-            };
-        }
-    }
+    //            next(app);
+    //        };
+    //    }
+    //}
 }

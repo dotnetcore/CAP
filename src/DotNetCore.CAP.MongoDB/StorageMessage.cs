@@ -1,4 +1,4 @@
-﻿using DotNetCore.CAP.Models;
+﻿using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.MongoDB
 {

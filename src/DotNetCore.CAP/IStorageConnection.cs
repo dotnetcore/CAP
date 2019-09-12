@@ -3,7 +3,7 @@
 
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP
 {
@@ -44,10 +44,6 @@ namespace DotNetCore.CAP
         /// </summary>
         Task<IEnumerable<CapReceivedMessage>> GetReceivedMessagesOfNeedRetry();
 
-        /// <summary>
-        /// Creates and returns an <see cref="IStorageTransaction" />.
-        /// </summary>
-        IStorageTransaction CreateTransaction();
 
         /// <summary>
         /// Change specified message's state of published message

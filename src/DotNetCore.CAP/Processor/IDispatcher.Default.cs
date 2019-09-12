@@ -5,7 +5,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Processor
@@ -13,19 +14,18 @@ namespace DotNetCore.CAP.Processor
     public class Dispatcher : IDispatcher, IDisposable
     {
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly IMessageSender _sender;
         private readonly ISubscriberExecutor _executor;
         private readonly ILogger<Dispatcher> _logger;
 
-        private readonly BlockingCollection<CapPublishedMessage> _publishedMessageQueue =
-            new BlockingCollection<CapPublishedMessage>(new ConcurrentQueue<CapPublishedMessage>());
+        private readonly BlockingCollection<MediumMessage> _publishedMessageQueue =
+            new BlockingCollection<MediumMessage>(new ConcurrentQueue<MediumMessage>());
 
-        private readonly BlockingCollection<CapReceivedMessage> _receivedMessageQueue =
-            new BlockingCollection<CapReceivedMessage>(new ConcurrentQueue<CapReceivedMessage>());
-
-        private readonly IPublishMessageSender _sender;
+        private readonly BlockingCollection<MediumMessage> _receivedMessageQueue =
+            new BlockingCollection<MediumMessage>(new ConcurrentQueue<MediumMessage>());
 
         public Dispatcher(ILogger<Dispatcher> logger,
-            IPublishMessageSender sender,
+            IMessageSender sender,
             ISubscriberExecutor executor)
         {
             _logger = logger;
@@ -36,12 +36,12 @@ namespace DotNetCore.CAP.Processor
             Task.Factory.StartNew(Processing, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
-        public void EnqueueToPublish(CapPublishedMessage message)
+        public void EnqueueToPublish(MediumMessage message)
         {
             _publishedMessageQueue.Add(message);
         }
 
-        public void EnqueueToExecute(CapReceivedMessage message)
+        public void EnqueueToExecute(MediumMessage message)
         {
             _receivedMessageQueue.Add(message);
         }
@@ -67,7 +67,7 @@ namespace DotNetCore.CAP.Processor
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Topic:{message.Name}, Id:{message.Id}");
+                                _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Id:{message.DbId}");
                             }
                         });
                     }

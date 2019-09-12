@@ -12,14 +12,13 @@ namespace DotNetCore.CAP.Diagnostics
             string methodName,
             string subscribeName,
             string subscribeGroup,
-            string parameterValues,
+            object values,
             DateTimeOffset startTime)
             : base(operationId, operation)
         {
             MethodName = methodName;
             SubscribeName = subscribeName;
             SubscribeGroup = subscribeGroup;
-            ParameterValues = parameterValues;
             StartTime = startTime;
         }
 
@@ -31,6 +30,6 @@ namespace DotNetCore.CAP.Diagnostics
 
         public string SubscribeGroup { get; set; }
 
-        public string ParameterValues { get; set; }
+        public string Values { get; set; }
     }
 }

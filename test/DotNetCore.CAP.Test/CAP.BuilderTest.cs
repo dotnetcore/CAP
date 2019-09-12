@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -126,6 +127,12 @@ namespace DotNetCore.CAP.Test
 
             public Task PublishAsync<T>(string name, T contentObj, string callbackName = null,
                 CancellationToken cancellationToken = default(CancellationToken))
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PublishAsync<T>(string name, T contentObj, IDictionary<string, string> optionHeaders = null,
+                CancellationToken cancellationToken = default)
             {
                 throw new NotImplementedException();
             }

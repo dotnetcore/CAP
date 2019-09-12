@@ -1,0 +1,125 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Content\css\bootstrap.min.css" />
+    <EmbeddedResource Include="Content\css\cap.css" />
+    <EmbeddedResource Include="Content\css\jsonview.min.css" />
+    <EmbeddedResource Include="Content\css\rickshaw.min.css" />
+    <EmbeddedResource Include="Content\fonts\glyphicons-halflings-regular.eot" />
+    <EmbeddedResource Include="Content\fonts\glyphicons-halflings-regular.svg" />
+    <EmbeddedResource Include="Content\fonts\glyphicons-halflings-regular.ttf" />
+    <EmbeddedResource Include="Content\fonts\glyphicons-halflings-regular.woff" />
+    <EmbeddedResource Include="Content\fonts\glyphicons-halflings-regular.woff2" />
+    <EmbeddedResource Include="Content\js\bootstrap.min.js" />
+    <EmbeddedResource Include="Content\js\cap.js" />
+    <EmbeddedResource Include="Content\js\d3.layout.min.js" />
+    <EmbeddedResource Include="Content\js\d3.min.js" />
+    <EmbeddedResource Include="Content\js\jquery-2.1.4.min.js" />
+    <EmbeddedResource Include="Content\js\jsonview.min.js" />
+    <EmbeddedResource Include="Content\js\moment-with-locales.min.js" />
+    <EmbeddedResource Include="Content\js\moment.min.js" />
+    <EmbeddedResource Include="Content\js\rickshaw.min.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Dashboard\Content\resx\Strings.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Strings.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\_SidebarMenu.generated.cs">
+      <DependentUpon>_SidebarMenu.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\SidebarMenu.cs">
+      <DependentUpon>_SidebarMenu.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\ReceivedPage.generated.cs">
+      <DependentUpon>ReceivedPage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\ReceivedPage.cs">
+      <DependentUpon>ReceivedPage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\_BlockMetric.generated.cs">
+      <DependentUpon>_BlockMetric.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\BlockMetric.cs">
+      <DependentUpon>_BlockMetric.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\Breadcrumbs.cs">
+      <DependentUpon>_Breadcrumbs.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\_Breadcrumbs.generated.cs">
+      <DependentUpon>_Breadcrumbs.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\_Paginator.generated.cs">
+      <DependentUpon>_Paginator.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\_Paginator.cs">
+      <DependentUpon>_Paginator.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\_PerPageSelector.cs">
+      <DependentUpon>_PerPageSelector.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\_PerPageSelector.generated.cs">
+      <DependentUpon>_PerPageSelector.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\PublishedPage.cs">
+      <DependentUpon>PublishedPage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\PublishedPage*.cs">
+      <DependentUpon>PublishedPage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\LayoutPage.*.cs">
+      <DependentUpon>LayoutPage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\LayoutPage.cs">
+      <DependentUpon>LayoutPage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\InlineMetric.cs">
+      <DependentUpon>_InlineMetric.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\_InlineMetric.generated.cs">
+      <DependentUpon>_InlineMetric.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\_Navigation.generated.cs">
+      <DependentUpon>_Navigation.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\HomePage.generated.cs">
+      <DependentUpon>HomePage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\HomePage.cs">
+      <DependentUpon>HomePage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\SubscriberPage.generated.cs">
+      <DependentUpon>SubscriberPage.cshtml</DependentUpon>
+    </Compile>
+    <Compile Update="Dashboard\Pages\NodePage*.cs">
+      <DependentUpon>NodePage.cshtml</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Content\resx\Strings.resx">
+      <CustomToolNamespace>DotNetCore.CAP.Dashboard.Resources</CustomToolNamespace>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+      <Generator>PublicResXFileCodeGenerator</Generator>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Dashboard\Content\resx\Strings.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <CustomToolNamespace>DotNetCore.CAP.Dashboard.Resources</CustomToolNamespace>
+      <LastGenOutput>Strings.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+</Project>

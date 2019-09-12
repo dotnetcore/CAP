@@ -4,7 +4,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.InMemoryStorage
 {

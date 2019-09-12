@@ -5,7 +5,7 @@ using System;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using Npgsql;
 
 namespace DotNetCore.CAP.PostgreSql

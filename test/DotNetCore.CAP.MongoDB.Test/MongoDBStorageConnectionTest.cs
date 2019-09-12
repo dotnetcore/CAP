@@ -1,6 +1,6 @@
 using System;
 using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;

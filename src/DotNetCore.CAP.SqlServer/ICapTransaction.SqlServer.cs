@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;

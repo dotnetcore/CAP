@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;

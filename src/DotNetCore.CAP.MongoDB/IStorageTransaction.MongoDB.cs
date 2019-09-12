@@ -3,7 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB

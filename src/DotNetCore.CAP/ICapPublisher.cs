@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -26,7 +27,10 @@ namespace DotNetCore.CAP
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
         /// <param name="callbackName">callback subscriber name</param>
         /// <param name="cancellationToken"></param>
-        Task PublishAsync<T>(string name, T contentObj, string callbackName = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task PublishAsync<T>(string name, T contentObj, string callbackName = null, CancellationToken cancellationToken = default);
+
+
+        Task PublishAsync<T>(string name, T contentObj, IDictionary<string, string> optionHeaders, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Publish an object message.

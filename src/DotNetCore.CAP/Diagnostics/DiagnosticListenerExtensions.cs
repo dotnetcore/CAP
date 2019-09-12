@@ -4,8 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Diagnostics
 {
@@ -18,28 +17,28 @@ namespace DotNetCore.CAP.Diagnostics
 
         private const string CapPrefix = "DotNetCore.CAP.";
 
-        public const string CapBeforePublishMessageStore = CapPrefix + nameof(WritePublishMessageStoreBefore);
-        public const string CapAfterPublishMessageStore = CapPrefix + nameof(WritePublishMessageStoreAfter);
-        public const string CapErrorPublishMessageStore = CapPrefix + nameof(WritePublishMessageStoreError);
+        public const string CapBeforePublishMessageStore = CapPrefix + "WritePublishMessageStoreBefore";
+        public const string CapAfterPublishMessageStore = CapPrefix + "WritePublishMessageStoreAfter";
+        public const string CapErrorPublishMessageStore = CapPrefix + "WritePublishMessageStoreError";
 
-        public const string CapBeforePublish = CapPrefix + nameof(WritePublishBefore);
-        public const string CapAfterPublish = CapPrefix + nameof(WritePublishAfter);
-        public const string CapErrorPublish = CapPrefix + nameof(WritePublishError);
+        public const string CapBeforePublish = CapPrefix + "WritePublishBefore";
+        public const string CapAfterPublish = CapPrefix + "WritePublishAfter";
+        public const string CapErrorPublish = CapPrefix + "WritePublishError";
 
-        public const string CapBeforeConsume = CapPrefix + nameof(WriteConsumeBefore);
-        public const string CapAfterConsume = CapPrefix + nameof(WriteConsumeAfter);
-        public const string CapErrorConsume = CapPrefix + nameof(WriteConsumeError);
+        public const string CapBeforeConsume = CapPrefix + "WriteConsumeBefore";
+        public const string CapAfterConsume = CapPrefix + "WriteConsumeAfter";
+        public const string CapErrorConsume = CapPrefix + "WriteConsumeError";
 
-        public const string CapBeforeSubscriberInvoke = CapPrefix + nameof(WriteSubscriberInvokeBefore);
-        public const string CapAfterSubscriberInvoke = CapPrefix + nameof(WriteSubscriberInvokeAfter);
-        public const string CapErrorSubscriberInvoke = CapPrefix + nameof(WriteSubscriberInvokeError);
+        public const string CapBeforeSubscriberInvoke = CapPrefix + "WriteSubscriberInvokeBefore";
+        public const string CapAfterSubscriberInvoke = CapPrefix + "WriteSubscriberInvokeAfter";
+        public const string CapErrorSubscriberInvoke = CapPrefix + "WriteSubscriberInvokeError";
 
 
         //============================================================================
         //====================  Before publish store message      ====================
         //============================================================================
         public static Guid WritePublishMessageStoreBefore(this DiagnosticListener @this,
-            CapPublishedMessage message,
+            Message message,
             [CallerMemberName] string operation = "")
         {
             if (@this.IsEnabled(CapBeforePublishMessageStore))
@@ -50,8 +49,7 @@ namespace DotNetCore.CAP.Diagnostics
                 {
                     OperationId = operationId,
                     Operation = operation,
-                    MessageName = message.Name,
-                    MessageContent = message.Content
+                    Message = message
                 });
 
                 return operationId;
@@ -62,7 +60,7 @@ namespace DotNetCore.CAP.Diagnostics
 
         public static void WritePublishMessageStoreAfter(this DiagnosticListener @this,
             Guid operationId,
-            CapPublishedMessage message,
+            Message message,
             [CallerMemberName] string operation = "")
         {
             if (@this.IsEnabled(CapAfterPublishMessageStore))
@@ -71,9 +69,7 @@ namespace DotNetCore.CAP.Diagnostics
                 {
                     OperationId = operationId,
                     Operation = operation,
-                    MessageId = message.Id,
-                    MessageName = message.Name,
-                    MessageContent = message.Content,
+                    Message = message,
                     Timestamp = Stopwatch.GetTimestamp()
                 });
             }
@@ -81,7 +77,7 @@ namespace DotNetCore.CAP.Diagnostics
 
         public static void WritePublishMessageStoreError(this DiagnosticListener @this,
             Guid operationId,
-            CapPublishedMessage message,
+            Message message,
             Exception ex,
             [CallerMemberName] string operation = "")
         {
@@ -91,8 +87,7 @@ namespace DotNetCore.CAP.Diagnostics
                 {
                     OperationId = operationId,
                     Operation = operation,
-                    MessageName = message.Name,
-                    MessageContent = message.Content,
+                    Message = message,
                     Exception = ex,
                     Timestamp = Stopwatch.GetTimestamp()
                 });
@@ -100,135 +95,135 @@ namespace DotNetCore.CAP.Diagnostics
         }
 
 
-        //============================================================================
-        //====================                  Publish           ====================
-        //============================================================================
-        public static void WritePublishBefore(this DiagnosticListener @this, BrokerPublishEventData eventData)
-        {
-            if (@this.IsEnabled(CapBeforePublish))
-            {
-                eventData.Headers = new TracingHeaders();
-                @this.Write(CapBeforePublish, eventData);
-            }
-        }
+        ////============================================================================
+        ////====================                  Publish           ====================
+        ////============================================================================
+        //public static void WritePublishBefore(this DiagnosticListener @this, BrokerPublishEventData eventData)
+        //{
+        //    if (@this.IsEnabled(CapBeforePublish))
+        //    {
+        //        eventData.Headers = new TracingHeaders();
+        //        @this.Write(CapBeforePublish, eventData);
+        //    }
+        //}
 
-        public static void WritePublishAfter(this DiagnosticListener @this, BrokerPublishEndEventData eventData)
-        {
-            if (@this.IsEnabled(CapAfterPublish))
-            {
-                eventData.Headers = new TracingHeaders();
-                @this.Write(CapAfterPublish, eventData);
-            }
-        }
+        //public static void WritePublishAfter(this DiagnosticListener @this, BrokerPublishEndEventData eventData)
+        //{
+        //    if (@this.IsEnabled(CapAfterPublish))
+        //    {
+        //        eventData.Headers = new TracingHeaders();
+        //        @this.Write(CapAfterPublish, eventData);
+        //    }
+        //}
 
-        public static void WritePublishError(this DiagnosticListener @this, BrokerPublishErrorEventData eventData)
-        {
-            if (@this.IsEnabled(CapErrorPublish))
-            {
-                eventData.Headers = new TracingHeaders();
-                @this.Write(CapErrorPublish, eventData);
-            }
-        }
+        //public static void WritePublishError(this DiagnosticListener @this, BrokerPublishErrorEventData eventData)
+        //{
+        //    if (@this.IsEnabled(CapErrorPublish))
+        //    {
+        //        eventData.Headers = new TracingHeaders();
+        //        @this.Write(CapErrorPublish, eventData);
+        //    }
+        //}
 
 
         //============================================================================
         //====================                  Consume           ====================
         //============================================================================
-        public static Guid WriteConsumeBefore(this DiagnosticListener @this, BrokerConsumeEventData eventData)
-        {
-            if (@this.IsEnabled(CapBeforeConsume))
-            {
-                eventData.Headers = new TracingHeaders();
-                @this.Write(CapBeforeConsume, eventData);
-            }
+        //public static Guid WriteConsumeBefore(this DiagnosticListener @this, BrokerConsumeEventData eventData)
+        //{
+        //    if (@this.IsEnabled(CapBeforeConsume))
+        //    {
+        //        eventData.Headers = new TracingHeaders();
+        //        @this.Write(CapBeforeConsume, eventData);
+        //    }
 
-            return Guid.Empty;
-        }
+        //    return Guid.Empty;
+        //}
 
-        public static void WriteConsumeAfter(this DiagnosticListener @this, BrokerConsumeEndEventData eventData)
-        {
-            if (@this.IsEnabled(CapAfterConsume))
-            {
-                eventData.Headers = new TracingHeaders();
-                @this.Write(CapAfterConsume, eventData);
-            }
-        }
+        //public static void WriteConsumeAfter(this DiagnosticListener @this, BrokerConsumeEndEventData eventData)
+        //{
+        //    if (@this.IsEnabled(CapAfterConsume))
+        //    {
+        //        eventData.Headers = new TracingHeaders();
+        //        @this.Write(CapAfterConsume, eventData);
+        //    }
+        //}
 
-        public static void WriteConsumeError(this DiagnosticListener @this, BrokerConsumeErrorEventData eventData)
-        {
-            if (@this.IsEnabled(CapErrorConsume))
-            {
-                eventData.Headers = new TracingHeaders();
-                @this.Write(CapErrorConsume, eventData);
-            }
-        }
+        //public static void WriteConsumeError(this DiagnosticListener @this, BrokerConsumeErrorEventData eventData)
+        //{
+        //    if (@this.IsEnabled(CapErrorConsume))
+        //    {
+        //        eventData.Headers = new TracingHeaders();
+        //        @this.Write(CapErrorConsume, eventData);
+        //    }
+        //}
 
 
         //============================================================================
         //====================           SubscriberInvoke         ====================
         //============================================================================
-        public static Guid WriteSubscriberInvokeBefore(this DiagnosticListener @this,
-            ConsumerContext context,
-            [CallerMemberName] string operation = "")
-        {
-            if (@this.IsEnabled(CapBeforeSubscriberInvoke))
-            {
-                var operationId = Guid.NewGuid();
+        //public static Guid WriteSubscriberInvokeBefore(this DiagnosticListener @this,
+        //    ConsumerContext context,
+        //    [CallerMemberName] string operation = "")
+        //{
+        //    if (@this.IsEnabled(CapBeforeSubscriberInvoke))
+        //    {
+        //        var operationId = Guid.NewGuid();
 
-                var methodName = context.ConsumerDescriptor.MethodInfo.Name;
-                var subscribeName = context.ConsumerDescriptor.Attribute.Name;
-                var subscribeGroup = context.ConsumerDescriptor.Attribute.Group;
-                var parameterValues = context.DeliverMessage.Content;
+        //        var methodName = context.ConsumerDescriptor.MethodInfo.Name;
+        //        var subscribeName = context.ConsumerDescriptor.Attribute.Name;
+        //        var subscribeGroup = context.ConsumerDescriptor.Attribute.Group;
+        //        var values = context.DeliverMessage.Value;
 
-                @this.Write(CapBeforeSubscriberInvoke, new SubscriberInvokeEventData(operationId, operation, methodName,
-                    subscribeName,
-                    subscribeGroup, parameterValues, DateTimeOffset.UtcNow));
+        //        @this.Write(CapBeforeSubscriberInvoke, new SubscriberInvokeEventData(operationId, operation, methodName,
+        //            subscribeName,
+        //            subscribeGroup, parameterValues, DateTimeOffset.UtcNow));
 
-                return operationId;
-            }
+        //        return operationId;
+        //    }
 
-            return Guid.Empty;
-        }
+        //    return Guid.Empty;
+        //}
 
-        public static void WriteSubscriberInvokeAfter(this DiagnosticListener @this,
-            Guid operationId,
-            ConsumerContext context,
-            DateTimeOffset startTime,
-            TimeSpan duration,
-            [CallerMemberName] string operation = "")
-        {
-            if (@this.IsEnabled(CapAfterSubscriberInvoke))
-            {
-                var methodName = context.ConsumerDescriptor.MethodInfo.Name;
-                var subscribeName = context.ConsumerDescriptor.Attribute.Name;
-                var subscribeGroup = context.ConsumerDescriptor.Attribute.Group;
-                var parameterValues = context.DeliverMessage.Content;
+        //public static void WriteSubscriberInvokeAfter(this DiagnosticListener @this,
+        //    Guid operationId,
+        //    ConsumerContext context,
+        //    DateTimeOffset startTime,
+        //    TimeSpan duration,
+        //    [CallerMemberName] string operation = "")
+        //{
+        //    if (@this.IsEnabled(CapAfterSubscriberInvoke))
+        //    {
+        //        var methodName = context.ConsumerDescriptor.MethodInfo.Name;
+        //        var subscribeName = context.ConsumerDescriptor.Attribute.Name;
+        //        var subscribeGroup = context.ConsumerDescriptor.Attribute.Group;
+        //        var values = context.DeliverMessage.Value;
 
-                @this.Write(CapAfterSubscriberInvoke, new SubscriberInvokeEndEventData(operationId, operation, methodName,
-                    subscribeName,
-                    subscribeGroup, parameterValues, startTime, duration));
-            }
-        }
+        //        @this.Write(CapAfterSubscriberInvoke, new SubscriberInvokeEndEventData(operationId, operation, methodName,
+        //            subscribeName,
+        //            subscribeGroup, parameterValues, startTime, duration));
+        //    }
+        //}
 
-        public static void WriteSubscriberInvokeError(this DiagnosticListener @this,
-            Guid operationId,
-            ConsumerContext context,
-            Exception ex,
-            DateTimeOffset startTime,
-            TimeSpan duration,
-            [CallerMemberName] string operation = "")
-        {
-            if (@this.IsEnabled(CapErrorSubscriberInvoke))
-            {
-                var methodName = context.ConsumerDescriptor.MethodInfo.Name;
-                var subscribeName = context.ConsumerDescriptor.Attribute.Name;
-                var subscribeGroup = context.ConsumerDescriptor.Attribute.Group;
-                var parameterValues = context.DeliverMessage.Content;
+        //public static void WriteSubscriberInvokeError(this DiagnosticListener @this,
+        //    Guid operationId,
+        //    ConsumerContext context,
+        //    Exception ex,
+        //    DateTimeOffset startTime,
+        //    TimeSpan duration,
+        //    [CallerMemberName] string operation = "")
+        //{
+        //    if (@this.IsEnabled(CapErrorSubscriberInvoke))
+        //    {
+        //        var methodName = context.ConsumerDescriptor.MethodInfo.Name;
+        //        var subscribeName = context.ConsumerDescriptor.Attribute.Name;
+        //        var subscribeGroup = context.ConsumerDescriptor.Attribute.Group;
+        //        var parameterValues = context.DeliverMessage.Content;
 
-                @this.Write(CapErrorSubscriberInvoke, new SubscriberInvokeErrorEventData(operationId, operation, methodName,
-                    subscribeName,
-                    subscribeGroup, parameterValues, ex, startTime, duration));
-            }
-        }
+        //        @this.Write(CapErrorSubscriberInvoke, new SubscriberInvokeErrorEventData(operationId, operation, methodName,
+        //            subscribeName,
+        //            subscribeGroup, parameterValues, ex, startTime, duration));
+        //    }
+        //}
     }
 }

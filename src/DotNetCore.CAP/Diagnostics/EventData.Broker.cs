@@ -2,26 +2,22 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Diagnostics
 {
     public class BrokerEventData : EventData
     {
-        public BrokerEventData(Guid operationId, string operation, string brokerAddress,
-            string brokerTopicName, string brokerTopicBody)
+        public BrokerEventData(Guid operationId, string operation, string brokerAddress, Message message)
             : base(operationId, operation)
         {
             BrokerAddress = brokerAddress;
-            BrokerTopicName = brokerTopicName;
-            BrokerTopicBody = brokerTopicBody;
-        }
 
-        public TracingHeaders Headers { get; set; }
+            Message = message;
+        }
 
         public string BrokerAddress { get; set; }
 
-        public string BrokerTopicBody { get; set; }
-
-        public string BrokerTopicName { get; set; }
+        public Message Message { get; set; }
     }
 }

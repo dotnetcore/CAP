@@ -6,7 +6,6 @@ using DotNetCore.CAP;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor;
-using DotNetCore.CAP.Processor.States;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -44,7 +43,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
             services.TryAddSingleton<IModelBinderFactory, ModelBinderFactory>();
 
-            services.TryAddSingleton<ICallbackMessageSender, CallbackMessageSender>();
+            //services.TryAddSingleton<ICallbackMessageSender, CallbackMessageSender>();
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();
 
@@ -53,13 +52,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerRegister>());
-            services.TryAddSingleton<IStateChanger, StateChanger>();
 
             //Queue's message processor
             services.TryAddSingleton<MessageNeedToRetryProcessor>();
             services.TryAddSingleton<TransportCheckProcessor>();
 
             //Sender and Executors   
+            services.AddSingleton<IMessageSender, MessageSender>();
             services.TryAddSingleton<IDispatcher, Dispatcher>();
             // Warning: IPublishMessageSender need to inject at extension project. 
             services.TryAddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
@@ -74,7 +73,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(setupAction);
 
             //Startup and Hosted
-            services.AddTransient<IStartupFilter, CapStartupFilter>();
+            //services.AddTransient<IStartupFilter, CapStartupFilter>();
             services.AddHostedService<DefaultBootstrapper>();
 
             return new CapBuilder(services);

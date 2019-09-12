@@ -3,7 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Persistence;
 
 namespace DotNetCore.CAP
 {
@@ -12,6 +12,6 @@ namespace DotNetCore.CAP
     /// </summary>
     public interface ISubscriberExecutor
     {
-        Task<OperateResult> ExecuteAsync(CapReceivedMessage message, CancellationToken cancellationToken = default);
+        Task<OperateResult> ExecuteAsync(MediumMessage message, CancellationToken cancellationToken = default);
     }
 }
