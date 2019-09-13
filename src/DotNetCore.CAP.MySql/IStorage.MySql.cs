@@ -70,8 +70,13 @@ CREATE TABLE IF NOT EXISTS `{prefix}.received` (
   `Added` datetime NOT NULL,
   `ExpiresAt` datetime DEFAULT NULL,
   `StatusName` varchar(50) NOT NULL,
+  `Key` longtext DEFAULT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+           WHERE TABLE_NAME = '{prefix}.received' AND COLUMN_NAME = 'Key' ) 
+ALTER TABLE MLReport ADD `Key` longtext DEFAULT NULL;
 
 CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   `Id` bigint NOT NULL,
@@ -82,8 +87,13 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   `Added` datetime NOT NULL,
   `ExpiresAt` datetime DEFAULT NULL,
   `StatusName` varchar(40) NOT NULL,
+  `Key` longtext DEFAULT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
+           WHERE TABLE_NAME = '{prefix}.published' AND COLUMN_NAME = 'Key' ) 
+ALTER TABLE MLReport ADD `Key` longtext DEFAULT NULL;
 ";
             return batchSql;
         }
