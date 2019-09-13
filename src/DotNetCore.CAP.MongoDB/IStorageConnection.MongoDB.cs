@@ -121,7 +121,8 @@ namespace DotNetCore.CAP.MongoDB
                 StatusName = message.StatusName,
                 ExpiresAt = message.ExpiresAt,
                 Retries = message.Retries,
-                Version = _capOptions.Version
+                Version = _capOptions.Version,
+                Key = message.Key,
             };
 
             collection.InsertOne(store);

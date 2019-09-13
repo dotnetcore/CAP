@@ -45,7 +45,8 @@ namespace DotNetCore.CAP.MongoDB
                 .Set(x => x.Retries, message.Retries)
                 .Set(x => x.Content, message.Content)
                 .Set(x => x.ExpiresAt, message.ExpiresAt)
-                .Set(x => x.StatusName, message.StatusName);
+                .Set(x => x.StatusName, message.StatusName)
+                .Set(x => x.Key, message.Key);
 
             collection.FindOneAndUpdate(_session, x => x.Id == message.Id, updateDef);
         }
@@ -63,7 +64,8 @@ namespace DotNetCore.CAP.MongoDB
                 .Set(x => x.Retries, message.Retries)
                 .Set(x => x.Content, message.Content)
                 .Set(x => x.ExpiresAt, message.ExpiresAt)
-                .Set(x => x.StatusName, message.StatusName);
+                .Set(x => x.StatusName, message.StatusName)
+                .Set(x => x.Key, message.Key);
 
             collection.FindOneAndUpdate(_session, x => x.Id == message.Id, updateDef);
         }

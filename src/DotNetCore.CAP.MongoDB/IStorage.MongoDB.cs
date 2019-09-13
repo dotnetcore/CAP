@@ -64,11 +64,11 @@ namespace DotNetCore.CAP.MongoDB
 
             var receivedMessageIndexNames = new[] {
                 nameof(ReceivedMessage.Name), nameof(ReceivedMessage.Added), nameof(ReceivedMessage.ExpiresAt),
-                nameof(ReceivedMessage.StatusName), nameof(ReceivedMessage.Retries), nameof(ReceivedMessage.Version) };
+                nameof(ReceivedMessage.StatusName), nameof(ReceivedMessage.Retries), nameof(ReceivedMessage.Version), nameof(ReceivedMessage.Key) };
 
             var publishedMessageIndexNames = new[] {
                 nameof(PublishedMessage.Name), nameof(PublishedMessage.Added), nameof(PublishedMessage.ExpiresAt),
-                nameof(PublishedMessage.StatusName), nameof(PublishedMessage.Retries), nameof(PublishedMessage.Version) };
+                nameof(PublishedMessage.StatusName), nameof(PublishedMessage.Retries), nameof(PublishedMessage.Version), nameof(PublishedMessage.Key) };
 
             await Task.WhenAll(
                 TryCreateIndexesAsync<ReceivedMessage>(options.ReceivedCollection, receivedMessageIndexNames),

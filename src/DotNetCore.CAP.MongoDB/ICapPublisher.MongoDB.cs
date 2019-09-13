@@ -48,6 +48,7 @@ namespace DotNetCore.CAP.MongoDB
                 ExpiresAt = message.ExpiresAt,
                 Retries = message.Retries,
                 Version = _options.Version,
+                Key = message.Key,
             };
 
             if (transaction == null)
