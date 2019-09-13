@@ -30,6 +30,7 @@ namespace DotNetCore.CAP.InMemoryStorage
             msg.Content = message.Content;
             msg.ExpiresAt = message.ExpiresAt;
             msg.StatusName = message.StatusName;
+            msg.Key = message.Key;
         }
 
         public void UpdateMessage(CapReceivedMessage message)
@@ -44,6 +45,7 @@ namespace DotNetCore.CAP.InMemoryStorage
             msg.Content = message.Content;
             msg.ExpiresAt = message.ExpiresAt;
             msg.StatusName = message.StatusName;
+            msg.Key = message.Key;
         }
 
         public Task CommitAsync()
