@@ -93,6 +93,12 @@ CREATE TABLE [{schema}].[Received](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 END;
 
+IF COL_LENGTH('{schema}.Received', 'Key') IS NULL
+BEGIN
+    ALTER TABLE [{schema}].[Received]
+    ADD [Key] [nvarchar](max) NULL
+END;
+
 IF OBJECT_ID(N'[{schema}].[Published]',N'U') IS NULL
 BEGIN
 CREATE TABLE [{schema}].[Published](
@@ -110,6 +116,12 @@ CREATE TABLE [{schema}].[Published](
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+END;
+
+IF COL_LENGTH('{schema}.Published', 'Key') IS NULL
+BEGIN
+    ALTER TABLE [{schema}].[Published]
+    ADD [Key] [nvarchar](max) NULL
 END;";
             return batchSql;
         }
