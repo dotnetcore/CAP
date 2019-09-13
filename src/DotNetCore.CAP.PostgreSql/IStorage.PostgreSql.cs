@@ -110,7 +110,8 @@ CREATE TABLE IF NOT EXISTS ""{schema}"".""received""(
 	""Retries"" INT NOT NULL,
 	""Added"" TIMESTAMP NOT NULL,
     ""ExpiresAt"" TIMESTAMP NULL,
-	""StatusName"" VARCHAR(50) NOT NULL
+	""StatusName"" VARCHAR(50) NOT NULL,
+    ""Key"" TEXT NULL
 );
 
 CREATE TABLE IF NOT EXISTS ""{schema}"".""published""(
@@ -121,11 +122,15 @@ CREATE TABLE IF NOT EXISTS ""{schema}"".""published""(
 	""Retries"" INT NOT NULL,
 	""Added"" TIMESTAMP NOT NULL,
     ""ExpiresAt"" TIMESTAMP NULL,
-	""StatusName"" VARCHAR(50) NOT NULL
+	""StatusName"" VARCHAR(50) NOT NULL,
+    ""Key"" TEXT NULL
 );
 
 ALTER TABLE ""{schema}"".""received"" ADD COLUMN IF NOT EXISTS ""Version"" VARCHAR(20) NOT NULL;
 ALTER TABLE ""{schema}"".""published"" ADD COLUMN IF NOT EXISTS ""Version"" VARCHAR(20) NOT NULL;
+
+ALTER TABLE ""{schema}"".""received"" ADD COLUMN IF NOT EXISTS ""Key"" TEXT NULL;
+ALTER TABLE ""{schema}"".""published"" ADD COLUMN IF NOT EXISTS ""Key"" TEXT NULL;
 ";
             return batchSql;
         }
