@@ -85,6 +85,7 @@ CREATE TABLE [{schema}].[Received](
 	[Added] [datetime2](7) NOT NULL,
     [ExpiresAt] [datetime2](7) NULL,
 	[StatusName] [nvarchar](50) NOT NULL,
+    [Key] [nvarchar](max) NULL,
  CONSTRAINT [PK_{schema}.Received] PRIMARY KEY CLUSTERED
 (
 	[Id] ASC
@@ -103,6 +104,7 @@ CREATE TABLE [{schema}].[Published](
 	[Added] [datetime2](7) NOT NULL,
     [ExpiresAt] [datetime2](7) NULL,
 	[StatusName] [nvarchar](50) NOT NULL,
+    [Key] [nvarchar](max) NULL,
  CONSTRAINT [PK_{schema}.Published] PRIMARY KEY CLUSTERED
 (
 	[Id] ASC

@@ -34,7 +34,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         protected override string ServersAddress => _connectionChannelPool.HostAddress;
 
-        public override Task<OperateResult> PublishAsync(string keyName, string content)
+        public override Task<OperateResult> PublishAsync(string keyName, string content, string key = null)
         {
             var channel = _connectionChannelPool.Rent();
             try

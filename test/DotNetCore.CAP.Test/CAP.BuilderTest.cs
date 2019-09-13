@@ -124,13 +124,13 @@ namespace DotNetCore.CAP.Test
 
             public AsyncLocal<ICapTransaction> Transaction { get; }
 
-            public Task PublishAsync<T>(string name, T contentObj, string callbackName = null,
+            public Task PublishAsync<T>(string name, T contentObj, string callbackName = null, string key = null,
                 CancellationToken cancellationToken = default(CancellationToken))
             {
                 throw new NotImplementedException();
             }
 
-            public void Publish<T>(string name, T contentObj, string callbackName = null)
+            public void Publish<T>(string name, T contentObj, string callbackName = null, string key = null)
             {
                 throw new NotImplementedException();
             }

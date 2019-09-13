@@ -61,6 +61,7 @@ namespace DotNetCore.CAP.Diagnostics
                     MessageId = message.Id,
                     MessageName = message.Name,
                     MessageContent = message.Content,
+                    MessageKey = message.Key,
                     Timestamp = Stopwatch.GetTimestamp()
                 });
             }
@@ -80,6 +81,7 @@ namespace DotNetCore.CAP.Diagnostics
                     Operation = operation,
                     MessageName = message.Name,
                     MessageContent = message.Content,
+                    MessageKey = message.Key,
                     Exception = ex,
                     Timestamp = Stopwatch.GetTimestamp()
                 });

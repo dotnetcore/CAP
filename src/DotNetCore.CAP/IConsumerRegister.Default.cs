@@ -159,7 +159,8 @@ namespace DotNetCore.CAP
                 {
                     Id = SnowflakeId.Default().NextId(),
                     StatusName = StatusName.Scheduled,
-                    Content = messageBody
+                    Content = messageBody,
+                    Key = messageContext.Key
                 };
 
                 try

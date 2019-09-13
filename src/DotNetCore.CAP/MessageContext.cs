@@ -23,11 +23,23 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Message content
         /// </summary>
-        public string Content { get; set; } 
+        public string Content { get; set; }
+        
+        /// <summary>
+        /// Message key (Kafka).
+        /// </summary>
+        public string Key { get; set; }
 
         public override string ToString()
         {
-            return $"Group:{Group}, Name:{Name}, Content:{Content}";
+            if (string.IsNullOrEmpty(Key))
+            {
+                return $"Group:{Group}, Name:{Name}, Content:{Content}";
+            }
+            else
+            {
+                return $"Group:{Group}, Name:{Name}, Key:{Key}, Content:{Content}";
+            }
         }
     }
 }

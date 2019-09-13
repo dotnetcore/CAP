@@ -29,9 +29,18 @@ namespace DotNetCore.CAP.Models
 
         public string StatusName { get; set; }
 
+        public string Key { get; set; }
+
         public override string ToString()
         {
-            return "name:" + Name + ", content:" + Content;
+            if (string.IsNullOrEmpty(Key))
+            {
+                return "name:" + Name + ", content:" + Content;
+            }
+            else
+            {
+                return $"name:{Name}, key:{Key}, content:{Content}";
+            }
         }
     }
 }

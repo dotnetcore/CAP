@@ -20,6 +20,7 @@ namespace DotNetCore.CAP.Models
             Group = message.Group;
             Name = message.Name;
             Content = message.Content;
+            Key = message.Key;
         }
 
         public long Id { get; set; }
@@ -38,13 +39,16 @@ namespace DotNetCore.CAP.Models
 
         public string StatusName { get; set; }
 
+        public string Key { get; set; }
+
         public MessageContext ToMessageContext()
         {
             return new MessageContext
             {
                 Group = Group,
                 Name = Name,
-                Content = Content
+                Content = Content,
+                Key = Key
             };
         }
 

@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.Abstractions
 
         public AsyncLocal<ICapTransaction> Transaction { get; }
 
-        public void Publish<T>(string name, T contentObj, string callbackName = null)
+        public void Publish<T>(string name, T contentObj, string callbackName = null, string key = null)
         {
             var message = new CapPublishedMessage
             {
@@ -44,11 +44,15 @@ namespace DotNetCore.CAP.Abstractions
                 Content = Serialize(contentObj, callbackName),
                 StatusName = StatusName.Scheduled
             };
+            if (!string.IsNullOrEmpty(key))
+            {
+                message.Key = key;
+            }
 
             PublishAsyncInternal(message).GetAwaiter().GetResult();
         }
 
-        public async Task PublishAsync<T>(string name, T contentObj, string callbackName = null,
+        public async Task PublishAsync<T>(string name, T contentObj, string callbackName = null, string key = null,
             CancellationToken cancellationToken = default(CancellationToken))
         {
             var message = new CapPublishedMessage
@@ -58,6 +62,11 @@ namespace DotNetCore.CAP.Abstractions
                 Content = Serialize(contentObj, callbackName),
                 StatusName = StatusName.Scheduled
             };
+
+            if (!string.IsNullOrEmpty(key))
+            {
+                message.Key = key;
+            }
 
             await PublishAsyncInternal(message);
         }

@@ -30,20 +30,21 @@ namespace DotNetCore.CAP.Kafka
 
         protected override string ServersAddress => _connectionPool.ServersAddress;
 
-        public override async Task<OperateResult> PublishAsync(string keyName, string content)
+        public override async Task<OperateResult> PublishAsync(string topicName, string content, string key = null)
         {
             var producer = _connectionPool.RentProducer();
 
             try
             {
-                var result = await producer.ProduceAsync(keyName, new Message<Null, string>()
+                var result = await producer.ProduceAsync(topicName, new Message<string, string>()
                 {
-                    Value = content
+                    Value = content,
+                    Key = key
                 });
 
                 if (result.Status == PersistenceStatus.Persisted || result.Status == PersistenceStatus.PossiblyPersisted)
                 {
-                    _logger.LogDebug($"kafka topic message [{keyName}] has been published.");
+                    _logger.LogDebug($"kafka topic message [{topicName}] has been published.");
 
                     return OperateResult.Success;
                 }

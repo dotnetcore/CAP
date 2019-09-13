@@ -25,8 +25,9 @@ namespace DotNetCore.CAP
         /// <param name="name">the topic name or exchange router key.</param>
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
         /// <param name="callbackName">callback subscriber name</param>
+        /// <param name="key">kafka message key</param>
         /// <param name="cancellationToken"></param>
-        Task PublishAsync<T>(string name, T contentObj, string callbackName = null, CancellationToken cancellationToken = default(CancellationToken));
+        Task PublishAsync<T>(string name, T contentObj, string callbackName = null, string key = null, CancellationToken cancellationToken = default(CancellationToken));
 
         /// <summary>
         /// Publish an object message.
@@ -34,6 +35,7 @@ namespace DotNetCore.CAP
         /// <param name="name">the topic name or exchange router key.</param>
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
         /// <param name="callbackName">callback subscriber name</param>
-        void Publish<T>(string name, T contentObj, string callbackName = null);
+        /// <param name="key">kafka message key</param>
+        void Publish<T>(string name, T contentObj, string callbackName = null, string key = null);
     }
 }

@@ -41,7 +41,7 @@ namespace DotNetCore.CAP
             _logger = logger;
         }
 
-        public abstract Task<OperateResult> PublishAsync(string keyName, string content);
+        public abstract Task<OperateResult> PublishAsync(string keyName, string content, string key = null);
 
         public async Task<OperateResult> SendAsync(CapPublishedMessage message)
         {
@@ -73,7 +73,7 @@ namespace DotNetCore.CAP
                 ? Helper.AddTracingHeaderProperty(message.Content, tracingResult.Item2)
                 : message.Content;
 
-            var result = await PublishAsync(message.Name, sendValues);
+            var result = await PublishAsync(message.Name, sendValues, message.Key);
 
             stopwatch.Stop();
             if (result.Succeeded)

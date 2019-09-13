@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         protected override string ServersAddress => _asbOptions.Value.ConnectionString;
 
-        public override async Task<OperateResult> PublishAsync(string keyName, string content)
+        public override async Task<OperateResult> PublishAsync(string keyName, string content, string key = null)
         {
             try
             {

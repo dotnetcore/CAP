@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.Kafka
 
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;
-        private IConsumer<Null, string> _consumerClient;
+        private IConsumer<string, string> _consumerClient;
 
         public KafkaConsumerClient(string groupId, IOptions<KafkaOptions> options)
         {
@@ -55,6 +55,7 @@ namespace DotNetCore.CAP.Kafka
                 {
                     Group = _groupId,
                     Name = consumerResult.Topic,
+                    Key = consumerResult.Key,
                     Content = consumerResult.Value
                 };
 
@@ -97,7 +98,7 @@ namespace DotNetCore.CAP.Kafka
                     _kafkaOptions.MainConfig["auto.offset.reset"] = "earliest";
                     var config = _kafkaOptions.AsKafkaConfig();
 
-                    _consumerClient = new ConsumerBuilder<Null, string>(config)
+                    _consumerClient = new ConsumerBuilder<string, string>(config)
                         .SetErrorHandler(ConsumerClient_OnConsumeError)
                         .Build();
                 }
@@ -108,7 +109,7 @@ namespace DotNetCore.CAP.Kafka
             } 
         }
 
-        private void ConsumerClient_OnConsumeError(IConsumer<Null, string> consumer, Error e)
+        private void ConsumerClient_OnConsumeError(IConsumer<string, string> consumer, Error e)
         {
             var logArgs = new LogMessageEventArgs
             {

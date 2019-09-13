@@ -15,7 +15,8 @@ namespace DotNetCore.CAP
         /// </summary>
         /// <param name="keyName">The message topic name.</param>
         /// <param name="content">The message content.</param>
+        /// <param name="key">The message key (Kafka).</param>
         /// <returns></returns>
-        Task<OperateResult> PublishAsync(string keyName, string content);
+        Task<OperateResult> PublishAsync(string keyName, string content, string key = null);
     }
 }
