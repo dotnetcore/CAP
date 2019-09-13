@@ -32,7 +32,7 @@ namespace DotNetCore.CAP.SqlServer
             }
 
             var sql =
-                $"UPDATE [{_schema}].[Published] SET [Retries] = @Retries,[Content] = @Content,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
+                $"UPDATE [{_schema}].[Published] SET [Retries] = @Retries,[Content] = @Content,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName,[Key]=@Key WHERE Id=@Id;";
             _dbConnection.Execute(sql, message);
         }
 
@@ -44,7 +44,7 @@ namespace DotNetCore.CAP.SqlServer
             }
 
             var sql =
-                $"UPDATE [{_schema}].[Received] SET [Retries] = @Retries,[Content] = @Content,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName WHERE Id=@Id;";
+                $"UPDATE [{_schema}].[Received] SET [Retries] = @Retries,[Content] = @Content,[ExpiresAt] = @ExpiresAt,[StatusName]=@StatusName,[Key]=@Key WHERE Id=@Id;";
             _dbConnection.Execute(sql, message);
         }
 
