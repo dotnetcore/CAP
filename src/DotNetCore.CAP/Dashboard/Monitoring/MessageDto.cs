@@ -24,5 +24,7 @@ namespace DotNetCore.CAP.Dashboard.Monitoring
         public int Retries { get; set; }
 
         public string StatusName { get; set; }
+
+        public string Key { get; set; }
     }
 }
