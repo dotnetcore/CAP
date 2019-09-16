@@ -51,6 +51,16 @@ namespace DotNetCore.CAP.MySql
             using (var connection = new MySqlConnection(_options.Value.ConnectionString))
             {
                 await connection.ExecuteAsync(sql);
+                var hasKeyField = await connection.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{_options.Value.TableNamePrefix}.received' AND COLUMN_NAME = 'Key';") > 0;
+                if (!hasKeyField)
+                {
+                    await connection.ExecuteAsync($"ALTER TABLE '{_options.Value.TableNamePrefix}.received' ADD `Key` longtext DEFAULT NULL;");
+                }
+                hasKeyField = await connection.ExecuteScalarAsync<int>($"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = '{_options.Value.TableNamePrefix}.published' AND COLUMN_NAME = 'Key';") > 0;
+                if (!hasKeyField)
+                {
+                    await connection.ExecuteAsync($"ALTER TABLE '{_options.Value.TableNamePrefix}.published' ADD `Key` longtext DEFAULT NULL;");
+                }
             }
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
@@ -74,10 +84,6 @@ CREATE TABLE IF NOT EXISTS `{prefix}.received` (
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-           WHERE TABLE_NAME = '{prefix}.received' AND COLUMN_NAME = 'Key' ) 
-ALTER TABLE MLReport ADD `Key` longtext DEFAULT NULL;
-
 CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   `Id` bigint NOT NULL,
   `Version` varchar(20) DEFAULT NULL,
@@ -90,10 +96,6 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   `Key` longtext DEFAULT NULL,
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
-IF NOT EXISTS (SELECT * FROM INFORMATION_SCHEMA.COLUMNS 
-           WHERE TABLE_NAME = '{prefix}.published' AND COLUMN_NAME = 'Key' ) 
-ALTER TABLE MLReport ADD `Key` longtext DEFAULT NULL;
 ";
             return batchSql;
         }
