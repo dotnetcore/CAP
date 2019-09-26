@@ -8,7 +8,7 @@ namespace DotNetCore.CAP.Messages
     /// </summary>
     public class TransportMessage
     {
-        public TransportMessage(Dictionary<string, string> headers, byte[] body)
+        public TransportMessage(IDictionary<string, string> headers, byte[] body)
         {
             Headers = headers ?? throw new ArgumentNullException(nameof(headers));
             Body = body ?? throw new ArgumentNullException(nameof(body));
@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.Messages
         /// <summary>
         /// Gets the headers of this message
         /// </summary>
-        public Dictionary<string, string> Headers { get; }
+        public IDictionary<string, string> Headers { get; }
 
         /// <summary>
         /// Gets the body object of this message

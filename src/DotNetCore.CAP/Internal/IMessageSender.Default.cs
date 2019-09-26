@@ -29,7 +29,7 @@ namespace DotNetCore.CAP.Internal
             new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
         protected MessageSender(
-            ILogger logger,
+            ILogger<MessageSender> logger,
             IOptions<CapOptions> options,
             IDataStorage dataStorage,
             ISerializer serializer,

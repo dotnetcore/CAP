@@ -3,6 +3,7 @@
 
 using System;
 using DotNetCore.CAP.MySql;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -21,7 +22,7 @@ namespace DotNetCore.CAP
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<CapStorageMarkerService>();
-            //services.AddSingleton<IStorageConnection, MySqlStorageConnection>();
+            services.AddSingleton<IStorageInitializer, MySqlStorageInitializer>();
             services.AddTransient<CapTransactionBase, MySqlCapTransaction>();
 
             //Add MySqlOptions

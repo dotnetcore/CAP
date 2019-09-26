@@ -6,8 +6,7 @@ using DotNetCore.CAP;
 using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -58,8 +57,11 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<TransportCheckProcessor>();
 
             //Sender and Executors   
-            services.AddSingleton<IMessageSender, MessageSender>();
+            services.TryAddSingleton<IMessageSender, MessageSender>();
             services.TryAddSingleton<IDispatcher, Dispatcher>();
+
+            services.TryAddSingleton<ISerializer, MemorySerializer>();
+
             // Warning: IPublishMessageSender need to inject at extension project. 
             services.TryAddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
 
