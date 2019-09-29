@@ -17,14 +17,11 @@ namespace DotNetCore.CAP
         /// </summary>
         public string ConnectionString
         {
-            get
-            {
-                return _connectionString;
-            }
+            get => _connectionString;
             set
             {
-                MySqlConnection mySqlConnection = new MySqlConnection(value);
-                DatabaseName = mySqlConnection.Database;
+                MySqlConnectionStringBuilder builder = new MySqlConnectionStringBuilder(value);
+                DatabaseName = builder.Database;
                 _connectionString = value;
             }
         }
