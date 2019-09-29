@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.MySql
         private string PrepareSql()
         {
             return
-                $"INSERT INTO `{_options.TableNamePrefix}.published` (`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)" +
+                $"INSERT INTO `{_options.DatabaseName}`.`{_options.TableNamePrefix}.published` (`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)" +
                 $"VALUES(@Id,'{_options.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
         }
 

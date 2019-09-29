@@ -17,12 +17,14 @@ namespace DotNetCore.CAP.MySql
         private readonly CapOptions _capOptions;
         private readonly IOptions<MySqlOptions> _options;
         private readonly string _prefix;
+        private readonly string _databaseName;
 
         public MySqlStorageConnection(IOptions<MySqlOptions> options, IOptions<CapOptions> capOptions)
         {
             _options = options;
             _capOptions = capOptions.Value;
             _prefix = options.Value.TableNamePrefix;
+            _databaseName = options.Value.DatabaseName;
         }
 
         public MySqlOptions Options => _options.Value;
@@ -34,7 +36,7 @@ namespace DotNetCore.CAP.MySql
 
         public async Task<CapPublishedMessage> GetPublishedMessageAsync(long id)
         {
-            var sql = $@"SELECT * FROM `{_prefix}.published` WHERE `Id`={id};";
+            var sql = $@"SELECT * FROM `{_databaseName}`.`{_prefix}.published` WHERE `Id`={id};";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
@@ -46,7 +48,7 @@ namespace DotNetCore.CAP.MySql
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
-                $"SELECT * FROM `{_prefix}.published` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `Version`='{_capOptions.Version}' AND `Added`<'{fourMinsAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
+                $"SELECT * FROM `{_databaseName}`.`{_prefix}.published` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `Version`='{_capOptions.Version}' AND `Added`<'{fourMinsAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
@@ -62,7 +64,7 @@ namespace DotNetCore.CAP.MySql
             }
 
             var sql = $@"
-INSERT INTO `{_prefix}.received`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
+INSERT INTO `{_databaseName}`.`{_prefix}.received`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)
 VALUES(@Id,'{_capOptions.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
@@ -73,7 +75,7 @@ VALUES(@Id,'{_capOptions.Version}',@Name,@Group,@Content,@Retries,@Added,@Expire
 
         public async Task<CapReceivedMessage> GetReceivedMessageAsync(long id)
         {
-            var sql = $@"SELECT * FROM `{_prefix}.received` WHERE Id={id};";
+            var sql = $@"SELECT * FROM `{_databaseName}`.`{_prefix}.received` WHERE Id={id};";
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
@@ -84,7 +86,7 @@ VALUES(@Id,'{_capOptions.Version}',@Name,@Group,@Content,@Retries,@Added,@Expire
         {
             var fourMinsAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
-                $"SELECT * FROM `{_prefix}.received` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `Version`='{_capOptions.Version}' AND `Added`<'{fourMinsAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
+                $"SELECT * FROM `{_databaseName}`.`{_prefix}.received` WHERE `Retries`<{_capOptions.FailedRetryCount} AND `Version`='{_capOptions.Version}' AND `Added`<'{fourMinsAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
                 return await connection.QueryAsync<CapReceivedMessage>(sql);
@@ -94,7 +96,7 @@ VALUES(@Id,'{_capOptions.Version}',@Name,@Group,@Content,@Retries,@Added,@Expire
         public bool ChangePublishedState(long messageId, string state)
         {
             var sql =
-                $"UPDATE `{_prefix}.published` SET `Retries`=`Retries`+1,`ExpiresAt`=NULL,`StatusName` = '{state}' WHERE `Id`={messageId}";
+                $"UPDATE `{_databaseName}`.`{_prefix}.published` SET `Retries`=`Retries`+1,`ExpiresAt`=NULL,`StatusName` = '{state}' WHERE `Id`={messageId}";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {
@@ -105,7 +107,7 @@ VALUES(@Id,'{_capOptions.Version}',@Name,@Group,@Content,@Retries,@Added,@Expire
         public bool ChangeReceivedState(long messageId, string state)
         {
             var sql =
-                $"UPDATE `{_prefix}.received` SET `Retries`=`Retries`+1,`ExpiresAt`=NULL,`StatusName` = '{state}' WHERE `Id`={messageId}";
+                $"UPDATE `{_databaseName}`.`{_prefix}.received` SET `Retries`=`Retries`+1,`ExpiresAt`=NULL,`StatusName` = '{state}' WHERE `Id`={messageId}";
 
             using (var connection = new MySqlConnection(Options.ConnectionString))
             {

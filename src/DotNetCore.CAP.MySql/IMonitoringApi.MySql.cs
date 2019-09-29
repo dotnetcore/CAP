@@ -17,22 +17,24 @@ namespace DotNetCore.CAP.MySql
     internal class MySqlMonitoringApi : IMonitoringApi
     {
         private readonly string _prefix;
+        private readonly string _databaseName;
         private readonly MySqlStorage _storage;
 
         public MySqlMonitoringApi(IStorage storage, IOptions<MySqlOptions> options)
         {
             _storage = storage as MySqlStorage ?? throw new ArgumentNullException(nameof(storage));
             _prefix = options.Value.TableNamePrefix ?? throw new ArgumentNullException(nameof(options));
+            _databaseName = options.Value.DatabaseName ?? throw new ArgumentNullException(nameof(options));
         }
 
         public StatisticsDto GetStatistics()
         {
             var sql = string.Format(@"
 set transaction isolation level read committed;
-select count(Id) from `{0}.published` where StatusName = N'Succeeded';
-select count(Id) from `{0}.received` where StatusName = N'Succeeded';
-select count(Id) from `{0}.published` where StatusName = N'Failed';
-select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
+select count(Id) from `{0}`.`{1}.published` where StatusName = N'Succeeded';
+select count(Id) from `{0}.`{1}.received` where StatusName = N'Succeeded';
+select count(Id) from `{0}.`{1}.published` where StatusName = N'Failed';
+select count(Id) from `{0}.`{1}.received` where StatusName = N'Failed';", _databaseName, _prefix);
 
             var statistics = UseConnection(connection =>
             {
@@ -90,7 +92,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
             }
 
             var sqlQuery =
-                $"select * from `{_prefix}.{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
+                $"select * from `{_databaseName}`.`{_prefix}.{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
 
             return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
@@ -125,7 +127,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = $"select count(Id) from `{_prefix}.{tableName}` where StatusName = @state";
+            var sqlQuery = $"select count(Id) from `{_databaseName}`.`{_prefix}.{tableName}` where StatusName = @state";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
             return count;
@@ -163,7 +165,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 select aggr.* from (
     select date_format(`Added`,'%Y-%m-%d-%H') as `Key`,
         count(id) `Count`
-    from  `{_prefix}.{tableName}`
+    from  `{_databaseName}`.`{_prefix}.{tableName}`
     where StatusName = @statusName
     group by date_format(`Added`,'%Y-%m-%d-%H')
 ) aggr where `Key` in @keys;";

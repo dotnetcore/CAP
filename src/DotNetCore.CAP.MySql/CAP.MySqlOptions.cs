@@ -4,15 +4,35 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP
 {
     public class MySqlOptions : EFOptions
     {
+        private string _connectionString;
+
         /// <summary>
         /// Gets or sets the database's connection string that will be used to store database entities.
         /// </summary>
-        public string ConnectionString { get; set; }
+        public string ConnectionString
+        {
+            get
+            {
+                return _connectionString;
+            }
+            set
+            {
+                MySqlConnection mySqlConnection = new MySqlConnection(value);
+                DatabaseName = mySqlConnection.Database;
+                _connectionString = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the database's Name.
+        /// </summary>
+        public string DatabaseName { get; set; }
     }
 
     internal class ConfigureMySqlOptions : IConfigureOptions<MySqlOptions>

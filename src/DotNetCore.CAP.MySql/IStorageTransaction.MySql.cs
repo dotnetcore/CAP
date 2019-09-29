@@ -15,11 +15,13 @@ namespace DotNetCore.CAP.MySql
         private readonly IDbConnection _dbConnection;
 
         private readonly string _prefix;
+        private readonly string _databaseName;
 
         public MySqlStorageTransaction(MySqlStorageConnection connection)
         {
             var options = connection.Options;
             _prefix = options.TableNamePrefix;
+            _databaseName = options.DatabaseName;
 
             _dbConnection = new MySqlConnection(options.ConnectionString);
         }
@@ -32,7 +34,7 @@ namespace DotNetCore.CAP.MySql
             }
 
             var sql =
-                $"UPDATE `{_prefix}.published` SET `Retries` = @Retries,`Content`= @Content,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+                $"UPDATE `{_databaseName}`.`{_prefix}.published` SET `Retries` = @Retries,`Content`= @Content,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
             _dbConnection.Execute(sql, message);
         }
 
@@ -44,7 +46,7 @@ namespace DotNetCore.CAP.MySql
             }
 
             var sql =
-                $"UPDATE `{_prefix}.received` SET `Retries` = @Retries,`Content`= @Content,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+                $"UPDATE `{_databaseName}`.`{_prefix}.received` SET `Retries` = @Retries,`Content`= @Content,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
             _dbConnection.Execute(sql, message);
         }
 

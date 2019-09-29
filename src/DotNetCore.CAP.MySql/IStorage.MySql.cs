@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.MySql
 
         public MySqlStorage(
             ILogger<MySqlStorage> logger,
-            IOptions<MySqlOptions> options, 
+            IOptions<MySqlOptions> options,
             IOptions<CapOptions> capOptions)
         {
             _options = options;
@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.MySql
                 return;
             }
 
-            var sql = CreateDbTablesScript(_options.Value.TableNamePrefix);
+            var sql = CreateDbTablesScript(_options.Value.DatabaseName, _options.Value.TableNamePrefix);
             using (var connection = new MySqlConnection(_options.Value.ConnectionString))
             {
                 await connection.ExecuteAsync(sql);
@@ -56,11 +56,11 @@ namespace DotNetCore.CAP.MySql
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
 
-        protected virtual string CreateDbTablesScript(string prefix)
+        protected virtual string CreateDbTablesScript(string databaseName, string prefix)
         {
             var batchSql =
                 $@"
-CREATE TABLE IF NOT EXISTS `{prefix}.received` (
+CREATE TABLE IF NOT EXISTS `{databaseName}`.`{prefix}.received` (
   `Id` bigint NOT NULL,
   `Version` varchar(20) DEFAULT NULL,
   `Name` varchar(400) NOT NULL,
@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS `{prefix}.received` (
   PRIMARY KEY (`Id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `{prefix}.published` (
+CREATE TABLE IF NOT EXISTS `{databaseName}`.`{prefix}.published` (
   `Id` bigint NOT NULL,
   `Version` varchar(20) DEFAULT NULL,
   `Name` varchar(200) NOT NULL,

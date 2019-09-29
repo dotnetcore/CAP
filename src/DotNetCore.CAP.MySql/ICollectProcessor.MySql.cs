@@ -43,7 +43,7 @@ namespace DotNetCore.CAP.MySql
                     using (var connection = new MySqlConnection(_options.ConnectionString))
                     {
                         removedCount = await connection.ExecuteAsync(
-                            $@"DELETE FROM `{table}` WHERE ExpiresAt < @now limit @count;",
+                            $@"DELETE FROM `{_options.DatabaseName}`.`{table}` WHERE ExpiresAt < @now limit @count;",
                             new { now = DateTime.Now, count = MaxBatch });
                     }
 
