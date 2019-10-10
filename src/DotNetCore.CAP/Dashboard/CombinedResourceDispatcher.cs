@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -22,14 +23,14 @@ namespace DotNetCore.CAP.Dashboard
             _resourceNames = resourceNames;
         }
 
-        protected override void WriteResponse(DashboardResponse response)
+        protected override async Task WriteResponse(DashboardResponse response)
         {
             foreach (var resourceName in _resourceNames)
             {
-                WriteResource(
+               await WriteResource(
                     response,
                     _assembly,
-                    $"{_baseNamespace}.{resourceName}");
+                    $"{_baseNamespace}.{resourceName}").ConfigureAwait(false);
             }
         }
     }
