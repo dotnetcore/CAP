@@ -4,6 +4,7 @@
 using System;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.RabbitMQ;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
@@ -23,6 +24,7 @@ namespace DotNetCore.CAP
             services.AddSingleton<CapMessageQueueMakerService>();
              
             services.Configure(_configure);
+            services.AddSingleton<ITransport, RabbitMQMessageSender>();
             services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
             services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
         
