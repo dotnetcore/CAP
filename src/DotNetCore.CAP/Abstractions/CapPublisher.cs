@@ -23,7 +23,7 @@ namespace DotNetCore.CAP.Abstractions
         protected static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
-        protected CapPublisher(IServiceProvider service)
+        public CapPublisher(IServiceProvider service)
         {
             ServiceProvider = service;
             _dispatcher = service.GetRequiredService<IDispatcher>();

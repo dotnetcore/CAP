@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.Internal
         protected static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
-        protected MessageSender(
+        public MessageSender(
             ILogger<MessageSender> logger,
             IOptions<CapOptions> options,
             IDataStorage dataStorage,
