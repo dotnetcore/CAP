@@ -181,7 +181,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] in @keys;";
             var sqlQuery = $@"
 with aggr as (
     select FORMAT(Added,'yyyy-MM-dd-HH') as [Key],
-        count(id) [Count]
+        count(Id) [Count]
     from  [{_options.Schema}].{tableName}
     where StatusName = @statusName
     group by FORMAT(Added,'yyyy-MM-dd-HH')
