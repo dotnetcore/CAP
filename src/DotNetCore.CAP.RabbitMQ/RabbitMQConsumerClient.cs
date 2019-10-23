@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.Options;
@@ -163,11 +164,14 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             _deliveryTag = e.DeliveryTag;
 
-            var header = e.BasicProperties.Headers
-                .ToDictionary(x => x.Key, x => x.Value.ToString());
-            header.Add(Headers.Group, _queueName);
+            var headers = new Dictionary<string, string>();
+            foreach (var header in e.BasicProperties.Headers)
+            {
+                headers.Add(header.Key, header.Value == null ? null : Encoding.UTF8.GetString((byte[])header.Value));
+            }
+            headers.Add(Headers.Group, _queueName);
 
-            var message = new TransportMessage(header, e.Body);
+            var message = new TransportMessage(headers, e.Body);
 
             OnMessageReceived?.Invoke(sender, message);
         }

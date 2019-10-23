@@ -103,7 +103,7 @@ namespace DotNetCore.CAP.MySql
             return message;
         }
 
-        public async Task<MediumMessage> StoreMessageAsync(string name, string group, Message content, CancellationToken cancellationToken = default)
+        public Task<MediumMessage> StoreMessageAsync(string name, string group, Message content, CancellationToken cancellationToken = default)
         {
             var sql = $@"INSERT INTO `{_options.Value.TableNamePrefix}.received`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
@@ -125,14 +125,15 @@ namespace DotNetCore.CAP.MySql
                 Retries = message.Retries,
                 Added = message.Added,
                 ExpiresAt = message.ExpiresAt,
-                StatusName = StatusName.Scheduled
+                StatusName = nameof(StatusName.Scheduled)
             };
 
             using (var connection = new MySqlConnection(_options.Value.ConnectionString))
             {
-                await connection.ExecuteAsync(sql, po);
+                connection.Execute(sql, po);
             }
-            return message;
+
+            return Task.FromResult(message);
         }
 
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default)

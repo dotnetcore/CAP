@@ -160,6 +160,7 @@ namespace DotNetCore.CAP
                     var stopwatch = Stopwatch.StartNew();
 
                     var message = await _serializer.DeserializeAsync(messageContext);
+
                     var mediumMessage = await _storage.StoreMessageAsync(message.GetName(), message.GetGroup(), message);
 
                     client.Commit();

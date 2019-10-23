@@ -36,6 +36,8 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddSingleton<CapMarkerService>();
 
+            services.TryAddSingleton<ICapPublisher, CapPublisher>();
+
             //Serializer and model binder
             services.TryAddSingleton<IContentSerializer, JsonContentSerializer>();
             services.TryAddSingleton<IMessagePacker, DefaultMessagePacker>();
@@ -55,6 +57,7 @@ namespace Microsoft.Extensions.DependencyInjection
             //Queue's message processor
             services.TryAddSingleton<MessageNeedToRetryProcessor>();
             services.TryAddSingleton<TransportCheckProcessor>();
+            services.TryAddSingleton<CollectorProcessor>();
 
             //Sender and Executors   
             services.TryAddSingleton<IMessageSender, MessageSender>();

@@ -71,7 +71,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [CapSubscribe("sample.rabbitmq.mysql")]
         public void Subscriber(DateTime time)
         {
-            //Console.WriteLine($@"{DateTime.Now}, Subscriber invoked, Sent time:{time}");
+            Console.WriteLine($@"{DateTime.Now}, Subscriber invoked, Sent time:{time}");
         }
     }
 }

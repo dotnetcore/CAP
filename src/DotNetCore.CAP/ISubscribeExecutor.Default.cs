@@ -14,14 +14,15 @@ using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP
 {
     internal class DefaultSubscriberExecutor : ISubscriberExecutor
     {
-        private readonly ICapPublisher _sender;
         private readonly IDataStorage _dataStorage;
         private readonly ILogger _logger;
+        private readonly IServiceProvider _provider;
         private readonly CapOptions _options;
         private readonly MethodMatcherCache _selector;
 
@@ -33,18 +34,17 @@ namespace DotNetCore.CAP
         public DefaultSubscriberExecutor(
             ILogger<DefaultSubscriberExecutor> logger,
             IOptions<CapOptions> options,
-            IConsumerInvokerFactory consumerInvokerFactory,
-            ICapPublisher sender,
-            IDataStorage dataStorage,
+            IServiceProvider provider,
             MethodMatcherCache selector)
         {
             _selector = selector;
-            _sender = sender;
-            _options = options.Value;
-            _dataStorage = dataStorage;
-            _logger = logger;
 
-            Invoker = consumerInvokerFactory.CreateInvoker();
+            _provider = provider;
+            _logger = logger;
+            _options = options.Value;
+           
+            _dataStorage = _provider.GetService<IDataStorage>();
+            Invoker = _provider.GetService<IConsumerInvokerFactory>().CreateInvoker();
         }
 
         private IConsumerInvoker Invoker { get; }
@@ -190,7 +190,7 @@ namespace DotNetCore.CAP
                         [Headers.CorrelationSequence] = (message.Origin.GetCorrelationSequence() + 1).ToString()
                     };
 
-                    await _sender.PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken);
+                    await _provider.GetService<ICapPublisher>().PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken);
                 }
             }
             catch (OperationCanceledException)
