@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
@@ -21,7 +22,11 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
+            await _capBus.PublishAsync("sample.rabbitmq.mysql", new Person()
+            {
+                Id = 123,
+                Name = "Bar"
+            });
 
             return Ok();
         }
@@ -69,9 +74,9 @@ namespace Sample.RabbitMQ.MySql.Controllers
 
         [NonAction]
         [CapSubscribe("sample.rabbitmq.mysql")]
-        public void Subscriber(DateTime time)
+        public void Subscriber(Person2 p)
         {
-            Console.WriteLine($@"{DateTime.Now}, Subscriber invoked, Sent time:{time}");
+            Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
         }
     }
 }
