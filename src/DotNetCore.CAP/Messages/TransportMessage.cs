@@ -28,5 +28,10 @@ namespace DotNetCore.CAP.Messages
         {
             return Headers.TryGetValue(Messages.Headers.MessageName, out var value) ? value : null;
         }
+
+        public string GetGroup()
+        {
+            return Headers.TryGetValue(Messages.Headers.Group, out var value) ? value : null;
+        }
     }
 }

@@ -24,7 +24,6 @@ namespace DotNetCore.CAP
         private readonly ILogger _logger;
         private readonly IServiceProvider _provider;
         private readonly CapOptions _options;
-        private readonly MethodMatcherCache _selector;
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
@@ -34,28 +33,40 @@ namespace DotNetCore.CAP
         public DefaultSubscriberExecutor(
             ILogger<DefaultSubscriberExecutor> logger,
             IOptions<CapOptions> options,
-            IServiceProvider provider,
-            MethodMatcherCache selector)
+            IServiceProvider provider)
         {
-            _selector = selector;
-
             _provider = provider;
             _logger = logger;
             _options = options.Value;
-           
+
             _dataStorage = _provider.GetService<IDataStorage>();
             Invoker = _provider.GetService<IConsumerInvokerFactory>().CreateInvoker();
         }
 
         private IConsumerInvoker Invoker { get; }
 
-        public async Task<OperateResult> ExecuteAsync(MediumMessage message, CancellationToken cancellationToken)
+        public Task<OperateResult> ExecuteAsync(MediumMessage message, CancellationToken cancellationToken)
+        {
+            var selector = _provider.GetService<MethodMatcherCache>();
+            if (!selector.TryGetTopicExecutor(message.Origin.GetName(), message.Origin.GetGroup(), out var executor))
+            {
+                var error = $"Message (Name:{message.Origin.GetName()},Group:{message.Origin.GetGroup()}) can not be found subscriber." +
+                            $"{Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
+                _logger.LogError(error);
+
+                return Task.FromResult(OperateResult.Failed(new SubscriberNotFoundException(error)));
+            }
+
+            return ExecuteAsync(message, executor, cancellationToken);
+        }
+
+        public async Task<OperateResult> ExecuteAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
         {
             bool retry;
             OperateResult result;
             do
             {
-                var executedResult = await ExecuteWithoutRetryAsync(message, cancellationToken);
+                var executedResult = await ExecuteWithoutRetryAsync(message, descriptor, cancellationToken);
                 result = executedResult.Item2;
                 if (result == OperateResult.Success)
                 {
@@ -67,7 +78,7 @@ namespace DotNetCore.CAP
             return result;
         }
 
-        private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync(MediumMessage message, CancellationToken cancellationToken)
+        private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
         {
             if (message == null)
             {
@@ -80,7 +91,7 @@ namespace DotNetCore.CAP
             {
                 var sp = Stopwatch.StartNew();
 
-                await InvokeConsumerMethodAsync(message, cancellationToken);
+                await InvokeConsumerMethodAsync(message, descriptor, cancellationToken);
 
                 sp.Stop();
 
@@ -157,22 +168,13 @@ namespace DotNetCore.CAP
         //    message.Content = Helper.AddExceptionProperty(message.Content, exception);
         //}
 
-        private async Task InvokeConsumerMethodAsync(MediumMessage message, CancellationToken cancellationToken)
+        private async Task InvokeConsumerMethodAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
         {
-            if (!_selector.TryGetTopicExecutor(
-                message.Origin.GetName(),
-                message.Origin.GetGroup(),
-                out var executor))
-            {
-                var error = $"Message can not be found subscriber. {message} \r\n see: https://github.com/dotnetcore/CAP/issues/63";
-                throw new SubscriberNotFoundException(error);
-            }
-
             var startTime = DateTimeOffset.UtcNow;
             var stopwatch = Stopwatch.StartNew();
             var operationId = Guid.Empty;
 
-            var consumerContext = new ConsumerContext(executor, message.Origin);
+            var consumerContext = new ConsumerContext(descriptor, message.Origin);
 
             try
             {

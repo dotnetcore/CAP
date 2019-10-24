@@ -21,8 +21,8 @@ namespace DotNetCore.CAP.Processor
         private readonly BlockingCollection<MediumMessage> _publishedMessageQueue =
             new BlockingCollection<MediumMessage>(new ConcurrentQueue<MediumMessage>());
 
-        private readonly BlockingCollection<MediumMessage> _receivedMessageQueue =
-            new BlockingCollection<MediumMessage>(new ConcurrentQueue<MediumMessage>());
+        private readonly BlockingCollection<(MediumMessage, ConsumerExecutorDescriptor)> _receivedMessageQueue =
+            new BlockingCollection<(MediumMessage, ConsumerExecutorDescriptor)>(new ConcurrentQueue<(MediumMessage, ConsumerExecutorDescriptor)>());
 
         public Dispatcher(ILogger<Dispatcher> logger,
             IMessageSender sender,
@@ -41,9 +41,9 @@ namespace DotNetCore.CAP.Processor
             _publishedMessageQueue.Add(message);
         }
 
-        public void EnqueueToExecute(MediumMessage message)
+        public void EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
         {
-            _receivedMessageQueue.Add(message);
+            _receivedMessageQueue.Add((message, descriptor));
         }
 
         public void Dispose()
@@ -85,7 +85,7 @@ namespace DotNetCore.CAP.Processor
             {
                 foreach (var message in _receivedMessageQueue.GetConsumingEnumerable(_cts.Token))
                 {
-                    _executor.ExecuteAsync(message, _cts.Token);
+                    _executor.ExecuteAsync(message.Item1, message.Item2, _cts.Token);
                 }
             }
             catch (OperationCanceledException)

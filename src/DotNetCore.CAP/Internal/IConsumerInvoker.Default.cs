@@ -59,65 +59,34 @@ namespace DotNetCore.CAP.Internal
                     obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, implType);
                 }
 
-                //var jsonContent = context.DeliverMessage.Content;
-                //var message = _messagePacker.UnPack(jsonContent);
-
                 var message = context.DeliverMessage;
-                object resultObj;
-                if (executor.MethodParameters.Length > 0)
+                var parameterDescriptors = context.ConsumerDescriptor.Parameters;
+                var executeParameters = new object[parameterDescriptors.Count];
+                for (var i = 0; i < parameterDescriptors.Count; i++)
                 {
-                    resultObj = await ExecuteWithParameterAsync(executor, obj, message.Value);
-                }
-                else
-                {
-                    resultObj = await ExecuteAsync(executor, obj);
+                    if (parameterDescriptors[i].IsFromCap)
+                    {
+                        executeParameters[i] = new CapHeader(message.Headers);
+                    }
+                    else
+                    {
+                        executeParameters[i] = message.Value;
+                    }
                 }
 
+                var resultObj = await ExecuteWithParameterAsync(executor, obj, executeParameters);
                 return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName());
             }
         }
 
-        private async Task<object> ExecuteAsync(ObjectMethodExecutor executor, object @class)
+        private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor, object @class, object[] parameter)
         {
             if (executor.IsMethodAsync)
             {
-                return await executor.ExecuteAsync(@class);
+                return await executor.ExecuteAsync(@class, parameter);
             }
 
-            return executor.Execute(@class);
-        }
-
-        private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor, object @class, object parameter)
-        {
-            var firstParameter = executor.MethodParameters[0];
-            try
-            {
-                if (executor.IsMethodAsync)
-                {
-                    return await executor.ExecuteAsync(@class, parameter);
-                }
-
-                return executor.Execute(@class, parameter);
-                //var binder = _modelBinderFactory.CreateBinder(firstParameter);
-                //var bindResult = await binder.BindModelAsync(parameter);
-                //if (bindResult.IsSuccess)
-                //{
-                //    if (executor.IsMethodAsync)
-                //    {
-                //        return await executor.ExecuteAsync(@class, bindResult.Model);
-                //    }
-
-                //    return executor.Execute(@class, bindResult.Model);
-                //}
-
-                //throw new MethodBindException(
-                //    $"Parameters:{firstParameter.Name} bind failed! ParameterString is: {parameter} ");
-            }
-            catch (FormatException ex)
-            {
-                //_logger.ModelBinderFormattingException(executor.MethodInfo?.Name, firstParameter.Name, parameter, ex);
-                return null;
-            }
+            return executor.Execute(@class, parameter);
         }
     }
 }

@@ -11,6 +11,7 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly ILoggerFactory _loggerFactory;
         //private readonly IMessagePacker _messagePacker;
+        //
         //private readonly IModelBinderFactory _modelBinderFactory;
         private readonly IServiceProvider _serviceProvider;
 

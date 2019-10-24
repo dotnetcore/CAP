@@ -1,6 +1,8 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
+using System.Collections.Generic;
 using System.Reflection;
 using DotNetCore.CAP.Abstractions;
 
@@ -18,5 +20,16 @@ namespace DotNetCore.CAP
         public TypeInfo ImplTypeInfo { get; set; }
 
         public TopicAttribute Attribute { get; set; }
+
+        public IList<ParameterDescriptor> Parameters { get; set; }
+    }
+
+    public class ParameterDescriptor
+    {
+        public string Name { get; set; }
+
+        public Type ParameterType { get; set; }
+
+        public bool IsFromCap { get; set; }
     }
 }

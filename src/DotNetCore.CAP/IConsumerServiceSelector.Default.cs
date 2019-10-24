@@ -134,7 +134,15 @@ namespace DotNetCore.CAP
                         attr.Group = attr.Group + "." + _capOptions.Version;
                     }
 
-                    yield return InitDescriptor(attr, method, typeInfo, serviceTypeInfo);
+                    var parameters = method.GetParameters()
+                        .Select(parameter => new ParameterDescriptor
+                        {
+                            Name = parameter.Name,
+                            ParameterType = parameter.ParameterType,
+                            IsFromCap = parameter.GetCustomAttributes(typeof(FromCapAttribute)).Any()
+                        }).ToList();
+
+                    yield return InitDescriptor(attr, method, typeInfo, serviceTypeInfo, parameters);
                 }
             }
         }
@@ -143,14 +151,16 @@ namespace DotNetCore.CAP
             TopicAttribute attr,
             MethodInfo methodInfo,
             TypeInfo implType,
-            TypeInfo serviceTypeInfo)
+            TypeInfo serviceTypeInfo,
+            IList<ParameterDescriptor> parameters)
         {
             var descriptor = new ConsumerExecutorDescriptor
             {
                 Attribute = attr,
                 MethodInfo = methodInfo,
                 ImplTypeInfo = implType,
-                ServiceTypeInfo = serviceTypeInfo
+                ServiceTypeInfo = serviceTypeInfo,
+                Parameters = parameters
             };
 
             return descriptor;

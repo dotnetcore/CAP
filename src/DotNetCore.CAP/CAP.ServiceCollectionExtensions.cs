@@ -38,19 +38,13 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddSingleton<ICapPublisher, CapPublisher>();
 
-            //Serializer and model binder
-            services.TryAddSingleton<IContentSerializer, JsonContentSerializer>();
-            services.TryAddSingleton<IMessagePacker, DefaultMessagePacker>();
             services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
-            services.TryAddSingleton<IModelBinderFactory, ModelBinderFactory>();
-
-            //services.TryAddSingleton<ICallbackMessageSender, CallbackMessageSender>();
             services.TryAddSingleton<IConsumerInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();
 
-            //Processors
             services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();
 
+            //Processors
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerRegister>());
 
@@ -63,7 +57,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IMessageSender, MessageSender>();
             services.TryAddSingleton<IDispatcher, Dispatcher>();
 
-            services.TryAddSingleton<ISerializer, MemorySerializer>();
+            services.TryAddSingleton<ISerializer, JsonUtf8Serializer>();
 
             // Warning: IPublishMessageSender need to inject at extension project. 
             services.TryAddSingleton<ISubscriberExecutor, DefaultSubscriberExecutor>();
@@ -77,8 +71,7 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             services.Configure(setupAction);
 
-            //Startup and Hosted
-            //services.AddTransient<IStartupFilter, CapStartupFilter>();
+            //Startup and Hosted 
             services.AddHostedService<DefaultBootstrapper>();
 
             return new CapBuilder(services);

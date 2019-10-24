@@ -148,20 +148,31 @@ namespace DotNetCore.CAP
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
-            client.OnMessageReceived += async (sender, messageContext) =>
+            client.OnMessageReceived += async (sender, transportMessage) =>
             {
                 _cts.Token.ThrowIfCancellationRequested();
                 Guid? operationId = null;
                 try
                 {
-                    operationId = TracingBefore(messageContext);
+                    operationId = TracingBefore(transportMessage);
 
                     var startTime = DateTimeOffset.UtcNow;
                     var stopwatch = Stopwatch.StartNew();
 
-                    var message = await _serializer.DeserializeAsync(messageContext);
+                    var name = transportMessage.GetName();
+                    var group = transportMessage.GetGroup();
 
-                    var mediumMessage = await _storage.StoreMessageAsync(message.GetName(), message.GetGroup(), message);
+                    if (!_selector.TryGetTopicExecutor(name, group, out var executor))
+                    {
+                        var error = $"Message can not be found subscriber. Name:{name}, Group:{group}. {Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
+                        throw new SubscriberNotFoundException(error);
+                    }
+
+                    var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
+
+                    var message = await _serializer.DeserializeAsync(transportMessage, type);
+
+                    var mediumMessage = await _storage.StoreMessageAsync(name, group, message);
 
                     client.Commit();
 
@@ -170,17 +181,17 @@ namespace DotNetCore.CAP
                         TracingAfter(operationId.Value, message, startTime, stopwatch.Elapsed);
                     }
 
-                    _dispatcher.EnqueueToExecute(mediumMessage);
+                    _dispatcher.EnqueueToExecute(mediumMessage, executor);
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "An exception occurred when store received message. Message:'{0}'.", messageContext);
+                    _logger.LogError(e, "An exception occurred when store received message. Message:'{0}'.", transportMessage);
 
                     client.Reject();
 
                     if (operationId != null)
                     {
-                        TracingError(operationId.Value, messageContext, e);
+                        TracingError(operationId.Value, transportMessage, e);
                     }
                 }
             };

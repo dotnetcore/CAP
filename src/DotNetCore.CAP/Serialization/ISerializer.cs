@@ -1,5 +1,7 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
+using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Serialization
 {
@@ -13,6 +15,6 @@ namespace DotNetCore.CAP.Serialization
         /// <summary>
         /// Deserializes the given <see cref="TransportMessage"/> back into a <see cref="Message"/>
         /// </summary>
-        Task<Message> DeserializeAsync(TransportMessage transportMessage);
+        Task<Message> DeserializeAsync(TransportMessage transportMessage, [CanBeNull] Type valueType);
     }
 }

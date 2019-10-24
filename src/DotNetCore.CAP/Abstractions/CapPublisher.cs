@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.Abstractions
                 optionHeaders.Add(Headers.CorrelationSequence, 0.ToString());
             }
             optionHeaders.Add(Headers.MessageName, name);
-            optionHeaders.Add(Headers.Type, typeof(T).ToString());
+            optionHeaders.Add(Headers.Type, typeof(T).AssemblyQualifiedName);
             optionHeaders.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
 
             var message = new Message(optionHeaders, value);
