@@ -5,7 +5,7 @@ using System;
 using System.ComponentModel;
 using System.Reflection;
 
-namespace DotNetCore.CAP.Infrastructure
+namespace DotNetCore.CAP.Internal
 {
     public static class Helper
     {

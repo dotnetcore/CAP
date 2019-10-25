@@ -5,7 +5,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Infrastructure
+namespace DotNetCore.CAP.Internal
 {
     public static class WaitHandleEx
     {

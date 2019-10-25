@@ -5,7 +5,6 @@ using System;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
-using DotNetCore.CAP.Infrastructure;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Processor;

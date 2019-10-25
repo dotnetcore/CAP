@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Persistence
@@ -22,31 +22,5 @@ namespace DotNetCore.CAP.Persistence
         Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry();
 
         Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry();
-
-        //Task<CapPublishedMessage> GetPublishedMessageAsync(long id);
-        //Task<CapReceivedMessage> GetReceivedMessageAsync(long id);
-
-        //public void UpdateMessage(CapPublishedMessage message)
-        //{
-        //    if (message == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(message));
-        //    }
-
-        //    var sql =
-        //        $"UPDATE `{_prefix}.published` SET `Retries` = @Retries,`Content`= @Content,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
-        //    _dbConnection.Execute(sql, message);
-        //}
-
-        //public void UpdateMessage(CapReceivedMessage message)
-        //{
-        //    if (message == null)
-        //    {
-        //        throw new ArgumentNullException(nameof(message));
-        //    }
-
-        //    var sql = $"UPDATE `{_prefix}.received` SET `Retries` = @Retries,`Content`= @Content,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
-        //    _dbConnection.Execute(sql, message);
-        //}
     }
 }

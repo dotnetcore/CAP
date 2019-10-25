@@ -3,7 +3,7 @@
 
 using System;
 
-namespace DotNetCore.CAP.Infrastructure
+namespace DotNetCore.CAP.Internal
 {
     public class SnowflakeId
     {

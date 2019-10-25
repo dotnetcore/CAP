@@ -7,9 +7,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using System.Collections.Concurrent;
+using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP

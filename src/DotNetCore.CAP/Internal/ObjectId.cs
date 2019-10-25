@@ -9,7 +9,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 
-namespace DotNetCore.CAP.Infrastructure
+namespace DotNetCore.CAP.Internal
 {
     /// <summary>
     /// Represents an ObjectId
