@@ -23,5 +23,7 @@
         public const string Group = "cap-msg-group";
 
         public const string SentTime = "cap-senttime";
+
+        public const string Exception = "cap-exception";
     }
 }

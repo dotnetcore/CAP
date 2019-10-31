@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using Dapper;
@@ -36,7 +35,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         {
             using (var connection = new MySqlConnection(AppDbContext.ConnectionString))
             {
-                using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
+                using (var transaction = connection.BeginTransaction(_capBus, true))
                 {
                     //your business code
                     connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
@@ -45,8 +44,6 @@ namespace Sample.RabbitMQ.MySql.Controllers
                     //{
                     _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
                     //}
-
-                    transaction.Commit();
                 }
             }
 
@@ -60,7 +57,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
             {
                 dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
 
-                for (int i = 0; i < 5; i++)
+                for (int i = 0; i < 1; i++)
                 {
                     _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
                 }
@@ -74,7 +71,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
 
         [NonAction]
         [CapSubscribe("sample.rabbitmq.mysql")]
-        public void Subscriber(Person2 p)
+        public void Subscriber(DateTime p)
         {
             Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
         }

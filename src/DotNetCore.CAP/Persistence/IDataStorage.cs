@@ -15,7 +15,9 @@ namespace DotNetCore.CAP.Persistence
 
         Task<MediumMessage> StoreMessageAsync(string name, Message content, object dbTransaction = null, CancellationToken cancellationToken = default);
 
-        Task<MediumMessage> StoreMessageAsync(string name, string group, Message content, CancellationToken cancellationToken = default);
+        Task StoreReceivedExceptionMessageAsync(string name, string group, string content);
+
+        Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message content);
 
         Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default);
 

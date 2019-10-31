@@ -51,6 +51,11 @@ namespace DotNetCore.CAP.Messages
 
             return 0;
         }
+
+        public static bool HasException(this Message message)
+        {
+            return message.Headers.ContainsKey(Headers.Exception);
+        }
     }
 
 }

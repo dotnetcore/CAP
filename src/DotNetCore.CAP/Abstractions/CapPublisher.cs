@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.Abstractions
                 optionHeaders.Add(Headers.CorrelationSequence, 0.ToString());
             }
             optionHeaders.Add(Headers.MessageName, name);
-            optionHeaders.Add(Headers.Type, typeof(T).AssemblyQualifiedName);
+            optionHeaders.Add(Headers.Type, typeof(T).FullName);
             optionHeaders.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
 
             var message = new Message(optionHeaders, value);
@@ -79,7 +79,7 @@ namespace DotNetCore.CAP.Abstractions
                 {
                     var transaction = (CapTransactionBase)Transaction.Value;
 
-                    var mediumMessage = await _storage.StoreMessageAsync(name, message, transaction, cancellationToken);
+                    var mediumMessage = await _storage.StoreMessageAsync(name, message, transaction.DbTransaction, cancellationToken);
 
                     s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
 

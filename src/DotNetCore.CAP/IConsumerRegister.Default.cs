@@ -4,6 +4,8 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
@@ -170,18 +172,44 @@ namespace DotNetCore.CAP
 
                     var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
 
-                    var message = await _serializer.DeserializeAsync(transportMessage, type);
-
-                    var mediumMessage = await _storage.StoreMessageAsync(name, group, message);
-
-                    client.Commit();
-
-                    if (operationId != null)
+                    Message message;
+                    try
                     {
-                        TracingAfter(operationId.Value, message, startTime, stopwatch.Elapsed);
+                        message = await _serializer.DeserializeAsync(transportMessage, type);
+                    }
+                    catch (Exception e)
+                    {
+                        transportMessage.Headers.Add(Headers.Exception, e.Message);
+                        var dataUri = $"data:{transportMessage.Headers[Headers.Type]};base64," + Convert.ToBase64String(transportMessage.Body);
+                        message = new Message(transportMessage.Headers, dataUri);
                     }
 
-                    _dispatcher.EnqueueToExecute(mediumMessage, executor);
+                    if (message.HasException())
+                    {
+                        var content = StringSerializer.Serialize(message);
+                        await _storage.StoreReceivedExceptionMessageAsync(name, group, content);
+
+                        client.Commit();
+
+                        if (operationId != null)
+                        {
+                            TracingAfter(operationId.Value, message, startTime, stopwatch.Elapsed);
+                        }
+                    }
+                    else
+                    {
+                        var mediumMessage = await _storage.StoreReceivedMessageAsync(name, group, message);
+                        mediumMessage.Origin = message;
+
+                        client.Commit();
+
+                        if (operationId != null)
+                        {
+                            TracingAfter(operationId.Value, message, startTime, stopwatch.Elapsed);
+                        }
+
+                        _dispatcher.EnqueueToExecute(mediumMessage, executor);
+                    }
                 }
                 catch (Exception e)
                 {
