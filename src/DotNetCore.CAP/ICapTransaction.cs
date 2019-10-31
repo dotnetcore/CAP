@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace DotNetCore.CAP
 {
@@ -25,9 +27,13 @@ namespace DotNetCore.CAP
         /// </summary>
         void Commit();
 
+        Task CommitAsync(CancellationToken cancellationToken = default);
+
         /// <summary>
         /// We will delete the message data that has not been sstore in the buffer data of current transaction context.
         /// </summary>
         void Rollback();
+
+        Task RollbackAsync(CancellationToken cancellationToken = default);
     }
 }

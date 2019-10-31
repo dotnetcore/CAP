@@ -1,4 +1,6 @@
 ﻿using System.Collections.Concurrent;
+using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 
 namespace DotNetCore.CAP
@@ -36,7 +38,11 @@ namespace DotNetCore.CAP
 
         public abstract void Commit();
 
+        public abstract Task CommitAsync(CancellationToken cancellationToken = default);
+
         public abstract void Rollback();
+
+        public abstract Task RollbackAsync(CancellationToken cancellationToken = default);
 
         public abstract void Dispose();
     }
