@@ -75,5 +75,12 @@ namespace Sample.RabbitMQ.MySql.Controllers
         {
             Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
         }
+
+        [NonAction]
+        [CapSubscribe("sample.rabbitmq.mysql", Group = "group.test2")]
+        public void Subscriber2(DateTime p, [FromCap]CapHeader header)
+        {
+            Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
+        }
     }
 }

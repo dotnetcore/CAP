@@ -15,7 +15,7 @@ namespace Sample.RabbitMQ.MySql
             {
                 x.UseEntityFramework<AppDbContext>();
                 x.UseRabbitMQ("192.168.2.120");
-                //x.UseDashboard();
+                x.UseDashboard();
                 x.FailedRetryCount = 5;
                 x.FailedThresholdCallback = (type, msg) =>
                 {

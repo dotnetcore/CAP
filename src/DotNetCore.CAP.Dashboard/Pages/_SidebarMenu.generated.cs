@@ -16,18 +16,12 @@ namespace DotNetCore.CAP.Dashboard.Pages
     using System.Linq;
     using System.Text;
     
-    #line 2 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
-    using DotNetCore.CAP.Dashboard;
-    
-    #line default
-    #line hidden
-    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    internal partial class SidebarMenu : RazorPage
+    internal partial class SidebarMenu : DotNetCore.CAP.Dashboard.RazorPage
     {
 #line hidden
 
-        protected override void Execute()
+        public override void Execute()
         {
 
 
@@ -35,9 +29,8 @@ WriteLiteral("\r\n");
 
 
 
-
             
-            #line 4 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 3 "..\..\Pages\_SidebarMenu.cshtml"
  if (Items.Any())
 {
 
@@ -48,7 +41,7 @@ WriteLiteral("    <div id=\"stats\" class=\"list-group\">\r\n");
 
 
             
-            #line 7 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 6 "..\..\Pages\_SidebarMenu.cshtml"
          foreach (var item in Items)
         {
             var itemValue = item(this);
@@ -60,7 +53,7 @@ WriteLiteral("            <a href=\"");
 
 
             
-            #line 10 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 9 "..\..\Pages\_SidebarMenu.cshtml"
                 Write(itemValue.Url);
 
             
@@ -70,7 +63,7 @@ WriteLiteral("\" class=\"list-group-item ");
 
 
             
-            #line 10 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 9 "..\..\Pages\_SidebarMenu.cshtml"
                                                         Write(itemValue.Active ? "active" : null);
 
             
@@ -80,7 +73,7 @@ WriteLiteral("\">\r\n                ");
 
 
             
-            #line 11 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 10 "..\..\Pages\_SidebarMenu.cshtml"
            Write(itemValue.Text);
 
             
@@ -90,7 +83,7 @@ WriteLiteral("\r\n                <span class=\"pull-right\">\r\n");
 
 
             
-            #line 13 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 12 "..\..\Pages\_SidebarMenu.cshtml"
                      foreach (var metric in itemValue.GetAllMetrics())
                     {
                         
@@ -98,14 +91,14 @@ WriteLiteral("\r\n                <span class=\"pull-right\">\r\n");
             #line default
             #line hidden
             
-            #line 15 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 14 "..\..\Pages\_SidebarMenu.cshtml"
                    Write(Html.InlineMetric(metric));
 
             
             #line default
             #line hidden
             
-            #line 15 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 14 "..\..\Pages\_SidebarMenu.cshtml"
                                                   
                     }
 
@@ -116,7 +109,7 @@ WriteLiteral("                </span>\r\n            </a>\r\n");
 
 
             
-            #line 19 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 18 "..\..\Pages\_SidebarMenu.cshtml"
         }
 
             
@@ -126,9 +119,8 @@ WriteLiteral("    </div>\r\n");
 
 
             
-            #line 21 "..\..\Dashboard\Pages\_SidebarMenu.cshtml"
+            #line 20 "..\..\Pages\_SidebarMenu.cshtml"
 }
-
             
             #line default
             #line hidden

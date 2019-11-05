@@ -9,6 +9,14 @@ namespace DotNetCore.CAP.Internal
 {
     public static class Helper
     {
+        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local);
+
+        public static long ToTimestamp(DateTime value)
+        {
+            var elapsedTime = value - Epoch;
+            return (long)elapsedTime.TotalSeconds;
+        }
+
         public static bool IsController(TypeInfo typeInfo)
         {
             if (!typeInfo.IsClass)

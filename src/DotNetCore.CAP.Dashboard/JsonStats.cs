@@ -34,7 +34,7 @@ namespace DotNetCore.CAP.Dashboard
                 {
                     new StringEnumConverter
                     {
-                        NamingStrategy = new CamelCaseNamingStrategy()
+                        CamelCaseText = true
                     }
                 }
             };
@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.Dashboard
 
         private class StubPage : RazorPage
         {
-            protected override void Execute()
+            public override void Execute()
             {
             }
         }

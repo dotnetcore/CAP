@@ -1,10 +1,10 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
 @using System
 @using DotNetCore.CAP.Dashboard
-@using DotNetCore.CAP.Dashboard.Monitoring
 @using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Resources
 @using DotNetCore.CAP.Messages
+@using DotNetCore.CAP.Monitoring
 @inherits DotNetCore.CAP.Dashboard.RazorPage
 @{
     Layout = new LayoutPage(Strings.PublishedMessagesPage_Title);
@@ -23,7 +23,7 @@
         MessageType = MessageType.Publish,
         Name = name,
         Content = content,
-        StatusName = StatusName,
+        StatusName = Name,
         CurrentPage = pager.CurrentPage - 1,
         PageSize = pager.RecordsPerPage
     };
@@ -84,7 +84,7 @@
                             <th>@Strings.Common_Version</th>
                             <th>@Strings.MessagesPage_Table_Name</th>
                             <th class="min-width">@Strings.MessagesPage_Table_Retries</th>
-                            @if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
+                            @if (string.Equals(Name, "Processing", StringComparison.CurrentCultureIgnoreCase))
                             {
                                 <th>@Strings.MessagesPage_Table_State</th>
                             }
@@ -110,7 +110,7 @@
                                 <td>
                                     @message.Retries
                                 </td>
-                                @if (string.Equals(StatusName, "Processing", StringComparison.CurrentCultureIgnoreCase))
+                                @if (string.Equals(Name, "Processing", StringComparison.CurrentCultureIgnoreCase))
                                 {
                                     <td>
                                         @message.StatusName

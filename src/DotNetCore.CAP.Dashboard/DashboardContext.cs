@@ -3,13 +3,14 @@
 
 using System;
 using System.Text.RegularExpressions;
+using DotNetCore.CAP.Persistence;
 using Microsoft.AspNetCore.Http;
 
 namespace DotNetCore.CAP.Dashboard
 {
     public abstract class DashboardContext
     {
-        protected DashboardContext(IStorage storage, DashboardOptions options)
+        protected DashboardContext(IDataStorage storage, DashboardOptions options)
         {
             if (storage == null)
             {
@@ -25,7 +26,7 @@ namespace DotNetCore.CAP.Dashboard
             Options = options;
         }
 
-        public IStorage Storage { get; }
+        public IDataStorage Storage { get; }
 
         public DashboardOptions Options { get; }
 
@@ -41,7 +42,7 @@ namespace DotNetCore.CAP.Dashboard
     public sealed class CapDashboardContext : DashboardContext
     {
         public CapDashboardContext(
-            IStorage storage,
+            IDataStorage storage,
             DashboardOptions options,
             HttpContext httpContext)
             : base(storage, options)

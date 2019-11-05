@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Text;
-using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Internal;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -24,16 +24,16 @@ namespace DotNetCore.CAP.Dashboard
         [SuppressMessage("Microsoft.Performance", "CA1810:InitializeReferenceTypeStaticFieldsInline")]
         static MessageHistoryRenderer()
         {
-            Register(StatusName.Succeeded, SucceededRenderer);
-            Register(StatusName.Failed, FailedRenderer);
+            Register(nameof(StatusName.Succeeded), SucceededRenderer);
+            Register(nameof(StatusName.Failed), FailedRenderer);
 
-            BackgroundStateColors.Add(StatusName.Succeeded, "#EDF7ED");
-            BackgroundStateColors.Add(StatusName.Failed, "#FAEBEA");
-            BackgroundStateColors.Add(StatusName.Scheduled, "#E0F3F8");
+            BackgroundStateColors.Add(nameof(StatusName.Succeeded), "#EDF7ED");
+            BackgroundStateColors.Add(nameof(StatusName.Failed), "#FAEBEA");
+            BackgroundStateColors.Add(nameof(StatusName.Scheduled), "#E0F3F8");
 
-            ForegroundStateColors.Add(StatusName.Succeeded, "#5cb85c");
-            ForegroundStateColors.Add(StatusName.Failed, "#d9534f");
-            ForegroundStateColors.Add(StatusName.Scheduled, "#5bc0de");
+            ForegroundStateColors.Add(nameof(StatusName.Succeeded), "#5cb85c");
+            ForegroundStateColors.Add(nameof(StatusName.Failed), "#d9534f");
+            ForegroundStateColors.Add(nameof(StatusName.Scheduled), "#5bc0de");
         }
 
         public static void AddBackgroundStateColor(string stateName, string color)

@@ -6,19 +6,89 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
+using DotNetCore.CAP.Dashboard.GatewayProxy;
+using DotNetCore.CAP.Dashboard.NodeDiscovery;
+using DotNetCore.CAP.Persistence;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
+    public static class CapBuilderExtension
+    {
+        public static IApplicationBuilder UseCapDashboard(this IApplicationBuilder app)
+        {
+            if (app == null)
+            {
+                throw new ArgumentNullException(nameof(app));
+            }
+
+            CheckRequirement(app);
+
+            var provider = app.ApplicationServices;
+
+            if (provider.GetService<DashboardOptions>() != null)
+            {
+                if (provider.GetService<DiscoveryOptions>() != null)
+                {
+                    app.UseMiddleware<GatewayProxyMiddleware>();
+                }
+
+                app.UseMiddleware<DashboardMiddleware>();
+            }
+
+            return app;
+        }
+
+        private static void CheckRequirement(IApplicationBuilder app)
+        {
+            var marker = app.ApplicationServices.GetService<CapMarkerService>();
+            if (marker == null)
+            {
+                throw new InvalidOperationException(
+                    "AddCap() must be called on the service collection.   eg: services.AddCap(...)");
+            }
+
+            var messageQueueMarker = app.ApplicationServices.GetService<CapMessageQueueMakerService>();
+            if (messageQueueMarker == null)
+            {
+                throw new InvalidOperationException(
+                    "You must be config used message queue provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseKafka(...) })");
+            }
+
+            var databaseMarker = app.ApplicationServices.GetService<CapStorageMarkerService>();
+            if (databaseMarker == null)
+            {
+                throw new InvalidOperationException(
+                    "You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseSqlServer(...) })");
+            }
+        }
+    }
+
+    sealed class CapStartupFilter : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
+        {
+            return app =>
+            {
+                app.UseCapDashboard();
+
+                next(app);
+            };
+        }
+    }
+
     public class DashboardMiddleware
     {
         private readonly RequestDelegate _next;
         private readonly DashboardOptions _options;
         private readonly RouteCollection _routes;
-        private readonly IStorage _storage;
+        private readonly IDataStorage _storage;
 
-        public DashboardMiddleware(RequestDelegate next, DashboardOptions options, IStorage storage,
+        public DashboardMiddleware(RequestDelegate next, DashboardOptions options, IDataStorage storage,
             RouteCollection routes)
         {
             _next = next ?? throw new ArgumentNullException(nameof(next));

@@ -2,7 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.Collections.Generic;
-using DotNetCore.CAP.NodeDiscovery;
+using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard.Pages

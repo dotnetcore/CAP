@@ -7,9 +7,9 @@ namespace DotNetCore.CAP.Dashboard.Pages
     {
         public BlockMetric(DashboardMetric dashboardMetric)
         {
-            DashboardMetric = dashboardMetric;
+            Metric = dashboardMetric;
         }
 
-        public DashboardMetric DashboardMetric { get; }
+        public DashboardMetric Metric { get; }
     }
 }

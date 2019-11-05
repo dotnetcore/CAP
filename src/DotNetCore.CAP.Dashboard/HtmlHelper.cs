@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using DotNetCore.CAP.Dashboard.Pages;
 using DotNetCore.CAP.Dashboard.Resources;
-using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.Internal;
 

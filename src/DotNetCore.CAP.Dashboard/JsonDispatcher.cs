@@ -38,7 +38,7 @@ namespace DotNetCore.CAP.Dashboard
                     {
                         new StringEnumConverter
                         {
-                            NamingStrategy = new CamelCaseNamingStrategy()
+                            CamelCaseText= true
                         }
                     }
                 };

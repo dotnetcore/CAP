@@ -9,7 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
-using DotNetCore.CAP.NodeDiscovery;
+using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;

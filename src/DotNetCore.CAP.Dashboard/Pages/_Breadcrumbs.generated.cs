@@ -16,51 +16,45 @@ namespace DotNetCore.CAP.Dashboard.Pages
     using System.Linq;
     using System.Text;
     
-    #line 2 "..\..\Dashboard\Pages\_Breadcrumbs.cshtml"
-    using DotNetCore.CAP.Dashboard;
-    
-    #line default
-    #line hidden
-    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    internal partial class Breadcrumbs : RazorPage
+    internal partial class Breadcrumbs : DotNetCore.CAP.Dashboard.RazorPage
     {
 #line hidden
 
-        protected override void Execute()
+        public override void Execute()
         {
 
 
 WriteLiteral("\r\n");
 
 
-
-WriteLiteral("\r\n<ol class=\"breadcrumb\">\r\n    <li><a href=\"");
+WriteLiteral("\r\n<ol class=\"breadcrumb\">\r\n    <li>\r\n        <a href=\"");
 
 
             
-            #line 6 "..\..\Dashboard\Pages\_Breadcrumbs.cshtml"
+            #line 6 "..\..\Pages\_Breadcrumbs.cshtml"
             Write(Url.Home());
 
             
             #line default
             #line hidden
-WriteLiteral("\"><span class=\"glyphicon glyphicon-home\"></span></a></li>\r\n");
+WriteLiteral("\">\r\n            <span class=\"glyphicon glyphicon-home\"></span>\r\n        </a>\r\n   " +
+" </li>\r\n");
 
 
             
-            #line 7 "..\..\Dashboard\Pages\_Breadcrumbs.cshtml"
+            #line 10 "..\..\Pages\_Breadcrumbs.cshtml"
      foreach (var item in Items)
     {
 
             
             #line default
             #line hidden
-WriteLiteral("        <li><a href=\"");
+WriteLiteral("        <li>\r\n            <a href=\"");
 
 
             
-            #line 9 "..\..\Dashboard\Pages\_Breadcrumbs.cshtml"
+            #line 13 "..\..\Pages\_Breadcrumbs.cshtml"
                 Write(item.Value);
 
             
@@ -70,17 +64,17 @@ WriteLiteral("\">");
 
 
             
-            #line 9 "..\..\Dashboard\Pages\_Breadcrumbs.cshtml"
+            #line 13 "..\..\Pages\_Breadcrumbs.cshtml"
                              Write(item.Key);
 
             
             #line default
             #line hidden
-WriteLiteral("</a></li>\r\n");
+WriteLiteral("</a>\r\n        </li>\r\n");
 
 
             
-            #line 10 "..\..\Dashboard\Pages\_Breadcrumbs.cshtml"
+            #line 15 "..\..\Pages\_Breadcrumbs.cshtml"
     }
 
             
@@ -90,7 +84,7 @@ WriteLiteral("    <li class=\"active\">");
 
 
             
-            #line 11 "..\..\Dashboard\Pages\_Breadcrumbs.cshtml"
+            #line 16 "..\..\Pages\_Breadcrumbs.cshtml"
                   Write(Title);
 
             

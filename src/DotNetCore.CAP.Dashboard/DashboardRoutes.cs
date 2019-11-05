@@ -83,14 +83,14 @@ namespace DotNetCore.CAP.Dashboard
             Routes.AddJsonResult("/published/message/(?<Id>.+)", x =>
             {
                 var id = long.Parse(x.UriMatch.Groups["Id"].Value);
-                var message = x.Storage.GetConnection().GetPublishedMessageAsync(id)
+                var message = x.Storage.GetMonitoringApi().GetPublishedMessageAsync(id)
                     .GetAwaiter().GetResult();
                 return message.Content;
             });
             Routes.AddJsonResult("/received/message/(?<Id>.+)", x =>
             {
                 var id = long.Parse(x.UriMatch.Groups["Id"].Value);
-                var message = x.Storage.GetConnection().GetReceivedMessageAsync(id)
+                var message = x.Storage.GetMonitoringApi().GetReceivedMessageAsync(id)
                     .GetAwaiter().GetResult();
                 return message.Content;
             });
@@ -99,7 +99,7 @@ namespace DotNetCore.CAP.Dashboard
                 "/published/requeue",
                 (client, messageId) =>
                 {
-                    var msg = client.Storage.GetConnection().GetPublishedMessageAsync(messageId)
+                    var msg = client.Storage.GetMonitoringApi().GetPublishedMessageAsync(messageId)
                         .GetAwaiter().GetResult(); 
                     client.RequestServices.GetService<IDispatcher>().EnqueueToPublish(msg);
                 });
@@ -107,9 +107,9 @@ namespace DotNetCore.CAP.Dashboard
                 "/received/requeue",
                 (client, messageId) =>
                 {
-                    var msg = client.Storage.GetConnection().GetReceivedMessageAsync(messageId)
+                    var msg = client.Storage.GetMonitoringApi().GetReceivedMessageAsync(messageId)
                         .GetAwaiter().GetResult();
-                    client.RequestServices.GetService<IDispatcher>().EnqueueToExecute(msg);
+                    client.RequestServices.GetService<ISubscriberExecutor>().ExecuteAsync(msg);
                 }); 
 
             Routes.AddRazorPage(

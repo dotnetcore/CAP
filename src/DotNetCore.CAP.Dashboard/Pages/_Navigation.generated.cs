@@ -16,18 +16,18 @@ namespace DotNetCore.CAP.Dashboard.Pages
     using System.Linq;
     using System.Text;
     
-    #line 2 "..\..\Dashboard\Pages\_Navigation.cshtml"
+    #line 2 "..\..\Pages\_Navigation.cshtml"
     using DotNetCore.CAP.Dashboard;
     
     #line default
     #line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    internal partial class Navigation : RazorPage
+    internal partial class Navigation : DotNetCore.CAP.Dashboard.RazorPage
     {
 #line hidden
 
-        protected override void Execute()
+        public override void Execute()
         {
 
 
@@ -37,7 +37,7 @@ WriteLiteral("\r\n");
 
 
             
-            #line 4 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 4 "..\..\Pages\_Navigation.cshtml"
  if (NavigationMenu.Items.Count > 0)
 {
 
@@ -48,12 +48,15 @@ WriteLiteral("    <ul class=\"nav navbar-nav\">\r\n");
 
 
             
-            #line 7 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 7 "..\..\Pages\_Navigation.cshtml"
          foreach (var item in NavigationMenu.Items)
         {
             var itemValue = item(this);
 
-            if (itemValue == null) { continue; }
+            if (itemValue == null)
+            {
+                continue;
+            }
 
 
             
@@ -63,7 +66,7 @@ WriteLiteral("            <li class=\"");
 
 
             
-            #line 13 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 16 "..\..\Pages\_Navigation.cshtml"
                    Write(itemValue.Active ? "active" : null);
 
             
@@ -73,7 +76,7 @@ WriteLiteral("\">\r\n                <a href=\"");
 
 
             
-            #line 14 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 17 "..\..\Pages\_Navigation.cshtml"
                     Write(itemValue.Url);
 
             
@@ -83,7 +86,7 @@ WriteLiteral("\">\r\n                    ");
 
 
             
-            #line 15 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 18 "..\..\Pages\_Navigation.cshtml"
                Write(itemValue.Text);
 
             
@@ -93,7 +96,7 @@ WriteLiteral("\r\n\r\n");
 
 
             
-            #line 17 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 20 "..\..\Pages\_Navigation.cshtml"
                      foreach (var metric in itemValue.GetAllMetrics())
                     {
                         
@@ -101,14 +104,14 @@ WriteLiteral("\r\n\r\n");
             #line default
             #line hidden
             
-            #line 19 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 22 "..\..\Pages\_Navigation.cshtml"
                    Write(Html.InlineMetric(metric));
 
             
             #line default
             #line hidden
             
-            #line 19 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 22 "..\..\Pages\_Navigation.cshtml"
                                                   
                     }
 
@@ -119,7 +122,7 @@ WriteLiteral("                </a>\r\n            </li>\r\n");
 
 
             
-            #line 23 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 26 "..\..\Pages\_Navigation.cshtml"
         }
 
             
@@ -129,7 +132,7 @@ WriteLiteral("    </ul>\r\n");
 
 
             
-            #line 25 "..\..\Dashboard\Pages\_Navigation.cshtml"
+            #line 28 "..\..\Pages\_Navigation.cshtml"
 }
             
             #line default

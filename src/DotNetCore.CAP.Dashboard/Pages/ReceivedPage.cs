@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Monitoring;
 
 namespace DotNetCore.CAP.Dashboard.Pages
 {
@@ -16,7 +17,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
 
         public int GetTotal(IMonitoringApi api)
         {
-            if (string.Equals(StatusName, Infrastructure.StatusName.Succeeded,
+            if (string.Equals(StatusName, nameof(Internal.StatusName.Succeeded),
                 StringComparison.CurrentCultureIgnoreCase))
             {
                 return api.ReceivedSucceededCount();

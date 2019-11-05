@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
     using System.Linq;
     using System.Text;
     
-    #line 2 "..\..\Dashboard\Pages\_PerPageSelector.cshtml"
+    #line 2 "..\..\Pages\_PerPageSelector.cshtml"
     using DotNetCore.CAP.Dashboard.Resources;
     
     #line default
@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
     {
 #line hidden
 
-        protected override void Execute()
+        public override void Execute()
         {
 
 
@@ -35,69 +35,69 @@ WriteLiteral("\r\n");
 
 
 
-WriteLiteral("\r\n    <div class=\"btn-group pull-right paginator\">\r\n");
+WriteLiteral("\r\n<div class=\"btn-group pull-right paginator\">\r\n");
 
 
             
-            #line 6 "..\..\Dashboard\Pages\_PerPageSelector.cshtml"
-         foreach (var count in new[] { 10, 20, 50, 100, 500 })
-        {
-
-            
-            #line default
-            #line hidden
-WriteLiteral("            <a class=\"btn btn-sm btn-default ");
-
-
-            
-            #line 8 "..\..\Dashboard\Pages\_PerPageSelector.cshtml"
-                                         Write(count == _pager.RecordsPerPage ? "active" : null);
+            #line 6 "..\..\Pages\_PerPageSelector.cshtml"
+     foreach (var count in new[] {10, 20, 50, 100, 500})
+    {
 
             
             #line default
             #line hidden
-WriteLiteral("\" \r\n                   href=\"");
+WriteLiteral("        <a class=\"btn btn-sm btn-default ");
 
 
             
-            #line 9 "..\..\Dashboard\Pages\_PerPageSelector.cshtml"
-                    Write(_pager.RecordsPerPageUrl(count));
-
-            
-            #line default
-            #line hidden
-WriteLiteral("\">");
-
-
-            
-            #line 9 "..\..\Dashboard\Pages\_PerPageSelector.cshtml"
-                                                      Write(count);
+            #line 8 "..\..\Pages\_PerPageSelector.cshtml"
+                                     Write(count == _pager.RecordsPerPage ? "active" : null);
 
             
             #line default
             #line hidden
-WriteLiteral("</a>    \r\n");
+WriteLiteral("\"\r\n           href=\"");
 
 
             
-            #line 10 "..\..\Dashboard\Pages\_PerPageSelector.cshtml"
-        }
-
-            
-            #line default
-            #line hidden
-WriteLiteral("    </div>\r\n    <div class=\"btn-toolbar-spacer pull-right\"></div>\r\n    <div class" +
-"=\"btn-toolbar-label btn-toolbar-label-sm pull-right\">\r\n        ");
-
-
-            
-            #line 14 "..\..\Dashboard\Pages\_PerPageSelector.cshtml"
-   Write(Strings.PerPageSelector_ItemsPerPage);
+            #line 9 "..\..\Pages\_PerPageSelector.cshtml"
+            Write(_pager.RecordsPerPageUrl(count));
 
             
             #line default
             #line hidden
-WriteLiteral(":\r\n    </div>\r\n");
+WriteLiteral("\">\r\n            ");
+
+
+            
+            #line 10 "..\..\Pages\_PerPageSelector.cshtml"
+       Write(count);
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</a>\r\n");
+
+
+            
+            #line 11 "..\..\Pages\_PerPageSelector.cshtml"
+    }
+
+            
+            #line default
+            #line hidden
+WriteLiteral("</div>\r\n<div class=\"btn-toolbar-spacer pull-right\"></div>\r\n<div class=\"btn-toolba" +
+"r-label btn-toolbar-label-sm pull-right\">\r\n    ");
+
+
+            
+            #line 15 "..\..\Pages\_PerPageSelector.cshtml"
+Write(Strings.PerPageSelector_ItemsPerPage);
+
+            
+            #line default
+            #line hidden
+WriteLiteral(":\r\n</div>");
 
 
         }

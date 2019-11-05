@@ -16,37 +16,33 @@ namespace DotNetCore.CAP.Dashboard.Pages
     using System.Linq;
     using System.Text;
     
-    #line 2 "..\..\Dashboard\Pages\_BlockMetric.cshtml"
-    using DotNetCore.CAP.Dashboard;
-    
-    #line default
-    #line hidden
-    
-    #line 3 "..\..\Dashboard\Pages\_BlockMetric.cshtml"
+    #line 2 "..\..\Pages\_BlockMetric.cshtml"
     using DotNetCore.CAP.Dashboard.Resources;
     
     #line default
     #line hidden
     
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
-    internal partial class BlockMetric : RazorPage
+    internal partial class BlockMetric : DotNetCore.CAP.Dashboard.RazorPage
     {
 #line hidden
 
-        protected override void Execute()
+        public override void Execute()
         {
 
 
 WriteLiteral("\r\n");
 
 
+WriteLiteral("\r\n");
 
 
 
             
-            #line 5 "..\..\Dashboard\Pages\_BlockMetric.cshtml"
+            #line 5 "..\..\Pages\_BlockMetric.cshtml"
   
-    var metric = DashboardMetric.Func(this);
+
+    var metric = Metric.Func(this);
     var className = metric == null ? "metric-null" : metric.Style.ToClassName();
     var highlighted = metric != null && metric.Highlighted ? "highlighted" : null;
 
@@ -58,7 +54,7 @@ WriteLiteral("<div class=\"metric ");
 
 
             
-            #line 10 "..\..\Dashboard\Pages\_BlockMetric.cshtml"
+            #line 11 "..\..\Pages\_BlockMetric.cshtml"
               Write(className);
 
             
@@ -68,7 +64,7 @@ WriteLiteral(" ");
 
 
             
-            #line 10 "..\..\Dashboard\Pages\_BlockMetric.cshtml"
+            #line 11 "..\..\Pages\_BlockMetric.cshtml"
                          Write(highlighted);
 
             
@@ -78,8 +74,8 @@ WriteLiteral("\">\r\n    <div class=\"metric-body\" data-metric=\"");
 
 
             
-            #line 11 "..\..\Dashboard\Pages\_BlockMetric.cshtml"
-                                     Write(DashboardMetric.Name);
+            #line 12 "..\..\Pages\_BlockMetric.cshtml"
+                                     Write(Metric.Name);
 
             
             #line default
@@ -88,7 +84,7 @@ WriteLiteral("\">\r\n        ");
 
 
             
-            #line 12 "..\..\Dashboard\Pages\_BlockMetric.cshtml"
+            #line 13 "..\..\Pages\_BlockMetric.cshtml"
     Write(metric?.Value);
 
             
@@ -98,8 +94,8 @@ WriteLiteral("\r\n    </div>\r\n    <div class=\"metric-description\">\r\n      
 
 
             
-            #line 15 "..\..\Dashboard\Pages\_BlockMetric.cshtml"
-    Write(Strings.ResourceManager.GetString(DashboardMetric.Title) ?? DashboardMetric.Title);
+            #line 16 "..\..\Pages\_BlockMetric.cshtml"
+    Write(Strings.ResourceManager.GetString(Metric.Title) ?? Metric.Title);
 
             
             #line default

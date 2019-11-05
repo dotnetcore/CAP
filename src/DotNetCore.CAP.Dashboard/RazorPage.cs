@@ -5,9 +5,10 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Text;
-using DotNetCore.CAP.Dashboard.Monitoring;
+using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.NodeDiscovery;
+using DotNetCore.CAP.Monitoring;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard
@@ -28,7 +29,7 @@ namespace DotNetCore.CAP.Dashboard
         protected HtmlHelper Html { get; }
         public UrlHelper Url { get; private set; }
 
-        protected IStorage Storage { get; set; }
+        protected IDataStorage Storage { get; set; }
         protected string AppPath { get; set; }
         protected string NodeName { get; set; }
 
@@ -55,7 +56,7 @@ namespace DotNetCore.CAP.Dashboard
         public string RequestPath => Request.Path;
 
         /// <exclude />
-        protected abstract void Execute();
+        public abstract void Execute();
 
         protected string Query(string key)
         {
@@ -95,8 +96,7 @@ namespace DotNetCore.CAP.Dashboard
 
             _statisticsLazy = new Lazy<StatisticsDto>(() =>
             {
-                var monitoring = Storage.GetMonitoringApi();
-                var dto = monitoring.GetStatistics();
+                var dto = Storage.GetMonitoringApi().GetStatistics();
 
                 SetServersCount(dto);
 

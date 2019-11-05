@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -65,6 +66,7 @@ namespace DotNetCore.CAP.MySql
             {
                 DbId = content.GetId(),
                 Origin = content,
+                Content = StringSerializer.Serialize(content),
                 Added = DateTime.Now,
                 ExpiresAt = null,
                 Retries = 0
@@ -74,7 +76,7 @@ namespace DotNetCore.CAP.MySql
             {
                 Id = message.DbId,
                 Name = name,
-                Content = StringSerializer.Serialize(message.Origin),
+                message.Content,
                 message.Retries,
                 message.Added,
                 message.ExpiresAt,
@@ -138,7 +140,7 @@ namespace DotNetCore.CAP.MySql
             var content = StringSerializer.Serialize(mdMessage.Origin);
             using (var connection = new MySqlConnection(_options.Value.ConnectionString))
             {
-               
+
                 connection.Execute(sql, new
                 {
                     Id = mdMessage.DbId,
@@ -212,24 +214,9 @@ namespace DotNetCore.CAP.MySql
             return result;
         }
 
-        //public Task<CapPublishedMessage> GetPublishedMessageAsync(long id)
-        //{
-        //    var sql = $@"SELECT * FROM `{_prefix}.published` WHERE `Id`={id};";
-
-        //    using (var connection = new MySqlConnection(Options.ConnectionString))
-        //    {
-        //        return await connection.QueryFirstOrDefaultAsync<CapPublishedMessage>(sql);
-        //    }
-        //}
-
-        //public Task<CapReceivedMessage> GetReceivedMessageAsync(long id)
-        //{
-        //    var sql =
-        //        $@"SELECT * FROM `{_prefix}.received` WHERE Id={id};";
-        //    using (var connection = new MySqlConnection(Options.ConnectionString))
-        //    {
-        //        return await connection.QueryFirstOrDefaultAsync<CapReceivedMessage>(sql);
-        //    }
-        //}
+        public IMonitoringApi GetMonitoringApi()
+        {
+            return new MySqlMonitoringApi(_options);
+        }
     }
 }

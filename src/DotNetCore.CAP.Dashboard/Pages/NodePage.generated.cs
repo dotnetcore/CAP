@@ -15,243 +15,242 @@ namespace DotNetCore.CAP.Dashboard.Pages
     using System.Collections.Generic;
     using System.Linq;
     using System.Text;
-
-#line 2 "..\..\NodePage.cshtml"
+    
+    #line 2 "..\..\Pages\NodePage.cshtml"
     using DotNetCore.CAP.Dashboard.Pages;
-
-#line default
-#line hidden
-
-#line 3 "..\..\NodePage.cshtml"
+    
+    #line default
+    #line hidden
+    
+    #line 3 "..\..\Pages\NodePage.cshtml"
     using DotNetCore.CAP.Dashboard.Resources;
-
-#line default
-#line hidden
-
+    
+    #line default
+    #line hidden
+    
     [System.CodeDom.Compiler.GeneratedCodeAttribute("RazorGenerator", "2.0.0.0")]
     internal partial class NodePage : DotNetCore.CAP.Dashboard.RazorPage
     {
 #line hidden
 
-        protected override void Execute()
+        public override void Execute()
         {
 
 
-            WriteLiteral("\r\n");
+WriteLiteral("\r\n");
 
 
 
 
 
+            
+            #line 5 "..\..\Pages\NodePage.cshtml"
+  
+    Layout = new LayoutPage(Strings.NodePage_Title);
 
-#line 5 "..\..\NodePage.cshtml"
 
-            Layout = new LayoutPage(Strings.NodePage_Title);
+            
+            #line default
+            #line hidden
+WriteLiteral("<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <h1 class=\"page-header\">");
 
 
+            
+            #line 10 "..\..\Pages\NodePage.cshtml"
+                           Write(Strings.NodePage_Title);
 
-#line default
-#line hidden
-            WriteLiteral("<div class=\"row\">\r\n    <div class=\"col-md-12\">\r\n        <h1 class=\"page-header\">");
+            
+            #line default
+            #line hidden
+WriteLiteral("</h1>\r\n\r\n");
 
 
+            
+            #line 12 "..\..\Pages\NodePage.cshtml"
+         if (Nodes == null || Nodes.Count == 0)
+        {
 
-#line 10 "..\..\NodePage.cshtml"
-            Write(Strings.NodePage_Title);
+            
+            #line default
+            #line hidden
+WriteLiteral("            <div class=\"alert alert-warning\">\r\n                ");
 
 
-#line default
-#line hidden
-            WriteLiteral("</h1>\r\n\r\n");
+            
+            #line 15 "..\..\Pages\NodePage.cshtml"
+           Write(Strings.NodePage_NoNodes);
 
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n            </div>\r\n");
 
 
-#line 12 "..\..\NodePage.cshtml"
-            if (Nodes == null || Nodes.Count == 0)
-            {
+            
+            #line 17 "..\..\Pages\NodePage.cshtml"
+        }
+        else
+        {
 
+            
+            #line default
+            #line hidden
+WriteLiteral("            <div class=\"table-responsive\">\r\n                <table class=\"table\">" +
+"\r\n                    <thead>\r\n                    <tr>\r\n                       " +
+" <th width=\"10%\">");
 
-#line default
-#line hidden
-                WriteLiteral("            <div class=\"alert alert-warning\">\r\n                ");
 
+            
+            #line 24 "..\..\Pages\NodePage.cshtml"
+                                   Write(Strings.Common_Id);
 
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                        <th width=\"20%\">");
 
-#line 15 "..\..\NodePage.cshtml"
-                Write(Strings.NodePage_NoNodes);
 
+            
+            #line 25 "..\..\Pages\NodePage.cshtml"
+                                   Write(Strings.NodePage_Table_NodeName);
 
-#line default
-#line hidden
-                WriteLiteral("\r\n            </div>\r\n");
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                        <th width=\"20%\">");
 
 
+            
+            #line 26 "..\..\Pages\NodePage.cshtml"
+                                   Write(Strings.NodePage_Table_IP);
 
-#line 17 "..\..\NodePage.cshtml"
-            }
-            else
-            {
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                        <th width=\"7%\">");
 
 
-#line default
-#line hidden
-                WriteLiteral("            <div class=\"table-responsive\">\r\n                <table class=\"table\">" +
-                "\r\n                    <thead>\r\n                        <tr>\r\n                   " +
-                "         <th width=\"10%\">");
+            
+            #line 27 "..\..\Pages\NodePage.cshtml"
+                                  Write(Strings.NodePage_Table_Port);
 
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                        <th>Tags</th>\r\n                        <th width=\"" +
+"20%\">");
 
 
-#line 24 "..\..\NodePage.cshtml"
-                Write(Strings.Common_Id);
+            
+            #line 29 "..\..\Pages\NodePage.cshtml"
+                                   Write(Strings.NodePage_Switch);
 
+            
+            #line default
+            #line hidden
+WriteLiteral("</th>\r\n                    </tr>\r\n                    </thead>\r\n                 " +
+"   <tbody>\r\n");
 
-#line default
-#line hidden
-                WriteLiteral("</th>\r\n                            <th width=\"20%\">");
 
+            
+            #line 33 "..\..\Pages\NodePage.cshtml"
+                     foreach (var node in Nodes)
+                    {
 
+            
+            #line default
+            #line hidden
+WriteLiteral("                        <tr class=\"");
 
-#line 25 "..\..\NodePage.cshtml"
-                Write(Strings.NodePage_Table_NodeName);
 
+            
+            #line 35 "..\..\Pages\NodePage.cshtml"
+                               Write(CurrentNodeId == node.Id ? "active" : null);
 
-#line default
-#line hidden
-                WriteLiteral("</th>\r\n                            <th width=\"20%\">");
+            
+            #line default
+            #line hidden
+WriteLiteral("\">\r\n                            <td>");
 
 
+            
+            #line 36 "..\..\Pages\NodePage.cshtml"
+                           Write(node.Id);
 
-#line 26 "..\..\NodePage.cshtml"
-                Write(Strings.NodePage_Table_IP);
+            
+            #line default
+            #line hidden
+WriteLiteral("</td>\r\n                            <td>");
 
 
-#line default
-#line hidden
-                WriteLiteral("</th>\r\n                            <th width=\"7%\">");
+            
+            #line 37 "..\..\Pages\NodePage.cshtml"
+                           Write(node.Name);
 
+            
+            #line default
+            #line hidden
+WriteLiteral("</td>\r\n                            <td>");
 
 
-#line 27 "..\..\NodePage.cshtml"
-                Write(Strings.NodePage_Table_Port);
+            
+            #line 38 "..\..\Pages\NodePage.cshtml"
+                           Write(node.Address);
 
+            
+            #line default
+            #line hidden
+WriteLiteral("</td>\r\n                            <td>");
 
-#line default
-#line hidden
-                WriteLiteral("</th>\r\n                            <th>Tags</th>\r\n                            <th" +
-                " width=\"20%\">");
 
+            
+            #line 39 "..\..\Pages\NodePage.cshtml"
+                           Write(node.Port);
 
+            
+            #line default
+            #line hidden
+WriteLiteral("</td>\r\n                            <td>");
 
-#line 29 "..\..\NodePage.cshtml"
-                Write(Strings.NodePage_Switch);
 
+            
+            #line 40 "..\..\Pages\NodePage.cshtml"
+                           Write(node.Tags);
 
-#line default
-#line hidden
-                WriteLiteral("</th>\r\n                        </tr>\r\n                    </thead>\r\n             " +
-                "       <tbody>\r\n");
+            
+            #line default
+            #line hidden
+WriteLiteral("</td>\r\n                            <td>\r\n                                ");
 
 
+            
+            #line 42 "..\..\Pages\NodePage.cshtml"
+                           Write(Html.NodeSwitchLink(node.Id));
 
-#line 33 "..\..\NodePage.cshtml"
-                foreach (var node in Nodes)
-                {
+            
+            #line default
+            #line hidden
+WriteLiteral("\r\n                            </td>\r\n                        </tr>\r\n");
 
 
-#line default
-#line hidden
-                    WriteLiteral("                            <tr class=\"");
+            
+            #line 45 "..\..\Pages\NodePage.cshtml"
+                    }
 
+            
+            #line default
+            #line hidden
+WriteLiteral("                    </tbody>\r\n                </table>\r\n            </div>\r\n");
 
 
-#line 35 "..\..\NodePage.cshtml"
-                    Write(CurrentNodeId == node.Id ? "active" : null);
+            
+            #line 49 "..\..\Pages\NodePage.cshtml"
+        }
 
-
-#line default
-#line hidden
-                    WriteLiteral("\">\r\n                                <td>");
-
-
-
-#line 36 "..\..\NodePage.cshtml"
-                    Write(node.Id);
-
-
-#line default
-#line hidden
-                    WriteLiteral("</td>\r\n                                <td>");
-
-
-
-#line 37 "..\..\NodePage.cshtml"
-                    Write(node.Name);
-
-
-#line default
-#line hidden
-                    WriteLiteral("</td>\r\n                                <td>");
-
-
-
-#line 38 "..\..\NodePage.cshtml"
-                    Write(node.Address);
-
-
-#line default
-#line hidden
-                    WriteLiteral("</td>\r\n                                <td>");
-
-
-
-#line 39 "..\..\NodePage.cshtml"
-                    Write(node.Port);
-
-
-#line default
-#line hidden
-                    WriteLiteral("</td>\r\n                                <td>");
-
-
-
-#line 40 "..\..\NodePage.cshtml"
-                    Write(node.Tags);
-
-
-#line default
-#line hidden
-                    WriteLiteral("</td>\r\n                                <td>\r\n                                    " +
-                    "");
-
-
-
-#line 42 "..\..\NodePage.cshtml"
-                    Write(Html.NodeSwitchLink(node.Id));
-
-
-#line default
-#line hidden
-                    WriteLiteral("\r\n                                </td>\r\n                            </tr>\r\n");
-
-
-
-#line 45 "..\..\NodePage.cshtml"
-                }
-
-
-#line default
-#line hidden
-                WriteLiteral("                    </tbody>\r\n                </table>\r\n            </div>\r\n");
-
-
-
-#line 49 "..\..\NodePage.cshtml"
-            }
-
-
-#line default
-#line hidden
-            WriteLiteral("    </div>\r\n</div>");
+            
+            #line default
+            #line hidden
+WriteLiteral("    </div>\r\n</div>");
 
 
         }

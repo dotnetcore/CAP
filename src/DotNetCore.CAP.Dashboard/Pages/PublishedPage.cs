@@ -2,21 +2,22 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Monitoring;
 
 namespace DotNetCore.CAP.Dashboard.Pages
 {
-    internal partial class PublishedPage
+    internal partial class PublishedPage : DotNetCore.CAP.Dashboard.RazorPage
     {
         public PublishedPage(string statusName)
         {
-            StatusName = statusName;
+            Name = statusName;
         }
 
-        public string StatusName { get; set; }
+        public string Name { get; set; }
 
         public int GetTotal(IMonitoringApi api)
         {
-            if (string.Equals(StatusName, Infrastructure.StatusName.Succeeded,
+            if (string.Equals(Name, nameof(Internal.StatusName.Succeeded),
                 StringComparison.CurrentCultureIgnoreCase))
             {
                 return api.PublishedSucceededCount();

@@ -30,22 +30,20 @@ namespace DotNetCore.CAP.Dashboard
             }
         }
 
-        public Task Dispatch(DashboardContext context)
+        public async Task Dispatch(DashboardContext context)
         {
             context.Response.ContentType = _contentType;
             context.Response.SetExpire(DateTimeOffset.Now.AddYears(1));
 
-            WriteResponse(context.Response);
-
-            return Task.FromResult(true);
+            await WriteResponse(context.Response);
         }
 
-        protected virtual void WriteResponse(DashboardResponse response)
+        protected virtual Task WriteResponse(DashboardResponse response)
         {
-            WriteResource(response, _assembly, _resourceName);
+            return WriteResource(response, _assembly, _resourceName);
         }
 
-        protected void WriteResource(DashboardResponse response, Assembly assembly, string resourceName)
+        protected async Task WriteResource(DashboardResponse response, Assembly assembly, string resourceName)
         {
             using (var inputStream = assembly.GetManifestResourceStream(resourceName))
             {
@@ -54,8 +52,7 @@ namespace DotNetCore.CAP.Dashboard
                     throw new ArgumentException(
                         $@"Resource with name {resourceName} not found in assembly {assembly}.");
                 }
-
-                inputStream.CopyTo(response.Body);
+                await inputStream.CopyToAsync(response.Body);
             }
         }
     }
