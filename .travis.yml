@@ -15,8 +15,7 @@ mono: none
 #    osx_image: xcode8.3 # macOS 10.12
     
 # Run the build script
+
 script:
-  - dotnet --info
-  - dotnet restore CAP.sln
-  - dotnet build CAP.sln
-  - dotnet test test/DotNetCore.CAP.Test/DotNetCore.CAP.Test.csproj
+ - dotnet tool install --global FlubuCore.GlobalTool --version 4.2.8
+ - flubu build test
