@@ -1,6 +1,7 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -18,8 +19,7 @@ namespace DotNetCore.CAP.MySql
 
         public MySqlStorageInitializer(
             ILogger<MySqlStorageInitializer> logger,
-            IOptions<MySqlOptions> options, 
-            IOptions<CapOptions> capOptions)
+            IOptions<MySqlOptions> options)
         {
             _options = options;
             _logger = logger;
@@ -43,7 +43,7 @@ namespace DotNetCore.CAP.MySql
             }
 
             var sql = CreateDbTablesScript(_options.Value.TableNamePrefix);
-            using (var connection = new MySqlConnection(_options.Value.ConnectionString))
+            await using (var connection = new MySqlConnection(_options.Value.ConnectionString))
             {
                 await connection.ExecuteAsync(sql);
             }
