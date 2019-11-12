@@ -3,6 +3,8 @@
 
 using System.Data;
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +35,23 @@ namespace DotNetCore.CAP
             Flush();
         }
 
+        public override async Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            Debug.Assert(DbTransaction != null);
+
+            switch (DbTransaction)
+            {
+                case IDbTransaction dbTransaction:
+                    dbTransaction.Commit();
+                    break;
+                case IDbContextTransaction dbContextTransaction:
+                    await dbContextTransaction.CommitAsync(cancellationToken);
+                    break;
+            }
+
+            Flush();
+        }
+
         public override void Rollback()
         {
             Debug.Assert(DbTransaction != null);
@@ -44,6 +63,21 @@ namespace DotNetCore.CAP
                     break;
                 case IDbContextTransaction dbContextTransaction:
                     dbContextTransaction.Rollback();
+                    break;
+            }
+        }
+
+        public override async Task RollbackAsync(CancellationToken cancellationToken = default)
+        {
+            Debug.Assert(DbTransaction != null);
+
+            switch (DbTransaction)
+            {
+                case IDbTransaction dbTransaction:
+                    dbTransaction.Rollback();
+                    break;
+                case IDbContextTransaction dbContextTransaction:
+                    await dbContextTransaction.RollbackAsync(cancellationToken);
                     break;
             }
         }
@@ -85,10 +119,7 @@ namespace DotNetCore.CAP
         public static ICapTransaction BeginTransaction(this IDbConnection dbConnection,
             ICapPublisher publisher, bool autoCommit = false)
         {
-            if (dbConnection.State == ConnectionState.Closed)
-            {
-                dbConnection.Open();
-            }
+            if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
 
             var dbTransaction = dbConnection.BeginTransaction();
             publisher.Transaction.Value = publisher.ServiceProvider.GetService<CapTransactionBase>();

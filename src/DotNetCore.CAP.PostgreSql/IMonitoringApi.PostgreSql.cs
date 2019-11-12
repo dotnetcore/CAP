@@ -5,24 +5,45 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
-using DotNetCore.CAP.Dashboard;
-using DotNetCore.CAP.Dashboard.Monitoring;
-using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Monitoring;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace DotNetCore.CAP.PostgreSql
 {
     public class PostgreSqlMonitoringApi : IMonitoringApi
     {
-        private readonly PostgreSqlOptions _options;
-        private readonly PostgreSqlStorage _storage;
+        private readonly IOptions<PostgreSqlOptions> _options;
 
-        public PostgreSqlMonitoringApi(IStorage storage, IOptions<PostgreSqlOptions> options)
+        public PostgreSqlMonitoringApi(IOptions<PostgreSqlOptions> options)
         {
-            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
-            _storage = storage as PostgreSqlStorage ?? throw new ArgumentNullException(nameof(storage));
+            _options = options ?? throw new ArgumentNullException(nameof(options));
+        }
+
+        public async Task<MediumMessage> GetPublishedMessageAsync(long id)
+        {
+            var sql =
+                $"SELECT * FROM \"{_options.Value.Schema}\".\"published\" WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
+
+            using (var connection = new NpgsqlConnection(_options.Value.ConnectionString))
+            {
+                return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
+            }
+        }
+
+        public async Task<MediumMessage> GetReceivedMessageAsync(long id)
+        {
+            var sql =
+                $"SELECT * FROM \"{_options.Value.Schema}\".\"received\" WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
+            using (var connection = new NpgsqlConnection(_options.Value.ConnectionString))
+            {
+                return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
+            }
         }
 
         public StatisticsDto GetStatistics()
@@ -32,7 +53,7 @@ select count(""Id"") from ""{0}"".""published"" where ""StatusName"" = N'Succeed
 select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Succeeded';
 select count(""Id"") from ""{0}"".""published"" where ""StatusName"" = N'Failed';
 select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Failed';",
-                _options.Schema);
+                _options.Value.Schema);
 
             var statistics = UseConnection(connection =>
             {
@@ -56,28 +77,16 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Failed'
             var tableName = queryDto.MessageType == MessageType.Publish ? "published" : "received";
             var where = string.Empty;
 
-            if (!string.IsNullOrEmpty(queryDto.StatusName))
-            {
-                where += " and Lower(\"StatusName\") = Lower(@StatusName)";
-            }
+            if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " and Lower(\"StatusName\") = Lower(@StatusName)";
 
-            if (!string.IsNullOrEmpty(queryDto.Name))
-            {
-                where += " and Lower(\"Name\") = Lower(@Name)";
-            }
+            if (!string.IsNullOrEmpty(queryDto.Name)) where += " and Lower(\"Name\") = Lower(@Name)";
 
-            if (!string.IsNullOrEmpty(queryDto.Group))
-            {
-                where += " and Lower(\"Group\") = Lower(@Group)";
-            }
+            if (!string.IsNullOrEmpty(queryDto.Group)) where += " and Lower(\"Group\") = Lower(@Group)";
 
-            if (!string.IsNullOrEmpty(queryDto.Content))
-            {
-                where += " and \"Content\" ILike '%@Content%'";
-            }
+            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and \"Content\" ILike '%@Content%'";
 
             var sqlQuery =
-                $"select * from \"{_options.Schema}\".\"{tableName}\" where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
+                $"select * from \"{_options.Value.Schema}\".\"{tableName}\" where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
 
             return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
@@ -92,42 +101,42 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Failed'
 
         public int PublishedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Failed));
+            return UseConnection(conn => GetNumberOfMessage(conn, "published", nameof(StatusName.Failed)));
         }
 
         public int PublishedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Succeeded));
+            return UseConnection(conn => GetNumberOfMessage(conn, "published", nameof(StatusName.Succeeded)));
         }
 
         public int ReceivedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "received", StatusName.Failed));
+            return UseConnection(conn => GetNumberOfMessage(conn, "received", nameof(StatusName.Failed)));
         }
 
         public int ReceivedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "received", StatusName.Succeeded));
+            return UseConnection(conn => GetNumberOfMessage(conn, "received", nameof(StatusName.Succeeded)));
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? "published" : "received";
             return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, StatusName.Succeeded));
+                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Succeeded)));
         }
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? "published" : "received";
             return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, StatusName.Failed));
+                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Failed)));
         }
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
             var sqlQuery =
-                $"select count(\"Id\") from \"{_options.Schema}\".\"{tableName}\" where Lower(\"StatusName\") = Lower(@state)";
+                $"select count(\"Id\") from \"{_options.Value.Schema}\".\"{tableName}\" where Lower(\"StatusName\") = Lower(@state)";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new {state = statusName});
             return count;
@@ -135,7 +144,7 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Failed'
 
         private T UseConnection<T>(Func<IDbConnection, T> action)
         {
-            return _storage.UseConnection(action);
+            return action(new NpgsqlConnection(_options.Value.ConnectionString));
         }
 
         private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string tableName,
@@ -165,7 +174,7 @@ select count(""Id"") from ""{0}"".""received""  where ""StatusName"" = N'Failed'
 with aggr as (
     select to_char(""Added"",'yyyy-MM-dd-HH') as ""Key"",
     count(""Id"") as ""Count""
-    from ""{_options.Schema}"".""{tableName}""
+    from ""{_options.Value.Schema}"".""{tableName}""
         where ""StatusName"" = @statusName
     group by to_char(""Added"", 'yyyy-MM-dd-HH')
 )
@@ -178,9 +187,7 @@ select ""Key"",""Count"" from aggr where ""Key""= Any(@keys);";
             foreach (var key in keyMaps.Keys)
             {
                 if (!valuesMap.ContainsKey(key))
-                {
                     valuesMap.Add(key, 0);
-                }
             }
 
             var result = new Dictionary<DateTime, int>();
@@ -192,5 +199,11 @@ select ""Key"",""Count"" from aggr where ""Key""= Any(@keys);";
 
             return result;
         }
+    }
+
+    internal class TimelineCounter
+    {
+        public string Key { get; set; }
+        public int Count { get; set; }
     }
 }

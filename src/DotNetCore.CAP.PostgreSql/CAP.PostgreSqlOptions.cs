@@ -28,16 +28,14 @@ namespace DotNetCore.CAP
         public void Configure(PostgreSqlOptions options)
         {
             if (options.DbContextType != null)
-            {
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var provider = scope.ServiceProvider;
-                    using (var dbContext = (DbContext)provider.GetRequiredService(options.DbContextType))
+                    using (var dbContext = (DbContext) provider.GetRequiredService(options.DbContextType))
                     {
                         options.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
                     }
                 }
-            }
         }
     }
 }

@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.RabbitMQ;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,7 +26,6 @@ namespace DotNetCore.CAP
             services.AddSingleton<ITransport, RabbitMQMessageSender>();
             services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
             services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
-        
         }
     }
 }
