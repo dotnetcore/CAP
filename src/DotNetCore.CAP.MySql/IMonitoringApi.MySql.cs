@@ -88,7 +88,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
             if (!string.IsNullOrEmpty(queryDto.Content))
             {
-                where += " and Content like '%@Content%'";
+                where += " and Content like CONCAT('%',@Content,'%')";
             }
 
             var sqlQuery =
