@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.Diagnostics;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
 
@@ -19,10 +21,16 @@ namespace DotNetCore.CAP
         {
             Debug.Assert(DbTransaction != null);
 
-            if (DbTransaction is IClientSessionHandle session)
-            {
-                session.CommitTransaction();
-            }
+            if (DbTransaction is IClientSessionHandle session) session.CommitTransaction();
+
+            Flush();
+        }
+
+        public override async Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            Debug.Assert(DbTransaction != null);
+
+            if (DbTransaction is IClientSessionHandle session) await session.CommitTransactionAsync(cancellationToken);
 
             Flush();
         }
@@ -31,10 +39,14 @@ namespace DotNetCore.CAP
         {
             Debug.Assert(DbTransaction != null);
 
-            if (DbTransaction is IClientSessionHandle session)
-            {
-                session.AbortTransaction();
-            }
+            if (DbTransaction is IClientSessionHandle session) session.AbortTransaction();
+        }
+
+        public override async Task RollbackAsync(CancellationToken cancellationToken = default)
+        {
+            Debug.Assert(DbTransaction != null);
+
+            if (DbTransaction is IClientSessionHandle session) await session.AbortTransactionAsync(cancellationToken);
         }
 
         public override void Dispose()
@@ -49,10 +61,7 @@ namespace DotNetCore.CAP
         public static ICapTransaction Begin(this ICapTransaction transaction,
             IClientSessionHandle dbTransaction, bool autoCommit = false)
         {
-            if (!dbTransaction.IsInTransaction)
-            {
-                dbTransaction.StartTransaction();
-            }
+            if (!dbTransaction.IsInTransaction) dbTransaction.StartTransaction();
 
             transaction.DbTransaction = dbTransaction;
             transaction.AutoCommit = autoCommit;

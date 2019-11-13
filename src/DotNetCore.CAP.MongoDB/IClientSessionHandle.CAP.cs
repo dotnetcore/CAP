@@ -26,12 +26,12 @@ namespace MongoDB.Driver
             _transaction.Dispose();
         }
 
-        public void AbortTransaction(CancellationToken cancellationToken = default(CancellationToken))
+        public void AbortTransaction(CancellationToken cancellationToken = default)
         {
             _transaction.Rollback();
         }
 
-        public Task AbortTransactionAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public Task AbortTransactionAsync(CancellationToken cancellationToken = default)
         {
             _transaction.Rollback();
             return Task.CompletedTask;
@@ -47,12 +47,12 @@ namespace MongoDB.Driver
             _sessionHandle.AdvanceOperationTime(newOperationTime);
         }
 
-        public void CommitTransaction(CancellationToken cancellationToken = default(CancellationToken))
+        public void CommitTransaction(CancellationToken cancellationToken = default)
         {
             _transaction.Commit();
         }
 
-        public Task CommitTransactionAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public Task CommitTransactionAsync(CancellationToken cancellationToken = default)
         {
             _transaction.Commit();
             return Task.CompletedTask;
