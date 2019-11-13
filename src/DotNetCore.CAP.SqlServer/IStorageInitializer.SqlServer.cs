@@ -44,7 +44,7 @@ namespace DotNetCore.CAP.SqlServer
             if (cancellationToken.IsCancellationRequested) return;
 
             var sql = CreateDbTablesScript(_options.Value.Schema);
-            using (var connection = new SqlConnection(_options.Value.ConnectionString))
+            await using (var connection = new SqlConnection(_options.Value.ConnectionString))
             {
                 await connection.ExecuteAsync(sql);
             }
