@@ -66,7 +66,8 @@ CREATE TABLE IF NOT EXISTS `{prefix}.received` (
   `Added` datetime NOT NULL,
   `ExpiresAt` datetime DEFAULT NULL,
   `StatusName` varchar(50) NOT NULL,
-  PRIMARY KEY (`Id`)
+  PRIMARY KEY (`Id`),
+  INDEX `IX_ExpiresAt`(`ExpiresAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `{prefix}.published` (
@@ -78,7 +79,8 @@ CREATE TABLE IF NOT EXISTS `{prefix}.published` (
   `Added` datetime NOT NULL,
   `ExpiresAt` datetime DEFAULT NULL,
   `StatusName` varchar(40) NOT NULL,
-  PRIMARY KEY (`Id`)
+  PRIMARY KEY (`Id`),
+  INDEX `IX_ExpiresAt`(`ExpiresAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
             return batchSql;
