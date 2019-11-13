@@ -4,9 +4,9 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Reflection;
-using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Persistence;
+using Microsoft.Data.SqlClient;
 
 namespace DotNetCore.CAP.SqlServer.Diagnostics
 {
@@ -16,11 +16,11 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
 
         public const string SqlAfterCommitTransaction = SqlClientPrefix + "WriteTransactionCommitAfter";
         public const string SqlErrorCommitTransaction = SqlClientPrefix + "WriteTransactionCommitError";
-        private readonly ConcurrentDictionary<Guid, List<CapPublishedMessage>> _bufferList;
+        private readonly ConcurrentDictionary<Guid, List<MediumMessage>> _bufferList;
         private readonly IDispatcher _dispatcher;
 
         public DiagnosticObserver(IDispatcher dispatcher,
-            ConcurrentDictionary<Guid, List<CapPublishedMessage>> bufferList)
+            ConcurrentDictionary<Guid, List<MediumMessage>> bufferList)
         {
             _dispatcher = dispatcher;
             _bufferList = bufferList;
@@ -41,12 +41,10 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
                 var sqlConnection = (SqlConnection) GetProperty(evt.Value, "Connection");
                 var transactionKey = sqlConnection.ClientConnectionId;
                 if (_bufferList.TryRemove(transactionKey, out var msgList))
-                {
                     foreach (var message in msgList)
                     {
                         _dispatcher.EnqueueToPublish(message);
                     }
-                }
             }
             else if (evt.Key == SqlErrorCommitTransaction)
             {

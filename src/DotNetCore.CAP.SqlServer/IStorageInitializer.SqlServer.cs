@@ -1,59 +1,49 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Data;
-using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
-using DotNetCore.CAP.Dashboard;
+using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.SqlServer.Diagnostics;
+using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.SqlServer
 {
-    public class SqlServerStorage : IStorage
+    public class SqlServerStorageInitializer : IStorageInitializer
     {
-        private readonly ILogger _logger;
-        private readonly IOptions<CapOptions> _capOptions;
-        private readonly IOptions<SqlServerOptions> _options;
-        private readonly IDbConnection _existingConnection = null;
         private readonly DiagnosticProcessorObserver _diagnosticProcessorObserver;
+        private readonly ILogger _logger;
+        private readonly IOptions<SqlServerOptions> _options;
 
-        public SqlServerStorage(
-            ILogger<SqlServerStorage> logger,
-            IOptions<CapOptions> capOptions,
+        public SqlServerStorageInitializer(
+            ILogger<SqlServerStorageInitializer> logger,
             IOptions<SqlServerOptions> options,
             DiagnosticProcessorObserver diagnosticProcessorObserver)
         {
             _options = options;
             _diagnosticProcessorObserver = diagnosticProcessorObserver;
             _logger = logger;
-            _capOptions = capOptions;
         }
 
-        public IStorageConnection GetConnection()
+        public string GetPublishedTableName()
         {
-            return new SqlServerStorageConnection(_options, _capOptions);
+            return $"[{_options.Value.Schema}].[Published]";
         }
 
-        public IMonitoringApi GetMonitoringApi()
+        public string GetReceivedTableName()
         {
-            return new SqlServerMonitoringApi(this, _options);
+            return $"[{_options.Value.Schema}].[Received]";
         }
 
-        public async Task InitializeAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public async Task InitializeAsync(CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return;
-            }
+            if (cancellationToken.IsCancellationRequested) return;
 
             var sql = CreateDbTablesScript(_options.Value.Schema);
-
             using (var connection = new SqlConnection(_options.Value.ConnectionString))
             {
                 await connection.ExecuteAsync(sql);
@@ -63,6 +53,7 @@ namespace DotNetCore.CAP.SqlServer
 
             DiagnosticListener.AllListeners.Subscribe(_diagnosticProcessorObserver);
         }
+
 
         protected virtual string CreateDbTablesScript(string schema)
         {
@@ -110,46 +101,6 @@ CREATE TABLE [{schema}].[Published](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 END;";
             return batchSql;
-        }
-
-        internal T UseConnection<T>(Func<IDbConnection, T> func)
-        {
-            IDbConnection connection = null;
-
-            try
-            {
-                connection = CreateAndOpenConnection();
-                return func(connection);
-            }
-            finally
-            {
-                ReleaseConnection(connection);
-            }
-        }
-
-        internal IDbConnection CreateAndOpenConnection()
-        {
-            var connection = _existingConnection ?? new SqlConnection(_options.Value.ConnectionString);
-
-            if (connection.State == ConnectionState.Closed)
-            {
-                connection.Open();
-            }
-
-            return connection;
-        }
-
-        internal bool IsExistingConnection(IDbConnection connection)
-        {
-            return connection != null && ReferenceEquals(connection, _existingConnection);
-        }
-
-        internal void ReleaseConnection(IDbConnection connection)
-        {
-            if (connection != null && !IsExistingConnection(connection))
-            {
-                connection.Dispose();
-            }
         }
     }
 }

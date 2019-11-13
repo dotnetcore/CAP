@@ -4,10 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
+using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.SqlServer.Diagnostics;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
@@ -28,14 +30,12 @@ namespace DotNetCore.CAP
         {
             var sqlServerOptions = serviceProvider.GetService<IOptions<SqlServerOptions>>().Value;
             if (sqlServerOptions.DbContextType != null)
-            {
                 _dbContext = serviceProvider.GetService(sqlServerOptions.DbContextType) as DbContext;
-            }
 
             _diagnosticProcessor = serviceProvider.GetRequiredService<DiagnosticProcessorObserver>();
         }
 
-        protected override void AddToSent(CapPublishedMessage msg)
+        protected override void AddToSent(MediumMessage msg)
         {
             if (DbTransaction is NoopTransaction)
             {
@@ -47,24 +47,19 @@ namespace DotNetCore.CAP
             if (dbTransaction == null)
             {
                 if (DbTransaction is IDbContextTransaction dbContextTransaction)
-                {
                     dbTransaction = dbContextTransaction.GetDbTransaction();
-                }
 
-                if (dbTransaction == null)
-                {
-                    throw new ArgumentNullException(nameof(DbTransaction));
-                }
+                if (dbTransaction == null) throw new ArgumentNullException(nameof(DbTransaction));
             }
 
-            var transactionKey = ((SqlConnection)dbTransaction.Connection).ClientConnectionId;
+            var transactionKey = ((SqlConnection) dbTransaction.Connection).ClientConnectionId;
             if (_diagnosticProcessor.BufferList.TryGetValue(transactionKey, out var list))
             {
                 list.Add(msg);
             }
             else
             {
-                var msgList = new List<CapPublishedMessage>(1) { msg };
+                var msgList = new List<MediumMessage>(1) {msg};
                 _diagnosticProcessor.BufferList.TryAdd(transactionKey, msgList);
             }
         }
@@ -86,6 +81,23 @@ namespace DotNetCore.CAP
             }
         }
 
+        public override async Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            switch (DbTransaction)
+            {
+                case NoopTransaction _:
+                    Flush();
+                    break;
+                case IDbTransaction dbTransaction:
+                    dbTransaction.Commit();
+                    break;
+                case IDbContextTransaction dbContextTransaction:
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                    await dbContextTransaction.CommitAsync(cancellationToken);
+                    break;
+            }
+        }
+
         public override void Rollback()
         {
             switch (DbTransaction)
@@ -95,6 +107,19 @@ namespace DotNetCore.CAP
                     break;
                 case IDbContextTransaction dbContextTransaction:
                     dbContextTransaction.Rollback();
+                    break;
+            }
+        }
+
+        public override async Task RollbackAsync(CancellationToken cancellationToken = default)
+        {
+            switch (DbTransaction)
+            {
+                case IDbTransaction dbTransaction:
+                    dbTransaction.Rollback();
+                    break;
+                case IDbContextTransaction dbContextTransaction:
+                    await dbContextTransaction.RollbackAsync(cancellationToken);
                     break;
             }
         }
@@ -110,6 +135,7 @@ namespace DotNetCore.CAP
                     dbContextTransaction.Dispose();
                     break;
             }
+
             DbTransaction = null;
         }
     }
@@ -144,15 +170,12 @@ namespace DotNetCore.CAP
         public static IDbTransaction BeginTransaction(this IDbConnection dbConnection,
             ICapPublisher publisher, bool autoCommit = false)
         {
-            if (dbConnection.State == ConnectionState.Closed)
-            {
-                dbConnection.Open();
-            }
+            if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
 
             var dbTransaction = dbConnection.BeginTransaction();
             publisher.Transaction.Value = publisher.ServiceProvider.GetService<CapTransactionBase>();
             var capTransaction = publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
-            return (IDbTransaction)capTransaction.DbTransaction;
+            return (IDbTransaction) capTransaction.DbTransaction;
         }
 
         /// <summary>

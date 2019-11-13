@@ -2,7 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using DotNetCore.CAP.Processor;
+using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.SqlServer;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,12 +25,8 @@ namespace DotNetCore.CAP
             services.AddSingleton<CapStorageMarkerService>();
 
             services.AddSingleton<DiagnosticProcessorObserver>();
-            services.AddSingleton<IStorage, SqlServerStorage>();
-            services.AddSingleton<IStorageConnection, SqlServerStorageConnection>();
-            services.AddSingleton<ICapPublisher, SqlServerPublisher>();
-            services.AddSingleton<ICallbackPublisher>(x => (SqlServerPublisher)x.GetService<ICapPublisher>());
-            services.AddSingleton<ICollectProcessor, SqlServerCollectProcessor>();
-
+            services.AddSingleton<IDataStorage, SqlServerDataStorage>();
+            services.AddSingleton<IStorageInitializer, SqlServerStorageInitializer>();
             services.AddTransient<CapTransactionBase, SqlServerCapTransaction>();
 
             services.Configure(_configure);
