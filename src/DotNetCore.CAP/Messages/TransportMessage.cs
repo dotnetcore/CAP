@@ -24,6 +24,11 @@ namespace DotNetCore.CAP.Messages
         /// </summary>
         public byte[] Body { get; }
 
+        public string GetId()
+        {
+            return Headers.TryGetValue(Messages.Headers.MessageId, out var value) ? value : null;
+        }
+
         public string GetName()
         {
             return Headers.TryGetValue(Messages.Headers.MessageName, out var value) ? value : null;

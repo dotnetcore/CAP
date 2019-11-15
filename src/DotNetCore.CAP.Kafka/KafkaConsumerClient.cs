@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading;
 using Confluent.Kafka;
+using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
@@ -15,7 +18,7 @@ namespace DotNetCore.CAP.Kafka
 
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;
-        private IConsumer<Null, string> _consumerClient;
+        private IConsumer<string, byte[]> _consumerClient;
 
         public KafkaConsumerClient(string groupId, IOptions<KafkaOptions> options)
         {
@@ -23,7 +26,7 @@ namespace DotNetCore.CAP.Kafka
             _kafkaOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public event EventHandler<MessageContext> OnMessageReceived;
+        public event EventHandler<TransportMessage> OnMessageReceived;
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
@@ -51,12 +54,8 @@ namespace DotNetCore.CAP.Kafka
 
                 if (consumerResult.IsPartitionEOF || consumerResult.Value == null) continue;
 
-                var message = new MessageContext
-                {
-                    Group = _groupId,
-                    Name = consumerResult.Topic,
-                    Content = consumerResult.Value
-                };
+                var header = consumerResult.Headers.ToDictionary(x => x.Key, y => Encoding.UTF8.GetString(y.GetValueBytes()));
+                var message = new TransportMessage(header, consumerResult.Value);
 
                 OnMessageReceived?.Invoke(consumerResult, message);
             }
@@ -97,7 +96,7 @@ namespace DotNetCore.CAP.Kafka
                     _kafkaOptions.MainConfig["auto.offset.reset"] = "earliest";
                     var config = _kafkaOptions.AsKafkaConfig();
 
-                    _consumerClient = new ConsumerBuilder<Null, string>(config)
+                    _consumerClient = new ConsumerBuilder<string, byte[]>(config)
                         .SetErrorHandler(ConsumerClient_OnConsumeError)
                         .Build();
                 }
@@ -105,10 +104,10 @@ namespace DotNetCore.CAP.Kafka
             finally
             {
                 _connectionLock.Release();
-            } 
+            }
         }
 
-        private void ConsumerClient_OnConsumeError(IConsumer<Null, string> consumer, Error e)
+        private void ConsumerClient_OnConsumeError(IConsumer<string, byte[]> consumer, Error e)
         {
             var logArgs = new LogMessageEventArgs
             {

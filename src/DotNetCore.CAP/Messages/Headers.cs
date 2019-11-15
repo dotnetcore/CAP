@@ -3,7 +3,7 @@
     public static class Headers
     {
         /// <summary>
-        /// Id of the message. Either set the ID explicitly when sending a message, or Rebus will assign one to the message.
+        /// Id of the message. Either set the ID explicitly when sending a message, or assign one to the message.
         /// </summary>
         public const string MessageId = "cap-msg-id";
 

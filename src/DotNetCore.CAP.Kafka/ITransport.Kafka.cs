@@ -2,48 +2,53 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Confluent.Kafka;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Processor.States;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
-    internal class KafkaPublishMessageSender : BasePublishMessageSender
+    internal class KafkaTransport : ITransport
     {
         private readonly IConnectionPool _connectionPool;
         private readonly ILogger _logger;
 
-        public KafkaPublishMessageSender(
-            ILogger<KafkaPublishMessageSender> logger, 
-            IOptions<CapOptions> options,
-            IStorageConnection connection,
-            IConnectionPool connectionPool, 
-            IStateChanger stateChanger)
-            : base(logger, options, connection, stateChanger)
+        public KafkaTransport(ILogger<KafkaTransport> logger, IConnectionPool connectionPool)
         {
             _logger = logger;
             _connectionPool = connectionPool;
         }
 
-        protected override string ServersAddress => _connectionPool.ServersAddress;
+        public string Address => _connectionPool.ServersAddress;
 
-        public override async Task<OperateResult> PublishAsync(string keyName, string content)
+        public async Task<OperateResult> SendAsync(TransportMessage message)
         {
             var producer = _connectionPool.RentProducer();
 
             try
             {
-                var result = await producer.ProduceAsync(keyName, new Message<Null, string>()
+                var headers = new Confluent.Kafka.Headers();
+
+                foreach (var header in message.Headers.Select(x => new Header(x.Key, Encoding.UTF8.GetBytes(x.Value))))
                 {
-                    Value = content
+                    headers.Add(header);
+                }
+
+                var result = await producer.ProduceAsync(message.GetName(), new Message<string, byte[]>
+                {
+                    Headers = headers,
+                    Key = message.GetId(),
+                    Value = message.Body
                 });
 
                 if (result.Status == PersistenceStatus.Persisted || result.Status == PersistenceStatus.PossiblyPersisted)
                 {
-                    _logger.LogDebug($"kafka topic message [{keyName}] has been published.");
+                    _logger.LogDebug($"kafka topic message [{message.GetName()}] has been published.");
 
                     return OperateResult.Success;
                 }
