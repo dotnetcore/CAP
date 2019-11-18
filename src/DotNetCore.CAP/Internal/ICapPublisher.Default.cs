@@ -7,14 +7,14 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
-using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetCore.CAP.Abstractions
+namespace DotNetCore.CAP.Internal
 {
-    public class CapPublisher : ICapPublisher
+    internal class CapPublisher : ICapPublisher
     {
         private readonly IDispatcher _dispatcher;
         private readonly IDataStorage _storage;

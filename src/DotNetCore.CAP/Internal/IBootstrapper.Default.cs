@@ -9,10 +9,10 @@ using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Internal
 {
     /// <summary>
-    /// Default implement of <see cref="T:DotNetCore.CAP.IBootstrapper" />.
+    /// Default implement of <see cref="T:DotNetCore.CAP.Internal.IBootstrapper" />.
     /// </summary>
     internal class DefaultBootstrapper : BackgroundService, IBootstrapper
     {

@@ -5,7 +5,7 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Internal
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static class LoggerExtensions

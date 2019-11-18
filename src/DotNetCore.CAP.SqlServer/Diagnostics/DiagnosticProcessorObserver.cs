@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 
 namespace DotNetCore.CAP.SqlServer.Diagnostics
 {

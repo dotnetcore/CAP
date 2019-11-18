@@ -3,10 +3,10 @@
 
 using System;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Abstractions;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Serialization;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace

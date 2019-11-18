@@ -4,7 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP

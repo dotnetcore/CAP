@@ -5,7 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Internal
 {
     /// <summary>
     /// Consumer executor

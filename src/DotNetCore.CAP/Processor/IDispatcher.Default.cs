@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Processor

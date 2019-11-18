@@ -3,6 +3,8 @@
 
 using System.Reflection;
 using DotNetCore.CAP.Dashboard.Pages;
+using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard

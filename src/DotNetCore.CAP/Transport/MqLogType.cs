@@ -3,7 +3,7 @@
 
 using System;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Transport
 {
     public enum MqLogType
     {

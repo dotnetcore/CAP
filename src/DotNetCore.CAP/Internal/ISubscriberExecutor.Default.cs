@@ -7,15 +7,14 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
-using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Processor;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Internal
 {
     internal class DefaultSubscriberExecutor : ISubscriberExecutor
     {

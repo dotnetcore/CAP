@@ -3,6 +3,7 @@
 
 using System;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery

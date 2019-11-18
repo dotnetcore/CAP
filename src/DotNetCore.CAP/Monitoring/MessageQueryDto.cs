@@ -10,6 +10,7 @@ namespace DotNetCore.CAP.Monitoring
         public MessageType MessageType { get; set; }
 
         public string Group { get; set; }
+
         public string Name { get; set; }
 
         public string Content { get; set; }

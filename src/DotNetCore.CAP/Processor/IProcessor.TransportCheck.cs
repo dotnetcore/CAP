@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Internal;
 
 namespace DotNetCore.CAP.Processor
 {

@@ -5,6 +5,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Transport;
 
 namespace DotNetCore.CAP.InMemoryStorage
 {

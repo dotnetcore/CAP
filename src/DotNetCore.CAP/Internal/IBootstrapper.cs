@@ -4,7 +4,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Internal
 {
     /// <summary>
     /// Represents bootstrapping logic. For example, adding initial state to the storage or querying certain entities.

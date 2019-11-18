@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using DotNetCore.CAP.Messages;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Transport
 {
     /// <inheritdoc />
     /// <summary>

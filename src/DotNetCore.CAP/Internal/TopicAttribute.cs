@@ -3,7 +3,7 @@
 
 using System;
 
-namespace DotNetCore.CAP.Abstractions
+namespace DotNetCore.CAP.Internal
 {
     /// <inheritdoc />
     /// <summary>

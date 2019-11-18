@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Infrastructure;
+using DotNetCore.CAP.Internal;
 using Xunit;
 
 namespace DotNetCore.CAP.Test

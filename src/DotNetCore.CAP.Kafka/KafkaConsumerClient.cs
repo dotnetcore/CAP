@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using Confluent.Kafka;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka

@@ -4,7 +4,7 @@
 using System;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Abstractions
+namespace DotNetCore.CAP.Internal
 {
     public interface IMongoTransaction : IDisposable
     {
@@ -14,8 +14,8 @@ namespace DotNetCore.CAP.Abstractions
         /// <value></value>
         bool AutoCommit { get; set; }
 
-        Task<IMongoTransaction> BegeinAsync(bool autoCommit = true);
+        Task<IMongoTransaction> BeginAsync(bool autoCommit = true);
 
-        IMongoTransaction Begein(bool autoCommit = true);
+        IMongoTransaction Begin(bool autoCommit = true);
     }
 }

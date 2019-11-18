@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 
 namespace DotNetCore.CAP
 {
