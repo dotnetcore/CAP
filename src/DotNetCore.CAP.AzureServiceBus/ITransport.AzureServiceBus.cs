@@ -2,18 +2,18 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Processor.States;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Transport;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
-    internal class AzureServiceBusPublishMessageSender : BasePublishMessageSender
+    internal class AzureServiceBusTransport : ITransport
     {
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
@@ -22,38 +22,38 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private ITopicClient _topicClient;
 
-        public AzureServiceBusPublishMessageSender(
-            ILogger<AzureServiceBusPublishMessageSender> logger,
+        public AzureServiceBusTransport(
+            ILogger<AzureServiceBusTransport> logger,
             IOptions<CapOptions> options,
-            IOptions<AzureServiceBusOptions> asbOptions,
-            IStateChanger stateChanger,
-            IStorageConnection connection)
-            : base(logger, options, connection, stateChanger)
+            IOptions<AzureServiceBusOptions> asbOptions)
         {
             _logger = logger;
             _asbOptions = asbOptions;
         }
 
-        protected override string ServersAddress => _asbOptions.Value.ConnectionString;
+        public string Address => _asbOptions.Value.ConnectionString;
 
-        public override async Task<OperateResult> PublishAsync(string keyName, string content)
+        public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {
             try
             {
                 Connect();
 
-                var contentBytes = Encoding.UTF8.GetBytes(content);
-
-                var message = new Message
+                var message = new Microsoft.Azure.ServiceBus.Message
                 {
-                    MessageId = Guid.NewGuid().ToString(),
-                    Body = contentBytes,
-                    Label = keyName,
+                    MessageId = transportMessage.GetId(),
+                    Body = transportMessage.Body,
+                    Label = transportMessage.GetName()
                 };
+
+                foreach (var header in transportMessage.Headers)
+                {
+                    message.UserProperties.Add(header.Key, header.Value);
+                }
 
                 await _topicClient.SendAsync(message);
 
-                _logger.LogDebug($"Azure Service Bus message [{keyName}] has been published.");
+                _logger.LogDebug($"Azure Service Bus message [{transportMessage.GetName()}] has been published.");
 
                 return OperateResult.Success;
             }
@@ -78,7 +78,7 @@ namespace DotNetCore.CAP.AzureServiceBus
             {
                 if (_topicClient == null)
                 {
-                    _topicClient = new TopicClient(ServersAddress, _asbOptions.Value.TopicPath, RetryPolicy.NoRetry);
+                    _topicClient = new TopicClient(Address, _asbOptions.Value.TopicPath, RetryPolicy.NoRetry);
                 }
             }
             finally

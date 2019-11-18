@@ -7,10 +7,12 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Messages;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Management;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Message = Microsoft.Azure.ServiceBus.Message;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
@@ -36,7 +38,7 @@ namespace DotNetCore.CAP.AzureServiceBus
             _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public event EventHandler<MessageContext> OnMessageReceived;
+        public event EventHandler<TransportMessage> OnMessageReceived;
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
@@ -160,12 +162,10 @@ namespace DotNetCore.CAP.AzureServiceBus
         private Task OnConsumerReceived(Message message, CancellationToken token)
         {
             _lockToken = message.SystemProperties.LockToken;
-            var context = new MessageContext
-            {
-                Group = _subscriptionName,
-                Name = message.Label,
-                Content = Encoding.UTF8.GetString(message.Body)
-            };
+
+            var header = message.UserProperties.ToDictionary(x => x.Key, y => y.Value.ToString());
+
+            var context = new TransportMessage(header, message.Body);
 
             OnMessageReceived?.Invoke(null, context);
 
