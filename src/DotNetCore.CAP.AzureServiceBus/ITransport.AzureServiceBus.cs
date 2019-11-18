@@ -24,7 +24,6 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public AzureServiceBusTransport(
             ILogger<AzureServiceBusTransport> logger,
-            IOptions<CapOptions> options,
             IOptions<AzureServiceBusOptions> asbOptions)
         {
             _logger = logger;

@@ -15,12 +15,16 @@ namespace Sample.Kafka.MySql
                 x.UseDashboard();
             });
 
-            services.AddMvc();
+            services.AddControllers();
         }
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseMvc();
+            app.UseRouting();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }
