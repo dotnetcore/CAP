@@ -13,14 +13,14 @@ using RabbitMQ.Client.Framing;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
-    internal sealed class RabbitMQMessageSender : ITransport
+    internal sealed class RabbitMQTransport : ITransport
     {
         private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly ILogger _logger;
         private readonly string _exchange;
 
-        public RabbitMQMessageSender(
-            ILogger<RabbitMQMessageSender> logger,
+        public RabbitMQTransport(
+            ILogger<RabbitMQTransport> logger,
             IConnectionChannelPool connectionChannelPool)
         {
             _logger = logger;
