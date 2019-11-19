@@ -203,9 +203,9 @@ namespace DotNetCore.CAP.PostgreSql
                 result.Add(new MediumMessage
                 {
                     DbId = reader.GetInt64(0).ToString(),
-                    Origin = StringSerializer.DeSerialize(reader.GetString(3)),
-                    Retries = reader.GetInt32(4),
-                    Added = reader.GetDateTime(5)
+                    Origin = StringSerializer.DeSerialize(reader.GetString(4)),
+                    Retries = reader.GetInt32(5),
+                    Added = reader.GetDateTime(6)
                 });
             }
 
