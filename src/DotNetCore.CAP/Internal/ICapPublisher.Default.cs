@@ -51,14 +51,14 @@ namespace DotNetCore.CAP.Internal
 
             var messageId = SnowflakeId.Default().NextId().ToString();
             optionHeaders.Add(Headers.MessageId, messageId);
+            optionHeaders.Add(Headers.MessageName, name);
+            optionHeaders.Add(Headers.Type, typeof(T).FullName);
+            optionHeaders.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
             if (!optionHeaders.ContainsKey(Headers.CorrelationId))
             {
                 optionHeaders.Add(Headers.CorrelationId, messageId);
                 optionHeaders.Add(Headers.CorrelationSequence, 0.ToString());
             }
-            optionHeaders.Add(Headers.MessageName, name);
-            optionHeaders.Add(Headers.Type, typeof(T).FullName);
-            optionHeaders.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
 
             var message = new Message(optionHeaders, value);
 

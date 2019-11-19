@@ -102,10 +102,12 @@ namespace DotNetCore.CAP.Internal
 
         private async Task<bool> SetFailedState(MediumMessage message, Exception ex)
         {
-            //TODO: Add exception to content
-
             var needRetry = UpdateMessageForRetry(message);
 
+            if (message.ExpiresAt != null)
+            {
+                message.ExpiresAt = DateTime.Now.AddDays(15);
+            }
             await _dataStorage.ChangePublishStateAsync(message, StatusName.Failed);
 
             return needRetry;

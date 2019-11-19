@@ -4,6 +4,7 @@
 using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
@@ -162,22 +163,23 @@ namespace DotNetCore.CAP.Internal
                     var name = transportMessage.GetName();
                     var group = transportMessage.GetGroup();
 
-                    if (!_selector.TryGetTopicExecutor(name, group, out var executor))
-                    {
-                        var error = $"Message can not be found subscriber. Name:{name}, Group:{group}. {Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
-                        throw new SubscriberNotFoundException(error);
-                    }
-
-                    var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
-
                     Message message;
+
+                    var canFindSubscriber = _selector.TryGetTopicExecutor(name, group, out var executor);
                     try
                     {
+                        if (!canFindSubscriber)
+                        {
+                            var error = $"Message can not be found subscriber. Name:{name}, Group:{group}. {Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
+                            throw new SubscriberNotFoundException(error);
+                        }
+
+                        var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
                         message = await _serializer.DeserializeAsync(transportMessage, type);
                     }
                     catch (Exception e)
                     {
-                        transportMessage.Headers.Add(Headers.Exception, e.Message);
+                        transportMessage.Headers.Add(Headers.Exception, nameof(SerializationException) + "-->" + e.Message);
                         var dataUri = $"data:{transportMessage.Headers[Headers.Type]};base64," + Convert.ToBase64String(transportMessage.Body);
                         message = new Message(transportMessage.Headers, dataUri);
                     }
@@ -211,7 +213,7 @@ namespace DotNetCore.CAP.Internal
                 }
                 catch (Exception e)
                 {
-                    _logger.LogError(e, "An exception occurred when store received message. Message:'{0}'.", transportMessage);
+                    _logger.LogError(e, "An exception occurred when process received message. Message:'{0}'.", transportMessage);
 
                     client.Reject();
 
