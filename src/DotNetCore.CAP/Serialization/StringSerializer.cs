@@ -1,5 +1,8 @@
-﻿using DotNetCore.CAP.Messages;
-using System.Text.Json;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using DotNetCore.CAP.Messages;
+using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Serialization
 {
@@ -7,12 +10,12 @@ namespace DotNetCore.CAP.Serialization
     {
         public static string Serialize(Message message)
         {
-            return JsonSerializer.Serialize(message);
+            return JsonConvert.SerializeObject(message);
         }
 
         public static Message DeSerialize(string json)
         {
-            return JsonSerializer.Deserialize<Message>(json);
+            return JsonConvert.DeserializeObject<Message>(json);
         }
     }
 }

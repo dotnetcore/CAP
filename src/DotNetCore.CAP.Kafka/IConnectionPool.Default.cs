@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Text.Json;
 using System.Threading;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Kafka
 {
@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.Kafka
             _producerPool = new ConcurrentQueue<IProducer<string, byte[]>>();
             _maxSize = _options.ConnectionPoolSize;
 
-            logger.LogDebug("Kafka configuration of CAP :\r\n {0}", JsonSerializer.Serialize(_options.AsKafkaConfig()));
+            logger.LogDebug("Kafka configuration of CAP :\r\n {0}", JsonConvert.SerializeObject(_options.AsKafkaConfig()));
         }
 
         public string ServersAddress => _options.Servers;

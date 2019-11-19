@@ -1,7 +1,11 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
+using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
-using System.Text.Json;
+using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Serialization
 {
@@ -9,7 +13,8 @@ namespace DotNetCore.CAP.Serialization
     {
         public Task<TransportMessage> SerializeAsync(Message message)
         {
-            return Task.FromResult(new TransportMessage(message.Headers, JsonSerializer.SerializeToUtf8Bytes(message.Value)));
+            var json = JsonConvert.SerializeObject(message.Value);
+            return Task.FromResult(new TransportMessage(message.Headers, Encoding.UTF8.GetBytes(json)));
         }
 
         public Task<Message> DeserializeAsync(TransportMessage transportMessage, Type valueType)
@@ -19,7 +24,8 @@ namespace DotNetCore.CAP.Serialization
                 return Task.FromResult(new Message(transportMessage.Headers, null));
             }
 
-            return Task.FromResult(new Message(transportMessage.Headers, JsonSerializer.Deserialize(transportMessage.Body, valueType)));
+            var json = Encoding.UTF8.GetString(transportMessage.Body);
+            return Task.FromResult(new Message(transportMessage.Headers, JsonConvert.DeserializeObject(json, valueType)));
         }
     }
 }
