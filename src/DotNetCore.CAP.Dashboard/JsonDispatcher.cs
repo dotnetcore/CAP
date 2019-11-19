@@ -37,8 +37,8 @@ namespace DotNetCore.CAP.Dashboard
                     Converters = new JsonConverter[]
                     {
                         new StringEnumConverter
-                        {
-                            CamelCaseText= true
+                        { 
+                            NamingStrategy = new CamelCaseNamingStrategy()
                         }
                     }
                 };
