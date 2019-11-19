@@ -34,9 +34,11 @@ namespace DotNetCore.CAP.Kafka
             {
                 var headers = new Confluent.Kafka.Headers();
 
-                foreach (var header in message.Headers.Select(x => new Header(x.Key, Encoding.UTF8.GetBytes(x.Value))))
+                foreach (var header in message.Headers)
                 {
-                    headers.Add(header);
+                    headers.Add(header.Value != null
+                        ? new Header(header.Key, Encoding.UTF8.GetBytes(header.Value))
+                        : new Header(header.Key, null));
                 }
 
                 var result = await producer.ProduceAsync(message.GetName(), new Message<string, byte[]>

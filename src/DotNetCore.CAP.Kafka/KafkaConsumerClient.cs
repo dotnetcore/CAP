@@ -55,8 +55,15 @@ namespace DotNetCore.CAP.Kafka
 
                 if (consumerResult.IsPartitionEOF || consumerResult.Value == null) continue;
 
-                var header = consumerResult.Headers.ToDictionary(x => x.Key, y => Encoding.UTF8.GetString(y.GetValueBytes()));
-                var message = new TransportMessage(header, consumerResult.Value);
+                var headers = new Dictionary<string, string>(consumerResult.Headers.Count);
+                foreach (var header in consumerResult.Headers)
+                {
+                    var val = header.GetValueBytes();
+                    headers.Add(header.Key, val != null ? Encoding.UTF8.GetString(val) : null);
+                }
+                headers.Add(Messages.Headers.Group, _groupId);
+
+                var message = new TransportMessage(headers, consumerResult.Value);
 
                 OnMessageReceived?.Invoke(consumerResult, message);
             }
