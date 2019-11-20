@@ -211,7 +211,7 @@ namespace DotNetCore.CAP.MySql
 
         public IMonitoringApi GetMonitoringApi()
         {
-            return new MySqlMonitoringApi(_options);
+            return new MySqlMonitoringApi(_options, _initializer);
         }
     }
 }
