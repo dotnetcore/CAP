@@ -1,7 +1,6 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -25,12 +24,12 @@ namespace DotNetCore.CAP.MySql
             _logger = logger;
         }
 
-        public string GetPublishedTableName()
+        public virtual string GetPublishedTableName()
         {
             return $"{_options.Value.TableNamePrefix}.published";
         }
 
-        public string GetReceivedTableName()
+        public virtual string GetReceivedTableName()
         {
             return $"{_options.Value.TableNamePrefix}.received";
         }
@@ -42,7 +41,7 @@ namespace DotNetCore.CAP.MySql
                 return;
             }
 
-            var sql = CreateDbTablesScript(_options.Value.TableNamePrefix);
+            var sql = CreateDbTablesScript();
             await using (var connection = new MySqlConnection(_options.Value.ConnectionString))
             {
                 await connection.ExecuteAsync(sql);
@@ -52,11 +51,11 @@ namespace DotNetCore.CAP.MySql
         }
 
 
-        protected virtual string CreateDbTablesScript(string prefix)
+        protected virtual string CreateDbTablesScript()
         {
             var batchSql =
                 $@"
-CREATE TABLE IF NOT EXISTS `{prefix}.received` (
+CREATE TABLE IF NOT EXISTS `{GetReceivedTableName()}` (
   `Id` bigint NOT NULL,
   `Version` varchar(20) DEFAULT NULL,
   `Name` varchar(400) NOT NULL,
@@ -70,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `{prefix}.received` (
   INDEX `IX_ExpiresAt`(`ExpiresAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE IF NOT EXISTS `{prefix}.published` (
+CREATE TABLE IF NOT EXISTS `{GetPublishedTableName()}` (
   `Id` bigint NOT NULL,
   `Version` varchar(20) DEFAULT NULL,
   `Name` varchar(200) NOT NULL,

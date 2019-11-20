@@ -22,18 +22,23 @@ namespace DotNetCore.CAP.MySql
     {
         private readonly IOptions<MySqlOptions> _options;
         private readonly IOptions<CapOptions> _capOptions;
+        private readonly IStorageInitializer _initializer;
 
-        public MySqlDataStorage(IOptions<MySqlOptions> options, IOptions<CapOptions> capOptions)
+        public MySqlDataStorage(
+            IOptions<MySqlOptions> options,
+            IOptions<CapOptions> capOptions,
+            IStorageInitializer initializer)
         {
             _options = options;
             _capOptions = capOptions;
+            _initializer = initializer;
         }
 
         public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)
         {
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
 
-            var sql = $"UPDATE `{_options.Value.TableNamePrefix}.published` SET `Retries` = @Retries,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+            var sql = $"UPDATE `{_initializer.GetPublishedTableName()}` SET `Retries` = @Retries,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
 
             await connection.ExecuteAsync(sql, new
             {
@@ -48,7 +53,7 @@ namespace DotNetCore.CAP.MySql
         {
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
 
-            var sql = $"UPDATE `{_options.Value.TableNamePrefix}.received` SET `Retries` = @Retries,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+            var sql = $"UPDATE `{_initializer.GetReceivedTableName()}` SET `Retries` = @Retries,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
 
             await connection.ExecuteAsync(sql, new
             {
@@ -61,7 +66,7 @@ namespace DotNetCore.CAP.MySql
 
         public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object dbTransaction = null, CancellationToken cancellationToken = default)
         {
-            var sql = $"INSERT INTO `{_options.Value.TableNamePrefix}.published`(`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = $"INSERT INTO `{_initializer.GetPublishedTableName()}`(`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             var message = new MediumMessage
             {
@@ -106,7 +111,7 @@ namespace DotNetCore.CAP.MySql
 
         public async Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
         {
-            var sql = $@"INSERT INTO `{_options.Value.TableNamePrefix}.received`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = $@"INSERT INTO `{_initializer.GetReceivedTableName()}`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
@@ -124,7 +129,7 @@ namespace DotNetCore.CAP.MySql
 
         public async Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message message)
         {
-            var sql = $@"INSERT INTO `{_options.Value.TableNamePrefix}.received`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = $@"INSERT INTO `{_initializer.GetReceivedTableName()}`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             var mdMessage = new MediumMessage
             {
@@ -162,7 +167,7 @@ namespace DotNetCore.CAP.MySql
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql = $"SELECT * FROM `{_options.Value.TableNamePrefix}.published` WHERE `Retries`<{_capOptions.Value.FailedRetryCount} AND `Version`='{_capOptions.Value.Version}' AND `Added`<'{fourMinAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
+            var sql = $"SELECT * FROM `{_initializer.GetPublishedTableName()}` WHERE `Retries`<{_capOptions.Value.FailedRetryCount} AND `Version`='{_capOptions.Value.Version}' AND `Added`<'{fourMinAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
 
             var result = new List<MediumMessage>();
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
@@ -184,7 +189,7 @@ namespace DotNetCore.CAP.MySql
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
-                $"SELECT * FROM `{_options.Value.TableNamePrefix}.received` WHERE `Retries`<{_capOptions.Value.FailedRetryCount} AND `Version`='{_capOptions.Value.Version}' AND `Added`<'{fourMinAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
+                $"SELECT * FROM `{_initializer.GetReceivedTableName()}` WHERE `Retries`<{_capOptions.Value.FailedRetryCount} AND `Version`='{_capOptions.Value.Version}' AND `Added`<'{fourMinAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
 
             var result = new List<MediumMessage>();
 

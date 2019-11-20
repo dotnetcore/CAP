@@ -19,22 +19,24 @@ namespace DotNetCore.CAP.MySql
     internal class MySqlMonitoringApi : IMonitoringApi
     {
         private readonly IOptions<MySqlOptions> _options;
-        private readonly string _prefix;
+        private readonly string _pubName;
+        private readonly string _recName;
 
-        public MySqlMonitoringApi(IOptions<MySqlOptions> options)
+        public MySqlMonitoringApi(IOptions<MySqlOptions> options, IStorageInitializer initializer)
         {
             _options = options;
-            _prefix = options.Value.TableNamePrefix ?? throw new ArgumentNullException(nameof(options));
+            _pubName = initializer.GetPublishedTableName();
+            _recName = initializer.GetReceivedTableName();
         }
 
         public StatisticsDto GetStatistics()
         {
-            var sql = string.Format(@"
+            var sql = $@"
 set transaction isolation level read committed;
-select count(Id) from `{0}.published` where StatusName = N'Succeeded';
-select count(Id) from `{0}.received` where StatusName = N'Succeeded';
-select count(Id) from `{0}.published` where StatusName = N'Failed';
-select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
+select count(Id) from `{_pubName}` where StatusName = N'Succeeded';
+select count(Id) from `{_recName}` where StatusName = N'Succeeded';
+select count(Id) from `{_pubName}` where StatusName = N'Failed';
+select count(Id) from `{_recName}` where StatusName = N'Failed';";
 
             var statistics = UseConnection(connection =>
             {
@@ -55,21 +57,21 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
-            var tableName = type == MessageType.Publish ? "published" : "received";
+            var tableName = type == MessageType.Publish ? _pubName : _recName;
             return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName,nameof(StatusName.Failed)));
+                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Failed)));
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
-            var tableName = type == MessageType.Publish ? "published" : "received";
+            var tableName = type == MessageType.Publish ? _pubName : _recName;
             return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, nameof( StatusName.Succeeded)));
+                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Succeeded)));
         }
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
         {
-            var tableName = queryDto.MessageType == MessageType.Publish ? "published" : "received";
+            var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
             {
@@ -92,7 +94,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
             }
 
             var sqlQuery =
-                $"select * from `{_prefix}.{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
+                $"select * from `{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
 
             return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
@@ -107,27 +109,27 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
         public int PublishedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "published", nameof( StatusName.Failed)));
+            return UseConnection(conn => GetNumberOfMessage(conn, _pubName, nameof(StatusName.Failed)));
         }
 
         public int PublishedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "published", nameof(StatusName.Succeeded)));
+            return UseConnection(conn => GetNumberOfMessage(conn, _pubName, nameof(StatusName.Succeeded)));
         }
 
         public int ReceivedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "received", nameof(StatusName.Failed)));
+            return UseConnection(conn => GetNumberOfMessage(conn, _recName, nameof(StatusName.Failed)));
         }
 
         public int ReceivedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "received", nameof(StatusName.Succeeded)));
+            return UseConnection(conn => GetNumberOfMessage(conn, _recName, nameof(StatusName.Succeeded)));
         }
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = $"select count(Id) from `{_prefix}.{tableName}` where StatusName = @state";
+            var sqlQuery = $"select count(Id) from `{tableName}` where StatusName = @state";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
             return count;
@@ -165,7 +167,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 select aggr.* from (
     select date_format(`Added`,'%Y-%m-%d-%H') as `Key`,
         count(id) `Count`
-    from  `{_prefix}.{tableName}`
+    from  `{tableName}`
     where StatusName = @statusName
     group by date_format(`Added`,'%Y-%m-%d-%H')
 ) aggr where `Key` in @keys;";
@@ -195,7 +197,7 @@ select aggr.* from (
 
         public async Task<MediumMessage> GetPublishedMessageAsync(long id)
         {
-            var sql = $@"SELECT * FROM `{_prefix}.published` WHERE `Id`={id};";
+            var sql = $@"SELECT * FROM `{_pubName}` WHERE `Id`={id};";
 
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
             return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
@@ -203,7 +205,7 @@ select aggr.* from (
 
         public async Task<MediumMessage> GetReceivedMessageAsync(long id)
         {
-            var sql = $@"SELECT * FROM `{_prefix}.received` WHERE Id={id};";
+            var sql = $@"SELECT * FROM `{_recName}` WHERE Id={id};";
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
             return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
         }
