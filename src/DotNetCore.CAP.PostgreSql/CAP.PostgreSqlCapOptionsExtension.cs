@@ -22,14 +22,12 @@ namespace DotNetCore.CAP
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<CapStorageMarkerService>();
-
-            services.AddSingleton<IDataStorage, PostgreSqlDataStorage>();
-
-            services.AddSingleton<IStorageInitializer, PostgreSqlStorageInitializer>();
-            services.AddTransient<CapTransactionBase, PostgreSqlCapTransaction>();
-
             services.Configure(_configure);
             services.AddSingleton<IConfigureOptions<PostgreSqlOptions>, ConfigurePostgreSqlOptions>();
+
+            services.AddSingleton<IDataStorage, PostgreSqlDataStorage>();
+            services.AddSingleton<IStorageInitializer, PostgreSqlStorageInitializer>();
+            services.AddTransient<CapTransactionBase, PostgreSqlCapTransaction>();
         }
     }
 }

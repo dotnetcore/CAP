@@ -24,14 +24,14 @@ namespace DotNetCore.CAP.PostgreSql
             _logger = logger;
         }
 
-        public string GetPublishedTableName()
+        public virtual string GetPublishedTableName()
         {
-            return $"{_options.Value.Schema}.published";
+            return $"\"{_options.Value.Schema}\".\"published\"";
         }
 
-        public string GetReceivedTableName()
+        public virtual string GetReceivedTableName()
         {
-            return $"{_options.Value.Schema}.received";
+            return $"\"{_options.Value.Schema}\".\"received\"";
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.PostgreSql
             if (cancellationToken.IsCancellationRequested) return;
 
             var sql = CreateDbTablesScript(_options.Value.Schema);
-            using (var connection = new NpgsqlConnection(_options.Value.ConnectionString))
+            await using (var connection = new NpgsqlConnection(_options.Value.ConnectionString))
             {
                 await connection.ExecuteAsync(sql);
             }
@@ -53,7 +53,7 @@ namespace DotNetCore.CAP.PostgreSql
             var batchSql = $@"
 CREATE SCHEMA IF NOT EXISTS ""{schema}"";
 
-CREATE TABLE IF NOT EXISTS ""{schema}"".""received""(
+CREATE TABLE IF NOT EXISTS {GetPublishedTableName()}(
 	""Id"" BIGINT PRIMARY KEY NOT NULL,
     ""Version"" VARCHAR(20) NOT NULL,
 	""Name"" VARCHAR(200) NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS ""{schema}"".""received""(
 	""StatusName"" VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS ""{schema}"".""published""(
+CREATE TABLE IF NOT EXISTS {GetReceivedTableName()}(
 	""Id"" BIGINT PRIMARY KEY NOT NULL,
     ""Version"" VARCHAR(20) NOT NULL,
 	""Name"" VARCHAR(200) NOT NULL,
@@ -74,11 +74,7 @@ CREATE TABLE IF NOT EXISTS ""{schema}"".""published""(
 	""Added"" TIMESTAMP NOT NULL,
     ""ExpiresAt"" TIMESTAMP NULL,
 	""StatusName"" VARCHAR(50) NOT NULL
-);
-
-ALTER TABLE ""{schema}"".""received"" ADD COLUMN IF NOT EXISTS ""Version"" VARCHAR(20) NOT NULL;
-ALTER TABLE ""{schema}"".""published"" ADD COLUMN IF NOT EXISTS ""Version"" VARCHAR(20) NOT NULL;
-";
+);";
             return batchSql;
         }
     }

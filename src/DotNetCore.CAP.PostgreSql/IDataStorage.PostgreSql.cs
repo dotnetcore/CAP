@@ -21,20 +21,27 @@ namespace DotNetCore.CAP.PostgreSql
     public class PostgreSqlDataStorage : IDataStorage
     {
         private readonly IOptions<CapOptions> _capOptions;
+        private readonly IStorageInitializer _initializer;
         private readonly IOptions<PostgreSqlOptions> _options;
+        private readonly string _pubName;
+        private readonly string _recName;
 
         public PostgreSqlDataStorage(
             IOptions<PostgreSqlOptions> options,
-            IOptions<CapOptions> capOptions)
+            IOptions<CapOptions> capOptions,
+            IStorageInitializer initializer)
         {
             _capOptions = capOptions;
+            _initializer = initializer;
             _options = options;
+            _pubName = initializer.GetPublishedTableName();
+            _recName = initializer.GetReceivedTableName();
         }
 
         public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE \"{_options.Value.Schema}\".\"published\" SET \"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
+                $"UPDATE {_pubName} SET \"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
@@ -48,7 +55,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE \"{_options.Value.Schema}\".\"received\" SET \"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
+                $"UPDATE {_recName} SET \"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
@@ -63,7 +70,7 @@ namespace DotNetCore.CAP.PostgreSql
             CancellationToken cancellationToken = default)
         {
             var sql =
-                $"INSERT INTO \"{_options.Value.Schema}\".\"published\" (\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
+                $"INSERT INTO {_pubName} (\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
                 $"VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             var message = new MediumMessage
@@ -108,7 +115,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
         {
             var sql =
-                $"INSERT INTO \"{_options.Value.Schema}\".\"received\"(\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
+                $"INSERT INTO {_recName}(\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
                 $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING \"Id\";";
 
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
@@ -128,7 +135,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message message)
         {
             var sql =
-                $"INSERT INTO \"{_options.Value.Schema}\".\"received\"(\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
+                $"INSERT INTO {_recName}(\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
                 $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING \"Id\";";
 
             var mdMessage = new MediumMessage
@@ -161,15 +168,15 @@ namespace DotNetCore.CAP.PostgreSql
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
 
             return await connection.ExecuteAsync(
-                $"DELETE FROM \"{_options.Value.Schema}\".\"{table}\" WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM \"{_options.Value.Schema}\".\"{table}\" LIMIT @count);",
-                new {timeout, batchCount});
+                $"DELETE FROM {table} WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM {table} LIMIT @count);",
+                new { timeout, batchCount });
         }
 
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
-                $"SELECT * FROM \"{_options.Value.Schema}\".\"published\" WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
+                $"SELECT * FROM {_pubName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
 
             var result = new List<MediumMessage>();
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
@@ -192,7 +199,7 @@ namespace DotNetCore.CAP.PostgreSql
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
-                $"SELECT * FROM \"{_options.Value.Schema}\".\"received\" WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
+                $"SELECT * FROM {_recName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
 
             var result = new List<MediumMessage>();
 
@@ -214,7 +221,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         public IMonitoringApi GetMonitoringApi()
         {
-            return new PostgreSqlMonitoringApi(_options);
+            return new PostgreSqlMonitoringApi(_options, _initializer);
         }
     }
 }
