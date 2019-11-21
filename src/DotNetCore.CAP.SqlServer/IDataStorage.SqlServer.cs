@@ -22,19 +22,26 @@ namespace DotNetCore.CAP.SqlServer
     {
         private readonly IOptions<CapOptions> _capOptions;
         private readonly IOptions<SqlServerOptions> _options;
+        private readonly IStorageInitializer _initializer;
+        private readonly string _pubName;
+        private readonly string _recName;
 
         public SqlServerDataStorage(
             IOptions<CapOptions> capOptions,
-            IOptions<SqlServerOptions> options)
+            IOptions<SqlServerOptions> options,
+            IStorageInitializer initializer)
         {
             _options = options;
+            _initializer = initializer;
             _capOptions = capOptions;
+            _pubName = initializer.GetPublishedTableName();
+            _recName = initializer.GetReceivedTableName();
         }
 
         public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE [{_options.Value.Schema}].[Published] SET Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
+                $"UPDATE {_pubName} SET Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
             await using var connection = new SqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
@@ -48,7 +55,7 @@ namespace DotNetCore.CAP.SqlServer
         public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE [{_options.Value.Schema}].[Received] SET Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
+                $"UPDATE {_recName} SET Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
             await using var connection = new SqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
@@ -62,7 +69,7 @@ namespace DotNetCore.CAP.SqlServer
         public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object dbTransaction = null,
             CancellationToken cancellationToken = default)
         {
-            var sql = $"INSERT INTO {_options.Value.Schema}.[Published] ([Id],[Version],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
+            var sql = $"INSERT INTO {_pubName} ([Id],[Version],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
                       $"VALUES(@Id,'{_options.Value}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             var message = new MediumMessage
@@ -107,7 +114,7 @@ namespace DotNetCore.CAP.SqlServer
         public async Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
         {
             var sql =
-                $"INSERT INTO [{_options.Value.Schema}].[Received]([Id],[Version],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
+                $"INSERT INTO {_recName}([Id],[Version],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
                 $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             await using var connection = new SqlConnection(_options.Value.ConnectionString);
@@ -127,7 +134,7 @@ namespace DotNetCore.CAP.SqlServer
         public async Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message message)
         {
             var sql =
-                $"INSERT INTO [{_options.Value.Schema}].[Received]([Id],[Version],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
+                $"INSERT INTO {_recName}([Id],[Version],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
                 $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             var mdMessage = new MediumMessage
@@ -159,14 +166,14 @@ namespace DotNetCore.CAP.SqlServer
         {
             await using var connection = new SqlConnection(_options.Value.ConnectionString);
             return await connection.ExecuteAsync(
-                $"DELETE TOP (@batchCount) FROM [{_options.Value.Schema}].[{table}] WITH (readpast) WHERE ExpiresAt < @timeout;",
-                new {timeout, batchCount});
+                $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout;",
+                new { timeout, batchCount });
         }
 
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql = $"SELECT TOP (200) * FROM [{_options.Value.Schema}].[Published] WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
+            var sql = $"SELECT TOP (200) * FROM {_pubName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
                       $"AND Version='{_capOptions.Value.Version}' AND Added<'{fourMinAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
 
             var result = new List<MediumMessage>();
@@ -190,7 +197,7 @@ namespace DotNetCore.CAP.SqlServer
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
-                $"SELECT TOP (200) * FROM [{_options.Value.Schema}].[Received] WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
+                $"SELECT TOP (200) * FROM {_recName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
                 $"AND Version='{_capOptions.Value.Version}' AND Added<'{fourMinAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
 
             var result = new List<MediumMessage>();
@@ -213,7 +220,7 @@ namespace DotNetCore.CAP.SqlServer
 
         public IMonitoringApi GetMonitoringApi()
         {
-            return new SqlServerMonitoringApi(_options);
+            return new SqlServerMonitoringApi(_options, _initializer);
         }
     }
 }

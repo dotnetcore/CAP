@@ -29,12 +29,12 @@ namespace DotNetCore.CAP.SqlServer
             _logger = logger;
         }
 
-        public string GetPublishedTableName()
+        public virtual string GetPublishedTableName()
         {
             return $"[{_options.Value.Schema}].[Published]";
         }
 
-        public string GetReceivedTableName()
+        public virtual string GetReceivedTableName()
         {
             return $"[{_options.Value.Schema}].[Received]";
         }
@@ -64,7 +64,7 @@ BEGIN
 	EXEC('CREATE SCHEMA [{schema}]')
 END;
 
-IF OBJECT_ID(N'[{schema}].[Received]',N'U') IS NULL
+IF OBJECT_ID(N'{GetReceivedTableName()}',N'U') IS NULL
 BEGIN
 CREATE TABLE [{schema}].[Received](
 	[Id] [bigint] NOT NULL,
@@ -83,7 +83,7 @@ CREATE TABLE [{schema}].[Received](
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 END;
 
-IF OBJECT_ID(N'[{schema}].[Published]',N'U') IS NULL
+IF OBJECT_ID(N'{GetPublishedTableName()}',N'U') IS NULL
 BEGIN
 CREATE TABLE [{schema}].[Published](
 	[Id] [bigint] NOT NULL,
