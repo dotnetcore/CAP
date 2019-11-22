@@ -70,7 +70,7 @@ namespace DotNetCore.CAP.SqlServer
             CancellationToken cancellationToken = default)
         {
             var sql = $"INSERT INTO {_pubName} ([Id],[Version],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
-                      $"VALUES(@Id,'{_options.Value}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+                      $"VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             var message = new MediumMessage
             {
