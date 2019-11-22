@@ -2,10 +2,12 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.SqlServer;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
@@ -28,6 +30,7 @@ namespace DotNetCore.CAP
             services.AddSingleton<IDataStorage, SqlServerDataStorage>();
             services.AddSingleton<IStorageInitializer, SqlServerStorageInitializer>();
             services.AddTransient<CapTransactionBase, SqlServerCapTransaction>();
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, DiagnosticRegister>());
 
             services.Configure(_configure);
             services.AddSingleton<IConfigureOptions<SqlServerOptions>, ConfigureSqlServerOptions>();

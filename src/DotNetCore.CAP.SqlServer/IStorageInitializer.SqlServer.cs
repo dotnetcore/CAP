@@ -1,12 +1,10 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP.Persistence;
-using DotNetCore.CAP.SqlServer.Diagnostics;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,17 +13,14 @@ namespace DotNetCore.CAP.SqlServer
 {
     public class SqlServerStorageInitializer : IStorageInitializer
     {
-        private readonly DiagnosticProcessorObserver _diagnosticProcessorObserver;
         private readonly ILogger _logger;
         private readonly IOptions<SqlServerOptions> _options;
 
         public SqlServerStorageInitializer(
             ILogger<SqlServerStorageInitializer> logger,
-            IOptions<SqlServerOptions> options,
-            DiagnosticProcessorObserver diagnosticProcessorObserver)
+            IOptions<SqlServerOptions> options)
         {
             _options = options;
-            _diagnosticProcessorObserver = diagnosticProcessorObserver;
             _logger = logger;
         }
 
@@ -50,10 +45,7 @@ namespace DotNetCore.CAP.SqlServer
             }
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
-
-            DiagnosticListener.AllListeners.Subscribe(_diagnosticProcessorObserver);
         }
-
 
         protected virtual string CreateDbTablesScript(string schema)
         {
