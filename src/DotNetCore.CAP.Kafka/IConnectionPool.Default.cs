@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.Kafka
             _producerPool = new ConcurrentQueue<IProducer<string, byte[]>>();
             _maxSize = _options.ConnectionPoolSize;
 
-            logger.LogDebug("Kafka configuration of CAP :\r\n {0}", JsonConvert.SerializeObject(_options.AsKafkaConfig()));
+            logger.LogDebug("CAP Kafka configuration: {0}", JsonConvert.SerializeObject(_options.AsKafkaConfig(), Formatting.Indented));
         }
 
         public string ServersAddress => _options.Servers;

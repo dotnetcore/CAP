@@ -38,7 +38,7 @@ namespace DotNetCore.CAP.Processor
 
             foreach (var table in tables)
             {
-                _logger.LogDebug($"Collecting expired data from table [{table}].");
+                _logger.LogDebug($"Collecting expired data from table: {table}");
 
                 int deletedCount;
                 var time = DateTime.Now;

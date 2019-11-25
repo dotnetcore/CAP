@@ -27,8 +27,8 @@ namespace DotNetCore.CAP.Internal
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly CapOptions _options;
         private readonly MethodMatcherCache _selector;
-        private readonly CancellationTokenSource _cts;
 
+        private CancellationTokenSource _cts;
         private string _serverAddress;
         private Task _compositeTask;
         private bool _disposed;
@@ -111,6 +111,7 @@ namespace DotNetCore.CAP.Internal
             {
                 Pulse();
 
+                _cts = new CancellationTokenSource();
                 _isHealthy = true;
 
                 Start();
@@ -247,6 +248,7 @@ namespace DotNetCore.CAP.Internal
                     _logger.LogError("Kafka client consume error. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ServerConnError:
+                    _isHealthy = false;
                     _logger.LogCritical("Kafka server connection error. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ExceptionReceived:

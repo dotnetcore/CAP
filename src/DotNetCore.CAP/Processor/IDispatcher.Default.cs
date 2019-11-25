@@ -64,7 +64,11 @@ namespace DotNetCore.CAP.Processor
                         {
                             try
                             {
-                                await _sender.SendAsync(message);
+                                var result = await _sender.SendAsync(message);
+                                if (!result.Succeeded)
+                                {
+                                    _logger.LogWarning(result.Exception, "Message send failed! -->" + result);
+                                }
                             }
                             catch (Exception ex)
                             {
