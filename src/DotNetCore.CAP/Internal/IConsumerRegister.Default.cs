@@ -39,14 +39,13 @@ namespace DotNetCore.CAP.Internal
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
 
-        public ConsumerRegister(
+        public ConsumerRegister(ILogger<ConsumerRegister> logger,
             IOptions<CapOptions> options,
+            MethodMatcherCache selector,
             IConsumerClientFactory consumerClientFactory,
             IDispatcher dispatcher,
             ISerializer serializer,
-            IDataStorage storage,
-            ILogger<ConsumerRegister> logger,
-            MethodMatcherCache selector)
+            IDataStorage storage)
         {
             _options = options.Value;
             _selector = selector;

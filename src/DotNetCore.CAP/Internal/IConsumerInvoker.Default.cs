@@ -15,19 +15,11 @@ namespace DotNetCore.CAP.Internal
     internal class DefaultConsumerInvoker : IConsumerInvoker
     {
         private readonly ILogger _logger;
-        //private readonly IMessagePacker _messagePacker;
-        //private readonly IModelBinderFactory _modelBinderFactory;
         private readonly IServiceProvider _serviceProvider;
 
-        public DefaultConsumerInvoker(ILoggerFactory loggerFactory,
-            IServiceProvider serviceProvider
-            //IMessagePacker messagePacker,
-            //IModelBinderFactory modelBinderFactory
-            )
+        public DefaultConsumerInvoker(ILoggerFactory loggerFactory,IServiceProvider serviceProvider)
         {
-            //_modelBinderFactory = modelBinderFactory;
             _serviceProvider = serviceProvider;
-            //_messagePacker = messagePacker;
             _logger = loggerFactory.CreateLogger<DefaultConsumerInvoker>();
         }
 
@@ -35,7 +27,7 @@ namespace DotNetCore.CAP.Internal
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            _logger.LogDebug("Executing consumer Topic: {0}", context.ConsumerDescriptor.MethodInfo.Name);
+            _logger.LogDebug("Executing subscriber method : {0}", context.ConsumerDescriptor.MethodInfo.Name);
 
             var executor = ObjectMethodExecutor.Create(
                 context.ConsumerDescriptor.MethodInfo,
