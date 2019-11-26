@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sample.AzureServiceBus.InMemory
+namespace Sample.Kafka.InMemory
 {
     public class Startup
     {
@@ -10,7 +10,7 @@ namespace Sample.AzureServiceBus.InMemory
             services.AddCap(x =>
             {
                 x.UseInMemoryStorage();
-                x.UseAzureServiceBus("Endpoint=sb://testcap.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=<your-key>");
+                x.UseKafka("192.168.2.120:9093");
                 x.UseDashboard();
             });
 
