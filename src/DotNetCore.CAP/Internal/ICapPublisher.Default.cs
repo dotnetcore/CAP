@@ -21,7 +21,7 @@ namespace DotNetCore.CAP.Internal
 
         // ReSharper disable once InconsistentNaming
         protected static readonly DiagnosticListener s_diagnosticListener =
-            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
+            new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
 
         public CapPublisher(IServiceProvider service)
         {
@@ -62,16 +62,16 @@ namespace DotNetCore.CAP.Internal
 
             var message = new Message(optionHeaders, value);
 
-            var operationId = default(Guid);
+            long? tracingTimestamp = null;
             try
             {
-                operationId = s_diagnosticListener.WritePublishMessageStoreBefore(message);
+                tracingTimestamp = TracingBefore(message);
 
                 if (Transaction.Value?.DbTransaction == null)
                 {
                     var mediumMessage = await _storage.StoreMessageAsync(name, message, cancellationToken: cancellationToken);
 
-                    s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
+                    TracingAfter(tracingTimestamp, message);
 
                     _dispatcher.EnqueueToPublish(mediumMessage);
                 }
@@ -81,7 +81,7 @@ namespace DotNetCore.CAP.Internal
 
                     var mediumMessage = await _storage.StoreMessageAsync(name, message, transaction.DbTransaction, cancellationToken);
 
-                    s_diagnosticListener.WritePublishMessageStoreAfter(operationId, message);
+                    TracingAfter(tracingTimestamp, message);
 
                     transaction.AddToSent(mediumMessage);
 
@@ -93,7 +93,8 @@ namespace DotNetCore.CAP.Internal
             }
             catch (Exception e)
             {
-                s_diagnosticListener.WritePublishMessageStoreError(operationId, message, e);
+                TracingError(tracingTimestamp, message, e);
+
                 throw;
             }
         }
@@ -113,5 +114,63 @@ namespace DotNetCore.CAP.Internal
 
             return PublishAsync(name, value, header, cancellationToken);
         }
+
+        #region tracing
+
+        private long? TracingBefore(Message message)
+        {
+            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforePublishMessageStore))
+            {
+                var eventData = new CapEventDataPubStore()
+                {
+                    OperationTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    Operation = message.GetName(),
+                    Message = message
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.BeforePublishMessageStore, eventData);
+
+                return eventData.OperationTimestamp;
+            }
+
+            return null;
+        }
+
+        private void TracingAfter(long? tracingTimestamp, Message message)
+        {
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterPublishMessageStore))
+            {
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var eventData = new CapEventDataPubStore()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    Message = message,
+                    ElapsedTimeMs = now - tracingTimestamp.Value
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.AfterPublishMessageStore, eventData);
+            }
+        }
+
+        private void TracingError(long? tracingTimestamp, Message message, Exception ex)
+        {
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.ErrorPublishMessageStore))
+            {
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var eventData = new CapEventDataPubStore()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    Message = message,
+                    ElapsedTimeMs = now - tracingTimestamp.Value,
+                    Exception = ex
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.ErrorPublishMessageStore, eventData);
+            }
+        }
+
+        #endregion
     }
 }

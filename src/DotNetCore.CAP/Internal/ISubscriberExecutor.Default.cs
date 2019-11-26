@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
@@ -26,7 +27,7 @@ namespace DotNetCore.CAP.Internal
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
         private static readonly DiagnosticListener s_diagnosticListener =
-            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
+            new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
 
         public DefaultSubscriberExecutor(
             ILogger<DefaultSubscriberExecutor> logger,
@@ -51,6 +52,8 @@ namespace DotNetCore.CAP.Internal
                 var error = $"Message (Name:{message.Origin.GetName()},Group:{message.Origin.GetGroup()}) can not be found subscriber." +
                             $"{Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
                 _logger.LogError(error);
+
+                TracingError(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), message.Origin, null, new Exception(error));
 
                 return Task.FromResult(OperateResult.Failed(new SubscriberNotFoundException(error)));
             }
@@ -168,19 +171,13 @@ namespace DotNetCore.CAP.Internal
 
         private async Task InvokeConsumerMethodAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
         {
-            var startTime = DateTimeOffset.UtcNow;
-            var stopwatch = Stopwatch.StartNew();
-            var operationId = Guid.Empty;
-
             var consumerContext = new ConsumerContext(descriptor, message.Origin);
-
+            var tracingTimestamp = TracingBefore(message.Origin, descriptor.MethodInfo);
             try
             {
-                // operationId = s_diagnosticListener.WriteSubscriberInvokeBefore(consumerContext);
-
                 var ret = await Invoker.InvokeAsync(consumerContext, cancellationToken);
 
-                // s_diagnosticListener.WriteSubscriberInvokeAfter(operationId, consumerContext, startTime,stopwatch.Elapsed);
+                TracingAfter(tracingTimestamp, message.Origin, descriptor.MethodInfo);
 
                 if (!string.IsNullOrEmpty(ret.CallbackName))
                 {
@@ -199,10 +196,71 @@ namespace DotNetCore.CAP.Internal
             }
             catch (Exception ex)
             {
-                // s_diagnosticListener.WriteSubscriberInvokeError(operationId, consumerContext, ex, startTime, stopwatch.Elapsed);
+                TracingError(tracingTimestamp, message.Origin, descriptor.MethodInfo, ex);
 
                 throw new SubscriberExecutionFailedException(ex.Message, ex);
             }
         }
+
+        #region tracing
+
+        private long? TracingBefore(Message message, MethodInfo method)
+        {
+            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforeSubscriberInvoke))
+            {
+                var eventData = new CapEventDataSubExecute()
+                {
+                    OperationTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    Operation = message.GetName(),
+                    Message = message,
+                    MethodInfo = method
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.BeforeSubscriberInvoke, eventData);
+
+                return eventData.OperationTimestamp;
+            }
+
+            return null;
+        }
+
+        private void TracingAfter(long? tracingTimestamp, Message message, MethodInfo method)
+        {
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterSubscriberInvoke))
+            {
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var eventData = new CapEventDataSubExecute()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    Message = message,
+                    MethodInfo = method,
+                    ElapsedTimeMs = now - tracingTimestamp.Value
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.AfterSubscriberInvoke, eventData);
+            }
+        }
+
+        private void TracingError(long? tracingTimestamp, Message message, MethodInfo method, Exception ex)
+        {
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.ErrorSubscriberInvoke))
+            {
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var eventData = new CapEventDataSubExecute()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    Message = message,
+                    MethodInfo = method,
+                    ElapsedTimeMs = now - tracingTimestamp.Value,
+                    Exception = ex
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.ErrorSubscriberInvoke, eventData);
+            }
+        }
+
+        #endregion
     }
 }

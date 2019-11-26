@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.Internal
 
         // ReSharper disable once InconsistentNaming
         protected static readonly DiagnosticListener s_diagnosticListener =
-            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
+            new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
 
         public MessageSender(
             ILogger<MessageSender> logger,
@@ -61,32 +61,23 @@ namespace DotNetCore.CAP.Internal
 
         private async Task<(bool, OperateResult)> SendWithoutRetryAsync(MediumMessage message)
         {
-            var startTime = DateTimeOffset.UtcNow;
-            var stopwatch = Stopwatch.StartNew();
-
-            var operationId = TracingBefore(message.Origin);
-
             var transportMsg = await _serializer.SerializeAsync(message.Origin);
+
+            var tracingTimestamp = TracingBefore(transportMsg, _transport.Address);
+
             var result = await _transport.SendAsync(transportMsg);
 
-            stopwatch.Stop();
             if (result.Succeeded)
             {
                 await SetSuccessfulState(message);
 
-                if (operationId != null)
-                {
-                    TracingAfter(operationId.Value, message.Origin, startTime, stopwatch.Elapsed);
-                }
+                TracingAfter(tracingTimestamp, transportMsg, _transport.Address);
 
                 return (false, OperateResult.Success);
             }
             else
             {
-                if (operationId != null)
-                {
-                    TracingError(operationId.Value, message.Origin, result, startTime, stopwatch.Elapsed);
-                }
+                TracingError(tracingTimestamp, transportMsg, _transport.Address, result);
 
                 var needRetry = await SetFailedState(message, result.Exception);
 
@@ -144,42 +135,67 @@ namespace DotNetCore.CAP.Internal
             return true;
         }
 
-        private Guid? TracingBefore(Message message)
+        #region tracing
+
+        private long? TracingBefore(TransportMessage message, string broker)
         {
-            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerExtensions.CapBeforePublish))
+            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforePublish))
             {
-                var operationId = Guid.NewGuid();
+                var eventData = new CapEventDataPubSend()
+                {
+                    OperationTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    Operation = message.GetName(),
+                    BrokerAddress = broker,
+                    TransportMessage = message
+                };
 
-                var eventData = new BrokerPublishEventData(operationId, "",_transport.Address, message,DateTimeOffset.UtcNow);
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.BeforePublish, eventData);
 
-                s_diagnosticListener.Write(CapDiagnosticListenerExtensions.CapBeforePublish, eventData);
-
-                return operationId;
+                return eventData.OperationTimestamp;
             }
 
             return null;
         }
 
-        private void TracingAfter(Guid operationId, Message message, DateTimeOffset startTime, TimeSpan du)
+        private void TracingAfter(long? tracingTimestamp, TransportMessage message, string broker)
         {
-            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerExtensions.CapAfterPublish))
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterPublish))
             {
-                var eventData = new BrokerPublishEndEventData(operationId, "", _transport.Address, message, startTime, du);
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var eventData = new CapEventDataPubSend()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    BrokerAddress = broker,
+                    TransportMessage = message,
+                    ElapsedTimeMs = now - tracingTimestamp.Value
+                };
 
-                s_diagnosticListener.Write(CapDiagnosticListenerExtensions.CapAfterPublish, eventData);
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.AfterPublish, eventData);
             }
         }
 
-        private void TracingError(Guid operationId, Message message, OperateResult result, DateTimeOffset startTime, TimeSpan du)
+        private void TracingError(long? tracingTimestamp, TransportMessage message, string broker, OperateResult result)
         {
-            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerExtensions.CapAfterPublish))
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.ErrorPublish))
             {
                 var ex = new PublisherSentFailedException(result.ToString(), result.Exception);
-                var eventData = new BrokerPublishErrorEventData(operationId, "", _transport.Address, 
-                    message, ex, startTime, du);
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                s_diagnosticListener.Write(CapDiagnosticListenerExtensions.CapErrorPublish, eventData);
+                var eventData = new CapEventDataPubSend()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    BrokerAddress = broker,
+                    TransportMessage = message,
+                    ElapsedTimeMs = now - tracingTimestamp.Value,
+                    Exception = ex
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.ErrorPublish, eventData);
             }
-        }
+        } 
+
+        #endregion
     }
 }

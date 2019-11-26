@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.Internal
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
         private static readonly DiagnosticListener s_diagnosticListener =
-            new DiagnosticListener(CapDiagnosticListenerExtensions.DiagnosticListenerName);
+            new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
 
         public ConsumerRegister(ILogger<ConsumerRegister> logger,
             IOptions<CapOptions> options,
@@ -152,10 +152,10 @@ namespace DotNetCore.CAP.Internal
             client.OnMessageReceived += async (sender, transportMessage) =>
             {
                 _cts.Token.ThrowIfCancellationRequested();
-                Guid? operationId = null;
+                long? tracingTimestamp = null;
                 try
                 {
-                    operationId = TracingBefore(transportMessage);
+                    tracingTimestamp = TracingBefore(transportMessage, _serverAddress);
 
                     var startTime = DateTimeOffset.UtcNow;
                     var stopwatch = Stopwatch.StartNew();
@@ -191,10 +191,7 @@ namespace DotNetCore.CAP.Internal
 
                         client.Commit();
 
-                        if (operationId != null)
-                        {
-                            TracingAfter(operationId.Value, message, startTime, stopwatch.Elapsed);
-                        }
+                        TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
                     }
                     else
                     {
@@ -203,10 +200,7 @@ namespace DotNetCore.CAP.Internal
 
                         client.Commit();
 
-                        if (operationId != null)
-                        {
-                            TracingAfter(operationId.Value, message, startTime, stopwatch.Elapsed);
-                        }
+                        TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
 
                         _dispatcher.EnqueueToExecute(mediumMessage, executor);
                     }
@@ -217,10 +211,7 @@ namespace DotNetCore.CAP.Internal
 
                     client.Reject();
 
-                    if (operationId != null)
-                    {
-                        TracingError(operationId.Value, transportMessage, e);
-                    }
+                    TracingError(tracingTimestamp, transportMessage, client.ServersAddress, e);
                 }
             };
 
@@ -258,39 +249,66 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private Guid? TracingBefore(TransportMessage message)
+        #region tracing
+
+        private long? TracingBefore(TransportMessage message, string broker)
         {
-            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerExtensions.CapBeforeConsume))
+            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforeConsume))
             {
-                var operationId = Guid.NewGuid();
+                var eventData = new CapEventDataSubStore()
+                {
+                    OperationTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    Operation = message.GetName(),
+                    BrokerAddress = broker,
+                    TransportMessage = message
+                };
 
-                var eventData = new BrokerConsumeEventData(operationId, _serverAddress, message, DateTimeOffset.UtcNow);
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.BeforeConsume, eventData);
 
-                s_diagnosticListener.Write(CapDiagnosticListenerExtensions.CapBeforeConsume, eventData);
-
-                return operationId;
+                return eventData.OperationTimestamp;
             }
 
             return null;
         }
 
-        private void TracingAfter(Guid operationId, Message message, DateTimeOffset startTime, TimeSpan du)
+        private void TracingAfter(long? tracingTimestamp, TransportMessage message, string broker)
         {
-            //if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerExtensions.CapAfterConsume))
-            //{
-            //    var eventData = new BrokerConsumeEndEventData(operationId, "", _serverAddress, message, startTime, du);
-
-            //    s_diagnosticListener.Write(CapDiagnosticListenerExtensions.CapAfterConsume, eventData);
-            //}
-        }
-
-        private void TracingError(Guid operationId, TransportMessage message, Exception ex)
-        {
-            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerExtensions.CapErrorConsume))
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterConsume))
             {
-                var eventData = new BrokerConsumeErrorEventData(operationId, _serverAddress, message, ex);
-                s_diagnosticListener.Write(CapDiagnosticListenerExtensions.CapErrorConsume, eventData);
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var eventData = new CapEventDataSubStore()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    BrokerAddress = broker,
+                    TransportMessage = message,
+                    ElapsedTimeMs = now - tracingTimestamp.Value
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.AfterConsume, eventData);
             }
         }
+
+        private void TracingError(long? tracingTimestamp, TransportMessage message, string broker, Exception ex)
+        {
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.ErrorConsume))
+            {
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+
+                var eventData = new CapEventDataPubSend()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    BrokerAddress = broker,
+                    TransportMessage = message,
+                    ElapsedTimeMs = now - tracingTimestamp.Value,
+                    Exception = ex
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.ErrorConsume, eventData);
+            }
+        }
+
+        #endregion
     }
 }
