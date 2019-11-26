@@ -268,12 +268,12 @@ WriteLiteral(@"
                             <th style=""width: 30px;"">
                                 <input type=""checkbox"" class=""js-jobs-list-select-all""/>
                             </th>
-                            <th>");
+                            <th style=""width: 175px"">");
 
 
             
             #line 83 "..\..\Pages\PublishedPage.cshtml"
-                           Write(Strings.Common_Id);
+                                                Write(Strings.Common_Id);
 
             
             #line default

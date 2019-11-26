@@ -55,12 +55,12 @@ namespace DotNetCore.CAP.InMemoryStorage
 
                 if (!string.IsNullOrEmpty(queryDto.StatusName))
                 {
-                    expression = expression.Where(x => x.StatusName.ToString() == queryDto.StatusName);
+                    expression = expression.Where(x => x.StatusName.ToString().Equals(queryDto.StatusName, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Name))
                 {
-                    expression = expression.Where(x => x.Name == queryDto.Name);
+                    expression = expression.Where(x => x.Name.Equals(queryDto.Name, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Content))
@@ -74,6 +74,7 @@ namespace DotNetCore.CAP.InMemoryStorage
                 return expression.Skip(offset).Take(size).Select(x => new MessageDto()
                 {
                     Added = x.Added,
+                    Version = "N/A",
                     Content = x.Content,
                     ExpiresAt = x.ExpiresAt,
                     Id = long.Parse(x.DbId),
@@ -88,17 +89,17 @@ namespace DotNetCore.CAP.InMemoryStorage
 
                 if (!string.IsNullOrEmpty(queryDto.StatusName))
                 {
-                    expression = expression.Where(x => x.StatusName.ToString() == queryDto.StatusName);
+                    expression = expression.Where(x => x.StatusName.ToString().Equals(queryDto.StatusName, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Name))
                 {
-                    expression = expression.Where(x => x.Name == queryDto.Name);
+                    expression = expression.Where(x => x.Name.Equals(queryDto.Name, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Group))
                 {
-                    expression = expression.Where(x => x.Group == queryDto.Name);
+                    expression = expression.Where(x => x.Group.Equals(queryDto.Group, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Content))

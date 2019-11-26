@@ -145,7 +145,7 @@ WriteLiteral("</th>\r\n                    </tr>\r\n                    </thead>
             
             #line 37 "..\..\Pages\SubscriberPage.cshtml"
                      foreach (var subscriber in subscribers)
-                    {
+                    {   
                         var i = 0;
                         var rowCount = subscriber.Value.Count;
                         foreach (var column in subscriber.Value)
