@@ -111,7 +111,7 @@ namespace DotNetCore.CAP.Dashboard
                 {
                     var msg = client.Storage.GetMonitoringApi().GetReceivedMessageAsync(messageId)
                         .GetAwaiter().GetResult();
-                    client.RequestServices.GetService<ISubscriberExecutor>().ExecuteAsync(msg);
+                    client.RequestServices.GetService<ISubscribeDispatcher>().DispatchAsync(msg);
                 }); 
 
             Routes.AddRazorPage(

@@ -18,17 +18,17 @@ namespace DotNetCore.CAP.Processor
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
         private readonly ILogger<MessageNeedToRetryProcessor> _logger;
         private readonly IMessageSender _messageSender;
-        private readonly ISubscriberExecutor _subscriberExecutor;
+        private readonly ISubscribeDispatcher _subscribeDispatcher;
         private readonly TimeSpan _waitingInterval;
 
         public MessageNeedToRetryProcessor(
             IOptions<CapOptions> options,
             ILogger<MessageNeedToRetryProcessor> logger,
-            ISubscriberExecutor subscriberExecutor,
+            ISubscribeDispatcher subscribeDispatcher,
             IMessageSender messageSender)
         {
             _logger = logger;
-            _subscriberExecutor = subscriberExecutor;
+            _subscribeDispatcher = subscribeDispatcher;
             _messageSender = messageSender;
             _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
         }
@@ -69,7 +69,7 @@ namespace DotNetCore.CAP.Processor
 
             foreach (var message in messages)
             {
-                await _subscriberExecutor.ExecuteAsync(message);
+                await _subscribeDispatcher.DispatchAsync(message);
 
                 await context.WaitAsync(_delay);
             }

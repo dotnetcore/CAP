@@ -3,8 +3,8 @@
 
 namespace DotNetCore.CAP.Internal
 {
-    internal interface IConsumerInvokerFactory
+    internal interface ISubscribeInvokerFactory
     {
-        IConsumerInvoker CreateInvoker();
+        ISubscribeInvoker CreateInvoker();
     }
 }

@@ -17,7 +17,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Internal
 {
-    internal class DefaultSubscriberExecutor : ISubscriberExecutor
+    internal class DefaultSubscribeDispatcher : ISubscribeDispatcher
     {
         private readonly IDataStorage _dataStorage;
         private readonly ILogger _logger;
@@ -29,8 +29,8 @@ namespace DotNetCore.CAP.Internal
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
 
-        public DefaultSubscriberExecutor(
-            ILogger<DefaultSubscriberExecutor> logger,
+        public DefaultSubscribeDispatcher(
+            ILogger<DefaultSubscribeDispatcher> logger,
             IOptions<CapOptions> options,
             IServiceProvider provider)
         {
@@ -39,12 +39,12 @@ namespace DotNetCore.CAP.Internal
             _options = options.Value;
 
             _dataStorage = _provider.GetService<IDataStorage>();
-            Invoker = _provider.GetService<IConsumerInvokerFactory>().CreateInvoker();
+            Invoker = _provider.GetService<ISubscribeInvokerFactory>().CreateInvoker();
         }
 
-        private IConsumerInvoker Invoker { get; }
+        private ISubscribeInvoker Invoker { get; }
 
-        public Task<OperateResult> ExecuteAsync(MediumMessage message, CancellationToken cancellationToken)
+        public Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken)
         {
             var selector = _provider.GetService<MethodMatcherCache>();
             if (!selector.TryGetTopicExecutor(message.Origin.GetName(), message.Origin.GetGroup(), out var executor))
@@ -58,10 +58,10 @@ namespace DotNetCore.CAP.Internal
                 return Task.FromResult(OperateResult.Failed(new SubscriberNotFoundException(error)));
             }
 
-            return ExecuteAsync(message, executor, cancellationToken);
+            return DispatchAsync(message, executor, cancellationToken);
         }
 
-        public async Task<OperateResult> ExecuteAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
+        public async Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
         {
             bool retry;
             OperateResult result;

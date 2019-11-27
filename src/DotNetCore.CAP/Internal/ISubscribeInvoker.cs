@@ -9,10 +9,10 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// Perform user definition method of consumers.
     /// </summary>
-    internal interface IConsumerInvoker
+    internal interface ISubscribeInvoker
     {
         /// <summary>
-        /// Invoke consumer method whit consumer context.
+        /// Invoke subscribe method with the consumer context.
         /// </summary>
         /// <param name="context">consumer execute context</param>
         /// <param name="cancellationToken">The object of <see cref="CancellationToken"/>.</param>

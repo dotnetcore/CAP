@@ -10,10 +10,10 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// Consumer executor
     /// </summary>
-    public interface ISubscriberExecutor
+    public interface ISubscribeDispatcher
     {
-        Task<OperateResult> ExecuteAsync(MediumMessage message, CancellationToken cancellationToken = default);
+        Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken = default);
 
-        Task<OperateResult> ExecuteAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken = default);
+        Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken = default);
     }
 }

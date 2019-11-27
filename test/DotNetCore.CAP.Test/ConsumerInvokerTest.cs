@@ -17,12 +17,11 @@ namespace DotNetCore.CAP.Test
         {
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddLogging();
-            serviceCollection.AddSingleton<IConsumerInvoker, DefaultConsumerInvoker>();
-            serviceCollection.AddTransient<FakeSubscriber>();
+            serviceCollection.AddSingleton<ISubscribeInvoker, DefaultSubscribeInvoker>();
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
 
-        private IConsumerInvoker ConsumerInvoker => _serviceProvider.GetService<IConsumerInvoker>();
+        private ISubscribeInvoker SubscribeInvoker => _serviceProvider.GetService<ISubscribeInvoker>();
 
         [Fact]
         public async Task InvokeTest()
@@ -40,7 +39,7 @@ namespace DotNetCore.CAP.Test
             var message = new Message(header, null);
             var context = new ConsumerContext(descriptor, message);
 
-            var ret = await ConsumerInvoker.InvokeAsync(context);
+            var ret = await SubscribeInvoker.InvokeAsync(context);
             Assert.Equal(int.MaxValue, ret.Result);
         }
     }

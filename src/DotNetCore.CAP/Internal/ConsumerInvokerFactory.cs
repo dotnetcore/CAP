@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
 {
-    internal class ConsumerInvokerFactory : IConsumerInvokerFactory
+    internal class ConsumerInvokerFactory : ISubscribeInvokerFactory
     {
         private readonly ILoggerFactory _loggerFactory; 
         private readonly IServiceProvider _serviceProvider;
@@ -19,9 +19,9 @@ namespace DotNetCore.CAP.Internal
             _serviceProvider = serviceProvider;
         }
 
-        public IConsumerInvoker CreateInvoker()
+        public ISubscribeInvoker CreateInvoker()
         {
-            return new DefaultConsumerInvoker(_loggerFactory, _serviceProvider);
+            return new DefaultSubscribeInvoker(_loggerFactory, _serviceProvider);
         }
     }
 }

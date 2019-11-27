@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Processor
     {
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private readonly IMessageSender _sender;
-        private readonly ISubscriberExecutor _executor;
+        private readonly ISubscribeDispatcher _executor;
         private readonly ILogger<Dispatcher> _logger;
 
         private readonly BlockingCollection<MediumMessage> _publishedMessageQueue =
@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Processor
 
         public Dispatcher(ILogger<Dispatcher> logger,
             IMessageSender sender,
-            ISubscriberExecutor executor)
+            ISubscribeDispatcher executor)
         {
             _logger = logger;
             _sender = sender;
@@ -90,7 +90,7 @@ namespace DotNetCore.CAP.Processor
             {
                 foreach (var message in _receivedMessageQueue.GetConsumingEnumerable(_cts.Token))
                 {
-                    _executor.ExecuteAsync(message.Item1, message.Item2, _cts.Token);
+                    _executor.DispatchAsync(message.Item1, message.Item2, _cts.Token);
                 }
             }
             catch (OperationCanceledException)
