@@ -72,7 +72,7 @@ namespace DotNetCore.CAP.Test
         }
     }
 
-    class HomeController
+    public class HomeController
     {
         
     }
