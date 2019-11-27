@@ -196,9 +196,11 @@ namespace DotNetCore.CAP.Internal
             }
             catch (Exception ex)
             {
-                TracingError(tracingTimestamp, message.Origin, descriptor.MethodInfo, ex);
+                var e = new SubscriberExecutionFailedException(ex.Message, ex);
+                
+                TracingError(tracingTimestamp, message.Origin, descriptor.MethodInfo, e);
 
-                throw new SubscriberExecutionFailedException(ex.Message, ex);
+                throw e;
             }
         }
 

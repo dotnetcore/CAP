@@ -157,9 +157,6 @@ namespace DotNetCore.CAP.Internal
                 {
                     tracingTimestamp = TracingBefore(transportMessage, _serverAddress);
 
-                    var startTime = DateTimeOffset.UtcNow;
-                    var stopwatch = Stopwatch.StartNew();
-
                     var name = transportMessage.GetName();
                     var group = transportMessage.GetGroup();
 
@@ -171,7 +168,11 @@ namespace DotNetCore.CAP.Internal
                         if (!canFindSubscriber)
                         {
                             var error = $"Message can not be found subscriber. Name:{name}, Group:{group}. {Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
-                            throw new SubscriberNotFoundException(error);
+                            var ex = new SubscriberNotFoundException(error);
+
+                            TracingError(tracingTimestamp, transportMessage, client.ServersAddress, ex);
+
+                            throw ex;
                         }
 
                         var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;

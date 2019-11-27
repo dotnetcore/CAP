@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.Internal
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
 
-        public DefaultConsumerInvoker(ILoggerFactory loggerFactory,IServiceProvider serviceProvider)
+        public DefaultConsumerInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _logger = loggerFactory.CreateLogger<DefaultConsumerInvoker>();

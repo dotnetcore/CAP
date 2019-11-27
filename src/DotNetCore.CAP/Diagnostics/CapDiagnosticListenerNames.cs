@@ -8,9 +8,9 @@ namespace DotNetCore.CAP.Diagnostics
     /// </summary>
     public static class CapDiagnosticListenerNames
     {
-        public const string DiagnosticListenerName = "CapDiagnosticListener";
-
         private const string CapPrefix = "DotNetCore.CAP.";
+
+        public const string DiagnosticListenerName = "CapDiagnosticListener";
 
         public const string BeforePublishMessageStore = CapPrefix + "WritePublishMessageStoreBefore";
         public const string AfterPublishMessageStore = CapPrefix + "WritePublishMessageStoreAfter";

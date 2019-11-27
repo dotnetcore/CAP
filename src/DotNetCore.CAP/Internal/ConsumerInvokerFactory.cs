@@ -8,21 +8,14 @@ namespace DotNetCore.CAP.Internal
 {
     internal class ConsumerInvokerFactory : IConsumerInvokerFactory
     {
-        private readonly ILoggerFactory _loggerFactory;
-        //private readonly IMessagePacker _messagePacker;
-        //
-        //private readonly IModelBinderFactory _modelBinderFactory;
+        private readonly ILoggerFactory _loggerFactory; 
         private readonly IServiceProvider _serviceProvider;
 
         public ConsumerInvokerFactory(
-            ILoggerFactory loggerFactory,
-            //IMessagePacker messagePacker,
-            //IModelBinderFactory modelBinderFactory,
+            ILoggerFactory loggerFactory, 
             IServiceProvider serviceProvider)
         {
-            _loggerFactory = loggerFactory;
-            //_messagePacker = messagePacker;
-            //_modelBinderFactory = modelBinderFactory;
+            _loggerFactory = loggerFactory; 
             _serviceProvider = serviceProvider;
         }
 
