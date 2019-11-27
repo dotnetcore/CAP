@@ -84,6 +84,11 @@ namespace DotNetCore.CAP.Test
             {
                 throw new NotImplementedException();
             }
+
+            public void Publish<T>(string name, T contentObj, IDictionary<string, string> headers)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

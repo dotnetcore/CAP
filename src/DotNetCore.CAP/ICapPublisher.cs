@@ -24,13 +24,20 @@ namespace DotNetCore.CAP
         /// Asynchronous publish an object message.
         /// </summary>
         /// <param name="name">the topic name or exchange router key.</param>
-        /// <param name="contentObj">message body content, that will be serialized of json.</param>
+        /// <param name="contentObj">message body content, that will be serialized.</param>
         /// <param name="callbackName">callback subscriber name</param>
         /// <param name="cancellationToken"></param>
         Task PublishAsync<T>(string name, T contentObj, string callbackName = null, CancellationToken cancellationToken = default);
 
-
-        Task PublishAsync<T>(string name, T contentObj, IDictionary<string, string> optionHeaders, CancellationToken cancellationToken = default);
+        /// <summary>
+        /// Asynchronous publish an object message with custom headers
+        /// </summary>
+        /// <typeparam name="T">content object</typeparam>
+        /// <param name="name">the topic name or exchange router key.</param>
+        /// <param name="contentObj">message body content, that will be serialized.</param>
+        /// <param name="headers">message additional headers.</param>
+        /// <param name="cancellationToken"></param>
+        Task PublishAsync<T>(string name, T contentObj, IDictionary<string, string> headers, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Publish an object message.
@@ -39,5 +46,13 @@ namespace DotNetCore.CAP
         /// <param name="contentObj">message body content, that will be serialized of json.</param>
         /// <param name="callbackName">callback subscriber name</param>
         void Publish<T>(string name, T contentObj, string callbackName = null);
+
+        /// <summary>
+        /// Publish an object message.
+        /// </summary>
+        /// <param name="name">the topic name or exchange router key.</param>
+        /// <param name="contentObj">message body content, that will be serialized of json.</param>
+        /// <param name="headers">message additional headers.</param>
+        void Publish<T>(string name, T contentObj, IDictionary<string, string> headers);
     }
 }

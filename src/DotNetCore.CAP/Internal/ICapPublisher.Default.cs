@@ -35,32 +35,30 @@ namespace DotNetCore.CAP.Internal
 
         public AsyncLocal<ICapTransaction> Transaction { get; }
 
-        public async Task PublishAsync<T>(string name, T value,
-            IDictionary<string, string> optionHeaders,
-            CancellationToken cancellationToken = default)
+        public async Task PublishAsync<T>(string name, T value, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentNullException(nameof(name));
             }
 
-            if (optionHeaders == null)
+            if (headers == null)
             {
-                optionHeaders = new Dictionary<string, string>();
+                headers = new Dictionary<string, string>();
             }
 
             var messageId = SnowflakeId.Default().NextId().ToString();
-            optionHeaders.Add(Headers.MessageId, messageId);
-            optionHeaders.Add(Headers.MessageName, name);
-            optionHeaders.Add(Headers.Type, typeof(T).FullName);
-            optionHeaders.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
-            if (!optionHeaders.ContainsKey(Headers.CorrelationId))
+            headers.Add(Headers.MessageId, messageId);
+            headers.Add(Headers.MessageName, name);
+            headers.Add(Headers.Type, typeof(T).FullName);
+            headers.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
+            if (!headers.ContainsKey(Headers.CorrelationId))
             {
-                optionHeaders.Add(Headers.CorrelationId, messageId);
-                optionHeaders.Add(Headers.CorrelationSequence, 0.ToString());
+                headers.Add(Headers.CorrelationId, messageId);
+                headers.Add(Headers.CorrelationSequence, 0.ToString());
             }
 
-            var message = new Message(optionHeaders, value);
+            var message = new Message(headers, value);
 
             long? tracingTimestamp = null;
             try
@@ -99,11 +97,6 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        public void Publish<T>(string name, T value, string callbackName = null)
-        {
-            PublishAsync(name, value, callbackName).GetAwaiter().GetResult();
-        }
-
         public Task PublishAsync<T>(string name, T value, string callbackName = null,
             CancellationToken cancellationToken = default)
         {
@@ -113,6 +106,16 @@ namespace DotNetCore.CAP.Internal
             };
 
             return PublishAsync(name, value, header, cancellationToken);
+        }
+
+        public void Publish<T>(string name, T value, string callbackName = null)
+        {
+            PublishAsync(name, value, callbackName).GetAwaiter().GetResult();
+        }
+
+        public void Publish<T>(string name, T value, IDictionary<string, string> headers)
+        {
+            PublishAsync(name, value, headers).GetAwaiter().GetResult();
         }
 
         #region tracing
