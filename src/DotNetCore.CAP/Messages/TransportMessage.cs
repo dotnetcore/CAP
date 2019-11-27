@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Messages
 {
@@ -8,10 +9,10 @@ namespace DotNetCore.CAP.Messages
     /// </summary>
     public class TransportMessage
     {
-        public TransportMessage(IDictionary<string, string> headers, byte[] body)
+        public TransportMessage(IDictionary<string, string> headers, [CanBeNull] byte[] body)
         {
             Headers = headers ?? throw new ArgumentNullException(nameof(headers));
-            Body = body ?? throw new ArgumentNullException(nameof(body));
+            Body = body;
         }
 
         /// <summary>
@@ -22,6 +23,7 @@ namespace DotNetCore.CAP.Messages
         /// <summary>
         /// Gets the body object of this message
         /// </summary>
+        [CanBeNull]
         public byte[] Body { get; }
 
         public string GetId()

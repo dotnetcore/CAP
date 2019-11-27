@@ -1,18 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
+using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Messages
 {
     public class Message
     {
-        public Message(IDictionary<string, string> headers, object value)
+        public Message(IDictionary<string, string> headers, [CanBeNull] object value)
         {
             Headers = headers ?? throw new ArgumentNullException(nameof(headers));
-            Value = value ?? throw new ArgumentNullException(nameof(value));
+            Value = value;
         }
 
         public IDictionary<string, string> Headers { get; }
 
+        [CanBeNull]
         public object Value { get; }
     }
 

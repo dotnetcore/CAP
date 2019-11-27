@@ -13,13 +13,18 @@ namespace DotNetCore.CAP.Serialization
     {
         public Task<TransportMessage> SerializeAsync(Message message)
         {
+            if (message.Value == null)
+            {
+                return Task.FromResult(new TransportMessage(message.Headers, null));
+            }
+
             var json = JsonConvert.SerializeObject(message.Value);
             return Task.FromResult(new TransportMessage(message.Headers, Encoding.UTF8.GetBytes(json)));
         }
 
         public Task<Message> DeserializeAsync(TransportMessage transportMessage, Type valueType)
         {
-            if (valueType == null)
+            if (valueType == null || transportMessage.Body == null)
             {
                 return Task.FromResult(new Message(transportMessage.Headers, null));
             }
