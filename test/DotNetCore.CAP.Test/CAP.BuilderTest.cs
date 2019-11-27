@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Abstractions;
-using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -52,30 +50,7 @@ namespace DotNetCore.CAP.Test
 
             Assert.NotNull(thingy);
         }
-
-        [Fact]
-        public void CanOverrideContentSerialize()
-        {
-            var services = new ServiceCollection();
-            services.AddCap(x => { }).AddContentSerializer<MyContentSerializer>();
-
-            var thingy = services.BuildServiceProvider()
-                .GetRequiredService<IContentSerializer>() as MyContentSerializer;
-
-            Assert.NotNull(thingy);
-        }
-
-        [Fact]
-        public void CanOverrideMessagePack()
-        {
-            var services = new ServiceCollection();
-            services.AddCap(x => { }).AddMessagePacker<MyMessagePacker>();
-
-            var thingy = services.BuildServiceProvider()
-                .GetRequiredService<IMessagePacker>() as MyMessagePacker;
-
-            Assert.NotNull(thingy);
-        }
+      
 
         [Fact]
         public void CanResolveCapOptions()
@@ -85,38 +60,6 @@ namespace DotNetCore.CAP.Test
             var builder = services.BuildServiceProvider();
             var capOptions = builder.GetService<IOptions<CapOptions>>().Value;
             Assert.NotNull(capOptions);
-        }
-
-        private class MyMessagePacker : IMessagePacker
-        {
-            public string Pack(CapMessage obj)
-            {
-                throw new NotImplementedException();
-            }
-
-            public CapMessage UnPack(string packingMessage)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-
-        private class MyContentSerializer : IContentSerializer
-        {
-            public T DeSerialize<T>(string content)
-            {
-                throw new NotImplementedException();
-            }
-
-            public object DeSerialize(string content, Type type)
-            {
-                throw new NotImplementedException();
-            }
-
-            public string Serialize<T>(T obj)
-            {
-                throw new NotImplementedException();
-            }
         }
 
         private class MyProducerService : ICapPublisher
