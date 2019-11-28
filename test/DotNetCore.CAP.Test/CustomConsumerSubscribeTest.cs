@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.Test
         }
     }
 
-    public class MyConsumerServiceSelector : DefaultConsumerServiceSelector
+    public class MyConsumerServiceSelector : ConsumerServiceSelector
     {
         private readonly CapOptions _capOptions;
 

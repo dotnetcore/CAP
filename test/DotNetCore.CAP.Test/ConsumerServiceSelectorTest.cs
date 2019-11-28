@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Test
             ServiceCollectionExtensions.ServiceCollection = services;
             services.AddOptions();
             services.PostConfigure<CapOptions>(x=>{});
-            services.AddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
+            services.AddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
             services.AddScoped<IFooTest, CandidatesFooTest>();
             services.AddScoped<IBarTest, CandidatesBarTest>();
             services.AddLogging();

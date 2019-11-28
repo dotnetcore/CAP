@@ -9,15 +9,15 @@ using Xunit;
 
 namespace DotNetCore.CAP.Test
 {
-    public class ConsumerInvokerTest
+    public class SubscribeInvokerTest
     {
         private readonly IServiceProvider _serviceProvider;
 
-        public ConsumerInvokerTest()
+        public SubscribeInvokerTest()
         {
             var serviceCollection = new ServiceCollection();
             serviceCollection.AddLogging();
-            serviceCollection.AddSingleton<ISubscribeInvoker, DefaultSubscribeInvoker>();
+            serviceCollection.AddSingleton<ISubscribeInvoker, SubscribeInvoker>();
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
 

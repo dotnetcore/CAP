@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
     /// </summary>
-    public class DefaultConsumerServiceSelector : IConsumerServiceSelector
+    public class ConsumerServiceSelector : IConsumerServiceSelector
     {
         private readonly CapOptions _capOptions;
         private readonly IServiceProvider _serviceProvider;
@@ -28,9 +28,9 @@ namespace DotNetCore.CAP.Internal
         private readonly ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _poundList;
 
         /// <summary>
-        /// Creates a new <see cref="DefaultConsumerServiceSelector" />.
+        /// Creates a new <see cref="ConsumerServiceSelector" />.
         /// </summary>
-        public DefaultConsumerServiceSelector(IServiceProvider serviceProvider)
+        public ConsumerServiceSelector(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _capOptions = serviceProvider.GetService<IOptions<CapOptions>>().Value;

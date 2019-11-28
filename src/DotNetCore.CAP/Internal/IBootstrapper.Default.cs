@@ -14,12 +14,12 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// Default implement of <see cref="T:DotNetCore.CAP.Internal.IBootstrapper" />.
     /// </summary>
-    internal class DefaultBootstrapper : BackgroundService, IBootstrapper
+    internal class Bootstrapper : BackgroundService, IBootstrapper
     {
-        private readonly ILogger<DefaultBootstrapper> _logger;
+        private readonly ILogger<Bootstrapper> _logger;
 
-        public DefaultBootstrapper(
-            ILogger<DefaultBootstrapper> logger,
+        public Bootstrapper(
+            ILogger<Bootstrapper> logger,
             IStorageInitializer storage,
             IEnumerable<IProcessingServer> processors)
         {

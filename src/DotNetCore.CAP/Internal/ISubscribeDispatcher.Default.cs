@@ -17,7 +17,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Internal
 {
-    internal class DefaultSubscribeDispatcher : ISubscribeDispatcher
+    internal class SubscribeDispatcher : ISubscribeDispatcher
     {
         private readonly IDataStorage _dataStorage;
         private readonly ILogger _logger;
@@ -29,8 +29,8 @@ namespace DotNetCore.CAP.Internal
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
 
-        public DefaultSubscribeDispatcher(
-            ILogger<DefaultSubscribeDispatcher> logger,
+        public SubscribeDispatcher(
+            ILogger<SubscribeDispatcher> logger,
             IOptions<CapOptions> options,
             IServiceProvider provider)
         {

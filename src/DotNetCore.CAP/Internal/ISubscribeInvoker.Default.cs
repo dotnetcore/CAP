@@ -12,15 +12,15 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
 {
-    internal class DefaultSubscribeInvoker : ISubscribeInvoker
+    internal class SubscribeInvoker : ISubscribeInvoker
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
 
-        public DefaultSubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
+        public SubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _logger = loggerFactory.CreateLogger<DefaultSubscribeInvoker>();
+            _logger = loggerFactory.CreateLogger<SubscribeInvoker>();
         }
 
         public async Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context, CancellationToken cancellationToken = default)
@@ -30,7 +30,7 @@ namespace DotNetCore.CAP.Internal
             _logger.LogDebug("Executing subscriber method : {0}", context.ConsumerDescriptor.MethodInfo.Name);
 
             var executor = ObjectMethodExecutor.Create(
-                context.ConsumerDescriptor.MethodInfo,  
+                context.ConsumerDescriptor.MethodInfo,
                 context.ConsumerDescriptor.ImplTypeInfo);
 
             using (var scope = _serviceProvider.CreateScope())

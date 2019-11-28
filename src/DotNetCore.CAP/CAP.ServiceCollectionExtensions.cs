@@ -38,7 +38,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddSingleton<ICapPublisher, CapPublisher>();
 
-            services.TryAddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
+            services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
             services.TryAddSingleton<ISubscribeInvokerFactory, ConsumerInvokerFactory>();
             services.TryAddSingleton<MethodMatcherCache>();
 
@@ -60,7 +60,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<ISerializer, JsonUtf8Serializer>();
 
             // Warning: IPublishMessageSender need to inject at extension project. 
-            services.TryAddSingleton<ISubscribeDispatcher, DefaultSubscribeDispatcher>();
+            services.TryAddSingleton<ISubscribeDispatcher, SubscribeDispatcher>();
 
             //Options and extension service
             var options = new CapOptions();
@@ -72,7 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(setupAction);
 
             //Startup and Hosted 
-            services.AddHostedService<DefaultBootstrapper>();
+            services.AddHostedService<Bootstrapper>();
 
             return new CapBuilder(services);
         }

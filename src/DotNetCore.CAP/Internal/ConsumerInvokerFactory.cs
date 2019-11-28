@@ -21,7 +21,7 @@ namespace DotNetCore.CAP.Internal
 
         public ISubscribeInvoker CreateInvoker()
         {
-            return new DefaultSubscribeInvoker(_loggerFactory, _serviceProvider);
+            return new SubscribeInvoker(_loggerFactory, _serviceProvider);
         }
     }
 }
