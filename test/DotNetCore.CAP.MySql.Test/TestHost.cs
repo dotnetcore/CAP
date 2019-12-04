@@ -1,4 +1,5 @@
 using System;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.MySql.Test
@@ -6,7 +7,7 @@ namespace DotNetCore.CAP.MySql.Test
     public abstract class TestHost : IDisposable
     {
         protected IServiceCollection _services;
-        protected string _connectionString;
+        protected string ConnectionString;
         private IServiceProvider _provider;
         private IServiceProvider _scopedProvider;
 
@@ -27,12 +28,14 @@ namespace DotNetCore.CAP.MySql.Test
             services.AddOptions();
             services.AddLogging();
 
-            _connectionString = ConnectionUtil.GetConnectionString();
+            ConnectionString = ConnectionUtil.GetConnectionString();
             services.AddOptions<CapOptions>();
-            services.Configure<MySqlOptions>(x => x.ConnectionString = _connectionString);
-            
-            services.AddSingleton<MySqlStorage>();
-
+            services.Configure<MySqlOptions>(x =>
+            {
+                x.ConnectionString = ConnectionString;
+            });
+            services.AddSingleton<MySqlDataStorage>();
+            services.AddSingleton<IStorageInitializer,MySqlStorageInitializer>();
             _services = services;
         }
 
@@ -71,10 +74,6 @@ namespace DotNetCore.CAP.MySql.Test
         }
 
         public T GetService<T>() => Provider.GetService<T>();
-
-        public T Ensure<T>(ref T service)
-            where T : class
-            => service ?? (service = GetService<T>());
 
         public virtual void Dispose()
         {
