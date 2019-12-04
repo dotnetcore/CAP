@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
@@ -67,7 +68,7 @@ namespace DotNetCore.CAP.Processor
                                 var result = await _sender.SendAsync(message);
                                 if (!result.Succeeded)
                                 {
-                                    _logger.LogWarning(result.Exception, "Message send failed! -->" + result);
+                                    _logger.MessagePublishException(message.Origin.GetId(),result.ToString(),result.Exception);
                                 }
                             }
                             catch (Exception ex)

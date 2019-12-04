@@ -40,7 +40,12 @@ namespace DotNetCore.CAP.Internal
             logger.LogDebug($"Message published. name: {name}, content:{content}.");
         }
 
-        public static void MessagePublishException(this ILogger logger, long messageId, string reason, Exception ex)
+        public static void MessageReceived(this ILogger logger, string messageId, string name)
+        {
+            logger.LogDebug($"Received message. id:{messageId}, name: {name}");
+        }
+
+        public static void MessagePublishException(this ILogger logger, string messageId, string reason, Exception ex)
         {
             logger.LogError(ex, $"An exception occured while publishing a message, reason:{reason}. message id:{messageId}");
         }

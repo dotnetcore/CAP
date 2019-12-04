@@ -151,6 +151,8 @@ namespace DotNetCore.CAP.Internal
         {
             client.OnMessageReceived += async (sender, transportMessage) =>
             {
+                _logger.MessageReceived(transportMessage.GetId(), transportMessage.GetName());
+
                 _cts.Token.ThrowIfCancellationRequested();
                 long? tracingTimestamp = null;
                 try
@@ -189,7 +191,7 @@ namespace DotNetCore.CAP.Internal
                     {
                         var content = StringSerializer.Serialize(message);
                         await _storage.StoreReceivedExceptionMessageAsync(name, group, content);
-
+                        
                         client.Commit();
 
                         TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
