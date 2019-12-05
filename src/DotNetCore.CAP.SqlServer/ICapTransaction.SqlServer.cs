@@ -11,29 +11,22 @@ using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using DotNetCore.CAP.Transport;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class SqlServerCapTransaction : CapTransactionBase
     {
-        private readonly DbContext _dbContext;
         private readonly DiagnosticProcessorObserver _diagnosticProcessor;
 
         public SqlServerCapTransaction(
             IDispatcher dispatcher,
-            IServiceProvider serviceProvider) : base(dispatcher)
+            DiagnosticProcessorObserver diagnosticProcessor) : base(dispatcher)
         {
-            var sqlServerOptions = serviceProvider.GetService<IOptions<SqlServerOptions>>().Value;
-            if (sqlServerOptions.DbContextType != null)
-                _dbContext = serviceProvider.GetService(sqlServerOptions.DbContextType) as DbContext;
-
-            _diagnosticProcessor = serviceProvider.GetRequiredService<DiagnosticProcessorObserver>();
+            _diagnosticProcessor = diagnosticProcessor;
         }
 
         protected override void AddToSent(MediumMessage msg)
@@ -76,7 +69,6 @@ namespace DotNetCore.CAP
                     dbTransaction.Commit();
                     break;
                 case IDbContextTransaction dbContextTransaction:
-                    _dbContext?.SaveChanges();
                     dbContextTransaction.Commit();
                     break;
             }
@@ -93,7 +85,6 @@ namespace DotNetCore.CAP
                     dbTransaction.Commit();
                     break;
                 case IDbContextTransaction dbContextTransaction:
-                    await _dbContext.SaveChangesAsync(cancellationToken);
                     await dbContextTransaction.CommitAsync(cancellationToken);
                     break;
             }
