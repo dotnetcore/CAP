@@ -8,7 +8,7 @@ namespace DotNetCore.CAP
 {
     public class EFOptions
     {
-        public const string DefaultSchema = "Cap";
+        public const string DefaultSchema = "cap";
 
         /// <summary>
         /// Gets or sets the schema to use when creating database objects.
