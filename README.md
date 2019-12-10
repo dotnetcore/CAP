@@ -224,7 +224,11 @@ services.AddCap(x =>
 
 ### Dashboard
 
-CAP v2.1+ provides the dashboard pages, you can easily view the sent and received messages. In addition, you can also view the  message status in real time on the dashboard.
+CAP v2.1+ provides the dashboard pages, you can easily view the sent and received messages. In addition, you can also view the  message status in real time on the dashboard. Use the  following command to install the Dashboard in your project.
+
+```
+PM> Install-Package DotNetCore.Dashboard
+```
 
 In the distributed environment, the dashboard built-in integrated [Consul](http://consul.io) as a node discovery, while the realization of the gateway agent function, you can also easily view the node or other node data, It's like you are visiting local resources.
 
