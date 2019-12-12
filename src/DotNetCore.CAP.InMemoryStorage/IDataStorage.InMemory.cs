@@ -40,8 +40,7 @@ namespace DotNetCore.CAP.InMemoryStorage
             return Task.CompletedTask;
         }
 
-        public Task<MediumMessage> StoreMessageAsync(string name, Message content, object dbTransaction = null,
-            CancellationToken cancellationToken = default)
+        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
         {
             var message = new MediumMessage
             {
@@ -64,10 +63,10 @@ namespace DotNetCore.CAP.InMemoryStorage
                 StatusName = StatusName.Scheduled
             });
 
-            return Task.FromResult(message);
+            return message;
         }
 
-        public Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
+        public void StoreReceivedExceptionMessage(string name, string group, string content)
         {
             ReceivedMessages.Add(new MemoryMessage
             {
@@ -80,11 +79,9 @@ namespace DotNetCore.CAP.InMemoryStorage
                 ExpiresAt = DateTime.Now.AddDays(15),
                 StatusName = StatusName.Failed
             });
-
-            return Task.CompletedTask;
         }
 
-        public Task<MediumMessage> StoreReceivedMessageAsync(string name, string @group, Message message)
+        public MediumMessage StoreReceivedMessage(string name, string @group, Message message)
         {
             var mdMessage = new MediumMessage
             {
@@ -107,7 +104,7 @@ namespace DotNetCore.CAP.InMemoryStorage
                 StatusName = StatusName.Failed
             });
 
-            return Task.FromResult(mdMessage);
+            return mdMessage;
         }
 
         public Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default)

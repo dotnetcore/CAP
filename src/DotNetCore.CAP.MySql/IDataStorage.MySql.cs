@@ -64,7 +64,7 @@ namespace DotNetCore.CAP.MySql
             });
         }
 
-        public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object dbTransaction = null, CancellationToken cancellationToken = default)
+        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
         {
             var sql = $"INSERT INTO `{_initializer.GetPublishedTableName()}`(`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
@@ -91,8 +91,8 @@ namespace DotNetCore.CAP.MySql
 
             if (dbTransaction == null)
             {
-                await using var connection = new MySqlConnection(_options.Value.ConnectionString);
-                await connection.ExecuteAsync(sql, po);
+                using var connection = new MySqlConnection(_options.Value.ConnectionString);
+                connection.Execute(sql, po);
             }
             else
             {
@@ -103,18 +103,18 @@ namespace DotNetCore.CAP.MySql
                 }
 
                 var conn = dbTrans?.Connection;
-                await conn.ExecuteAsync(sql, po, dbTrans);
+                conn.Execute(sql, po, dbTrans);
             }
 
             return message;
         }
 
-        public async Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
+        public void StoreReceivedExceptionMessage(string name, string group, string content)
         {
             var sql = $@"INSERT INTO `{_initializer.GetReceivedTableName()}`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
-            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
-            await connection.ExecuteAsync(sql, new
+            using var connection = new MySqlConnection(_options.Value.ConnectionString);
+            connection.Execute(sql, new
             {
                 Id = SnowflakeId.Default().NextId().ToString(),
                 Group = @group,
@@ -127,7 +127,7 @@ namespace DotNetCore.CAP.MySql
             });
         }
 
-        public async Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message message)
+        public MediumMessage StoreReceivedMessage(string name, string group, Message message)
         {
             var sql = $@"INSERT INTO `{_initializer.GetReceivedTableName()}`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
@@ -140,8 +140,8 @@ namespace DotNetCore.CAP.MySql
                 Retries = 0
             };
             var content = StringSerializer.Serialize(mdMessage.Origin);
-            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
-            await connection.ExecuteAsync(sql, new
+            using var connection = new MySqlConnection(_options.Value.ConnectionString);
+            connection.Execute(sql, new
             {
                 Id = mdMessage.DbId,
                 Group = @group,

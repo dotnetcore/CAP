@@ -68,7 +68,7 @@ namespace DotNetCore.CAP.Processor
                                 var result = await _sender.SendAsync(message);
                                 if (!result.Succeeded)
                                 {
-                                    _logger.MessagePublishException(message.Origin.GetId(),result.ToString(),result.Exception);
+                                    _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
                                 }
                             }
                             catch (Exception ex)

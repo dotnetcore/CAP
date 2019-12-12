@@ -22,7 +22,6 @@ namespace DotNetCore.CAP.MongoDB
         private readonly IOptions<CapOptions> _capOptions;
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
-        private readonly ILogger<MongoDBDataStorage> _logger;
         private readonly IOptions<MongoDBOptions> _options;
 
         public MongoDBDataStorage(
@@ -34,7 +33,6 @@ namespace DotNetCore.CAP.MongoDB
             _capOptions = capOptions;
             _options = options;
             _client = client;
-            _logger = logger;
             _database = _client.GetDatabase(_options.Value.DatabaseName);
         }
 
@@ -62,10 +60,9 @@ namespace DotNetCore.CAP.MongoDB
             await collection.UpdateOneAsync(x => x.Id == long.Parse(message.DbId), updateDef);
         }
 
-        public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object dbTransaction = null,
-            CancellationToken cancellationToken = default)
+        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
         {
-            var insertOptions = new InsertOneOptions {BypassDocumentValidation = false};
+            var insertOptions = new InsertOneOptions { BypassDocumentValidation = false };
 
             var message = new MediumMessage
             {
@@ -93,18 +90,18 @@ namespace DotNetCore.CAP.MongoDB
 
             if (dbTransaction == null)
             {
-                await collection.InsertOneAsync(store, insertOptions, cancellationToken);
+                collection.InsertOne(store, insertOptions);
             }
             else
             {
                 var dbTrans = dbTransaction as IClientSessionHandle;
-                await collection.InsertOneAsync(dbTrans, store, insertOptions, cancellationToken);
+                collection.InsertOne(dbTrans, store, insertOptions);
             }
 
             return message;
         }
 
-        public async Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
+        public void StoreReceivedExceptionMessage(string name, string group, string content)
         {
             var collection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
 
@@ -121,10 +118,10 @@ namespace DotNetCore.CAP.MongoDB
                 StatusName = nameof(StatusName.Failed)
             };
 
-            await collection.InsertOneAsync(store);
+            collection.InsertOne(store);
         }
 
-        public async Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message message)
+        public MediumMessage StoreReceivedMessage(string name, string group, Message message)
         {
             var mdMessage = new MediumMessage
             {
@@ -151,7 +148,7 @@ namespace DotNetCore.CAP.MongoDB
                 StatusName = nameof(StatusName.Scheduled)
             };
 
-            await collection.InsertOneAsync(store);
+            collection.InsertOne(store);
 
             return mdMessage;
         }
@@ -161,18 +158,15 @@ namespace DotNetCore.CAP.MongoDB
         {
             if (collection == _options.Value.PublishedCollection)
             {
-                //Builders<PublishedMessage>.Filter.Lt(x => x.ExpiresAt, timeout);
-
                 var publishedCollection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
                 var ret = await publishedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout, cancellationToken);
-                return (int) ret.DeletedCount;
+                return (int)ret.DeletedCount;
             }
             else
             {
                 var receivedCollection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
                 var ret = await receivedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout, cancellationToken);
-                ;
-                return (int) ret.DeletedCount;
+                return (int)ret.DeletedCount;
             }
         }
 

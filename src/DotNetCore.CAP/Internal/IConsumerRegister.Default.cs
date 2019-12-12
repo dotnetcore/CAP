@@ -190,15 +190,16 @@ namespace DotNetCore.CAP.Internal
                     if (message.HasException())
                     {
                         var content = StringSerializer.Serialize(message);
-                        await _storage.StoreReceivedExceptionMessageAsync(name, group, content);
-                        
+
+                        _storage.StoreReceivedExceptionMessage(name, group, content);
+
                         client.Commit();
 
                         TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
                     }
                     else
                     {
-                        var mediumMessage = await _storage.StoreReceivedMessageAsync(name, group, message);
+                        var mediumMessage = _storage.StoreReceivedMessage(name, group, message);
                         mediumMessage.Origin = message;
 
                         client.Commit();

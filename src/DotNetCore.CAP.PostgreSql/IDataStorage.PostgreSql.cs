@@ -66,8 +66,7 @@ namespace DotNetCore.CAP.PostgreSql
             });
         }
 
-        public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object dbTransaction = null,
-            CancellationToken cancellationToken = default)
+        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
         {
             var sql =
                 $"INSERT INTO {_pubName} (\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
@@ -96,8 +95,8 @@ namespace DotNetCore.CAP.PostgreSql
 
             if (dbTransaction == null)
             {
-                await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-                await connection.ExecuteAsync(sql, po);
+                using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+                connection.Execute(sql, po);
             }
             else
             {
@@ -106,20 +105,20 @@ namespace DotNetCore.CAP.PostgreSql
                     dbTrans = dbContextTrans.GetDbTransaction();
 
                 var conn = dbTrans?.Connection;
-                await conn.ExecuteAsync(sql, po, dbTrans);
+                conn.Execute(sql, po, dbTrans);
             }
 
             return message;
         }
 
-        public async Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
+        public void StoreReceivedExceptionMessage(string name, string group, string content)
         {
             var sql =
                 $"INSERT INTO {_recName}(\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
                 $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING \"Id\";";
 
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            await connection.ExecuteAsync(sql, new
+            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            connection.Execute(sql, new
             {
                 Id = SnowflakeId.Default().NextId(),
                 Group = group,
@@ -132,7 +131,7 @@ namespace DotNetCore.CAP.PostgreSql
             });
         }
 
-        public async Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message message)
+        public MediumMessage StoreReceivedMessage(string name, string group, Message message)
         {
             var sql =
                 $"INSERT INTO {_recName}(\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
@@ -147,8 +146,8 @@ namespace DotNetCore.CAP.PostgreSql
                 Retries = 0
             };
             var content = StringSerializer.Serialize(mdMessage.Origin);
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            await connection.ExecuteAsync(sql, new
+            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            connection.Execute(sql, new
             {
                 Id = long.Parse(mdMessage.DbId),
                 Group = group,
