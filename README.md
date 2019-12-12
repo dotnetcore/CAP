@@ -253,7 +253,7 @@ services.AddCap(x =>
 });
 ```
 
-The default dashboard address is :[http://localhost:xxx/cap](http://localhost:xxx/cap) , you can also change the `cap` suffix to others with `d.MatchPath` configuration options.
+The default dashboard address is :[http://localhost:xxx/cap](http://localhost:xxx/cap), you can also configure the `/cap` suffix with `x.UseDashboard(opt =>{ opt.MatchPath="/mycap"; })`.
 
 ![dashboard](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220827302-189215107.png)
 

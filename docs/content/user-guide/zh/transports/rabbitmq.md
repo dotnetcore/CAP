@@ -14,7 +14,7 @@ Install-Package DotNetCore.CAP.RabbitMQ
 
 ```
 
-然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于内存的配置项。
+然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于 RabbitMQ 的配置项。
 
 ```csharp
 
