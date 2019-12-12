@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using Confluent.Kafka;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -42,6 +43,11 @@ namespace DotNetCore.CAP
         /// </para>
         /// </summary>
         public string Servers { get; set; }
+
+        /// <summary>
+        /// If you need to get offset and partition and so on.., you can use this function to write additional header into <see cref="CapHeader"/>
+        /// </summary>
+        public Func<ConsumeResult<string, byte[]>, List<KeyValuePair<string, string>>> CustomHeaders { get; set; }
 
         internal IEnumerable<KeyValuePair<string, string>> AsKafkaConfig()
         {

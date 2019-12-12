@@ -62,6 +62,15 @@ namespace DotNetCore.CAP.Kafka
                 }
                 headers.Add(Messages.Headers.Group, _groupId);
 
+                if (_kafkaOptions.CustomHeaders != null)
+                {
+                    var customHeaders = _kafkaOptions.CustomHeaders(consumerResult);
+                    foreach (var customHeader in customHeaders)
+                    {
+                        headers.Add(customHeader.Key, customHeader.Value);
+                    }
+                }
+
                 var message = new TransportMessage(headers, consumerResult.Value);
 
                 OnMessageReceived?.Invoke(consumerResult, message);
