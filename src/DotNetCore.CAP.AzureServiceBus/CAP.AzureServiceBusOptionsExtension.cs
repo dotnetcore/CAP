@@ -3,6 +3,7 @@
 
 using System;
 using DotNetCore.CAP.AzureServiceBus;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
@@ -24,8 +25,7 @@ namespace DotNetCore.CAP
             services.Configure(_configure);
 
             services.AddSingleton<IConsumerClientFactory, AzureServiceBusConsumerClientFactory>();
-            services.AddSingleton<IPublishExecutor, AzureServiceBusPublishMessageSender>();
-            services.AddSingleton<IPublishMessageSender, AzureServiceBusPublishMessageSender>();
+            services.AddSingleton<ITransport,AzureServiceBusTransport>();
         }
     }
 }

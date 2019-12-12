@@ -22,10 +22,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static CapOptions UseMongoDB(this CapOptions options, Action<MongoDBOptions> configure)
         {
-            if (configure == null)
-            {
-                throw new ArgumentNullException(nameof(configure));
-            }
+            if (configure == null) throw new ArgumentNullException(nameof(configure));
 
             configure += x => x.Version = options.Version;
 

@@ -5,7 +5,10 @@ using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Processor
@@ -13,20 +16,19 @@ namespace DotNetCore.CAP.Processor
     public class Dispatcher : IDispatcher, IDisposable
     {
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
-        private readonly ISubscriberExecutor _executor;
+        private readonly IMessageSender _sender;
+        private readonly ISubscribeDispatcher _executor;
         private readonly ILogger<Dispatcher> _logger;
 
-        private readonly BlockingCollection<CapPublishedMessage> _publishedMessageQueue =
-            new BlockingCollection<CapPublishedMessage>(new ConcurrentQueue<CapPublishedMessage>());
+        private readonly BlockingCollection<MediumMessage> _publishedMessageQueue =
+            new BlockingCollection<MediumMessage>(new ConcurrentQueue<MediumMessage>());
 
-        private readonly BlockingCollection<CapReceivedMessage> _receivedMessageQueue =
-            new BlockingCollection<CapReceivedMessage>(new ConcurrentQueue<CapReceivedMessage>());
-
-        private readonly IPublishMessageSender _sender;
+        private readonly BlockingCollection<(MediumMessage, ConsumerExecutorDescriptor)> _receivedMessageQueue =
+            new BlockingCollection<(MediumMessage, ConsumerExecutorDescriptor)>(new ConcurrentQueue<(MediumMessage, ConsumerExecutorDescriptor)>());
 
         public Dispatcher(ILogger<Dispatcher> logger,
-            IPublishMessageSender sender,
-            ISubscriberExecutor executor)
+            IMessageSender sender,
+            ISubscribeDispatcher executor)
         {
             _logger = logger;
             _sender = sender;
@@ -36,14 +38,14 @@ namespace DotNetCore.CAP.Processor
             Task.Factory.StartNew(Processing, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         }
 
-        public void EnqueueToPublish(CapPublishedMessage message)
+        public void EnqueueToPublish(MediumMessage message)
         {
             _publishedMessageQueue.Add(message);
         }
 
-        public void EnqueueToExecute(CapReceivedMessage message)
+        public void EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
         {
-            _receivedMessageQueue.Add(message);
+            _receivedMessageQueue.Add((message, descriptor));
         }
 
         public void Dispose()
@@ -63,11 +65,15 @@ namespace DotNetCore.CAP.Processor
                         {
                             try
                             {
-                                await _sender.SendAsync(message);
+                                var result = await _sender.SendAsync(message);
+                                if (!result.Succeeded)
+                                {
+                                    _logger.MessagePublishException(message.Origin.GetId(),result.ToString(),result.Exception);
+                                }
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Topic:{message.Name}, Id:{message.Id}");
+                                _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Id:{message.DbId}");
                             }
                         });
                     }
@@ -85,7 +91,7 @@ namespace DotNetCore.CAP.Processor
             {
                 foreach (var message in _receivedMessageQueue.GetConsumingEnumerable(_cts.Token))
                 {
-                    _executor.ExecuteAsync(message, _cts.Token);
+                    _executor.DispatchAsync(message.Item1, message.Item2, _cts.Token);
                 }
             }
             catch (OperationCanceledException)

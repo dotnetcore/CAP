@@ -74,7 +74,7 @@ markdown_extensions:
 nav:
     - Home: index.md
     - Documentation:
-      - Getting Stared:
+      - Getting Started:
           - Quick Start: user-guide/en/getting-started/quick-start.md
           - Introduction: user-guide/en/getting-started/introduction.md
           - Contributing: user-guide/en/getting-started/contributing.md    

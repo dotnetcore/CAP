@@ -4,23 +4,25 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Reflection;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
+using Microsoft.Data.SqlClient;
 
 namespace DotNetCore.CAP.SqlServer.Diagnostics
 {
     internal class DiagnosticObserver : IObserver<KeyValuePair<string, object>>
     {
-        private const string SqlClientPrefix = "System.Data.SqlClient.";
+        public const string SqlAfterCommitTransaction = "System.Data.SqlClient.WriteTransactionCommitAfter";
+        public const string SqlAfterCommitTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionCommitAfter";
+        public const string SqlErrorCommitTransaction = "System.Data.SqlClient.WriteTransactionCommitError";
+        public const string SqlErrorCommitTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionCommitError";
 
-        public const string SqlAfterCommitTransaction = SqlClientPrefix + "WriteTransactionCommitAfter";
-        public const string SqlErrorCommitTransaction = SqlClientPrefix + "WriteTransactionCommitError";
-        private readonly ConcurrentDictionary<Guid, List<CapPublishedMessage>> _bufferList;
+        private readonly ConcurrentDictionary<Guid, List<MediumMessage>> _bufferList;
         private readonly IDispatcher _dispatcher;
 
         public DiagnosticObserver(IDispatcher dispatcher,
-            ConcurrentDictionary<Guid, List<CapPublishedMessage>> bufferList)
+            ConcurrentDictionary<Guid, List<MediumMessage>> bufferList)
         {
             _dispatcher = dispatcher;
             _bufferList = bufferList;
@@ -36,21 +38,19 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
 
         public void OnNext(KeyValuePair<string, object> evt)
         {
-            if (evt.Key == SqlAfterCommitTransaction)
+            if (evt.Key == SqlAfterCommitTransaction || evt.Key == SqlAfterCommitTransactionMicrosoft)
             {
-                var sqlConnection = (SqlConnection) GetProperty(evt.Value, "Connection");
+                var sqlConnection = (SqlConnection)GetProperty(evt.Value, "Connection");
                 var transactionKey = sqlConnection.ClientConnectionId;
                 if (_bufferList.TryRemove(transactionKey, out var msgList))
-                {
                     foreach (var message in msgList)
                     {
                         _dispatcher.EnqueueToPublish(message);
                     }
-                }
             }
-            else if (evt.Key == SqlErrorCommitTransaction)
+            else if (evt.Key == SqlErrorCommitTransaction || evt.Key == SqlErrorCommitTransactionMicrosoft)
             {
-                var sqlConnection = (SqlConnection) GetProperty(evt.Value, "Connection");
+                var sqlConnection = (SqlConnection)GetProperty(evt.Value, "Connection");
                 var transactionKey = sqlConnection.ClientConnectionId;
 
                 _bufferList.TryRemove(transactionKey, out _);

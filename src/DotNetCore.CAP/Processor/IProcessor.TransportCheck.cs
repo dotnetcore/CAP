@@ -3,16 +3,20 @@
 
 using System;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Internal;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Processor
 {
     public class TransportCheckProcessor : IProcessor
     {
+        private readonly ILogger<TransportCheckProcessor> _logger;
         private readonly IConsumerRegister _register;
         private readonly TimeSpan _waitingInterval;
 
-        public TransportCheckProcessor(IConsumerRegister register)
+        public TransportCheckProcessor(ILogger<TransportCheckProcessor> logger, IConsumerRegister register)
         {
+            _logger = logger;
             _register = register;
             _waitingInterval = TimeSpan.FromSeconds(30);
         }
@@ -24,12 +28,20 @@ namespace DotNetCore.CAP.Processor
                 throw new ArgumentNullException(nameof(context));
             }
 
+            _logger.LogDebug("Transport connection checking...");
+
             if (!_register.IsHealthy())
             {
+                _logger.LogWarning("Transport connection is unhealthy, reconnection...");
+
                 _register.ReStart();
+            }
+            else
+            {
+                _logger.LogDebug("Transport connection healthy!");
             }
 
             await context.WaitAsync(_waitingInterval);
-        } 
+        }
     }
 }

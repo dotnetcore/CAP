@@ -3,8 +3,9 @@
 
 using System;
 using DotNetCore.CAP.MySql;
-using DotNetCore.CAP.Processor;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
@@ -22,12 +23,9 @@ namespace DotNetCore.CAP
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<CapStorageMarkerService>();
-            services.AddSingleton<IStorage, MySqlStorage>();
-            services.AddSingleton<IStorageConnection, MySqlStorageConnection>();
-            services.AddSingleton<ICapPublisher, MySqlPublisher>();
-            services.AddSingleton<ICallbackPublisher>(provider => (MySqlPublisher)provider.GetService<ICapPublisher>());
-            services.AddSingleton<ICollectProcessor, MySqlCollectProcessor>();
-
+            services.AddSingleton<IDataStorage, MySqlDataStorage>();
+            
+            services.TryAddSingleton<IStorageInitializer, MySqlStorageInitializer>();
             services.AddTransient<CapTransactionBase, MySqlCapTransaction>();
 
             //Add MySqlOptions

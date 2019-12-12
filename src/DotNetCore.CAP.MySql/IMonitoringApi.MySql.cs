@@ -5,34 +5,38 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using Dapper;
-using DotNetCore.CAP.Dashboard;
-using DotNetCore.CAP.Dashboard.Monitoring;
-using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Monitoring;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Options;
+using MySql.Data.MySqlClient;
 
 namespace DotNetCore.CAP.MySql
 {
     internal class MySqlMonitoringApi : IMonitoringApi
     {
-        private readonly string _prefix;
-        private readonly MySqlStorage _storage;
+        private readonly IOptions<MySqlOptions> _options;
+        private readonly string _pubName;
+        private readonly string _recName;
 
-        public MySqlMonitoringApi(IStorage storage, IOptions<MySqlOptions> options)
+        public MySqlMonitoringApi(IOptions<MySqlOptions> options, IStorageInitializer initializer)
         {
-            _storage = storage as MySqlStorage ?? throw new ArgumentNullException(nameof(storage));
-            _prefix = options.Value.TableNamePrefix ?? throw new ArgumentNullException(nameof(options));
+            _options = options;
+            _pubName = initializer.GetPublishedTableName();
+            _recName = initializer.GetReceivedTableName();
         }
 
         public StatisticsDto GetStatistics()
         {
-            var sql = string.Format(@"
+            var sql = $@"
 set transaction isolation level read committed;
-select count(Id) from `{0}.published` where StatusName = N'Succeeded';
-select count(Id) from `{0}.received` where StatusName = N'Succeeded';
-select count(Id) from `{0}.published` where StatusName = N'Failed';
-select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
+select count(Id) from `{_pubName}` where StatusName = N'Succeeded';
+select count(Id) from `{_recName}` where StatusName = N'Succeeded';
+select count(Id) from `{_pubName}` where StatusName = N'Failed';
+select count(Id) from `{_recName}` where StatusName = N'Failed';";
 
             var statistics = UseConnection(connection =>
             {
@@ -53,21 +57,21 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
-            var tableName = type == MessageType.Publish ? "published" : "received";
+            var tableName = type == MessageType.Publish ? _pubName : _recName;
             return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, StatusName.Failed));
+                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Failed)));
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
-            var tableName = type == MessageType.Publish ? "published" : "received";
+            var tableName = type == MessageType.Publish ? _pubName : _recName;
             return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, StatusName.Succeeded));
+                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Succeeded)));
         }
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
         {
-            var tableName = queryDto.MessageType == MessageType.Publish ? "published" : "received";
+            var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
             {
@@ -86,11 +90,11 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
             if (!string.IsNullOrEmpty(queryDto.Content))
             {
-                where += " and Content like '%@Content%'";
+                where += " and Content like CONCAT('%',@Content,'%')";
             }
 
             var sqlQuery =
-                $"select * from `{_prefix}.{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
+                $"select * from `{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
 
             return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
             {
@@ -105,27 +109,27 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
         public int PublishedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Failed));
+            return UseConnection(conn => GetNumberOfMessage(conn, _pubName, nameof(StatusName.Failed)));
         }
 
         public int PublishedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "published", StatusName.Succeeded));
+            return UseConnection(conn => GetNumberOfMessage(conn, _pubName, nameof(StatusName.Succeeded)));
         }
 
         public int ReceivedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "received", StatusName.Failed));
+            return UseConnection(conn => GetNumberOfMessage(conn, _recName, nameof(StatusName.Failed)));
         }
 
         public int ReceivedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, "received", StatusName.Succeeded));
+            return UseConnection(conn => GetNumberOfMessage(conn, _recName, nameof(StatusName.Succeeded)));
         }
 
         private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
         {
-            var sqlQuery = $"select count(Id) from `{_prefix}.{tableName}` where StatusName = @state";
+            var sqlQuery = $"select count(Id) from `{tableName}` where StatusName = @state";
 
             var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
             return count;
@@ -133,7 +137,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 
         private T UseConnection<T>(Func<IDbConnection, T> action)
         {
-            return _storage.UseConnection(action);
+            return action(new MySqlConnection(_options.Value.ConnectionString));
         }
 
         private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string tableName,
@@ -163,7 +167,7 @@ select count(Id) from `{0}.received` where StatusName = N'Failed';", _prefix);
 select aggr.* from (
     select date_format(`Added`,'%Y-%m-%d-%H') as `Key`,
         count(id) `Count`
-    from  `{_prefix}.{tableName}`
+    from  `{tableName}`
     where StatusName = @statusName
     group by date_format(`Added`,'%Y-%m-%d-%H')
 ) aggr where `Key` in @keys;";
@@ -190,5 +194,26 @@ select aggr.* from (
 
             return result;
         }
+
+        public async Task<MediumMessage> GetPublishedMessageAsync(long id)
+        {
+            var sql = $@"SELECT * FROM `{_pubName}` WHERE `Id`={id};";
+
+            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+            return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
+        }
+
+        public async Task<MediumMessage> GetReceivedMessageAsync(long id)
+        {
+            var sql = $@"SELECT * FROM `{_recName}` WHERE Id={id};";
+            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+            return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
+        }
+    }
+
+    class TimelineCounter
+    {
+        public string Key { get; set; }
+        public int Count { get; set; }
     }
 }

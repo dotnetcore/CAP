@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using DotNetCore.CAP.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP
@@ -51,26 +50,6 @@ namespace DotNetCore.CAP
             where T : class, ICapPublisher
         {
             return AddScoped(typeof(ICapPublisher), typeof(T));
-        }
-
-        /// <summary>
-        /// Add a custom content serializer
-        /// </summary>
-        /// <typeparam name="T">The type of the service.</typeparam>
-        public CapBuilder AddContentSerializer<T>()
-            where T : class, IContentSerializer
-        {
-            return AddSingleton(typeof(IContentSerializer), typeof(T));
-        }
-
-        /// <summary>
-        /// Add a custom message wapper
-        /// </summary>
-        /// <typeparam name="T">The type of the service.</typeparam>
-        public CapBuilder AddMessagePacker<T>()
-            where T : class, IMessagePacker
-        {
-            return AddSingleton(typeof(IMessagePacker), typeof(T));
         }
 
         /// <summary>

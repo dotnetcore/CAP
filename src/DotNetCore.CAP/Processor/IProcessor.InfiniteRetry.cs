@@ -30,11 +30,12 @@ namespace DotNetCore.CAP.Processor
                 }
                 catch (OperationCanceledException)
                 {
-                     //ignore
+                    //ignore
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(1, ex, "Processor '{ProcessorName}' failed. Retrying...", _inner.ToString());
+                    _logger.LogWarning(ex, "Processor '{ProcessorName}' failed. Retrying...", _inner.ToString());
+                    await context.WaitAsync(TimeSpan.FromSeconds(2));
                 }
             }
         }
