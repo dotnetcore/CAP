@@ -63,12 +63,12 @@ namespace DotNetCore.CAP.MongoDB
             var statistics = new StatisticsDto
             {
                 PublishedSucceeded =
-                    (int) publishedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Succeeded)),
+                    (int)publishedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Succeeded)),
                 PublishedFailed =
-                    (int) publishedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Failed)),
+                    (int)publishedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Failed)),
                 ReceivedSucceeded =
-                    (int) receivedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Succeeded)),
-                ReceivedFailed = (int) receivedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Failed))
+                    (int)receivedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Succeeded)),
+                ReceivedFailed = (int)receivedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Failed))
             };
             return statistics;
         }
@@ -93,7 +93,7 @@ namespace DotNetCore.CAP.MongoDB
             var builder = Builders<MessageDto>.Filter;
             var filter = builder.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
-                filter &= builder.Eq(x => x.StatusName, queryDto.StatusName);
+                filter &= builder.Where(x => x.StatusName.ToLower() == queryDto.StatusName);
 
             if (!string.IsNullOrEmpty(queryDto.Name)) filter &= builder.Eq(x => x.Name, queryDto.Name);
 
@@ -135,7 +135,7 @@ namespace DotNetCore.CAP.MongoDB
         private int GetNumberOfMessage(string collectionName, string statusName)
         {
             var collection = _database.GetCollection<BsonDocument>(collectionName);
-            var count = collection.CountDocuments(new BsonDocument {{"StatusName", statusName}});
+            var count = collection.CountDocuments(new BsonDocument { { "StatusName", statusName } });
             return int.Parse(count.ToString());
         }
 
@@ -194,7 +194,7 @@ namespace DotNetCore.CAP.MongoDB
                 }
             };
 
-            var pipeline = new[] {match, groupby};
+            var pipeline = new[] { match, groupby };
 
             var collection = _database.GetCollection<BsonDocument>(collectionName);
             var result = collection.Aggregate<BsonDocument>(pipeline).ToList();

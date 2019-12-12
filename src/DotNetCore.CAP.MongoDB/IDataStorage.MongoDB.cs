@@ -52,7 +52,7 @@ namespace DotNetCore.CAP.MongoDB
 
         public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state)
         {
-            var collection = _database.GetCollection<ReceivedMessage>(_options.Value.PublishedCollection);
+            var collection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
 
             var updateDef = Builders<ReceivedMessage>.Update
                 .Set(x => x.Retries, message.Retries)
@@ -161,7 +161,7 @@ namespace DotNetCore.CAP.MongoDB
         {
             if (collection == _options.Value.PublishedCollection)
             {
-                Builders<PublishedMessage>.Filter.Lt(x => x.ExpiresAt, timeout);
+                //Builders<PublishedMessage>.Filter.Lt(x => x.ExpiresAt, timeout);
 
                 var publishedCollection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
                 var ret = await publishedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout, cancellationToken);
