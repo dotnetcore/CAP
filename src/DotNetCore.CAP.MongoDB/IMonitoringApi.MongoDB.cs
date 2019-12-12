@@ -3,10 +3,11 @@
 
 using System;
 using System.Collections.Generic;
-using DotNetCore.CAP.Dashboard;
-using DotNetCore.CAP.Dashboard.Monitoring;
-using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Models;
+using System.Threading.Tasks;
+using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Monitoring;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -26,61 +27,64 @@ namespace DotNetCore.CAP.MongoDB
             _database = mongoClient.GetDatabase(_options.DatabaseName);
         }
 
+        public async Task<MediumMessage> GetPublishedMessageAsync(long id)
+        {
+            var collection = _database.GetCollection<PublishedMessage>(_options.PublishedCollection);
+            var message = await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
+            return new MediumMessage
+            {
+                Added = message.Added,
+                Content = message.Content,
+                DbId = message.Id.ToString(),
+                ExpiresAt = message.ExpiresAt,
+                Retries = message.Retries
+            };
+        }
+
+        public async Task<MediumMessage> GetReceivedMessageAsync(long id)
+        {
+            var collection = _database.GetCollection<ReceivedMessage>(_options.ReceivedCollection);
+            var message = await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
+            return new MediumMessage
+            {
+                Added = message.Added,
+                Content = message.Content,
+                DbId = message.Id.ToString(),
+                ExpiresAt = message.ExpiresAt,
+                Retries = message.Retries
+            };
+        }
+
         public StatisticsDto GetStatistics()
         {
-            var publishedCollection = _database.GetCollection<CapPublishedMessage>(_options.PublishedCollection);
-            var receivedCollection = _database.GetCollection<CapReceivedMessage>(_options.ReceivedCollection);
+            var publishedCollection = _database.GetCollection<PublishedMessage>(_options.PublishedCollection);
+            var receivedCollection = _database.GetCollection<ReceivedMessage>(_options.ReceivedCollection);
 
-            var statistics = new StatisticsDto();
-
+            var statistics = new StatisticsDto
             {
-                if (int.TryParse(
-                    publishedCollection.CountDocuments(x => x.StatusName == StatusName.Succeeded).ToString(),
-                    out var count))
-                {
-                    statistics.PublishedSucceeded = count;
-                }
-            }
-            {
-                if (int.TryParse(publishedCollection.CountDocuments(x => x.StatusName == StatusName.Failed).ToString(),
-                    out var count))
-                {
-                    statistics.PublishedFailed = count;
-                }
-            }
-            {
-                if (int.TryParse(
-                    receivedCollection.CountDocuments(x => x.StatusName == StatusName.Succeeded).ToString(),
-                    out var count))
-                {
-                    statistics.ReceivedSucceeded = count;
-                }
-            }
-            {
-                if (int.TryParse(receivedCollection.CountDocuments(x => x.StatusName == StatusName.Failed).ToString(),
-                    out var count))
-                {
-                    statistics.ReceivedFailed = count;
-                }
-            }
-
+                PublishedSucceeded =
+                    (int)publishedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Succeeded)),
+                PublishedFailed =
+                    (int)publishedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Failed)),
+                ReceivedSucceeded =
+                    (int)receivedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Succeeded)),
+                ReceivedFailed = (int)receivedCollection.CountDocuments(x => x.StatusName == nameof(StatusName.Failed))
+            };
             return statistics;
         }
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
-            return GetHourlyTimelineStats(type, StatusName.Failed);
+            return GetHourlyTimelineStats(type, nameof(StatusName.Failed));
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
-            return GetHourlyTimelineStats(type, StatusName.Succeeded);
+            return GetHourlyTimelineStats(type, nameof(StatusName.Succeeded));
         }
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
         {
-            queryDto.StatusName = StatusName.Standardized(queryDto.StatusName);
-
             var name = queryDto.MessageType == MessageType.Publish
                 ? _options.PublishedCollection
                 : _options.ReceivedCollection;
@@ -89,24 +93,14 @@ namespace DotNetCore.CAP.MongoDB
             var builder = Builders<MessageDto>.Filter;
             var filter = builder.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
-            {
-                filter = filter & builder.Eq(x => x.StatusName, queryDto.StatusName);
-            }
+                filter &= builder.Where(x => x.StatusName.ToLower() == queryDto.StatusName);
 
-            if (!string.IsNullOrEmpty(queryDto.Name))
-            {
-                filter = filter & builder.Eq(x => x.Name, queryDto.Name);
-            }
+            if (!string.IsNullOrEmpty(queryDto.Name)) filter &= builder.Eq(x => x.Name, queryDto.Name);
 
-            if (!string.IsNullOrEmpty(queryDto.Group))
-            {
-                filter = filter & builder.Eq(x => x.Group, queryDto.Group);
-            }
+            if (!string.IsNullOrEmpty(queryDto.Group)) filter &= builder.Eq(x => x.Group, queryDto.Group);
 
             if (!string.IsNullOrEmpty(queryDto.Content))
-            {
-                filter = filter & builder.Regex(x => x.Content, ".*" + queryDto.Content + ".*");
-            }
+                filter &= builder.Regex(x => x.Content, ".*" + queryDto.Content + ".*");
 
             var result = collection
                 .Find(filter)
@@ -120,22 +114,22 @@ namespace DotNetCore.CAP.MongoDB
 
         public int PublishedFailedCount()
         {
-            return GetNumberOfMessage(_options.PublishedCollection, StatusName.Failed);
+            return GetNumberOfMessage(_options.PublishedCollection, nameof(StatusName.Failed));
         }
 
         public int PublishedSucceededCount()
         {
-            return GetNumberOfMessage(_options.PublishedCollection, StatusName.Succeeded);
+            return GetNumberOfMessage(_options.PublishedCollection, nameof(StatusName.Succeeded));
         }
 
         public int ReceivedFailedCount()
         {
-            return GetNumberOfMessage(_options.ReceivedCollection, StatusName.Failed);
+            return GetNumberOfMessage(_options.ReceivedCollection, nameof(StatusName.Failed));
         }
 
         public int ReceivedSucceededCount()
         {
-            return GetNumberOfMessage(_options.ReceivedCollection, StatusName.Succeeded);
+            return GetNumberOfMessage(_options.ReceivedCollection, nameof(StatusName.Succeeded));
         }
 
         private int GetNumberOfMessage(string collectionName, string statusName)
@@ -215,10 +209,7 @@ namespace DotNetCore.CAP.MongoDB
             result.ForEach(d =>
             {
                 var key = d["_id"].AsBsonDocument["Key"].AsString;
-                if (DateTime.TryParse(key, out var dateTime))
-                {
-                    dic[dateTime.ToLocalTime()] = d["Count"].AsInt32;
-                }
+                if (DateTime.TryParse(key, out var dateTime)) dic[dateTime.ToLocalTime()] = d["Count"].AsInt32;
             });
 
             return dic;

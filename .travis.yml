@@ -2,7 +2,7 @@ language: csharp
 sudo: required
 dist: xenial
 solution: CAP.sln
-dotnet: 2.2
+dotnet: 3.0
 mono: none
 
 #matrix:

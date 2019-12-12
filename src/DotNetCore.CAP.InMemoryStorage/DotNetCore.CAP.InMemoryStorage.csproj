@@ -12,10 +12,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AsyncEnumerator" Version="3.0.0-beta1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
   </ItemGroup>
 

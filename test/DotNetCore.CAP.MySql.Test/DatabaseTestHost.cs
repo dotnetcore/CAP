@@ -1,5 +1,6 @@
 using System.Threading;
 using Dapper;
+using DotNetCore.CAP.Persistence;
 
 namespace DotNetCore.CAP.MySql.Test
 {
@@ -30,7 +31,7 @@ namespace DotNetCore.CAP.MySql.Test
         {
             using (CreateScope())
             {
-                var storage = GetService<MySqlStorage>();
+                var storage = GetService<IStorageInitializer>();
                 var token = new CancellationTokenSource().Token;
                 CreateDatabase();
                 storage.InitializeAsync(token).GetAwaiter().GetResult();

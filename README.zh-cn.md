@@ -239,6 +239,12 @@ services.AddCap(x =>
 
 CAP 2.1+ 以上版本中提供了仪表盘（Dashboard）功能，你可以很方便的查看发出和接收到的消息。除此之外，你还可以在仪表盘中实时查看发送或者接收到的消息。 
 
+使用一下命令安装 Dashboard：
+
+```
+PM> Install-Package DotNetCore.Dashboard
+```
+
 在分布式环境中，仪表盘内置集成了 [Consul](http://consul.io) 作为节点的注册发现，同时实现了网关代理功能，你同样可以方便的查看本节点或者其他节点的数据，它就像你访问本地资源一样。
 
 ```c#

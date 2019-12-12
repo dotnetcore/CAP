@@ -17,10 +17,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static CapOptions UsePostgreSql(this CapOptions options, Action<PostgreSqlOptions> configure)
         {
-            if (configure == null)
-            {
-                throw new ArgumentNullException(nameof(configure));
-            }
+            if (configure == null) throw new ArgumentNullException(nameof(configure));
 
             configure += x => x.Version = options.Version;
 
@@ -38,10 +35,7 @@ namespace Microsoft.Extensions.DependencyInjection
         public static CapOptions UseEntityFramework<TContext>(this CapOptions options, Action<EFOptions> configure)
             where TContext : DbContext
         {
-            if (configure == null)
-            {
-                throw new ArgumentNullException(nameof(configure));
-            }
+            if (configure == null) throw new ArgumentNullException(nameof(configure));
 
             options.RegisterExtension(new PostgreSqlCapOptionsExtension(x =>
             {
