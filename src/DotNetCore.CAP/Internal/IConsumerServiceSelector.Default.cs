@@ -166,7 +166,7 @@ namespace DotNetCore.CAP.Internal
 
         private ConsumerExecutorDescriptor MatchUsingName(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
-            return executeDescriptor.FirstOrDefault(x => x.Attribute.Name == key);
+            return executeDescriptor.FirstOrDefault(x => x.Attribute.Name.Equals(key, StringComparison.InvariantCultureIgnoreCase));
         }
 
         private ConsumerExecutorDescriptor MatchAsteriskUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
