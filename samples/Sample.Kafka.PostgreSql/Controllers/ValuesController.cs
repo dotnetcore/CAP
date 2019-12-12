@@ -21,7 +21,7 @@ namespace Sample.Kafka.PostgreSql.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
+            await _capBus.PublishAsync("sample.kafka.postgrsql", DateTime.Now);
 
             return Ok();
         }
@@ -36,10 +36,7 @@ namespace Sample.Kafka.PostgreSql.Controllers
                     //your business code
                     connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
 
-                    for (int i = 0; i < 5; i++)
-                    {
-                        _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
-                    }
+                    _capBus.Publish("sample.kafka.postgrsql", DateTime.Now);
 
                     transaction.Commit();
                 }
@@ -49,8 +46,8 @@ namespace Sample.Kafka.PostgreSql.Controllers
         }
 
 
-        [CapSubscribe("#.test2")]
-        public void Test2(int value)
+        [CapSubscribe("sample.kafka.postgrsql")]
+        public void Test2(DateTime value)
         {
             Console.WriteLine("Subscriber output message: " + value);
         }

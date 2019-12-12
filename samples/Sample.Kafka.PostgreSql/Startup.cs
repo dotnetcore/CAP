@@ -1,8 +1,7 @@
-﻿using System;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sample.Kafka.MySql
+namespace Sample.Kafka.PostgreSql
 {
     public class Startup
     {
@@ -10,8 +9,8 @@ namespace Sample.Kafka.MySql
         {
             services.AddCap(x =>
             {
-                x.UsePostgreSql("Server=localhost;Database=testcap;UserId=root;Password=123123;");
-                x.UseKafka("localhost:9092");
+                x.UsePostgreSql("");
+                x.UseKafka("");
                 x.UseDashboard();
             });
 

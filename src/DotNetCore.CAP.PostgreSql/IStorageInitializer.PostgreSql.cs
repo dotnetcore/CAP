@@ -53,7 +53,7 @@ namespace DotNetCore.CAP.PostgreSql
             var batchSql = $@"
 CREATE SCHEMA IF NOT EXISTS ""{schema}"";
 
-CREATE TABLE IF NOT EXISTS {GetPublishedTableName()}(
+CREATE TABLE IF NOT EXISTS {GetReceivedTableName()}(
 	""Id"" BIGINT PRIMARY KEY NOT NULL,
     ""Version"" VARCHAR(20) NOT NULL,
 	""Name"" VARCHAR(200) NOT NULL,
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS {GetPublishedTableName()}(
 	""StatusName"" VARCHAR(50) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS {GetReceivedTableName()}(
+CREATE TABLE IF NOT EXISTS {GetPublishedTableName()}(
 	""Id"" BIGINT PRIMARY KEY NOT NULL,
     ""Version"" VARCHAR(20) NOT NULL,
 	""Name"" VARCHAR(200) NOT NULL,

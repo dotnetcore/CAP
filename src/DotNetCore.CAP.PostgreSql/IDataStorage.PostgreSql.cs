@@ -45,7 +45,7 @@ namespace DotNetCore.CAP.PostgreSql
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
-                Id = message.DbId,
+                Id = long.Parse(message.DbId),
                 message.Retries,
                 message.ExpiresAt,
                 StatusName = state.ToString("G")
@@ -59,7 +59,7 @@ namespace DotNetCore.CAP.PostgreSql
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
-                Id = message.DbId,
+                Id = long.Parse(message.DbId),
                 message.Retries,
                 message.ExpiresAt,
                 StatusName = state.ToString("G")
@@ -85,13 +85,13 @@ namespace DotNetCore.CAP.PostgreSql
 
             var po = new
             {
-                Id = message.DbId,
+                Id = long.Parse(message.DbId),
                 Name = name,
                 message.Content,
                 message.Retries,
                 message.Added,
                 message.ExpiresAt,
-                StatusName = StatusName.Scheduled
+                StatusName = nameof(StatusName.Scheduled)
             };
 
             if (dbTransaction == null)
@@ -121,7 +121,7 @@ namespace DotNetCore.CAP.PostgreSql
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
-                Id = SnowflakeId.Default().NextId().ToString(),
+                Id = SnowflakeId.Default().NextId(),
                 Group = group,
                 Name = name,
                 Content = content,
@@ -150,7 +150,7 @@ namespace DotNetCore.CAP.PostgreSql
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
-                Id = mdMessage.DbId,
+                Id = long.Parse(mdMessage.DbId),
                 Group = group,
                 Name = name,
                 Content = content,
@@ -168,7 +168,7 @@ namespace DotNetCore.CAP.PostgreSql
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
 
             return await connection.ExecuteAsync(
-                $"DELETE FROM {table} WHERE \"ExpiresAt\" < @now AND \"Id\" IN (SELECT \"Id\" FROM {table} LIMIT @count);",
+                $"DELETE FROM {table} WHERE \"ExpiresAt\" < @timeout AND \"Id\" IN (SELECT \"Id\" FROM {table} LIMIT @batchCount);",
                 new { timeout, batchCount });
         }
 
