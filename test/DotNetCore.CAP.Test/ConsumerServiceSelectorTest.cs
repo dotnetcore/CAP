@@ -63,8 +63,18 @@ namespace DotNetCore.CAP.Test
         [InlineData("Candidates.Asterisk.AAA")]
         [InlineData("AAA.BBB.CCC.Asterisk")]
         [InlineData("aaa.BBB.ccc.Asterisk")]
-        [InlineData("Asterisk.aaa.bbb")]
         public void CanNotFindAsteriskTopic(string topic)
+        {
+            var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+            var candidates = selector.SelectCandidates();
+
+            var bestCandidates = selector.SelectBestCandidate(topic, candidates);
+            Assert.Null(bestCandidates);
+        }
+
+        [Theory]
+        [InlineData("Asterisk.aaa.bbb")]
+        public void CanNotFindAsteriskTopic2(string topic)
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
