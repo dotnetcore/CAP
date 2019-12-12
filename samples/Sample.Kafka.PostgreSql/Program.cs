@@ -1,8 +1,7 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Sample.Kafka.MySql
+namespace Sample.Kafka.PostgreSql
 {
     public class Program
     {

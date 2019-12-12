@@ -10,7 +10,7 @@ namespace Sample.Kafka.MySql
         {
             services.AddCap(x =>
             {
-                x.UseMySql("Server=localhost;Database=testcap;UserId=root;Password=123123;");
+                x.UsePostgreSql("Server=localhost;Database=testcap;UserId=root;Password=123123;");
                 x.UseKafka("localhost:9092");
                 x.UseDashboard();
             });

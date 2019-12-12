@@ -4,9 +4,9 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
-using MySql.Data.MySqlClient;
+using Npgsql;
 
-namespace Sample.Kafka.MySql.Controllers
+namespace Sample.Kafka.PostgreSql.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller, ICapSubscribe
@@ -29,7 +29,7 @@ namespace Sample.Kafka.MySql.Controllers
         [Route("~/adonet/transaction")]
         public IActionResult AdonetWithTransaction()
         {
-            using (var connection = new MySqlConnection(""))
+            using (var connection = new NpgsqlConnection(""))
             {
                 using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
                 {
