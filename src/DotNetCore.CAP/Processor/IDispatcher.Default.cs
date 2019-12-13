@@ -53,7 +53,7 @@ namespace DotNetCore.CAP.Processor
             _cts.Cancel();
         }
 
-        private void Sending()
+        private async Task Sending()
         {
             try
             {
@@ -61,21 +61,18 @@ namespace DotNetCore.CAP.Processor
                 {
                     if (_publishedMessageQueue.TryTake(out var message, 3000, _cts.Token))
                     {
-                        Task.Run(async () =>
+                        try
                         {
-                            try
+                            var result = await _sender.SendAsync(message);
+                            if (!result.Succeeded)
                             {
-                                var result = await _sender.SendAsync(message);
-                                if (!result.Succeeded)
-                                {
-                                    _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
-                                }
+                                _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
                             }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Id:{message.DbId}");
-                            }
-                        });
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Id:{message.DbId}");
+                        }
                     }
                 }
             }
@@ -85,13 +82,13 @@ namespace DotNetCore.CAP.Processor
             }
         }
 
-        private void Processing()
+        private async Task Processing()
         {
             try
             {
                 foreach (var message in _receivedMessageQueue.GetConsumingEnumerable(_cts.Token))
                 {
-                    _executor.DispatchAsync(message.Item1, message.Item2, _cts.Token);
+                    await _executor.DispatchAsync(message.Item1, message.Item2, _cts.Token);
                 }
             }
             catch (OperationCanceledException)
