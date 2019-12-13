@@ -123,14 +123,7 @@ namespace DotNetCore.CAP.Internal
 
                 foreach (var attr in topicAttributes)
                 {
-                    if (attr.Group == null)
-                    {
-                        attr.Group = _capOptions.DefaultGroup + "." + _capOptions.Version;
-                    }
-                    else
-                    {
-                        attr.Group = attr.Group + "." + _capOptions.Version;
-                    }
+                    SetSubscribeAttribute(attr);
 
                     var parameters = method.GetParameters()
                         .Select(parameter => new ParameterDescriptor
@@ -142,6 +135,18 @@ namespace DotNetCore.CAP.Internal
 
                     yield return InitDescriptor(attr, method, typeInfo, serviceTypeInfo, parameters);
                 }
+            }
+        }
+
+        protected virtual void SetSubscribeAttribute(TopicAttribute attribute)
+        {
+            if (attribute.Group == null)
+            {
+                attribute.Group = _capOptions.DefaultGroup + "." + _capOptions.Version;
+            }
+            else
+            {
+                attribute.Group = attribute.Group + "." + _capOptions.Version;
             }
         }
 
