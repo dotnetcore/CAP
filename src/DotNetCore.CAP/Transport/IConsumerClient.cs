@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using DotNetCore.CAP.Messages;
+using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Transport
 {
@@ -30,12 +31,12 @@ namespace DotNetCore.CAP.Transport
         /// <summary>
         /// Manual submit message offset when the message consumption is complete
         /// </summary>
-        void Commit();
+        void Commit([NotNull] object sender);
 
         /// <summary>
         /// Reject message and resumption
         /// </summary>
-        void Reject();
+        void Reject([CanBeNull] object sender);
 
         event EventHandler<TransportMessage> OnMessageReceived;
 

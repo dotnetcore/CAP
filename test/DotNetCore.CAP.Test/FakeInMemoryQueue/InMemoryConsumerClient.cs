@@ -49,12 +49,12 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
             }
         }
 
-        public void Commit()
+        public void Commit(object sender)
         {
             // ignore
         }
 
-        public void Reject()
+        public void Reject(object sender)
         {
             // ignore
         }

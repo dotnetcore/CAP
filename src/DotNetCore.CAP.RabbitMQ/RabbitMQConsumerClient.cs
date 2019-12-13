@@ -25,7 +25,6 @@ namespace DotNetCore.CAP.RabbitMQ
         private IModel _channel;
 
         private IConnection _connection;
-        private ulong _deliveryTag;
 
         public RabbitMQConsumerClient(string queueName,
             IConnectionChannelPool connectionChannelPool,
@@ -80,14 +79,14 @@ namespace DotNetCore.CAP.RabbitMQ
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit()
+        public void Commit(object sender)
         {
-            _channel.BasicAck(_deliveryTag, false);
+            _channel.BasicAck((ulong)sender, false);
         }
 
-        public void Reject()
+        public void Reject(object sender)
         {
-            _channel.BasicReject(_deliveryTag, true);
+            _channel.BasicReject((ulong)sender, true);
         }
 
         public void Dispose()
@@ -162,8 +161,6 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
-            _deliveryTag = e.DeliveryTag;
-
             var headers = new Dictionary<string, string>();
             foreach (var header in e.BasicProperties.Headers)
             {
@@ -173,7 +170,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
             var message = new TransportMessage(headers, e.Body);
 
-            OnMessageReceived?.Invoke(sender, message);
+            OnMessageReceived?.Invoke(e.DeliveryTag, message);
         }
 
         private void OnConsumerShutdown(object sender, ShutdownEventArgs e)

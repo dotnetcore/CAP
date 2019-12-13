@@ -193,7 +193,7 @@ namespace DotNetCore.CAP.Internal
 
                         _storage.StoreReceivedExceptionMessage(name, group, content);
 
-                        client.Commit();
+                        client.Commit(sender);
 
                         TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
                     }
@@ -202,7 +202,7 @@ namespace DotNetCore.CAP.Internal
                         var mediumMessage = _storage.StoreReceivedMessage(name, group, message);
                         mediumMessage.Origin = message;
 
-                        client.Commit();
+                        client.Commit(sender);
 
                         TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
 
@@ -213,7 +213,7 @@ namespace DotNetCore.CAP.Internal
                 {
                     _logger.LogError(e, "An exception occurred when process received message. Message:'{0}'.", transportMessage);
 
-                    client.Reject();
+                    client.Reject(sender);
 
                     TracingError(tracingTimestamp, transportMessage, client.ServersAddress, e);
                 }

@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
@@ -26,8 +25,6 @@ namespace DotNetCore.CAP.AzureServiceBus
         private readonly AzureServiceBusOptions _asbOptions;
 
         private SubscriptionClient _consumerClient;
-
-        private string _lockToken;
 
         public AzureServiceBusConsumerClient(
             ILogger logger,
@@ -97,12 +94,12 @@ namespace DotNetCore.CAP.AzureServiceBus
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit()
+        public void Commit(object sender)
         {
-            _consumerClient.CompleteAsync(_lockToken);
+            _consumerClient.CompleteAsync((string)sender);
         }
 
-        public void Reject()
+        public void Reject(object sender)
         {
             // ignore
         }
@@ -162,13 +159,11 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private Task OnConsumerReceived(Message message, CancellationToken token)
         {
-            _lockToken = message.SystemProperties.LockToken;
-
             var header = message.UserProperties.ToDictionary(x => x.Key, y => y.Value.ToString());
 
             var context = new TransportMessage(header, message.Body);
 
-            OnMessageReceived?.Invoke(null, context);
+            OnMessageReceived?.Invoke(message.SystemProperties.LockToken, context);
 
             return Task.CompletedTask;
         }
