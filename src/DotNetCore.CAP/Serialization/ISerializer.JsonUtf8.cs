@@ -13,6 +13,11 @@ namespace DotNetCore.CAP.Serialization
     {
         public Task<TransportMessage> SerializeAsync(Message message)
         {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
             if (message.Value == null)
             {
                 return Task.FromResult(new TransportMessage(message.Headers, null));
