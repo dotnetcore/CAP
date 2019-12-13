@@ -95,10 +95,8 @@ namespace DotNetCore.CAP.Internal
         {
             var needRetry = UpdateMessageForRetry(message);
 
-            if (message.ExpiresAt != null)
-            {
-                message.ExpiresAt = DateTime.Now.AddDays(15);
-            }
+            message.ExpiresAt = message.Added.AddDays(15);
+
             await _dataStorage.ChangePublishStateAsync(message, StatusName.Failed);
 
             return needRetry;
@@ -106,12 +104,8 @@ namespace DotNetCore.CAP.Internal
 
         private bool UpdateMessageForRetry(MediumMessage message)
         {
-            var retryBehavior = RetryBehavior.DefaultRetry;
-
             var retries = ++message.Retries;
-            message.ExpiresAt = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
-
-            var retryCount = Math.Min(_options.Value.FailedRetryCount, retryBehavior.RetryCount);
+            var retryCount = Math.Min(_options.Value.FailedRetryCount, 3);
             if (retries >= retryCount)
             {
                 if (retries == _options.Value.FailedRetryCount)
@@ -194,7 +188,7 @@ namespace DotNetCore.CAP.Internal
 
                 s_diagnosticListener.Write(CapDiagnosticListenerNames.ErrorPublish, eventData);
             }
-        } 
+        }
 
         #endregion
     }

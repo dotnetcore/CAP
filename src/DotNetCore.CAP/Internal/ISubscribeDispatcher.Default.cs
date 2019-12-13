@@ -128,6 +128,8 @@ namespace DotNetCore.CAP.Internal
 
             var needRetry = UpdateMessageForRetry(message);
 
+            message.ExpiresAt = message.Added.AddDays(15);
+
             await _dataStorage.ChangeReceiveStateAsync(message, StatusName.Failed);
 
             return needRetry;
@@ -135,12 +137,9 @@ namespace DotNetCore.CAP.Internal
 
         private bool UpdateMessageForRetry(MediumMessage message)
         {
-            var retryBehavior = RetryBehavior.DefaultRetry;
-
             var retries = ++message.Retries;
-            message.ExpiresAt = message.Added.AddSeconds(retryBehavior.RetryIn(retries));
 
-            var retryCount = Math.Min(_options.FailedRetryCount, retryBehavior.RetryCount);
+            var retryCount = Math.Min(_options.FailedRetryCount, 3);
             if (retries >= retryCount)
             {
                 if (retries == _options.FailedRetryCount)
@@ -197,7 +196,7 @@ namespace DotNetCore.CAP.Internal
             catch (Exception ex)
             {
                 var e = new SubscriberExecutionFailedException(ex.Message, ex);
-                
+
                 TracingError(tracingTimestamp, message.Origin, descriptor.MethodInfo, e);
 
                 throw e;
