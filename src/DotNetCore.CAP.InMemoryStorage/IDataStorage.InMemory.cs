@@ -32,12 +32,14 @@ namespace DotNetCore.CAP.InMemoryStorage
         public Task ChangePublishStateAsync(MediumMessage message, StatusName state)
         {
             PublishedMessages[message.DbId].StatusName = state;
+            PublishedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
             return Task.CompletedTask;
         }
 
         public Task ChangeReceiveStateAsync(MediumMessage message, StatusName state)
         {
             ReceivedMessages[message.DbId].StatusName = state;
+            ReceivedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
             return Task.CompletedTask;
         }
 
@@ -106,7 +108,7 @@ namespace DotNetCore.CAP.InMemoryStorage
                 Retries = mdMessage.Retries,
                 Added = mdMessage.Added,
                 ExpiresAt = mdMessage.ExpiresAt,
-                StatusName = StatusName.Failed
+                StatusName = StatusName.Scheduled
             };
             return mdMessage;
         }

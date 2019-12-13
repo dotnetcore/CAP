@@ -152,8 +152,7 @@ namespace DotNetCore.CAP.Internal
             client.OnMessageReceived += async (sender, transportMessage) =>
             {
                 _logger.MessageReceived(transportMessage.GetId(), transportMessage.GetName());
-
-                _cts.Token.ThrowIfCancellationRequested();
+               
                 long? tracingTimestamp = null;
                 try
                 {
