@@ -86,7 +86,7 @@ namespace DotNetCore.CAP.MySql
                 message.Retries,
                 message.Added,
                 message.ExpiresAt,
-                StatusName = StatusName.Scheduled
+                StatusName = nameof(StatusName.Scheduled)
             };
 
             if (dbTransaction == null)
