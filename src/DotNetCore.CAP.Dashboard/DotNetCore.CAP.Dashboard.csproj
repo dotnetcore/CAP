@@ -2,11 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <!--<PropertyGroup>
     <MSBuildCurrentFullPath>C:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe</MSBuildCurrentFullPath>
     <RazorProjectFile>Razor.build</RazorProjectFile>
     <InnerTargets>GenerateRazorClasses;Build</InnerTargets>
@@ -15,7 +14,7 @@
   <Target Name="GenerateRazorClasses">
     <Exec Command="&quot;$(MSBuildCurrentFullPath)&quot; $(RazorProjectFile) /v:quiet /nologo" Condition="Exists('$(MSBuildCurrentFullPath)')" />
     <Warning Text="Classes for Razor files (*.cshtml) weren't re-generated: couldn't find the '$(MSBuildCurrentFullPath)' file" Condition="!Exists('$(MSBuildCurrentFullPath)')" />
-  </Target>
+  </Target>-->
 
   <ItemGroup>
     <EmbeddedResource Include="Content\css\bootstrap.min.css" />

@@ -1,7 +1,6 @@
 ﻿@* Generator: Template TypeVisibility: Public GeneratePrettyNames: True *@
 @using System
 @using System.Globalization
-@using System.Reflection
 @using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Resources
 @inherits DotNetCore.CAP.Dashboard.RazorPage
@@ -12,7 +11,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    @{ var version = GetType().GetTypeInfo().Assembly.GetName().Version; }
+    @{ var version = GetType().Assembly.GetName().Version; }
     <link rel="stylesheet" href="@Url.To($"/css{version.Major}{version.Minor}{version.Build}")">
 </head>
 <body>
