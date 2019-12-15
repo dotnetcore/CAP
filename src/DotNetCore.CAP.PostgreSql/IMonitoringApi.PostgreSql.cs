@@ -34,7 +34,7 @@ namespace DotNetCore.CAP.PostgreSql
             var sql =
                 $"SELECT * FROM {_pubName} WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
 
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
         }
 
@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.PostgreSql
         {
             var sql =
                 $"SELECT * FROM {_recName} WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
         }
 
