@@ -101,7 +101,6 @@ namespace DotNetCore.CAP.Test
 
         [Theory]
         [InlineData("Pound")]
-        [InlineData("aaa.Pound.AAA.BBB")]
         [InlineData("Pound.AAA")]
         [InlineData("Pound.aaa")]
         [InlineData("AAA.Pound.aaa")]
