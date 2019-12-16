@@ -38,7 +38,7 @@ namespace DotNetCore.CAP.MySql.Test
 
         public static MySqlConnection CreateConnection(string connectionString = null)
         {
-            connectionString = connectionString ?? GetConnectionString();
+            connectionString ??= GetConnectionString();
             var connection = new MySqlConnection(connectionString);
             connection.Open();
             return connection;
