@@ -4,6 +4,7 @@
 
   <PropertyGroup Label="Package">
     <Product>CAP</Product>
+    <LangVersion>8</LangVersion>
     <Authors>ncc;savorboard</Authors>
     <RepositoryUrl>https://github.com/dotnetcore/CAP</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -24,6 +25,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
+    <PackageReference Include="JetBrains.Annotations" Version="2019.1.3" PrivateAssets="All" />
   </ItemGroup>
 
 </Project>

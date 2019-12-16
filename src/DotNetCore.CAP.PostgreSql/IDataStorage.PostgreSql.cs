@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.PostgreSql
         {
             var sql =
                 $"UPDATE {_pubName} SET \"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
                 Id = long.Parse(message.DbId),
@@ -56,7 +56,7 @@ namespace DotNetCore.CAP.PostgreSql
         {
             var sql =
                 $"UPDATE {_recName} SET \"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await connection.ExecuteAsync(sql, new
             {
                 Id = long.Parse(message.DbId),
@@ -164,7 +164,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
             CancellationToken token = default)
         {
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
 
             return await connection.ExecuteAsync(
                 $"DELETE FROM {table} WHERE \"ExpiresAt\" < @timeout AND \"Id\" IN (SELECT \"Id\" FROM {table} LIMIT @batchCount);",
@@ -178,7 +178,7 @@ namespace DotNetCore.CAP.PostgreSql
                 $"SELECT * FROM {_pubName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
 
             var result = new List<MediumMessage>();
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             var reader = await connection.ExecuteReaderAsync(sql);
             while (reader.Read())
             {
@@ -202,7 +202,7 @@ namespace DotNetCore.CAP.PostgreSql
 
             var result = new List<MediumMessage>();
 
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             var reader = await connection.ExecuteReaderAsync(sql);
             while (reader.Read())
             {
