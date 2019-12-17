@@ -1,16 +1,11 @@
 version: '{build}'
-os: Visual Studio 2017
+os: Visual Studio 2019
 environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
-  Cap_SqlServer_ConnectionStringTemplate: Server=(local)\SQL2014;Database={0};User ID=sa;Password=Password12!
   Cap_MySql_ConnectionStringTemplate: Server=localhost;Database={0};Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=none
-  Cap_PostgreSql_ConnectionStringTemplate: Server=localhost;Database={0};UserId=postgres;Password=Password12!
 services:
-  - mssql2014
   - mysql
-  - postgresql
-  - mongodb
 before_build:
   - ps: dotnet tool install --global FlubuCore.GlobalTool --version 4.2.8
 build_script:
@@ -23,6 +18,6 @@ deploy:
   on:
     appveyor_repo_tag: true
   api_key:
-    secure: Qjj0e1B9giVIpozI/J3DMcF5nT1hchlE3xpGctBoqMrT8r/0Z1suwEdMAfTBMkjn
+    secure: PZXRBOGLyhYLP7ulHfrh6MnkqB8CstuitgbLcJr3cZkLJLLzPH0ahvuTtmhWxtR2            
   skip_symbols: true
   artifact: /artifacts\/.+\.nupkg/

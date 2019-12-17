@@ -4,13 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Transport;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Management;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Message = Microsoft.Azure.ServiceBus.Message;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
@@ -24,8 +26,6 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private SubscriptionClient _consumerClient;
 
-        private string _lockToken;
-
         public AzureServiceBusConsumerClient(
             ILogger logger,
             string subscriptionName,
@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.AzureServiceBus
             _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public event EventHandler<MessageContext> OnMessageReceived;
+        public event EventHandler<TransportMessage> OnMessageReceived;
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
@@ -94,12 +94,12 @@ namespace DotNetCore.CAP.AzureServiceBus
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit()
+        public void Commit(object sender)
         {
-            _consumerClient.CompleteAsync(_lockToken);
+            _consumerClient.CompleteAsync((string)sender);
         }
 
-        public void Reject()
+        public void Reject(object sender)
         {
             // ignore
         }
@@ -159,15 +159,11 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private Task OnConsumerReceived(Message message, CancellationToken token)
         {
-            _lockToken = message.SystemProperties.LockToken;
-            var context = new MessageContext
-            {
-                Group = _subscriptionName,
-                Name = message.Label,
-                Content = Encoding.UTF8.GetString(message.Body)
-            };
+            var header = message.UserProperties.ToDictionary(x => x.Key, y => y.Value.ToString());
 
-            OnMessageReceived?.Invoke(null, context);
+            var context = new TransportMessage(header, message.Body);
+
+            OnMessageReceived?.Invoke(message.SystemProperties.LockToken, context);
 
             return Task.CompletedTask;
         }

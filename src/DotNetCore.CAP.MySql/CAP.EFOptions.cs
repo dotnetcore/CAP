@@ -23,6 +23,6 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Data version
         /// </summary>
-        internal string Version { get; set; }
+        internal string Version { get; set; } = "v1";
     }
 }

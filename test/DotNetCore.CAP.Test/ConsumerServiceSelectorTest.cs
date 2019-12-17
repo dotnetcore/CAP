@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Abstractions;
+using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 
@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.Test
             ServiceCollectionExtensions.ServiceCollection = services;
             services.AddOptions();
             services.PostConfigure<CapOptions>(x=>{});
-            services.AddSingleton<IConsumerServiceSelector, DefaultConsumerServiceSelector>();
+            services.AddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
             services.AddScoped<IFooTest, CandidatesFooTest>();
             services.AddScoped<IBarTest, CandidatesBarTest>();
             services.AddLogging();
@@ -63,8 +63,18 @@ namespace DotNetCore.CAP.Test
         [InlineData("Candidates.Asterisk.AAA")]
         [InlineData("AAA.BBB.CCC.Asterisk")]
         [InlineData("aaa.BBB.ccc.Asterisk")]
-        [InlineData("Asterisk.aaa.bbb")]
         public void CanNotFindAsteriskTopic(string topic)
+        {
+            var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+            var candidates = selector.SelectCandidates();
+
+            var bestCandidates = selector.SelectBestCandidate(topic, candidates);
+            Assert.Null(bestCandidates);
+        }
+
+        [Theory]
+        [InlineData("Asterisk.aaa.bbb")]
+        public void CanNotFindAsteriskTopic2(string topic)
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
@@ -91,7 +101,6 @@ namespace DotNetCore.CAP.Test
 
         [Theory]
         [InlineData("Pound")]
-        [InlineData("aaa.Pound.AAA.BBB")]
         [InlineData("Pound.AAA")]
         [InlineData("Pound.aaa")]
         [InlineData("AAA.Pound.aaa")]

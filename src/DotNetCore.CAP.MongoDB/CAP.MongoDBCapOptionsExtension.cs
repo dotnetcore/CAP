@@ -2,7 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using DotNetCore.CAP.Processor;
+using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -23,12 +23,9 @@ namespace DotNetCore.CAP.MongoDB
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<CapStorageMarkerService>();
-            services.AddSingleton<IStorage, MongoDBStorage>();
-            services.AddSingleton<IStorageConnection, MongoDBStorageConnection>();
 
-            services.AddSingleton<ICapPublisher, MongoDBPublisher>();
-            services.AddSingleton<ICallbackPublisher>(x => (MongoDBPublisher)x.GetService<ICapPublisher>());
-            services.AddSingleton<ICollectProcessor, MongoDBCollectProcessor>();
+            services.AddSingleton<IDataStorage, MongoDBDataStorage>();
+            services.AddSingleton<IStorageInitializer, MongoDBStorageInitializer>();
 
             services.AddTransient<CapTransactionBase, MongoDBCapTransaction>();
 

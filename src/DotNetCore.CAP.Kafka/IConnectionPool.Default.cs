@@ -14,22 +14,22 @@ namespace DotNetCore.CAP.Kafka
     public class ConnectionPool : IConnectionPool, IDisposable
     {
         private readonly KafkaOptions _options;
-        private readonly ConcurrentQueue<IProducer<Null, string>> _producerPool;
+        private readonly ConcurrentQueue<IProducer<string, byte[]>> _producerPool;
         private int _pCount;
         private int _maxSize;
 
         public ConnectionPool(ILogger<ConnectionPool> logger, IOptions<KafkaOptions> options)
         {
             _options = options.Value;
-            _producerPool = new ConcurrentQueue<IProducer<Null, string>>();
+            _producerPool = new ConcurrentQueue<IProducer<string, byte[]>>();
             _maxSize = _options.ConnectionPoolSize;
-             
-            logger.LogDebug("Kafka configuration of CAP :\r\n {0}", JsonConvert.SerializeObject(_options.AsKafkaConfig(), Formatting.Indented));
+
+            logger.LogDebug("CAP Kafka configuration: {0}", JsonConvert.SerializeObject(_options.AsKafkaConfig(), Formatting.Indented));
         }
 
         public string ServersAddress => _options.Servers;
 
-        public IProducer<Null, string> RentProducer()
+        public IProducer<string, byte[]> RentProducer()
         {
             if (_producerPool.TryDequeue(out var producer))
             {
@@ -38,12 +38,12 @@ namespace DotNetCore.CAP.Kafka
                 return producer;
             }
 
-            producer = new ProducerBuilder<Null, string>(_options.AsKafkaConfig()).Build();
+            producer = new ProducerBuilder<string, byte[]>(_options.AsKafkaConfig()).Build();
 
             return producer;
         }
 
-        public bool Return(IProducer<Null, string> producer)
+        public bool Return(IProducer<string, byte[]> producer)
         {
             if (Interlocked.Increment(ref _pCount) <= _maxSize)
             {

@@ -4,7 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Messages;
+
 // ReSharper disable InconsistentNaming
 
 namespace DotNetCore.CAP
@@ -52,7 +53,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// We’ll invoke this call-back with message type,name,content when retry failed (send or executed) messages equals <see cref="FailedRetryCount"/> times.
         /// </summary>
-        public Action<MessageType, string, string> FailedThresholdCallback { get; set; }
+        public Action<MessageType, Message> FailedThresholdCallback { get; set; }
 
         /// <summary>
         /// The number of message retries, the retry will stop when the threshold is reached.

@@ -8,7 +8,7 @@ using System.Linq;
 
 namespace DotNetCore.CAP.Internal
 {
-    internal class MethodMatcherCache
+    public class MethodMatcherCache
     {
         private readonly IConsumerServiceSelector _selector;
 

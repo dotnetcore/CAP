@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading;
 using Confluent.Kafka;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
@@ -15,7 +18,7 @@ namespace DotNetCore.CAP.Kafka
 
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;
-        private IConsumer<Null, string> _consumerClient;
+        private IConsumer<string, byte[]> _consumerClient;
 
         public KafkaConsumerClient(string groupId, IOptions<KafkaOptions> options)
         {
@@ -23,7 +26,7 @@ namespace DotNetCore.CAP.Kafka
             _kafkaOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public event EventHandler<MessageContext> OnMessageReceived;
+        public event EventHandler<TransportMessage> OnMessageReceived;
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
@@ -51,24 +54,36 @@ namespace DotNetCore.CAP.Kafka
 
                 if (consumerResult.IsPartitionEOF || consumerResult.Value == null) continue;
 
-                var message = new MessageContext
+                var headers = new Dictionary<string, string>(consumerResult.Headers.Count);
+                foreach (var header in consumerResult.Headers)
                 {
-                    Group = _groupId,
-                    Name = consumerResult.Topic,
-                    Content = consumerResult.Value
-                };
+                    var val = header.GetValueBytes();
+                    headers.Add(header.Key, val != null ? Encoding.UTF8.GetString(val) : null);
+                }
+                headers.Add(Messages.Headers.Group, _groupId);
+
+                if (_kafkaOptions.CustomHeaders != null)
+                {
+                    var customHeaders = _kafkaOptions.CustomHeaders(consumerResult);
+                    foreach (var customHeader in customHeaders)
+                    {
+                        headers.Add(customHeader.Key, customHeader.Value);
+                    }
+                }
+
+                var message = new TransportMessage(headers, consumerResult.Value);
 
                 OnMessageReceived?.Invoke(consumerResult, message);
             }
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit()
+        public void Commit(object sender)
         {
-            _consumerClient.Commit();
+            _consumerClient.Commit((ConsumeResult<string, byte[]>)sender);
         }
 
-        public void Reject()
+        public void Reject(object sender)
         {
             _consumerClient.Assign(_consumerClient.Assignment);
         }
@@ -97,7 +112,7 @@ namespace DotNetCore.CAP.Kafka
                     _kafkaOptions.MainConfig["auto.offset.reset"] = "earliest";
                     var config = _kafkaOptions.AsKafkaConfig();
 
-                    _consumerClient = new ConsumerBuilder<Null, string>(config)
+                    _consumerClient = new ConsumerBuilder<string, byte[]>(config)
                         .SetErrorHandler(ConsumerClient_OnConsumeError)
                         .Build();
                 }
@@ -105,10 +120,10 @@ namespace DotNetCore.CAP.Kafka
             finally
             {
                 _connectionLock.Release();
-            } 
+            }
         }
 
-        private void ConsumerClient_OnConsumeError(IConsumer<Null, string> consumer, Error e)
+        private void ConsumerClient_OnConsumeError(IConsumer<string, byte[]> consumer, Error e)
         {
             var logArgs = new LogMessageEventArgs
             {

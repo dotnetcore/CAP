@@ -7,7 +7,6 @@ using FlubuCore.Scripting.Attributes;
 
 namespace BuildScript
 {
-    [Include("./build/BuildVersion.cs")]
     [Reference("System.Xml.XmlDocument, System.Xml, Version=4.0.0.0, Culture=neutral, publicKeyToken=b77a5c561934e089")]
     public partial class BuildScript
     {

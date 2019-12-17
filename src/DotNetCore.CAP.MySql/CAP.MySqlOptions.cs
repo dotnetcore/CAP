@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
+// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
     public class MySqlOptions : EFOptions
@@ -28,14 +29,10 @@ namespace DotNetCore.CAP
         {
             if (options.DbContextType != null)
             {
-                using (var scope = _serviceScopeFactory.CreateScope())
-                {
-                    var provider = scope.ServiceProvider;
-                    using (var dbContext = (DbContext)provider.GetRequiredService(options.DbContextType))
-                    {
-                        options.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
-                    }
-                }
+                using var scope = _serviceScopeFactory.CreateScope();
+                var provider = scope.ServiceProvider;
+                using var dbContext = (DbContext)provider.GetRequiredService(options.DbContextType);
+                options.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
             }
         }
     }

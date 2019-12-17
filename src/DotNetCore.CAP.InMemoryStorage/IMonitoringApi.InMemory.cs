@@ -3,61 +3,64 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
-using DotNetCore.CAP.Dashboard;
-using DotNetCore.CAP.Dashboard.Monitoring;
-using DotNetCore.CAP.Infrastructure;
-using DotNetCore.CAP.Models;
+using System.Threading.Tasks;
+using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Monitoring;
+using DotNetCore.CAP.Persistence;
 
 namespace DotNetCore.CAP.InMemoryStorage
 {
     internal class InMemoryMonitoringApi : IMonitoringApi
     {
-        private readonly IStorage _storage;
-
-        public InMemoryMonitoringApi(IStorage storage)
+        public Task<MediumMessage> GetPublishedMessageAsync(long id)
         {
-            _storage = storage;
+            return Task.FromResult((MediumMessage)InMemoryStorage.PublishedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
+        }
+
+        public Task<MediumMessage> GetReceivedMessageAsync(long id)
+        {
+            return Task.FromResult((MediumMessage)InMemoryStorage.ReceivedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
         }
 
         public StatisticsDto GetStatistics()
         {
-            var connection = GetConnection();
             var stats = new StatisticsDto
             {
-                PublishedSucceeded = connection.PublishedMessages.Count(x => x.StatusName == StatusName.Succeeded),
-                ReceivedSucceeded = connection.ReceivedMessages.Count(x => x.StatusName == StatusName.Succeeded),
-                PublishedFailed = connection.PublishedMessages.Count(x => x.StatusName == StatusName.Failed),
-                ReceivedFailed = connection.ReceivedMessages.Count(x => x.StatusName == StatusName.Failed)
+                PublishedSucceeded = InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded),
+                ReceivedSucceeded = InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded),
+                PublishedFailed = InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Failed),
+                ReceivedFailed = InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Failed)
             };
             return stats;
         }
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
-            return GetHourlyTimelineStats(type, StatusName.Failed);
+            return GetHourlyTimelineStats(type, nameof(StatusName.Failed));
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
-            return GetHourlyTimelineStats(type, StatusName.Succeeded);
+            return GetHourlyTimelineStats(type, nameof(StatusName.Succeeded));
         }
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
         {
-            var connection = GetConnection();
             if (queryDto.MessageType == MessageType.Publish)
             {
-                var expression = connection.PublishedMessages.Where(x => true);
+                var expression = InMemoryStorage.PublishedMessages.Values.Where(x => true);
 
                 if (!string.IsNullOrEmpty(queryDto.StatusName))
                 {
-                    expression = expression.Where(x => x.StatusName.ToLower() == queryDto.StatusName);
+                    expression = expression.Where(x => x.StatusName.ToString().Equals(queryDto.StatusName, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Name))
                 {
-                    expression = expression.Where(x => x.Name == queryDto.Name);
+                    expression = expression.Where(x => x.Name.Equals(queryDto.Name, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Content))
@@ -71,31 +74,32 @@ namespace DotNetCore.CAP.InMemoryStorage
                 return expression.Skip(offset).Take(size).Select(x => new MessageDto()
                 {
                     Added = x.Added,
+                    Version = "N/A",
                     Content = x.Content,
                     ExpiresAt = x.ExpiresAt,
-                    Id = x.Id,
+                    Id = long.Parse(x.DbId),
                     Name = x.Name,
                     Retries = x.Retries,
-                    StatusName = x.StatusName
+                    StatusName = x.StatusName.ToString()
                 }).ToList();
             }
             else
             {
-                var expression = connection.ReceivedMessages.Where(x => true);
+                var expression = InMemoryStorage.ReceivedMessages.Values.Where(x => true);
 
                 if (!string.IsNullOrEmpty(queryDto.StatusName))
                 {
-                    expression = expression.Where(x => x.StatusName.ToLower() == queryDto.StatusName);
+                    expression = expression.Where(x => x.StatusName.ToString().Equals(queryDto.StatusName, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Name))
                 {
-                    expression = expression.Where(x => x.Name == queryDto.Name);
+                    expression = expression.Where(x => x.Name.Equals(queryDto.Name, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Group))
                 {
-                    expression = expression.Where(x => x.Group == queryDto.Name);
+                    expression = expression.Where(x => x.Group.Equals(queryDto.Group, StringComparison.InvariantCultureIgnoreCase));
                 }
 
                 if (!string.IsNullOrEmpty(queryDto.Content))
@@ -113,37 +117,32 @@ namespace DotNetCore.CAP.InMemoryStorage
                     Version = "N/A",
                     Content = x.Content,
                     ExpiresAt = x.ExpiresAt,
-                    Id = x.Id,
+                    Id = long.Parse(x.DbId),
                     Name = x.Name,
                     Retries = x.Retries,
-                    StatusName = x.StatusName
+                    StatusName = x.StatusName.ToString()
                 }).ToList();
             }
         }
 
         public int PublishedFailedCount()
         {
-            return GetConnection().PublishedMessages.Count(x => x.StatusName == StatusName.Failed);
+            return InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Failed);
         }
 
         public int PublishedSucceededCount()
         {
-            return GetConnection().PublishedMessages.Count(x => x.StatusName == StatusName.Succeeded);
+            return InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded);
         }
 
         public int ReceivedFailedCount()
         {
-            return GetConnection().ReceivedMessages.Count(x => x.StatusName == StatusName.Failed);
+            return InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Failed);
         }
 
         public int ReceivedSucceededCount()
         {
-            return GetConnection().ReceivedMessages.Count(x => x.StatusName == StatusName.Succeeded);
-        }
-
-        private InMemoryStorageConnection GetConnection()
-        {
-            return (InMemoryStorageConnection)_storage.GetConnection();
+            return InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded);
         }
 
         private Dictionary<DateTime, int> GetHourlyTimelineStats(MessageType type, string statusName)
@@ -158,20 +157,19 @@ namespace DotNetCore.CAP.InMemoryStorage
 
             var keyMaps = dates.ToDictionary(x => x.ToString("yyyy-MM-dd-HH"), x => x);
 
-            var connection = GetConnection();
 
             Dictionary<string, int> valuesMap;
             if (type == MessageType.Publish)
             {
-                valuesMap = connection.PublishedMessages
-                    .Where(x => x.StatusName == statusName)
+                valuesMap = InMemoryStorage.PublishedMessages.Values
+                    .Where(x => x.StatusName.ToString() == statusName)
                     .GroupBy(x => x.Added.ToString("yyyy-MM-dd-HH"))
                     .ToDictionary(x => x.Key, x => x.Count());
             }
             else
             {
-                valuesMap = connection.ReceivedMessages
-                    .Where(x => x.StatusName == statusName)
+                valuesMap = InMemoryStorage.ReceivedMessages.Values
+                    .Where(x => x.StatusName.ToString() == statusName)
                     .GroupBy(x => x.Added.ToString("yyyy-MM-dd-HH"))
                     .ToDictionary(x => x.Key, x => x.Count());
             }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
@@ -18,7 +19,7 @@ namespace MongoDB.Driver
         public CapMongoDbClientSessionHandle(ICapTransaction transaction)
         {
             _transaction = transaction;
-            _sessionHandle = (IClientSessionHandle) _transaction.DbTransaction;
+            _sessionHandle = (IClientSessionHandle)_transaction.DbTransaction;
         }
 
         public void Dispose()
@@ -26,12 +27,12 @@ namespace MongoDB.Driver
             _transaction.Dispose();
         }
 
-        public void AbortTransaction(CancellationToken cancellationToken = default(CancellationToken))
+        public void AbortTransaction(CancellationToken cancellationToken = default)
         {
             _transaction.Rollback();
         }
 
-        public Task AbortTransactionAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public Task AbortTransactionAsync(CancellationToken cancellationToken = default)
         {
             _transaction.Rollback();
             return Task.CompletedTask;
@@ -47,12 +48,12 @@ namespace MongoDB.Driver
             _sessionHandle.AdvanceOperationTime(newOperationTime);
         }
 
-        public void CommitTransaction(CancellationToken cancellationToken = default(CancellationToken))
+        public void CommitTransaction(CancellationToken cancellationToken = default)
         {
             _transaction.Commit();
         }
 
-        public Task CommitTransactionAsync(CancellationToken cancellationToken = default(CancellationToken))
+        public Task CommitTransactionAsync(CancellationToken cancellationToken = default)
         {
             _transaction.Commit();
             return Task.CompletedTask;
@@ -75,6 +76,16 @@ namespace MongoDB.Driver
         public IClientSessionHandle Fork()
         {
             return _sessionHandle.Fork();
+        }
+
+        public TResult WithTransaction<TResult>(Func<IClientSessionHandle, CancellationToken, TResult> callback, TransactionOptions transactionOptions = null, CancellationToken cancellationToken = default)
+        {
+            return _sessionHandle.WithTransaction(callback, transactionOptions, cancellationToken);
+        }
+
+        public Task<TResult> WithTransactionAsync<TResult>(Func<IClientSessionHandle, CancellationToken, Task<TResult>> callbackAsync, TransactionOptions transactionOptions = null, CancellationToken cancellationToken = default)
+        {
+            return _sessionHandle.WithTransactionAsync(callbackAsync, transactionOptions, cancellationToken);
         }
     }
 }

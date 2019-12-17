@@ -5,7 +5,8 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
-using DotNetCore.CAP.Models;
+using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 
 namespace DotNetCore.CAP.SqlServer.Diagnostics
 {
@@ -17,10 +18,10 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
         public DiagnosticProcessorObserver(IDispatcher dispatcher)
         {
             _dispatcher = dispatcher;
-            BufferList = new ConcurrentDictionary<Guid, List<CapPublishedMessage>>();
+            BufferList = new ConcurrentDictionary<Guid, List<MediumMessage>>();
         }
 
-        public ConcurrentDictionary<Guid, List<CapPublishedMessage>> BufferList { get; }
+        public ConcurrentDictionary<Guid, List<MediumMessage>> BufferList { get; }
 
         public void OnCompleted()
         {
@@ -33,9 +34,7 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
         public void OnNext(DiagnosticListener listener)
         {
             if (listener.Name == DiagnosticListenerName)
-            {
                 listener.Subscribe(new DiagnosticObserver(_dispatcher, BufferList));
-            }
         }
     }
 }

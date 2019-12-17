@@ -2,9 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+
+using System.Threading;
+using System.Threading.Tasks;
+using DotNetCore.CAP.Transport;
+
+namespace DotNetCore.CAP.InMemoryStorage
 {
-    public class InMemoryCapTransaction : CapTransactionBase
+    internal class InMemoryCapTransaction : CapTransactionBase
     {
         public InMemoryCapTransaction(IDispatcher dispatcher) : base(dispatcher)
         {
@@ -15,9 +20,19 @@ namespace DotNetCore.CAP
             Flush();
         }
 
+        public override Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
+        }
+
         public override void Rollback()
         {
             //Ignore
+        }
+
+        public override Task RollbackAsync(CancellationToken cancellationToken = default)
+        {
+            return Task.CompletedTask;
         }
 
         public override void Dispose()

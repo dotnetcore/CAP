@@ -2,8 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.PostgreSql;
-using DotNetCore.CAP.Processor;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -22,16 +22,12 @@ namespace DotNetCore.CAP
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<CapStorageMarkerService>();
-            services.AddSingleton<IStorage, PostgreSqlStorage>();
-            services.AddSingleton<IStorageConnection, PostgreSqlStorageConnection>();
-            services.AddSingleton<ICapPublisher, PostgreSqlPublisher>();
-            services.AddSingleton<ICallbackPublisher>(provider => (PostgreSqlPublisher)provider.GetService<ICapPublisher>());
-            services.AddSingleton<ICollectProcessor, PostgreSqlCollectProcessor>();
-
-            services.AddTransient<CapTransactionBase, PostgreSqlCapTransaction>();
-
             services.Configure(_configure);
             services.AddSingleton<IConfigureOptions<PostgreSqlOptions>, ConfigurePostgreSqlOptions>();
+
+            services.AddSingleton<IDataStorage, PostgreSqlDataStorage>();
+            services.AddSingleton<IStorageInitializer, PostgreSqlStorageInitializer>();
+            services.AddTransient<CapTransactionBase, PostgreSqlCapTransaction>();
         }
     }
 }

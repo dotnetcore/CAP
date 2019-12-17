@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -15,7 +16,7 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         /// <param name="descriptor">consumer method descriptor. </param>
         /// <param name="message"> received message.</param>
-        public ConsumerContext(ConsumerExecutorDescriptor descriptor, MessageContext message)
+        public ConsumerContext(ConsumerExecutorDescriptor descriptor, Message message)
         {
             ConsumerDescriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
             DeliverMessage = message ?? throw new ArgumentNullException(nameof(message));
@@ -29,6 +30,6 @@ namespace DotNetCore.CAP.Internal
         /// <summary>
         /// consumer received message.
         /// </summary>
-        public MessageContext DeliverMessage { get; }
+        public Message DeliverMessage { get; }
     }
 }

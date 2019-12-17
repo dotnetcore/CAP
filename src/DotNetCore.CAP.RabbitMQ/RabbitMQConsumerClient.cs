@@ -5,9 +5,12 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
+using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using Headers = DotNetCore.CAP.Messages.Headers;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
@@ -22,7 +25,6 @@ namespace DotNetCore.CAP.RabbitMQ
         private IModel _channel;
 
         private IConnection _connection;
-        private ulong _deliveryTag;
 
         public RabbitMQConsumerClient(string queueName,
             IConnectionChannelPool connectionChannelPool,
@@ -34,7 +36,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _exchangeName = connectionChannelPool.Exchange;
         }
 
-        public event EventHandler<MessageContext> OnMessageReceived;
+        public event EventHandler<TransportMessage> OnMessageReceived;
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
@@ -77,14 +79,14 @@ namespace DotNetCore.CAP.RabbitMQ
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit()
+        public void Commit(object sender)
         {
-            _channel.BasicAck(_deliveryTag, false);
+            _channel.BasicAck((ulong)sender, false);
         }
 
-        public void Reject()
+        public void Reject(object sender)
         {
-            _channel.BasicReject(_deliveryTag, true);
+            _channel.BasicReject((ulong)sender, true);
         }
 
         public void Dispose()
@@ -125,7 +127,7 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 _connectionLock.Release();
             }
-        } 
+        }
 
         private void OnConsumerConsumerCancelled(object sender, ConsumerEventArgs e)
         {
@@ -159,14 +161,16 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
-            _deliveryTag = e.DeliveryTag;
-            var message = new MessageContext
+            var headers = new Dictionary<string, string>();
+            foreach (var header in e.BasicProperties.Headers)
             {
-                Group = _queueName,
-                Name = e.RoutingKey,
-                Content = Encoding.UTF8.GetString(e.Body)
-            };
-            OnMessageReceived?.Invoke(sender, message);
+                headers.Add(header.Key, header.Value == null ? null : Encoding.UTF8.GetString((byte[])header.Value));
+            }
+            headers.Add(Headers.Group, _queueName);
+
+            var message = new TransportMessage(headers, e.Body);
+
+            OnMessageReceived?.Invoke(e.DeliveryTag, message);
         }
 
         private void OnConsumerShutdown(object sender, ShutdownEventArgs e)
@@ -176,6 +180,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 LogType = MqLogType.ConsumerShutdown,
                 Reason = e.ReplyText
             };
+
             OnLog?.Invoke(sender, args);
         }
 

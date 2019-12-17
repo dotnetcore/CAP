@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP;
 
 // ReSharper disable once CheckNamespace
@@ -18,6 +20,8 @@ namespace Microsoft.EntityFrameworkCore.Storage
             TransactionId = dbContextTransaction.TransactionId;
         }
 
+        public Guid TransactionId { get; }
+
         public void Dispose()
         {
             _transaction.Dispose();
@@ -33,6 +37,19 @@ namespace Microsoft.EntityFrameworkCore.Storage
             _transaction.Rollback();
         }
 
-        public Guid TransactionId { get; }
+        public async Task CommitAsync(CancellationToken cancellationToken = default)
+        {
+            await _transaction.CommitAsync(cancellationToken);
+        }
+
+        public async Task RollbackAsync(CancellationToken cancellationToken = default)
+        {
+            await _transaction.RollbackAsync(cancellationToken);
+        }
+
+        public ValueTask DisposeAsync()
+        {
+            return new ValueTask(Task.Run(() => _transaction.Dispose()));
+        }
     }
 }
