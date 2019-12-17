@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
-        public string ServersAddress => string.Empty;
+        public BrokerAddress BrokerAddress => new BrokerAddress("InMemory", string.Empty);
 
         public void Subscribe(IEnumerable<string> topics)
         {

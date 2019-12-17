@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
-        public string ServersAddress => _rabbitMQOptions.HostName;
+        public BrokerAddress BrokerAddress => new BrokerAddress("RabbitMQ", _rabbitMQOptions.HostName);
 
         public void Subscribe(IEnumerable<string> topics)
         {

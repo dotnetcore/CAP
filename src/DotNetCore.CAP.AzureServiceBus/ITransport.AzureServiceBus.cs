@@ -30,7 +30,7 @@ namespace DotNetCore.CAP.AzureServiceBus
             _asbOptions = asbOptions;
         }
 
-        public string Address => _asbOptions.Value.ConnectionString;
+        public BrokerAddress BrokerAddress => new BrokerAddress("AzureServiceBus", _asbOptions.Value.ConnectionString);
 
         public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {
@@ -77,7 +77,7 @@ namespace DotNetCore.CAP.AzureServiceBus
             {
                 if (_topicClient == null)
                 {
-                    _topicClient = new TopicClient(Address, _asbOptions.Value.TopicPath, RetryPolicy.NoRetry);
+                    _topicClient = new TopicClient(BrokerAddress.Endpoint, _asbOptions.Value.TopicPath, RetryPolicy.NoRetry);
                 }
             }
             finally

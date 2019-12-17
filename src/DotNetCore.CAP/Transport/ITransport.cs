@@ -8,7 +8,7 @@ namespace DotNetCore.CAP.Transport
 {
     public interface ITransport
     {
-        string Address { get; }
+        BrokerAddress BrokerAddress { get; }
 
         Task<OperateResult> SendAsync(TransportMessage message);
     }

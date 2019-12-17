@@ -23,7 +23,7 @@ namespace DotNetCore.CAP.Kafka
             _connectionPool = connectionPool;
         }
 
-        public string Address => _connectionPool.ServersAddress;
+        public BrokerAddress BrokerAddress => new BrokerAddress("Kafka", _connectionPool.ServersAddress);
 
         public async Task<OperateResult> SendAsync(TransportMessage message)
         {

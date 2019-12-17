@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _exchange = _connectionChannelPool.Exchange;
         }
 
-        public string Address => _connectionChannelPool.HostAddress;
+        public BrokerAddress BrokerAddress => new BrokerAddress("RabbitMQ", _connectionChannelPool.HostAddress);
 
         public Task<OperateResult> SendAsync(TransportMessage message)
         {

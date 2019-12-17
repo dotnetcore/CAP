@@ -29,7 +29,7 @@ namespace DotNetCore.CAP.Internal
         private readonly MethodMatcherCache _selector;
 
         private CancellationTokenSource _cts;
-        private string _serverAddress;
+        private BrokerAddress _serverAddress;
         private Task _compositeTask;
         private bool _disposed;
         private static bool _isHealthy = true;
@@ -76,7 +76,7 @@ namespace DotNetCore.CAP.Internal
                         {
                             using (var client = _consumerClientFactory.Create(matchGroup.Key))
                             {
-                                _serverAddress = client.ServersAddress;
+                                _serverAddress = client.BrokerAddress;
 
                                 RegisterMessageProcessor(client);
 
@@ -171,7 +171,7 @@ namespace DotNetCore.CAP.Internal
                             var error = $"Message can not be found subscriber. Name:{name}, Group:{group}. {Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
                             var ex = new SubscriberNotFoundException(error);
 
-                            TracingError(tracingTimestamp, transportMessage, client.ServersAddress, ex);
+                            TracingError(tracingTimestamp, transportMessage, client.BrokerAddress, ex);
 
                             throw ex;
                         }
@@ -214,7 +214,7 @@ namespace DotNetCore.CAP.Internal
 
                     client.Reject(sender);
 
-                    TracingError(tracingTimestamp, transportMessage, client.ServersAddress, e);
+                    TracingError(tracingTimestamp, transportMessage, client.BrokerAddress, e);
                 }
             };
 
@@ -254,7 +254,7 @@ namespace DotNetCore.CAP.Internal
 
         #region tracing
 
-        private long? TracingBefore(TransportMessage message, string broker)
+        private long? TracingBefore(TransportMessage message, BrokerAddress broker)
         {
             if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforeConsume))
             {
@@ -274,7 +274,7 @@ namespace DotNetCore.CAP.Internal
             return null;
         }
 
-        private void TracingAfter(long? tracingTimestamp, TransportMessage message, string broker)
+        private void TracingAfter(long? tracingTimestamp, TransportMessage message, BrokerAddress broker)
         {
             if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterConsume))
             {
@@ -292,7 +292,7 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private void TracingError(long? tracingTimestamp, TransportMessage message, string broker, Exception ex)
+        private void TracingError(long? tracingTimestamp, TransportMessage message, BrokerAddress broker, Exception ex)
         {
             if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.ErrorConsume))
             {

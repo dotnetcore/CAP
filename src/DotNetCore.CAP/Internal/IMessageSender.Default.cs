@@ -63,7 +63,7 @@ namespace DotNetCore.CAP.Internal
         {
             var transportMsg = await _serializer.SerializeAsync(message.Origin);
 
-            var tracingTimestamp = TracingBefore(transportMsg, _transport.Address);
+            var tracingTimestamp = TracingBefore(transportMsg, _transport.BrokerAddress);
 
             var result = await _transport.SendAsync(transportMsg);
 
@@ -71,13 +71,13 @@ namespace DotNetCore.CAP.Internal
             {
                 await SetSuccessfulState(message);
 
-                TracingAfter(tracingTimestamp, transportMsg, _transport.Address);
+                TracingAfter(tracingTimestamp, transportMsg, _transport.BrokerAddress);
 
                 return (false, OperateResult.Success);
             }
             else
             {
-                TracingError(tracingTimestamp, transportMsg, _transport.Address, result);
+                TracingError(tracingTimestamp, transportMsg, _transport.BrokerAddress, result);
 
                 var needRetry = await SetFailedState(message, result.Exception);
 
@@ -131,7 +131,7 @@ namespace DotNetCore.CAP.Internal
 
         #region tracing
 
-        private long? TracingBefore(TransportMessage message, string broker)
+        private long? TracingBefore(TransportMessage message, BrokerAddress broker)
         {
             if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforePublish))
             {
@@ -151,7 +151,7 @@ namespace DotNetCore.CAP.Internal
             return null;
         }
 
-        private void TracingAfter(long? tracingTimestamp, TransportMessage message, string broker)
+        private void TracingAfter(long? tracingTimestamp, TransportMessage message, BrokerAddress broker)
         {
             if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterPublish))
             {
@@ -169,7 +169,7 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private void TracingError(long? tracingTimestamp, TransportMessage message, string broker, OperateResult result)
+        private void TracingError(long? tracingTimestamp, TransportMessage message, BrokerAddress broker, OperateResult result)
         {
             if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.ErrorPublish))
             {

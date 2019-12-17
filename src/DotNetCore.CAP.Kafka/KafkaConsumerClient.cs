@@ -30,7 +30,7 @@ namespace DotNetCore.CAP.Kafka
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
-        public string ServersAddress => _kafkaOptions.Servers;
+        public BrokerAddress BrokerAddress => new BrokerAddress("Kafka", _kafkaOptions.Servers);
 
         public void Subscribe(IEnumerable<string> topics)
         {
