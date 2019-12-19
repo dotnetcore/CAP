@@ -35,7 +35,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ```
 
-#### MongoDBOptions
+#### 配置项
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
@@ -44,7 +44,7 @@ DatabaseConnection | 数据库连接字符串 | string | mongodb://localhost:270
 ReceivedCollection | 接收消息集合名称 | string | cap.received
 PublishedCollection | 发送消息集合名称 | string | cap.published
 
-## Publish with transaction
+## 使用事务发布消息
 
 下面的示例展示了如何利用 CAP 和 MongoDB 进行本地事务集成。
 

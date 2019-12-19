@@ -4,7 +4,13 @@ CAP 原生提供了 Dashboard 供查看消息，利用 Dashboard 提供的功能
 
 ## 启用 Dashboard
 
-默认情况下，不会启动Dashboard中间件，要开启Dashboard功能你需要在配置中添加如下代码：
+首先，你需要安装Dashboard的 NuGet 包。
+
+```powershell
+PM> Install-Package DotNetCore.CAP.Dashboard
+```
+
+然后，在配置中添加如下代码：
 
 ```C#
 services.AddCap(x =>

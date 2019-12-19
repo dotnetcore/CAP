@@ -6,7 +6,7 @@ CAP 是一个EventBus，同时也是一个在微服务或者SOA系统中解决�
 
 !!! question "什么是 EventBus？"
 
-    An Eventbus is a mechanism that allows different components to communicate with each other without knowing about each other. A component can send an Event to the Eventbus without knowing who will pick it up or how many others will pick it up. Components can also listen to Events on an Eventbus, without knowing who sent the Events. That way, components can communicate without depending on each other. Also, it is very easy to substitute a component. As long as the new component understands the Events that are being sent and received, the other components will never know.
+    事件总线是一种机制，它允许不同的组件彼此通信而不彼此了解。 组件可以将事件发送到Eventbus，而无需知道是谁来接听或有多少其他人来接听。 组件也可以侦听Eventbus上的事件，而无需知道谁发送了事件。 这样，组件可以相互通信而无需相互依赖。 同样，很容易替换一个组件。 只要新组件了解正在发送和接收的事件，其他组件就永远不会知道.
 
 相对于其他的 Service Bus 或者 Event Bus， CAP 拥有自己的特色，它不要求使用者发送消息或者处理消息的时候实现或者继承任何接口，拥有非常高的灵活性。我们一直坚信约定大于配置，所以CAP使用起来非常简单，对于新手非常友好，并且拥有轻量级。
 
