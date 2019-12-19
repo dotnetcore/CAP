@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
-using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Serialization;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;

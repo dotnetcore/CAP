@@ -27,3 +27,6 @@ CAP supports several transport methods:
 >`Kafka` vs `RabbitMQ` :   
 > https://stackoverflow.com/questions/42151544/is-there-any-reason-to-use-rabbitmq-over-kafka
 
+## Community Supported transports
+
+* SQLite ([@colinin](https://github.com/colinin)) ： https://github.com/colinin/DotNetCore.CAP.Sqlite   
