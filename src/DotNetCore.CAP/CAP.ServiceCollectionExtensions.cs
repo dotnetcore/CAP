@@ -37,6 +37,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<CapMarkerService>();
 
             services.TryAddSingleton<ICapPublisher, CapPublisher>();
+            services.TryAddTransient<CapMqSender>();
 
             services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
             services.TryAddSingleton<ISubscribeInvokerFactory, ConsumerInvokerFactory>();

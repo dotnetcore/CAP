@@ -186,7 +186,7 @@ namespace DotNetCore.CAP.Internal
                         [Headers.CorrelationSequence] = (message.Origin.GetCorrelationSequence() + 1).ToString()
                     };
 
-                    await _provider.GetService<ICapPublisher>().PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken);
+                    await _provider.GetService<ICapPublisher>().PublishAsync(ret.CallbackName, ret.Result, header, false, cancellationToken);
                 }
             }
             catch (OperationCanceledException)

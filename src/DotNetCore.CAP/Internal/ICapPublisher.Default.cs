@@ -34,29 +34,31 @@ namespace DotNetCore.CAP.Internal
         public IServiceProvider ServiceProvider { get; }
 
         public AsyncLocal<ICapTransaction> Transaction { get; }
+        private AsyncLocal<CapMqSender> _capMqSender = new AsyncLocal<CapMqSender>();
+        private CapMqSender CapMqSender => _capMqSender.Value ?? (_capMqSender.Value = ServiceProvider.GetService<CapMqSender>());
 
-        public Task PublishAsync<T>(string name, T value, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        public Task PublishAsync<T>(string name, T value, IDictionary<string, string> headers, bool manuallySendMq = false, CancellationToken cancellationToken = default)
         {
-            return Task.Run(() => Publish(name, value, headers), cancellationToken);
+            return Task.Run(() => Publish(name, value, headers, manuallySendMq), cancellationToken);
         }
 
-        public Task PublishAsync<T>(string name, T value, string callbackName = null,
+        public Task PublishAsync<T>(string name, T value, string callbackName = null, bool manuallySendMq = false,
             CancellationToken cancellationToken = default)
         {
-            return Task.Run(() => Publish(name, value, callbackName), cancellationToken);
+            return Task.Run(() => Publish(name, value, callbackName, manuallySendMq), cancellationToken);
         }
 
-        public void Publish<T>(string name, T value, string callbackName = null)
+        public void Publish<T>(string name, T value, string callbackName = null, bool manuallySendMq = false)
         {
             var header = new Dictionary<string, string>
             {
                 {Headers.CallbackName, callbackName}
             };
 
-            Publish(name, value, header);
+            Publish(name, value, header, manuallySendMq);
         }
 
-        public void Publish<T>(string name, T value, IDictionary<string, string> headers)
+        public void Publish<T>(string name, T value, IDictionary<string, string> headers, bool manuallySendMq = false)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -86,19 +88,18 @@ namespace DotNetCore.CAP.Internal
             {
                 tracingTimestamp = TracingBefore(message);
 
+                MediumMessage mediumMessage = null;
                 if (Transaction.Value?.DbTransaction == null)
                 {
-                    var mediumMessage = _storage.StoreMessage(name, message);
+                    mediumMessage = _storage.StoreMessage(name, message);
 
                     TracingAfter(tracingTimestamp, message);
-
-                    _dispatcher.EnqueueToPublish(mediumMessage);
                 }
                 else
                 {
                     var transaction = (CapTransactionBase)Transaction.Value;
 
-                    var mediumMessage = _storage.StoreMessage(name, message, transaction.DbTransaction);
+                    mediumMessage = _storage.StoreMessage(name, message, transaction.DbTransaction);
 
                     TracingAfter(tracingTimestamp, message);
 
@@ -109,6 +110,15 @@ namespace DotNetCore.CAP.Internal
                         transaction.Commit();
                     }
                 }
+
+                if (manuallySendMq)
+                {
+                    CapMqSender.AddToSent(mediumMessage);
+                }
+                else
+                {
+                    _dispatcher.EnqueueToPublish(mediumMessage);
+                }
             }
             catch (Exception e)
             {
@@ -118,6 +128,10 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
+        public void ManuallySendMq()
+        {
+            CapMqSender.Flush();
+        }
         #region tracing
 
         private long? TracingBefore(Message message)
