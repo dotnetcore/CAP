@@ -68,24 +68,27 @@ namespace DotNetCore.CAP.Test
 
             public AsyncLocal<ICapTransaction> Transaction { get; }
 
-            public Task PublishAsync<T>(string name, T contentObj, string callbackName = null,
-                CancellationToken cancellationToken = default(CancellationToken))
+            public void ManuallySendMq()
             {
                 throw new NotImplementedException();
             }
 
-            public Task PublishAsync<T>(string name, T contentObj, IDictionary<string, string> optionHeaders = null,
-                CancellationToken cancellationToken = default)
+            public void Publish<T>(string name, [global::JetBrains.Annotations.CanBeNullAttribute] T contentObj, string callbackName = null, bool manuallySendMq = false)
             {
                 throw new NotImplementedException();
             }
 
-            public void Publish<T>(string name, T contentObj, string callbackName = null)
+            public void Publish<T>(string name, [global::JetBrains.Annotations.CanBeNullAttribute] T contentObj, IDictionary<string, string> headers, bool manuallySendMq = false)
             {
                 throw new NotImplementedException();
             }
 
-            public void Publish<T>(string name, T contentObj, IDictionary<string, string> headers)
+            public Task PublishAsync<T>(string name, [global::JetBrains.Annotations.CanBeNullAttribute] T contentObj, string callbackName = null, bool manuallySendMq = false, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PublishAsync<T>(string name, [global::JetBrains.Annotations.CanBeNullAttribute] T contentObj, IDictionary<string, string> headers, bool manuallySendMq = false, CancellationToken cancellationToken = default)
             {
                 throw new NotImplementedException();
             }
