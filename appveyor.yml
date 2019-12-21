@@ -6,11 +6,13 @@ environment:
   Cap_MySql_ConnectionStringTemplate: Server=localhost;Database={0};Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=none
 services:
   - mysql
+before_build:
+  - ps: dotnet tool install --global FlubuCore.GlobalTool --version 4.2.8
 build_script:
-- ps: ./build.ps1
+  - ps: flubu
 test: off
 artifacts:
-- path: artifacts/packages/*.nupkg
+- path: artifacts/*.nupkg
 deploy:
   provider: NuGet
   on:
@@ -18,4 +20,4 @@ deploy:
   api_key:
     secure: PZXRBOGLyhYLP7ulHfrh6MnkqB8CstuitgbLcJr3cZkLJLLzPH0ahvuTtmhWxtR2            
   skip_symbols: true
-  artifact: /artifacts\/packages\/.+\.nupkg/
+  artifact: /artifacts\/.+\.nupkg/
