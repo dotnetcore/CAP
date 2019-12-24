@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
-        public string ServersAddress => _asbOptions.ConnectionString;
+        public BrokerAddress BrokerAddress => new BrokerAddress("AzureServiceBus", _asbOptions.ConnectionString);
 
         public void Subscribe(IEnumerable<string> topics)
         {

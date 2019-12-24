@@ -1,17 +1,17 @@
-# Transports
+# 运输器
 
-Transports move data from one place to another – between acquisition programs and pipelines, between pipelines and the entity database, and even between pipelines and external systems.
+通过运输将数据从一个地方移动到另一个地方-在采集程序和管道之间，管道与实体数据库之间，甚至在管道与外部系统之间。
 
-## Supported transports
+## 支持的运输器
 
-CAP supports several transport methods:
+CAP 支持以下几种运输方式：
 
 * [RabbitMQ](rabbitmq.md)
 * [Kafka](kafka.md)
 * [Azure Service Bus](azure-service-bus.md)
 * [In-Memory Queue](in-memory-queue.md)
 
-## How to select a transport
+## 怎么选择运输器
 
  🏳‍🌈  | RabbitMQ | Kafka | Azure Service Bus | In-Memory
 :--   |   :--:    | :--: | :--:               | :--  :
@@ -26,4 +26,3 @@ CAP supports several transport methods:
 
 >`Kafka` vs `RabbitMQ` :   
 > https://stackoverflow.com/questions/42151544/is-there-any-reason-to-use-rabbitmq-over-kafka
-

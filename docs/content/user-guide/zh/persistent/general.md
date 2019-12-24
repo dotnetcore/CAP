@@ -63,3 +63,9 @@ Content |	内容 |	string
 CallbackName |	回调的订阅者名称 | string
 
 其中 Id 字段，CAP 采用的 MongoDB 中的 ObjectId 分布式Id生成算法生成。
+
+## 社区支持的持久化
+
+感谢社区对CAP的支持，以下是社区支持的持久化的实现
+
+* SQLite ([@colinin](https://github.com/colinin)) ： https://github.com/colinin/DotNetCore.CAP.Sqlite   

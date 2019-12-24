@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
             _logger = logger;
         }
 
-        public string Address { get; } = string.Empty;
+        public BrokerAddress BrokerAddress { get; } = new BrokerAddress("InMemory", string.Empty);
 
         public Task<OperateResult> SendAsync(TransportMessage message)
         {

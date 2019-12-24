@@ -1,32 +1,38 @@
 # 序列化
 
-CAP 目前还不支持消息本身的序列化，在将消息发送到消息队列之前 CAP 使用 json 对消息对象进行序列化。
+CAP 提供了 `ISerializer` 接口来支持对消息进行序列化，默认情况下我们使用 json 来对消息进行序列化处理并存储到数据库中。
 
-## 内容序列化
+## 自定义序列化
 
-CAP 支持对消息的 Content 字段进行序列化，你可以自定义 `IContentSerializer` 接口来做到这一点。
-
-目前由于消息对象需要进行数据库存储，所以只支持 string 的序列化和反序例化。
-
-```csharp
-
-class MyContentSerializer : IContentSerializer 
+```C#
+public class YourSerializer: ISerializer
 {
-    public T DeSerialize<T>(string messageObjStr)
+    Task<TransportMessage> SerializeAsync(Message message)
     {
-    }
 
-    public object DeSerialize(string content, Type type)
-    {
     }
-
-    public string Serialize<T>(T messageObj)
+ 
+    Task<Message> DeserializeAsync(TransportMessage transportMessage, Type valueType)
     {
+
     }
 }
 ```
 
-## 消息适配器
+然后将你的实现注册到容器中:
+
+```
+
+//注册你的自定义实现
+services.AddSingleton<ISerializer, YourSerializer>();
+
+// ---
+services.AddCap 
+
+```
+
+
+## 消息适配器 (v3.0移除 )
 
 在异构系统中，有时候需要和其他系统进行通讯，但是其他系统使用的消息对象可能和 CAP 的[**包装器对象**](../persistent/general.md#_7)不一样，这个时候就需要对消息进行自定义适配。
 

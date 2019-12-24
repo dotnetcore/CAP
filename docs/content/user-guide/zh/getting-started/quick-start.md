@@ -59,6 +59,35 @@ public class ConsumerController : Controller
 }
 ```
 
+## 带有头信息的消息
+
+### 发送包含头信息的消息
+
+```c#
+var header = new Dictionary<string, string>()
+{
+    ["my.header.first"] = "first",
+    ["my.header.second"] = "second"
+};
+
+capBus.Publish("test.show.time", DateTime.Now, header);
+
+```
+
+### 处理包含头信息的消息
+
+```c#
+[CapSubscribe("test.show.time")]
+public void ReceiveMessage(DateTime time, [FromCap]CapHeader header)
+{
+    Console.WriteLine("message time is:" + time);
+    Console.WriteLine("message firset header :" + header["my.header.first"]);
+    Console.WriteLine("message second header :" + header["my.header.second"]);
+}
+
+```
+
+
 ## 摘要
 
 相对于直接集成消息队列，异步消息传递最强大的优势之一是可靠性，系统的一个部分中的故障不会传播，也不会导致整个系统崩溃。 在 CAP 内部会将消息进行存储，以保证消息的可靠性，并配合重试等策略以达到各个服务之间的数据最终一致性。

@@ -115,7 +115,7 @@ nav:
           - 消息: user-guide/zh/cap/messaging.md
           - Sagas: user-guide/zh/cap/sagas.md
           - 序列化: user-guide/zh/cap/serialization.md
-          - 传输: user-guide/zh/cap/transactions.md
+          - 运输: user-guide/zh/cap/transactions.md
           - 幂等性: user-guide/zh/cap/idempotence.md          
       - 传输:
           - 简介: user-guide/zh/transports/general.md

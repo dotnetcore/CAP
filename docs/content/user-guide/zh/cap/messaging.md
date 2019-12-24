@@ -2,6 +2,10 @@
 
 使用 `ICapPublisher` 接口发送出去的数据称之为 Message (`消息`)。
 
+## 发送 & 处理消息
+
+你可以阅读 [quick-start](../getting-started/quick-start.md#_3) 来学习如何发送和处理消息。
+
 ## 消息调度
 
 CAP 接收到消息之后会将消息发送到 Transport, 由 Transport 进行运输。

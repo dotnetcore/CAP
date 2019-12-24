@@ -52,6 +52,11 @@ namespace DotNetCore.CAP.Internal
 
         public ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
+            if (executeDescriptor.Count == 0)
+            {
+                return null;
+            }
+
             var result = MatchUsingName(key, executeDescriptor);
             if (result != null)
             {

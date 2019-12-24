@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Transport;
 using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Diagnostics
@@ -16,7 +17,7 @@ namespace DotNetCore.CAP.Diagnostics
 
         public TransportMessage TransportMessage { get; set; }
 
-        public string BrokerAddress { get; set; }
+        public BrokerAddress BrokerAddress { get; set; }
 
         public long? ElapsedTimeMs { get; set; }
 

@@ -41,7 +41,37 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 Servers | Broker 地址 | string | 
 ConnectionPoolSize | 用户名 | int | 10
+CustomHeaders | 设置自定义头 | Function | 
 
+有关 `CustomHeaders` 的说明：
+
+如果你想在消费消息的时候，通过从 `CapHeader` 获取 Kafka 中例如 Offset 或者 Partition 等信息，你可以通过自定义此函数来实现这一点。
+
+例如以下代码为你展示了如何进行设置额外的参数到 `CapHeader` 中:
+
+```C#
+x.UseKafka(opt =>
+{
+    //...
+
+    opt.CustomHeaders = kafkaResult => new List<KeyValuePair<string, string>>
+    {
+        new KeyValuePair<string, string>("my.kafka.offset", kafkaResult.Offset.ToString()),
+        new KeyValuePair<string, string>("my.kafka.partition", kafkaResult.Partition.ToString())
+    };
+});
+```
+
+然后你可以通过这个方式来获取你添加的头信息:
+
+```C#
+[CapSubscribe("sample.kafka.postgrsql")]
+public void HeadersTest(DateTime value, [FromCap]CapHeader header)
+{
+    var offset = header["my.kafka.offset"];
+    var partition = header["my.kafka.partition"];
+}
+```
 
 #### Kafka MainConfig Options
 

@@ -29,16 +29,43 @@ public void ConfigureServices(IServiceCollection services)
 
 ```
 
-#### MySqlOptions
+### 配置项
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 TableNamePrefix | Cap表名前缀 | string | cap 
 ConnectionString | 数据库连接字符串 | string | null
 
-## Publish with transaction
+### 自定义表名称
 
-### ADO.NET with transaction
+你可以通过重写 `IStorageInitializer` 接口获取表名称的方法来做到这一点
+
+示例代码：
+
+```C#
+
+public class MyTableInitializer : MySqlStorageInitializer
+{
+    public override string GetPublishedTableName()
+    {
+        //你的 发送消息表 名称
+    }
+
+    public override string GetReceivedTableName()
+    {
+        //你的 接收消息表 名称
+    }
+}
+```
+然后将你的实现注册到容器中
+
+```
+services.AddSingleton<IStorageInitializer, MyTableInitializer>();
+```
+
+## 使用事务发布消息
+
+### ADO.NET 
 
 ```csharp
 
@@ -59,7 +86,7 @@ using (var connection = new MySqlConnection(AppDbContext.ConnectionString))
 }
 ```
 
-### EntityFramework with transaction
+### EntityFramework 
 
 ```csharp
 
