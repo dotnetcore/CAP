@@ -19,4 +19,4 @@ mono: none
 script:
  - export PATH="$PATH:$HOME/.dotnet/tools"
  - dotnet tool install --global FlubuCore.GlobalTool --version 4.3.5
- - flubu build test -s=build/BuildScript.cs
+ - flubu build tests -s=build/BuildScript.cs
