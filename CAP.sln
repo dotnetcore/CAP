@@ -9,6 +9,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "test", "test", "{C09CDAB0-6
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{57A8A8E5-5715-41BF-A0A6-46B819933FBC}"
 	ProjectSection(SolutionItems) = preProject
+		.flubu = .flubu
 		.gitignore = .gitignore
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
@@ -28,13 +29,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.RabbitMQ", "
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{10C0818D-9160-4B80-BB86-DDE925B64D43}"
 	ProjectSection(SolutionItems) = preProject
-		build.cake = build.cake
-		build.ps1 = build.ps1
-		build.sh = build.sh
 		src\Directory.Build.props = src\Directory.Build.props
-		build\index.cake = build\index.cake
-		build\util.cake = build\util.cake
-		build\version.cake = build\version.cake
 		build\version.props = build\version.props
 	EndProjectSection
 EndProject
