@@ -4,17 +4,11 @@ dist: xenial
 solution: CAP.sln
 dotnet: 3.1.100
 mono: none
+env:
+ - Cap_MySql_ConnectionString="Server=127.0.0.1;Database=cap_test;Uid=root;Pwd=;Allow User Variables=True;SslMode=none"
 
-#matrix:
-#  include:
-#  - dotnet: 2.2
-#  - os: linux
-#    dist: trusty # Ubuntu 14.04
-#    sudo: required
-#  - os: osx
-#    osx_image: xcode8.3 # macOS 10.12
-    
-# Run the build script
+services:
+ - mysql
 
 script:
  - export PATH="$PATH:$HOME/.dotnet/tools"
