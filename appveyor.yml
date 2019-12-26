@@ -7,7 +7,7 @@ environment:
 services:
   - mysql
 before_build:
-  - ps: dotnet tool install --global FlubuCore.GlobalTool --version 4.2.8
+  - ps: dotnet tool install --global FlubuCore.GlobalTool --version 4.3.5
 build_script:
   - ps: flubu
 test: off

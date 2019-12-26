@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using FlubuCore.Context;
+using FlubuCore.IO;
 using FlubuCore.Scripting;
 using FlubuCore.Scripting.Attributes;
 using GlobExpressions;
@@ -18,25 +19,27 @@ namespace BuildScript
 
         protected BuildVersion BuildVersion { get; set; }
 
-        protected List<string> ProjectFiles { get; set; }
+        protected List<FileFullPath> ProjectFiles { get; set; }
 
-        protected List<string> TestProjectFiles { get; set; }
+        protected List<FileFullPath> TestProjectFiles { get; set; }
 
         protected override void ConfigureBuildProperties(IBuildPropertiesContext context)
         {
-            context.Properties.Set(BuildProps.ProductId, "CAP");
             context.Properties.Set(BuildProps.SolutionFileName, "CAP.sln");
             context.Properties.Set(BuildProps.BuildConfiguration, string.IsNullOrEmpty(Configuration) ? "Release" : Configuration);
-            //// todo remove casting when new version of flubu is available
-            BuildVersion = FetchBuildVersion(context as ITaskContext);
-            Console.WriteLine(BuildVersion.Version());
-            TestProjectFiles =  Glob.Files("./test", "*/*.csproj", GlobOptions.MatchFullPath).Select(x => $"./test/{x}").ToList();
-            ProjectFiles = Glob.Files("./src", "*/*.csproj").Select(x => $"./src/{x}").ToList();
+        }
+
+        protected override void BeforeBuildExecution(ITaskContext context)
+        {
+            BuildVersion = FetchBuildVersion(context);
+            TestProjectFiles = context.GetFiles("./test", "*/*.csproj");
+            ProjectFiles = context.GetFiles("./src", "*/*.csproj");
         }
 
         protected override void ConfigureTargets(ITaskContext context)
         {
             var clean = context.CreateTarget("Clean")
+                .SetDescription("")
                 .AddCoreTask(x => x.Clean()
                     .AddDirectoryToClean(ArtifactsDir, true));
 
@@ -58,7 +61,7 @@ namespace BuildScript
                             .NoBuild());
                     });
 
-          var pack =  context.CreateTarget("Pack")
+          var pack = context.CreateTarget("Pack")
                 .ForEach(ProjectFiles, (projectFile, target) =>
                 {
                     target.AddCoreTask(x => x.Pack()
