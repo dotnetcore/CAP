@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="version.props" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="FlubuCore" Version="4.3.5" />
   </ItemGroup>
 

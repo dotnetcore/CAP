@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using FlubuCore.Context;
 using FlubuCore.IO;
 using FlubuCore.Scripting;
 using FlubuCore.Scripting.Attributes;
-using GlobExpressions;
 
 namespace BuildScript
 {
