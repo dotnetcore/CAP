@@ -27,7 +27,7 @@ namespace DotNetCore.CAP
 
             services.AddSingleton<IDataStorage, PostgreSqlDataStorage>();
             services.AddSingleton<IStorageInitializer, PostgreSqlStorageInitializer>();
-            services.AddTransient<CapTransactionBase, PostgreSqlCapTransaction>();
+            services.AddTransient<ICapTransaction, PostgreSqlCapTransaction>();
         }
     }
 }

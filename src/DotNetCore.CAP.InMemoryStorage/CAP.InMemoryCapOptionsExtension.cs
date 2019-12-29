@@ -14,7 +14,7 @@ namespace DotNetCore.CAP
         {
             services.AddSingleton<CapStorageMarkerService>();
 
-            services.AddTransient<CapTransactionBase, InMemoryCapTransaction>();
+            services.AddTransient<ICapTransaction, InMemoryCapTransaction>();
             services.AddSingleton<IDataStorage, InMemoryStorage.InMemoryStorage>();
             services.AddSingleton<IStorageInitializer, InMemoryStorageInitializer>();
         }

@@ -29,7 +29,7 @@ namespace DotNetCore.CAP
             services.AddSingleton<DiagnosticProcessorObserver>();
             services.AddSingleton<IDataStorage, SqlServerDataStorage>();
             services.AddSingleton<IStorageInitializer, SqlServerStorageInitializer>();
-            services.AddTransient<CapTransactionBase, SqlServerCapTransaction>();
+            services.AddTransient<ICapTransaction, SqlServerCapTransaction>();
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, DiagnosticRegister>());
 
             services.Configure(_configure);

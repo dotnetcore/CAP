@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.MongoDB
             services.AddSingleton<IDataStorage, MongoDBDataStorage>();
             services.AddSingleton<IStorageInitializer, MongoDBStorageInitializer>();
 
-            services.AddTransient<CapTransactionBase, MongoDBCapTransaction>();
+            services.AddTransient<ICapTransaction, MongoDBCapTransaction>();
 
             services.Configure(_configure);
 
