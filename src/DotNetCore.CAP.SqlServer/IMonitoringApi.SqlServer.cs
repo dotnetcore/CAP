@@ -79,7 +79,7 @@ select count(Id) from {_recName} with (nolock) where StatusName = N'Failed';";
 
             if (!string.IsNullOrEmpty(queryDto.Group)) where += " and [group]=@Group";
 
-            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and content like '%@Content%'";
+            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and content like @Content";
 
             var sqlQuery2008 =
                 $@"select * from 
@@ -96,7 +96,7 @@ select count(Id) from {_recName} with (nolock) where StatusName = N'Failed';";
                 queryDto.StatusName,
                 queryDto.Group,
                 queryDto.Name,
-                queryDto.Content,
+                Content = "%" + queryDto.Content + "%",
                 Offset = queryDto.CurrentPage * queryDto.PageSize,
                 Limit = queryDto.PageSize
             }).ToList());

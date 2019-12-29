@@ -82,7 +82,7 @@ select count(""Id"") from {_recName} where ""StatusName"" = N'Failed';";
 
             if (!string.IsNullOrEmpty(queryDto.Group)) where += " and Lower(\"Group\") = Lower(@Group)";
 
-            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and \"Content\" ILike '%@Content%'";
+            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and \"Content\" ILike concat('%',@Content,'%')";
 
             var sqlQuery =
                 $"select * from {tableName} where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
