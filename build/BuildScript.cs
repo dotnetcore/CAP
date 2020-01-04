@@ -65,8 +65,8 @@ namespace BuildScript
                         .NoBuild()
                         .Project(projectFile)
                         .IncludeSymbols()
-                        .When(() => !string.IsNullOrEmpty(BuildVersion.Suffix), t => t.VersionSufix(BuildVersion.Suffix)
-                        .OutputDirectory(ArtifactsDir);
+                        .When(() => !string.IsNullOrEmpty(BuildVersion.Suffix), t => t.VersionSufix(BuildVersion.Suffix))
+                        .OutputDirectory(ArtifactsDir));
                 });
 
           context.CreateTarget("Default")
