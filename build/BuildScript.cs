@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using FlubuCore.Context;
 using FlubuCore.IO;
 using FlubuCore.Scripting;
@@ -66,8 +65,8 @@ namespace BuildScript
                         .NoBuild()
                         .Project(projectFile)
                         .IncludeSymbols()
-                        .VersionSufix(BuildVersion.Suffix)
-                        .OutputDirectory(ArtifactsDir));
+                        .When(() => !string.IsNullOrEmpty(BuildVersion.Suffix), t => t.VersionSufix(BuildVersion.Suffix)
+                        .OutputDirectory(ArtifactsDir);
                 });
 
           context.CreateTarget("Default")
