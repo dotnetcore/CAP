@@ -55,6 +55,7 @@ namespace DotNetCore.CAP.Processor
 
             foreach (var message in messages)
             {
+                //the message.Origin.Value maybe JObject
                 await _messageSender.SendAsync(message);
 
                 await context.WaitAsync(_delay);

@@ -9,6 +9,7 @@ using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Linq;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -62,7 +63,14 @@ namespace DotNetCore.CAP.Internal
                     }
                     else
                     {
-                        executeParameters[i] = message.Value;
+                        if (message.Value is JObject jValue)  //reading from storage
+                        {
+                            executeParameters[i] = jValue.ToObject(parameterDescriptors[i].ParameterType);
+                        }
+                        else
+                        {
+                            executeParameters[i] = message.Value;
+                        }
                     }
                 }
 
