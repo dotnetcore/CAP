@@ -201,7 +201,7 @@ namespace DotNetCore.CAP.SqlServer
 
             var result = new List<MediumMessage>();
 
-            var connection = new SqlConnection(_options.Value.ConnectionString);
+            using var connection = new SqlConnection(_options.Value.ConnectionString);
             var reader = await connection.ExecuteReaderAsync(sql);
             while (reader.Read())
             {
