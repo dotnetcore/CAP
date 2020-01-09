@@ -9,7 +9,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FlubuCore" Version="4.3.5" />
+    <PackageReference Include="FlubuCore" Version="4.3.7" />
   </ItemGroup>
 
 </Project>
