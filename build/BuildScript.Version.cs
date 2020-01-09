@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Xml;
 using FlubuCore.Context;
 using FlubuCore.Scripting.Attributes;
@@ -10,7 +11,7 @@ namespace BuildScript
     {
         public BuildVersion FetchBuildVersion(ITaskContext context)
         {
-            var content = System.IO.File.ReadAllText("./build/version.props");
+            var content = System.IO.File.ReadAllText(RootDirectory.CombineWith("build/version.props"));
 
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(content);
@@ -28,22 +29,20 @@ namespace BuildScript
             if (!context.BuildSystems().IsLocalBuild)
             {
                 isCi = true;
-                //// todo use flubu build system when available.
-                var appveyortag = context.GetEnvironmentVariable("APPVEYOR_REPO_TAG");
-                bool isTagAppveyor = !string.IsNullOrEmpty(appveyortag) && appveyortag.Equals("true", StringComparison.OrdinalIgnoreCase);
+                bool isTagAppveyor = context.BuildSystems().AppVeyor().IsTag;
              
-                if ((context.BuildSystems().RunningOn == BuildSystemType.AppVeyor && isTagAppveyor) ||
-                    (context.BuildSystems().RunningOn == BuildSystemType.TravisCI && string.IsNullOrWhiteSpace(context.BuildSystems().Travis().TagName)))
+                if (context.BuildSystems().RunningOn == BuildSystemType.AppVeyor && isTagAppveyor ||
+                    context.BuildSystems().RunningOn == BuildSystemType.TravisCI && string.IsNullOrWhiteSpace(context.BuildSystems().Travis().TagName))
                 {
                     isTagged = true;
                 }
             }
 
-
             if (!isTagged)
             {
                 suffix += (isCi ? "preview-" : "dv-") + CreateStamp();
             }
+
             suffix = string.IsNullOrWhiteSpace(suffix) ? null : suffix;
 
             var version = new BuildVersion(int.Parse(versionMajor), int.Parse(versionMinor), int.Parse(versionPatch), versionQuality);

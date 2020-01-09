@@ -12,5 +12,5 @@ services:
 
 script:
  - export PATH="$PATH:$HOME/.dotnet/tools"
- - dotnet tool install --global FlubuCore.GlobalTool --version 4.3.5
- - flubu build tests -s=build/BuildScript.cs
+ - dotnet tool install --global FlubuCore.GlobalTool --version 4.3.7
+ - flubu build tests
