@@ -63,9 +63,9 @@ namespace DotNetCore.CAP.Internal
                     }
                     else
                     {
-                        if (message.Value is JObject jValue)  //reading from storage
+                        if (message.Value is JToken jToken)  //reading from storage
                         {
-                            executeParameters[i] = jValue.ToObject(parameterDescriptors[i].ParameterType);
+                            executeParameters[i] = jToken.ToObject(parameterDescriptors[i].ParameterType);
                         }
                         else
                         {
