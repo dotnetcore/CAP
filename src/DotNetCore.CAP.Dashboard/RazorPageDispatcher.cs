@@ -9,9 +9,9 @@ namespace DotNetCore.CAP.Dashboard
 {
     internal class RazorPageDispatcher : IDashboardDispatcher
     {
-        private readonly Func<Match, RazorPage> _pageFunc;
+        private readonly Func<DashboardContext, RazorPage> _pageFunc;
 
-        public RazorPageDispatcher(Func<Match, RazorPage> pageFunc)
+        public RazorPageDispatcher(Func<DashboardContext, RazorPage> pageFunc)
         {
             _pageFunc = pageFunc;
         }
@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.Dashboard
         {
             context.Response.ContentType = "text/html";
 
-            var page = _pageFunc(context.UriMatch);
+            var page = _pageFunc(context);
             page.Assign(context);
 
             return context.Response.WriteAsync(page.ToString());

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -11,6 +12,7 @@ namespace DotNetCore.CAP.Dashboard
     public abstract class DashboardRequest
     {
         public abstract string Method { get; }
+        public abstract Dictionary<string, string> Cookies { get; }
         public abstract string Path { get; }
         public abstract string PathBase { get; }
 
@@ -28,10 +30,11 @@ namespace DotNetCore.CAP.Dashboard
 
         public CapDashboardRequest(HttpContext context)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context)); 
+            _context = context ?? throw new ArgumentNullException(nameof(context));
         }
 
         public override string Method => _context.Request.Method;
+        public override Dictionary<string, string> Cookies => _context.Request.Cookies.ToDictionary(x => x.Key, v => v.Value);
         public override string Path => _context.Request.Path.Value;
         public override string PathBase => _context.Request.PathBase.Value;
         public override string LocalIpAddress => _context.Connection.LocalIpAddress.MapToIPv4().ToString();

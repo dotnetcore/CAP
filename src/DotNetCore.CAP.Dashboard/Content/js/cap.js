@@ -652,4 +652,5 @@ $(function() {
 function nodeSwitch(id) {
     console.log(`id:${id}`);
     document.cookie = `cap.node=${escape(id)};`;
+    window.location.reload();
 }

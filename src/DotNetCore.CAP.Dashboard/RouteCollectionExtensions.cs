@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.Dashboard
         public static void AddRazorPage(
             this RouteCollection routes,
             string pathTemplate,
-            Func<Match, RazorPage> pageFunc)
+            Func<DashboardContext, RazorPage> pageFunc)
         {
             if (routes == null)
             {

@@ -119,16 +119,20 @@ namespace DotNetCore.CAP.Dashboard
 
             Routes.AddRazorPage(
                 "/published/(?<StatusName>.+)",
-                x => new PublishedPage(x.Groups["StatusName"].Value));
+                x => new PublishedPage(x.UriMatch.Groups["StatusName"].Value));
             Routes.AddRazorPage(
                 "/received/(?<StatusName>.+)",
-                x => new ReceivedPage(x.Groups["StatusName"].Value));
+                x => new ReceivedPage(x.UriMatch.Groups["StatusName"].Value));
 
             Routes.AddRazorPage("/subscribers", x => new SubscriberPage());
+            
+            Routes.AddRazorPage("/nodes", x =>
+            {
+                var id = x.Request.Cookies["cap.node"];
+                return new NodePage(id);
+            });
 
-            Routes.AddRazorPage("/nodes", x => new NodePage());
-
-            Routes.AddRazorPage("/nodes/node/(?<Id>.+)", x => new NodePage(x.Groups["Id"].Value));
+            Routes.AddRazorPage("/nodes/node/(?<Id>.+)", x => new NodePage(x.UriMatch.Groups["Id"].Value));
 
             #endregion Razor pages and commands
         }
