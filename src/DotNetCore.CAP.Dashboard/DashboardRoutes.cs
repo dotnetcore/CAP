@@ -4,6 +4,7 @@
 using System.Reflection;
 using DotNetCore.CAP.Dashboard.Pages;
 using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Serialization;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -102,7 +103,8 @@ namespace DotNetCore.CAP.Dashboard
                 (client, messageId) =>
                 {
                     var msg = client.Storage.GetMonitoringApi().GetPublishedMessageAsync(messageId)
-                        .GetAwaiter().GetResult(); 
+                        .GetAwaiter().GetResult();
+                    msg.Origin = StringSerializer.DeSerialize(msg.Content);
                     client.RequestServices.GetService<IDispatcher>().EnqueueToPublish(msg);
                 });
             Routes.AddPublishBatchCommand(
@@ -111,6 +113,7 @@ namespace DotNetCore.CAP.Dashboard
                 {
                     var msg = client.Storage.GetMonitoringApi().GetReceivedMessageAsync(messageId)
                         .GetAwaiter().GetResult();
+                    msg.Origin = StringSerializer.DeSerialize(msg.Content);
                     client.RequestServices.GetService<ISubscribeDispatcher>().DispatchAsync(msg);
                 }); 
 
