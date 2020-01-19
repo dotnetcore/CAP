@@ -159,7 +159,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private Task OnConsumerReceived(Message message, CancellationToken token)
         {
-            var header = message.UserProperties.ToDictionary(x => x.Key, y => y.Value.ToString());
+            var header = message.UserProperties.ToDictionary(x => x.Key, y => y.Value?.ToString());
 
             var context = new TransportMessage(header, message.Body);
 
