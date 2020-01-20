@@ -175,7 +175,7 @@ select count(Id) from {_recName} with (nolock) where StatusName = N'Failed';";
             var sqlQuery2008 = $@"
 with aggr as (
     select replace(convert(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added)) as [Key],
-        count(id) [Count]
+        count(Id) [Count]
     from  {tableName}
     where StatusName = @statusName
     group by replace(convert(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added))
@@ -186,7 +186,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] in @keys;";
             var sqlQuery = $@"
 with aggr as (
     select FORMAT(Added,'yyyy-MM-dd-HH') as [Key],
-        count(id) [Count]
+        count(Id) [Count]
     from  {tableName}
     where StatusName = @statusName
     group by FORMAT(Added,'yyyy-MM-dd-HH')
