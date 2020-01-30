@@ -43,7 +43,7 @@ namespace DotNetCore.CAP.Kafka
                 var result = await producer.ProduceAsync(message.GetName(), new Message<string, byte[]>
                 {
                     Headers = headers,
-                    Key = message.GetId(),
+                    Key = message.Headers.TryGetValue(KafkaHeaders.KafkaKey, out string kafkaMessageKey) && !string.IsNullOrEmpty(kafkaMessageKey) ? kafkaMessageKey : message.GetId(),
                     Value = message.Body
                 });
 
