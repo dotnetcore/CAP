@@ -299,7 +299,7 @@ namespace DotNetCore.CAP.Internal
             {
                 var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
-                var eventData = new CapEventDataPubSend()
+                var eventData = new CapEventDataSubStore()
                 {
                     OperationTimestamp = now,
                     Operation = message.GetName(),
