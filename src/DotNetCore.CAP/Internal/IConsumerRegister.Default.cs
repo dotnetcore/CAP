@@ -235,6 +235,7 @@ namespace DotNetCore.CAP.Internal
                     _logger.LogWarning("RabbitMQ consumer unregistered. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ConsumerShutdown:
+                    _isHealthy = false;
                     _logger.LogWarning("RabbitMQ consumer shutdown. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ConsumeError:

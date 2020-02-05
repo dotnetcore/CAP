@@ -95,9 +95,7 @@ namespace DotNetCore.CAP.Kafka
             _consumerClient?.Dispose();
         }
 
-        #region private methods
-
-        private void Connect()
+        public void Connect()
         {
             if (_consumerClient != null)
             {
@@ -134,7 +132,5 @@ namespace DotNetCore.CAP.Kafka
             };
             OnLog?.Invoke(null, logArgs);
         }
-
-        #endregion private methods
     }
 }

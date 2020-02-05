@@ -109,9 +109,7 @@ namespace DotNetCore.CAP.AzureServiceBus
             _consumerClient?.CloseAsync().Wait(1500);
         }
 
-        #region private methods
-
-        private async Task ConnectAsync()
+        public async Task ConnectAsync()
         {
             if (_consumerClient != null)
             {
@@ -156,6 +154,8 @@ namespace DotNetCore.CAP.AzureServiceBus
                 _connectionLock.Release();
             }
         }
+
+        #region private methods
 
         private Task OnConsumerReceived(Message message, CancellationToken token)
         {

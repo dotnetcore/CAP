@@ -25,7 +25,9 @@ namespace DotNetCore.CAP.AzureServiceBus
             try
             {
                 var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
-                return new AzureServiceBusConsumerClient(logger, groupId, _asbOptions);
+                var client = new AzureServiceBusConsumerClient(logger, groupId, _asbOptions);
+                client.ConnectAsync().GetAwaiter().GetResult();
+                return client;
             }
             catch (System.Exception e)
             {

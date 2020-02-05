@@ -21,7 +21,9 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             try
             {
-                return new RabbitMQConsumerClient(groupId, _connectionChannelPool, _rabbitMQOptions);
+               var client = new RabbitMQConsumerClient(groupId, _connectionChannelPool, _rabbitMQOptions);
+               client.Connect();
+               return client;
             }
             catch (System.Exception e)
             {

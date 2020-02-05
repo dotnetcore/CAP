@@ -95,9 +95,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _connection?.Dispose();
         }
 
-        #region events
-
-        private void Connect()
+        public void Connect()
         {
             if (_connection != null)
             {
@@ -128,6 +126,8 @@ namespace DotNetCore.CAP.RabbitMQ
                 _connectionLock.Release();
             }
         }
+
+        #region events
 
         private void OnConsumerConsumerCancelled(object sender, ConsumerEventArgs e)
         {
