@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,22 +19,24 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ConcurrentDictionary<int, ObjectMethodExecutor> _executors;
 
         public SubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _logger = loggerFactory.CreateLogger<SubscribeInvoker>();
+            _executors = new ConcurrentDictionary<int, ObjectMethodExecutor>();
         }
 
         public async Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            _logger.LogDebug("Executing subscriber method : {0}", context.ConsumerDescriptor.MethodInfo.Name);
+            var methodInfo = context.ConsumerDescriptor.MethodInfo;
 
-            var executor = ObjectMethodExecutor.Create(
-                context.ConsumerDescriptor.MethodInfo,
-                context.ConsumerDescriptor.ImplTypeInfo);
+            _logger.LogDebug("Executing subscriber method : {0}", methodInfo.Name);
+
+            var executor = _executors.GetOrAdd(methodInfo.MetadataToken, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
             using (var scope = _serviceProvider.CreateScope())
             {
