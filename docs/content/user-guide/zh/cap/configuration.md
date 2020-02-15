@@ -57,6 +57,7 @@ services.AddCap(config =>
 
 > 查看博客来了解更多关于 Version 的信息： https://www.cnblogs.com/savorboard/p/cap-2-4.html
 
+
 #### FailedRetryInterval
 
 默认值：60 秒
@@ -68,6 +69,12 @@ services.AddCap(config =>
 !!! WARNING "重试 & 间隔"
     在默认情况下，重试将在发送和消费消息失败的 **4分钟后** 开始，这是为了避免设置消息状态延迟导致可能出现的问题。  
     发送和消费消息的过程中失败会立即重试 3 次，在 3 次以后将进入重试轮询，此时 FailedRetryInterval 配置才会生效。
+
+#### ConsumerThreadCount 
+
+默认值：1
+
+消费者线程并行处理消息的线程数。
 
 #### FailedRetryCount
 
