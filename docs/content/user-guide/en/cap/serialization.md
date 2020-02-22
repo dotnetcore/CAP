@@ -1,40 +1,36 @@
 # Serialization
 
-CAP does not currently support serialization for transport messages, and CAP uses json to serialize message objects before sending them to the transport.
+We provide the `ISerializer` interface to support serialization of messages. By default, we use json to serialize messages and store them in the database.
 
-## Content Serialization
+## Custom Serialization
 
-The CAP supports serializing the Message's Content field, which you can do by customizing the `IContentSerializer` interface.
-
-Currently, since the message object needs to be stored in the database, only the serialization and reverse ordering of `string` are supported.
-
-```csharp
-
-class MyContentSerializer : IContentSerializer 
+```C#
+public class YourSerializer: ISerializer
 {
-    public T DeSerialize<T>(string messageObjStr)
+    Task<TransportMessage> SerializeAsync(Message message)
     {
-    }
 
-    public object DeSerialize(string content, Type type)
-    {
     }
-
-    public string Serialize<T>(T messageObj)
+ 
+    Task<Message> DeserializeAsync(TransportMessage transportMessage, Type valueType)
     {
+
     }
 }
 ```
 
-Configure the custom `MyContentSerializer` to the service.
-
-```csharp
-
-services.AddCap(x =>{  }).AddContentSerializer<MyContentSerializer>();
+Then register your implementation in the container:
 
 ```
 
-## Message Adapter
+services.AddSingleton<ISerializer, YourSerializer>();
+
+// ---
+services.AddCap 
+
+```
+
+## Message Adapter (removed in v3.0)
 
 In heterogeneous systems, sometimes you need to communicate with other systems, but other systems use message objects that may be different from CAP's [**Wrapper Object**](../persistent/general.md#_7). This time maybe you need to customize the message wapper.
 
