@@ -56,7 +56,8 @@ namespace DotNetCore.CAP.Test
             _capOptions = serviceProvider.GetService<IOptions<CapOptions>>().Value;
         }
 
-        protected override IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(IServiceProvider provider)
+        protected override IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
+            IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
@@ -102,6 +103,11 @@ namespace DotNetCore.CAP.Test
                         attr.Group = attr.Group + "." + _capOptions.Version;
                     }
 
+                    if (!string.IsNullOrEmpty(_capOptions.GroupPrefix))
+                    {
+                        attr.Group = _capOptions.GroupPrefix + "." + attr.Group;
+                    }
+
                     yield return new ConsumerExecutorDescriptor
                     {
                         Attribute = new CapSubscribeAttribute(attr.Name)
@@ -116,7 +122,9 @@ namespace DotNetCore.CAP.Test
         }
     }
 
-    public interface IMySubscribe { }
+    public interface IMySubscribe
+    {
+    }
 
     public class MySubscribeAttribute : Attribute
     {
