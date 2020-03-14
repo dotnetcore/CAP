@@ -32,7 +32,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<MediumMessage> GetPublishedMessageAsync(long id)
         {
             var sql =
-                $"SELECT * FROM {_pubName} WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
+                $"SELECT \"Id\" AS \"DbId\",* FROM {_pubName} WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
 
             using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<MediumMessage> GetReceivedMessageAsync(long id)
         {
             var sql =
-                $"SELECT * FROM {_recName} WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
+                $"SELECT \"Id\" AS \"DbId\",* FROM {_recName} WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
             using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
         }

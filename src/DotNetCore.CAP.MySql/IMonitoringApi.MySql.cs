@@ -197,7 +197,7 @@ select aggr.* from (
 
         public async Task<MediumMessage> GetPublishedMessageAsync(long id)
         {
-            var sql = $@"SELECT * FROM `{_pubName}` WHERE `Id`={id};";
+            var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{_pubName}` WHERE `Id`={id};";
 
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
             return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
@@ -205,7 +205,7 @@ select aggr.* from (
 
         public async Task<MediumMessage> GetReceivedMessageAsync(long id)
         {
-            var sql = $@"SELECT * FROM `{_recName}` WHERE Id={id};";
+            var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{_recName}` WHERE Id={id};";
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
             return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
         }
