@@ -4,6 +4,7 @@
 // ReSharper disable once CheckNamespace
 
 using System;
+using System.Collections.Generic;
 using RabbitMQ.Client;
 
 // ReSharper disable once CheckNamespace
@@ -77,5 +78,10 @@ namespace DotNetCore.CAP
         /// RabbitMQ native connection factory options
         /// </summary>
         public Action<ConnectionFactory> ConnectionFactoryOptions { get; set; }
+
+        /// <summary>
+        /// If you need to priority queues and queue length limit and so on.., you can use this function to write additional arguments
+        /// </summary>
+        public Func<Dictionary<string, object>, Dictionary<string, object>> CustomArguments { get; set; }
     }
 }

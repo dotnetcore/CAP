@@ -41,6 +41,13 @@ namespace DotNetCore.CAP.RabbitMQ
                     Headers = message.Headers.ToDictionary(x => x.Key, x => (object)x.Value)
                 };
 
+                if (message.Headers.ContainsKey(RabbitMQProperties.Priority))
+                {
+                    int priority = 0;
+                    int.TryParse(message.Headers[RabbitMQProperties.Priority], out priority);
+                    props.Priority = (byte)priority;
+                }
+
                 channel.ExchangeDeclare(_exchange, RabbitMQOptions.ExchangeType, true);
 
                 channel.BasicPublish(_exchange, message.GetName(), props, message.Body);

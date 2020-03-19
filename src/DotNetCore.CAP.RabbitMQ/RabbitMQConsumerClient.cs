@@ -118,6 +118,12 @@ namespace DotNetCore.CAP.RabbitMQ
                     {
                         {"x-message-ttl", _rabbitMQOptions.QueueMessageExpires}
                     };
+
+                    if (_rabbitMQOptions.CustomArguments != null)
+                    {
+                        arguments = _rabbitMQOptions.CustomArguments(arguments);
+                    }
+
                     _channel.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false, arguments: arguments);
                 }
             }
