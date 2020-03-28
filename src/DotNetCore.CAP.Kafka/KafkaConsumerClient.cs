@@ -62,8 +62,6 @@ namespace DotNetCore.CAP.Kafka
                 }
                 headers.Add(Messages.Headers.Group, _groupId);
 
-                headers.Add(KafkaHeaders.KafkaKey, consumerResult.Key);
-
                 if (_kafkaOptions.CustomHeaders != null)
                 {
                     var customHeaders = _kafkaOptions.CustomHeaders(consumerResult);
