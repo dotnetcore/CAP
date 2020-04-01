@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -15,7 +14,7 @@ using Newtonsoft.Json.Linq;
 
 namespace DotNetCore.CAP.Internal
 {
-    internal class SubscribeInvoker : ISubscribeInvoker
+    public class SubscribeInvoker : ISubscribeInvoker
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
@@ -41,20 +40,8 @@ namespace DotNetCore.CAP.Internal
             using (var scope = _serviceProvider.CreateScope())
             {
                 var provider = scope.ServiceProvider;
-                var srvType = context.ConsumerDescriptor.ServiceTypeInfo?.AsType();
-                var implType = context.ConsumerDescriptor.ImplTypeInfo.AsType();
 
-                object obj = null;
-
-                if (srvType != null)
-                {
-                    obj = provider.GetServices(srvType).FirstOrDefault(o => o.GetType() == implType);
-                }
-
-                if (obj == null)
-                {
-                    obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, implType);
-                }
+                var obj = GetInstance(provider, context);
 
                 var message = context.DeliverMessage;
                 var parameterDescriptors = context.ConsumerDescriptor.Parameters;
@@ -81,6 +68,25 @@ namespace DotNetCore.CAP.Internal
                 var resultObj = await ExecuteWithParameterAsync(executor, obj, executeParameters);
                 return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName());
             }
+        }
+
+        protected virtual object GetInstance(IServiceProvider provider, ConsumerContext context)
+        {
+            var srvType = context.ConsumerDescriptor.ServiceTypeInfo?.AsType();
+            var implType = context.ConsumerDescriptor.ImplTypeInfo.AsType();
+
+            object obj = null;
+            if (srvType != null)
+            {
+                obj = provider.GetServices(srvType).FirstOrDefault(o => o.GetType() == implType);
+            }
+
+            if (obj == null)
+            {
+                obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, implType);
+            }
+
+            return obj;
         }
 
         private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor, object @class, object[] parameter)

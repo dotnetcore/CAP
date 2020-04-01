@@ -3,7 +3,7 @@
 
 namespace DotNetCore.CAP.Internal
 {
-    internal class ConsumerExecutedResult
+    public class ConsumerExecutedResult
     {
         public ConsumerExecutedResult(object result, string msgId, string callbackName)
         {
