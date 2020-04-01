@@ -143,7 +143,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public virtual bool Return(IModel connection)
         {
-            if (Interlocked.Increment(ref _count) <= _maxSize)
+            if (Interlocked.Increment(ref _count) <= _maxSize && connection.IsOpen)
             {
                 _pool.Enqueue(connection);
 
