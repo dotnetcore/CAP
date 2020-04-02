@@ -39,7 +39,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<ICapPublisher, CapPublisher>();
 
             services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
-            services.TryAddSingleton<ISubscribeInvokerFactory, ConsumerInvokerFactory>();
+            services.TryAddSingleton<ISubscribeInvoker, SubscribeInvoker>();
             services.TryAddSingleton<MethodMatcherCache>();
 
             services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();

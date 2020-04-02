@@ -38,7 +38,7 @@ namespace DotNetCore.CAP.Internal
             _options = options.Value;
 
             _dataStorage = _provider.GetService<IDataStorage>();
-            Invoker = _provider.GetService<ISubscribeInvokerFactory>().CreateInvoker();
+            Invoker = _provider.GetService<SubscribeInvoker>();
         }
 
         private ISubscribeInvoker Invoker { get; }
