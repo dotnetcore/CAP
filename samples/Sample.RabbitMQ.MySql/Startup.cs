@@ -14,7 +14,7 @@ namespace Sample.RabbitMQ.MySql
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ("192.168.2.120");
+                x.UseRabbitMQ("localhost");
                 x.UseDashboard();
                 x.FailedRetryCount = 5;
                 x.FailedThresholdCallback = (type, msg) =>
