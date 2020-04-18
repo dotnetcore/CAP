@@ -32,9 +32,10 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public Task<OperateResult> SendAsync(TransportMessage message)
         {
-            var channel = _connectionChannelPool.Rent();
+            IModel channel = null;
             try
             {
+                channel = _connectionChannelPool.Rent();
                 var props = new BasicProperties
                 {
                     DeliveryMode = 2,
@@ -62,12 +63,15 @@ namespace DotNetCore.CAP.RabbitMQ
             }
             finally
             {
-                var returned = _connectionChannelPool.Return(channel);
-                if (!returned)
+                if (channel != null)
                 {
-                    channel.Dispose();
+                    var returned = _connectionChannelPool.Return(channel);
+                    if (!returned)
+                    {
+                        channel.Dispose();
+                    }
                 }
             }
-        } 
+        }
     }
 }

@@ -12,6 +12,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using DotNetCore.CAP.Transport;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -19,14 +20,16 @@ namespace DotNetCore.CAP.Internal
 {
     internal class ConsumerRegister : IConsumerRegister
     {
+        private readonly ILogger _logger;
+        private readonly IServiceProvider _serviceProvider;
+
         private readonly IConsumerClientFactory _consumerClientFactory;
         private readonly IDispatcher _dispatcher;
         private readonly ISerializer _serializer;
         private readonly IDataStorage _storage;
-        private readonly ILogger _logger;
+        private readonly MethodMatcherCache _selector;
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly CapOptions _options;
-        private readonly MethodMatcherCache _selector;
 
         private CancellationTokenSource _cts;
         private BrokerAddress _serverAddress;
@@ -39,21 +42,17 @@ namespace DotNetCore.CAP.Internal
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
 
-        public ConsumerRegister(ILogger<ConsumerRegister> logger,
-            IOptions<CapOptions> options,
-            MethodMatcherCache selector,
-            IConsumerClientFactory consumerClientFactory,
-            IDispatcher dispatcher,
-            ISerializer serializer,
-            IDataStorage storage)
+        public ConsumerRegister(ILogger<ConsumerRegister> logger, IServiceProvider serviceProvider)
         {
-            _options = options.Value;
-            _selector = selector;
             _logger = logger;
-            _consumerClientFactory = consumerClientFactory;
-            _dispatcher = dispatcher;
-            _serializer = serializer;
-            _storage = storage;
+            _serviceProvider = serviceProvider;
+
+            _options = serviceProvider.GetService<IOptions<CapOptions>>().Value;
+            _selector = serviceProvider.GetService<MethodMatcherCache>();
+            _consumerClientFactory = serviceProvider.GetService<IConsumerClientFactory>();
+            _dispatcher = serviceProvider.GetService<IDispatcher>();
+            _serializer = serviceProvider.GetService<ISerializer>();
+            _storage = serviceProvider.GetService<IDataStorage>();
             _cts = new CancellationTokenSource();
         }
 
@@ -152,7 +151,7 @@ namespace DotNetCore.CAP.Internal
             client.OnMessageReceived += async (sender, transportMessage) =>
             {
                 _logger.MessageReceived(transportMessage.GetId(), transportMessage.GetName());
-               
+
                 long? tracingTimestamp = null;
                 try
                 {
@@ -193,6 +192,22 @@ namespace DotNetCore.CAP.Internal
                         _storage.StoreReceivedExceptionMessage(name, group, content);
 
                         client.Commit(sender);
+
+                        try
+                        {
+                            _options.FailedThresholdCallback?.Invoke(new FailedInfo
+                            {
+                                ServiceProvider = _serviceProvider,
+                                MessageType = MessageType.Subscribe,
+                                Message = message
+                            });
+
+                            _logger.ConsumerExecutedAfterThreshold(message.GetId(), _options.FailedRetryCount);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.ExecutedThresholdCallbackFailed(e);
+                        }
 
                         TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
                     }

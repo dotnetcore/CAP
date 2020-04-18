@@ -1,7 +1,7 @@
-﻿using System;
-using DotNetCore.CAP.Messages;
+﻿using DotNetCore.CAP.Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace Sample.RabbitMQ.MySql
 {
@@ -17,10 +17,11 @@ namespace Sample.RabbitMQ.MySql
                 x.UseRabbitMQ("localhost");
                 x.UseDashboard();
                 x.FailedRetryCount = 5;
-                x.FailedThresholdCallback = (type, msg) =>
+                x.FailedThresholdCallback = failed =>
                 {
-                    Console.WriteLine(
-                        $@"A message of type {type} failed after executing {x.FailedRetryCount} several times, requiring manual troubleshooting. Message name: {msg.GetName()}");
+                    var logger = failed.ServiceProvider.GetService<ILogger<Startup>>();
+                    logger.LogError($@"A message of type {failed.MessageType} failed after executing {x.FailedRetryCount} several times, 
+                        requiring manual troubleshooting. Message name: {failed.Message.GetName()}");
                 };
             });
 

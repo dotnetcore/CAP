@@ -10,7 +10,7 @@ namespace Sample.Kafka.InMemory
             services.AddCap(x =>
             {
                 x.UseInMemoryStorage();
-                x.UseKafka("192.168.2.120:9093");
+                x.UseKafka("localhost:9092");
                 x.UseDashboard();
             });
 
