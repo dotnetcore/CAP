@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,7 +61,8 @@ namespace DotNetCore.CAP.Internal
                         }
                         else
                         {
-                            executeParameters[i] = message.Value;
+                            var converter = TypeDescriptor.GetConverter(parameterDescriptors[i].ParameterType);
+                            executeParameters[i] = converter.ConvertFrom(message.Value);
                         }
                     }
                 }
