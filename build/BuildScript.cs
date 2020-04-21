@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using FlubuCore.Context;
+using FlubuCore.Context.Attributes.BuildProperties;
 using FlubuCore.IO;
 using FlubuCore.Scripting;
 using FlubuCore.Scripting.Attributes;
@@ -9,22 +10,19 @@ namespace BuildScript
     [Include("./build/BuildVersion.cs")]
     public partial class BuildScript : DefaultBuildScript
     {
-        protected string ArtifactsDir => RootDirectory.CombineWith("artifacts");
-
         [FromArg("c|configuration")]
-        public string Configuration { get; set; }
+        [BuildConfiguration]
+        public string Configuration { get; set; } = "Release";
+
+        [SolutionFileName] public string SolutionFileName { get; set; } = "CAP.sln";
 
         protected BuildVersion BuildVersion { get; set; }
 
+        protected string ArtifactsDir => RootDirectory.CombineWith("artifacts");
+        
         protected List<FileFullPath> ProjectFiles { get; set; }
 
         protected List<FileFullPath> TestProjectFiles { get; set; }
-
-        protected override void ConfigureBuildProperties(IBuildPropertiesContext context)
-        {
-            context.Properties.Set(BuildProps.SolutionFileName, "CAP.sln");
-            context.Properties.Set(BuildProps.BuildConfiguration, string.IsNullOrEmpty(Configuration) ? "Release" : Configuration);
-        }
 
         protected override void BeforeBuildExecution(ITaskContext context)
         {
