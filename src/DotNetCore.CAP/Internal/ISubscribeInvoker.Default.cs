@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.Internal
 
             _logger.LogDebug("Executing subscriber method : {0}", methodInfo.Name);
 
-            var executor = _executors.GetOrAdd(methodInfo.MetadataToken, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
+            var executor = _executors.GetOrAdd(methodInfo.GetHashCode(), x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
             using (var scope = _serviceProvider.CreateScope())
             {
