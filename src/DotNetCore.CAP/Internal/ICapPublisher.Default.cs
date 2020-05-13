@@ -71,7 +71,7 @@ namespace DotNetCore.CAP.Internal
             var messageId = SnowflakeId.Default().NextId().ToString();
             headers.Add(Headers.MessageId, messageId);
             headers.Add(Headers.MessageName, name);
-            headers.Add(Headers.Type, typeof(T).FullName);
+            headers.Add(Headers.Type, typeof(T).Name);
             headers.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
             if (!headers.ContainsKey(Headers.CorrelationId))
             {
