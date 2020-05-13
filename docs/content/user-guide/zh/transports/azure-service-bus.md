@@ -39,7 +39,7 @@ public void ConfigureServices(IServiceCollection services)
 
 #### AzureServiceBus Options
 
-CAP 直接对外提供的 Kafka 配置参数如下：
+CAP 直接对外提供的 Azure Service Bus 配置参数如下：
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---

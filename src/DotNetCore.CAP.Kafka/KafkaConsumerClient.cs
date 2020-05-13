@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.Kafka
 {
     internal sealed class KafkaConsumerClient : IConsumerClient
     {
-        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+        private static readonly SemaphoreSlim ConnectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;
@@ -100,7 +100,7 @@ namespace DotNetCore.CAP.Kafka
                 return;
             }
 
-            _connectionLock.Wait();
+            ConnectionLock.Wait();
 
             try
             {
@@ -117,7 +117,7 @@ namespace DotNetCore.CAP.Kafka
             }
             finally
             {
-                _connectionLock.Release();
+                ConnectionLock.Release();
             }
         }
 

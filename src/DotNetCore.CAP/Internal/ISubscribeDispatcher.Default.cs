@@ -145,7 +145,12 @@ namespace DotNetCore.CAP.Internal
                 {
                     try
                     {
-                        _options.FailedThresholdCallback?.Invoke(MessageType.Subscribe, message.Origin);
+                        _options.FailedThresholdCallback?.Invoke(new FailedInfo
+                        {
+                            ServiceProvider = _provider,
+                            MessageType = MessageType.Subscribe,
+                            Message = message.Origin
+                        });
 
                         _logger.ConsumerExecutedAfterThreshold(message.DbId, _options.FailedRetryCount);
                     }

@@ -9,6 +9,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using DotNetCore.CAP.Transport;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -16,10 +17,12 @@ namespace DotNetCore.CAP.Internal
 {
     internal class MessageSender : IMessageSender
     {
+        private readonly ILogger _logger;
+        private readonly IServiceProvider _serviceProvider;
+
         private readonly IDataStorage _dataStorage;
         private readonly ISerializer _serializer;
         private readonly ITransport _transport;
-        private readonly ILogger _logger;
         private readonly IOptions<CapOptions> _options;
 
         // ReSharper disable once InconsistentNaming
@@ -28,16 +31,15 @@ namespace DotNetCore.CAP.Internal
 
         public MessageSender(
             ILogger<MessageSender> logger,
-            IOptions<CapOptions> options,
-            IDataStorage dataStorage,
-            ISerializer serializer,
-            ITransport transport)
+            IServiceProvider serviceProvider)
         {
-            _options = options;
-            _dataStorage = dataStorage;
-            _serializer = serializer;
-            _transport = transport;
             _logger = logger;
+            _serviceProvider = serviceProvider;
+
+            _options = serviceProvider.GetService<IOptions<CapOptions>>();
+            _dataStorage = serviceProvider.GetService<IDataStorage>();
+            _serializer = serviceProvider.GetService<ISerializer>();
+            _transport = serviceProvider.GetService<ITransport>();
         }
 
         public async Task<OperateResult> SendAsync(MediumMessage message)
@@ -111,7 +113,12 @@ namespace DotNetCore.CAP.Internal
                 {
                     try
                     {
-                        _options.Value.FailedThresholdCallback?.Invoke(MessageType.Publish, message.Origin);
+                        _options.Value.FailedThresholdCallback?.Invoke(new FailedInfo
+                        {
+                            ServiceProvider = _serviceProvider,
+                            MessageType = MessageType.Publish,
+                            Message = message.Origin
+                        }); 
 
                         _logger.SenderAfterThreshold(message.DbId, _options.Value.FailedRetryCount);
                     }
