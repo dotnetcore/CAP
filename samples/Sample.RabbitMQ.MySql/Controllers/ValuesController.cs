@@ -21,11 +21,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.rabbitmq.mysql", new Person()
-            {
-                Id = 123,
-                Name = "Bar"
-            });
+            await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
 
             return Ok();
         }

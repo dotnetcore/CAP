@@ -72,6 +72,7 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(setupAction);
 
             //Startup and Hosted 
+            services.AddSingleton<IBootstrapper, Bootstrapper>();
             services.AddHostedService<Bootstrapper>();
 
             return new CapBuilder(services);

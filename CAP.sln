@@ -63,6 +63,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.InMemoryStor
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.Test", "test\DotNetCore.CAP.Test\DotNetCore.CAP.Test.csproj", "{75CC45E6-BF06-40F4-977D-10DCC05B2EFA}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.ConsoleApp", "samples\Sample.ConsoleApp\Sample.ConsoleApp.csproj", "{2B0F467E-ABBD-4A51-BF38-D4F609DB6266}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -141,6 +143,10 @@ Global
 		{75CC45E6-BF06-40F4-977D-10DCC05B2EFA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75CC45E6-BF06-40F4-977D-10DCC05B2EFA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75CC45E6-BF06-40F4-977D-10DCC05B2EFA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B0F467E-ABBD-4A51-BF38-D4F609DB6266}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B0F467E-ABBD-4A51-BF38-D4F609DB6266}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B0F467E-ABBD-4A51-BF38-D4F609DB6266}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B0F467E-ABBD-4A51-BF38-D4F609DB6266}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -164,6 +170,7 @@ Global
 		{F8EF381A-FE83-40B3-A63D-09D83851B0FB} = {10C0818D-9160-4B80-BB86-DDE925B64D43}
 		{93176BAE-914B-4BED-9DE3-01FFB4F27FC5} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{75CC45E6-BF06-40F4-977D-10DCC05B2EFA} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
+		{2B0F467E-ABBD-4A51-BF38-D4F609DB6266} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E70565D-94CF-40B4-BFE1-AC18D5F736AB}
