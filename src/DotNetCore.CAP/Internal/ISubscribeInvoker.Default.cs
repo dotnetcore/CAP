@@ -61,8 +61,15 @@ namespace DotNetCore.CAP.Internal
                         }
                         else
                         {
-                            var converter = TypeDescriptor.GetConverter(parameterDescriptors[i].ParameterType);
-                            executeParameters[i] = converter.ConvertFrom(message.Value);
+                            if (message.Value?.GetType() == parameterDescriptors[i].ParameterType)
+                            {
+                                executeParameters[i] = message.Value;
+                            }
+                            else
+                            {
+                                var converter = TypeDescriptor.GetConverter(parameterDescriptors[i].ParameterType);
+                                executeParameters[i] = converter.ConvertFrom(message.Value);
+                            }
                         }
                     }
                 }
