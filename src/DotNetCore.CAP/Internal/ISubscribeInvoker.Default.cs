@@ -38,22 +38,24 @@ namespace DotNetCore.CAP.Internal
 
             var executor = _executors.GetOrAdd(methodInfo.MetadataToken, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
-            using (var scope = _serviceProvider.CreateScope())
+            using var scope = _serviceProvider.CreateScope();
+
+            var provider = scope.ServiceProvider;
+
+            var obj = GetInstance(provider, context);
+
+            var message = context.DeliverMessage;
+            var parameterDescriptors = context.ConsumerDescriptor.Parameters;
+            var executeParameters = new object[parameterDescriptors.Count];
+            for (var i = 0; i < parameterDescriptors.Count; i++)
             {
-                var provider = scope.ServiceProvider;
-
-                var obj = GetInstance(provider, context);
-
-                var message = context.DeliverMessage;
-                var parameterDescriptors = context.ConsumerDescriptor.Parameters;
-                var executeParameters = new object[parameterDescriptors.Count];
-                for (var i = 0; i < parameterDescriptors.Count; i++)
+                if (parameterDescriptors[i].IsFromCap)
                 {
-                    if (parameterDescriptors[i].IsFromCap)
-                    {
-                        executeParameters[i] = new CapHeader(message.Headers);
-                    }
-                    else
+                    executeParameters[i] = new CapHeader(message.Headers);
+                }
+                else
+                {
+                    if (message.Value != null)
                     {
                         if (message.Value is JToken jToken)  //reading from storage
                         {
@@ -62,21 +64,21 @@ namespace DotNetCore.CAP.Internal
                         else
                         {
                             var converter = TypeDescriptor.GetConverter(parameterDescriptors[i].ParameterType);
-                            if (converter.IsValid(message.Value))
+                            if (converter.CanConvertFrom(message.Value.GetType()))
                             {
                                 executeParameters[i] = converter.ConvertFrom(message.Value);
                             }
                             else
                             {
-                                executeParameters[i] = message.Value;
+                                executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
                             }
                         }
                     }
                 }
-
-                var resultObj = await ExecuteWithParameterAsync(executor, obj, executeParameters);
-                return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName());
             }
+
+            var resultObj = await ExecuteWithParameterAsync(executor, obj, executeParameters);
+            return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName());
         }
 
         protected virtual object GetInstance(IServiceProvider provider, ConsumerContext context)
