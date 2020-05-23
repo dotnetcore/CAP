@@ -21,6 +21,7 @@ namespace DotNetCore.CAP
             FailedRetryInterval = 60;
             FailedRetryCount = 50;
             ConsumerThreadCount = 1;
+            ConsumerMaxTimeOut = 300;
             Extensions = new List<ICapOptionsExtension>();
             Version = "v1";
             DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
@@ -66,6 +67,12 @@ namespace DotNetCore.CAP
         /// Default is 1
         /// </summary>
         public int ConsumerThreadCount { get; set; }
+        
+        /// <summary>
+        /// consumer maximum execution time
+        /// Default is 300s
+        /// </summary>
+        public int ConsumerMaxTimeOut { get; set; }
 
         /// <summary>
         /// Registers an extension that will be executed when building services.

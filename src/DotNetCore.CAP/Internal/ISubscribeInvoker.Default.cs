@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,6 +12,7 @@ using DotNetCore.CAP.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 
 namespace DotNetCore.CAP.Internal
@@ -20,15 +22,18 @@ namespace DotNetCore.CAP.Internal
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly ConcurrentDictionary<int, ObjectMethodExecutor> _executors;
+        private readonly CapOptions _options;
 
         public SubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
             _logger = loggerFactory.CreateLogger<SubscribeInvoker>();
             _executors = new ConcurrentDictionary<int, ObjectMethodExecutor>();
+            _options = serviceProvider.GetService<IOptions<CapOptions>>().Value;
         }
 
-        public async Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context, CancellationToken cancellationToken = default)
+        public async Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context,
+            CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -36,7 +41,8 @@ namespace DotNetCore.CAP.Internal
 
             _logger.LogDebug("Executing subscriber method : {0}", methodInfo.Name);
 
-            var executor = _executors.GetOrAdd(methodInfo.MetadataToken, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
+            var executor = _executors.GetOrAdd(methodInfo.MetadataToken,
+                x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
             using var scope = _serviceProvider.CreateScope();
 
@@ -57,7 +63,7 @@ namespace DotNetCore.CAP.Internal
                 {
                     if (message.Value != null)
                     {
-                        if (message.Value is JToken jToken)  //reading from storage
+                        if (message.Value is JToken jToken) //reading from storage
                         {
                             executeParameters[i] = jToken.ToObject(parameterDescriptors[i].ParameterType);
                         }
@@ -70,7 +76,8 @@ namespace DotNetCore.CAP.Internal
                             }
                             else
                             {
-                                executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
+                                executeParameters[i] =
+                                    Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
                             }
                         }
                     }
@@ -100,14 +107,21 @@ namespace DotNetCore.CAP.Internal
             return obj;
         }
 
-        private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor, object @class, object[] parameter)
+        private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor, object @class,
+            object[] parameter)
         {
             if (executor.IsMethodAsync)
             {
-                return await executor.ExecuteAsync(@class, parameter);
+                var response = await Helper.TimeOutExecuteAsync(_options.ConsumerMaxTimeOut,
+                    async (cts) => await executor.ExecuteAsync(@class, parameter));
+                return response;
             }
-
-            return executor.Execute(@class, parameter);
+            else
+            {
+                var response = Helper.TimeOutExecute(_options.ConsumerMaxTimeOut,
+                    (cts) => executor.Execute(@class, parameter));
+                return response;
+            }
         }
     }
 }
