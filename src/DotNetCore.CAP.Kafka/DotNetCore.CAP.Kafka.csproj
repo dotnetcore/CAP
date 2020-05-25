@@ -13,7 +13,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Confluent.Kafka" Version="1.3.0" />
+    <PackageReference Include="Confluent.Kafka" Version="1.4.3" />
   </ItemGroup>
 
   <ItemGroup>
