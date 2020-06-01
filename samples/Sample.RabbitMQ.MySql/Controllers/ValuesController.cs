@@ -1,10 +1,11 @@
-﻿using System;
-using System.Data;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
 using MySql.Data.MySqlClient;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Threading.Tasks;
 
 namespace Sample.RabbitMQ.MySql.Controllers
 {
@@ -16,6 +17,23 @@ namespace Sample.RabbitMQ.MySql.Controllers
         public ValuesController(ICapPublisher capPublisher)
         {
             _capBus = capPublisher;
+        }
+
+        /// <summary>
+        /// 延迟队列
+        /// </summary>
+        /// <returns>ok</returns>
+        [HttpGet("delaymq")]
+        public async Task<IActionResult> DelayMq()
+        {
+            var msg = $"this is a delayed message,current date: {DateTime.Now}";
+            var headers = new Dictionary<string, string>
+            {
+                { "x-delay", "6000" } // 6000ms = 6s
+            };
+            await _capBus.PublishAsync("rk.delayed", msg, headers);
+
+            return Ok();
         }
 
         [Route("~/without/transaction")]

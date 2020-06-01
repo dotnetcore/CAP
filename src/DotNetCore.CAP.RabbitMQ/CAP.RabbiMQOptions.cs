@@ -3,8 +3,8 @@
 
 // ReSharper disable once CheckNamespace
 
-using System;
 using RabbitMQ.Client;
+using System;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -35,7 +35,7 @@ namespace DotNetCore.CAP
         public const string DefaultExchangeName = "cap.default.router";
 
         /// <summary> The topic exchange type. </summary>
-        public const string ExchangeType = "topic";
+        public const string DefaultExchangeType = "topic";
 
         /// <summary>
         /// The host to connect to.
@@ -62,6 +62,11 @@ namespace DotNetCore.CAP
         /// Topic exchange name when declare a topic exchange.
         /// </summary>
         public string ExchangeName { get; set; } = DefaultExchangeName;
+
+        /// <summary>
+        /// Exchange yype where declare an exchange
+        /// </summary>
+        public string ExChangeType { get; set; } = DefaultExchangeType;
 
         /// <summary>
         /// The port to connect on.

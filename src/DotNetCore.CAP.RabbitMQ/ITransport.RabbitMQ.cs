@@ -1,15 +1,16 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Framing;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
@@ -17,15 +18,20 @@ namespace DotNetCore.CAP.RabbitMQ
     {
         private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly ILogger _logger;
-        private readonly string _exchange;
+        private readonly string _exchangeName;
+        private readonly string _exchangeType;
+        private readonly RabbitMQOptions _rabbitMQOptions;
 
         public RabbitMQTransport(
             ILogger<RabbitMQTransport> logger,
-            IConnectionChannelPool connectionChannelPool)
+            IConnectionChannelPool connectionChannelPool,
+            IOptions<RabbitMQOptions> options)
         {
             _logger = logger;
             _connectionChannelPool = connectionChannelPool;
-            _exchange = _connectionChannelPool.Exchange;
+            _exchangeName = _connectionChannelPool.Exchange;
+            _rabbitMQOptions = options.Value;
+            _exchangeType = _rabbitMQOptions.ExChangeType;
         }
 
         public BrokerAddress BrokerAddress => new BrokerAddress("RabbitMQ", _connectionChannelPool.HostAddress);
@@ -42,9 +48,9 @@ namespace DotNetCore.CAP.RabbitMQ
                     Headers = message.Headers.ToDictionary(x => x.Key, x => (object)x.Value)
                 };
 
-                channel.ExchangeDeclare(_exchange, RabbitMQOptions.ExchangeType, true);
+                channel.ExchangeDeclare(_exchangeName, _exchangeType, true);
 
-                channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
+                channel.BasicPublish(_exchangeName, message.GetName(), props, message.Body);
 
                 _logger.LogDebug($"RabbitMQ topic message [{message.GetName()}] has been published.");
 

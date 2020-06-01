@@ -1,15 +1,15 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
 using Headers = DotNetCore.CAP.Messages.Headers;
 
 namespace DotNetCore.CAP.RabbitMQ
@@ -20,6 +20,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly string _exchangeName;
+        private readonly string _exchangeType;
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
         private IModel _channel;
@@ -34,6 +35,7 @@ namespace DotNetCore.CAP.RabbitMQ
             _connectionChannelPool = connectionChannelPool;
             _rabbitMQOptions = options.Value;
             _exchangeName = connectionChannelPool.Exchange;
+            _exchangeType = _rabbitMQOptions.ExChangeType;
         }
 
         public event EventHandler<TransportMessage> OnMessageReceived;
@@ -112,7 +114,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
                     _channel = _connection.CreateModel();
 
-                    _channel.ExchangeDeclare(_exchangeName, RabbitMQOptions.ExchangeType, true);
+                    _channel.ExchangeDeclare(_exchangeName, _exchangeType, true);
 
                     var arguments = new Dictionary<string, object>
                     {
@@ -184,6 +186,6 @@ namespace DotNetCore.CAP.RabbitMQ
             OnLog?.Invoke(sender, args);
         }
 
-        #endregion
+        #endregion events
     }
 }
