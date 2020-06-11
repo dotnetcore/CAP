@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Data;
 
 namespace DotNetCore.CAP.Persistence
@@ -69,12 +70,21 @@ namespace DotNetCore.CAP.Persistence
                 command.Parameters.Add(param);
             }
 
-            var obj = command.ExecuteScalar();
+            var objValue = command.ExecuteScalar();
 
             T result = default;
-            if (obj != null)
+            if (objValue != null)
             {
-                result = (T)obj;
+                var returnType = typeof(T);
+                var converter = TypeDescriptor.GetConverter(returnType);
+                if (converter.CanConvertFrom(objValue.GetType()))
+                {
+                    result = (T)converter.ConvertFrom(objValue);
+                }
+                else
+                {
+                    result = (T)Convert.ChangeType(objValue, returnType);
+                }
             }
 
             return result;

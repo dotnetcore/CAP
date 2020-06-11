@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
@@ -18,13 +16,13 @@ namespace DotNetCore.CAP.MySql
 {
     internal class MySqlMonitoringApi : IMonitoringApi
     {
-        private readonly IOptions<MySqlOptions> _options;
+        private readonly MySqlOptions _options;
         private readonly string _pubName;
         private readonly string _recName;
 
         public MySqlMonitoringApi(IOptions<MySqlOptions> options, IStorageInitializer initializer)
         {
-            _options = options;
+            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
         }
@@ -32,41 +30,53 @@ namespace DotNetCore.CAP.MySql
         public StatisticsDto GetStatistics()
         {
             var sql = $@"
-set transaction isolation level read committed;
-select count(Id) from `{_pubName}` where StatusName = N'Succeeded';
-select count(Id) from `{_recName}` where StatusName = N'Succeeded';
-select count(Id) from `{_pubName}` where StatusName = N'Failed';
-select count(Id) from `{_recName}` where StatusName = N'Failed';";
+    set transaction isolation level read committed;
+    SELECT
+    (
+        SELECT COUNT(Id) FROM `{_pubName}` WHERE StatusName = N'Succeeded'
+    ) AS PublishedSucceeded,
+    (
+        SELECT COUNT(Id) FROM `{_recName}` WHERE StatusName = N'Succeeded'
+    ) AS ReceivedSucceeded,
+    (
+        SELECT COUNT(Id) FROM `{_pubName}` WHERE StatusName = N'Failed'
+    ) AS PublishedFailed,
+    (
+        SELECT COUNT(Id) FROM `{_recName}` WHERE StatusName = N'Failed'
+    ) AS ReceivedFailed;";
 
-            var statistics = UseConnection(connection =>
+            StatisticsDto statistics;
+            using (var connection = new MySqlConnection(_options.ConnectionString))
             {
-                var stats = new StatisticsDto();
-                using (var multi = connection.QueryMultiple(sql))
+                statistics = connection.ExecuteReader(sql, reader =>
                 {
-                    stats.PublishedSucceeded = multi.ReadSingle<int>();
-                    stats.ReceivedSucceeded = multi.ReadSingle<int>();
+                    var statisticsDto = new StatisticsDto();
 
-                    stats.PublishedFailed = multi.ReadSingle<int>();
-                    stats.ReceivedFailed = multi.ReadSingle<int>();
-                }
+                    while (reader.Read())
+                    {
+                        statisticsDto.PublishedSucceeded = reader.GetInt32(0);
+                        statisticsDto.ReceivedSucceeded = reader.GetInt32(1);
+                        statisticsDto.PublishedFailed = reader.GetInt32(2);
+                        statisticsDto.ReceivedFailed = reader.GetInt32(3);
+                    }
 
-                return stats;
-            });
+                    return statisticsDto;
+                });
+            }
+
             return statistics;
         }
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Failed)));
+            return GetHourlyTimelineStats(tableName, nameof(StatusName.Failed));
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Succeeded)));
+            return GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded));
         }
 
         public IList<MessageDto> Messages(MessageQueryDto queryDto)
@@ -96,52 +106,70 @@ select count(Id) from `{_recName}` where StatusName = N'Failed';";
             var sqlQuery =
                 $"select * from `{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
 
-            return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
+            object[] sqlParams =
             {
-                queryDto.StatusName,
-                queryDto.Group,
-                queryDto.Name,
-                queryDto.Content,
-                Offset = queryDto.CurrentPage * queryDto.PageSize,
-                Limit = queryDto.PageSize
-            }).ToList());
+                new MySqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
+                new MySqlParameter("@Group", queryDto.Group ?? string.Empty),
+                new MySqlParameter("@Name", queryDto.Name ?? string.Empty),
+                new MySqlParameter("@Content", $"%{queryDto.Content}%"),
+                new MySqlParameter("@Offset", queryDto.CurrentPage * queryDto.PageSize),
+                new MySqlParameter("@Limit", queryDto.PageSize)
+            };
+
+            using var connection = new MySqlConnection(_options.ConnectionString);
+            return connection.ExecuteReader(sqlQuery, reader =>
+            {
+                var messages = new List<MessageDto>();
+
+                while (reader.Read())
+                {
+                    var index = 0;
+                    messages.Add(new MessageDto
+                    {
+                        Id = reader.GetInt64(index++),
+                        Version = reader.GetString(index++),
+                        Group = queryDto.MessageType == MessageType.Subscribe ? reader.GetString(index++) : default,
+                        Name = reader.GetString(index++),
+                        Content = reader.GetString(index++),
+                        Retries = reader.GetInt32(index++),
+                        Added = reader.GetDateTime(index++),
+                        ExpiresAt = reader.GetDateTime(index++),
+                        StatusName = reader.GetString(index)
+                    });
+                }
+
+                return messages;
+            }, sqlParams);
         }
 
         public int PublishedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, _pubName, nameof(StatusName.Failed)));
+            return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));
         }
 
         public int PublishedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, _pubName, nameof(StatusName.Succeeded)));
+            return GetNumberOfMessage(_pubName, nameof(StatusName.Succeeded));
         }
 
         public int ReceivedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, _recName, nameof(StatusName.Failed)));
+            return GetNumberOfMessage(_recName, nameof(StatusName.Failed));
         }
 
         public int ReceivedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, _recName, nameof(StatusName.Succeeded)));
+            return GetNumberOfMessage(_recName, nameof(StatusName.Succeeded));
         }
 
-        private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
+        private int GetNumberOfMessage(string tableName, string statusName)
         {
             var sqlQuery = $"select count(Id) from `{tableName}` where StatusName = @state";
-
-            var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
-            return count;
+            using var connection = new MySqlConnection(_options.ConnectionString);
+            return connection.ExecuteScalar<int>(sqlQuery, new MySqlParameter("@state", statusName));
         }
 
-        private T UseConnection<T>(Func<IDbConnection, T> action)
-        {
-            return action(new MySqlConnection(_options.Value.ConnectionString));
-        }
-
-        private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string tableName,
-            string statusName)
+        private Dictionary<DateTime, int> GetHourlyTimelineStats(string tableName, string statusName)
         {
             var endDate = DateTime.Now;
             var dates = new List<DateTime>();
@@ -153,11 +181,10 @@ select count(Id) from `{_recName}` where StatusName = N'Failed';";
 
             var keyMaps = dates.ToDictionary(x => x.ToString("yyyy-MM-dd-HH"), x => x);
 
-            return GetTimelineStats(connection, tableName, statusName, keyMaps);
+            return GetTimelineStats(tableName, statusName, keyMaps);
         }
 
         private Dictionary<DateTime, int> GetTimelineStats(
-            IDbConnection connection,
             string tableName,
             string statusName,
             IDictionary<string, DateTime> keyMaps)
@@ -170,12 +197,30 @@ select aggr.* from (
     from  `{tableName}`
     where StatusName = @statusName
     group by date_format(`Added`,'%Y-%m-%d-%H')
-) aggr where `Key` in @keys;";
+) aggr where `Key` >= @minKey and `Key` <= @maxKey;";
 
-            var valuesMap = connection.Query<TimelineCounter>(
-                    sqlQuery,
-                    new { keys = keyMaps.Keys, statusName })
-                .ToDictionary(x => x.Key, x => x.Count);
+            object[] sqlParams =
+            {
+                new MySqlParameter("@statusName", statusName),
+                new MySqlParameter("@minKey", keyMaps.Keys.Min()),
+                new MySqlParameter("@maxKey", keyMaps.Keys.Max())
+            };
+
+            Dictionary<string, int> valuesMap;
+            using (var connection = new MySqlConnection(_options.ConnectionString))
+            {
+                valuesMap = connection.ExecuteReader(sqlQuery, reader =>
+                {
+                    var dictionary = new Dictionary<string, int>();
+
+                    while (reader.Read())
+                    {
+                        dictionary.Add(reader.GetString(0), reader.GetInt32(1));
+                    }
+
+                    return dictionary;
+                }, sqlParams);
+            }
 
             foreach (var key in keyMaps.Keys)
             {
@@ -195,19 +240,35 @@ select aggr.* from (
             return result;
         }
 
-        public async Task<MediumMessage> GetPublishedMessageAsync(long id)
-        {
-            var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{_pubName}` WHERE `Id`={id};";
+        public async Task<MediumMessage> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
 
-            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
-            return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
-        }
+        public async Task<MediumMessage> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
 
-        public async Task<MediumMessage> GetReceivedMessageAsync(long id)
+        private async Task<MediumMessage> GetMessageAsync(string tableName, long id)
         {
-            var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{_recName}` WHERE Id={id};";
-            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
-            return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
+            var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
+
+            await using var connection = new MySqlConnection(_options.ConnectionString);
+            var mediumMessae = connection.ExecuteReader(sql, reader =>
+            {
+                MediumMessage message = null;
+
+                while (reader.Read())
+                {
+                    message = new MediumMessage
+                    {
+                        DbId = reader.GetInt64(0).ToString(),
+                        Content = reader.GetString(1),
+                        Added = reader.GetDateTime(2),
+                        ExpiresAt = reader.GetDateTime(3),
+                        Retries = reader.GetInt32(4)
+                    };
+                }
+
+                return message;
+            });
+
+            return mediumMessae;
         }
     }
 

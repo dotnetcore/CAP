@@ -29,7 +29,9 @@ namespace DotNetCore.CAP.SqlServer
 
         public StatisticsDto GetStatistics()
         {
-            var sql = $@"SELECT
+            var sql = $@"
+    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
+    SELECT
     (
         SELECT COUNT(Id) FROM {_pubName} WHERE StatusName = N'Succeeded'
     ) AS PublishedSucceeded,
@@ -206,7 +208,7 @@ with aggr as (
     where StatusName = @statusName
     group by FORMAT(Added,'yyyy-MM-dd-HH')
 )
-select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key]<= @maxKey;";
+select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <= @maxKey;";
 
             object[] sqlParams =
             {
@@ -273,7 +275,6 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key]<=
             return await Task.FromResult(mediumMessae);
         }
     }
-
 
     internal class TimelineCounter
     {
