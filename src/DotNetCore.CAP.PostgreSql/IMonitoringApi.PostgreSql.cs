@@ -3,10 +3,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Dapper;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
@@ -18,56 +16,57 @@ namespace DotNetCore.CAP.PostgreSql
 {
     public class PostgreSqlMonitoringApi : IMonitoringApi
     {
-        private readonly IOptions<PostgreSqlOptions> _options;
+        private readonly PostgreSqlOptions _options;
         private readonly string _pubName;
         private readonly string _recName;
 
-        public PostgreSqlMonitoringApi(IOptions<PostgreSqlOptions> options,IStorageInitializer initializer)
+        public PostgreSqlMonitoringApi(IOptions<PostgreSqlOptions> options, IStorageInitializer initializer)
         {
-            _options = options ?? throw new ArgumentNullException(nameof(options));
+            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
         }
 
-        public async Task<MediumMessage> GetPublishedMessageAsync(long id)
-        {
-            var sql =
-                $"SELECT \"Id\" AS \"DbId\",* FROM {_pubName} WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
+        public async Task<MediumMessage> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
 
-            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
-        }
-
-        public async Task<MediumMessage> GetReceivedMessageAsync(long id)
-        {
-            var sql =
-                $"SELECT \"Id\" AS \"DbId\",* FROM {_recName} WHERE \"Id\"={id} FOR UPDATE SKIP LOCKED";
-            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            return await connection.QueryFirstOrDefaultAsync<MediumMessage>(sql);
-        }
+        public async Task<MediumMessage> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
 
         public StatisticsDto GetStatistics()
         {
             var sql = $@"
-select count(""Id"") from {_pubName} where ""StatusName"" = N'Succeeded';
-select count(""Id"") from {_recName} where ""StatusName"" = N'Succeeded';
-select count(""Id"") from {_pubName} where ""StatusName"" = N'Failed';
-select count(""Id"") from {_recName} where ""StatusName"" = N'Failed';";
+    SELECT
+    (
+        SELECT COUNT(""Id"") FROM {_pubName} WHERE ""StatusName"" = N'Succeeded'
+    ) AS ""PublishedSucceeded"",
+    (
+        SELECT COUNT(""Id"") FROM {_recName} WHERE ""StatusName"" = N'Succeeded'
+    ) AS ""ReceivedSucceeded"",
+    (
+        SELECT COUNT(""Id"") FROM {_pubName} WHERE ""StatusName"" = N'Failed'
+    ) AS ""PublishedFailed"",
+    (
+        SELECT COUNT(""Id"") FROM {_recName} WHERE ""StatusName"" = N'Failed'
+    ) AS ""ReceivedFailed"";";
 
-            var statistics = UseConnection(connection =>
+            StatisticsDto statistics;
+            using (var connection = new NpgsqlConnection(_options.ConnectionString))
             {
-                var stats = new StatisticsDto();
-                using (var multi = connection.QueryMultiple(sql))
+                statistics = connection.ExecuteReader(sql, reader =>
                 {
-                    stats.PublishedSucceeded = multi.ReadSingle<int>();
-                    stats.ReceivedSucceeded = multi.ReadSingle<int>();
+                    var statisticsDto = new StatisticsDto();
 
-                    stats.PublishedFailed = multi.ReadSingle<int>();
-                    stats.ReceivedFailed = multi.ReadSingle<int>();
-                }
+                    while (reader.Read())
+                    {
+                        statisticsDto.PublishedSucceeded = reader.GetInt32(0);
+                        statisticsDto.ReceivedSucceeded = reader.GetInt32(1);
+                        statisticsDto.PublishedFailed = reader.GetInt32(2);
+                        statisticsDto.ReceivedFailed = reader.GetInt32(3);
+                    }
 
-                return stats;
-            });
+                    return statisticsDto;
+                });
+            }
+
             return statistics;
         }
 
@@ -87,67 +86,85 @@ select count(""Id"") from {_recName} where ""StatusName"" = N'Failed';";
             var sqlQuery =
                 $"select * from {tableName} where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
 
-            return UseConnection(conn => conn.Query<MessageDto>(sqlQuery, new
+            object[] sqlParams =
             {
-                queryDto.StatusName,
-                queryDto.Group,
-                queryDto.Name,
-                queryDto.Content,
-                Offset = queryDto.CurrentPage * queryDto.PageSize,
-                Limit = queryDto.PageSize
-            }).ToList());
+                new NpgsqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
+                new NpgsqlParameter("@Group", queryDto.Group ?? string.Empty),
+                new NpgsqlParameter("@Name", queryDto.Name ?? string.Empty),
+                new NpgsqlParameter("@Content", $"%{queryDto.Content}%"),
+                new NpgsqlParameter("@Offset", queryDto.CurrentPage * queryDto.PageSize),
+                new NpgsqlParameter("@Limit", queryDto.PageSize)
+            };
+
+            using var connection = new NpgsqlConnection(_options.ConnectionString);
+            return connection.ExecuteReader(sqlQuery, reader =>
+            {
+                var messages = new List<MessageDto>();
+
+                while (reader.Read())
+                {
+                    var index = 0;
+                    messages.Add(new MessageDto
+                    {
+                        Id = reader.GetInt64(index++),
+                        Version = reader.GetString(index++),
+                        Group = queryDto.MessageType == MessageType.Subscribe ? reader.GetString(index++) : default,
+                        Name = reader.GetString(index++),
+                        Content = reader.GetString(index++),
+                        Retries = reader.GetInt32(index++),
+                        Added = reader.GetDateTime(index++),
+                        ExpiresAt = reader.GetDateTime(index++),
+                        StatusName = reader.GetString(index)
+                    });
+                }
+
+                return messages;
+            }, sqlParams);
         }
 
         public int PublishedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, _pubName, nameof(StatusName.Failed)));
+            return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));
         }
 
         public int PublishedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, _pubName, nameof(StatusName.Succeeded)));
+            return GetNumberOfMessage(_pubName, nameof(StatusName.Succeeded));
         }
 
         public int ReceivedFailedCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, _recName, nameof(StatusName.Failed)));
+            return GetNumberOfMessage(_recName, nameof(StatusName.Failed));
         }
 
         public int ReceivedSucceededCount()
         {
-            return UseConnection(conn => GetNumberOfMessage(conn, _recName, nameof(StatusName.Succeeded)));
+            return GetNumberOfMessage(_recName, nameof(StatusName.Succeeded));
         }
 
         public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Succeeded)));
+            return GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded));
         }
 
         public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return UseConnection(connection =>
-                GetHourlyTimelineStats(connection, tableName, nameof(StatusName.Failed)));
+            return GetHourlyTimelineStats(tableName, nameof(StatusName.Failed));
         }
 
-        private int GetNumberOfMessage(IDbConnection connection, string tableName, string statusName)
+        private int GetNumberOfMessage(string tableName, string statusName)
         {
             var sqlQuery =
                 $"select count(\"Id\") from {tableName} where Lower(\"StatusName\") = Lower(@state)";
 
-            var count = connection.ExecuteScalar<int>(sqlQuery, new { state = statusName });
+            using var connection = new NpgsqlConnection(_options.ConnectionString);
+            var count = connection.ExecuteScalar<int>(sqlQuery, new NpgsqlParameter("@state", statusName));
             return count;
         }
 
-        private T UseConnection<T>(Func<IDbConnection, T> action)
-        {
-            return action(new NpgsqlConnection(_options.Value.ConnectionString));
-        }
-
-        private Dictionary<DateTime, int> GetHourlyTimelineStats(IDbConnection connection, string tableName,
-            string statusName)
+        private Dictionary<DateTime, int> GetHourlyTimelineStats(string tableName, string statusName)
         {
             var endDate = DateTime.Now;
             var dates = new List<DateTime>();
@@ -159,11 +176,10 @@ select count(""Id"") from {_recName} where ""StatusName"" = N'Failed';";
 
             var keyMaps = dates.ToDictionary(x => x.ToString("yyyy-MM-dd-HH"), x => x);
 
-            return GetTimelineStats(connection, tableName, statusName, keyMaps);
+            return GetTimelineStats(tableName, statusName, keyMaps);
         }
 
         private Dictionary<DateTime, int> GetTimelineStats(
-            IDbConnection connection,
             string tableName,
             string statusName,
             IDictionary<string, DateTime> keyMaps)
@@ -177,11 +193,30 @@ with aggr as (
         where ""StatusName"" = @statusName
     group by to_char(""Added"", 'yyyy-MM-dd-HH')
 )
-select ""Key"",""Count"" from aggr where ""Key""= Any(@keys);";
+select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxKey;";
 
-            var valuesMap = connection.Query<TimelineCounter>(sqlQuery, new { keys = keyMaps.Keys.ToList(), statusName })
-                .ToList()
-                .ToDictionary(x => x.Key, x => x.Count);
+            object[] sqlParams =
+            {
+                new NpgsqlParameter("@statusName", statusName),
+                new NpgsqlParameter("@minKey", keyMaps.Keys.Min()),
+                new NpgsqlParameter("@maxKey", keyMaps.Keys.Max())
+            };
+
+            Dictionary<string, int> valuesMap;
+            using (var connection = new NpgsqlConnection(_options.ConnectionString))
+            {
+                valuesMap = connection.ExecuteReader(sqlQuery, reader =>
+                {
+                    var dictionary = new Dictionary<string, int>();
+
+                    while (reader.Read())
+                    {
+                        dictionary.Add(reader.GetString(0), reader.GetInt32(1));
+                    }
+
+                    return dictionary;
+                }, sqlParams);
+            }
 
             foreach (var key in keyMaps.Keys)
             {
@@ -197,6 +232,33 @@ select ""Key"",""Count"" from aggr where ""Key""= Any(@keys);";
             }
 
             return result;
+        }
+
+        private async Task<MediumMessage> GetMessageAsync(string tableName, long id)
+        {
+            var sql = $@"SELECT ""Id"" AS ""DbId"", ""Content"", ""Added"", ""ExpiresAt"", ""Retries"" FROM {tableName} WHERE ""Id""={id} FOR UPDATE SKIP LOCKED";
+
+            using var connection = new NpgsqlConnection(_options.ConnectionString);
+            var mediumMessae = connection.ExecuteReader(sql, reader =>
+            {
+                MediumMessage message = null;
+
+                while (reader.Read())
+                {
+                    message = new MediumMessage
+                    {
+                        DbId = reader.GetInt64(0).ToString(),
+                        Content = reader.GetString(1),
+                        Added = reader.GetDateTime(2),
+                        ExpiresAt = reader.GetDateTime(3),
+                        Retries = reader.GetInt32(4)
+                    };
+                }
+
+                return message;
+            });
+
+            return await Task.FromResult(mediumMessae);
         }
     }
 

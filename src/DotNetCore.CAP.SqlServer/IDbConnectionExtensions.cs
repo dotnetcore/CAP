@@ -2,11 +2,12 @@
 using System.ComponentModel;
 using System.Data;
 
-namespace DotNetCore.CAP.Persistence
+namespace DotNetCore.CAP.SqlServer
 {
-    public static class IDbConnectionExtensions
+    internal static class IDbConnectionExtensions
     {
-        public static int ExecuteNonQuery(this IDbConnection connection, string sql, IDbTransaction transaction = null, params object[] sqlParams)
+        public static int ExecuteNonQuery(this IDbConnection connection, string sql, IDbTransaction transaction = null,
+            params object[] sqlParams)
         {
             if (connection.State == ConnectionState.Closed)
             {
@@ -29,7 +30,8 @@ namespace DotNetCore.CAP.Persistence
             return command.ExecuteNonQuery();
         }
 
-        public static T ExecuteReader<T>(this IDbConnection connection, string sql, Func<IDataReader, T> readerFunc, params object[] sqlParams)
+        public static T ExecuteReader<T>(this IDbConnection connection, string sql, Func<IDataReader, T> readerFunc,
+            params object[] sqlParams)
         {
             if (connection.State == ConnectionState.Closed)
             {

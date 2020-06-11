@@ -66,7 +66,7 @@ namespace DotNetCore.CAP.SqlServer
                 new SqlParameter("@Retries", message.Retries),
                 new SqlParameter("@Added", message.Added),
                 new SqlParameter("@ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
-                new SqlParameter("@StatusName", nameof(StatusName.Scheduled)),
+                new SqlParameter("@StatusName", nameof(StatusName.Scheduled))
             };
 
             if (dbTransaction == null)
