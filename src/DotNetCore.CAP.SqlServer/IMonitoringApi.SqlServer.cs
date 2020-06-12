@@ -30,39 +30,35 @@ namespace DotNetCore.CAP.SqlServer
         public StatisticsDto GetStatistics()
         {
             var sql = $@"
-    SET TRANSACTION ISOLATION LEVEL READ COMMITTED;
-    SELECT
-    (
-        SELECT COUNT(Id) FROM {_pubName} WHERE StatusName = N'Succeeded'
-    ) AS PublishedSucceeded,
-    (
-        SELECT COUNT(Id) FROM {_recName} WHERE StatusName = N'Succeeded'
-    ) AS ReceivedSucceeded,
-    (
-        SELECT COUNT(Id) FROM {_pubName} WHERE StatusName = N'Failed'
-    ) AS PublishedFailed,
-    (
-        SELECT COUNT(Id) FROM {_recName} WHERE StatusName = N'Failed'
-    ) AS ReceivedFailed;";
+SELECT
+(
+    SELECT COUNT(Id) FROM {_pubName} WHERE StatusName = N'Succeeded'
+) AS PublishedSucceeded,
+(
+    SELECT COUNT(Id) FROM {_recName} WHERE StatusName = N'Succeeded'
+) AS ReceivedSucceeded,
+(
+    SELECT COUNT(Id) FROM {_pubName} WHERE StatusName = N'Failed'
+) AS PublishedFailed,
+(
+    SELECT COUNT(Id) FROM {_recName} WHERE StatusName = N'Failed'
+) AS ReceivedFailed;";
 
-            StatisticsDto statistics;
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            using var connection = new SqlConnection(_options.ConnectionString);
+            var statistics = connection.ExecuteReader(sql, reader =>
             {
-                statistics = connection.ExecuteReader(sql, reader =>
+                var statisticsDto = new StatisticsDto();
+
+                while (reader.Read())
                 {
-                    var statisticsDto = new StatisticsDto();
+                    statisticsDto.PublishedSucceeded = reader.GetInt32(0);
+                    statisticsDto.ReceivedSucceeded = reader.GetInt32(1);
+                    statisticsDto.PublishedFailed = reader.GetInt32(2);
+                    statisticsDto.ReceivedFailed = reader.GetInt32(3);
+                }
 
-                    while (reader.Read())
-                    {
-                        statisticsDto.PublishedSucceeded = reader.GetInt32(0);
-                        statisticsDto.ReceivedSucceeded = reader.GetInt32(1);
-                        statisticsDto.PublishedFailed = reader.GetInt32(2);
-                        statisticsDto.ReceivedFailed = reader.GetInt32(3);
-                    }
-
-                    return statisticsDto;
-                });
-            }
+                return statisticsDto;
+            });
 
             return statistics;
         }
@@ -253,7 +249,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
             var sql = $@"SELECT TOP 1 Id AS DbId, Content, Added, ExpiresAt, Retries FROM {tableName} WITH (readpast) WHERE Id={id}";
 
             using var connection = new SqlConnection(_options.ConnectionString);
-            var mediumMessae = connection.ExecuteReader(sql, reader =>
+            var mediumMessage = connection.ExecuteReader(sql, reader =>
             {
                 MediumMessage message = null;
 
@@ -272,13 +268,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
                 return message;
             });
 
-            return await Task.FromResult(mediumMessae);
+            return await Task.FromResult(mediumMessage);
         }
-    }
-
-    internal class TimelineCounter
-    {
-        public string Key { get; set; }
-        public int Count { get; set; }
-    }
+    } 
 }

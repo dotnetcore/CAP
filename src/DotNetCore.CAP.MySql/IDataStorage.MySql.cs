@@ -191,26 +191,23 @@ namespace DotNetCore.CAP.MySql
 
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string sql)
         {
-            List<MediumMessage> result;
-            await using (var connection = new MySqlConnection(_options.Value.ConnectionString))
+            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+            var result = connection.ExecuteReader(sql, reader =>
             {
-                result = connection.ExecuteReader(sql, reader =>
+                var messages = new List<MediumMessage>();
+                while (reader.Read())
                 {
-                    var messages = new List<MediumMessage>();
-                    while (reader.Read())
+                    messages.Add(new MediumMessage
                     {
-                        messages.Add(new MediumMessage
-                        {
-                            DbId = reader.GetInt64(0).ToString(),
-                            Origin = StringSerializer.DeSerialize(reader.GetString(1)),
-                            Retries = reader.GetInt32(2),
-                            Added = reader.GetDateTime(3)
-                        });
-                    }
+                        DbId = reader.GetInt64(0).ToString(),
+                        Origin = StringSerializer.DeSerialize(reader.GetString(1)),
+                        Retries = reader.GetInt32(2),
+                        Added = reader.GetDateTime(3)
+                    });
+                }
 
-                    return messages;
-                });
-            }
+                return messages;
+            });
 
             return result;
         }

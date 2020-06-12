@@ -238,8 +238,8 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
         {
             var sql = $@"SELECT ""Id"" AS ""DbId"", ""Content"", ""Added"", ""ExpiresAt"", ""Retries"" FROM {tableName} WHERE ""Id""={id} FOR UPDATE SKIP LOCKED";
 
-            using var connection = new NpgsqlConnection(_options.ConnectionString);
-            var mediumMessae = connection.ExecuteReader(sql, reader =>
+            await using var connection = new NpgsqlConnection(_options.ConnectionString);
+            var mediumMessage = connection.ExecuteReader(sql, reader =>
             {
                 MediumMessage message = null;
 
@@ -258,13 +258,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
                 return message;
             });
 
-            return await Task.FromResult(mediumMessae);
+            return await Task.FromResult(mediumMessage);
         }
-    }
-
-    internal class TimelineCounter
-    {
-        public string Key { get; set; }
-        public int Count { get; set; }
-    }
+    } 
 }

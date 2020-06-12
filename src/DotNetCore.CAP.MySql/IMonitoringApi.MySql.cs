@@ -30,39 +30,35 @@ namespace DotNetCore.CAP.MySql
         public StatisticsDto GetStatistics()
         {
             var sql = $@"
-    set transaction isolation level read committed;
-    SELECT
-    (
-        SELECT COUNT(Id) FROM `{_pubName}` WHERE StatusName = N'Succeeded'
-    ) AS PublishedSucceeded,
-    (
-        SELECT COUNT(Id) FROM `{_recName}` WHERE StatusName = N'Succeeded'
-    ) AS ReceivedSucceeded,
-    (
-        SELECT COUNT(Id) FROM `{_pubName}` WHERE StatusName = N'Failed'
-    ) AS PublishedFailed,
-    (
-        SELECT COUNT(Id) FROM `{_recName}` WHERE StatusName = N'Failed'
-    ) AS ReceivedFailed;";
+SELECT
+(
+    SELECT COUNT(Id) FROM `{_pubName}` WHERE StatusName = N'Succeeded'
+) AS PublishedSucceeded,
+(
+    SELECT COUNT(Id) FROM `{_recName}` WHERE StatusName = N'Succeeded'
+) AS ReceivedSucceeded,
+(
+    SELECT COUNT(Id) FROM `{_pubName}` WHERE StatusName = N'Failed'
+) AS PublishedFailed,
+(
+    SELECT COUNT(Id) FROM `{_recName}` WHERE StatusName = N'Failed'
+) AS ReceivedFailed;";
 
-            StatisticsDto statistics;
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            using var connection = new MySqlConnection(_options.ConnectionString);
+            var statistics = connection.ExecuteReader(sql, reader =>
             {
-                statistics = connection.ExecuteReader(sql, reader =>
+                var statisticsDto = new StatisticsDto();
+
+                while (reader.Read())
                 {
-                    var statisticsDto = new StatisticsDto();
+                    statisticsDto.PublishedSucceeded = reader.GetInt32(0);
+                    statisticsDto.ReceivedSucceeded = reader.GetInt32(1);
+                    statisticsDto.PublishedFailed = reader.GetInt32(2);
+                    statisticsDto.ReceivedFailed = reader.GetInt32(3);
+                }
 
-                    while (reader.Read())
-                    {
-                        statisticsDto.PublishedSucceeded = reader.GetInt32(0);
-                        statisticsDto.ReceivedSucceeded = reader.GetInt32(1);
-                        statisticsDto.PublishedFailed = reader.GetInt32(2);
-                        statisticsDto.ReceivedFailed = reader.GetInt32(3);
-                    }
-
-                    return statisticsDto;
-                });
-            }
+                return statisticsDto;
+            });
 
             return statistics;
         }
@@ -189,15 +185,17 @@ namespace DotNetCore.CAP.MySql
             string statusName,
             IDictionary<string, DateTime> keyMaps)
         {
-            var sqlQuery =
-                $@"
-select aggr.* from (
-    select date_format(`Added`,'%Y-%m-%d-%H') as `Key`,
-        count(id) `Count`
-    from  `{tableName}`
-    where StatusName = @statusName
-    group by date_format(`Added`,'%Y-%m-%d-%H')
-) aggr where `Key` >= @minKey and `Key` <= @maxKey;";
+            var sqlQuery = $@"
+SELECT aggr.*
+FROM (
+         SELECT date_format(`Added`, '%Y-%m-%d-%H') AS `Key`,
+                count(id)                              `Count`
+         FROM `{tableName}`
+         WHERE StatusName = @statusName
+         GROUP BY date_format(`Added`, '%Y-%m-%d-%H')
+     ) aggr
+WHERE `Key` >= @minKey
+  AND `Key` <= @maxKey;";
 
             object[] sqlParams =
             {
@@ -249,7 +247,7 @@ select aggr.* from (
             var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
 
             await using var connection = new MySqlConnection(_options.ConnectionString);
-            var mediumMessae = connection.ExecuteReader(sql, reader =>
+            var mediumMessage = connection.ExecuteReader(sql, reader =>
             {
                 MediumMessage message = null;
 
@@ -268,13 +266,7 @@ select aggr.* from (
                 return message;
             });
 
-            return mediumMessae;
+            return mediumMessage;
         }
-    }
-
-    class TimelineCounter
-    {
-        public string Key { get; set; }
-        public int Count { get; set; }
     }
 }

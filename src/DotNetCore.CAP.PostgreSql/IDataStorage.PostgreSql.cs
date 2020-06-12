@@ -135,7 +135,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
             CancellationToken token = default)
         {
-            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             var count = connection.ExecuteNonQuery(
                 $"DELETE FROM {table} WHERE \"ExpiresAt\" < @timeout AND \"Id\" IN (SELECT \"Id\" FROM {table} LIMIT @batchCount);", null,
                 new NpgsqlParameter("@timeout", timeout), new NpgsqlParameter("@batchCount", batchCount));
@@ -179,7 +179,7 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@StatusName", state.ToString("G"))
             };
 
-            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
 
             await Task.CompletedTask;
@@ -197,28 +197,25 @@ namespace DotNetCore.CAP.PostgreSql
 
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string sql)
         {
-            List<MediumMessage> result;
-            using (var connection = new NpgsqlConnection(_options.Value.ConnectionString))
+            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            var result = connection.ExecuteReader(sql, reader =>
             {
-                result = connection.ExecuteReader(sql, reader =>
+                var messages = new List<MediumMessage>();
+                while (reader.Read())
                 {
-                    var messages = new List<MediumMessage>();
-                    while (reader.Read())
+                    messages.Add(new MediumMessage
                     {
-                        messages.Add(new MediumMessage
-                        {
-                            DbId = reader.GetInt64(0).ToString(),
-                            Origin = StringSerializer.DeSerialize(reader.GetString(1)),
-                            Retries = reader.GetInt32(2),
-                            Added = reader.GetDateTime(3)
-                        });
-                    }
+                        DbId = reader.GetInt64(0).ToString(),
+                        Origin = StringSerializer.DeSerialize(reader.GetString(1)),
+                        Retries = reader.GetInt32(2),
+                        Added = reader.GetDateTime(3)
+                    });
+                }
 
-                    return messages;
-                });
-            }
+                return messages;
+            });
 
-            return await Task.FromResult(result);
+            return result;
         }
     }
 }
