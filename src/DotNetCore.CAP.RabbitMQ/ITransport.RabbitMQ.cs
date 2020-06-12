@@ -36,12 +36,11 @@ namespace DotNetCore.CAP.RabbitMQ
             try
             {
                 channel = _connectionChannelPool.Rent();
-                var props = new BasicProperties
-                {
-                    DeliveryMode = 2,
-                    Headers = message.Headers.ToDictionary(x => x.Key, x => (object)x.Value)
-                };
 
+                var props = channel.CreateBasicProperties();
+                props.DeliveryMode = 2;
+                props.Headers = message.Headers.ToDictionary(x => x.Key, x => (object) x.Value);
+                
                 channel.ExchangeDeclare(_exchange, RabbitMQOptions.ExchangeType, true);
 
                 channel.BasicPublish(_exchange, message.GetName(), props, message.Body);

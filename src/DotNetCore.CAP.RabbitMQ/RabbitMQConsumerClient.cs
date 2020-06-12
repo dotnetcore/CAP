@@ -134,7 +134,7 @@ namespace DotNetCore.CAP.RabbitMQ
             var args = new LogMessageEventArgs
             {
                 LogType = MqLogType.ConsumerCancelled,
-                Reason = e.ConsumerTag
+                Reason = string.Join(",", e.ConsumerTags)
             };
             OnLog?.Invoke(sender, args);
         }
@@ -144,7 +144,7 @@ namespace DotNetCore.CAP.RabbitMQ
             var args = new LogMessageEventArgs
             {
                 LogType = MqLogType.ConsumerUnregistered,
-                Reason = e.ConsumerTag
+                Reason = string.Join(",", e.ConsumerTags)
             };
             OnLog?.Invoke(sender, args);
         }
@@ -154,7 +154,7 @@ namespace DotNetCore.CAP.RabbitMQ
             var args = new LogMessageEventArgs
             {
                 LogType = MqLogType.ConsumerRegistered,
-                Reason = e.ConsumerTag
+                Reason = string.Join(",", e.ConsumerTags)
             };
             OnLog?.Invoke(sender, args);
         }
@@ -168,7 +168,7 @@ namespace DotNetCore.CAP.RabbitMQ
             }
             headers.Add(Headers.Group, _queueName);
 
-            var message = new TransportMessage(headers, e.Body);
+            var message = new TransportMessage(headers, e.Body.ToArray());
 
             OnMessageReceived?.Invoke(e.DeliveryTag, message);
         }
