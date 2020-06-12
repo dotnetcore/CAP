@@ -39,7 +39,7 @@ The default consumer group name, corresponding to different names in different T
 
 !!! info "Mapping"
     Map to [Queue Names](https://www.rabbitmq.com/queues.html#names) in RabbitMQ.  
-    Map to Topic Name in Apache Kafka.  
+    Map to [Consumer Group Id](http://kafka.apache.org/documentation/#group.id) in Apache Kafka.  
     Map to Subscription Name in Azure Service Bus.  
 
 #### Version

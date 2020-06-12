@@ -37,7 +37,7 @@ services.AddCap(config =>
 默认的消费者组的名字，在不同的 Transports 中对应不同的名字，可以通过自定义此值来自定义不同 Transports 中的名字，以便于查看。
 
 > 在 RabbitMQ 中映射到 [Queue Names](https://www.rabbitmq.com/queues.html#names)。  
-> 在 Apache Kafka 中映射到 Topic Name。  
+> 在 Apache Kafka 中映射到 [Consumer Group Id](http://kafka.apache.org/documentation/#group.id)。  
 > 在 Azure Service Bus 中映射到 Subscription Name。  
 
 #### Version
