@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
@@ -38,33 +37,11 @@ namespace DotNetCore.CAP.SqlServer
             _recName = initializer.GetReceivedTableName();
         }
 
-        public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)
-        {
-            var sql =
-                $"UPDATE {_pubName} SET Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
-            using var connection = new SqlConnection(_options.Value.ConnectionString);
-            await connection.ExecuteAsync(sql, new
-            {
-                Id = message.DbId,
-                message.Retries,
-                message.ExpiresAt,
-                StatusName = state.ToString("G")
-            });
-        }
+        public async Task ChangePublishStateAsync(MediumMessage message, StatusName state) =>
+            await ChangeMessageStateAsync(_pubName, message, state);
 
-        public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state)
-        {
-            var sql =
-                $"UPDATE {_recName} SET Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
-            using var connection = new SqlConnection(_options.Value.ConnectionString);
-            await connection.ExecuteAsync(sql, new
-            {
-                Id = message.DbId,
-                message.Retries,
-                message.ExpiresAt,
-                StatusName = state.ToString("G")
-            });
-        }
+        public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state) =>
+            await ChangeMessageStateAsync(_recName, message, state);
 
         public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
         {
@@ -81,21 +58,21 @@ namespace DotNetCore.CAP.SqlServer
                 Retries = 0
             };
 
-            var po = new
+            object[] sqlParams =
             {
-                Id = message.DbId,
-                Name = name,
-                message.Content,
-                message.Retries,
-                message.Added,
-                message.ExpiresAt,
-                StatusName = nameof(StatusName.Scheduled)
+                new SqlParameter("@Id", message.DbId),
+                new SqlParameter("@Name", name),
+                new SqlParameter("@Content", message.Content),
+                new SqlParameter("@Retries", message.Retries),
+                new SqlParameter("@Added", message.Added),
+                new SqlParameter("@ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
+                new SqlParameter("@StatusName", nameof(StatusName.Scheduled))
             };
 
             if (dbTransaction == null)
             {
                 using var connection = new SqlConnection(_options.Value.ConnectionString);
-                connection.Execute(sql, po);
+                connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
             }
             else
             {
@@ -104,7 +81,7 @@ namespace DotNetCore.CAP.SqlServer
                     dbTrans = dbContextTrans.GetDbTransaction();
 
                 var conn = dbTrans?.Connection;
-                conn.Execute(sql, po, dbTrans);
+                conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
             }
 
             return message;
@@ -112,30 +89,23 @@ namespace DotNetCore.CAP.SqlServer
 
         public void StoreReceivedExceptionMessage(string name, string group, string content)
         {
-            var sql =
-                $"INSERT INTO {_recName}([Id],[Version],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
-                $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
-
-            using var connection = new SqlConnection(_options.Value.ConnectionString);
-            connection.Execute(sql, new
+            object[] sqlParams =
             {
-                Id = SnowflakeId.Default().NextId().ToString(),
-                Group = group,
-                Name = name,
-                Content = content,
-                Retries = _capOptions.Value.FailedRetryCount,
-                Added = DateTime.Now,
-                ExpiresAt = DateTime.Now.AddDays(15),
-                StatusName = nameof(StatusName.Failed)
-            });
+                new SqlParameter("@Id", SnowflakeId.Default().NextId().ToString()),
+                new SqlParameter("@Name", name),
+                new SqlParameter("@Group", group),
+                new SqlParameter("@Content", content),
+                new SqlParameter("@Retries", _capOptions.Value.FailedRetryCount),
+                new SqlParameter("@Added", DateTime.Now),
+                new SqlParameter("@ExpiresAt", DateTime.Now.AddDays(15)),
+                new SqlParameter("@StatusName", nameof(StatusName.Failed))
+            };
+
+            StoreReceivedMessage(sqlParams);
         }
 
         public MediumMessage StoreReceivedMessage(string name, string group, Message message)
         {
-            var sql =
-                $"INSERT INTO {_recName}([Id],[Version],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
-                $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
-
             var mdMessage = new MediumMessage
             {
                 DbId = SnowflakeId.Default().NextId().ToString(),
@@ -144,19 +114,20 @@ namespace DotNetCore.CAP.SqlServer
                 ExpiresAt = null,
                 Retries = 0
             };
-            var content = StringSerializer.Serialize(mdMessage.Origin);
-            using var connection = new SqlConnection(_options.Value.ConnectionString);
-            connection.Execute(sql, new
+
+            object[] sqlParams =
             {
-                Id = mdMessage.DbId,
-                Group = group,
-                Name = name,
-                Content = content,
-                mdMessage.Retries,
-                mdMessage.Added,
-                mdMessage.ExpiresAt,
-                StatusName = nameof(StatusName.Scheduled)
-            });
+                new SqlParameter("@Id", mdMessage.DbId),
+                new SqlParameter("@Name", name),
+                new SqlParameter("@Group", group),
+                new SqlParameter("@Content", StringSerializer.Serialize(mdMessage.Origin)),
+                new SqlParameter("@Retries", mdMessage.Retries),
+                new SqlParameter("@Added", mdMessage.Added),
+                new SqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
+                new SqlParameter("@StatusName", nameof(StatusName.Scheduled))
+            };
+
+            StoreReceivedMessage(sqlParams);
             return mdMessage;
         }
 
@@ -164,62 +135,90 @@ namespace DotNetCore.CAP.SqlServer
             CancellationToken token = default)
         {
             using var connection = new SqlConnection(_options.Value.ConnectionString);
-            return await connection.ExecuteAsync(
-                $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout;",
-                new { timeout, batchCount });
+            var count = connection.ExecuteNonQuery(
+                $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout;", null,
+                new SqlParameter("@timeout", timeout), new SqlParameter("@batchCount", batchCount));
+
+            return await Task.FromResult(count);
         }
 
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql = $"SELECT TOP (200) * FROM {_pubName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
+            var sql = $"SELECT TOP (200) Id, Content, Retries, Added FROM {_pubName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
                       $"AND Version='{_capOptions.Value.Version}' AND Added<'{fourMinAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
 
-            var result = new List<MediumMessage>();
-            using var connection = new SqlConnection(_options.Value.ConnectionString);
-            var reader = await connection.ExecuteReaderAsync(sql);
-            while (reader.Read())
-            {
-                result.Add(new MediumMessage
-                {
-                    DbId = reader.GetInt64(0).ToString(),
-                    Origin = StringSerializer.DeSerialize(reader.GetString(3)),
-                    Retries = reader.GetInt32(4),
-                    Added = reader.GetDateTime(5)
-                });
-            }
-
-            return result;
+            return await GetMessagesOfNeedRetryAsync(sql);
         }
 
         public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
-                $"SELECT TOP (200) * FROM {_recName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
+                $"SELECT TOP (200) Id, Content, Retries, Added FROM {_recName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
                 $"AND Version='{_capOptions.Value.Version}' AND Added<'{fourMinAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
 
-            var result = new List<MediumMessage>();
-
-            using var connection = new SqlConnection(_options.Value.ConnectionString);
-            var reader = await connection.ExecuteReaderAsync(sql);
-            while (reader.Read())
-            {
-                result.Add(new MediumMessage
-                {
-                    DbId = reader.GetInt64(0).ToString(),
-                    Origin = StringSerializer.DeSerialize(reader.GetString(4)),
-                    Retries = reader.GetInt32(5),
-                    Added = reader.GetDateTime(6)
-                });
-            }
-
-            return result;
+            return await GetMessagesOfNeedRetryAsync(sql);
         }
 
         public IMonitoringApi GetMonitoringApi()
         {
             return new SqlServerMonitoringApi(_options, _initializer);
+        }
+
+        private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
+        {
+            var sql =
+                $"UPDATE {tableName} SET Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
+
+            object[] sqlParams =
+            {
+                new SqlParameter("@Id", message.DbId),
+                new SqlParameter("@Retries", message.Retries),
+                new SqlParameter("@ExpiresAt", message.ExpiresAt),
+                new SqlParameter("@StatusName", state.ToString("G"))
+            };
+
+            using var connection = new SqlConnection(_options.Value.ConnectionString);
+            connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+
+            await Task.CompletedTask;
+        }
+
+        private void StoreReceivedMessage(object[] sqlParams)
+        {
+            var sql =
+                $"INSERT INTO {_recName}([Id],[Version],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
+                $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+
+            using var connection = new SqlConnection(_options.Value.ConnectionString);
+            connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+        }
+
+        private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string sql)
+        {
+            List<MediumMessage> result;
+            using (var connection = new SqlConnection(_options.Value.ConnectionString))
+            {
+                result = connection.ExecuteReader(sql, reader =>
+                {
+                    var messages = new List<MediumMessage>();
+                    while (reader.Read())
+                    {
+                        messages.Add(new MediumMessage
+                        {
+                            DbId = reader.GetInt64(0).ToString(),
+                            Origin = StringSerializer.DeSerialize(reader.GetString(1)),
+                            Retries = reader.GetInt32(2),
+                            Added = reader.GetDateTime(3)
+                        });
+                    }
+
+                    return messages;
+                });
+            }
+
+            return await Task.FromResult(result);
         }
     }
 }

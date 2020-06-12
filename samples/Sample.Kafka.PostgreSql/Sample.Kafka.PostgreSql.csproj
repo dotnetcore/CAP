@@ -5,7 +5,10 @@
     <WarningsAsErrors>NU1701</WarningsAsErrors>
     <NoWarn>NU1701</NoWarn>
   </PropertyGroup>
-  
+
+  <ItemGroup>
+    <PackageReference Include="Dapper" Version="2.0.35" />
+  </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard\DotNetCore.CAP.Dashboard.csproj" />
     <ProjectReference Include="..\..\src\DotNetCore.CAP.Kafka\DotNetCore.CAP.Kafka.csproj" />
