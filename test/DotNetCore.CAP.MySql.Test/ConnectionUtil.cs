@@ -1,5 +1,5 @@
 using System;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace DotNetCore.CAP.MySql.Test
 {
