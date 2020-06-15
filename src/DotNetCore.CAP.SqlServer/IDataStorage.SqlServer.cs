@@ -12,7 +12,6 @@ using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.SqlServer
@@ -76,9 +75,7 @@ namespace DotNetCore.CAP.SqlServer
             }
             else
             {
-                var dbTrans = dbTransaction as IDbTransaction;
-                if (dbTrans == null && dbTransaction is IDbContextTransaction dbContextTrans)
-                    dbTrans = dbContextTrans.GetDbTransaction();
+                var dbTrans = GetDbTransaction(dbTransaction);
 
                 var conn = dbTrans?.Connection;
                 conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
@@ -164,6 +161,13 @@ namespace DotNetCore.CAP.SqlServer
         public IMonitoringApi GetMonitoringApi()
         {
             return new SqlServerMonitoringApi(_options, _initializer);
+        }
+
+        protected virtual IDbTransaction GetDbTransaction(object dbTransaction)
+        {
+            var dbTrans = dbTransaction as IDbTransaction;
+
+            return dbTrans;
         }
 
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)

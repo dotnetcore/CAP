@@ -11,16 +11,18 @@ using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using DotNetCore.CAP.Transport;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
-    public class SqlServerCapTransaction : CapTransactionBase
+    public class EntityFrameworkSqlServerCapTransaction : CapTransactionBase
     {
         private readonly DiagnosticProcessorObserver _diagnosticProcessor;
 
-        public SqlServerCapTransaction(
+        public EntityFrameworkSqlServerCapTransaction(
             IDispatcher dispatcher,
             DiagnosticProcessorObserver diagnosticProcessor) : base(dispatcher)
         {
@@ -35,8 +37,14 @@ namespace DotNetCore.CAP
                 return;
             }
 
-            var dbTransaction = DbTransaction as IDbTransaction
-                                ?? throw new ArgumentNullException(nameof(DbTransaction));
+            var dbTransaction = DbTransaction as IDbTransaction;
+            if (dbTransaction == null)
+            {
+                if (DbTransaction is IDbContextTransaction dbContextTransaction)
+                    dbTransaction = dbContextTransaction.GetDbTransaction();
+
+                if (dbTransaction == null) throw new ArgumentNullException(nameof(DbTransaction));
+            }
 
             var transactionKey = ((SqlConnection)dbTransaction.Connection).ClientConnectionId;
             if (_diagnosticProcessor.BufferList.TryGetValue(transactionKey, out var list))
@@ -60,6 +68,9 @@ namespace DotNetCore.CAP
                 case IDbTransaction dbTransaction:
                     dbTransaction.Commit();
                     break;
+                case IDbContextTransaction dbContextTransaction:
+                    dbContextTransaction.Commit();
+                    break;
             }
         }
 
@@ -72,7 +83,9 @@ namespace DotNetCore.CAP
                     break;
                 case IDbTransaction dbTransaction:
                     dbTransaction.Commit();
-                    await Task.CompletedTask;
+                    break;
+                case IDbContextTransaction dbContextTransaction:
+                    await dbContextTransaction.CommitAsync(cancellationToken);
                     break;
             }
         }
@@ -84,6 +97,9 @@ namespace DotNetCore.CAP
                 case IDbTransaction dbTransaction:
                     dbTransaction.Rollback();
                     break;
+                case IDbContextTransaction dbContextTransaction:
+                    dbContextTransaction.Rollback();
+                    break;
             }
         }
 
@@ -93,7 +109,9 @@ namespace DotNetCore.CAP
             {
                 case IDbTransaction dbTransaction:
                     dbTransaction.Rollback();
-                    await Task.CompletedTask;
+                    break;
+                case IDbContextTransaction dbContextTransaction:
+                    await dbContextTransaction.RollbackAsync(cancellationToken);
                     break;
             }
         }
@@ -105,6 +123,9 @@ namespace DotNetCore.CAP
                 case IDbTransaction dbTransaction:
                     dbTransaction.Dispose();
                     break;
+                case IDbContextTransaction dbContextTransaction:
+                    dbContextTransaction.Dispose();
+                    break;
             }
 
             DbTransaction = null;
@@ -114,7 +135,7 @@ namespace DotNetCore.CAP
     public static class CapTransactionExtensions
     {
         public static ICapTransaction Begin(this ICapTransaction transaction,
-            IDbTransaction dbTransaction, bool autoCommit = false)
+            IDbContextTransaction dbTransaction, bool autoCommit = false)
         {
             transaction.DbTransaction = dbTransaction;
             transaction.AutoCommit = autoCommit;
@@ -125,19 +146,17 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Start the CAP transaction
         /// </summary>
-        /// <param name="dbConnection">The <see cref="IDbConnection" />.</param>
+        /// <param name="database">The <see cref="DatabaseFacade" />.</param>
         /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
         /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-        /// <returns>The <see cref="ICapTransaction" /> object.</returns>
-        public static IDbTransaction BeginTransaction(this IDbConnection dbConnection,
+        /// <returns>The <see cref="IDbContextTransaction" /> of EF dbcontext transaction object.</returns>
+        public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
             ICapPublisher publisher, bool autoCommit = false)
         {
-            if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
-
-            var dbTransaction = dbConnection.BeginTransaction();
+            var trans = database.BeginTransaction();
             publisher.Transaction.Value = publisher.ServiceProvider.GetService<ICapTransaction>();
-            var capTransaction = publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
-            return (IDbTransaction)capTransaction.DbTransaction;
+            var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+            return new CapEFDbTransaction(capTrans);
         }
     }
 }
