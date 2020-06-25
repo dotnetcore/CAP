@@ -18,7 +18,10 @@ namespace DotNetCore.CAP.Transport
         ServerConnError,
 
         //AzureServiceBus
-        ExceptionReceived
+        ExceptionReceived,
+
+        //NATS
+        AsyncErrorEvent
     }
 
     public class LogMessageEventArgs : EventArgs
