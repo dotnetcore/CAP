@@ -35,11 +35,17 @@ namespace DotNetCore.CAP.NATS
                 using var mStream = new MemoryStream();
                 binFormatter.Serialize(mStream, message);
 
-                connection.Publish(message.GetName(), mStream.ToArray());
+                //connection.Publish(message.GetName(), mStream.ToArray());
+                //return Task.FromResult(OperateResult.Success);
 
-                _logger.LogDebug($"kafka topic message [{message.GetName()}] has been published.");
+                var reply = connection.Request(message.GetName(), mStream.ToArray(), 2000);
+                if (reply.Data != null && reply.Data[0] == 1)
+                {
+                    _logger.LogDebug($"NATS subject message [{message.GetName()}] has been consumed.");
 
-                return Task.FromResult(OperateResult.Success);
+                    return Task.FromResult(OperateResult.Success);
+                }
+                throw new PublisherSentFailedException("NATS message send failed, no consumer reply!");
             }
             catch (Exception ex)
             {

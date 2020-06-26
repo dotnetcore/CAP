@@ -77,19 +77,25 @@ namespace DotNetCore.CAP.NATS
             mStream.Write(e.Message.Data, 0, e.Message.Data.Length);
             mStream.Position = 0;
 
-            var message = binFormatter.Deserialize(mStream) as TransportMessage;
-
-            OnMessageReceived?.Invoke(sender, message);
+            var message = (TransportMessage)binFormatter.Deserialize(mStream);
+            message.Headers.Add(Headers.Group, _groupId);
+            OnMessageReceived?.Invoke(e.Message.Reply, message);
         }
 
         public void Commit(object sender)
         {
-            //TODO : Only NATS Streaming Server Support
+            if (sender is string reply)
+            {
+                _consumerClient.Publish(reply, new byte[] { 1 });
+            }
         }
 
         public void Reject(object sender)
         {
-            //TODO : Only NATS Streaming Server Support
+            if (sender is string reply)
+            {
+                _consumerClient.Publish(reply, new byte[] { 0 });
+            }
         }
 
         public void Dispose()
