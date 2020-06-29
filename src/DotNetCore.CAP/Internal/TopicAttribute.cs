@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.Internal
         /// <summary>
         /// Topic or exchange route key name.
         /// </summary>
-        public string Name { get; }
+        public string Name { get; set; }
 
         /// <summary>
         /// Default group name is CapOptions setting.(Assembly name)

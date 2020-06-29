@@ -153,6 +153,11 @@ namespace DotNetCore.CAP.Internal
             {
                 attribute.Group = attribute.Group + "." + _capOptions.Version;
             }
+
+            if (!string.IsNullOrEmpty(_capOptions.ExtensionSubscribeName))
+            {
+                attribute.Name = attribute.Name + "." + _capOptions.ExtensionSubscribeName;
+            }
         }
 
         private static ConsumerExecutorDescriptor InitDescriptor(

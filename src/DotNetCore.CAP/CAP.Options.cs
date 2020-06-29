@@ -23,10 +23,16 @@ namespace DotNetCore.CAP
             ConsumerThreadCount = 1;
             Extensions = new List<ICapOptionsExtension>();
             Version = "v1";
+            ExtensionSubscribeName = "";
             DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
         }
 
         internal IList<ICapOptionsExtension> Extensions { get; }
+
+        /// <summary>
+        /// Subscriber extension subscribe name.
+        /// </summary>
+        public string ExtensionSubscribeName { get; set; }
 
         /// <summary>
         /// Subscriber default group name. kafka-->group name. rabbitmq --> queue name.
