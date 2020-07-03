@@ -10,11 +10,11 @@
 [![Member project of .NET Core Community](https://img.shields.io/badge/member%20project%20of-NCC-9e20c9.svg)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
-CAP is a library based on .Net standard, which is a solution to deal with distributed transactions, also has the function of EventBus, it is lightweight, easy to use, and efficiently.
+CAP is a library based on .Net standard, which is a solution to deal with distributed transactions, has the function of EventBus, it is lightweight, easy to use, and efficient.
 
-In the process of building an SOA or MicroService system, we usually need to use the event to integrate each services. In the process, the simple use of message queue does not guarantee the reliability. CAP is adopted the local message table program integrated with the current database to solve the exception may occur in the process of the distributed system calling each other. It can ensure that the event messages are not lost in any case.
+In the process of building an SOA or MicroService system, we usually need to use the event to integrate each service. In the process, the simple use of message queue does not guarantee the reliability. CAP adopts local message table program integrated with the current database to solve exceptions that may occur in the process of the distributed system calling each other. It can ensure that the event messages are not lost in any case.
 
-You can also use the CAP as an EventBus. The CAP provides a simpler way to implement event publishing and subscriptions. You do not need to inherit or implement any interface during the process of subscription and sending.
+You can also use CAP as an EventBus. CAP provides a simpler way to implement event publishing and subscriptions. You do not need to inherit or implement any interface during subscription and sending process.
 
 ## Architecture overview
 
@@ -26,13 +26,13 @@ You can also use the CAP as an EventBus. The CAP provides a simpler way to imple
 
 ### NuGet
 
-You can run the following command to install the CAP in your project.
+You can run the following command to install CAP in your project.
 
 ```
 PM> Install-Package DotNetCore.CAP
 ```
 
-CAP supports RabbitMQ,Kafka and AzureService as message queue, select the packages you need to install:
+CAP supports RabbitMQ, Kafka and AzureService as message queue, following packages are available to install:
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka
@@ -53,7 +53,7 @@ PM> Install-Package DotNetCore.CAP.MongoDB     //need MongoDB 4.0+ cluster
 
 ### Configuration
 
-First,You need to config CAP in your Startup.cs：
+First, you need to config CAP in your Startup.cs：
 
 ```cs
 public void ConfigureServices(IServiceCollection services)
@@ -151,7 +151,7 @@ public class PublishController : Controller
 
 **In Business Logic Service**
 
-If your subscribe method is not in the Controller,then your subscribe class need to Inheritance `ICapSubscribe`:
+If your subscription method is not in the Controller,then your subscribe class need to implement `ICapSubscribe` interface:
 
 ```c#
 
@@ -173,7 +173,7 @@ namespace BusinessCode.Service
 
 ```
 
-Then inject your  `ISubscriberService`  class in Startup.cs
+Then register your class that implements `ISubscriberService` in Startup.cs
 
 ```c#
 public void ConfigureServices(IServiceCollection services)
@@ -192,10 +192,10 @@ public void ConfigureServices(IServiceCollection services)
 
 The concept of a subscription group is similar to that of a consumer group in Kafka. it is the same as the broadcast mode in the message queue, which is used to process the same message between multiple different microservice instances.
 
-When CAP startup, it will use the current assembly name as the default group name, if multiple same group subscribers subscribe the same topic name, there is only one subscriber can receive the message.
+When CAP startups, it will use the current assembly name as the default group name, if multiple same group subscribers subscribe to the same topic name, there is only one subscriber that can receive the message.
 Conversely, if subscribers are in different groups, they will all receive messages.
 
-In the same application, you can specify the `Group` property to keep they are in different subscribe groups:
+In the same application, you can specify `Group` property to keep subscriptions in different subscribe groups:
 
 ```C#
 
@@ -224,7 +224,7 @@ services.AddCap(x =>
 
 ### Dashboard
 
-CAP v2.1+ provides the dashboard pages, you can easily view the sent and received messages. In addition, you can also view the  message status in real time on the dashboard. Use the  following command to install the Dashboard in your project.
+CAP v2.1+ provides dashboard pages, you can easily view message that were sent and received. In addition, you can also view the  message status in real time in the dashboard. Use the following command to install the Dashboard in your project.
 
 ```
 PM> Install-Package DotNetCore.CAP.Dashboard
@@ -253,7 +253,7 @@ services.AddCap(x =>
 });
 ```
 
-The default dashboard address is :[http://localhost:xxx/cap](http://localhost:xxx/cap), you can also configure the `/cap` suffix with `x.UseDashboard(opt =>{ opt.MatchPath="/mycap"; })`.
+The default dashboard address is :[http://localhost:xxx/cap](http://localhost:xxx/cap), you can configure relative path `/cap` with `x.UseDashboard(opt =>{ opt.MatchPath="/mycap"; })`.
 
 ![dashboard](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220827302-189215107.png)
 
