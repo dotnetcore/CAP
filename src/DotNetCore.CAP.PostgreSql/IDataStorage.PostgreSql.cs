@@ -143,23 +143,11 @@ namespace DotNetCore.CAP.PostgreSql
             return await Task.FromResult(count);
         }
 
-        public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
-        {
-            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql =
-                $"SELECT * FROM {_pubName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
+        public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
+            await GetMessagesOfNeedRetryAsync(_pubName);
 
-            return await GetMessagesOfNeedRetryAsync(sql);
-        }
-
-        public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
-        {
-            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql =
-                $"SELECT * FROM {_recName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
-
-            return await GetMessagesOfNeedRetryAsync(sql);
-        }
+        public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry() =>
+            await GetMessagesOfNeedRetryAsync(_recName);
 
         public IMonitoringApi GetMonitoringApi()
         {
@@ -195,8 +183,13 @@ namespace DotNetCore.CAP.PostgreSql
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
         }
 
-        private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string sql)
+        private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
         {
+            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
+            var sql =
+                $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\" FROM {tableName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} " +
+                $"AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
+
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             var result = connection.ExecuteReader(sql, reader =>
             {

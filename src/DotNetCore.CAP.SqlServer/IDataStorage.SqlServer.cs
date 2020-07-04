@@ -142,24 +142,11 @@ namespace DotNetCore.CAP.SqlServer
             return await Task.FromResult(count);
         }
 
-        public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
-        {
-            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql = $"SELECT TOP (200) Id, Content, Retries, Added FROM {_pubName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
-                      $"AND Version='{_capOptions.Value.Version}' AND Added<'{fourMinAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
+        public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
+            await GetMessagesOfNeedRetryAsync(_pubName);
 
-            return await GetMessagesOfNeedRetryAsync(sql);
-        }
-
-        public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
-        {
-            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql =
-                $"SELECT TOP (200) Id, Content, Retries, Added FROM {_recName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
-                $"AND Version='{_capOptions.Value.Version}' AND Added<'{fourMinAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
-
-            return await GetMessagesOfNeedRetryAsync(sql);
-        }
+        public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry() =>
+            await GetMessagesOfNeedRetryAsync(_recName);
 
         public IMonitoringApi GetMonitoringApi()
         {
@@ -195,8 +182,13 @@ namespace DotNetCore.CAP.SqlServer
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
         }
 
-        private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string sql)
+        private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
         {
+            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
+            var sql =
+                $"SELECT TOP (200) Id, Content, Retries, Added FROM {tableName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
+                $"AND Version='{_capOptions.Value.Version}' AND Added<'{fourMinAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
+
             List<MediumMessage> result;
             using (var connection = new SqlConnection(_options.Value.ConnectionString))
             {
