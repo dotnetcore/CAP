@@ -128,7 +128,7 @@ namespace DotNetCore.CAP.Dashboard
             
             Routes.AddRazorPage("/nodes", x =>
             {
-                var id = x.Request.Cookies["cap.node"];
+                var id = x.Request.Cookies.ContainsKey("cap.node") ? x.Request.Cookies["cap.node"] : string.Empty;
                 return new NodePage(id);
             });
 
