@@ -25,6 +25,10 @@ The CAP is modular in design and highly scalable. You have many options to choos
 
 [Article: Introduction and how to use](http://www.cnblogs.com/savorboard/p/cap.html)
 
+[Article: New features in version 3.0](https://www.cnblogs.com/savorboard/p/cap-3-0.html)
+
+[Article: New features in version 2.6](https://www.cnblogs.com/savorboard/p/cap-2-6.html)
+
 [Article: New features in version 2.5](https://www.cnblogs.com/savorboard/p/cap-2-5.html)
 
 [Article: New features in version 2.4](http://www.cnblogs.com/savorboard/p/cap-2-4.html)
