@@ -11,11 +11,6 @@ namespace DotNetCore.CAP.AmazonSQS
                 throw new ArgumentOutOfRangeException(nameof(origin) + " character string length must between 1~256!");
             }
             return origin.Replace(".", "-").Replace(":", "_");
-        }
-
-        public static string DeNormalizeForAws(this string origin)
-        {
-            return origin.Replace("-", ".").Replace("_", ":");
-        }
+        } 
     }
 }
