@@ -2,6 +2,9 @@
 
 SQL Server 是由微软开发的一个关系型数据库，你可以使用 SQL Server 来作为 CAP 消息的持久化。
 
+!!! warning "注意"
+    我们目前使用 `Microsoft.Data.SqlClient` 作为数据库驱动程序，它是SQL Server 驱动的未来，并且已经放弃了 `System.Data.SqlClient`，我们建议你切换过去。
+
 ## 配置
 
 要使用 SQL Server 存储，你需要从 NuGet 安装以下扩展包：

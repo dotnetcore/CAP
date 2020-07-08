@@ -66,3 +66,11 @@ services.AddCap(x =>
 });
 
 ```
+
+#### 如何连接 RabbitMQ 集群？
+
+使用逗号分隔连接字符串即可，如下：
+
+```
+x=> x.UseRabbitMQ("localhost:5672,localhost:5673,localhost:5674")
+```

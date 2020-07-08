@@ -65,3 +65,11 @@ services.AddCap(x =>
 });
 
 ```
+
+#### How to connect cluster
+
+using comma split connection string, like this:
+
+```
+x=> x.UseRabbitMQ("localhost:5672,localhost:5673,localhost:5674")
+```

@@ -14,9 +14,7 @@ To use Azure Service Bus as a message transport, you need to install the followi
 ```powershell
 PM> Install-Package DotNetCore.CAP.AzureServiceBus
 ```
-
-Then you can add memory-based configuration items to the `ConfigureServices` method of `Startup.cs`.
-
+Next, add configuration items to the `ConfigureServices` method of `Startup.cs`:
 
 ```csharp
 
