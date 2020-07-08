@@ -9,6 +9,7 @@ CAP supports several transport methods:
 * [RabbitMQ](rabbitmq.md)
 * [Kafka](kafka.md)
 * [Azure Service Bus](azure-service-bus.md)
+* [Amazon SQS](aws-sqs.md)
 * [In-Memory Queue](in-memory-queue.md)
 
 ## How to select a transport
