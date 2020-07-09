@@ -19,5 +19,5 @@ deploy:
     appveyor_repo_tag: true
   api_key:
     secure: PZXRBOGLyhYLP7ulHfrh6MnkqB8CstuitgbLcJr3cZkLJLLzPH0ahvuTtmhWxtR2            
-  skip_symbols: true
+  skip_symbols: false
   artifact: /artifacts\/.+\.nupkg/
