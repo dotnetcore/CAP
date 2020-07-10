@@ -13,7 +13,7 @@ PM> Install-Package DotNetCore.CAP.Kafka
 
 ```
 
-Then you can add memory-based configuration items to the `ConfigureServices` method of `Startup.cs`.
+Then you can add configuration items to the `ConfigureServices` method of `Startup.cs`.
 
 ```csharp
 

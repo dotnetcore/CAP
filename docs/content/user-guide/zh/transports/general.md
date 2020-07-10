@@ -9,6 +9,7 @@ CAP 支持以下几种运输方式：
 * [RabbitMQ](rabbitmq.md)
 * [Kafka](kafka.md)
 * [Azure Service Bus](azure-service-bus.md)
+* [Amazon SQS](aws-sqs.md)
 * [In-Memory Queue](in-memory-queue.md)
 
 ## 怎么选择运输器

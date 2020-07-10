@@ -10,7 +10,8 @@ To use In Memory Queue as a message transporter, you need to install the followi
 PM> Install-Package Savorboard.CAP.InMemoryMessageQueue
 
 ```
-Then you can add memory-based configuration items to the `ConfigureServices` method of `Startup.cs`.
+
+Next, add configuration items to the `ConfigureServices` method of `Startup.cs`:
 
 ```csharp
 

@@ -193,7 +193,7 @@ with aggr as (
     where StatusName = @statusName
     group by replace(convert(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added))
 )
-select [Key], [Count] from aggr with (nolock) where [Key] in @keys;";
+select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <= @maxKey;";
 
             //SQL Server 2012+ 
             var sqlQuery = $@"

@@ -2,6 +2,9 @@
 
 SQL Server is a relational database management system developed by Microsoft. CAP has supported SQL Server as persistent. 
 
+!!! warning "Warning"
+    We currently use `Microsoft.Data.SqlClient` as the database driver, which is the future of SQL Server drivers, and we have abandoned `System.Data.SqlClient`, we suggest you switch into.
+
 ## Configuration
 
 To use SQL Server storage, you need to install the following extensions from NuGet:

@@ -23,8 +23,8 @@ theme:
   include_sidebar: true
   logo: 'img/logo.svg'
   favicon: 'img/favicon.ico'
-  feature:
-    tabs: true  
+  features:
+    - tabs
   i18n:
     prev: 'Previous'
     next: 'Next'
@@ -32,11 +32,11 @@ theme:
 #Customization
 extra:
   social:
-    - type: 'github'
+    - icon: 'fontawesome/brands/github'
       link: 'https://github.com/dotnetcore/CAP'
-    - type: 'twitter'
+    - icon: 'fontawesome/brands/twitter'
       link: 'https://twitter.com/ncc_community'
-    - type: 'weibo'
+    - icon: 'fontawesome/brands/weibo'
       link: 'https://weibo.com/dotnetcore'
 
 # Extensions
@@ -90,6 +90,7 @@ nav:
           - RabbitMQ: user-guide/en/transports/rabbitmq.md
           - Apache Kafka®: user-guide/en/transports/kafka.md
           - Azure Service Bus: user-guide/en/transports/azure-service-bus.md
+          - Amazon SQS: user-guide/en/transports/aws-sqs.md
           - In-Memory Queue: user-guide/en/transports/in-memory-queue.md
       - Persistent:
           - General: user-guide/en/persistent/general.md
@@ -122,6 +123,7 @@ nav:
           - RabbitMQ: user-guide/zh/transports/rabbitmq.md
           - Apache Kafka®: user-guide/zh/transports/kafka.md
           - Azure Service Bus: user-guide/zh/transports/azure-service-bus.md
+          - Amazon SQS: user-guide/zh/transports/aws-sqs.md
           - In-Memory Queue: user-guide/zh/transports/in-memory-queue.md
       - 持久化:
           - 简介: user-guide/zh/persistent/general.md
