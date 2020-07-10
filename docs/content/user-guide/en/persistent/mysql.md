@@ -1,10 +1,10 @@
 # MySQL
 
-MySQL is an open-source relational database management system. CAP has supported MySQL as persistent. 
+MySQL is an open-source relational database management system. CAP supports MySQL database. 
 
 ## Configuration
 
-To use MySQL storage, you need to install the following extensions from NuGet:
+To use MySQL storage, you need to install the following package from NuGet:
  
 ```powershell
 PM> Install-Package DotNetCore.CAP.MySql

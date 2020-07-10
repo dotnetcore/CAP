@@ -151,7 +151,7 @@ public class PublishController : Controller
 
 **In Business Logic Service**
 
-If your subscription method is not in the Controller,then your subscribe class needs to implement `ICapSubscribe` interface:
+If your subscription method is not in the Controller, then your subscribe class needs to implement `ICapSubscribe` interface:
 
 ```c#
 

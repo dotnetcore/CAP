@@ -4,7 +4,7 @@ Persistent storage of memory messages is often used in development and test envi
 
 ## Configuration
 
-To use in-memory storage, you need to install the following extensions from NuGet:
+To use in-memory storage, you need to install following package from NuGet:
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.InMemoryStorage
@@ -27,8 +27,8 @@ public void ConfigureServices(IServiceCollection services)
 
 ```
 
-The successful message in memory, the CAP will be cleaned **every 5 minutes**.
+ CAP will clean **every 5 minutes** Successful messages in memory.
 
 ## Publish with transaction
 
-In-Memory Storage **Not supported** Transaction mode to send messages.
+In-Memory Storage **does not support** Transaction mode to send messages.
