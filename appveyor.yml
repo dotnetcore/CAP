@@ -12,7 +12,7 @@ build_script:
   - ps: flubu
 test: off
 artifacts:
-- path: artifacts/*.nupkg
+- path: artifacts/**
 deploy:
   provider: NuGet
   on:
@@ -20,4 +20,4 @@ deploy:
   api_key:
     secure: PZXRBOGLyhYLP7ulHfrh6MnkqB8CstuitgbLcJr3cZkLJLLzPH0ahvuTtmhWxtR2            
   skip_symbols: false
-  artifact: /artifacts\/.+\.nupkg/
+  artifact: /artifacts\/.+\.s?nupkg/
