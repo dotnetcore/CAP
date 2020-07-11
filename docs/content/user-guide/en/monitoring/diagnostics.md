@@ -1,6 +1,6 @@
 # Diagnostics
 
-Diagnostics provides a set of features that make it easy for us to document the critical operations that occur during the application's operation, their execution time, etc., allowing administrators to find the root cause of problems, especially in production environments.
+Diagnostics provides a set of features that make it easy for us to document critical operations that occurs during the application's operation, their execution time, etc., allowing administrators to find the root cause of problems, especially in production environments.
 
 ## Diagnostics events
 

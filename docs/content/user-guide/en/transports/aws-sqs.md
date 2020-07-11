@@ -10,12 +10,12 @@ AWS SNS is a highly available, durable, secure, fully managed pub/sub messaging 
 
 Because CAP works based on the topic pattern, it needs to use AWS SNS, which simplifies the publish and subscribe architecture of messages.
 
-When the CAP startup, all subscription names will be registered as SNS topics, and you will see a list of all registered topics in the management console.
+When CAP startups, all subscription names will be registered as SNS topics, and you will see a list of all registered topics in the management console.
 
-SNS does not support the use of symbols such as `.` `:` as the name of the topic, so we replaced it. We replaced `.` with `-` and `:` with `_`
+SNS does not support use of symbols such as `.` `:` as the name of the topic, so we replaced it. We replaced `.` with `-` and `:` with `_`
 
 !!! note "Precautions"
-    Amazon SNS currently allows the maximum size of published messages to be 256KB
+    Amazon SNS currently allows maximum size of published messages to be 256KB
 
 For example, you have the following two subscriber methods in your current project
 
@@ -30,7 +30,7 @@ public void TestBar(DateTime value)
 {
 }
 ```
-After the CAP startup, you will see in SNS management console:
+After CAP startups, you will see in SNS management console:
 
 ![img](/img/aws-sns-demo.png)
 

@@ -1,10 +1,10 @@
 # Postgre SQL
 
-PostgreSQL is an open-source relational database management system. CAP has supported PostgreSQL as persistent. 
+PostgreSQL is an open-source relational database management system. CAP supports PostgreSQL database. 
 
 ## Configuration
 
-To use PostgreSQL storage, you need to install the following extensions from NuGet:
+To use PostgreSQL storage, you need to install the following package from NuGet:
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.PostgreSql

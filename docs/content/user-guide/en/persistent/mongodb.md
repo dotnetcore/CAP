@@ -2,7 +2,7 @@
 
 MongoDB is a cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with schema.
 
-CAP has supported MongoDB as persistent since version 2.3 .
+CAP supports MongoDB since version 2.3 .
 
 MongoDB supports ACID transactions since version 4.0, so CAP only supports MongoDB above 4.0, and MongoDB needs to be deployed as a cluster, because MongoDB's ACID transaction requires a cluster to be used.
 
@@ -10,7 +10,7 @@ For a quick development of the MongoDB 4.0+ cluster for the development environm
 
 ## Configuration
 
-To use MongoDB storage, you need to install the following extensions from NuGet:
+To use MongoDB storage, you need to install the following package from NuGet:
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.MongoDB

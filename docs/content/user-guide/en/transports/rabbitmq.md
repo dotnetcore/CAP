@@ -2,11 +2,11 @@
 
 RabbitMQ is an open-source message-broker software that originally implemented the Advanced Message Queuing Protocol and has since been extended with a plug-in architecture to support Streaming Text Oriented Messaging Protocol, Message Queuing Telemetry Transport, and other protocols.
 
-CAP has supported RabbitMQ as message transporter. 
+RabbitMQ can be used in CAP as a message transporter. 
 
 ## Configuration
 
-To use RabbitMQ transporter, you need to install the following extensions from NuGet:
+To use RabbitMQ transporter, you need to install the following package from NuGet:
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.RabbitMQ
@@ -35,7 +35,7 @@ public void ConfigureServices(IServiceCollection services)
 
 #### RabbitMQ Options
 
-The RabbitMQ configuration parameters provided directly by the CAP are as follows:
+The RabbitMQ configuration parameters provided directly by CAP:
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
