@@ -14,7 +14,7 @@ CAP is a library based on .net standard, which is a solution to deal with distri
 
 ## Introduction
 
-In the process of building an SOA or MicroService system, we usually need to use the event to integrate each service. In the process, the simple use of message queue does not guarantee the reliability. CAP adopts local message table program integrated with the current database to solve exceptions that may occur in the process of the distributed system calling each other. It can ensure that the event messages are not lost in any case.
+In the process of building an SOA or MicroService system, we usually need to use the event to integrate each service. In the process, simple use of message queue does not guarantee reliability. CAP adopts local message table program integrated with the current database to solve exceptions that may occur in the process of the distributed system calling each other. It can ensure that the event messages are not lost in any case.
 
 You can also use CAP as an EventBus. CAP provides a simpler way to implement event publishing and subscriptions. You do not need to inherit or implement any interface during subscription and sending process.
 
