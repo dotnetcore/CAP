@@ -92,7 +92,7 @@ nav:
           - Azure Service Bus: user-guide/en/transports/azure-service-bus.md
           - Amazon SQS: user-guide/en/transports/aws-sqs.md
           - In-Memory Queue: user-guide/en/transports/in-memory-queue.md
-      - Persistent:
+      - Storage:
           - General: user-guide/en/persistent/general.md
           - SQL Server: user-guide/en/persistent/sqlserver.md
           - MySQL: user-guide/en/persistent/mysql.md

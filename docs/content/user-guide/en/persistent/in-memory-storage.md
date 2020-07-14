@@ -1,6 +1,6 @@
 # In-Memory Storage
 
-Persistent storage of memory messages is often used in development and test environments, and if you use memory-based storage you lose the reliability of local transaction messages.
+In-memory storage is often used in development and test environments, and if you use memory-based storage you lose the reliability of local transaction messages.
 
 ## Configuration
 

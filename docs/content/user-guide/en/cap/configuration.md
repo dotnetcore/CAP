@@ -49,13 +49,13 @@ The default consumer group name, corresponds to different names in different Tra
 This is a new configuration option introduced in the CAP v2.4 version. It is used to specify a version of a message to isolate messages of different versions of the service. It is often used in A/B testing or multi-service version scenarios. Following are application scenarios that needs versioning:
 
 !!! info "Business Iterative and compatible"
-    Due to the rapid iteration of services, the data structure of the message is not fixed during each service integration process. Sometimes we add or modify certain data structures to accommodate the newly introduced requirements. If you have a brand new system, there's no problem, but if your system is already deployed to a production environment and serves customers, this will cause new features to be incompatible with the old data structure when they go online, and then these changes can cause serious problems. To work around this issue, you can only clean up message queues and persistent messages before starting the application, which is obviously fatal for production environments.
+    Due to the rapid iteration of services, the data structure of the message is not fixed during each service integration process. Sometimes we add or modify certain data structures to accommodate the newly introduced requirements. If you have a brand new system, there's no problem, but if your system is already deployed to a production environment and serves customers, this will cause new features to be incompatible with the old data structure when they go online, and then these changes can cause serious problems. To work around this issue, you can only clean up message queues and persistent messages before starting the application, which is obviously not acceptable for production environments.
 
 !!! info "Multiple versions of the server"
     Sometimes, the server's server needs to provide multiple sets of interfaces to support different versions of the app. Data structures of the same interface and server interaction of these different versions of the app may be different, so usually server does not provide the same routing addresses to adapt to different versions of App calls.
 
 !!! info "Using the same persistent table/collection in different instance"
-    If you want multiple different instance services to use the same database, in versions prior to 2.4, we could isolate database tables for different instances by specifying different table names. That is to say, when configuring the CAP, it is implemented by configuring different table name prefixes.
+    If you want multiple different instance services to use the same database, in versions prior to 2.4, we could isolate database tables for different instances by specifying different table names. After version 2.4 this can be achived through CAP configuration, by configuring different table name prefixes.
 
 > Check out the blog to learn more about the Versioning feature: https://www.cnblogs.com/savorboard/p/cap-2-4.html
 
@@ -68,7 +68,7 @@ During the message sending process if message transport fails, CAP will try to s
 During the message sending process if consumption method fails, CAP will try to execute the method again. This configuration option is used to configure the interval between each retry.
 
 !!! WARNING "Retry & Interval"
-    By default, retry will start after **4 minutes** of failure to send or consume, in order to avoid possible problems caused by setting message state delays.    
+    By default if failure occurs on send or consume, retry will start after **4 minutes** in order to avoid possible problems caused by setting message state delays.    
     Failures in the process of sending and consuming messages will be retried 3 times immediately, and will be retried polling after 3 times, at which point the FailedRetryInterval configuration will take effect.
 
 #### ConsumerThreadCount 
@@ -94,10 +94,10 @@ T1 : Message Type
 T2 : Message Name  
 T3 : Message Content
 
-Failure threshold callback. This action is called when the retry reaches the value set by `FailedRetryCount`, you can receive notification by specifying this parameter to make a manual intervention. For example, send an email or notify.
+Failure threshold callback. This action is called when the retry reaches the value set by `FailedRetryCount`, you can receive notification by specifying this parameter to make a manual intervention. For example, send an email or notification.
 
 #### SucceedMessageExpiredAfter
 
 > Default: 24*3600 sec (1 days)
 
-The expiration time (in seconds) of the success message. When the message is sent or consumed successfully, it will be removed from persistent when the time reaches `SucceedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.
+The expiration time (in seconds) of the success message. When the message is sent or consumed successfully, it will be removed from database storage when the time reaches `SucceedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.

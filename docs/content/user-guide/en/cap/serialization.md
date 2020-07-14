@@ -19,7 +19,7 @@ public class YourSerializer: ISerializer
 }
 ```
 
-Then register your implementation in the container:
+Then register your implemented serializer in the container:
 
 ```
 
