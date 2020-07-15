@@ -32,9 +32,9 @@ services.AddCap
 
 ## Message Adapter (removed in v3.0)
 
-In heterogeneous systems, sometimes you need to communicate with other systems, but other systems use message objects that may be different from CAP's [**Wrapper Object**](../persistent/general.md#_7). This time maybe you need to customize the message wapper.
+In heterogeneous systems, sometimes you need to communicate with other systems, but other systems use message objects that may be different from CAP's [**Wrapper Object**](../storage/general.md#_7). This time maybe you need to customize the message wapper.
 
-CAP provides the `IMessagePacker` interface for customizing the [**Wrapper Object**](../persistent/general.md#_7). Custom MessagePacker usually packs and unpacks the `CapMessage` In this process you can add your own business objects.
+CAP provides the `IMessagePacker` interface for customizing the [**Wrapper Object**](../storage/general.md#_7). Custom MessagePacker usually packs and unpacks the `CapMessage` In this process you can add your own business objects.
 
 Usage :
 

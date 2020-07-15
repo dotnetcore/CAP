@@ -25,7 +25,7 @@ services.AddCap(capOptions =>
 });
 ```
 
-For specific transport and storage configuration, you can take a look at the configuration options provided by the specific components in the [Transports](../transports/general.md) section and the [Persistent](../persistent/general.md) section.
+For specific transport and storage configuration, you can take a look at the configuration options provided by the specific components in the [Transports](../transport/general.md) section and the [Persistent](../storage/general.md) section.
 
 ## Custom configuration
 

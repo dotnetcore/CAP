@@ -52,11 +52,11 @@ CAP 接收到消息之后会将消息发送到 Transport, 由 Transport 进行�
 
 当你使用 `ICapPublisher` 接口发送时，CAP将会将消息调度到相应的 Transport中去，目前还不支持批量发送消息。
 
-有关 Transports 的更多信息，可以查看 [Transports](../transports/general.md) 章节。
+有关 Transports 的更多信息，可以查看 [Transports](../transport/general.md) 章节。
 
 ## 消息存储
 
-CAP 接收到消息之后会将消息进行 Persistent（持久化）， 有关 Persistent 的更多信息，可以查看 [Persistent](../persistent/general.md) 章节。
+CAP 接收到消息之后会将消息进行 Persistent（持久化）， 有关 Persistent 的更多信息，可以查看 [Persistent](../storage/general.md) 章节。
 
 ## 消息重试
 

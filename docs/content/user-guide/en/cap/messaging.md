@@ -8,11 +8,11 @@ After CAP receives a message, it sends the message to Transport(RabitMq, Kafka..
  
 When you send message using the `ICapPublisher` interface, CAP will dispatch message to the corresponding Transport. Currently, bulk messaging is not supported.
 
-For more information on transports, see [Transports](../transports/general.md) section.
+For more information on transports, see [Transports](../transport/general.md) section.
 
 ## Storage 
 
-CAP will store the message after receiving it. For more information on storage, see the [Storage](../persistent/general.md) section.
+CAP will store the message after receiving it. For more information on storage, see the [Storage](../storage/general.md) section.
 
 ## Retry
 
