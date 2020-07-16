@@ -10,7 +10,7 @@ namespace Sample.Kafka.InMemory
             services.AddCap(x =>
             {
                 x.UseInMemoryStorage();
-                x.UsePulsar("pulsar://10.9.1.124:30398,10.9.1.124:30724,10.9.1.124:31771");
+                x.UseKafka("localhost:9092");
                 x.UseDashboard();
             });
 
