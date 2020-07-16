@@ -11,7 +11,7 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Pulsar.Client.Common;
 
-namespace DotNetCore.CAP.Pulsar
+namespace DotNetCore.CAP.Kafka
 {
     internal class PulsarTransport : ITransport
     {

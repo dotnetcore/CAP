@@ -15,7 +15,7 @@ using Microsoft.FSharp.Core;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP.Pulsar
+namespace DotNetCore.CAP.Kafka
 {
     internal sealed class PulsarConsumerClient : IConsumerClient
     {
