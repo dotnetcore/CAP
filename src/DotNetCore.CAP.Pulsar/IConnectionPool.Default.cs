@@ -33,6 +33,7 @@ namespace DotNetCore.CAP.Pulsar
 
         public IProducer<byte[]> RentProducer()
         {
+            // TODO: need topic to rent producer
             if (_producerPool.TryDequeue(out var producer))
             {
                 Interlocked.Decrement(ref _pCount);
@@ -40,7 +41,9 @@ namespace DotNetCore.CAP.Pulsar
                 return producer;
             }
 
-            producer = _client.NewProducer().Topic($"persistent://public/default/supermatelsotoppic").CreateAsync().Result;
+            var options = _options;
+            
+            producer = _client.NewProducer().Topic($"persistent://public/default/captesttopic").CreateAsync().Result;
 
             return producer;
         }
