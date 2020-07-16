@@ -10,7 +10,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Pulsar
 {
     internal class KafkaTransport : ITransport
     {

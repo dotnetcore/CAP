@@ -18,13 +18,13 @@ namespace Sample.Kafka.InMemory.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.azure.mysql2", DateTime.Now);
+            await _capBus.PublishAsync("persistent://public/default/supermatelsotoppic", DateTime.Now);
 
             return Ok();
         }
 
-        [CapSubscribe("sample.azure.mysql2")]
-        public void Test2T2(DateTime value)
+        [CapSubscribe("persistent://public/default/supermatelsotoppic")]
+        public void Test2T2(string value)
         {
             Console.WriteLine("Subscriber output message: " + value);
         }

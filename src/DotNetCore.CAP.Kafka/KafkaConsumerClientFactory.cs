@@ -4,7 +4,7 @@
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Pulsar
 {
     internal sealed class KafkaConsumerClientFactory : IConsumerClientFactory
     {

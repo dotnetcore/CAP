@@ -3,7 +3,7 @@
 
 using Confluent.Kafka;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Pulsar
 {
     public interface IConnectionPool
     {
