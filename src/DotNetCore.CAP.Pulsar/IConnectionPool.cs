@@ -3,7 +3,7 @@
 
 using Pulsar.Client.Api;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Pulsar
 {
     public interface IConnectionPool
     {

@@ -3,14 +3,13 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Threading;
-using Pulsar.Client.Api;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Pulsar.Client.Api;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Pulsar
 {
     public class ConnectionPool : IConnectionPool, IDisposable
     {

@@ -4,18 +4,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using Pulsar.Client.Api;
-using Pulsar.Client.Common;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
-using Microsoft.FSharp.Core;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+using Pulsar.Client.Api;
+using Pulsar.Client.Common;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Pulsar
 {
     internal sealed class PulsarConsumerClient : IConsumerClient
     {

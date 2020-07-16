@@ -2,7 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using DotNetCore.CAP.Kafka;
+using DotNetCore.CAP.Pulsar;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 

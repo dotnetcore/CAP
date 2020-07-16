@@ -2,16 +2,13 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Text;
 using System.Threading.Tasks;
-using Pulsar.Client.Api;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
-using Pulsar.Client.Common;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Pulsar
 {
     internal class PulsarTransport : ITransport
     {
