@@ -3,7 +3,7 @@
 SQL Server is a relational database management system developed by Microsoft. CAP supports SQL Server database. 
 
 !!! warning "Warning"
-    We currently use `Microsoft.Data.SqlClient` as the database driver, which is the future of SQL Server drivers, and we have abandoned `System.Data.SqlClient`, we suggest you switch into.
+    We currently use `Microsoft.Data.SqlClient` as the database driver, which is the future of SQL Server drivers, and we have abandoned `System.Data.SqlClient`, we suggest that you switch to.
 
 ## Configuration
 

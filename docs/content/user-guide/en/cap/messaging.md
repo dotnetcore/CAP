@@ -4,15 +4,15 @@ The data sent by using the `ICapPublisher` interface is called `Message`.
 
 ## Scheduling
 
-After CAP receives a message, it sends the message to Transport, which is transported by transport.
+After CAP receives a message, it sends the message to Transport(RabitMq, Kafka...), which is transported by transport.
  
 When you send message using the `ICapPublisher` interface, CAP will dispatch message to the corresponding Transport. Currently, bulk messaging is not supported.
 
-For more information on transports, see [Transports](../transports/general.md) section.
+For more information on transports, see [Transports](../transport/general.md) section.
 
-## Persistent 
+## Storage 
 
-CAP will store the message after receiving it. For more information on storage, see the [Persistent](../persistent/general.md) section.
+CAP will store the message after receiving it. For more information on storage, see the [Storage](../storage/general.md) section.
 
 ## Retry
 
@@ -20,7 +20,7 @@ Retrying plays an important role in the overall CAP architecture design, CAP ret
 
 ### Send retry
 
-During the message sending process, when the broker crashes or the connection fails or an abnormality occurs, the CAP will retry the sending. Retry 3 times for the first time, retry every minute after 4 minutes, and +1 retries. When the total number of times reaches 50,CAP will stop retrying.
+During the message sending process, when the broker crashes or the connection fails or an abnormality occurs, CAP will retry the sending. Retry 3 times for the first time, retry every minute after 4 minutes, and +1 retry. When the total number of retries reaches 50,CAP will stop retrying.
 
 You can adjust the total number of retries by setting `FailedRetryCount` in CapOptions.
 
@@ -32,10 +32,10 @@ The consumer method is executed when the Consumer receives the message and will 
 
 ## Data Cleanup
 
-There is an `ExpiresAt` field in the database message table indicating the expiration time of the message. When the message is sent successfully, the status will be changed to `Successed`, and `ExpiresAt` will be set to **1 hour** later. 
+There is an `ExpiresAt` field in the database message table indicating the expiration time of the message. When the message is sent successfully, status will be changed to `Successed`, and `ExpiresAt` will be set to **1 hour** later. 
 
 Consuming failure will change the message status to `Failed` and `ExpiresAt` will be set to **15 days** later.
 
 By default, the data of the message in the table is deleted **every hour** to avoid performance degradation caused by too much data. The cleanup strategy `ExpiresAt` is performed when field is not empty and is less than the current time. 
 
-That is to say, the message with the status Failed (normally they have been retried 50 times), if you do not have manual intervention for 15 days, it will **also be** cleaned up.
+That is to say, the message with the status Failed (by default they have been retried 50 times), if you do not have manual intervention for 15 days, it will **also be** cleaned up.

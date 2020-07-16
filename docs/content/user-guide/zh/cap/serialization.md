@@ -34,9 +34,9 @@ services.AddCap
 
 ## 消息适配器 (v3.0移除 )
 
-在异构系统中，有时候需要和其他系统进行通讯，但是其他系统使用的消息对象可能和 CAP 的[**包装器对象**](../persistent/general.md#_7)不一样，这个时候就需要对消息进行自定义适配。
+在异构系统中，有时候需要和其他系统进行通讯，但是其他系统使用的消息对象可能和 CAP 的[**包装器对象**](../storage/general.md#_7)不一样，这个时候就需要对消息进行自定义适配。
 
-CAP 提供了 `IMessagePacker` 接口用于对 [**包装器对象**](../persistent/general.md#_7) 进行自定义，自定义的 MessagePacker 通常是将 `CapMessage` 进行打包和解包操作，在这个过程中可以添加自己的业务对象。
+CAP 提供了 `IMessagePacker` 接口用于对 [**包装器对象**](../storage/general.md#_7) 进行自定义，自定义的 MessagePacker 通常是将 `CapMessage` 进行打包和解包操作，在这个过程中可以添加自己的业务对象。
 
 使用方法：
 

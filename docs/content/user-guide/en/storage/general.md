@@ -1,8 +1,8 @@
 # General
 
-CAP needs to use storage media with persistence capabilities to store event messages, such as through databases or other NoSql facilities. CAP uses this approach to deal with loss of messages in all environments or network anomalies. Reliability of messages is the cornerstone of distributed transactions, so messages cannot be lost under any circumstances.
+CAP needs to use storage media with persistence capabilities to store event messages in databases or other NoSql facilities. CAP uses this approach to deal with loss of messages in all environments or network anomalies. Reliability of messages is the cornerstone of distributed transactions, so messages cannot be lost under any circumstances.
 
-## Persistent
+## Persistence
 
 ### Before sent
 
@@ -23,7 +23,7 @@ Since Kafka is born with message persistence using files, Kafka will ensure that
 
 ## Storage
 
-After CAP is started, two tables are generated into the persistent, by default the name is `Cap.Published` and `Cap.Received`.
+After CAP is started, two tables are generated in used storage, by default the name is `Cap.Published` and `Cap.Received`.
 
 ### Storage Data Structure
 
