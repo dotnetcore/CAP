@@ -2,7 +2,7 @@
 
 namespace DotNetCore.CAP.AmazonSQS
 {
-    public static class TopicNormalizer
+    internal static class TopicNormalizer
     {
         public static string NormalizeForAws(this string origin)
         {

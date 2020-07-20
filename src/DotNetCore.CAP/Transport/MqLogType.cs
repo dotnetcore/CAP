@@ -18,7 +18,11 @@ namespace DotNetCore.CAP.Transport
         ServerConnError,
 
         //AzureServiceBus
-        ExceptionReceived
+        ExceptionReceived,
+
+        //Amazon SQS
+        InvalidIdFormat,
+        MessageNotInflight
     }
 
     public class LogMessageEventArgs : EventArgs
