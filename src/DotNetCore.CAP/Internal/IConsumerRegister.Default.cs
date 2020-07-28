@@ -79,7 +79,7 @@ namespace DotNetCore.CAP.Internal
 
                                 RegisterMessageProcessor(client);
 
-                                client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
+                                client.Subscribe(matchGroup.Value.Select(x => x.TopicName));
 
                                 client.Listening(_pollingDelay, _cts.Token);
                             }

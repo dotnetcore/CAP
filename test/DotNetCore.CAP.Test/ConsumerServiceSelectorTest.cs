@@ -32,12 +32,15 @@ namespace DotNetCore.CAP.Test
             Assert.Equal(6, candidates.Count);
         }
 
-        [Fact]
-        public void CanFindSpecifiedTopic()
+        [Theory]
+        [InlineData("Candidates.Foo")]
+        [InlineData("Candidates.Foo3")]
+        [InlineData("Candidates.Foo4")]
+        public void CanFindSpecifiedTopic(string topic)
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
-            var bestCandidates = selector.SelectBestCandidate("Candidates.Foo", candidates);
+            var bestCandidates = selector.SelectBestCandidate(topic, candidates);
 
             Assert.NotNull(bestCandidates);
             Assert.NotNull(bestCandidates.MethodInfo);
@@ -116,7 +119,7 @@ namespace DotNetCore.CAP.Test
 
     public class CandidatesTopic : TopicAttribute
     {
-        public CandidatesTopic(string topicName) : base(topicName)
+        public CandidatesTopic(string topicName, bool isPartial = false) : base(topicName, isPartial)
         {
         }
     }
@@ -129,6 +132,7 @@ namespace DotNetCore.CAP.Test
     {
     }
 
+    [CandidatesTopic("Candidates")]
     public class CandidatesFooTest : IFooTest, ICapSubscribe
     {
         [CandidatesTopic("Candidates.Foo")]
@@ -142,6 +146,20 @@ namespace DotNetCore.CAP.Test
         public void GetFoo2()
         {
             Console.WriteLine("GetFoo2() method has bee excuted.");
+        }
+
+        [CandidatesTopic("Foo3", isPartial: true)]
+        public Task GetFoo3()
+        {
+            Console.WriteLine("GetFoo3() method has bee excuted.");
+            return Task.CompletedTask;
+        }
+
+        [CandidatesTopic(".Foo4", isPartial: true)]
+        public Task GetFoo4()
+        {
+            Console.WriteLine("GetFoo4() method has bee excuted.");
+            return Task.CompletedTask;
         }
 
         [CandidatesTopic("*.*.Asterisk")]
