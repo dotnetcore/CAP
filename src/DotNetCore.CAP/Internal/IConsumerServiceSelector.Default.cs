@@ -123,7 +123,7 @@ namespace DotNetCore.CAP.Internal
                 var topicMethodAttributes = method.GetCustomAttributes<TopicAttribute>(true);
 
                 // Ignore partial attributes when no topic attribute is defined on class.
-                if (topicClassAttribute == null) 
+                if (topicClassAttribute is null) 
                 {
                     topicMethodAttributes = topicMethodAttributes.Where(x => x.IsPartial);
                 }

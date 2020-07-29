@@ -29,7 +29,7 @@ namespace DotNetCore.CAP.Test
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
 
-            Assert.Equal(6, candidates.Count);
+            Assert.Equal(8, candidates.Count);
         }
 
         [Theory]

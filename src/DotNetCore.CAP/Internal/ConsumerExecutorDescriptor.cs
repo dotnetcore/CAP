@@ -24,6 +24,7 @@ namespace DotNetCore.CAP.Internal
 
         public IList<ParameterDescriptor> Parameters { get; set; }
 
+        private string _topicName;
         /// <summary>
         /// Topic name based on both <see cref="Attribute"/> and <see cref="ClassAttribute"/>.
         /// </summary>
@@ -31,15 +32,19 @@ namespace DotNetCore.CAP.Internal
         {
             get
             {
-                if (ClassAttribute != null && Attribute.IsPartial)
+                if (_topicName == null) 
                 {
-                    // Allows class level attribute name to end with a '.' and allows methods level attribute to start with a '.'.
-                    return string.Join(".", $"{ClassAttribute.Name}.{Attribute.Name}".Split(new[] { '.' }, StringSplitOptions.RemoveEmptyEntries));
+                    if (ClassAttribute != null && Attribute.IsPartial)
+                    {
+                        // Allows class level attribute name to end with a '.' and allows methods level attribute to start with a '.'.
+                        _topicName = $"{ClassAttribute.Name.TrimEnd('.')}.{Attribute.Name.TrimStart('.')}";
+                    }
+                    else
+                    {
+                        _topicName = Attribute.Name;
+                    }
                 }
-                else
-                {
-                    return Attribute.Name;
-                }
+                return _topicName;
             }
         }
     }
