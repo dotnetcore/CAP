@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
@@ -12,39 +13,27 @@ namespace DotNetCore.CAP.Pulsar
 {
     internal class PulsarTransport : ITransport
     {
-        private readonly IConnectionPool _connectionPool;
+        private readonly IConnectionFactory _connectionFactory;
         private readonly ILogger _logger;
 
-        public PulsarTransport(ILogger<PulsarTransport> logger, IConnectionPool connectionPool)
+        public PulsarTransport(ILogger<PulsarTransport> logger, IConnectionFactory connectionFactory)
         {
             _logger = logger;
-            _connectionPool = connectionPool;
+            _connectionFactory = connectionFactory;
         }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("Pulsar", _connectionPool.ServersAddress);
+        public BrokerAddress BrokerAddress => new BrokerAddress("Pulsar", _connectionFactory.ServersAddress);
 
         public async Task<OperateResult> SendAsync(TransportMessage message)
         {
-            var producer = _connectionPool.RentProducer();
+            var producer = await _connectionFactory.CreateProducerAsync(message.GetName());
 
             try
             {
-                // var headers = new H. Headers();
-
-                /*foreach (var header in message.Headers)
-                {
-                    headers.Add(header.Value != null
-                        ? new Header(header.Key, Encoding.UTF8.GetBytes(header.Value))
-                        : new Header(header.Key, null));
-                }*/
-
-                var result = await producer.SendAsync(message.Body);
-                /*var result = await producer.SendAsync(message.GetName(), new Message
-                {
-                    Headers = headers,
-                    Key = message.Headers.TryGetValue(KafkaHeaders.KafkaKey, out string kafkaMessageKey) && !string.IsNullOrEmpty(kafkaMessageKey) ? kafkaMessageKey : message.GetId(),
-                    Value = message.Body
-                });*/
+                var headerDic = new Dictionary<string, string>(message.Headers);
+                headerDic.TryGetValue(PulsarHeaders.PulsarKey, out var key);
+                var pulsarMessage = producer.NewMessage(message.Body, key, headerDic);
+                var result = await producer.SendAsync(pulsarMessage);
 
                 if (result.Type != null)
                 {
@@ -57,17 +46,9 @@ namespace DotNetCore.CAP.Pulsar
             }
             catch (Exception ex)
             {
-                var wapperEx = new PublisherSentFailedException(ex.Message, ex);
+                var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
 
-                return OperateResult.Failed(wapperEx);
-            }
-            finally
-            {
-                var returned = _connectionPool.Return(producer);
-                if (!returned)
-                {
-                    await producer.DisposeAsync();
-                }
+                return OperateResult.Failed(wrapperEx);
             }
         }
     }

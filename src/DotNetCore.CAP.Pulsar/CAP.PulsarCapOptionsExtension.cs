@@ -26,7 +26,7 @@ namespace DotNetCore.CAP
 
             services.AddSingleton<ITransport, PulsarTransport>();
             services.AddSingleton<IConsumerClientFactory, PulsarConsumerClientFactory>();
-            services.AddSingleton<IConnectionPool, ConnectionPool>();
+            services.AddSingleton<IConnectionFactory, ConnectionFactory>();
         }
     }
 }

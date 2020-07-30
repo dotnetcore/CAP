@@ -13,10 +13,10 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Configuration to use pulsar in CAP.
         /// </summary>
         /// <param name="options">CAP configuration options</param>
-        /// <param name="bootstrapServers">Pulsar bootstrap server urls.</param>
-        public static CapOptions UsePulsar(this CapOptions options, string bootstrapServers)
+        /// <param name="serverUrl">Pulsar bootstrap server urls.</param>
+        public static CapOptions UsePulsar(this CapOptions options, string serverUrl)
         {
-            return options.UsePulsar(opt => { opt.Servers = bootstrapServers; });
+            return options.UsePulsar(opt => { opt.ServiceUrl = serverUrl; });
         }
 
         /// <summary>

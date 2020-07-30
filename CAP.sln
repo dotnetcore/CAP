@@ -67,9 +67,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.ConsoleApp", "sample
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.AmazonSQS", "src\DotNetCore.CAP.AmazonSQS\DotNetCore.CAP.AmazonSQS.csproj", "{43475E00-51B7-443D-BC2D-FC21F9D8A0B4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.Pulsar", "src\DotNetCore.CAP.Pulsar\DotNetCore.CAP.Pulsar.csproj", "{73408EA6-1025-463C-88BC-A20769E44BC4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.Pulsar", "src\DotNetCore.CAP.Pulsar\DotNetCore.CAP.Pulsar.csproj", "{73408EA6-1025-463C-88BC-A20769E44BC4}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.PulsarInMemory", "samples\Sample.Pulsar.InMemory\Sample.PulsarInMemory.csproj", "{AFF0A34A-F938-4F75-9A96-9FC3DC0BF6DF}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Pulsar.InMemory", "samples\Sample.Pulsar.InMemory\Sample.Pulsar.InMemory.csproj", "{AFF0A34A-F938-4F75-9A96-9FC3DC0BF6DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -8,10 +8,12 @@ namespace DotNetCore.CAP.Pulsar
 {
     internal sealed class PulsarConsumerClientFactory : IConsumerClientFactory
     {
+        private readonly IConnectionFactory _connection;
         private readonly IOptions<PulsarOptions> _pulsarOptions;
 
-        public PulsarConsumerClientFactory(IOptions<PulsarOptions> pulsarOptions)
+        public PulsarConsumerClientFactory(IConnectionFactory connection, IOptions<PulsarOptions> pulsarOptions)
         {
+            _connection = connection;
             _pulsarOptions = pulsarOptions;
         }
 
@@ -19,9 +21,9 @@ namespace DotNetCore.CAP.Pulsar
         {
             try
             {
-                var client = new PulsarConsumerClient(groupId, _pulsarOptions);
-                client.Connect();
-                return client;
+                var client = _connection.RentClient();
+                var consumerClient = new PulsarConsumerClient(client,groupId, _pulsarOptions);
+                return consumerClient;
             }
             catch (System.Exception e)
             {
