@@ -187,6 +187,21 @@ public void ConfigureServices(IServiceCollection services)
     });
 }
 ```
+#### Use partials for topic subscriptions
+
+To group topic subscriptions on class level you're able to define a subscription on a method as a partial. Subscriptions on the message queue will then be a combination of the topic defined on the class and the topic defined on the method. In the following example the `Create(..)` function will be invoked when receiving a message on `customers.create`
+
+```c#
+[CapSubscribe("customers")]
+public class CustomersSubscriberService : ICapSubscribe
+{
+    [CapSubscribe("create", isPartial: true)]
+    public void Create(Customer customer)
+    {
+    }
+}
+```
+
 
 #### Subscribe Group
 

@@ -20,7 +20,33 @@ namespace DotNetCore.CAP.Internal
 
         public TopicAttribute Attribute { get; set; }
 
+        public TopicAttribute ClassAttribute { get; set; }
+
         public IList<ParameterDescriptor> Parameters { get; set; }
+
+        private string _topicName;
+        /// <summary>
+        /// Topic name based on both <see cref="Attribute"/> and <see cref="ClassAttribute"/>.
+        /// </summary>
+        public string TopicName
+        {
+            get
+            {
+                if (_topicName == null) 
+                {
+                    if (ClassAttribute != null && Attribute.IsPartial)
+                    {
+                        // Allows class level attribute name to end with a '.' and allows methods level attribute to start with a '.'.
+                        _topicName = $"{ClassAttribute.Name.TrimEnd('.')}.{Attribute.Name.TrimStart('.')}";
+                    }
+                    else
+                    {
+                        _topicName = Attribute.Name;
+                    }
+                }
+                return _topicName;
+            }
+        }
     }
 
     public class ParameterDescriptor
