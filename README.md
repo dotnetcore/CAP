@@ -159,7 +159,7 @@ namespace BusinessCode.Service
 {
     public interface ISubscriberService
     {
-        public void CheckReceivedMessage(DateTime datetime);
+        void CheckReceivedMessage(DateTime datetime);
     }
 
     public class SubscriberService: ISubscriberService, ICapSubscribe
