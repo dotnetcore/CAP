@@ -125,7 +125,7 @@ namespace DotNetCore.CAP.Internal
                 // Ignore partial attributes when no topic attribute is defined on class.
                 if (topicClassAttribute is null) 
                 {
-                    topicMethodAttributes = topicMethodAttributes.Where(x => x.IsPartial);
+                    topicMethodAttributes = topicMethodAttributes.Where(x => !x.IsPartial);
                 }
 
                 if (!topicMethodAttributes.Any())
