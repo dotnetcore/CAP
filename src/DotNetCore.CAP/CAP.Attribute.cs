@@ -11,8 +11,8 @@ namespace DotNetCore.CAP
 {
     public class CapSubscribeAttribute : TopicAttribute
     {
-        public CapSubscribeAttribute(string name)
-            : base(name)
+        public CapSubscribeAttribute(string name, bool isPartial = false)
+            : base(name, isPartial)
         {
 
         }

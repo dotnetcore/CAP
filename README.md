@@ -2,7 +2,7 @@
   <img height="140" src="https://cap.dotnetcore.xyz/img/logo.svg">
 </p>
 
-# CAP 　　　　　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md)
+# CAP 　　　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md)
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/v8gfh6pe2u2laqoa/branch/master?svg=true)](https://ci.appveyor.com/project/yang-xiaodong/cap/branch/master)
 [![NuGet](https://img.shields.io/nuget/v/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
@@ -159,7 +159,7 @@ namespace BusinessCode.Service
 {
     public interface ISubscriberService
     {
-        public void CheckReceivedMessage(DateTime datetime);
+        void CheckReceivedMessage(DateTime datetime);
     }
 
     public class SubscriberService: ISubscriberService, ICapSubscribe
@@ -187,6 +187,21 @@ public void ConfigureServices(IServiceCollection services)
     });
 }
 ```
+#### Use partials for topic subscriptions
+
+To group topic subscriptions on class level you're able to define a subscription on a method as a partial. Subscriptions on the message queue will then be a combination of the topic defined on the class and the topic defined on the method. In the following example the `Create(..)` function will be invoked when receiving a message on `customers.create`
+
+```c#
+[CapSubscribe("customers")]
+public class CustomersSubscriberService : ICapSubscribe
+{
+    [CapSubscribe("create", isPartial: true)]
+    public void Create(Customer customer)
+    {
+    }
+}
+```
+
 
 #### Subscribe Group
 

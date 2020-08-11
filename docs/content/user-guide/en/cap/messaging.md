@@ -32,7 +32,7 @@ The consumer method is executed when the Consumer receives the message and will 
 
 ## Data Cleanup
 
-There is an `ExpiresAt` field in the database message table indicating the expiration time of the message. When the message is sent successfully, status will be changed to `Successed`, and `ExpiresAt` will be set to **1 hour** later. 
+There is an `ExpiresAt` field in the database message table indicating the expiration time of the message. When the message is sent successfully, status will be changed to `Successed`, and `ExpiresAt` will be set to **1 day** later. 
 
 Consuming failure will change the message status to `Failed` and `ExpiresAt` will be set to **15 days** later.
 

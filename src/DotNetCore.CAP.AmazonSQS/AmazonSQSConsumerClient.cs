@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using Amazon.SQS;
@@ -103,12 +104,27 @@ namespace DotNetCore.CAP.AmazonSQS
 
         public void Commit(object sender)
         {
-            _sqsClient.DeleteMessageAsync(_queueUrl, (string)sender);
+            try
+            {
+                _sqsClient.DeleteMessageAsync(_queueUrl, (string)sender);
+            }
+            catch (InvalidIdFormatException ex)
+            {
+                InvalidIdFormatLog(ex.Message);
+            }
         }
 
         public void Reject(object sender)
         {
-            _sqsClient.ChangeMessageVisibilityAsync(_queueUrl, (string)sender, 3000);
+            try
+            {
+                // Visible again in 3 seconds
+                _sqsClient.ChangeMessageVisibilityAsync(_queueUrl, (string)sender, 3);
+            }
+            catch (MessageNotInflightException ex)
+            {
+                MessageNotInflightLog(ex.Message);
+            }
         }
 
         public void Dispose()
@@ -162,5 +178,35 @@ namespace DotNetCore.CAP.AmazonSQS
                 }
             }
         }
+
+        #region private methods
+
+        private Task InvalidIdFormatLog(string exceptionMessage)
+        {
+            var logArgs = new LogMessageEventArgs
+            {
+                LogType = MqLogType.InvalidIdFormat,
+                Reason = exceptionMessage
+            };
+
+            OnLog?.Invoke(null, logArgs);
+
+            return Task.CompletedTask;
+        }
+
+        private Task MessageNotInflightLog(string exceptionMessage)
+        {
+            var logArgs = new LogMessageEventArgs
+            {
+                LogType = MqLogType.MessageNotInflight,
+                Reason = exceptionMessage
+            };
+
+            OnLog?.Invoke(null, logArgs);
+
+            return Task.CompletedTask;
+        }
+
+        #endregion
     }
 }
