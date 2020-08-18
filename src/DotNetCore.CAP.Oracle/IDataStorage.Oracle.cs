@@ -45,8 +45,7 @@ namespace DotNetCore.CAP.Oracle
 
         public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
         {
-            var sql =
-                $"INSERT INTO {_pubName} (\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
+            var sql = $"INSERT INTO {_pubName} (\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
                 $"VALUES(:Id,'{_options.Value.Version}',:Name,:Content,:Retries,:Added,:ExpiresAt,:StatusName)";
 
             var message = new MediumMessage
@@ -169,8 +168,7 @@ namespace DotNetCore.CAP.Oracle
 
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
         {
-            var sql =
-                $"UPDATE {tableName} SET \"Retries\"=:Retries,\"ExpiresAt\"=:ExpiresAt,\"StatusName\"=:StatusName WHERE \"Id\"=:Id";
+            var sql = $"UPDATE {tableName} SET \"Retries\"=:Retries,\"ExpiresAt\"=:ExpiresAt,\"StatusName\"=:StatusName WHERE \"Id\"=:Id";
 
             object[] sqlParams =
             {
@@ -188,8 +186,7 @@ namespace DotNetCore.CAP.Oracle
 
         private void StoreReceivedMessage(object[] sqlParams)
         {
-            var sql =
-                $"INSERT INTO {_recName} (\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
+            var sql = $"INSERT INTO {_recName} (\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
                 $" VALUES (:Id,'{_capOptions.Value.Version}',:Name,:Group1,:Content,:Retries,:Added,:ExpiresAt,:StatusName) ";
             using var connection = new OracleConnection(_options.Value.ConnectionString);
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
@@ -198,8 +195,7 @@ namespace DotNetCore.CAP.Oracle
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql =
-                $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\" FROM {tableName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} " +
+            var sql = $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\" FROM {tableName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} " +
                 $"AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') AND ROWNUM<= 200";
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);

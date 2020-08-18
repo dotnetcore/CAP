@@ -1,11 +1,11 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
 using DotNetCore.CAP.Oracle;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
