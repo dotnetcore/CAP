@@ -34,20 +34,12 @@ namespace DotNetCore.CAP.Oracle
         public StatisticsDto GetStatistics()
         {
             var sql = $@"
-    SELECT
-    (
-        SELECT COUNT(""Id"") FROM {_pubName} WHERE ""StatusName"" = N'Succeeded'
-    ) AS ""PublishedSucceeded"",
-    (
-        SELECT COUNT(""Id"") FROM {_recName} WHERE ""StatusName"" = N'Succeeded'
-    ) AS ""ReceivedSucceeded"",
-    (
-        SELECT COUNT(""Id"") FROM {_pubName} WHERE ""StatusName"" = N'Failed'
-    ) AS ""PublishedFailed"",
-    (
-        SELECT COUNT(""Id"") FROM {_recName} WHERE ""StatusName"" = N'Failed'
-    ) AS ""ReceivedFailed"";";
-
+ WITH 
+ C1 AS( SELECT COUNT(""Id"") AS PublishedSucceeded FROM {_pubName} WHERE ""StatusName"" = N'Succeeded'),
+ C2 AS(SELECT COUNT(""Id"") AS ReceivedSucceeded FROM {_recName} WHERE ""StatusName"" = N'Succeeded'),
+ C3 AS(SELECT COUNT(""Id"") AS PublishedFailed FROM {_pubName} WHERE ""StatusName"" = N'Failed'),
+ C4 AS(SELECT COUNT(""Id"") AS ReceivedFailed FROM {_recName} WHERE ""StatusName"" = N'Failed')
+ SELECT * FROM C1,C2,C3,C4";
             StatisticsDto statistics;
             using (var connection = new OracleConnection(_options.ConnectionString))
             {
@@ -75,25 +67,24 @@ namespace DotNetCore.CAP.Oracle
             var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
             var where = string.Empty;
 
-            if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " and Lower(\"StatusName\") = Lower(:StatusName)";
+            if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " AND LOWER(\"StatusName\") = LOWER(:StatusName)";
 
-            if (!string.IsNullOrEmpty(queryDto.Name)) where += " and Lower(\"Name\") = Lower(:Name)";
+            if (!string.IsNullOrEmpty(queryDto.Name)) where += " AND LOWER(\"Name\") = LOWER(:Name)";
 
-            if (!string.IsNullOrEmpty(queryDto.Group)) where += " and Lower(\"Group\") = Lower(:Group)";
+            if (!string.IsNullOrEmpty(queryDto.Group)) where += " AND LOWER(\"Group\") = LOWER(:Group)";
 
-            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and \"Content\" ILike concat('%',:Content,'%')";
+            if (!string.IsNullOrEmpty(queryDto.Content)) where += " AND \"Content\" Like CONCAT('%',:Content,'%')";
 
-            var sqlQuery =
-                $"select * from {tableName} where 1=1 {where} order by \"Added\" desc offset :Offset limit :Limit";
+            var sqlQuery = $@"SELECT * FROM (SELECT ROWNUM AS rowno,t.* FROM {tableName} t WHERE ""Id"">0 {where} ORDER BY ""Added"" DESC) alias WHERE alias.rowno BETWEEN :Offset AND :Offset + :Limit";
 
             object[] sqlParams =
             {
                 new OracleParameter(":StatusName", queryDto.StatusName ?? string.Empty),
-                new OracleParameter(":Group", queryDto.Group ?? string.Empty),
                 new OracleParameter(":Name", queryDto.Name ?? string.Empty),
+                new OracleParameter(":Group", queryDto.Group ?? string.Empty),
                 new OracleParameter(":Content", $"%{queryDto.Content}%"),
                 new OracleParameter(":Offset", queryDto.CurrentPage * queryDto.PageSize),
-                new OracleParameter(":Limit", queryDto.PageSize)
+                new OracleParameter(":Limit", queryDto.CurrentPage * queryDto.PageSize+queryDto.PageSize)
             };
 
             using var connection = new OracleConnection(_options.ConnectionString);
@@ -157,7 +148,7 @@ namespace DotNetCore.CAP.Oracle
         private int GetNumberOfMessage(string tableName, string statusName)
         {
             var sqlQuery =
-                $"select count(\"Id\") from {tableName} where Lower(\"StatusName\") = Lower(:state)";
+                $"SELECT COUNT(\"Id\") FROM {tableName} WHERE LOWER(\"StatusName\") = LOWER(:state)";
 
             using var connection = new OracleConnection(_options.ConnectionString);
             var count = connection.ExecuteScalar<int>(sqlQuery, new OracleParameter(":state", statusName));
@@ -184,16 +175,17 @@ namespace DotNetCore.CAP.Oracle
             string statusName,
             IDictionary<string, DateTime> keyMaps)
         {
+
             var sqlQuery =
-                $@"
-with aggr as (
-    select to_char(""Added"",'yyyy-MM-dd-HH') as ""Key"",
-    count(""Id"") as ""Count""
-    from {tableName}
-        where ""StatusName"" = :statusName
-    group by to_char(""Added"", 'yyyy-MM-dd-HH')
+                      $@"
+WITH aggr AS (
+    SELECT TO_CHAR(""Added"",'yyyy-MM-dd-HH') AS ""Key"",
+    COUNT(""Id"") AS ""Count""
+    FROM {tableName}
+    WHERE LOWER(""StatusName"") = LOWER(:statusName)
+    GROUP BY TO_CHAR(""Added"", 'yyyy-MM-dd-HH')
 )
-select ""Key"",""Count"" from aggr where ""Key"" >= :minKey and ""Key"" <= :maxKey;";
+SELECT ""Key"",""Count"" FROM aggr WHERE ""Key"" >= :minKey and ""Key"" <= :maxKey";
 
             object[] sqlParams =
             {
@@ -236,7 +228,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= :minKey and ""Key"" <= :maxK
 
         private async Task<MediumMessage> GetMessageAsync(string tableName, long id)
         {
-            var sql = $@"SELECT ""Id"" AS ""DbId"", ""Content"", ""Added"", ""ExpiresAt"", ""Retries"" FROM {tableName} WHERE ""Id""={id} FOR UPDATE SKIP LOCKED";
+            var sql = $@"SELECT ""Id"" AS ""DbId"", ""Content"", ""Added"", ""ExpiresAt"", ""Retries"" FROM {tableName} WHERE ""Id""={id}";
 
             using var connection = new OracleConnection(_options.ConnectionString);
             var mediumMessage = connection.ExecuteReader(sql, reader =>
