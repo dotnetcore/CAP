@@ -57,15 +57,15 @@ DECLARE
 num1 NUMBER;
 num2 NUMBER;
 BEGIN
-SELECT COUNT(*) INTO num1 FROM all_tables WHERE ""OWNER"" = '{_options.Value.Schema}' AND ""TABLE_NAME""='{PUBLISHED_TABLE}';
-SELECT COUNT(*) INTO num2 FROM all_tables WHERE ""OWNER"" = '{_options.Value.Schema}' AND ""TABLE_NAME"" = '{RECEIVED_TABLE}';
+SELECT COUNT(*) INTO num1 FROM all_tables WHERE ""OWNER"" = '{_options.Value.Schema}' AND ""TABLE_NAME""='{RECEIVED_TABLE}';
+SELECT COUNT(*) INTO num2 FROM all_tables WHERE ""OWNER"" = '{_options.Value.Schema}' AND ""TABLE_NAME"" = '{PUBLISHED_TABLE}';
 IF num1<1 THEN
-EXECUTE IMMEDIATE 'CREATE TABLE {GetPublishedTableName()}(
+EXECUTE IMMEDIATE 'CREATE TABLE {GetReceivedTableName()}(
 ""Id"" NUMBER PRIMARY KEY NOT NULL,
 ""Version"" VARCHAR2(20) NOT NULL,
 ""Name"" VARCHAR2(200) NOT NULL,
 ""Group"" VARCHAR2(200) NULL,
-""Content"" BLOB NULL,
+""Content"" CLOB NULL,
 ""Retries"" INT NOT NULL,
 ""Added"" TIMESTAMP NOT NULL,
 ""ExpiresAt"" TIMESTAMP NULL,
@@ -73,14 +73,14 @@ EXECUTE IMMEDIATE 'CREATE TABLE {GetPublishedTableName()}(
 END IF;
 
 IF num2<1 THEN
-EXECUTE IMMEDIATE 'CREATE TABLE {GetReceivedTableName()} (
+EXECUTE IMMEDIATE 'CREATE TABLE {GetPublishedTableName()} (
 ""Id"" NUMBER PRIMARY KEY NOT NULL,
 ""Version"" VARCHAR2(20) NOT NULL,
 ""Name"" VARCHAR2(200) NOT NULL,
-""Content"" BLOB NULL,
+""Content"" CLOB NULL,
 ""Retries"" INT NOT NULL,
 ""Added"" TIMESTAMP NOT NULL,
-""ExpiresAt"" TIMESTAMP NOT NULL,
+""ExpiresAt"" TIMESTAMP NULL,
 ""StatusName"" NVARCHAR2(50) NOT NULL)';
 END IF;
 END;

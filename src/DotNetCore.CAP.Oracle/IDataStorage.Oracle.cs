@@ -63,12 +63,16 @@ namespace DotNetCore.CAP.Oracle
             {
                 new OracleParameter(":Id", long.Parse(message.DbId)),
                 new OracleParameter(":Name", name),
-                new OracleParameter(":Content", message.Content),
+                new OracleParameter(":Content", OracleDbType.Clob)
+                {
+                    Value = message.Content
+                },
                 new OracleParameter(":Retries", message.Retries),
                 new OracleParameter(":Added", message.Added),
                 new OracleParameter(":ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
                 new OracleParameter(":StatusName", nameof(StatusName.Scheduled))
             };
+
 
             if (dbTransaction == null)
             {
@@ -95,7 +99,10 @@ namespace DotNetCore.CAP.Oracle
                 new OracleParameter(":Id", SnowflakeId.Default().NextId()),
                 new OracleParameter(":Name", name),
                 new OracleParameter(":Group", group),
-                new OracleParameter(":Content", content),
+                new OracleParameter(":Content", OracleDbType.Clob)
+                {
+                    Value = content
+                },
                 new OracleParameter(":Retries", _capOptions.Value.FailedRetryCount),
                 new OracleParameter(":Added", DateTime.Now),
                 new OracleParameter(":ExpiresAt", DateTime.Now.AddDays(15)),
@@ -120,8 +127,11 @@ namespace DotNetCore.CAP.Oracle
             {
                 new OracleParameter(":Id", long.Parse(mdMessage.DbId)),
                 new OracleParameter(":Name", name),
-                new OracleParameter(":Group", group),
-                new OracleParameter(":Content", StringSerializer.Serialize(mdMessage.Origin)),
+                new OracleParameter(":Group1", group),
+                new OracleParameter(":Content",OracleDbType.Clob)
+                {
+                    Value = StringSerializer.Serialize(mdMessage.Origin)
+                },
                 new OracleParameter(":Retries", mdMessage.Retries),
                 new OracleParameter(":Added", mdMessage.Added),
                 new OracleParameter(":ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
@@ -164,10 +174,10 @@ namespace DotNetCore.CAP.Oracle
 
             object[] sqlParams =
             {
-                new OracleParameter(":Id", long.Parse(message.DbId)),
                 new OracleParameter(":Retries", message.Retries),
-                new OracleParameter(":ExpiresAt", message.ExpiresAt),
-                new OracleParameter(":StatusName", state.ToString("G"))
+                new OracleParameter(":ExpiresAt",message.ExpiresAt.HasValue?(object)message.ExpiresAt:DBNull.Value),
+                new OracleParameter(":StatusName", state.ToString("G")),
+                new OracleParameter(":Id", long.Parse(message.DbId))
             };
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
@@ -179,9 +189,8 @@ namespace DotNetCore.CAP.Oracle
         private void StoreReceivedMessage(object[] sqlParams)
         {
             var sql =
-                $"INSERT INTO {_recName}(\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
-                $"VALUES(:Id,'{_capOptions.Value.Version}',:Name,:Group,:Content,:Retries,:Added,:ExpiresAt,:StatusName) RETURNING \"Id\" ";
-
+                $"INSERT INTO {_recName} (\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
+                $" VALUES (:Id,'{_capOptions.Value.Version}',:Name,:Group1,:Content,:Retries,:Added,:ExpiresAt,:StatusName) ";
             using var connection = new OracleConnection(_options.Value.ConnectionString);
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
         }

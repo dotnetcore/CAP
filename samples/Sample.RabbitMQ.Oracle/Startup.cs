@@ -24,8 +24,15 @@ namespace Sample.RabbitMQ.Oracle
             {
                 x.UseEntityFramework<AppDbContext>(c =>
                 {
+                    c.Schema = "KPACS";
                 });
-                x.UseRabbitMQ("localhost");
+                x.UseRabbitMQ(c=>
+                {
+                    c.HostName = "192.168.0.91";
+                    c.UserName = "kayisoft";
+                    c.Password = "kayisoft@123";
+                    c.VirtualHost = "kayi1";
+                });
                 x.UseDashboard();
                 x.FailedRetryCount = 5;
                 x.FailedThresholdCallback = failed =>

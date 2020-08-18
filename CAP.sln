@@ -69,7 +69,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AmazonSQS.InMemory",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.Oracle", "src\DotNetCore.CAP.Oracle\DotNetCore.CAP.Oracle.csproj", "{46CBD657-EAAE-4507-AE84-444312920195}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.RabbitMQ.Oracle", "samples\Sample.RabbitMQ.Oracle\Sample.RabbitMQ.Oracle.csproj", "{D8D80C2A-87BE-4509-BF1F-89977EC140A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.RabbitMQ.Oracle", "samples\Sample.RabbitMQ.Oracle\Sample.RabbitMQ.Oracle.csproj", "{D8D80C2A-87BE-4509-BF1F-89977EC140A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

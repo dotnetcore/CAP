@@ -21,12 +21,7 @@ namespace Sample.RabbitMQ.Oracle.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.rabbitmq.oracle", new Person()
-            {
-                Id = 123,
-                Name = "Bar"
-            });
-
+            await _capBus.PublishAsync("sample.rabbitmq.oracle", DateTime.Now);
             return Ok();
         }
 
@@ -38,7 +33,8 @@ namespace Sample.RabbitMQ.Oracle.Controllers
                 using (var transaction = connection.BeginTransaction(_capBus, true))
                 {
                     //your business code
-                    connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
+
+                    connection.Execute("INSERT INTO \"Persons\" (\"Name\") VALUES('test')", transaction: (IDbTransaction)transaction.DbTransaction);
 
                     _capBus.Publish("sample.rabbitmq.oracle", DateTime.Now);
                 }
@@ -50,12 +46,27 @@ namespace Sample.RabbitMQ.Oracle.Controllers
         [Route("~/ef/transaction")]
         public IActionResult EntityFrameworkWithTransaction([FromServices] AppDbContext dbContext)
         {
-            using (dbContext.Database.BeginTransaction(_capBus, autoCommit: true))
+            using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
             {
                 dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
 
-                _capBus.Publish("sample.rabbitmq.oracle", DateTime.Now);
+                for (int i = 0; i < 1; i++)
+                {
+                    _capBus.Publish("sample.rabbitmq.oracle", DateTime.Now);
+                }
+
+                dbContext.SaveChanges();
+
+                trans.Commit();
             }
+
+            //using (dbContext.Database.BeginTransaction(_capBus, autoCommit: true))
+            //{
+            //    dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
+
+            //    _capBus.Publish("sample.rabbitmq.oracle", DateTime.Now);
+            //}
+
             return Ok();
         }
 
