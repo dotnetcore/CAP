@@ -200,7 +200,7 @@ WriteLiteral("                                <td>");
 
             
             #line 48 "..\..\Pages\SubscriberPage.cshtml"
-                               Write(column.Attribute.Name);
+                               Write(column.TopicName);
 
             
             #line default

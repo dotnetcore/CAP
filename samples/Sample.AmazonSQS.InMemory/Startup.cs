@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Amazon;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sample.Kafka.InMemory
+namespace Sample.AmazonSQS.InMemory
 {
     public class Startup
     {
@@ -10,7 +11,7 @@ namespace Sample.Kafka.InMemory
             services.AddCap(x =>
             {
                 x.UseInMemoryStorage();
-                x.UseKafka("localhost:9092");
+                x.UseAmazonSQS(RegionEndpoint.CNNorthWest1);
                 x.UseDashboard();
             });
 

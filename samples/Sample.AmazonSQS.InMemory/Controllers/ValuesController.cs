@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Sample.Kafka.InMemory.Controllers
+namespace Sample.AmazonSQS.InMemory.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller, ICapSubscribe
@@ -18,13 +18,13 @@ namespace Sample.Kafka.InMemory.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.azure.mysql2", DateTime.Now);
+            await _capBus.PublishAsync("sample.aws.in-memory", DateTime.Now);
 
             return Ok();
         }
 
-        [CapSubscribe("sample.azure.mysql2")]
-        public void Test2T2(DateTime value)
+        [CapSubscribe("sample.aws.in-memory")]
+        public void SubscribeInMemoryTopic(DateTime value)
         {
             Console.WriteLine("Subscriber output message: " + value);
         }

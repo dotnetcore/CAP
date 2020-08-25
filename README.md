@@ -2,7 +2,7 @@
   <img height="140" src="https://cap.dotnetcore.xyz/img/logo.svg">
 </p>
 
-# CAP 　　　　　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md)
+# CAP 　　　　　　　　　　　　　　　　　　　　[中文](https://github.com/dotnetcore/CAP/blob/master/README.zh-cn.md)
 [![Travis branch](https://img.shields.io/travis/dotnetcore/CAP/master.svg?label=travis-ci)](https://travis-ci.org/dotnetcore/CAP)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/v8gfh6pe2u2laqoa/branch/master?svg=true)](https://ci.appveyor.com/project/yang-xiaodong/cap/branch/master)
 [![NuGet](https://img.shields.io/nuget/v/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
@@ -12,7 +12,7 @@
 
 CAP is a library based on .Net standard, which is a solution to deal with distributed transactions, has the function of EventBus, it is lightweight, easy to use, and efficient.
 
-In the process of building an SOA or MicroService system, we usually need to use the event to integrate each service. In the process, the simple use of message queue does not guarantee the reliability. CAP adopts local message table program integrated with the current database to solve exceptions that may occur in the process of the distributed system calling each other. It can ensure that the event messages are not lost in any case.
+In the process of building an SOA or MicroService system, we usually need to use the event to integrate each service. In the process, simple use of message queue does not guarantee reliability. CAP adopts local message table program integrated with the current database to solve exceptions that may occur in the process of the distributed system calling each other. It can ensure that the event messages are not lost in any case.
 
 You can also use CAP as an EventBus. CAP provides a simpler way to implement event publishing and subscriptions. You do not need to inherit or implement any interface during subscription and sending process.
 
@@ -26,7 +26,7 @@ You can also use CAP as an EventBus. CAP provides a simpler way to implement eve
 
 ### NuGet
 
-You can run the following command to install CAP in your project.
+CAP can be installed in your project with the following command.
 
 ```
 PM> Install-Package DotNetCore.CAP
@@ -53,7 +53,7 @@ PM> Install-Package DotNetCore.CAP.MongoDB     //need MongoDB 4.0+ cluster
 
 ### Configuration
 
-First, you need to config CAP in your Startup.cs：
+First, you need to configure CAP in your Startup.cs：
 
 ```cs
 public void ConfigureServices(IServiceCollection services)
@@ -87,7 +87,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Publish
 
-Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send message
+Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send messages
 
 ```c#
 public class PublishController : Controller
@@ -135,7 +135,7 @@ public class PublishController : Controller
 
 **In Controller Action**
 
-Add the Attribute `[CapSubscribe()]` on Action to subscribe message:
+Add the Attribute `[CapSubscribe()]` on Action to subscribe to messages:
 
 ```c#
 public class PublishController : Controller
@@ -151,7 +151,7 @@ public class PublishController : Controller
 
 **In Business Logic Service**
 
-If your subscription method is not in the Controller,then your subscribe class needs to implement `ICapSubscribe` interface:
+If your subscription method is not in the Controller, then your subscribe class needs to implement `ICapSubscribe` interface:
 
 ```c#
 
@@ -159,7 +159,7 @@ namespace BusinessCode.Service
 {
     public interface ISubscriberService
     {
-        public void CheckReceivedMessage(DateTime datetime);
+        void CheckReceivedMessage(DateTime datetime);
     }
 
     public class SubscriberService: ISubscriberService, ICapSubscribe
@@ -187,6 +187,21 @@ public void ConfigureServices(IServiceCollection services)
     });
 }
 ```
+#### Use partials for topic subscriptions
+
+To group topic subscriptions on class level you're able to define a subscription on a method as a partial. Subscriptions on the message queue will then be a combination of the topic defined on the class and the topic defined on the method. In the following example the `Create(..)` function will be invoked when receiving a message on `customers.create`
+
+```c#
+[CapSubscribe("customers")]
+public class CustomersSubscriberService : ICapSubscribe
+{
+    [CapSubscribe("create", isPartial: true)]
+    public void Create(Customer customer)
+    {
+    }
+}
+```
+
 
 #### Subscribe Group
 
@@ -212,7 +227,7 @@ public void ShowTime2(DateTime datetime)
 ```
 `ShowTime1` and `ShowTime2` will be called at the same time.
 
-BTW, You can specify the default group name in the configuration :
+BTW, You can specify the default group name in the configuration:
 
 ```C#
 services.AddCap(x =>
@@ -224,13 +239,13 @@ services.AddCap(x =>
 
 ### Dashboard
 
-CAP v2.1+ provides dashboard pages, you can easily view message that were sent and received. In addition, you can also view the  message status in real time in the dashboard. Use the following command to install the Dashboard in your project.
+CAP v2.1+ provides dashboard pages, you can easily view messages that were sent and received. In addition, you can also view the message status in real time in the dashboard. Use the following command to install the Dashboard in your project.
 
 ```
 PM> Install-Package DotNetCore.CAP.Dashboard
 ```
 
-In the distributed environment, the dashboard built-in integrated [Consul](http://consul.io) as a node discovery, while the realization of the gateway agent function, you can also easily view the node or other node data, It's like you are visiting local resources.
+In the distributed environment, the dashboard built-in integrates [Consul](http://consul.io) as a node discovery, while the realization of the gateway agent function, you can also easily view the node or other node data, It's like you are visiting local resources.
 
 ```c#
 services.AddCap(x =>

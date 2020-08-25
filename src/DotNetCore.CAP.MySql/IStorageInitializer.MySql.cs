@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace DotNetCore.CAP.MySql
 {

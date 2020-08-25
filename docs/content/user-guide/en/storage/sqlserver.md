@@ -1,13 +1,16 @@
-# Postgre SQL
+# SQL Server
 
-PostgreSQL is an open-source relational database management system. CAP has supported PostgreSQL as persistent. 
+SQL Server is a relational database management system developed by Microsoft. CAP supports SQL Server database. 
+
+!!! warning "Warning"
+    We currently use `Microsoft.Data.SqlClient` as the database driver, which is the future of SQL Server drivers, and we have abandoned `System.Data.SqlClient`, we suggest that you switch to.
 
 ## Configuration
 
-To use PostgreSQL storage, you need to install the following extensions from NuGet:
+To use SQL Server storage, you need to install the following package from NuGet:
 
 ```powershell
-PM> Install-Package DotNetCore.CAP.PostgreSql
+PM> Install-Package DotNetCore.CAP.SqlServer
 
 ```
 
@@ -22,7 +25,7 @@ public void ConfigureServices(IServiceCollection services)
     services.AddCap(x =>
     {
         x.UsePostgreSql(opt=>{
-            //PostgreSqlOptions
+            //SqlServerOptions
         }); 
         // x.UseXXX ...
     });
@@ -30,11 +33,11 @@ public void ConfigureServices(IServiceCollection services)
 
 ```
 
-#### PostgreSqlOptions
+#### SqlServerOptions
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-Schema | Database schema | string | cap 
+Schema | Database schema | string | Cap
 ConnectionString | Database connection string | string | 
 
 ## Publish with transaction
@@ -45,7 +48,7 @@ ConnectionString | Database connection string | string |
 
 private readonly ICapPublisher _capBus;
 
-using (var connection = new NpgsqlConnection("ConnectionString"))
+using (var connection = new SqlConnection("ConnectionString"))
 {
     using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
     {

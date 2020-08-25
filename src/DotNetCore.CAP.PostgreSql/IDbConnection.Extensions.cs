@@ -1,10 +1,13 @@
-﻿using System;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.ComponentModel;
 using System.Data;
 
-namespace DotNetCore.CAP.SqlServer
+namespace DotNetCore.CAP.PostgreSql
 {
-    internal static class IDbConnectionExtensions
+    internal static class DbConnectionExtensions
     {
         public static int ExecuteNonQuery(this IDbConnection connection, string sql, IDbTransaction transaction = null,
             params object[] sqlParams)

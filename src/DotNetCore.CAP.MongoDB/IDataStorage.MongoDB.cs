@@ -27,8 +27,7 @@ namespace DotNetCore.CAP.MongoDB
         public MongoDBDataStorage(
             IOptions<CapOptions> capOptions,
             IOptions<MongoDBOptions> options,
-            IMongoClient client,
-            ILogger<MongoDBDataStorage> logger)
+            IMongoClient client)
         {
             _capOptions = capOptions;
             _options = options;
@@ -194,7 +193,7 @@ namespace DotNetCore.CAP.MongoDB
         public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4);
-            var collection = _database.GetCollection<ReceivedMessage>(_options.Value.PublishedCollection);
+            var collection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
             var queryResult = await collection
                 .Find(x => x.Retries < _capOptions.Value.FailedRetryCount
                            && x.Added < fourMinAgo

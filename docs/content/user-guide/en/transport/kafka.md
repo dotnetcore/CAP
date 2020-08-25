@@ -2,11 +2,11 @@
 
 [Apache Kafka®](https://kafka.apache.org/)  is an open-source stream-processing software platform developed by LinkedIn and donated to the Apache Software Foundation, written in Scala and Java.
 
-CAP has supported Kafka® as message transporter. 
+Kafka® can be used in CAP as a message transporter. 
 
 ## Configuration
 
-To use Kafka transporter, you need to install the following extensions from NuGet:
+To use Kafka transporter, you need to install the following package from NuGet:
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.Kafka
@@ -34,7 +34,7 @@ public void ConfigureServices(IServiceCollection services)
 
 #### Kafka Options
 
-The Kafka configuration parameters provided directly by the CAP are as follows:
+The Kafka configuration parameters provided directly by the CAP:
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
@@ -43,7 +43,7 @@ ConnectionPoolSize | connection pool size | int | 10
 
 #### Kafka MainConfig Options
 
-If you need **more** native Kakfa related configuration items, you can set it with the `MainConfig` configuration option:
+If you need **more** native Kakfa related configuration options, you can set them in the `MainConfig` configuration option:
 
 ```csharp
 services.AddCap(capOptions => 
@@ -56,6 +56,6 @@ services.AddCap(capOptions =>
 });
 ```
 
-`MainConfig` is a configuration dictionary, you can find a list of supported configuration items through the following link.
+`MainConfig` is a configuration dictionary, you can find a list of supported configuration options through the following link.
 
 [https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)

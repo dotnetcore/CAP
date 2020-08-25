@@ -1,13 +1,13 @@
-# MySQL
+# Postgre SQL
 
-MySQL is an open-source relational database management system. CAP has supported MySQL as persistent. 
+PostgreSQL is an open-source relational database management system. CAP supports PostgreSQL database. 
 
 ## Configuration
 
-To use MySQL storage, you need to install the following extensions from NuGet:
- 
+To use PostgreSQL storage, you need to install the following package from NuGet:
+
 ```powershell
-PM> Install-Package DotNetCore.CAP.MySql
+PM> Install-Package DotNetCore.CAP.PostgreSql
 
 ```
 
@@ -21,21 +21,21 @@ public void ConfigureServices(IServiceCollection services)
 
     services.AddCap(x =>
     {
-        x.UseMySql(opt=>{
-            //MySqlOptions
-        });
+        x.UsePostgreSql(opt=>{
+            //PostgreSqlOptions
+        }); 
         // x.UseXXX ...
     });
 }
 
 ```
 
-#### MySqlOptions
+#### PostgreSqlOptions
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-TableNamePrefix | CAP table name prefix | string | cap 
-ConnectionString | Database connection string | string | null
+Schema | Database schema | string | cap 
+ConnectionString | Database connection string | string | 
 
 ## Publish with transaction
 
@@ -45,7 +45,7 @@ ConnectionString | Database connection string | string | null
 
 private readonly ICapPublisher _capBus;
 
-using (var connection = new MySqlConnection(AppDbContext.ConnectionString))
+using (var connection = new NpgsqlConnection("ConnectionString"))
 {
     using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
     {

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Sample.Kafka.InMemory
+namespace Sample.AmazonSQS.InMemory
 {
     public class Program
     {

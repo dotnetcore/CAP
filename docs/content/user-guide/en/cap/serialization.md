@@ -1,6 +1,6 @@
 # Serialization
 
-We provide the `ISerializer` interface to support serialization of messages. By default, we use json to serialize messages and store them in the database.
+We provide the `ISerializer` interface to support serialization of messages. By default, json is used to serialize messages and store them in the database.
 
 ## Custom Serialization
 
@@ -19,7 +19,7 @@ public class YourSerializer: ISerializer
 }
 ```
 
-Then register your implementation in the container:
+Then register your implemented serializer in the container:
 
 ```
 
@@ -32,9 +32,9 @@ services.AddCap
 
 ## Message Adapter (removed in v3.0)
 
-In heterogeneous systems, sometimes you need to communicate with other systems, but other systems use message objects that may be different from CAP's [**Wrapper Object**](../persistent/general.md#_7). This time maybe you need to customize the message wapper.
+In heterogeneous systems, sometimes you need to communicate with other systems, but other systems use message objects that may be different from CAP's [**Wrapper Object**](../storage/general.md#_7). This time maybe you need to customize the message wapper.
 
-The CAP provides the `IMessagePacker` interface for customizing the [**Wrapper Object**](../persistent/general.md#_7). The custom MessagePacker usually packs and unpacks the `CapMessage` In this process you can add your own business objects.
+CAP provides the `IMessagePacker` interface for customizing the [**Wrapper Object**](../storage/general.md#_7). Custom MessagePacker usually packs and unpacks the `CapMessage` In this process you can add your own business objects.
 
 Usage :
 
@@ -76,7 +76,7 @@ class MyMessagePacker : IMessagePacker
 }
 ```
 
-Next, configure the custom `MyMessagePacker` to the service.
+Next, add the custom `MyMessagePacker` to the service.
 
 ```csharp
 

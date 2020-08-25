@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace Sample.RabbitMQ.MySql.Controllers
 {

@@ -4,7 +4,7 @@
 
 CAP does not directly provide out-of-the-box MS DTC or 2PC-based distributed transactions, instead we provide a solution that can be used to solve problems encountered in distributed transactions.
 
-In a distributed environment, using 2PC or DTC-based distributed transactions can be very expensive due to the overhead involved in communication, as is performance. In addition, since distributed transactions based on 2PC or DTC are also subject to the **CAP theorem**, it will have to give up availability (A in CAP) when network partitioning occurs.
+In a distributed environment, using 2PC or DTC-based distributed transactions can be very expensive due to the overhead involved in communication which affects performance. In addition, since distributed transactions based on 2PC or DTC are also subject to the **CAP theorem**, it will have to give up availability (A in CAP) when network partitioning occurs.
 
 > A distributed transaction is a very complex process with a lot of moving parts that can fail. Also, if these parts run on different machines or even in different data centers, the process of committing a transaction could become very long and unreliable.
 
@@ -27,9 +27,9 @@ For example, suppose we need to solve the following task:
 * register a user profile  
 * do some automated background check that the user can actually access the system
 
-The second task is to ensure, for example, that this user wasn’t banned from our servers for some reason.
+Second task is to ensure, for example, that this user wasn’t banned from our servers for some reason.
 
-But it could take time, and we’d like to extract it to a separate microservice. It wouldn’t be reasonable to keep the user waiting for so long just to know that she was registered successfully.
+But it could take time, and we’d like to extract it to a separate microservice. It wouldn’t be reasonable to keep the user waiting for so long just to know that he was registered successfully.
 
 **One way to solve it would be with a message-driven approach including compensation**. Let’s consider the following architecture:
 
@@ -37,13 +37,13 @@ But it could take time, and we’d like to extract it to a separate microservice
 * the validation microservice tasked with doing a background check  
 * the messaging platform that supports persistent queues  
 
-The messaging platform could ensure that the messages sent by the microservices are persisted. Then they would be delivered at a later time if the receiver weren’t currently available
+The messaging platform could ensure that the messages sent by the microservices are persisted. Then they would be delivered at a later time if the receiver wasn't currently available
 
-#### Happy Scenario
+#### Best case scenario
 
-In this architecture, a happy scenario would be:
+In this architecture, best case scenario would be:
 
-* the user microservice registers a user, saving information about her in its local database
+* the user microservice registers a user, saving information about him in its local database
 * the user microservice marks this user with a flag. It could signify that this user hasn’t yet been validated and doesn’t have access to full system functionality
 * a confirmation of registration is sent to the user with a warning that not all functionality of the system is accessible right away
 * the user microservice sends a message to the validation microservice to do the background check of a user
@@ -51,7 +51,7 @@ In this architecture, a happy scenario would be:
 * if the results are positive, the user microservice unblocks the user
 * if the results are negative, the user microservice deletes the user account
 
-After we’ve gone through all these steps, the system should be in a consistent state. However, for some period of time, the user entity appeared to be in an incomplete state.
+After we’ve gone through all these steps, the system should be in a consistent state. However, for some period of time, user entity appeared to be in an incomplete state.
 
 The last step, when the user microservice removes the invalid account, is a compensation phase.
 

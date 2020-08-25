@@ -1,9 +1,9 @@
-# Diagnostics
+# 性能追踪
 
 Diagnostics 提供一组功能使我们能够很方便的可以记录在应用程序运行期间发生的关键性操作以及他们的执行时间等，使管理员可以查找特别是生产环境中出现问题所在的根本原因。
 
 
-## CAP 中的 Diagnostics
+## CAP 中的性能追踪
 
 在 CAP 中，对 `DiagnosticSource` 提供了支持，监听器名称为 `CapDiagnosticListener`。
 
@@ -37,6 +37,6 @@ Skywalking 的 C# 客户端提供了对 CAP Diagnostics 的支持，你可以利
 
 ## 其他 APM 的支持
 
-目前还没有实现对除了Skywalking的其他APM的支持，如果你想在其他 APM 中实现对 CAP 诊断事件的支持，你可以参考这里的代码来实现它：
+目前还没有实现对除了 Skywalking 的其他APM的支持，如果你想在其他 APM 中实现对 CAP 诊断事件的支持，你可以参考这里的代码来实现它：
 
 https://github.com/SkyAPM/SkyAPM-dotnet/tree/master/src/SkyApm.Diagnostics.CAP
