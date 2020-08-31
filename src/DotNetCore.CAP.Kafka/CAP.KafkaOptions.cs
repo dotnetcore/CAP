@@ -60,6 +60,7 @@ namespace DotNetCore.CAP
 
                 MainConfig["bootstrap.servers"] = Servers;
                 MainConfig["queue.buffering.max.ms"] = "10";
+                MainConfig["allow.auto.create.topics"] = "true";
                 MainConfig["enable.auto.commit"] = "false";
                 MainConfig["log.connection.close"] = "false";
                 MainConfig["request.timeout.ms"] = "3000";
