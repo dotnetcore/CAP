@@ -17,8 +17,9 @@ namespace DotNetCore.CAP.Test
             services.AddOptions();
             services.PostConfigure<CapOptions>(x=>{});
             services.AddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
-            services.AddScoped<IFooTest, CandidatesFooTest>();
+            services.AddScoped<IFooTest, CandidatesFooTest>();			
             services.AddScoped<IBarTest, CandidatesBarTest>();
+			services.AddScoped<IAbstractTest, CandidatesAbstractTest>();
             services.AddLogging();
             _provider = services.BuildServiceProvider();
         }
@@ -29,7 +30,7 @@ namespace DotNetCore.CAP.Test
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
 
-            Assert.Equal(8, candidates.Count);
+            Assert.Equal(9, candidates.Count);
         }
 
         [Theory]
@@ -46,6 +47,20 @@ namespace DotNetCore.CAP.Test
             Assert.NotNull(bestCandidates.MethodInfo);
             Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
         }
+		
+		[Theory]
+		[InlineData("Candidates.Abstract")]
+		[InlineData("Candidates.Abstract2")]
+		public void CanFindInheritedMethodsTopic(string topic)
+		{
+			var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+			var candidates = selector.SelectCandidates();
+			var bestCandidates = selector.SelectBestCandidate(topic, candidates);
+
+			Assert.NotNull(bestCandidates);
+			Assert.NotNull(bestCandidates.MethodInfo);
+			Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
+		}
 
 
         [Theory]
@@ -132,6 +147,10 @@ namespace DotNetCore.CAP.Test
     {
     }
 
+    public interface IAbstractTest
+    {
+    }
+
     [CandidatesTopic("Candidates")]
     public class CandidatesFooTest : IFooTest, ICapSubscribe
     {
@@ -198,4 +217,31 @@ namespace DotNetCore.CAP.Test
             Console.WriteLine("GetBar3() method has bee excuted.");
         }
     }
+	
+	/// <summary>
+	/// Test to verify if an inherited class also gets the subscribed methods.
+	/// Abstract class doesn't have a subscribe topic, inherited class with a topic
+	/// should also get the partial subscribed methods.
+	/// </summary>
+	public abstract class CandidatesAbstractBaseTest : ICapSubscribe, IAbstractTest
+	{
+		[CandidatesTopic("Candidates.Abstract")]
+		public virtual Task GetAbstract()
+		{
+		  Console.WriteLine("GetAbstract() method has been excuted.");
+		  return Task.CompletedTask;
+		}
+
+		[CandidatesTopic("Abstract2", isPartial: true)]
+		public virtual Task GetAbstract2()
+		{
+		  Console.WriteLine("GetAbstract2() method has been excuted.");
+		  return Task.CompletedTask;
+		}
+	}
+
+	[CandidatesTopic("Candidates")]
+	public class CandidatesAbstractTest : CandidatesAbstractBaseTest
+	{
+	}
 }

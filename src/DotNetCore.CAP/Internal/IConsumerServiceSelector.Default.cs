@@ -118,7 +118,7 @@ namespace DotNetCore.CAP.Internal
         {
             var topicClassAttribute = typeInfo.GetCustomAttribute<TopicAttribute>(true);
 
-            foreach (var method in typeInfo.DeclaredMethods)
+            foreach (var method in typeInfo.GetRuntimeMethods())
             {
                 var topicMethodAttributes = method.GetCustomAttributes<TopicAttribute>(true);
 
