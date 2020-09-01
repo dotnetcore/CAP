@@ -4,4 +4,13 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+	<ItemGroup>
+		<PackageReference Include="Dapper" Version="2.0.35" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard\DotNetCore.CAP.Dashboard.csproj" />
+		<ProjectReference Include="..\..\src\DotNetCore.CAP.Oracle\DotNetCore.CAP.Oracle.csproj" />
+		<ProjectReference Include="..\..\src\DotNetCore.CAP.RabbitMQ\DotNetCore.CAP.RabbitMQ.csproj" />
+		<ProjectReference Include="..\..\src\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+	</ItemGroup>
 </Project>
