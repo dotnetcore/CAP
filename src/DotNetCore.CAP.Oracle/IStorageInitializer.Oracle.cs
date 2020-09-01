@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using OracleConnector;
+using Oracle.ManagedDataAccess.Client;
 
 namespace DotNetCore.CAP.Oracle
 {
@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.Oracle
             }
 
             var sql = CreateDbTablesScript();
-            await using (var connection = new OracleConnection(_options.Value.ConnectionString))
+            using (var connection = new OracleConnection(_options.Value.ConnectionString))
                 connection.ExecuteNonQuery(sql);
 
             await Task.CompletedTask;

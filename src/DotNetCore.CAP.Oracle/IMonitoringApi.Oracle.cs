@@ -10,7 +10,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Options;
-using OracleConnector;
+using Oracle.ManagedDataAccess.Client;
 
 namespace DotNetCore.CAP.Oracle
 {
@@ -246,7 +246,7 @@ WHERE `Key` >= @minKey
         {
             var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
 
-            await using var connection = new OracleConnection(_options.ConnectionString);
+            using var connection = new OracleConnection(_options.ConnectionString);
             var mediumMessage = connection.ExecuteReader(sql, reader =>
             {
                 MediumMessage message = null;

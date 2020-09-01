@@ -13,7 +13,7 @@ using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.Options;
-using OracleConnector;
+using Oracle.ManagedDataAccess.Client;
 
 namespace DotNetCore.CAP.Oracle
 {
@@ -135,7 +135,7 @@ namespace DotNetCore.CAP.Oracle
 
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default)
         {
-            await using var connection = new OracleConnection(_options.Value.ConnectionString);
+            using var connection = new OracleConnection(_options.Value.ConnectionString);
             return connection.ExecuteNonQuery(
                 $@"DELETE FROM `{table}` WHERE ExpiresAt < @timeout limit @batchCount;", null,
                 new OracleParameter("@timeout", timeout), new OracleParameter("@batchCount", batchCount));
@@ -165,7 +165,7 @@ namespace DotNetCore.CAP.Oracle
                 new OracleParameter("@StatusName", state.ToString("G"))
             };
 
-            await using var connection = new OracleConnection(_options.Value.ConnectionString);
+            using var connection = new OracleConnection(_options.Value.ConnectionString);
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
         }
 
@@ -185,7 +185,7 @@ namespace DotNetCore.CAP.Oracle
                 $"SELECT `Id`,`Content`,`Retries`,`Added` FROM `{tableName}` WHERE `Retries`<{_capOptions.Value.FailedRetryCount} " +
                 $"AND `Version`='{_capOptions.Value.Version}' AND `Added`<'{fourMinAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
 
-            await using var connection = new OracleConnection(_options.Value.ConnectionString);
+            using var connection = new OracleConnection(_options.Value.ConnectionString);
             var result = connection.ExecuteReader(sql, reader =>
             {
                 var messages = new List<MediumMessage>();
