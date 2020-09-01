@@ -67,6 +67,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.AmazonSQS", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AmazonSQS.InMemory", "samples\Sample.AmazonSQS.InMemory\Sample.AmazonSQS.InMemory.csproj", "{B187DD15-092D-4B72-9807-50856607D237}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.Oracle", "src\DotNetCore.CAP.Oracle\DotNetCore.CAP.Oracle.csproj", "{43A43ED8-3F66-4864-ADD3-E5DEC762C9E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -153,6 +155,10 @@ Global
 		{B187DD15-092D-4B72-9807-50856607D237}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B187DD15-092D-4B72-9807-50856607D237}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B187DD15-092D-4B72-9807-50856607D237}.Release|Any CPU.Build.0 = Release|Any CPU
+		{43A43ED8-3F66-4864-ADD3-E5DEC762C9E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{43A43ED8-3F66-4864-ADD3-E5DEC762C9E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{43A43ED8-3F66-4864-ADD3-E5DEC762C9E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{43A43ED8-3F66-4864-ADD3-E5DEC762C9E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -178,6 +184,7 @@ Global
 		{2B0F467E-ABBD-4A51-BF38-D4F609DB6266} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 		{43475E00-51B7-443D-BC2D-FC21F9D8A0B4} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{B187DD15-092D-4B72-9807-50856607D237} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{43A43ED8-3F66-4864-ADD3-E5DEC762C9E2} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E70565D-94CF-40B4-BFE1-AC18D5F736AB}
