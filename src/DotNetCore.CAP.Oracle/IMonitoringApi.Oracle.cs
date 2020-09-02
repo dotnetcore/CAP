@@ -32,16 +32,16 @@ namespace DotNetCore.CAP.Oracle
             var sql = $@"
 SELECT
 (
-    SELECT COUNT(Id) FROM `{_pubName}` WHERE StatusName = N'Succeeded'
+    SELECT COUNT(""Id"") FROM ""{_pubName}"" WHERE ""StatusName"" = N'Succeeded'
 ) AS PublishedSucceeded,
 (
-    SELECT COUNT(Id) FROM `{_recName}` WHERE StatusName = N'Succeeded'
+    SELECT COUNT(""Id"") FROM ""{_recName}"" WHERE ""StatusName"" = N'Succeeded'
 ) AS ReceivedSucceeded,
 (
-    SELECT COUNT(Id) FROM `{_pubName}` WHERE StatusName = N'Failed'
+    SELECT COUNT(""Id"") FROM ""{_pubName}"" WHERE ""StatusName"" = N'Failed'
 ) AS PublishedFailed,
 (
-    SELECT COUNT(Id) FROM `{_recName}` WHERE StatusName = N'Failed'
+    SELECT COUNT(""Id"") FROM ""{_recName}"" WHERE ""StatusName"" = N'Failed'
 ) AS ReceivedFailed;";
 
             using var connection = new OracleConnection(_options.ConnectionString);
@@ -81,26 +81,27 @@ SELECT
             var where = string.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
             {
-                where += " and StatusName=@StatusName";
+                where += " AND \"StatusName\" = @StatusName";
             }
 
             if (!string.IsNullOrEmpty(queryDto.Name))
             {
-                where += " and Name=@Name";
+                where += " AND \"Name\" = @Name";
             }
 
             if (!string.IsNullOrEmpty(queryDto.Group))
             {
-                where += " and `Group`=@Group";
+                where += " AND \"Group\" = @Group";
             }
 
             if (!string.IsNullOrEmpty(queryDto.Content))
             {
-                where += " and Content like CONCAT('%',@Content,'%')";
+                where += " AND \"Content\" LIKE CONCAT('%',@Content,'%')";
             }
 
+            // TODO:Oracle poagnation
             var sqlQuery =
-                $"select * from `{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
+                $"SELECT * FROM \"{tableName}\" WHERE 1=1 {where} ORDER BY \"Added\" DESC AND ROWNUM @Limit offset @Offset";
 
             object[] sqlParams =
             {
@@ -160,7 +161,7 @@ SELECT
 
         private int GetNumberOfMessage(string tableName, string statusName)
         {
-            var sqlQuery = $"select count(Id) from `{tableName}` where StatusName = @state";
+            var sqlQuery = $"select count(\"Id\") from \"{tableName}\" where \"StatusName\" = @state";
             using var connection = new OracleConnection(_options.ConnectionString);
             return connection.ExecuteScalar<int>(sqlQuery, new OracleParameter("@state", statusName));
         }
@@ -188,14 +189,14 @@ SELECT
             var sqlQuery = $@"
 SELECT aggr.*
 FROM (
-         SELECT date_format(`Added`, '%Y-%m-%d-%H') AS `Key`,
-                count(id)                              `Count`
-         FROM `{tableName}`
-         WHERE StatusName = @statusName
-         GROUP BY date_format(`Added`, '%Y-%m-%d-%H')
+         SELECT date_format(`Added`, '%Y-%m-%d-%H') AS ""Key"",
+                count(""id"")                              `Count`
+         FROM ""{tableName}""
+         WHERE ""StatusName"" = @statusName
+         GROUP BY date_format(""Added"", '%Y-%m-%d-%H')
      ) aggr
-WHERE `Key` >= @minKey
-  AND `Key` <= @maxKey;";
+WHERE ""Key"" >= @minKey
+  AND ""Key"" <= @maxKey;";
 
             object[] sqlParams =
             {
@@ -244,7 +245,7 @@ WHERE `Key` >= @minKey
 
         private async Task<MediumMessage> GetMessageAsync(string tableName, long id)
         {
-            var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
+            var sql = $@"SELECT ""Id"" as ""DbId"", ""Content"",""Added"",""ExpiresAt"",""Retries"" FROM ""{tableName}"" WHERE ""Id""={id};";
 
             using var connection = new OracleConnection(_options.ConnectionString);
             var mediumMessage = connection.ExecuteReader(sql, reader =>
