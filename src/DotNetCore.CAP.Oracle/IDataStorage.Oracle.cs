@@ -45,7 +45,7 @@ namespace DotNetCore.CAP.Oracle
 
         public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
         {
-            var sql = $"INSERT INTO `{_pubName}`(`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)" +
+            var sql = $"INSERT INTO \"{_pubName}\"(\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
                       $" VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             var message = new MediumMessage
@@ -136,9 +136,10 @@ namespace DotNetCore.CAP.Oracle
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default)
         {
             using var connection = new OracleConnection(_options.Value.ConnectionString);
-            return connection.ExecuteNonQuery(
-                $@"DELETE FROM `{table}` WHERE ExpiresAt < @timeout limit @batchCount;", null,
+            var result = connection.ExecuteNonQuery(
+                $"DELETE FROM \"{table}\" WHERE \"ExpiresAt\" < @timeout AND ROWNUM <= @batchCount;", null,
                 new OracleParameter("@timeout", timeout), new OracleParameter("@batchCount", batchCount));
+            return await Task.FromResult(result);
         }
 
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
@@ -155,7 +156,7 @@ namespace DotNetCore.CAP.Oracle
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE `{tableName}` SET `Retries` = @Retries,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+                $"UPDATE \"{tableName}\" SET \"Retries\" = @Retries,\"ExpiresAt\" = @ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id;";
 
             object[] sqlParams =
             {
@@ -171,7 +172,7 @@ namespace DotNetCore.CAP.Oracle
 
         private void StoreReceivedMessage(object[] sqlParams)
         {
-            var sql = $@"INSERT INTO `{_recName}`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) " +
+            var sql = $"INSERT INTO \"{ _recName}\" (\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\") " +
                       $"VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
@@ -182,8 +183,8 @@ namespace DotNetCore.CAP.Oracle
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
-                $"SELECT `Id`,`Content`,`Retries`,`Added` FROM `{tableName}` WHERE `Retries`<{_capOptions.Value.FailedRetryCount} " +
-                $"AND `Version`='{_capOptions.Value.Version}' AND `Added`<'{fourMinAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
+                $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\" FROM \"{tableName}\" WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} " +
+                $"AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\" = '{StatusName.Failed}' OR \"StatusName\" = '{StatusName.Scheduled}') AND ROWNUM <= 200;";
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
             var result = connection.ExecuteReader(sql, reader =>
