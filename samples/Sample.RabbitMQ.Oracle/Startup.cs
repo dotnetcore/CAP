@@ -9,12 +9,12 @@ namespace Sample.RabbitMQ.Oracle
     {
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddDbContext<AppDbContext>();
+            services.AddDbContext<AppDbContext>();
 
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                //x.UseOracle("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=192.168.0.223)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=FEIKONG)));User Id=SYFORM;Password=Asd123$;Persist Security Info=True;");
+                //x.UseOracle("Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=xe)));User Id=test;Password=test;Persist Security Info=True;");
                 x.UseRabbitMQ("localhost");
                 x.UseDashboard();
                 x.FailedRetryCount = 5;

@@ -27,14 +27,12 @@ namespace Sample.RabbitMQ.Oracle
     }
     public class AppDbContext : DbContext
     {
-        public const string ConnectionString = "Server=localhost;Database=testcap;UserId=root;Password=123123;";
-
+        public const string ConnectionString = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=127.0.0.1)(PORT=1521))(CONNECT_DATA=(SERVICE_NAME=xe)));User Id=test;Password=test;Persist Security Info=True;";
         public DbSet<Person> Persons { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            throw new InvalidOperationException("it's can not supported ef core!");
-            //optionsBuilder.UseOracle(ConnectionString);
+            optionsBuilder.UseOracle(ConnectionString);
         }
     }
 }
