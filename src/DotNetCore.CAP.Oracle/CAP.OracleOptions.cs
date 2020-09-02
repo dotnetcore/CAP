@@ -4,6 +4,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using System.Text.RegularExpressions;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -14,6 +15,19 @@ namespace DotNetCore.CAP
         /// Gets or sets the database's connection string that will be used to store database entities.
         /// </summary>
         public string ConnectionString { get; set; }
+
+        /// <summary>
+        /// Gets the username of connection string that will be use to create table for owner.
+        /// </summary>
+        /// <returns></returns>
+        public string GetUserName()
+        {
+            var ms = new Regex(@"user\sid=\w+;", RegexOptions.IgnoreCase)
+                 .Match(ConnectionString);
+            if (string.IsNullOrEmpty(ms.Value))
+                throw new System.InvalidOperationException("connection string must has 'User Id=your userid;'");
+            return ms.Value.Split('=')[0].TrimEnd(';').Trim();
+        }
     }
 
     internal class ConfigureOracleOptions : IConfigureOptions<OracleOptions>
