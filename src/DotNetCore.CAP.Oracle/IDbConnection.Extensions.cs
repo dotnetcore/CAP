@@ -29,7 +29,7 @@ namespace DotNetCore.CAP.Oracle
             {
                 command.Transaction = transaction;
             }
-
+            
             return command.ExecuteNonQuery();
         }
 

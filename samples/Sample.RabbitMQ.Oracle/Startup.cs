@@ -2,6 +2,7 @@ using DotNetCore.CAP.Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Oracle.ManagedDataAccess.Client;
 
 namespace Sample.RabbitMQ.Oracle
 {

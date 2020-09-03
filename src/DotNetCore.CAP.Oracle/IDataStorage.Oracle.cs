@@ -45,9 +45,6 @@ namespace DotNetCore.CAP.Oracle
 
         public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
         {
-            var sql = $"INSERT INTO \"{_pubName}\"(\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
-                      $" VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
-
             var message = new MediumMessage
             {
                 DbId = content.GetId(),
@@ -58,15 +55,18 @@ namespace DotNetCore.CAP.Oracle
                 Retries = 0
             };
 
+            var sql = $"INSERT INTO \"{_pubName}\"(\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
+                      $" VALUES(:Id,'{_options.Value.Version}',:Name,:Content,:Retries,:Added,:ExpiresAt,:StatusName)";
+
             object[] sqlParams =
             {
-                new OracleParameter("@Id", message.DbId),
-                new OracleParameter("@Name", name),
-                new OracleParameter("@Content", message.Content),
-                new OracleParameter("@Retries", message.Retries),
-                new OracleParameter("@Added", message.Added),
-                new OracleParameter("@ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
-                new OracleParameter("@StatusName", nameof(StatusName.Scheduled)),
+                new OracleParameter(":Id", message.DbId),
+                new OracleParameter(":Name", name),
+                new OracleParameter(":Content", message.Content),
+                new OracleParameter(":Retries", message.Retries),
+                new OracleParameter(":Added", message.Added),
+                new OracleParameter(":ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
+                new OracleParameter(":StatusName", nameof(StatusName.Scheduled)),
             };
 
             if (dbTransaction == null)
@@ -93,17 +93,17 @@ namespace DotNetCore.CAP.Oracle
         {
             object[] sqlParams =
             {
-                new OracleParameter("@Id", SnowflakeId.Default().NextId().ToString()),
-                new OracleParameter("@Name", name),
-                new OracleParameter("@Group", group),
-                new OracleParameter("@Content", content),
-                new OracleParameter("@Retries", _capOptions.Value.FailedRetryCount),
-                new OracleParameter("@Added", DateTime.Now),
-                new OracleParameter("@ExpiresAt", DateTime.Now.AddDays(15)),
-                new OracleParameter("@StatusName", nameof(StatusName.Failed))
+                new OracleParameter(":Id", SnowflakeId.Default().NextId().ToString()),
+                new OracleParameter(":Name", name),
+                new OracleParameter(":Group", group),
+                new OracleParameter(":Content", content),
+                new OracleParameter(":Retries", _capOptions.Value.FailedRetryCount),
+                new OracleParameter(":Added", DateTime.Now),
+                new OracleParameter(":ExpiresAt", DateTime.Now.AddDays(15)),
+                new OracleParameter(":StatusName", nameof(StatusName.Failed))
             };
 
-            StoreReceivedMessage(sqlParams);
+            StoreReceivedMessage(sqlParams, DateTime.Now, DateTime.Now.AddDays(15));
         }
 
         public MediumMessage StoreReceivedMessage(string name, string group, Message message)
@@ -119,27 +119,27 @@ namespace DotNetCore.CAP.Oracle
 
             object[] sqlParams =
             {
-                new OracleParameter("@Id", mdMessage.DbId),
-                new OracleParameter("@Name", name),
-                new OracleParameter("@Group", group),
-                new OracleParameter("@Content", StringSerializer.Serialize(mdMessage.Origin)),
-                new OracleParameter("@Retries", mdMessage.Retries),
-                new OracleParameter("@Added", mdMessage.Added),
-                new OracleParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
-                new OracleParameter("@StatusName", nameof(StatusName.Scheduled))
+                new OracleParameter(":Id", mdMessage.DbId),
+                new OracleParameter(":Name", name),
+                new OracleParameter(":Group", group),
+                new OracleParameter(":Content", StringSerializer.Serialize(mdMessage.Origin)),
+                new OracleParameter(":Retries", mdMessage.Retries),
+                new OracleParameter(":Added", mdMessage.Added),
+                new OracleParameter(":ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
+                new OracleParameter(":StatusName", nameof(StatusName.Scheduled))
             };
 
-            StoreReceivedMessage(sqlParams);
+            StoreReceivedMessage(sqlParams, mdMessage.Added, mdMessage.ExpiresAt);
             return mdMessage;
         }
 
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default)
         {
             using var connection = new OracleConnection(_options.Value.ConnectionString);
-            var result = connection.ExecuteNonQuery(
-                $"DELETE FROM \"{table}\" WHERE \"ExpiresAt\" < @timeout AND ROWNUM <= @batchCount;", null,
-                new OracleParameter("@timeout", timeout), new OracleParameter("@batchCount", batchCount));
-            return await Task.FromResult(result);
+            //var sql = $@"DELETE FROM ""{table}"" WHERE ""ExpiresAt"" < {timeout.ToString().BootstrapDateFunction()} AND ROWNUM <= {batchCount}";
+            //return await Task.FromResult(connection.ExecuteNonQuery(sql));
+            var sql = $@"DELETE FROM ""{table}"" WHERE ""ExpiresAt"" < :timeout AND ROWNUM <= :batchCount";
+            return await Task.FromResult(connection.ExecuteNonQuery(sql, null, new OracleParameter(":timeout", timeout), new OracleParameter(":batchCount", batchCount)));
         }
 
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
@@ -156,24 +156,25 @@ namespace DotNetCore.CAP.Oracle
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE \"{tableName}\" SET \"Retries\" = @Retries,\"ExpiresAt\" = @ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id;";
+                $@"UPDATE ""{tableName}"" SET ""Retries"" = :Retries,""ExpiresAt"" = :ExpiresAt,""StatusName"" = :StatusName WHERE ""Id"" = :Id";
 
             object[] sqlParams =
             {
-                new OracleParameter("@Id", message.DbId),
-                new OracleParameter("@Retries", message.Retries),
-                new OracleParameter("@ExpiresAt", message.ExpiresAt),
-                new OracleParameter("@StatusName", state.ToString("G"))
+                new OracleParameter(":Id", message.DbId),
+                new OracleParameter(":Retries", message.Retries),
+                new OracleParameter(":ExpiresAt", message.ExpiresAt),
+                new OracleParameter(":StatusName", state.ToString("G"))
             };
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+            await Task.CompletedTask;
         }
 
-        private void StoreReceivedMessage(object[] sqlParams)
+        private void StoreReceivedMessage(object[] sqlParams, DateTime added, DateTime? expiresAt)
         {
-            var sql = $"INSERT INTO \"{ _recName}\" (\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\") " +
-                      $"VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+            var sql = $@"INSERT INTO ""{ _recName}"" (""Id"",""Version"",""Name"",""Group"",""Content"",""Retries"",""Added"",""ExpiresAt"",""StatusName"")
+                      VALUES(:Id,'{_options.Value.Version}',:Name,:Group,:Content,:Retries,:Added,:ExpiresAt,:StatusName)";
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
@@ -181,10 +182,10 @@ namespace DotNetCore.CAP.Oracle
 
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
         {
-            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
+            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString().BootstrapDateFunction();
             var sql =
                 $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\" FROM \"{tableName}\" WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} " +
-                $"AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\" = '{StatusName.Failed}' OR \"StatusName\" = '{StatusName.Scheduled}') AND ROWNUM <= 200";
+                $"AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<{fourMinAgo} AND (\"StatusName\" = '{StatusName.Failed}' OR \"StatusName\" = '{StatusName.Scheduled}') AND ROWNUM <= 200";
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
             var result = connection.ExecuteReader(sql, reader =>

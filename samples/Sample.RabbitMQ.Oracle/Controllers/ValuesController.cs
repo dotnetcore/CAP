@@ -35,7 +35,18 @@ namespace sample.rabbitmq.oracle.Controllers
                 using (var transaction = connection.BeginTransaction(_capBus, true))
                 {
                     //your business code
-                    connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
+                    var p = new OracleParameter { ParameterName = ":Id", Value = 4000 };
+                    var p2 = new OracleParameter { ParameterName = ":Name", Value = Guid.NewGuid().ToString() };
+                    var p3 = new OracleParameter { ParameterName = ":Birthday", Value = DateTime.Now };
+                    //connection.Execute($"insert into \"Persons\" (\"Id\",\"Name\") values(:Id,'{Guid.NewGuid().ToString()}')", param: p, transaction: (IDbTransaction)transaction.DbTransaction);
+                    
+                    var cmd = connection.CreateCommand();
+                    cmd.CommandType = CommandType.Text;
+                    cmd.CommandText = $"insert into \"Persons2\" (\"Id\",\"Name\",\"Birthday\") values(:Id,:Name,:Birthday)";
+                    cmd.Parameters.Add(p);
+                    cmd.Parameters.Add(p2);
+                    cmd.Parameters.Add(p3);
+                    cmd.ExecuteNonQuery();
 
                     //for (int i = 0; i < 5; i++)
                     //{
@@ -48,7 +59,7 @@ namespace sample.rabbitmq.oracle.Controllers
         }
 
         [Route("~/ef/transaction")]
-        public IActionResult EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
+        public IActionResult EntityFrameworkWithTransaction([FromServices] AppDbContext dbContext)
         {
             using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
             {
@@ -75,7 +86,7 @@ namespace sample.rabbitmq.oracle.Controllers
 
         [NonAction]
         [CapSubscribe("sample.rabbitmq.oracle", Group = "group.test2")]
-        public void Subscriber2(DateTime p, [FromCap]CapHeader header)
+        public void Subscriber2(DateTime p, [FromCap] CapHeader header)
         {
             Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
         }
