@@ -25,18 +25,15 @@ namespace DotNetCore.CAP.Oracle
 
         public virtual string GetPublishedTableName()
         {
-            return $"\"{_options.Value.GetUserName().ToUpper()}\".\"{_options.Value.TableNamePrefix}_published\"";
+            return $"{_options.Value.TableNamePrefix}_published";
         }
 
         public virtual string GetReceivedTableName()
         {
-            return $"\"{_options.Value.GetUserName().ToUpper()}\".\"{_options.Value.TableNamePrefix}_received\"";
+            return $"{_options.Value.TableNamePrefix}_received";
         }
 
-        private string GetOrginalTableName(string fullTableName)
-        {
-            return fullTableName.Replace($"\"{_options.Value.GetUserName().ToUpper()}\".", string.Empty).Trim('"');
-        }
+        private string GetTableSchema() => _options.Value.GetUserName().ToUpper();
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
         {
@@ -65,11 +62,11 @@ namespace DotNetCore.CAP.Oracle
                 begin
                         declare tableRecExists integer;
                         begin
-                            select count(1) into tableRecExists from user_tables where table_name ='{GetOrginalTableName(GetReceivedTableName())}';
+                            select count(1) into tableRecExists from user_tables where table_name ='{GetReceivedTableName()}';
                             if tableRecExists=0 then
                                 begin
                                     execute immediate'
-                                    CREATE TABLE {GetReceivedTableName()} (
+                                    CREATE TABLE ""{GetTableSchema()}"".""{GetReceivedTableName()}"" (
                                            ""Id"" number(23,0) NOT NULL,
                                            ""Version"" varchar2(20) DEFAULT NULL,
                                            ""Name"" varchar2(400) NOT NULL,
@@ -80,19 +77,19 @@ namespace DotNetCore.CAP.Oracle
                                            ""ExpiresAt"" date DEFAULT NULL,
                                            ""StatusName"" varchar2(50) NOT NULL
                                         )';
-                                       execute immediate 'ALTER TABLE ""{GetOrginalTableName(GetReceivedTableName())}"" ADD CONSTRAINT ""PK_CAP_Received"" PRIMARY KEY (""Id"")';
-                                       execute immediate 'CREATE INDEX ""IX_CAP_Received_ExpiresAt"" ON ""{GetOrginalTableName(GetReceivedTableName())}"" (""ExpiresAt"")';
+                                       execute immediate 'ALTER TABLE ""{GetReceivedTableName()}"" ADD CONSTRAINT ""PK_CAP_Received"" PRIMARY KEY (""Id"")';
+                                       execute immediate 'CREATE INDEX ""IX_CAP_Received_ExpiresAt"" ON ""{GetReceivedTableName()}"" (""ExpiresAt"")';
                                 end;
                             end if;
                         end;
 
                         declare tablePubExists integer;
                         begin
-                            select count(*) into tablePubExists from user_tables where table_name ='{GetOrginalTableName(GetPublishedTableName())}';
+                            select count(*) into tablePubExists from user_tables where table_name ='{GetPublishedTableName()}';
                             if tablePubExists=0 then
                                 begin
                                     execute immediate'
-                                    CREATE TABLE {GetPublishedTableName()} (
+                                    CREATE TABLE ""{GetTableSchema()}"".""{GetPublishedTableName()}"" (
                                          ""Id"" number(23,0) NOT NULL,
                                          ""Version"" varchar2(20) DEFAULT NULL,
                                          ""Name"" varchar2(200) NOT NULL,
@@ -102,8 +99,8 @@ namespace DotNetCore.CAP.Oracle
                                          ""ExpiresAt"" date DEFAULT NULL,
                                          ""StatusName"" varchar2(50) NOT NULL
                                         )';
-                                        execute immediate 'ALTER TABLE ""{GetOrginalTableName(GetPublishedTableName())}"" ADD CONSTRAINT ""PK_CAP_Published"" PRIMARY KEY (""Id"")';
-                                        execute immediate 'CREATE INDEX ""IX_CAP_Published_ExpiresAt"" ON ""{GetOrginalTableName(GetPublishedTableName())}"" (""ExpiresAt"")';
+                                        execute immediate 'ALTER TABLE ""{GetPublishedTableName()}"" ADD CONSTRAINT ""PK_CAP_Published"" PRIMARY KEY (""Id"")';
+                                        execute immediate 'CREATE INDEX ""IX_CAP_Published_ExpiresAt"" ON ""{GetPublishedTableName()}"" (""ExpiresAt"")';
                                 end;
                             end if;
                         end;
