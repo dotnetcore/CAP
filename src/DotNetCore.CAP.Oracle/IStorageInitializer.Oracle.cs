@@ -64,7 +64,7 @@ namespace DotNetCore.CAP.Oracle
                 $@"
                         declare tableRecExists integer;
                         begin
-                        select count(*) into tableRecExists from user_tables where table_name ='{GetOrginalTableName(GetReceivedTableName())}';
+                        select count(1) into tableRecExists from user_tables where table_name ='{GetOrginalTableName(GetReceivedTableName())}';
                         if tableRecExists=0 then
                             execute immediate'
                             CREATE TABLE {GetReceivedTableName()} (
@@ -77,10 +77,9 @@ namespace DotNetCore.CAP.Oracle
                                    ""Added"" date NOT NULL,
                                    ""ExpiresAt"" date DEFAULT NULL,
                                    ""StatusName"" varchar2(50) NOT NULL
-                                );
-                                ALTER TABLE {GetReceivedTableName()} ADD CONSTRAINT ""PK_Received"" PRIMARY KEY (""Id"");
-                                CREATE INDEX ""IX_ExpiresAt"" ON {GetReceivedTableName()}(""ExpiresAt"");
-                            ';
+                                )';
+                               execute immediate 'ALTER TABLE ""{GetOrginalTableName(GetReceivedTableName())}"" ADD CONSTRAINT ""PK_Received"" PRIMARY KEY (""Id"")';
+                               execute immediate 'CREATE INDEX ""IX_ExpiresAt"" ON {GetOrginalTableName(GetReceivedTableName())}(""ExpiresAt"")';
                             end if;
                         end;
 
@@ -98,10 +97,9 @@ namespace DotNetCore.CAP.Oracle
                                  ""Added"" date NOT NULL,
                                  ""ExpiresAt"" date DEFAULT NULL,
                                  ""StatusName"" varchar2(50) NOT NULL
-                                );
-                                ALTER TABLE {GetPublishedTableName()} ADD CONSTRAINT ""PK_Published"" PRIMARY KEY (""Id"");
-                                CREATE INDEX ""IX_ExpiresAt"" ON {GetPublishedTableName()}(""ExpiresAt"");
-                            ';
+                                )';
+                                execute immediate 'ALTER TABLE ""{GetOrginalTableName(GetPublishedTableName())}"" ADD CONSTRAINT ""PK_Published"" PRIMARY KEY (""Id"")';
+                                execute immediate 'CREATE INDEX ""IX_ExpiresAt"" ON {GetOrginalTableName(GetPublishedTableName())}(""ExpiresAt"")';
                             end if;
                         end;
             ";
