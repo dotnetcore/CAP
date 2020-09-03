@@ -25,17 +25,17 @@ namespace DotNetCore.CAP.Oracle
 
         public virtual string GetPublishedTableName()
         {
-            return $"\"{_options.Value.GetUserName()}\".\"{_options.Value.TableNamePrefix}_published\"";
+            return $"\"{_options.Value.GetUserName().ToUpper()}\".\"{_options.Value.TableNamePrefix}_published\"";
         }
 
         public virtual string GetReceivedTableName()
         {
-            return $"\"{_options.Value.GetUserName()}\".\"{_options.Value.TableNamePrefix}_received\"";
+            return $"\"{_options.Value.GetUserName().ToUpper()}\".\"{_options.Value.TableNamePrefix}_received\"";
         }
 
         private string GetOrginalTableName(string fullTableName)
         {
-            return fullTableName.Replace($"\"{_options.Value.GetUserName()}\"", string.Empty).Trim('"');
+            return fullTableName.Replace($"\"{_options.Value.GetUserName().ToUpper()}\".", string.Empty).Trim('"');
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -62,46 +62,52 @@ namespace DotNetCore.CAP.Oracle
         {
             var batchSql =
                 $@"
+                begin
                         declare tableRecExists integer;
                         begin
-                        select count(1) into tableRecExists from user_tables where table_name ='{GetOrginalTableName(GetReceivedTableName())}';
-                        if tableRecExists=0 then
-                            execute immediate'
-                            CREATE TABLE {GetReceivedTableName()} (
-                                   ""Id"" number(23,0) NOT NULL,
-                                   ""Version"" varchar2(20) DEFAULT NULL,
-                                   ""Name"" varchar2(400) NOT NULL,
-                                   ""Group"" varchar2(200) DEFAULT NULL,
-                                   ""Content"" clob,
-                                   ""Retries"" number(11,0) DEFAULT NULL,
-                                   ""Added"" date NOT NULL,
-                                   ""ExpiresAt"" date DEFAULT NULL,
-                                   ""StatusName"" varchar2(50) NOT NULL
-                                )';
-                               execute immediate 'ALTER TABLE ""{GetOrginalTableName(GetReceivedTableName())}"" ADD CONSTRAINT ""PK_Received"" PRIMARY KEY (""Id"")';
-                               execute immediate 'CREATE INDEX ""IX_ExpiresAt"" ON {GetOrginalTableName(GetReceivedTableName())}(""ExpiresAt"")';
+                            select count(1) into tableRecExists from user_tables where table_name ='{GetOrginalTableName(GetReceivedTableName())}';
+                            if tableRecExists=0 then
+                                begin
+                                    execute immediate'
+                                    CREATE TABLE {GetReceivedTableName()} (
+                                           ""Id"" number(23,0) NOT NULL,
+                                           ""Version"" varchar2(20) DEFAULT NULL,
+                                           ""Name"" varchar2(400) NOT NULL,
+                                           ""Group"" varchar2(200) DEFAULT NULL,
+                                           ""Content"" clob,
+                                           ""Retries"" number(11,0) DEFAULT NULL,
+                                           ""Added"" date NOT NULL,
+                                           ""ExpiresAt"" date DEFAULT NULL,
+                                           ""StatusName"" varchar2(50) NOT NULL
+                                        )';
+                                       execute immediate 'ALTER TABLE ""{GetOrginalTableName(GetReceivedTableName())}"" ADD CONSTRAINT ""PK_CAP_Received"" PRIMARY KEY (""Id"")';
+                                       execute immediate 'CREATE INDEX ""IX_CAP_Received_ExpiresAt"" ON ""{GetOrginalTableName(GetReceivedTableName())}"" (""ExpiresAt"")';
+                                end;
                             end if;
                         end;
 
                         declare tablePubExists integer;
                         begin
-                        select count(*) into tablePubExists from user_tables where table_name ='{GetOrginalTableName(GetPublishedTableName())}';
-                        if tablePubExists=0 then
-                            execute immediate'
-                            CREATE TABLE {GetPublishedTableName()} (
-                                 ""Id"" number(23,0) NOT NULL,
-                                 ""Version"" varchar2(20) DEFAULT NULL,
-                                 ""Name"" varchar2(200) NOT NULL,
-                                 ""Content"" clob,
-                                 ""Retries"" number(11,0) DEFAULT NULL,
-                                 ""Added"" date NOT NULL,
-                                 ""ExpiresAt"" date DEFAULT NULL,
-                                 ""StatusName"" varchar2(50) NOT NULL
-                                )';
-                                execute immediate 'ALTER TABLE ""{GetOrginalTableName(GetPublishedTableName())}"" ADD CONSTRAINT ""PK_Published"" PRIMARY KEY (""Id"")';
-                                execute immediate 'CREATE INDEX ""IX_ExpiresAt"" ON {GetOrginalTableName(GetPublishedTableName())}(""ExpiresAt"")';
+                            select count(*) into tablePubExists from user_tables where table_name ='{GetOrginalTableName(GetPublishedTableName())}';
+                            if tablePubExists=0 then
+                                begin
+                                    execute immediate'
+                                    CREATE TABLE {GetPublishedTableName()} (
+                                         ""Id"" number(23,0) NOT NULL,
+                                         ""Version"" varchar2(20) DEFAULT NULL,
+                                         ""Name"" varchar2(200) NOT NULL,
+                                         ""Content"" clob,
+                                         ""Retries"" number(11,0) DEFAULT NULL,
+                                         ""Added"" date NOT NULL,
+                                         ""ExpiresAt"" date DEFAULT NULL,
+                                         ""StatusName"" varchar2(50) NOT NULL
+                                        )';
+                                        execute immediate 'ALTER TABLE ""{GetOrginalTableName(GetPublishedTableName())}"" ADD CONSTRAINT ""PK_CAP_Published"" PRIMARY KEY (""Id"")';
+                                        execute immediate 'CREATE INDEX ""IX_CAP_Published_ExpiresAt"" ON ""{GetOrginalTableName(GetPublishedTableName())}"" (""ExpiresAt"")';
+                                end;
                             end if;
                         end;
+                end;
             ";
             return batchSql;
         }

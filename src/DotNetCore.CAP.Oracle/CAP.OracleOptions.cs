@@ -26,7 +26,7 @@ namespace DotNetCore.CAP
                  .Match(ConnectionString);
             if (string.IsNullOrEmpty(ms.Value))
                 throw new System.InvalidOperationException("connection string must has 'User Id=your userid;'");
-            return ms.Value.Split('=')[0].TrimEnd(';').Trim();
+            return ms.Value.Split('=')[1].TrimEnd(';').Trim();
         }
     }
 
