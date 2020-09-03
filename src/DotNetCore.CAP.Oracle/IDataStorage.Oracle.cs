@@ -56,17 +56,17 @@ namespace DotNetCore.CAP.Oracle
             };
 
             var sql = $"INSERT INTO \"{_pubName}\"(\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
-                      $" VALUES(:Id,'{_options.Value.Version}',:Name,:Content,:Retries,:Added,:ExpiresAt,:StatusName)";
+                      $" VALUES(:P_Id,'{_options.Value.Version}',:P_Name,:P_Content,:P_Retries,:P_Added,:P_ExpiresAt,:P_StatusName)";
 
             object[] sqlParams =
             {
-                new OracleParameter(":Id", message.DbId),
-                new OracleParameter(":Name", name),
-                new OracleParameter(":Content", message.Content),
-                new OracleParameter(":Retries", message.Retries),
-                new OracleParameter(":Added", message.Added),
-                new OracleParameter(":ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
-                new OracleParameter(":StatusName", nameof(StatusName.Scheduled)),
+                new OracleParameter(":P_Id", message.DbId),
+                new OracleParameter(":P_Name", name),
+                new OracleParameter(":P_Content", message.Content),
+                new OracleParameter(":P_Retries", message.Retries),
+                new OracleParameter(":P_Added", message.Added),
+                new OracleParameter(":P_ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
+                new OracleParameter(":P_StatusName", nameof(StatusName.Scheduled)),
             };
 
             if (dbTransaction == null)
@@ -93,14 +93,14 @@ namespace DotNetCore.CAP.Oracle
         {
             object[] sqlParams =
             {
-                new OracleParameter(":Id", SnowflakeId.Default().NextId().ToString()),
-                new OracleParameter(":Name", name),
-                new OracleParameter(":Group", group),
-                new OracleParameter(":Content", content),
-                new OracleParameter(":Retries", _capOptions.Value.FailedRetryCount),
-                new OracleParameter(":Added", DateTime.Now),
-                new OracleParameter(":ExpiresAt", DateTime.Now.AddDays(15)),
-                new OracleParameter(":StatusName", nameof(StatusName.Failed))
+                new OracleParameter(":P_Id", SnowflakeId.Default().NextId().ToString()),
+                new OracleParameter(":P_Name", name),
+                new OracleParameter(":P_Group", group),
+                new OracleParameter(":P_Content", content),
+                new OracleParameter(":P_Retries", _capOptions.Value.FailedRetryCount),
+                new OracleParameter(":P_Added", DateTime.Now),
+                new OracleParameter(":P_ExpiresAt", DateTime.Now.AddDays(15)),
+                new OracleParameter(":P_StatusName", nameof(StatusName.Failed))
             };
 
             StoreReceivedMessage(sqlParams, DateTime.Now, DateTime.Now.AddDays(15));
@@ -119,14 +119,14 @@ namespace DotNetCore.CAP.Oracle
 
             object[] sqlParams =
             {
-                new OracleParameter(":Id", mdMessage.DbId),
-                new OracleParameter(":Name", name),
-                new OracleParameter(":Group", group),
-                new OracleParameter(":Content", StringSerializer.Serialize(mdMessage.Origin)),
-                new OracleParameter(":Retries", mdMessage.Retries),
-                new OracleParameter(":Added", mdMessage.Added),
-                new OracleParameter(":ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
-                new OracleParameter(":StatusName", nameof(StatusName.Scheduled))
+                new OracleParameter(":P_Id", mdMessage.DbId),
+                new OracleParameter(":P_Name", name),
+                new OracleParameter(":P_Group", group),
+                new OracleParameter(":P_Content", StringSerializer.Serialize(mdMessage.Origin)),
+                new OracleParameter(":P_Retries", mdMessage.Retries),
+                new OracleParameter(":P_Added", mdMessage.Added),
+                new OracleParameter(":P_ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
+                new OracleParameter(":P_StatusName", nameof(StatusName.Scheduled))
             };
 
             StoreReceivedMessage(sqlParams, mdMessage.Added, mdMessage.ExpiresAt);
@@ -156,14 +156,14 @@ namespace DotNetCore.CAP.Oracle
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
         {
             var sql =
-                $@"UPDATE ""{tableName}"" SET ""Retries"" = :Retries,""ExpiresAt"" = :ExpiresAt,""StatusName"" = :StatusName WHERE ""Id"" = :Id";
+                $@"UPDATE ""{tableName}"" SET ""Retries"" = :P_Retries,""ExpiresAt"" = :P_ExpiresAt,""StatusName"" = :P_StatusName WHERE ""Id"" = :P_Id";
 
             object[] sqlParams =
             {
-                new OracleParameter(":Id", message.DbId),
-                new OracleParameter(":Retries", message.Retries),
-                new OracleParameter(":ExpiresAt", message.ExpiresAt),
-                new OracleParameter(":StatusName", state.ToString("G"))
+                new OracleParameter(":P_Id", message.DbId),
+                new OracleParameter(":P_Retries", message.Retries),
+                new OracleParameter(":P_ExpiresAt", message.ExpiresAt),
+                new OracleParameter(":P_StatusName", state.ToString("G"))
             };
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
@@ -174,7 +174,7 @@ namespace DotNetCore.CAP.Oracle
         private void StoreReceivedMessage(object[] sqlParams, DateTime added, DateTime? expiresAt)
         {
             var sql = $@"INSERT INTO ""{ _recName}"" (""Id"",""Version"",""Name"",""Group"",""Content"",""Retries"",""Added"",""ExpiresAt"",""StatusName"")
-                      VALUES(:Id,'{_options.Value.Version}',:Name,:Group,:Content,:Retries,:Added,:ExpiresAt,:StatusName)";
+                      VALUES(:P_Id,'{_options.Value.Version}',:P_Name,:P_Group,:P_Content,:P_Retries,:P_Added,:P_ExpiresAt,:P_StatusName)";
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
