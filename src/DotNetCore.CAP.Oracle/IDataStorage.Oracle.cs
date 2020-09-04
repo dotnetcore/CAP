@@ -182,10 +182,10 @@ namespace DotNetCore.CAP.Oracle
 
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
         {
-            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString().BootstrapDateFunction();
+            var fourMinAgo = DateTime.Now.AddMinutes(-4);
             var sql =
                 $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\" FROM \"{tableName}\" WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} " +
-                $"AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<{fourMinAgo} AND (\"StatusName\" = '{StatusName.Failed}' OR \"StatusName\" = '{StatusName.Scheduled}') AND ROWNUM <= 200";
+                $"AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<:P_FourMinAgo AND (\"StatusName\" = '{StatusName.Failed}' OR \"StatusName\" = '{StatusName.Scheduled}') AND ROWNUM <= 200";
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
             var result = connection.ExecuteReader(sql, reader =>
@@ -203,7 +203,7 @@ namespace DotNetCore.CAP.Oracle
                 }
 
                 return messages;
-            });
+            }, new OracleParameter(":P_FourMinAgo", fourMinAgo));
 
             return result;
         }
