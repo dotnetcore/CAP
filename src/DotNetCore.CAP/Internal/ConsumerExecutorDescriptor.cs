@@ -49,6 +49,43 @@ namespace DotNetCore.CAP.Internal
         }
     }
 
+    public class ConsumerExecutorDescriptorComparer : IEqualityComparer<ConsumerExecutorDescriptor>
+    {
+        public bool Equals(ConsumerExecutorDescriptor x, ConsumerExecutorDescriptor y)
+        {
+            //Check whether the compared objects reference the same data.
+            if (ReferenceEquals(x, y))
+            {
+                return true;
+            }
+
+            //Check whether any of the compared objects is null.
+            if (x is null || y is null)
+            {
+                return false;
+            }
+
+            //Check whether the ConsumerExecutorDescriptor' properties are equal.
+            return x.TopicName.Equals(y.TopicName, StringComparison.OrdinalIgnoreCase) &&
+                x.Attribute.Group.Equals(y.Attribute.Group, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public int GetHashCode(ConsumerExecutorDescriptor obj)
+        {
+            //Check whether the object is null
+            if (obj is null) return 0;
+
+            //Get hash code for the Attribute Group field if it is not null.
+            int hashAttributeGroup = obj.Attribute?.Group == null ? 0 : obj.Attribute.Group.GetHashCode();
+
+            //Get hash code for the TopicName field.
+            int hashTopicName = obj.TopicName.GetHashCode();
+
+            //Calculate the hash code.
+            return hashAttributeGroup ^ hashTopicName;
+        }
+    }
+
     public class ParameterDescriptor
     {
         public string Name { get; set; }
