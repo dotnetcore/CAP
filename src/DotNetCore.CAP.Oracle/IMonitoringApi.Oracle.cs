@@ -214,10 +214,10 @@ namespace DotNetCore.CAP.Oracle
             var sqlQuery = $@"
                 SELECT aggr.*
                 FROM (
-                         SELECT TO_CHAR(""Added"",'yyyy-mm-dd hh24') AS ""Key"", COUNT(""Id"") ""Count""
+                         SELECT TO_CHAR(""Added"",'yyyy-mm-dd-hh24') AS ""Key"", COUNT(""Id"") ""Count""
                          FROM ""{tableName}""
                          WHERE ""StatusName"" = :P_StatusName
-                         GROUP BY TO_CHAR(""Added"",'yyyy-mm-dd hh24')
+                         GROUP BY TO_CHAR(""Added"",'yyyy-mm-dd-hh24')
                      ) aggr
                 WHERE ""Key"" >= :P_MinKey AND ""Key"" <= :P_MaxKey";
 
