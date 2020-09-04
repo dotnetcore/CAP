@@ -1,3 +1,4 @@
+using DotNetCore.CAP;
 using DotNetCore.CAP.Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -32,6 +33,7 @@ namespace Sample.RabbitMQ.Oracle
 
         public void Configure(IApplicationBuilder app)
         {
+            app.UseCapDashboard();
             app.UseRouting();
             app.UseEndpoints(endpoints =>
             {

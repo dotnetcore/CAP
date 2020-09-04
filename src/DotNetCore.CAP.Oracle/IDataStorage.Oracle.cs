@@ -160,10 +160,10 @@ namespace DotNetCore.CAP.Oracle
 
             object[] sqlParams =
             {
-                new OracleParameter(":P_Id", message.DbId),
                 new OracleParameter(":P_Retries", message.Retries),
                 new OracleParameter(":P_ExpiresAt", message.ExpiresAt),
-                new OracleParameter(":P_StatusName", state.ToString("G"))
+                new OracleParameter(":P_StatusName", state.ToString("G")),
+                new OracleParameter(":P_Id", message.DbId)
             };
 
             using var connection = new OracleConnection(_options.Value.ConnectionString);
