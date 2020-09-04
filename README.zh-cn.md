@@ -47,13 +47,14 @@ PM> Install-Package DotNetCore.CAP.RabbitMQ
 PM> Install-Package DotNetCore.CAP.AzureServiceBus
 ```
 
-CAP 提供了 Sql Server, MySql, PostgreSQL，MongoDB 的扩展作为数据库存储：
+CAP 提供了 Sql Server, MySql, PostgreSQL，Oracle，MongoDB 的扩展作为数据库存储：
 
 ```
 // 按需选择安装你正在使用的数据库
 PM> Install-Package DotNetCore.CAP.SqlServer
 PM> Install-Package DotNetCore.CAP.MySql
 PM> Install-Package DotNetCore.CAP.PostgreSql
+PM> Install-Package DotNetCore.CAP.Oracle // 需要Oracle 12c+
 PM> Install-Package DotNetCore.CAP.MongoDB
 ```
 
@@ -77,6 +78,7 @@ public void ConfigureServices(IServiceCollection services)
         x.UseSqlServer("数据库连接字符串");
         x.UseMySql("数据库连接字符串");
         x.UsePostgreSql("数据库连接字符串");
+        x.UseOracle("数据库连接字符串");
 
         //如果你使用的 MongoDB，你可以添加如下配置：
         x.UseMongoDB("ConnectionStrings");  //注意，仅支持MongoDB 4.0+集群

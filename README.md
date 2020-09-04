@@ -40,7 +40,7 @@ PM> Install-Package DotNetCore.CAP.RabbitMQ
 PM> Install-Package DotNetCore.CAP.AzureServiceBus
 ```
 
-CAP supports SqlServer, MySql, PostgreSql，MongoDB as event log storage.
+CAP supports SqlServer, MySql, PostgreSql，Oracle，MongoDB as event log storage.
 
 ```
 // select a database provider you are using, event log table will integrate into.
@@ -48,6 +48,7 @@ CAP supports SqlServer, MySql, PostgreSql，MongoDB as event log storage.
 PM> Install-Package DotNetCore.CAP.SqlServer
 PM> Install-Package DotNetCore.CAP.MySql
 PM> Install-Package DotNetCore.CAP.PostgreSql
+PM> Install-Package DotNetCore.CAP.Oracle      //need Oracle 12c+
 PM> Install-Package DotNetCore.CAP.MongoDB     //need MongoDB 4.0+ cluster
 ```
 
@@ -72,6 +73,7 @@ public void ConfigureServices(IServiceCollection services)
         x.UseSqlServer("Your ConnectionStrings");
         x.UseMySql("Your ConnectionStrings");
         x.UsePostgreSql("Your ConnectionStrings");
+        x.UseOracle("Your ConnectionStrings");
 
         // If you are using MongoDB, you need to add the configuration：
         x.UseMongoDB("Your ConnectionStrings");  //MongoDB 4.0+ cluster
