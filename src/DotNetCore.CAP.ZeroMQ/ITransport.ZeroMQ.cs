@@ -33,20 +33,16 @@ namespace DotNetCore.CAP.ZeroMQ
 
         public Task<OperateResult> SendAsync(TransportMessage message)
         {
-            PublisherSocket channel=null;
+            PublisherSocket channel = null;
             try
-             {
-                  channel = _connectionChannelPool.Rent();
-
-               NetMQMessage msg = new NetMQMessage();
+            {
+                channel = _connectionChannelPool.Rent();
+                NetMQMessage msg = new NetMQMessage();
                 msg.Append(message.GetName());
-                msg.Append(message.GetId());
-                msg.Append(message.GetGroup()?? "ZeroMQ");
                 msg.Append(Newtonsoft.Json.JsonConvert.SerializeObject(message.Headers.ToDictionary(x => x.Key, x => (object)x.Value)));
                 msg.Append(message.Body);
                 channel.SendMultipartMessage(msg);
                 _logger.LogDebug($"ZeroMQ topic message [{message.GetName()}] has been published.");
-
                 return Task.FromResult(OperateResult.Success);
             }
             catch (Exception ex)

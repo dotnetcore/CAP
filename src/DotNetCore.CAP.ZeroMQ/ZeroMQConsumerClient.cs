@@ -52,9 +52,7 @@ namespace DotNetCore.CAP.ZeroMQ
             {
                 throw new ArgumentNullException(nameof(topics));
             }
-
             Connect();
-
             foreach (var topic in topics)
             {
                 _sub.Subscribe(topic);
@@ -67,27 +65,21 @@ namespace DotNetCore.CAP.ZeroMQ
 
             while (true)
             {
+                string topic = string.Empty;
                 try
                 {
-                    //msg.Append(message.GetName());
-                    //msg.Append(message.GetId());
-                    //msg.Append(message.GetGroup() ?? "ZeroMQ");
-                    //msg.Append(Newtonsoft.Json.JsonConvert.SerializeObject(message.Headers.ToDictionary(x => x.Key, x => (object)x.Value)));
-                    //msg.Append(message.Body);
-
                     var buffer = _sub.ReceiveMultipartMessage();
-                    string name = buffer[0].ConvertToString();
-                    string id = buffer[1].ConvertToString();
-                    string group = buffer[2].ConvertToString();
-                    string header = buffer[3].ConvertToString();
-                    var body = buffer[4].ToByteArray();
+                    topic = buffer[0].ConvertToString();
+                    string header = buffer[1].ConvertToString();
+                    var body = buffer[2].ToByteArray();
                     var _header = Newtonsoft.Json.JsonConvert.DeserializeObject<Dictionary<string, string>>(header);
+                    _header.Add(Messages.Headers.Group, _queueName);
                     var message = new TransportMessage(_header, body);
                     OnMessageReceived?.Invoke(_sub, message);
                 }
-                catch (Exception)
+                catch (Exception ex)
                 {
-
+                    OnLog?.Invoke(this, new LogMessageEventArgs() { LogType = MqLogType.ExceptionReceived, Reason = $"{_queueName}-{topic}-{ex.Message}" });
                 }
                 cancellationToken.ThrowIfCancellationRequested();
                 cancellationToken.WaitHandle.WaitOne(timeout);
@@ -118,9 +110,7 @@ namespace DotNetCore.CAP.ZeroMQ
             {
                 return;
             }
-
             _connectionLock.Wait();
-
             try
             {
                 if (_sub == null)
@@ -129,6 +119,10 @@ namespace DotNetCore.CAP.ZeroMQ
                     _sub = new SubscriberSocket();
                     _sub.Connect(HostAddress);
                 }
+            }
+            catch (Exception ex)
+            {
+                OnLog?.Invoke(this, new LogMessageEventArgs() { LogType = MqLogType.ExceptionReceived, Reason = $"{HostAddress }-{_queueName}-{ex.Message}" });
             }
             finally
             {

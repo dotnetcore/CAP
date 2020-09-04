@@ -71,6 +71,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.ZeroMQ", "sr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.ZeroMQ.InMemory", "samples\Sample.ZeroMQ.InMemory\Sample.ZeroMQ.InMemory.csproj", "{09F5DB95-60B4-47E1-86C8-BC00DC4A520E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.InMemory.InMemory", "samples\Sample.InMemory.InMemory\Sample.InMemory.InMemory.csproj", "{80AB645B-A6FD-457E-BD3F-E5EA8863ECD2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -165,6 +167,10 @@ Global
 		{09F5DB95-60B4-47E1-86C8-BC00DC4A520E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{09F5DB95-60B4-47E1-86C8-BC00DC4A520E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{09F5DB95-60B4-47E1-86C8-BC00DC4A520E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80AB645B-A6FD-457E-BD3F-E5EA8863ECD2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80AB645B-A6FD-457E-BD3F-E5EA8863ECD2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80AB645B-A6FD-457E-BD3F-E5EA8863ECD2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80AB645B-A6FD-457E-BD3F-E5EA8863ECD2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -192,6 +198,7 @@ Global
 		{B187DD15-092D-4B72-9807-50856607D237} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 		{E452C512-CC34-456A-87E9-F8A546587930} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{09F5DB95-60B4-47E1-86C8-BC00DC4A520E} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{80AB645B-A6FD-457E-BD3F-E5EA8863ECD2} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E70565D-94CF-40B4-BFE1-AC18D5F736AB}
