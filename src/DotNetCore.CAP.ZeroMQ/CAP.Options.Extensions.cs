@@ -9,7 +9,7 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CapOptionsExtensions
     {
-        public static CapOptions UseRabbitMQ(this CapOptions options, string hostName)
+        public static CapOptions UseZeroMQ(this CapOptions options, string hostName)
         {
             return options.UseZeroMQ(opt => { opt.HostName = hostName; });
         }
