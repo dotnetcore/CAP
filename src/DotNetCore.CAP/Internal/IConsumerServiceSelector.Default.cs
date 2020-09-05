@@ -47,6 +47,8 @@ namespace DotNetCore.CAP.Internal
 
             executorDescriptorList.AddRange(FindConsumersFromControllerTypes());
 
+            executorDescriptorList = executorDescriptorList.Distinct(new ConsumerExecutorDescriptorComparer()).ToList();
+
             return executorDescriptorList;
         }
 
