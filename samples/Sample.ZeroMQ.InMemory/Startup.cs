@@ -13,12 +13,18 @@ namespace Sample.ZeroMQ.InMemory
             services.AddCap(x =>
             {
                 x.UseInMemoryStorage();
-                x.UseZeroMQ(cfg=>
+                x.UseZeroMQ(cfg =>
                 {
                     cfg.HostName = "127.0.0.1";
                     cfg.SubPort = 5556;
                     cfg.PubPort = 5557;
                 });
+                //x.UseRabbitMQ(cfg =>
+                //{
+                //    cfg.HostName = "172.17.124.92";
+                //    cfg.UserName = "guest";
+                //    cfg.Password = "guest";
+                //});
                 x.UseDashboard();
             });
 

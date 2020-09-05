@@ -5,8 +5,8 @@ namespace Sample.ConsoleApp
 {
     public class EventSubscriber : ICapSubscribe
     {
-        [CapSubscribe("sample.console.showtime")]
-        public void ShowTime(DateTime date)
+        [CapSubscribe("sample.aws.in-memory", Group = "aaaa")]
+        public void ShowTime(Guid date)
         {
             Console.WriteLine(date);
         }
