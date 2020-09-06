@@ -19,7 +19,7 @@ namespace Sample.ZeroMQ.InMemory
                     cfg.HostName = "127.0.0.1";
                     cfg.SubPort = 5556;
                     cfg.PubPort = 5557;
-                    cfg.Pattern = DotNetCore.CAP.ZeroMQ.NetMQPattern.PushPull;
+                    cfg.Pattern = DotNetCore.CAP.NetMQPattern.PushPull;
 
                 });
                 //x.UseRabbitMQ(cfg =>

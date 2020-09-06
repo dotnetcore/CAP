@@ -12,12 +12,6 @@ using System.Threading;
 
 namespace DotNetCore.CAP.ZeroMQ
 {
-    public enum NetMQPattern
-    {
-        PushPull,
-        PubSub
-    }
-
     public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     {
         private const int DefaultPoolSize = 15;
@@ -76,15 +70,15 @@ namespace DotNetCore.CAP.ZeroMQ
                 context.Dispose();
             }
         }
-
+       
         public virtual NetMQSocket Rent()
         {
-            if (_pool.TryDequeue(out var model))
+            if (_pool.TryDequeue(out var _sender))
             {
                 Interlocked.Decrement(ref _count);
 
                 Debug.Assert(_count >= 0);
-                return model;
+                return _sender;
             }
 
             try
@@ -92,26 +86,25 @@ namespace DotNetCore.CAP.ZeroMQ
                 switch (_options.Pattern)
                 {
                     case NetMQPattern.PushPull:
-                        model = new PushSocket();
+                        _sender = new PushSocket();
                         break;
 
                     case NetMQPattern.PubSub:
-                        model = new PublisherSocket();
+                        _sender = new PublisherSocket();
                         break;
 
                     default:
                         break;
                 }
-                model.Connect(HostAddress);
+                _sender.Connect(HostAddress);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "ZeroMQ channel model create failed!");
-                Console.WriteLine(e);
                 throw;
             }
 
-            return model;
+            return _sender;
         }
 
         public virtual bool Return(NetMQSocket connection)

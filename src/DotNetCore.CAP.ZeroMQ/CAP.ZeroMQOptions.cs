@@ -8,6 +8,20 @@ using DotNetCore.CAP.ZeroMQ;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
+    /// <summary>
+    /// Which set of NetMQSocket to use.
+    /// </summary>
+    public enum NetMQPattern
+    {
+        /// <summary>
+        /// PushSocket is sender ,  PullSocket is receiver
+        /// </summary>
+        PushPull,
+        /// <summary>
+        /// XPublisherSocket is sender ,  XSubscriberSocket is receiver
+        /// </summary>
+        PubSub
+    }
     public class ZeroMQOptions
     {
         /// <summary>
@@ -62,6 +76,9 @@ namespace DotNetCore.CAP
         /// </summary>
         public string ExchangeName { get; set; } = DefaultExchangeName;
 
+        /// <summary>
+        /// 
+        /// </summary>
         public NetMQPattern Pattern { get; set; }
 
         /// <summary>
