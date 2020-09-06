@@ -8,17 +8,24 @@ using System.Reflection;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NetMQ;
 using NetMQ.Sockets;
 
 namespace DotNetCore.CAP.ZeroMQ
 {
+    
+    public enum NetMQPattern
+    {
+        PushPull,
+        PubSub
+    }
     public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     {
         private const int DefaultPoolSize = 15;
         private readonly ILogger<ConnectionChannelPool> _logger;
-        private readonly ConcurrentQueue<PublisherSocket> _pool;
+        private readonly ConcurrentQueue<NetMQSocket> _pool;
         private static readonly object SLock = new object();
-
+        private readonly ZeroMQOptions _options;
         private int _count;
         private int _maxSize;
 
@@ -29,20 +36,20 @@ namespace DotNetCore.CAP.ZeroMQ
         {
             _logger = logger;
             _maxSize = DefaultPoolSize;
-            _pool = new ConcurrentQueue<PublisherSocket>();
+            _pool = new ConcurrentQueue<NetMQSocket>();
 
             var capOptions = capOptionsAccessor.Value;
-            var options = optionsAccessor.Value;
+              _options = optionsAccessor.Value;
 
-             
 
-            HostAddress = $"tcp://{options.HostName}:{options.PubPort}";
-            Exchange = "v1" == capOptions.Version ? options.ExchangeName : $"{options.ExchangeName}.{capOptions.Version}";
 
-            _logger.LogDebug($"ZeroMQ configuration:'HostName:{options.HostName}, PubPort:{options.PubPort}, UserName:{options.UserName}, Password:{options.Password}, ExchangeName:{options.ExchangeName}'");
+            HostAddress = $"tcp://{_options.HostName}:{_options.PubPort}";
+            Exchange = "v1" == capOptions.Version ? _options.ExchangeName : $"{_options.ExchangeName}.{capOptions.Version}";
+
+            _logger.LogDebug($"ZeroMQ configuration:'HostName:{_options.HostName}, PubPort:{_options.PubPort}, UserName:{_options.UserName}, Password:{_options.Password}, ExchangeName:{_options.ExchangeName}'");
         }
 
-        PublisherSocket IConnectionChannelPool.Rent()
+        NetMQSocket IConnectionChannelPool.Rent()
         {
             lock (SLock)
             {
@@ -54,7 +61,7 @@ namespace DotNetCore.CAP.ZeroMQ
             }
         }
 
-        bool IConnectionChannelPool.Return(PublisherSocket connection)
+        bool IConnectionChannelPool.Return(NetMQSocket connection)
         {
             return Return(connection);
         }
@@ -78,20 +85,32 @@ namespace DotNetCore.CAP.ZeroMQ
         
 
     
-        public virtual PublisherSocket Rent()
+        public virtual NetMQSocket Rent()
         {
             if (_pool.TryDequeue(out var model))
             {
                 Interlocked.Decrement(ref _count);
 
                 Debug.Assert(_count >= 0);
-
                 return model;
             }
 
             try
             {
-                model = new PublisherSocket();
+
+
+
+                switch (_options.Pattern)
+                {
+                    case NetMQPattern.PushPull:
+                        model =new  PushSocket();
+                        break;
+                    case NetMQPattern.PubSub:
+                        model = new  PublisherSocket();
+                        break;
+                    default:
+                        break;
+                }
                 model.Connect(HostAddress);
             }
             catch (Exception e)
@@ -104,7 +123,7 @@ namespace DotNetCore.CAP.ZeroMQ
             return model;
         }
 
-        public virtual bool Return(PublisherSocket connection)
+        public virtual bool Return(NetMQSocket connection)
         {
             if (Interlocked.Increment(ref _count) <= _maxSize)
             {

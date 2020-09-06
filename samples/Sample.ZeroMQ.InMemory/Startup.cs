@@ -10,6 +10,7 @@ namespace Sample.ZeroMQ.InMemory
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddHostedService<ZeroMQService>();
+            
             services.AddCap(x =>
             {
                 x.UseInMemoryStorage();
@@ -18,6 +19,8 @@ namespace Sample.ZeroMQ.InMemory
                     cfg.HostName = "127.0.0.1";
                     cfg.SubPort = 5556;
                     cfg.PubPort = 5557;
+                    cfg.Pattern = DotNetCore.CAP.ZeroMQ.NetMQPattern.PushPull;
+
                 });
                 //x.UseRabbitMQ(cfg =>
                 //{

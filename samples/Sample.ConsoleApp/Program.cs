@@ -20,6 +20,8 @@ namespace Sample.ConsoleApp
                     cfg.HostName = "127.0.0.1";
                     cfg.SubPort = 5556;
                     cfg.PubPort = 5557;
+
+                    cfg.Pattern = DotNetCore.CAP.ZeroMQ.NetMQPattern.PubSub;
                 });
                 //x.UseRabbitMQ(cfg =>
                 //{
