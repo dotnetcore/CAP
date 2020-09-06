@@ -21,7 +21,7 @@ namespace Sample.ConsoleApp
                     cfg.SubPort = 5556;
                     cfg.PubPort = 5557;
 
-                    cfg.Pattern = DotNetCore.CAP.ZeroMQ.NetMQPattern.PubSub;
+                    cfg.Pattern = DotNetCore.CAP.NetMQPattern.PubSub;
                 });
                 //x.UseRabbitMQ(cfg =>
                 //{
