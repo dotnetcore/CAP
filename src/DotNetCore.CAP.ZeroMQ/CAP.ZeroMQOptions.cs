@@ -3,6 +3,7 @@
 
 // ReSharper disable once CheckNamespace
 
+using DotNetCore.CAP.ZeroMQ;
 using System;
 
 // ReSharper disable once CheckNamespace
@@ -61,6 +62,7 @@ namespace DotNetCore.CAP
         /// Topic exchange name when declare a topic exchange.
         /// </summary>
         public string ExchangeName { get; set; } = DefaultExchangeName;
+        public NetMQPattern Pattern { get;   set; }
 
         /// <summary>
         /// The port to connect on.

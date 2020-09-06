@@ -14,15 +14,22 @@ namespace Sample.ConsoleApp
             container.AddLogging(x => x.AddConsole());
             container.AddCap(x =>
             {
-                //console app does not support dashboard
-
-                x.UseMySql("Server=192.168.3.57;Port=3307;Database=captest;Uid=root;Pwd=123123;");
-                x.UseRabbitMQ(z =>
+                x.UseInMemoryStorage();
+                x.UseZeroMQ(cfg =>
                 {
-                    z.HostName = "192.168.3.57";
-                    z.UserName = "user";
-                    z.Password = "wJ0p5gSs17";
+                    cfg.HostName = "127.0.0.1";
+                    cfg.SubPort = 5556;
+                    cfg.PubPort = 5557;
+
+                    cfg.Pattern = DotNetCore.CAP.ZeroMQ.NetMQPattern.PubSub;
                 });
+                //x.UseRabbitMQ(cfg =>
+                //{
+                //    cfg.HostName = "172.17.124.92";
+                //    cfg.UserName = "guest";
+                //    cfg.Password = "guest";
+                //});
+                x.UseDashboard();
             });
 
             container.AddSingleton<EventSubscriber>();

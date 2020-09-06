@@ -18,13 +18,13 @@ namespace Sample.ZeroMQ.InMemory.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.aws.in-memory", DateTime.Now);
+            await _capBus.PublishAsync("sample.aws.in-memory", Guid.NewGuid());
 
             return Ok();
         }
 
-        [CapSubscribe("sample.aws.in-memory")]
-        public void SubscribeInMemoryTopic(DateTime value)
+        [CapSubscribe("sample.aws.in-memory", Group = "aaaa")]
+        public void SubscribeInMemoryTopic(Guid value)
         {
             Console.WriteLine("Subscriber output message: " + value);
         }

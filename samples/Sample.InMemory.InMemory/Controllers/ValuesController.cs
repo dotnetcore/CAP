@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
@@ -23,10 +24,16 @@ namespace Sample.AmazonSQS.InMemory.Controllers
             return Ok();
         }
 
-        [CapSubscribe("sample.aws.in-memory")]
+        [CapSubscribe("sample.aws.in-memory",Group ="aaa")]
         public void SubscribeInMemoryTopic(DateTime value)
         {
             Console.WriteLine("Subscriber output message: " + value);
+            Thread.Sleep(TimeSpan.FromSeconds(50));
+        }
+        [CapSubscribe("sample.aws.in-memory", Group = "aaa")]
+        public void SubscribeInMemoryTopic2(DateTime value)
+        {
+            Console.WriteLine("Subscriber2 output message: " + value);
         }
     }
 }

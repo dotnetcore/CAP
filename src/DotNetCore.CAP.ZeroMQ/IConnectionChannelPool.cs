@@ -13,8 +13,8 @@ namespace DotNetCore.CAP.ZeroMQ
         string Exchange { get; }
 
 
-        PublisherSocket Rent();
+        NetMQSocket Rent();
 
-        bool Return(PublisherSocket context);
+        bool Return(NetMQSocket context);
     }
 }

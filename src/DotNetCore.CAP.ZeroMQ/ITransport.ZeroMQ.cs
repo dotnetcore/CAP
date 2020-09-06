@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.ZeroMQ
 
         public Task<OperateResult> SendAsync(TransportMessage message)
         {
-            PublisherSocket channel = null;
+            NetMQSocket channel = null;
             try
             {
                 channel = _connectionChannelPool.Rent();
@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.ZeroMQ
             }
             catch (Exception ex)
             {
-                var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
+                var wrapperEx = new  PublisherSentFailedException(ex.Message, ex);
                 var errors = new OperateError
                 {
                     Code = ex.HResult.ToString(),

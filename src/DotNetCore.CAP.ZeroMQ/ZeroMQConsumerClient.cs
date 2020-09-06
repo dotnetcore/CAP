@@ -23,9 +23,7 @@ namespace DotNetCore.CAP.ZeroMQ
         private readonly string _exchangeName;
         private readonly string _queueName;
         private readonly ZeroMQOptions _ZeroMQOptions;
-    
-
-        private SubscriberSocket _sub;
+        private NetMQSocket _sub;
 
         public ZeroMQConsumerClient(string queueName,
             IConnectionChannelPool connectionChannelPool,
@@ -36,6 +34,7 @@ namespace DotNetCore.CAP.ZeroMQ
             _ZeroMQOptions = options.Value;
             _exchangeName = connectionChannelPool.Exchange;
             HostAddress = $"tcp://{_ZeroMQOptions.HostName}:{_ZeroMQOptions.SubPort}";
+
         }
 
         public event EventHandler<TransportMessage> OnMessageReceived;
@@ -53,9 +52,12 @@ namespace DotNetCore.CAP.ZeroMQ
                 throw new ArgumentNullException(nameof(topics));
             }
             Connect();
-            foreach (var topic in topics)
+            if (_ZeroMQOptions.Pattern== NetMQPattern.PubSub)
             {
-                _sub.Subscribe(topic);
+                foreach (var topic in topics)
+                {
+                    ((SubscriberSocket)_sub).Subscribe(topic);
+                }
             }
         }
 
@@ -115,8 +117,17 @@ namespace DotNetCore.CAP.ZeroMQ
             {
                 if (_sub == null)
                 {
-
-                    _sub = new SubscriberSocket();
+                    switch (_ZeroMQOptions.Pattern)
+                    {
+                        case NetMQPattern.PushPull:
+                            _sub  =new PullSocket();
+                            break;
+                        case NetMQPattern.PubSub:
+                            _sub = new SubscriberSocket();
+                            break;
+                        default:
+                            break;
+                    }
                     _sub.Connect(HostAddress);
                 }
             }

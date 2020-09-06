@@ -13,16 +13,16 @@ namespace Sample.ZeroMQ.InMemory
 
     public class ZeroMQService : BackgroundService
     {
-        private readonly XSubscriberSocket xsubSocket;
-        private readonly XPublisherSocket xpubSocket;
+        private readonly PullSocket xsubSocket;
+        private readonly PushSocket xpubSocket;
 
         private readonly ILogger _logger;
 
         public ZeroMQService(ILogger<ZeroMQService> logger)
         {
             _logger = logger;
-            this.xsubSocket = new XSubscriberSocket();
-            this.xpubSocket = new XPublisherSocket();
+            this.xsubSocket = new PullSocket();
+            this.xpubSocket = new PushSocket();
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
