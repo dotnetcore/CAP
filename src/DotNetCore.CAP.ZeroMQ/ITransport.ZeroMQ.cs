@@ -1,16 +1,14 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using NetMQ;
-using NetMQ.Sockets;
-
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.ZeroMQ
 {
@@ -47,7 +45,7 @@ namespace DotNetCore.CAP.ZeroMQ
             }
             catch (Exception ex)
             {
-                var wrapperEx = new  PublisherSentFailedException(ex.Message, ex);
+                var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
                 var errors = new OperateError
                 {
                     Code = ex.HResult.ToString(),

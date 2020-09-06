@@ -1,17 +1,14 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
-
-using Headers = DotNetCore.CAP.Messages.Headers;
+using System;
+using System.Collections.Generic;
+using System.Threading;
 
 namespace DotNetCore.CAP.ZeroMQ
 {
@@ -34,7 +31,6 @@ namespace DotNetCore.CAP.ZeroMQ
             _ZeroMQOptions = options.Value;
             _exchangeName = connectionChannelPool.Exchange;
             HostAddress = $"tcp://{_ZeroMQOptions.HostName}:{_ZeroMQOptions.SubPort}";
-
         }
 
         public event EventHandler<TransportMessage> OnMessageReceived;
@@ -52,7 +48,7 @@ namespace DotNetCore.CAP.ZeroMQ
                 throw new ArgumentNullException(nameof(topics));
             }
             Connect();
-            if (_ZeroMQOptions.Pattern== NetMQPattern.PubSub)
+            if (_ZeroMQOptions.Pattern == NetMQPattern.PubSub)
             {
                 foreach (var topic in topics)
                 {
@@ -64,7 +60,6 @@ namespace DotNetCore.CAP.ZeroMQ
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             Connect();
-
             while (true)
             {
                 string topic = string.Empty;
@@ -86,23 +81,18 @@ namespace DotNetCore.CAP.ZeroMQ
                 cancellationToken.ThrowIfCancellationRequested();
                 cancellationToken.WaitHandle.WaitOne(timeout);
             }
-
-            // ReSharper disable once FunctionNeverReturns
         }
 
         public void Commit(object sender)
         {
-             
         }
 
         public void Reject(object sender)
         {
-         
         }
 
         public void Dispose()
         {
- 
             _sub?.Dispose();
         }
 
@@ -120,11 +110,13 @@ namespace DotNetCore.CAP.ZeroMQ
                     switch (_ZeroMQOptions.Pattern)
                     {
                         case NetMQPattern.PushPull:
-                            _sub  =new PullSocket();
+                            _sub = new PullSocket();
                             break;
+
                         case NetMQPattern.PubSub:
                             _sub = new SubscriberSocket();
                             break;
+
                         default:
                             break;
                     }
@@ -140,12 +132,5 @@ namespace DotNetCore.CAP.ZeroMQ
                 _connectionLock.Release();
             }
         }
-
-        #region events
- 
-
-       
-
-        #endregion
     }
 }

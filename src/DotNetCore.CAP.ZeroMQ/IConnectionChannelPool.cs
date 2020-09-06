@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using NetMQ;
-using NetMQ.Sockets;
 
 namespace DotNetCore.CAP.ZeroMQ
 {
@@ -11,7 +10,6 @@ namespace DotNetCore.CAP.ZeroMQ
         string HostAddress { get; }
 
         string Exchange { get; }
-
 
         NetMQSocket Rent();
 
