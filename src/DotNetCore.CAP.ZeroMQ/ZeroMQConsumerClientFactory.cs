@@ -21,9 +21,9 @@ namespace DotNetCore.CAP.ZeroMQ
         {
             try
             {
-               var client = new ZeroMQConsumerClient(groupId, _connectionChannelPool, _ZeroMQOptions);
-               client.Connect();
-               return client;
+                var client = new ZeroMQConsumerClient(groupId, _connectionChannelPool, _ZeroMQOptions);
+                client.Connect();
+                return client;
             }
             catch (System.Exception e)
             {

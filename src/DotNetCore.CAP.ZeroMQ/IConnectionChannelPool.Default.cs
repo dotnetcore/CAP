@@ -1,24 +1,23 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Reflection;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NetMQ;
 using NetMQ.Sockets;
+using System;
+using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Threading;
 
 namespace DotNetCore.CAP.ZeroMQ
 {
-    
     public enum NetMQPattern
     {
         PushPull,
         PubSub
     }
+
     public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     {
         private const int DefaultPoolSize = 15;
@@ -39,9 +38,7 @@ namespace DotNetCore.CAP.ZeroMQ
             _pool = new ConcurrentQueue<NetMQSocket>();
 
             var capOptions = capOptionsAccessor.Value;
-              _options = optionsAccessor.Value;
-
-
+            _options = optionsAccessor.Value;
 
             HostAddress = $"tcp://{_options.HostName}:{_options.PubPort}";
             Exchange = "v1" == capOptions.Version ? _options.ExchangeName : $"{_options.ExchangeName}.{capOptions.Version}";
@@ -70,9 +67,7 @@ namespace DotNetCore.CAP.ZeroMQ
 
         public string Exchange { get; }
 
-      
-
-        public    void Dispose()
+        public void Dispose()
         {
             _maxSize = 0;
 
@@ -82,9 +77,6 @@ namespace DotNetCore.CAP.ZeroMQ
             }
         }
 
-        
-
-    
         public virtual NetMQSocket Rent()
         {
             if (_pool.TryDequeue(out var model))
@@ -97,17 +89,16 @@ namespace DotNetCore.CAP.ZeroMQ
 
             try
             {
-
-
-
                 switch (_options.Pattern)
                 {
                     case NetMQPattern.PushPull:
-                        model =new  PushSocket();
+                        model = new PushSocket();
                         break;
+
                     case NetMQPattern.PubSub:
-                        model = new  PublisherSocket();
+                        model = new PublisherSocket();
                         break;
+
                     default:
                         break;
                 }
