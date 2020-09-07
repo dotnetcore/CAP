@@ -42,3 +42,5 @@ Properties
 .vscode/*
 samples/Sample.RabbitMQ.MongoDB/appsettings.Development.json
 site/
+/samples/Sample.LiteDB.InMemory/Sample.LiteDB.InMemory.db
+/samples/Sample.LiteDB.InMemory/Sample.LiteDB.InMemory-log.db

@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Sample.LiteDB.InMemory-log.db" />
+    <None Remove="Sample.LiteDB.InMemory.db" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Savorboard.CAP.InMemoryMessageQueue" Version="3.0.0" />
+  </ItemGroup>
+   
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard\DotNetCore.CAP.Dashboard.csproj" />
+    <ProjectReference Include="..\..\src\DotNetCore.CAP.InMemoryStorage\DotNetCore.CAP.InMemoryStorage.csproj" />
+    <ProjectReference Include="..\..\src\DotNetCore.CAP.LiteDB\DotNetCore.CAP.LiteDB.csproj" />
+    <ProjectReference Include="..\..\src\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+  </ItemGroup> 
+
+</Project>

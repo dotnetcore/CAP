@@ -16,5 +16,7 @@ namespace DotNetCore.CAP.Persistence
         public DateTime? ExpiresAt { get; set; }
 
         public int Retries { get; set; }
+
+      
     }
 }
