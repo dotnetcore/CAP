@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Sample.AmazonSQS.InMemory
+namespace Sample.LiteDB.InMemory
 {
     public class Program
     {

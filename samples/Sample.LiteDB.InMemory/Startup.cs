@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Savorboard.CAP.InMemoryMessageQueue;
 
-namespace Sample.AmazonSQS.InMemory
+namespace Sample.LiteDB.InMemory
 {
     public class Startup
     {

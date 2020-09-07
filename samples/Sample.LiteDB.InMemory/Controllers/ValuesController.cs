@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Sample.AmazonSQS.InMemory.Controllers
+namespace Sample.LiteDB.InMemory.Controllers
 {
     [Route("api/[controller]")]
     public class ValuesController : Controller, ICapSubscribe
