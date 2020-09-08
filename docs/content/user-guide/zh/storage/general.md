@@ -70,4 +70,6 @@ CallbackName |	回调的订阅者名称 | string
 
 * SQLite ([@colinin](https://github.com/colinin)) ： https://github.com/colinin/DotNetCore.CAP.Sqlite   
 
+* LiteDB  ([@maikebing](https://github.com/maikebing)) https://github.com/maikebing/CAP.Extensions/tree/master/src/DotNetCore.CAP.LiteDB
+
 * SQLite & Oracle ([@cocosip](https://github.com/cocosip)) ： https://github.com/cocosip/CAP-Extensions   
