@@ -27,3 +27,10 @@ CAP 支持以下几种运输方式：
 
 >`Kafka` vs `RabbitMQ` :   
 > https://stackoverflow.com/questions/42151544/is-there-any-reason-to-use-rabbitmq-over-kafka
+
+## 社区支持的运输器
+
+感谢社区对CAP的支持，以下是社区支持的运输器实现
+
+* ZeroMQ  ([@maikebing](https://github.com/maikebing)) https://github.com/maikebing/CAP.Extensions/tree/master/src/DotNetCore.CAP.ZeroMQ
+
