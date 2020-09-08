@@ -69,3 +69,12 @@ CallbackName |	回调的订阅者名称 | string
 感谢社区对CAP的支持，以下是社区支持的持久化的实现
 
 * SQLite ([@colinin](https://github.com/colinin)) ： https://github.com/colinin/DotNetCore.CAP.Sqlite   
+* LiteDB  ([@maikebing](https://github.com/maikebing)) https://github.com/maikebing/CAP.Extensions/tree/master/src/DotNetCore.CAP.LiteDB
+
+
+## 社区支持的消息队列
+
+感谢社区对CAP的支持，以下是社区支持的消息队列实现
+
+* ZeroMQ  ([@maikebing](https://github.com/maikebing)) https://github.com/maikebing/CAP.Extensions/tree/master/src/DotNetCore.CAP.ZeroMQ
+
