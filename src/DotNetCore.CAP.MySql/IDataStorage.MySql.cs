@@ -22,19 +22,22 @@ namespace DotNetCore.CAP.MySql
         private readonly IOptions<MySqlOptions> _options;
         private readonly IOptions<CapOptions> _capOptions;
         private readonly IStorageInitializer _initializer;
+        private readonly ISerializer _serializer;
         private readonly string _pubName;
         private readonly string _recName;
 
         public MySqlDataStorage(
             IOptions<MySqlOptions> options,
             IOptions<CapOptions> capOptions,
-            IStorageInitializer initializer)
+            IStorageInitializer initializer,
+            ISerializer serializer)
         {
             _options = options;
             _capOptions = capOptions;
             _initializer = initializer;
+            _serializer = serializer;
             _pubName = initializer.GetPublishedTableName();
-            _recName = initializer.GetReceivedTableName();
+            _recName = initializer.GetReceivedTableName();            
         }
 
         public async Task ChangePublishStateAsync(MediumMessage message, StatusName state) =>
@@ -52,7 +55,7 @@ namespace DotNetCore.CAP.MySql
             {
                 DbId = content.GetId(),
                 Origin = content,
-                Content = StringSerializer.Serialize(content),
+                Content = _serializer.Serialize(content),
                 Added = DateTime.Now,
                 ExpiresAt = null,
                 Retries = 0
@@ -122,7 +125,7 @@ namespace DotNetCore.CAP.MySql
                 new MySqlParameter("@Id", mdMessage.DbId),
                 new MySqlParameter("@Name", name),
                 new MySqlParameter("@Group", group),
-                new MySqlParameter("@Content", StringSerializer.Serialize(mdMessage.Origin)),
+                new MySqlParameter("@Content", _serializer.Serialize(mdMessage.Origin)),
                 new MySqlParameter("@Retries", mdMessage.Retries),
                 new MySqlParameter("@Added", mdMessage.Added),
                 new MySqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
@@ -194,7 +197,7 @@ namespace DotNetCore.CAP.MySql
                     messages.Add(new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
-                        Origin = StringSerializer.DeSerialize(reader.GetString(1)),
+                        Origin = _serializer.Deserialize(reader.GetString(1)),
                         Retries = reader.GetInt32(2),
                         Added = reader.GetDateTime(3)
                     });

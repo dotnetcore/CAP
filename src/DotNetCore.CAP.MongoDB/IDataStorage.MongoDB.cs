@@ -11,7 +11,6 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -23,16 +22,19 @@ namespace DotNetCore.CAP.MongoDB
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
         private readonly IOptions<MongoDBOptions> _options;
+        private readonly ISerializer _serializer;
 
         public MongoDBDataStorage(
             IOptions<CapOptions> capOptions,
             IOptions<MongoDBOptions> options,
-            IMongoClient client)
+            IMongoClient client,
+            ISerializer serializer)
         {
             _capOptions = capOptions;
             _options = options;
             _client = client;
             _database = _client.GetDatabase(_options.Value.DatabaseName);
+            _serializer = serializer;
         }
 
         public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)
@@ -67,7 +69,7 @@ namespace DotNetCore.CAP.MongoDB
             {
                 DbId = content.GetId(),
                 Origin = content,
-                Content = StringSerializer.Serialize(content),
+                Content = _serializer.Serialize(content),
                 Added = DateTime.Now,
                 ExpiresAt = null,
                 Retries = 0
@@ -130,7 +132,7 @@ namespace DotNetCore.CAP.MongoDB
                 ExpiresAt = null,
                 Retries = 0
             };
-            var content = StringSerializer.Serialize(mdMessage.Origin);
+            var content = _serializer.Serialize(mdMessage.Origin);
 
             var collection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
 
@@ -184,7 +186,7 @@ namespace DotNetCore.CAP.MongoDB
             return queryResult.Select(x => new MediumMessage
             {
                 DbId = x.Id.ToString(),
-                Origin = StringSerializer.DeSerialize(x.Content),
+                Origin = _serializer.Deserialize(x.Content),
                 Retries = x.Retries,
                 Added = x.Added
             }).ToList();
@@ -205,7 +207,7 @@ namespace DotNetCore.CAP.MongoDB
             return queryResult.Select(x => new MediumMessage
             {
                 DbId = x.Id.ToString(),
-                Origin = StringSerializer.DeSerialize(x.Content),
+                Origin = _serializer.Deserialize(x.Content),
                 Retries = x.Retries,
                 Added = x.Added
             }).ToList();
