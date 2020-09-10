@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.MySql
             _initializer = initializer;
             _serializer = serializer;
             _pubName = initializer.GetPublishedTableName();
-            _recName = initializer.GetReceivedTableName();            
+            _recName = initializer.GetReceivedTableName();
         }
 
         public async Task ChangePublishStateAsync(MediumMessage message, StatusName state) =>
