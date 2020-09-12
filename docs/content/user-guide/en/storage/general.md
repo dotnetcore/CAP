@@ -68,3 +68,14 @@ Content |	Message content |	string
 CallbackName |	Consumer callback topic name | string
 
 The `Id` field is generate using the mongo [objectid algorithm](https://www.mongodb.com/blog/post/generating-globally-unique-identifiers-for-use-with-mongodb).
+
+
+## Community-supported extensions
+
+Thanks to the community for supporting CAP, the following is the implementation of community-supported storage
+
+* SQLite ([@colinin](https://github.com/colinin)) ：https://github.com/colinin/DotNetCore.CAP.Sqlite   
+
+* LiteDB ([@maikebing](https://github.com/maikebing)) ：https://github.com/maikebing/CAP.Extensions
+
+* SQLite & Oracle ([@cocosip](https://github.com/cocosip)) ：https://github.com/cocosip/CAP-Extensions   
