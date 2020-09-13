@@ -22,17 +22,20 @@ namespace DotNetCore.CAP.PostgreSql
         private readonly IOptions<CapOptions> _capOptions;
         private readonly IStorageInitializer _initializer;
         private readonly IOptions<PostgreSqlOptions> _options;
+        private readonly ISerializer _serializer;
         private readonly string _pubName;
         private readonly string _recName;
 
         public PostgreSqlDataStorage(
             IOptions<PostgreSqlOptions> options,
             IOptions<CapOptions> capOptions,
-            IStorageInitializer initializer)
+            IStorageInitializer initializer,
+            ISerializer serializer)
         {
             _capOptions = capOptions;
             _initializer = initializer;
             _options = options;
+            _serializer = serializer;
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
         }
@@ -53,7 +56,7 @@ namespace DotNetCore.CAP.PostgreSql
             {
                 DbId = content.GetId(),
                 Origin = content,
-                Content = StringSerializer.Serialize(content),
+                Content = _serializer.Serialize(content),
                 Added = DateTime.Now,
                 ExpiresAt = null,
                 Retries = 0
@@ -121,7 +124,7 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@Id", long.Parse(mdMessage.DbId)),
                 new NpgsqlParameter("@Name", name),
                 new NpgsqlParameter("@Group", group),
-                new NpgsqlParameter("@Content", StringSerializer.Serialize(mdMessage.Origin)),
+                new NpgsqlParameter("@Content", _serializer.Serialize(mdMessage.Origin)),
                 new NpgsqlParameter("@Retries", mdMessage.Retries),
                 new NpgsqlParameter("@Added", mdMessage.Added),
                 new NpgsqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
@@ -199,7 +202,7 @@ namespace DotNetCore.CAP.PostgreSql
                     messages.Add(new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
-                        Origin = StringSerializer.DeSerialize(reader.GetString(1)),
+                        Origin = _serializer.Deserialize(reader.GetString(1)),
                         Retries = reader.GetInt32(2),
                         Added = reader.GetDateTime(3)
                     });

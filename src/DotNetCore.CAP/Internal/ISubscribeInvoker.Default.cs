@@ -8,10 +8,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -19,11 +19,13 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ISerializer _serializer;
         private readonly ConcurrentDictionary<int, ObjectMethodExecutor> _executors;
 
-        public SubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
+        public SubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, ISerializer serializer)
         {
             _serviceProvider = serviceProvider;
+            _serializer = serializer;
             _logger = loggerFactory.CreateLogger<SubscribeInvoker>();
             _executors = new ConcurrentDictionary<int, ObjectMethodExecutor>();
         }
@@ -57,9 +59,9 @@ namespace DotNetCore.CAP.Internal
                 {
                     if (message.Value != null)
                     {
-                        if (message.Value is JToken jToken)  //reading from storage
+                        if (_serializer.IsJsonType(message.Value))  // use ISerializer when reading from storage, skip other objects if not Json
                         {
-                            executeParameters[i] = jToken.ToObject(parameterDescriptors[i].ParameterType);
+                            executeParameters[i] = _serializer.Deserialize(message.Value, parameterDescriptors[i].ParameterType);
                         }
                         else
                         {

@@ -195,7 +195,7 @@ namespace DotNetCore.CAP.Internal
 
                     if (message.HasException())
                     {
-                        var content = StringSerializer.Serialize(message);
+                        var content = _serializer.Serialize(message);
 
                         _storage.StoreReceivedExceptionMessage(name, group, content);
 
