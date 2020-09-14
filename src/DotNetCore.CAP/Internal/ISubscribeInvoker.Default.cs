@@ -20,14 +20,14 @@ namespace DotNetCore.CAP.Internal
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly ISerializer _serializer;
-        private readonly ConcurrentDictionary<int, ObjectMethodExecutor> _executors;
+        private readonly ConcurrentDictionary<string, ObjectMethodExecutor> _executors;
 
         public SubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, ISerializer serializer)
         {
             _serviceProvider = serviceProvider;
             _serializer = serializer;
             _logger = loggerFactory.CreateLogger<SubscribeInvoker>();
-            _executors = new ConcurrentDictionary<int, ObjectMethodExecutor>();
+            _executors = new ConcurrentDictionary<string, ObjectMethodExecutor>();
         }
 
         public async Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context, CancellationToken cancellationToken = default)
@@ -38,7 +38,8 @@ namespace DotNetCore.CAP.Internal
 
             _logger.LogDebug("Executing subscriber method : {0}", methodInfo.Name);
 
-            var executor = _executors.GetOrAdd(methodInfo.MetadataToken, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
+            var key = $"{methodInfo.Module.Name}_{methodInfo.MetadataToken}";
+            var executor = _executors.GetOrAdd(key, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
             using var scope = _serviceProvider.CreateScope();
 
