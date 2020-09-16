@@ -73,7 +73,14 @@ namespace DotNetCore.CAP.Internal
                             }
                             else
                             {
-                                executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
+                                if (parameterDescriptors[i].ParameterType.IsInstanceOfType(message.Value))
+                                {
+                                    executeParameters[i] = message.Value;
+                                }
+                                else
+                                {
+                                    executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
+                                }
                             }
                         }
                     }
