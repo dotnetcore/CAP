@@ -42,6 +42,9 @@ namespace DotNetCore.CAP.Processor
 
             var storage = context.Provider.GetRequiredService<IDataStorage>();
 
+            var leaderElectionService = context.Provider.GetRequiredService<ILeaderElectionService>();
+            if (!leaderElectionService.IsLeader()) return;
+
             await Task.WhenAll(ProcessPublishedAsync(storage, context), ProcessReceivedAsync(storage, context));
 
             await context.WaitAsync(_waitingInterval);

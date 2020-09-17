@@ -62,6 +62,9 @@ namespace Microsoft.Extensions.DependencyInjection
             // Warning: IPublishMessageSender need to inject at extension project. 
             services.TryAddSingleton<ISubscribeDispatcher, SubscribeDispatcher>();
 
+            // Leader election service
+            services.TryAddSingleton<ILeaderElectionService, LeaderElectionService>();
+
             //Options and extension service
             var options = new CapOptions();
             setupAction(options);
