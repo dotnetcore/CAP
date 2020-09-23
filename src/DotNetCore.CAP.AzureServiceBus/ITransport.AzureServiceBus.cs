@@ -42,7 +42,8 @@ namespace DotNetCore.CAP.AzureServiceBus
                 {
                     MessageId = transportMessage.GetId(),
                     Body = transportMessage.Body,
-                    Label = transportMessage.GetName()
+                    Label = transportMessage.GetName(),
+                    CorrelationId = transportMessage.GetCorrelationId()
                 };
 
                 foreach (var header in transportMessage.Headers)
