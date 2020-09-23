@@ -81,7 +81,6 @@ nav:
       - CAP:
           - Configuration: user-guide/en/cap/configuration.md
           - Messaging: user-guide/en/cap/messaging.md
-          - Sagas: user-guide/en/cap/sagas.md
           - Serialization: user-guide/en/cap/serialization.md
           - Transactions: user-guide/en/cap/transactions.md
           - Idempotence: user-guide/en/cap/idempotence.md
@@ -115,7 +114,6 @@ nav:
       - CAP:
           - 配置: user-guide/zh/cap/configuration.md
           - 消息: user-guide/zh/cap/messaging.md
-          - Sagas: user-guide/zh/cap/sagas.md
           - 序列化: user-guide/zh/cap/serialization.md
           - 运输: user-guide/zh/cap/transactions.md
           - 幂等性: user-guide/zh/cap/idempotence.md          
