@@ -43,5 +43,10 @@ namespace DotNetCore.CAP.Messages
         {
             return Headers.TryGetValue(Messages.Headers.Group, out var value) ? value : null;
         }
+        
+        public string GetCorrelationId()
+        {
+            return Headers.TryGetValue(Messages.Headers.CorrelationId, out var value) ? value : null;
+        }
     }
 }
