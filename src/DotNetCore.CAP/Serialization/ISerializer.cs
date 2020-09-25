@@ -11,24 +11,24 @@ namespace DotNetCore.CAP.Serialization
     public interface ISerializer
     {
         /// <summary>
-        /// Serializes the given <see cref="Message"/> into a <see cref="TransportMessage"/>
-        /// </summary>
-        Task<TransportMessage> SerializeAsync(Message message);
-
-        /// <summary>
-        /// Deserialize the given <see cref="TransportMessage"/> back into a <see cref="Message"/>
-        /// </summary>
-        Task<Message> DeserializeAsync(TransportMessage transportMessage, [CanBeNull] Type valueType);
-        
-        /// <summary>
         /// Serializes the given <see cref="Message"/> into a string
         /// </summary>
         string Serialize(Message message);
 
         /// <summary>
+        /// Serializes the given <see cref="Message"/> into a <see cref="TransportMessage"/>
+        /// </summary>
+        Task<TransportMessage> SerializeAsync(Message message);
+
+        /// <summary>
         /// Deserialize the given string into a <see cref="Message"/>
         /// </summary>
         Message Deserialize(string json);
+
+        /// <summary>
+        /// Deserialize the given <see cref="TransportMessage"/> back into a <see cref="Message"/>
+        /// </summary>
+        Task<Message> DeserializeAsync(TransportMessage transportMessage, [CanBeNull] Type valueType);
 
         /// <summary>
         /// Deserialize the given object with the given Type into an object
@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.Serialization
         /// <example>
         /// <code>
         /// // Example implementation for System.Text.Json
-        ///  public bool IsJsonType(object jsonObject)
+        /// public bool IsJsonType(object jsonObject)
         /// {
         ///    return jsonObject is JsonElement;
         /// }
