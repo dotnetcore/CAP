@@ -70,17 +70,14 @@ namespace DotNetCore.CAP.Messages
 
         public static void AddOrUpdateException(this Message message, Exception ex)
         {
-            var msg = $"{ex.GetType().Name}-->{ex}";
+            var msg = $"{ex.GetType().Name}-->{ex.Message}";
 
             message.Headers[Headers.Exception] = msg;
         }
 
         public static void RemoveException(this Message message)
         {
-            if (message.Headers.ContainsKey(Headers.Exception))
-            {
-                message.Headers.Remove(Headers.Exception);
-            }
+            message.Headers.Remove(Headers.Exception);
         }
     }
 }
