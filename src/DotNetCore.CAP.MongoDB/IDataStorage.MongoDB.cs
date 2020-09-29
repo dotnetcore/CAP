@@ -42,6 +42,7 @@ namespace DotNetCore.CAP.MongoDB
             var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
 
             var updateDef = Builders<PublishedMessage>.Update
+                .Set(x => x.Content, _serializer.Serialize(message.Origin))
                 .Set(x => x.Retries, message.Retries)
                 .Set(x => x.ExpiresAt, message.ExpiresAt)
                 .Set(x => x.StatusName, state.ToString("G"));
@@ -54,6 +55,7 @@ namespace DotNetCore.CAP.MongoDB
             var collection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
 
             var updateDef = Builders<ReceivedMessage>.Update
+                .Set(x => x.Content, _serializer.Serialize(message.Origin))
                 .Set(x => x.Retries, message.Retries)
                 .Set(x => x.ExpiresAt, message.ExpiresAt)
                 .Set(x => x.StatusName, state.ToString("G"));

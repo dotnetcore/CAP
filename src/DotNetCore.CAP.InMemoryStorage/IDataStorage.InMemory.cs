@@ -35,6 +35,7 @@ namespace DotNetCore.CAP.InMemoryStorage
         {
             PublishedMessages[message.DbId].StatusName = state;
             PublishedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
+            PublishedMessages[message.DbId].Content = _serializer.Serialize(message.Origin);
             return Task.CompletedTask;
         }
 
@@ -42,6 +43,7 @@ namespace DotNetCore.CAP.InMemoryStorage
         {
             ReceivedMessages[message.DbId].StatusName = state;
             ReceivedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
+            ReceivedMessages[message.DbId].Content = _serializer.Serialize(message.Origin);
             return Task.CompletedTask;
         }
 

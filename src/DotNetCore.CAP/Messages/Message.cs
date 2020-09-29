@@ -13,7 +13,7 @@ namespace DotNetCore.CAP.Messages
         /// System.Text.Json requires that class explicitly has a parameterless constructor
         /// and public properties have a setter.
         /// </summary>
-        public Message() {}
+        public Message() { }
 
         public Message(IDictionary<string, string> headers, [CanBeNull] object value)
         {
@@ -67,6 +67,17 @@ namespace DotNetCore.CAP.Messages
         {
             return message.Headers.ContainsKey(Headers.Exception);
         }
-    }
 
+        public static void AddOrUpdateException(this Message message, Exception ex)
+        {
+            var msg = $"{ex.GetType().Name}-->{ex.Message}";
+
+            message.Headers[Headers.Exception] = msg;
+        }
+
+        public static void RemoveException(this Message message)
+        {
+            message.Headers.Remove(Headers.Exception);
+        }
+    }
 }

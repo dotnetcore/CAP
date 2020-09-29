@@ -158,11 +158,12 @@ namespace DotNetCore.CAP.MySql
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE `{tableName}` SET `Retries` = @Retries,`ExpiresAt` = @ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+                $"UPDATE `{tableName}` SET `Content`=@Content,`Retries`=@Retries,`ExpiresAt`=@ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
 
             object[] sqlParams =
             {
                 new MySqlParameter("@Id", message.DbId),
+                new MySqlParameter("@Content", _serializer.Serialize(message.Origin)),
                 new MySqlParameter("@Retries", message.Retries),
                 new MySqlParameter("@ExpiresAt", message.ExpiresAt),
                 new MySqlParameter("@StatusName", state.ToString("G"))
