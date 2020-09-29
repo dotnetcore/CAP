@@ -159,11 +159,12 @@ namespace DotNetCore.CAP.SqlServer
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE {tableName} SET Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
+                $"UPDATE {tableName} SET Content=@Content, Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
 
             object[] sqlParams =
             {
                 new SqlParameter("@Id", message.DbId),
+                new SqlParameter("@Content", _serializer.Serialize(message.Origin)),
                 new SqlParameter("@Retries", message.Retries),
                 new SqlParameter("@ExpiresAt", message.ExpiresAt),
                 new SqlParameter("@StatusName", state.ToString("G"))

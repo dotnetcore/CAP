@@ -160,11 +160,12 @@ namespace DotNetCore.CAP.PostgreSql
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE {tableName} SET \"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
+                $"UPDATE {tableName} SET \"Content\"=@Content,\"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
 
             object[] sqlParams =
             {
                 new NpgsqlParameter("@Id", long.Parse(message.DbId)),
+                new NpgsqlParameter("@Content", _serializer.Serialize(message.Origin)),
                 new NpgsqlParameter("@Retries", message.Retries),
                 new NpgsqlParameter("@ExpiresAt", message.ExpiresAt),
                 new NpgsqlParameter("@StatusName", state.ToString("G"))
