@@ -34,3 +34,4 @@ CAP 支持以下几种运输方式：
 
 * ZeroMQ  ([@maikebing](https://github.com/maikebing)) https://github.com/maikebing/CAP.Extensions/tree/master/src/DotNetCore.CAP.ZeroMQ
 
+* RedisMQ  ([@木木](https://github.com/difudotnet)) https://github.com/difudotnet/CAP.RedisMQ.Extensions
