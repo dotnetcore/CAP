@@ -32,12 +32,13 @@ CAP can be installed in your project with the following command.
 PM> Install-Package DotNetCore.CAP
 ```
 
-CAP supports RabbitMQ, Kafka and AzureService as message queue, following packages are available to install:
+CAP supports RabbitMQ, Kafka, AzureService, AmazonSQS as message queue, following packages are available to install:
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 PM> Install-Package DotNetCore.CAP.AzureServiceBus
+PM> Install-Package DotNetCore.CAP.AmazonSQS
 ```
 
 CAP supports SqlServer, MySql, PostgreSql，MongoDB as event log storage.
@@ -80,6 +81,7 @@ public void ConfigureServices(IServiceCollection services)
         x.UseRabbitMQ("ConnectionString");
         x.UseKafka("ConnectionString");
         x.UseAzureServiceBus("ConnectionString");
+        x.UseAmazonSQS();
     });
 }
 
