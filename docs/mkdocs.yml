@@ -115,7 +115,7 @@ nav:
           - 配置: user-guide/zh/cap/configuration.md
           - 消息: user-guide/zh/cap/messaging.md
           - 序列化: user-guide/zh/cap/serialization.md
-          - 运输: user-guide/zh/cap/transactions.md
+          - 事务: user-guide/zh/cap/transactions.md
           - 幂等性: user-guide/zh/cap/idempotence.md          
       - 传输:
           - 简介: user-guide/zh/transport/general.md
