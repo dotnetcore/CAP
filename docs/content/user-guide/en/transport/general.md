@@ -32,5 +32,11 @@ CAP supports several transport methods:
 
 Thanks to the community for supporting CAP, the following is the implementation of community-supported transport
 
+* ActiveMQ (@[Lukas Zhang](https://github.com/lukazh/Lukaz.CAP.ActiveMQ)): https://github.com/lukazh
+
+* RedisMQ  ([@木木](https://github.com/difudotnet)) https://github.com/difudotnet/CAP.RedisMQ.Extensions
+
 * ZeroMQ ([@maikebing](https://github.com/maikebing))： https://github.com/maikebing/CAP.Extensions
+
+
 
