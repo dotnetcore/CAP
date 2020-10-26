@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MongoDB.Bson" Version="2.11.0" />
-    <PackageReference Include="MongoDB.Driver" Version="2.11.0" />
+    <PackageReference Include="MongoDB.Bson" Version="2.11.3" />
+    <PackageReference Include="MongoDB.Driver" Version="2.11.3" />
   </ItemGroup>
 
 </Project>
