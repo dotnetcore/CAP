@@ -5,11 +5,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
-using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Google.Cloud.PubSub.V1;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.GooglePubSub
 {
@@ -17,12 +17,14 @@ namespace DotNetCore.CAP.GooglePubSub
     {
         private readonly ILogger _logger;
         private readonly string _subscriptionName;
+        private readonly GooglePubSubOptions _googlePubSubOptions;
         private SubscriberServiceApiClient _subscriberClient;
 
-        public GooglePubSubConsumerClient(ILogger logger, string subscriptionName)
+        public GooglePubSubConsumerClient(ILogger logger, string subscriptionName, IOptions<GooglePubSubOptions> options)
         {
             _logger = logger;
             _subscriptionName = subscriptionName;
+            _googlePubSubOptions = options.Value;
         }
 
         public event EventHandler<TransportMessage> OnMessageReceived;
@@ -44,7 +46,7 @@ namespace DotNetCore.CAP.GooglePubSub
 
             foreach (var topic in topics)
             {
-                publisher.CreateTopic(new TopicName("projectId", topic));
+                publisher.CreateTopic(new TopicName(_googlePubSubOptions.ProjectId, topic));
             }
 
         }
@@ -53,22 +55,24 @@ namespace DotNetCore.CAP.GooglePubSub
         {
             Connect();
 
-            var subscriptionName = new SubscriptionName("projectId", _subscriptionName);
+            var subscriptionName = new SubscriptionName(_googlePubSubOptions.ProjectId, _subscriptionName);
 
             while (true)
             {
+                PullFromGcp:
+                
                 var response = _subscriberClient.Pull(subscriptionName, returnImmediately: true, maxMessages: 1);
                 if (response.ReceivedMessages.Count > 0)
                 {
                     OnConsumerReceived(response.ReceivedMessages[0]);
-                }
 
+                    goto PullFromGcp;
+                }
                 cancellationToken.ThrowIfCancellationRequested();
                 cancellationToken.WaitHandle.WaitOne(timeout);
             }
             // ReSharper disable once FunctionNeverReturns
         }
-
 
 
         public void Commit(object sender)
@@ -103,26 +107,6 @@ namespace DotNetCore.CAP.GooglePubSub
 
             OnMessageReceived?.Invoke(message.AckId, context);
         }
-
-        //private Task OnExceptionReceived(ExceptionReceivedEventArgs args)
-        //{
-        //    var context = args.ExceptionReceivedContext;
-        //    var exceptionMessage =
-        //        $"- Endpoint: {context.Endpoint}" + Environment.NewLine +
-        //        $"- Entity Path: {context.EntityPath}" + Environment.NewLine +
-        //        $"- Executing Action: {context.Action}" + Environment.NewLine +
-        //        $"- Exception: {args.Exception}";
-
-        //    var logArgs = new LogMessageEventArgs
-        //    {
-        //        LogType = MqLogType.ExceptionReceived,
-        //        Reason = exceptionMessage
-        //    };
-
-        //    OnLog?.Invoke(null, logArgs);
-
-        //    return Task.CompletedTask;
-        //}
 
         #endregion private methods
     }

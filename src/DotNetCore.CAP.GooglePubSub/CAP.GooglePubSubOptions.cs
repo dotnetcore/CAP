@@ -9,6 +9,9 @@ namespace DotNetCore.CAP
     /// </summary>
     public class GooglePubSubOptions
     {
- 
+        /// <summary>
+        /// The GCP <c>Project</c> ID.
+        /// </summary>
+        public string ProjectId { get; set; }
     }
 }

@@ -13,9 +13,13 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Configuration to use Google Cloud Pub/Sub in CAP.
         /// </summary>
         /// <param name="options">CAP configuration options</param>
-        public static CapOptions UseGooglePubSub(this CapOptions options)
+        /// <param name="projectId">The GCP <c>Project</c> ID.</param>
+        public static CapOptions UseGooglePubSub(this CapOptions options,string projectId)
         {
-            return options.UseGooglePubSub(opt => {  });
+            return options.UseGooglePubSub(opt =>
+            {
+                opt.ProjectId = projectId;
+            });
         }
 
         /// <summary>
