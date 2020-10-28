@@ -35,11 +35,11 @@ namespace DotNetCore.CAP.Internal
             cancellationToken.ThrowIfCancellationRequested();
 
             var methodInfo = context.ConsumerDescriptor.MethodInfo;
-            var serviceTypeInfo = context.ConsumerDescriptor.ServiceTypeInfo.Name;
+            var reflectedType = methodInfo.ReflectedType.Name;
 
             _logger.LogDebug("Executing subscriber method : {0}", methodInfo.Name);
 
-            var key = $"{methodInfo.Module.Name}_{serviceTypeInfo}_{methodInfo.MetadataToken}";
+            var key = $"{methodInfo.Module.Name}_{reflectedType}_{methodInfo.MetadataToken}";
             var executor = _executors.GetOrAdd(key, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
             using var scope = _serviceProvider.CreateScope();
