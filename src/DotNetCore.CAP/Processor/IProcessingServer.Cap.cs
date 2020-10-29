@@ -77,7 +77,7 @@ namespace DotNetCore.CAP.Processor
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "An exception was occured when disposing.");
+                _logger.LogWarning(ex, "An exception was occurred when disposing.");
             }
             finally
             {
