@@ -177,6 +177,7 @@ namespace DotNetCore.CAP.Internal
 
                         var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
                         message = await _serializer.DeserializeAsync(transportMessage, type);
+                        message.RemoveException();
                     }
                     catch (Exception e)
                     {
@@ -195,7 +196,7 @@ namespace DotNetCore.CAP.Internal
 
                     if (message.HasException())
                     {
-                        var content = StringSerializer.Serialize(message);
+                        var content = _serializer.Serialize(message);
 
                         _storage.StoreReceivedExceptionMessage(name, group, content);
 
@@ -276,7 +277,7 @@ namespace DotNetCore.CAP.Internal
                     break;
                 case MqLogType.MessageNotInflight:
                     _logger.LogError("AmazonSQS subscriber change message's visibility failed, message isn't in flight. --> " + logmsg.Reason);
-                    break; 
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

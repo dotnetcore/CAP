@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.7" />
-    <PackageReference Include="MySqlConnector" Version="1.0.0" />
+    <PackageReference Include="MySqlConnector" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>

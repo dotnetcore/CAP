@@ -122,11 +122,9 @@ namespace DotNetCore.CAP.Internal
                 message.Retries = _options.FailedRetryCount; // not retry if SubscriberNotFoundException
             }
 
-            //TODO: Add exception to content
-            // AddErrorReasonToContent(message, ex);
-
             var needRetry = UpdateMessageForRetry(message);
 
+            message.Origin.AddOrUpdateException(ex);
             message.ExpiresAt = message.Added.AddDays(15);
 
             await _dataStorage.ChangeReceiveStateAsync(message, StatusName.Failed);
@@ -166,11 +164,6 @@ namespace DotNetCore.CAP.Internal
 
             return true;
         }
-
-        //private static void AddErrorReasonToContent(CapReceivedMessage message, Exception exception)
-        //{
-        //    message.Content = Helper.AddExceptionProperty(message.Content, exception);
-        //}
 
         private async Task InvokeConsumerMethodAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
         {

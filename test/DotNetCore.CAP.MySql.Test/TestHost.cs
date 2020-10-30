@@ -1,5 +1,6 @@
 using System;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.MySql.Test
@@ -34,8 +35,9 @@ namespace DotNetCore.CAP.MySql.Test
             {
                 x.ConnectionString = ConnectionString;
             });
-            services.AddSingleton<MySqlDataStorage>();
+            services.AddSingleton<MySqlDataStorage>();            
             services.AddSingleton<IStorageInitializer,MySqlStorageInitializer>();
+            services.AddSingleton<ISerializer, JsonUtf8Serializer>();
             _services = services;
         }
 
