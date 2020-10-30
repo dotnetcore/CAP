@@ -13,7 +13,17 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return options.UseRabbitMQ(opt => { opt.HostName = hostName; });
         }
-
+        public static CapOptions UseRabbitMQ(this CapOptions options, Uri url)
+        {
+            return options.UseRabbitMQ(opt =>
+            {
+                var usr = url.UserInfo?.Split(':');
+                opt.HostName = url.Host;
+                opt.UserName = usr?.Length > 0 ? usr[0] : RabbitMQOptions.DefaultUser;
+                opt.Password = usr?.Length > 1 ? usr[1] : RabbitMQOptions.DefaultPass;
+                opt.Port = url.Port;
+            });
+        }
         public static CapOptions UseRabbitMQ(this CapOptions options, Action<RabbitMQOptions> configure)
         {
             if (configure == null)
