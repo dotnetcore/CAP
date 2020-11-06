@@ -10,7 +10,7 @@ edit_uri: 'edit/master/docs/content'
 docs_dir: 'content'
 
 # Copyright
-copyright: Copyright &copy; 2017 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
+copyright: Copyright &copy; 2020 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
 
 
 #theme: material
