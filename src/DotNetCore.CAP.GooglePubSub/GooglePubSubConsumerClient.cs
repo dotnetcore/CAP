@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
+using Google.Api.Gax.ResourceNames;
 using Google.Cloud.PubSub.V1;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -17,6 +18,7 @@ namespace DotNetCore.CAP.GooglePubSub
     {
         private readonly ILogger _logger;
         private readonly string _subscriptionName;
+        private readonly ProjectName _projectName;
         private readonly GooglePubSubOptions _googlePubSubOptions;
         private SubscriberServiceApiClient _subscriberClient;
 
@@ -25,6 +27,7 @@ namespace DotNetCore.CAP.GooglePubSub
             _logger = logger;
             _subscriptionName = subscriptionName;
             _googlePubSubOptions = options.Value;
+            _projectName = new ProjectName(_googlePubSubOptions.ProjectId);
         }
 
         public event EventHandler<TransportMessage> OnMessageReceived;
@@ -35,20 +38,39 @@ namespace DotNetCore.CAP.GooglePubSub
 
         public void Subscribe(IEnumerable<string> topics)
         {
-            var publisher = PublisherServiceApiClient.Create();
-            //var gcpTopics = publisher.ListTopics(new ListTopicsRequest()
-            //{
-            //    Project = "",
-            //    PageSize = int.MaxValue
-            //});
 
-            //gcpTopics.ReadPage(int.MaxValue);
+            var publisher = PublisherServiceApiClient.Create();
+            var gcpPagedTopics = publisher.ListTopics(new ListTopicsRequest()
+            {
+                ProjectAsProjectName = _projectName,
+                PageSize = int.MaxValue
+            });
+
+            var gcpTopics = gcpPagedTopics.ReadPage(1)
+                .Select(x => x.TopicName)
+                .Select(x => x.TopicId).ToList();
+
+            var subscriptions = _subscriberClient.ListSubscriptions(_projectName, pageSize: int.MaxValue);
+
+            subscriptions.ReadPage(1).Select(x=>x.).ToList()
+
+            var subscriptionName = new SubscriptionName(_googlePubSubOptions.ProjectId, _subscriptionName);
 
             foreach (var topic in topics)
             {
-                publisher.CreateTopic(new TopicName(_googlePubSubOptions.ProjectId, topic));
+                var topicName = new TopicName(_googlePubSubOptions.ProjectId, topic);
+                if (!gcpTopics.Contains(topic))
+                {
+                    var t = publisher.CreateTopic(topicName);
+                    _subscriberClient.CreateSubscription(subscriptionName, t.TopicName, null, 60);
+                }
+                else
+                {
+                    _subscriberClient.CreateSubscription(subscriptionName, topicName, null, 60);
+                }
             }
 
+            
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
@@ -60,7 +82,7 @@ namespace DotNetCore.CAP.GooglePubSub
             while (true)
             {
                 PullFromGcp:
-                
+
                 var response = _subscriberClient.Pull(subscriptionName, returnImmediately: true, maxMessages: 1);
                 if (response.ReceivedMessages.Count > 0)
                 {
@@ -87,7 +109,7 @@ namespace DotNetCore.CAP.GooglePubSub
 
         public void Dispose()
         {
-            
+
         }
 
         public void Connect()
