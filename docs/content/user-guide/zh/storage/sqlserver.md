@@ -25,7 +25,7 @@ public void ConfigureServices(IServiceCollection services)
 
     services.AddCap(x =>
     {
-        x.UsePostgreSql(opt=>{
+        x.UseSqlServer(opt=>{
             //SqlServerOptions
         }); 
         // x.UseXXX ...
