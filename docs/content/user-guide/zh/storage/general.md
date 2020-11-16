@@ -75,5 +75,3 @@ CallbackName |	回调的订阅者名称 | string
 * SQLite & Oracle ([@cocosip](https://github.com/cocosip)) ：https://github.com/cocosip/CAP-Extensions   
 
 * SmartSql ([@xiangxiren](https://github.com/xiangxiren)) ：https://github.com/xiangxiren/SmartSql.CAP   
-
-* RedisMQ ([@木木](https://github.com/difuteam)) ：https://github.com/difudotnet/CAP.RedisMQ.Extensions
