@@ -58,17 +58,17 @@ namespace DotNetCore.CAP.Processor
             _cts.Cancel();
         }
 
-        private async Task Sending()
+        private void Sending()
         {
             try
             {
-                while (await _publishedChannel.Reader.WaitToReadAsync(_cts.Token))
+                while (_publishedChannel.Reader.WaitToReadAsync(_cts.Token).Result)
                 {
                     while (_publishedChannel.Reader.TryRead(out var message))
                     {
                         try
                         {
-                            var result = await _sender.SendAsync(message);
+                            var result = _sender.SendAsync(message).Result;
                             if (!result.Succeeded)
                             {
                                 _logger.MessagePublishException(message.Origin.GetId(), result.ToString(),
@@ -89,15 +89,15 @@ namespace DotNetCore.CAP.Processor
             }
         }
 
-        private async Task Processing()
+        private void Processing()
         {
             try
             {
-                while (await _receivedChannel.Reader.WaitToReadAsync(_cts.Token))
+                while (_receivedChannel.Reader.WaitToReadAsync(_cts.Token).Result)
                 {
                     while (_receivedChannel.Reader.TryRead(out var message))
                     {
-                        await _executor.DispatchAsync(message.Item1, message.Item2, _cts.Token);
+                        _executor.DispatchAsync(message.Item1, message.Item2, _cts.Token).Wait();
                     }
                 }
             }
