@@ -85,7 +85,7 @@ namespace DotNetCore.CAP.MySql
                     dbTrans = dbContextTrans.GetDbTransaction();
                 }
 
-                var conn = dbTrans?.Connection;
+                var conn = dbTrans?.Connection ?? new MySqlConnection(_options.Value.ConnectionString);
                 conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
             }
 
