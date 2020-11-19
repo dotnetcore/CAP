@@ -42,73 +42,53 @@ namespace DotNetCore.CAP.Internal
             var key = $"{methodInfo.Module.Name}_{reflectedType}_{methodInfo.MetadataToken}";
             var executor = _executors.GetOrAdd(key, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
-            using var scope = _serviceProvider.CreateScope();
-
-            var provider = scope.ServiceProvider;
-
-            var obj = GetInstance(provider, context);
-
-            var message = context.DeliverMessage;
-            var parameterDescriptors = context.ConsumerDescriptor.Parameters;
-            var executeParameters = new object[parameterDescriptors.Count];
-            for (var i = 0; i < parameterDescriptors.Count; i++)
+            using (var scope = _serviceProvider.GetService<ICapServiceScope>())
             {
-                if (parameterDescriptors[i].IsFromCap)
+                var obj = scope.GetInstance(context);
+
+                var message = context.DeliverMessage;
+                var parameterDescriptors = context.ConsumerDescriptor.Parameters;
+                var executeParameters = new object[parameterDescriptors.Count];
+                for (var i = 0; i < parameterDescriptors.Count; i++)
                 {
-                    executeParameters[i] = new CapHeader(message.Headers);
-                }
-                else
-                {
-                    if (message.Value != null)
+                    if (parameterDescriptors[i].IsFromCap)
                     {
-                        if (_serializer.IsJsonType(message.Value))  // use ISerializer when reading from storage, skip other objects if not Json
+                        executeParameters[i] = new CapHeader(message.Headers);
+                    }
+                    else
+                    {
+                        if (message.Value != null)
                         {
-                            executeParameters[i] = _serializer.Deserialize(message.Value, parameterDescriptors[i].ParameterType);
-                        }
-                        else
-                        {
-                            var converter = TypeDescriptor.GetConverter(parameterDescriptors[i].ParameterType);
-                            if (converter.CanConvertFrom(message.Value.GetType()))
+                            if (_serializer.IsJsonType(message.Value))  // use ISerializer when reading from storage, skip other objects if not Json
                             {
-                                executeParameters[i] = converter.ConvertFrom(message.Value);
+                                executeParameters[i] = _serializer.Deserialize(message.Value, parameterDescriptors[i].ParameterType);
                             }
                             else
                             {
-                                if (parameterDescriptors[i].ParameterType.IsInstanceOfType(message.Value))
+                                var converter = TypeDescriptor.GetConverter(parameterDescriptors[i].ParameterType);
+                                if (converter.CanConvertFrom(message.Value.GetType()))
                                 {
-                                    executeParameters[i] = message.Value;
+                                    executeParameters[i] = converter.ConvertFrom(message.Value);
                                 }
                                 else
                                 {
-                                    executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
+                                    if (parameterDescriptors[i].ParameterType.IsInstanceOfType(message.Value))
+                                    {
+                                        executeParameters[i] = message.Value;
+                                    }
+                                    else
+                                    {
+                                        executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
+                                    }
                                 }
                             }
                         }
                     }
                 }
+
+                var resultObj = await ExecuteWithParameterAsync(executor, obj, executeParameters);
+                return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName());
             }
-
-            var resultObj = await ExecuteWithParameterAsync(executor, obj, executeParameters);
-            return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName());
-        }
-
-        protected virtual object GetInstance(IServiceProvider provider, ConsumerContext context)
-        {
-            var srvType = context.ConsumerDescriptor.ServiceTypeInfo?.AsType();
-            var implType = context.ConsumerDescriptor.ImplTypeInfo.AsType();
-
-            object obj = null;
-            if (srvType != null)
-            {
-                obj = provider.GetServices(srvType).FirstOrDefault(o => o.GetType() == implType);
-            }
-
-            if (obj == null)
-            {
-                obj = ActivatorUtilities.GetServiceOrCreateInstance(provider, implType);
-            }
-
-            return obj;
         }
 
         private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor, object @class, object[] parameter)
@@ -119,6 +99,42 @@ namespace DotNetCore.CAP.Internal
             }
 
             return executor.Execute(@class, parameter);
+        }
+    }
+    public interface ICapServiceScope : IDisposable
+    {
+        object GetInstance(ConsumerContext context);
+    }
+    public class CapServiceScope : ICapServiceScope
+    {
+        IServiceScope _scope;
+
+        public CapServiceScope(IServiceProvider provider)
+        {
+            _scope = provider.CreateScope();
+        }
+        public void Dispose()
+        {
+            _scope?.Dispose();
+        }
+
+        public object GetInstance(ConsumerContext context)
+        {
+            var srvType = context.ConsumerDescriptor.ServiceTypeInfo?.AsType();
+            var implType = context.ConsumerDescriptor.ImplTypeInfo.AsType();
+
+            object obj = null;
+            if (srvType != null)
+            {
+                obj = _scope.ServiceProvider.GetServices(srvType).FirstOrDefault(o => o.GetType() == implType);
+            }
+
+            if (obj == null)
+            {
+                obj = ActivatorUtilities.GetServiceOrCreateInstance(_scope.ServiceProvider, implType);
+            }
+
+            return obj;
         }
     }
 }

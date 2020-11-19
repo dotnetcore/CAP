@@ -40,6 +40,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
             services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
             services.TryAddSingleton<ISubscribeInvoker, SubscribeInvoker>();
+            services.TryAddTransient<ICapServiceScope, CapServiceScope>();
             services.TryAddSingleton<MethodMatcherCache>();
 
             services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();

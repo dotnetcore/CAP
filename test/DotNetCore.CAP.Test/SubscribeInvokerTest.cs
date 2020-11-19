@@ -20,6 +20,7 @@ namespace DotNetCore.CAP.Test
             serviceCollection.AddLogging();
             serviceCollection.AddSingleton<ISerializer, JsonUtf8Serializer>();
             serviceCollection.AddSingleton<ISubscribeInvoker, SubscribeInvoker>();
+            serviceCollection.AddTransient<ICapServiceScope, CapServiceScope>();
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
 
