@@ -39,37 +39,25 @@ namespace DotNetCore.CAP.GooglePubSub
         public void Subscribe(IEnumerable<string> topics)
         {
             var publisher = PublisherServiceApiClient.Create();
-            var gcpPagedTopics = publisher.ListTopics(new ListTopicsRequest()
-            {
-                ProjectAsProjectName = _projectName,
-                PageSize = int.MaxValue
-            });
 
-            var gcpTopics = gcpPagedTopics
-                .ReadPage(1)
+            var gcpTopics = publisher.ListTopics(_projectName)
                 .Select(x => x.TopicName)
                 .Select(x => x.TopicId)
                 .ToList();
 
-            var subscriptions = _subscriberClient.ListSubscriptions(_projectName, pageSize: int.MaxValue)
-                .ReadPage(1)
-                .Select(x => x.SubscriptionName)
-                .ToList();
+            var subscriptions = _subscriberClient.ListSubscriptions(_projectName).ToList();
 
             foreach (var topic in topics)
             {
                 var topicName = new TopicName(_googlePubSubOptions.ProjectId, topic);
                 if (!gcpTopics.Contains(topic))
                 {
-                    var t = publisher.CreateTopic(topicName);
-                    _subscriberClient.CreateSubscription(_subscriptionName, topicName, null, 60);
+                    publisher.CreateTopic(topicName);
                 }
-                else
+
+                if (!subscriptions.Any(x => x.TopicAsTopicName == topicName && x.SubscriptionName == _subscriptionName))
                 {
-                    if (!subscriptions.Contains(_subscriptionName))
-                    {
-                        _subscriberClient.CreateSubscription(_subscriptionName, topicName, null, 60);
-                    }
+                    _subscriberClient.CreateSubscription(_subscriptionName, topicName, null, 60);
                 }
             }
         }
