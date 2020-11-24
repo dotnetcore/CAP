@@ -10,6 +10,7 @@ using DotNetCore.CAP.Transport;
 using Google.Cloud.PubSub.V1;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.GooglePubSub
 {
@@ -17,12 +18,15 @@ namespace DotNetCore.CAP.GooglePubSub
     {
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
+        private readonly IOptions<GooglePubSubOptions> _options;
         private readonly ILogger _logger;
 
         private PublisherServiceApiClient _publisherClient;
 
-        public GooglePubSubTransport(ILogger<GooglePubSubTransport> logger)
+        public GooglePubSubTransport(IOptions<GooglePubSubOptions> options,
+            ILogger<GooglePubSubTransport> logger)
         {
+            _options = options;
             _logger = logger;
         }
 
@@ -38,9 +42,14 @@ namespace DotNetCore.CAP.GooglePubSub
                 {
                     Data = ByteString.CopyFrom(transportMessage.Body)
                 };
-                message.Attributes.Add(transportMessage.Headers);
 
-                await _publisherClient.PublishAsync(transportMessage.GetName(), new[] { message });
+                foreach (var header in transportMessage.Headers)
+                {
+                    if (header.Value != null)
+                        message.Attributes.Add(header.Key, header.Value);
+                }
+                var topicName = new TopicName(_options.Value.ProjectId, transportMessage.GetName());
+                await _publisherClient.PublishAsync(topicName, new[] { message });
 
                 _logger.LogDebug($"Topic message [{transportMessage.GetName()}] has been published.");
 

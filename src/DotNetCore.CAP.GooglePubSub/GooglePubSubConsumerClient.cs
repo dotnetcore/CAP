@@ -17,17 +17,17 @@ namespace DotNetCore.CAP.GooglePubSub
     internal sealed class GooglePubSubConsumerClient : IConsumerClient
     {
         private readonly ILogger _logger;
-        private readonly string _subscriptionName;
         private readonly ProjectName _projectName;
+        private readonly SubscriptionName _subscriptionName;
         private readonly GooglePubSubOptions _googlePubSubOptions;
         private SubscriberServiceApiClient _subscriberClient;
 
         public GooglePubSubConsumerClient(ILogger logger, string subscriptionName, IOptions<GooglePubSubOptions> options)
         {
             _logger = logger;
-            _subscriptionName = subscriptionName;
             _googlePubSubOptions = options.Value;
             _projectName = new ProjectName(_googlePubSubOptions.ProjectId);
+            _subscriptionName = new SubscriptionName(_googlePubSubOptions.ProjectId, subscriptionName);
         }
 
         public event EventHandler<TransportMessage> OnMessageReceived;
@@ -38,7 +38,6 @@ namespace DotNetCore.CAP.GooglePubSub
 
         public void Subscribe(IEnumerable<string> topics)
         {
-
             var publisher = PublisherServiceApiClient.Create();
             var gcpPagedTopics = publisher.ListTopics(new ListTopicsRequest()
             {
@@ -46,15 +45,16 @@ namespace DotNetCore.CAP.GooglePubSub
                 PageSize = int.MaxValue
             });
 
-            var gcpTopics = gcpPagedTopics.ReadPage(1)
+            var gcpTopics = gcpPagedTopics
+                .ReadPage(1)
                 .Select(x => x.TopicName)
-                .Select(x => x.TopicId).ToList();
+                .Select(x => x.TopicId)
+                .ToList();
 
-            var subscriptions = _subscriberClient.ListSubscriptions(_projectName, pageSize: int.MaxValue);
-
-            subscriptions.ReadPage(1).Select(x=>x.).ToList()
-
-            var subscriptionName = new SubscriptionName(_googlePubSubOptions.ProjectId, _subscriptionName);
+            var subscriptions = _subscriberClient.ListSubscriptions(_projectName, pageSize: int.MaxValue)
+                .ReadPage(1)
+                .Select(x => x.SubscriptionName)
+                .ToList();
 
             foreach (var topic in topics)
             {
@@ -62,28 +62,27 @@ namespace DotNetCore.CAP.GooglePubSub
                 if (!gcpTopics.Contains(topic))
                 {
                     var t = publisher.CreateTopic(topicName);
-                    _subscriberClient.CreateSubscription(subscriptionName, t.TopicName, null, 60);
+                    _subscriberClient.CreateSubscription(_subscriptionName, topicName, null, 60);
                 }
                 else
                 {
-                    _subscriberClient.CreateSubscription(subscriptionName, topicName, null, 60);
+                    if (!subscriptions.Contains(_subscriptionName))
+                    {
+                        _subscriberClient.CreateSubscription(_subscriptionName, topicName, null, 60);
+                    }
                 }
             }
-
-            
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             Connect();
 
-            var subscriptionName = new SubscriptionName(_googlePubSubOptions.ProjectId, _subscriptionName);
-
             while (true)
             {
                 PullFromGcp:
 
-                var response = _subscriberClient.Pull(subscriptionName, returnImmediately: true, maxMessages: 1);
+                var response = _subscriberClient.Pull(_subscriptionName, returnImmediately: true, maxMessages: 1);
                 if (response.ReceivedMessages.Count > 0)
                 {
                     OnConsumerReceived(response.ReceivedMessages[0]);
@@ -123,7 +122,7 @@ namespace DotNetCore.CAP.GooglePubSub
         {
             var header = message.Message.Attributes
                 .ToDictionary(x => x.Key, y => y.Value);
-            header.Add(Headers.Group, _subscriptionName);
+            header.Add(Headers.Group, _subscriptionName.SubscriptionId);
 
             var context = new TransportMessage(header, message.Message.Data.ToByteArray());
 
