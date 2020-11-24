@@ -2,11 +2,13 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
+using Google.Api.Gax.ResourceNames;
 using Google.Cloud.PubSub.V1;
 using Google.Protobuf;
 using Microsoft.Extensions.Logging;
@@ -28,6 +30,10 @@ namespace DotNetCore.CAP.GooglePubSub
         {
             _options = options;
             _logger = logger;
+
+            Connect();
+
+            CreateTopic();
         }
 
         public BrokerAddress BrokerAddress => new BrokerAddress("GooglePubSub", string.Empty);
@@ -48,7 +54,8 @@ namespace DotNetCore.CAP.GooglePubSub
                     if (header.Value != null)
                         message.Attributes.Add(header.Key, header.Value);
                 }
-                var topicName = new TopicName(_options.Value.ProjectId, transportMessage.GetName());
+                var topicName = new TopicName(_options.Value.ProjectId, _options.Value.TopicName);
+
                 await _publisherClient.PublishAsync(topicName, new[] { message });
 
                 _logger.LogDebug($"Topic message [{transportMessage.GetName()}] has been published.");
@@ -75,10 +82,22 @@ namespace DotNetCore.CAP.GooglePubSub
             try
             {
                 _publisherClient ??= PublisherServiceApiClient.Create();
+
+                
             }
             finally
             {
                 _connectionLock.Release();
+            }
+        }
+
+        private void CreateTopic()
+        {
+            var topicName = new TopicName(_options.Value.ProjectId, _options.Value.TopicName);
+            if (_publisherClient.ListTopics(new ProjectName(_options.Value.ProjectId))
+                .All(x => x.TopicName != topicName))
+            {
+                _publisherClient.CreateTopic(topicName);
             }
         }
     }

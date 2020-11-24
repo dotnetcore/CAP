@@ -9,25 +9,22 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Google.Api.Gax.ResourceNames;
 using Google.Cloud.PubSub.V1;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.GooglePubSub
 {
     internal sealed class GooglePubSubConsumerClient : IConsumerClient
     {
-        private readonly ILogger _logger;
         private readonly ProjectName _projectName;
         private readonly SubscriptionName _subscriptionName;
-        private readonly GooglePubSubOptions _googlePubSubOptions;
+        private readonly TopicName _topicName;
         private SubscriberServiceApiClient _subscriberClient;
 
-        public GooglePubSubConsumerClient(ILogger logger, string subscriptionName, IOptions<GooglePubSubOptions> options)
+        public GooglePubSubConsumerClient(string subscriptionName, IOptions<GooglePubSubOptions> options)
         {
-            _logger = logger;
-            _googlePubSubOptions = options.Value;
-            _projectName = new ProjectName(_googlePubSubOptions.ProjectId);
-            _subscriptionName = new SubscriptionName(_googlePubSubOptions.ProjectId, subscriptionName);
+            _projectName = new ProjectName(options.Value.ProjectId);
+            _subscriptionName = new SubscriptionName(options.Value.ProjectId, subscriptionName);
+            _topicName = new TopicName(options.Value.ProjectId, options.Value.TopicName);
         }
 
         public event EventHandler<TransportMessage> OnMessageReceived;
@@ -38,34 +35,19 @@ namespace DotNetCore.CAP.GooglePubSub
 
         public void Subscribe(IEnumerable<string> topics)
         {
-            var publisher = PublisherServiceApiClient.Create();
+            var hasSubscriptions = _subscriberClient.ListSubscriptions(_projectName)
+                .Any(x => x.TopicAsTopicName == _topicName && x.SubscriptionName == _subscriptionName);
 
-            var gcpTopics = publisher.ListTopics(_projectName)
-                .Select(x => x.TopicName)
-                .Select(x => x.TopicId)
-                .ToList();
-
-            var subscriptions = _subscriberClient.ListSubscriptions(_projectName).ToList();
-
-            foreach (var topic in topics)
+            if (!hasSubscriptions)
             {
-                var topicName = new TopicName(_googlePubSubOptions.ProjectId, topic);
-                if (!gcpTopics.Contains(topic))
-                {
-                    publisher.CreateTopic(topicName);
-                }
-
-                if (!subscriptions.Any(x => x.TopicAsTopicName == topicName && x.SubscriptionName == _subscriptionName))
-                {
-                    _subscriberClient.CreateSubscription(_subscriptionName, topicName, null, 60);
-                }
+                _subscriberClient.CreateSubscription(_subscriptionName, _topicName, null, 60);
             }
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             Connect();
-
+            
             while (true)
             {
                 PullFromGcp:
@@ -112,6 +94,8 @@ namespace DotNetCore.CAP.GooglePubSub
                 .ToDictionary(x => x.Key, y => y.Value);
             header.Add(Headers.Group, _subscriptionName.SubscriptionId);
 
+            //TODO: Since GCP does not support multiple topics attached to one subscription,
+            //TODO: multiple messages will be generated here and need to be removed
             var context = new TransportMessage(header, message.Message.Data.ToByteArray());
 
             OnMessageReceived?.Invoke(message.AckId, context);

@@ -13,5 +13,7 @@ namespace DotNetCore.CAP
         /// The GCP <c>Project</c> ID.
         /// </summary>
         public string ProjectId { get; set; }
+
+        public string TopicName { get; set; } = "CAP";
     }
 }
