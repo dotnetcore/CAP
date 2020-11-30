@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Messages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -77,6 +78,8 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
         [CapSubscribe("sample.rabbitmq.sqlserver", Group = "group.test2")]
         public void Subscriber2(Person p, [FromCap]CapHeader header)
         {
+            var id = header[Headers.MessageId];
+
             Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
         }
     }
