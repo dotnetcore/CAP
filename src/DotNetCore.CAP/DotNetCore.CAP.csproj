@@ -17,9 +17,5 @@
     <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.0" />
     <PackageReference Include="System.Threading.Channels" Version="5.0.0" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <PackageReference Update="JetBrains.Annotations" Version="2020.3.0" />
-  </ItemGroup>
  
 </Project>

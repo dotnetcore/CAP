@@ -18,10 +18,6 @@
   <ItemGroup>
     <PackageReference Include="MongoDB.Bson" Version="2.11.5" />
     <PackageReference Include="MongoDB.Driver" Version="2.11.5" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="JetBrains.Annotations" Version="2020.3.0" />
-  </ItemGroup>
+  </ItemGroup> 
 
 </Project>

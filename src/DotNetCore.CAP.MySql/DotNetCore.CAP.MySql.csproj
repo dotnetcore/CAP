@@ -20,9 +20,5 @@
   <ItemGroup>
     <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
   </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Update="JetBrains.Annotations" Version="2020.3.0" />
-  </ItemGroup>
-
+ 
 </Project>
