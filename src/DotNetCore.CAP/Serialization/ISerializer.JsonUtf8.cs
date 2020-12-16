@@ -2,11 +2,10 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Text;
+using System.Buffers;
+using System.Text.Json;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace DotNetCore.CAP.Serialization
 {
@@ -24,8 +23,8 @@ namespace DotNetCore.CAP.Serialization
                 return Task.FromResult(new TransportMessage(message.Headers, null));
             }
 
-            var json = JsonConvert.SerializeObject(message.Value);
-            return Task.FromResult(new TransportMessage(message.Headers, Encoding.UTF8.GetBytes(json)));
+            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(message.Value);
+            return Task.FromResult(new TransportMessage(message.Headers, jsonBytes));
         }
 
         public Task<Message> DeserializeAsync(TransportMessage transportMessage, Type valueType)
@@ -35,32 +34,39 @@ namespace DotNetCore.CAP.Serialization
                 return Task.FromResult(new Message(transportMessage.Headers, null));
             }
 
-            var json = Encoding.UTF8.GetString(transportMessage.Body);
-            return Task.FromResult(new Message(transportMessage.Headers, JsonConvert.DeserializeObject(json, valueType)));
+            var obj = JsonSerializer.Deserialize(transportMessage.Body, valueType);
+
+            return Task.FromResult(new Message(transportMessage.Headers, obj));
         }
 
         public string Serialize(Message message)
         {
-            return JsonConvert.SerializeObject(message);
+            return JsonSerializer.Serialize(message);
         }
 
         public Message Deserialize(string json)
         {
-            return JsonConvert.DeserializeObject<Message>(json);
+            return JsonSerializer.Deserialize<Message>(json);
         }
 
         public object Deserialize(object value, Type valueType)
         {
-            if (value is JToken jToken)
+            if (value is JsonElement jToken)
             {
-                return jToken.ToObject(valueType);
+                var bufferWriter = new ArrayBufferWriter<byte>();
+                using (var writer = new Utf8JsonWriter(bufferWriter))
+                {
+                    jToken.WriteTo(writer);
+                }
+                return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, valueType);
             }
             throw new NotSupportedException("Type is not of type JToken");
         }
 
         public bool IsJsonType(object jsonObject)
         {
-            return jsonObject is JToken;
+            return jsonObject is JsonElement;
         }
-  }
+         
+    }
 }
