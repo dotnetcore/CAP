@@ -21,7 +21,8 @@ namespace DotNetCore.CAP.Transport
         ExceptionReceived,
 
         //NATS
-        AsyncErrorEvent
+        AsyncErrorEvent,
+
         //Amazon SQS
         InvalidIdFormat,
         MessageNotInflight
