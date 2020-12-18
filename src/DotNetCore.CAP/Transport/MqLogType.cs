@@ -22,6 +22,9 @@ namespace DotNetCore.CAP.Transport
 
         //NATS
         AsyncErrorEvent
+        //Amazon SQS
+        InvalidIdFormat,
+        MessageNotInflight
     }
 
     public class LogMessageEventArgs : EventArgs

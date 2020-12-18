@@ -22,17 +22,20 @@ namespace DotNetCore.CAP.PostgreSql
         private readonly IOptions<CapOptions> _capOptions;
         private readonly IStorageInitializer _initializer;
         private readonly IOptions<PostgreSqlOptions> _options;
+        private readonly ISerializer _serializer;
         private readonly string _pubName;
         private readonly string _recName;
 
         public PostgreSqlDataStorage(
             IOptions<PostgreSqlOptions> options,
             IOptions<CapOptions> capOptions,
-            IStorageInitializer initializer)
+            IStorageInitializer initializer,
+            ISerializer serializer)
         {
             _capOptions = capOptions;
             _initializer = initializer;
             _options = options;
+            _serializer = serializer;
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
         }
@@ -53,7 +56,7 @@ namespace DotNetCore.CAP.PostgreSql
             {
                 DbId = content.GetId(),
                 Origin = content,
-                Content = StringSerializer.Serialize(content),
+                Content = _serializer.Serialize(content),
                 Added = DateTime.Now,
                 ExpiresAt = null,
                 Retries = 0
@@ -121,7 +124,7 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@Id", long.Parse(mdMessage.DbId)),
                 new NpgsqlParameter("@Name", name),
                 new NpgsqlParameter("@Group", group),
-                new NpgsqlParameter("@Content", StringSerializer.Serialize(mdMessage.Origin)),
+                new NpgsqlParameter("@Content", _serializer.Serialize(mdMessage.Origin)),
                 new NpgsqlParameter("@Retries", mdMessage.Retries),
                 new NpgsqlParameter("@Added", mdMessage.Added),
                 new NpgsqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
@@ -137,29 +140,17 @@ namespace DotNetCore.CAP.PostgreSql
         {
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             var count = connection.ExecuteNonQuery(
-                $"DELETE FROM {table} WHERE \"ExpiresAt\" < @timeout AND \"Id\" IN (SELECT \"Id\" FROM {table} LIMIT @batchCount);", null,
+                $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout LIMIT @batchCount);", null,
                 new NpgsqlParameter("@timeout", timeout), new NpgsqlParameter("@batchCount", batchCount));
 
             return await Task.FromResult(count);
         }
 
-        public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
-        {
-            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql =
-                $"SELECT * FROM {_pubName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
+        public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
+            await GetMessagesOfNeedRetryAsync(_pubName);
 
-            return await GetMessagesOfNeedRetryAsync(sql);
-        }
-
-        public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
-        {
-            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
-            var sql =
-                $"SELECT * FROM {_recName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
-
-            return await GetMessagesOfNeedRetryAsync(sql);
-        }
+        public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry() =>
+            await GetMessagesOfNeedRetryAsync(_recName);
 
         public IMonitoringApi GetMonitoringApi()
         {
@@ -169,11 +160,12 @@ namespace DotNetCore.CAP.PostgreSql
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
         {
             var sql =
-                $"UPDATE {tableName} SET \"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
+                $"UPDATE {tableName} SET \"Content\"=@Content,\"Retries\"=@Retries,\"ExpiresAt\"=@ExpiresAt,\"StatusName\"=@StatusName WHERE \"Id\"=@Id";
 
             object[] sqlParams =
             {
                 new NpgsqlParameter("@Id", long.Parse(message.DbId)),
+                new NpgsqlParameter("@Content", _serializer.Serialize(message.Origin)),
                 new NpgsqlParameter("@Retries", message.Retries),
                 new NpgsqlParameter("@ExpiresAt", message.ExpiresAt),
                 new NpgsqlParameter("@StatusName", state.ToString("G"))
@@ -195,8 +187,13 @@ namespace DotNetCore.CAP.PostgreSql
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
         }
 
-        private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string sql)
+        private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
         {
+            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
+            var sql =
+                $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\" FROM {tableName} WHERE \"Retries\"<{_capOptions.Value.FailedRetryCount} " +
+                $"AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
+
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             var result = connection.ExecuteReader(sql, reader =>
             {
@@ -206,7 +203,7 @@ namespace DotNetCore.CAP.PostgreSql
                     messages.Add(new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
-                        Origin = StringSerializer.DeSerialize(reader.GetString(1)),
+                        Origin = _serializer.Deserialize(reader.GetString(1)),
                         Retries = reader.GetInt32(2),
                         Added = reader.GetDateTime(3)
                     });

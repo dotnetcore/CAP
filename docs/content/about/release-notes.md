@@ -1,5 +1,127 @@
 # Release Notes
 
+## Version 3.1.1 (2020-09-23)
+
+**Features:**
+
+* Add consumer parameter with interface suppport. (#669)
+* Add custom correlation id and message id support. (#668)
+* Enhanced custom serialization support. (#641)
+
+**Bug Fixed:**
+
+* Solve the issue of being duplicated executors from different assemblies. (#666)
+* Added comparer to remove duplicate ConsumerExecutors. (#653)
+* Add re-enable the auto create topics configuration item for Kafka, it's false by default. now is true. (#635)
+* Fixed postgresql transaction rollback invoke bug. (#640)
+* Fixed SQLServer table name customize bug. (#632)
+
+## Version 3.1.0 (2020-08-15)
+
+**Features:**
+
+* Add Amazon SQS support. (#597)
+* Remove Dapper and replace with ADO.NET in storage project. (#583)
+* Add debug symbols package to nuget.
+* Upgrade dependent nuget package version to latest.
+* English docs grammar correction. Thanks @mzorec
+
+**Bug Fixed:**
+
+* Fix mysql transaction rollback bug. (#598)
+* Fix dashboard query bug. (#600)
+* Fix mongo db query bug. (#611)
+* Fix dashboard browser language detection bug. (#631)
+
+## Version 3.0.4 (2020-05-27)
+
+**Bug Fixed:**
+
+* Fix kafka consumer group does not works bug. (#541)
+* Fix cast object to primitive types failed bug. (#547)
+* Fix subscriber primitive types convert exception. (#568)
+* Add conosole app sample.
+* Upgrade Confluent.Kafka to 1.4.3
+
+
+## Version 3.0.3 (2020-04-01)
+
+**Bug Fixed:**
+
+* Change ISubscribeInvoker interface access modifier to public. (#537)
+* Fix rabbitmq connection may be reused when close forced. (#533)
+* Fix dahsboard message reexecute button throws exception bug. (#525)
+
+## Version 3.0.2 (2020-02-05)
+
+**Bug Fixed:**
+
+- Fixed diagnostics event data object error. (#504 )
+- Fixed RabbitMQ transport check not working. (#503 )
+- Fixed Azure Service Bus subscriber error. (#502  )
+
+## Version 3.0.1 (2020-01-19)
+
+**Bug Fixed:**
+
+* Fixed Dashboard requeue and reconsume failed bug.  (#482 )
+* Fixed Azure service bus null reference exception. (#483 )
+* Fixed type cast exception from storage. (#473 )
+* Fixed SqlServer  connection undisponse bug. (#477 )
+
+## Version 3.0.0 (2019-12-30)
+
+**Breaking Changes:**
+
+In this version, we have made major improvements to the code structure, which have introduced some destructive changes.
+
+* Publisher and Consumer are not compatible with older versions
+This version is not compatible with older versions of the message protocol because we have improved the format in which messages are published and stored.
+
+* Interface changes
+We have done a lot of refactoring of the code, and some of the interfaces may be incompatible with older versions
+
+* Detach the dashboard project
+
+**Features:**
+
+* Supports .NET Core 3.1.
+* Upgrade dependent packages.
+* New serialization interface `ISerializer` to support serialization of message body sent to MQ.
+* Add new api for `ICapPublisher` to publish message with headers.
+* Diagnostics event structure and names improved. #378
+* Support consumer method to read the message headers. #472
+* Support rename message storage tables. #435
+* Support for Kafka to write such as Offset and Partition to the header. #374
+* Improved the processor retry interval time. #444
+
+**Bug Fixed:**
+
+* Fixed SqlServer dashboard sql query bug. #470
+* Fixed Kafka health check bug. #436
+* Fixed dashboard bugs. #412 #404
+* Fixed transaction bug for sql server when using EF. #402
+
+
+## Version 2.6.0 (2019-08-29)
+
+**Features:**
+
+* Improvement Diagnostic support. Thanks [@gfx687](https://github.com/gfx687) 
+* Improvement documention. https://cap.dotnetcore.xyz
+* Improvement `ConsumerInvoker` implementation. Thanks [@hetaoos](https://github.com/hetaoos)
+* Support multiple consumer threads. (#295)
+* Change DashboardMiddleware to async. (#390) Thanks [@liuzhenyulive](https://github.com/liuzhenyulive) 
+
+**Bug Fixed:**
+
+* SQL Server Options Bug.
+* Fix transaction scope disposed bug. (#365)
+* Fix thread safe issue of ICapPublisher bug. (#371)
+* Improved Ctrl+C action raised exception issue.
+* Fixed asynchronous exception catching bug of sending.
+* Fix MatchPoundUsingRegex "." not escaped bug (#373)
+
 ## Version 2.5.1 (2019-06-21)
 
 **Features:**

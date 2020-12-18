@@ -6,7 +6,7 @@
 
 !!! faq "Does it require certain different databases, one each for productor and resumer in CAP?"
 
-    Not requird differences necessary, a given advice is that using a special database for each program.
+    Not required differences necessary, a given advice is that using a special database for each program.
 
     Otherwise, look at Q&A below.
 

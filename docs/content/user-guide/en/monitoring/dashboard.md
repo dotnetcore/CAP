@@ -1,6 +1,6 @@
 # Dashboard
 
-The CAP provides a Dashboard for viewing messages, and the features provided by Dashboard make it easy to view and manage messages.
+CAP provides a Dashboard for viewing messages, and features provided by Dashboard make it easy to view and manage messages.
 
 ## Enable Dashboard
 
@@ -24,17 +24,17 @@ By default, you can open the Dashboard by visiting the url `http://localhost:xxx
 
 > Default ：'/cap'
 
-You can change the path of the Dashboard by modifying this configuration item.
+You can change the path of the Dashboard by modifying this configuration option.
 
 * StatsPollingInterval
 
 > Default: 2000ms
 
-This configuration item is used to configure the Dashboard front end to get the polling time of the status interface (/stats).
+This configuration option is used to configure the Dashboard front end to get the polling time of the status interface (/stats).
 
 * Authorization
 
-This configuration item is used to configure the authorization filter when accessing the Dashboard. The default filter allows LAN access. When your application wants to provide external network access, you can customize the authentication rules by setting this configuration. See the next section for details.
+This configuration option is used to configure the authorization filter when accessing the Dashboard. The default filter allows LAN access. When your application wants to provide external network access, you can customize authentication rules by setting this configuration. See the next section for details.
 
 ### Custom authentication
 

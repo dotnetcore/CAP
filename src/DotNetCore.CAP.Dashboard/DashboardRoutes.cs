@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard
 {
-    public static class DashboardRoutes
+    public class DashboardRoutes
     {
         private static readonly string[] Javascripts =
         {
@@ -33,9 +33,9 @@ namespace DotNetCore.CAP.Dashboard
             "cap.css"
         };
 
-        static DashboardRoutes()
+        public static RouteCollection GetDashboardRoutes(ISerializer serializer)
         {
-            Routes = new RouteCollection();
+            RouteCollection Routes = new RouteCollection();
             Routes.AddRazorPage("/", x => new HomePage());
             Routes.Add("/stats", new JsonStats());
             Routes.Add("/health", new OkStats());
@@ -104,7 +104,7 @@ namespace DotNetCore.CAP.Dashboard
                 {
                     var msg = client.Storage.GetMonitoringApi().GetPublishedMessageAsync(messageId)
                         .GetAwaiter().GetResult();
-                    msg.Origin = StringSerializer.DeSerialize(msg.Content);
+                    msg.Origin = serializer.Deserialize(msg.Content);
                     client.RequestServices.GetService<IDispatcher>().EnqueueToPublish(msg);
                 });
             Routes.AddPublishBatchCommand(
@@ -113,7 +113,7 @@ namespace DotNetCore.CAP.Dashboard
                 {
                     var msg = client.Storage.GetMonitoringApi().GetReceivedMessageAsync(messageId)
                         .GetAwaiter().GetResult();
-                    msg.Origin = StringSerializer.DeSerialize(msg.Content);
+                    msg.Origin = serializer.Deserialize(msg.Content);
                     client.RequestServices.GetService<ISubscribeDispatcher>().DispatchAsync(msg);
                 }); 
 
@@ -128,16 +128,16 @@ namespace DotNetCore.CAP.Dashboard
             
             Routes.AddRazorPage("/nodes", x =>
             {
-                var id = x.Request.Cookies["cap.node"];
+                var id = x.Request.Cookies.ContainsKey("cap.node") ? x.Request.Cookies["cap.node"] : string.Empty;
                 return new NodePage(id);
             });
 
             Routes.AddRazorPage("/nodes/node/(?<Id>.+)", x => new NodePage(x.UriMatch.Groups["Id"].Value));
 
             #endregion Razor pages and commands
-        }
 
-        public static RouteCollection Routes { get; }
+            return Routes;
+        }
 
         internal static string GetContentFolderNamespace(string contentFolder)
         {

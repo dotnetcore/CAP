@@ -79,7 +79,7 @@ namespace DotNetCore.CAP.Internal
 
                                 RegisterMessageProcessor(client);
 
-                                client.Subscribe(matchGroup.Value.Select(x => x.Attribute.Name));
+                                client.Subscribe(matchGroup.Value.Select(x => x.TopicName));
 
                                 client.Listening(_pollingDelay, _cts.Token);
                             }
@@ -177,6 +177,7 @@ namespace DotNetCore.CAP.Internal
 
                         var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
                         message = await _serializer.DeserializeAsync(transportMessage, type);
+                        message.RemoveException();
                     }
                     catch (Exception e)
                     {
@@ -195,7 +196,7 @@ namespace DotNetCore.CAP.Internal
 
                     if (message.HasException())
                     {
-                        var content = StringSerializer.Serialize(message);
+                        var content = _serializer.Serialize(message);
 
                         _storage.StoreReceivedExceptionMessage(name, group, content);
 
@@ -273,6 +274,11 @@ namespace DotNetCore.CAP.Internal
                     break;
                 case MqLogType.AsyncErrorEvent:
                     _logger.LogError("NATS subscriber received an error. --> " + logmsg.Reason);
+                case MqLogType.InvalidIdFormat:
+                    _logger.LogError("AmazonSQS subscriber delete inflight message failed, invalid id. --> " + logmsg.Reason);
+                    break;
+                case MqLogType.MessageNotInflight:
+                    _logger.LogError("AmazonSQS subscriber change message's visibility failed, message isn't in flight. --> " + logmsg.Reason);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

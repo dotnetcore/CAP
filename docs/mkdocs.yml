@@ -10,7 +10,7 @@ edit_uri: 'edit/master/docs/content'
 docs_dir: 'content'
 
 # Copyright
-copyright: Copyright &copy; 2017 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
+copyright: Copyright &copy; 2020 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
 
 
 #theme: material
@@ -23,8 +23,8 @@ theme:
   include_sidebar: true
   logo: 'img/logo.svg'
   favicon: 'img/favicon.ico'
-  feature:
-    tabs: true  
+  features:
+    - tabs
   i18n:
     prev: 'Previous'
     next: 'Next'
@@ -32,11 +32,11 @@ theme:
 #Customization
 extra:
   social:
-    - type: 'github'
+    - icon: 'fontawesome/brands/github'
       link: 'https://github.com/dotnetcore/CAP'
-    - type: 'twitter'
+    - icon: 'fontawesome/brands/twitter'
       link: 'https://twitter.com/ncc_community'
-    - type: 'weibo'
+    - icon: 'fontawesome/brands/weibo'
       link: 'https://weibo.com/dotnetcore'
 
 # Extensions
@@ -81,24 +81,25 @@ nav:
       - CAP:
           - Configuration: user-guide/en/cap/configuration.md
           - Messaging: user-guide/en/cap/messaging.md
-          - Sagas: user-guide/en/cap/sagas.md
           - Serialization: user-guide/en/cap/serialization.md
           - Transactions: user-guide/en/cap/transactions.md
           - Idempotence: user-guide/en/cap/idempotence.md
-      - Transports:
-          - General: user-guide/en/transports/general.md
-          - RabbitMQ: user-guide/en/transports/rabbitmq.md
-          - Apache Kafka®: user-guide/en/transports/kafka.md
-          - Azure Service Bus: user-guide/en/transports/azure-service-bus.md
-          - In-Memory Queue: user-guide/en/transports/in-memory-queue.md
-      - Persistent:
-          - General: user-guide/en/persistent/general.md
-          - SQL Server: user-guide/en/persistent/sqlserver.md
-          - MySQL: user-guide/en/persistent/mysql.md
-          - PostgreSql: user-guide/en/persistent/postgresql.md
-          - MongoDB: user-guide/en/persistent/mongodb.md
-          - In-Memory: user-guide/en/persistent/in-memory-storage.md
+      - Transport:
+          - General: user-guide/en/transport/general.md
+          - RabbitMQ: user-guide/en/transport/rabbitmq.md
+          - Apache Kafka®: user-guide/en/transport/kafka.md
+          - Azure Service Bus: user-guide/en/transport/azure-service-bus.md
+          - Amazon SQS: user-guide/en/transport/aws-sqs.md
+          - In-Memory Queue: user-guide/en/transport/in-memory-queue.md
+      - Storage:
+          - General: user-guide/en/storage/general.md
+          - SQL Server: user-guide/en/storage/sqlserver.md
+          - MySQL: user-guide/en/storage/mysql.md
+          - PostgreSql: user-guide/en/storage/postgresql.md
+          - MongoDB: user-guide/en/storage/mongodb.md
+          - In-Memory: user-guide/en/storage/in-memory-storage.md
       - Monitoring:
+          - Consul: user-guide/en/monitoring/consul.md
           - Dashboard: user-guide/en/monitoring/dashboard.md
           - Diagnostics: user-guide/en/monitoring/diagnostics.md
       - Samples:
@@ -113,29 +114,28 @@ nav:
       - CAP:
           - 配置: user-guide/zh/cap/configuration.md
           - 消息: user-guide/zh/cap/messaging.md
-          - Sagas: user-guide/zh/cap/sagas.md
           - 序列化: user-guide/zh/cap/serialization.md
-          - 运输: user-guide/zh/cap/transactions.md
+          - 事务: user-guide/zh/cap/transactions.md
           - 幂等性: user-guide/zh/cap/idempotence.md          
       - 传输:
-          - 简介: user-guide/zh/transports/general.md
-          - RabbitMQ: user-guide/zh/transports/rabbitmq.md
-          - Apache Kafka®: user-guide/zh/transports/kafka.md
-          - Azure Service Bus: user-guide/zh/transports/azure-service-bus.md
-          - In-Memory Queue: user-guide/zh/transports/in-memory-queue.md
-      - 持久化:
-          - 简介: user-guide/zh/persistent/general.md
-          - SQL Server: user-guide/zh/persistent/sqlserver.md
-          - MySQL: user-guide/zh/persistent/mysql.md
-          - PostgreSql: user-guide/zh/persistent/postgresql.md
-          - MongoDB: user-guide/zh/persistent/mongodb.md
-          - In-Memory: user-guide/zh/persistent/in-memory-storage.md
+          - 简介: user-guide/zh/transport/general.md
+          - RabbitMQ: user-guide/zh/transport/rabbitmq.md
+          - Apache Kafka®: user-guide/zh/transport/kafka.md
+          - Azure Service Bus: user-guide/zh/transport/azure-service-bus.md
+          - Amazon SQS: user-guide/zh/transport/aws-sqs.md
+          - In-Memory Queue: user-guide/zh/transport/in-memory-queue.md
+      - 存储:
+          - 简介: user-guide/zh/storage/general.md
+          - SQL Server: user-guide/zh/storage/sqlserver.md
+          - MySQL: user-guide/zh/storage/mysql.md
+          - PostgreSql: user-guide/zh/storage/postgresql.md
+          - MongoDB: user-guide/zh/storage/mongodb.md
+          - In-Memory: user-guide/zh/storage/in-memory-storage.md
       - 监控:
           - Consul: user-guide/zh/monitoring/consul.md
           - Dashboard: user-guide/zh/monitoring/dashboard.md
-          - Diagnostics: user-guide/zh/monitoring/diagnostics.md
+          - 性能追踪: user-guide/zh/monitoring/diagnostics.md
           - 健康检查: user-guide/zh/monitoring/health-checks.md
-          - Metrics: user-guide/zh/monitoring/metrics.md
       - 示例:
           - Github: user-guide/zh/samples/github.md
           - eShopOnContainers: user-guide/zh/samples/eshoponcontainers.md

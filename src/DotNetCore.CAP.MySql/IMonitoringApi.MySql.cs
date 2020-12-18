@@ -10,7 +10,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Options;
-using MySql.Data.MySqlClient;
+using MySqlConnector;
 
 namespace DotNetCore.CAP.MySql
 {
@@ -124,8 +124,8 @@ SELECT
                     {
                         Id = reader.GetInt64(index++),
                         Version = reader.GetString(index++),
-                        Group = queryDto.MessageType == MessageType.Subscribe ? reader.GetString(index++) : default,
                         Name = reader.GetString(index++),
+                        Group = queryDto.MessageType == MessageType.Subscribe ? reader.GetString(index++) : default,
                         Content = reader.GetString(index++),
                         Retries = reader.GetInt32(index++),
                         Added = reader.GetDateTime(index++),

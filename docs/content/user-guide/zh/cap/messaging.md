@@ -6,6 +6,50 @@
 
 你可以阅读 [quick-start](../getting-started/quick-start.md#_3) 来学习如何发送和处理消息。
 
+## 补偿事务
+
+[Compensating transaction](https://en.wikipedia.org/wiki/Compensating_transaction)
+
+某些情况下，消费者需要返回值以告诉发布者执行结果，以便于发布者实施一些动作，通常情况下这属于补偿范围。
+
+你可以在消费者执行的代码中通过重新发布一个新消息来通知上游，CAP 提供了一种简单的方式来做到这一点。 你可以在发送的时候指定 `callbackName` 来得到消费者的执行结果，通常这仅适用于点对点的消费。以下是一个示例。
+
+例如，在一个电商程序中，订单初始状态为 pending，当商品数量成功扣除时将状态标记为 succeeded ，否则为 failed。
+
+```C#
+// =============  Publisher =================
+
+_capBus.Publish("place.order.qty.deducted", new { OrderId = 1234, ProductId = 23255, Qty = 1 }, "place.order.mark.status");    
+
+// publisher using `callbackName` to subscribe consumer result
+
+[CapSubscribe("place.order.mark.status")]
+public void MarkOrderStatus(JToken param)
+{
+    var orderId = param.Value<int>("OrderId");
+    var isSuccess = param.Value<bool>("IsSuccess");
+    
+    if(isSuccess)
+       //mark order status to succeeded
+    else
+       //mark order status to failed
+}
+
+// =============  Consumer ===================
+
+[CapSubscribe("place.order.qty.deducted")]
+public object DeductProductQty(JToken param)
+{
+    var orderId = param.Value<int>("OrderId");
+    var productId = param.Value<int>("ProductId");
+    var qty = param.Value<int>("Qty");
+
+    //business logic 
+
+    return new { OrderId = orderId, IsSuccess = true };
+}
+```
+
 ## 异构系统集成
 
 在 3.0+ 版本中，我们对消息结构进行了重构，我们利用了消息队列中消息协议中的 Header 来传输一些额外信息，以便于在 Body 中我们可以做到不需要修改或包装使用者的原始消息数据格式和内容进行发送。
@@ -45,18 +89,17 @@ channel.basicPublish(exchangeName, routingKey,
 
 ```
 
-
 ## 消息调度
 
 CAP 接收到消息之后会将消息发送到 Transport, 由 Transport 进行运输。
 
 当你使用 `ICapPublisher` 接口发送时，CAP将会将消息调度到相应的 Transport中去，目前还不支持批量发送消息。
 
-有关 Transports 的更多信息，可以查看 [Transports](../transports/general.md) 章节。
+有关 Transports 的更多信息，可以查看 [Transports](../transport/general.md) 章节。
 
 ## 消息存储
 
-CAP 接收到消息之后会将消息进行 Persistent（持久化）， 有关 Persistent 的更多信息，可以查看 [Persistent](../persistent/general.md) 章节。
+CAP 接收到消息之后会将消息进行 Persistent（持久化）， 有关 Persistent 的更多信息，可以查看 [Persistent](../storage/general.md) 章节。
 
 ## 消息重试
 

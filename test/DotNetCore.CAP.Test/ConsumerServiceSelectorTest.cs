@@ -17,8 +17,9 @@ namespace DotNetCore.CAP.Test
             services.AddOptions();
             services.PostConfigure<CapOptions>(x=>{});
             services.AddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
-            services.AddScoped<IFooTest, CandidatesFooTest>();
+            services.AddScoped<IFooTest, CandidatesFooTest>();			
             services.AddScoped<IBarTest, CandidatesBarTest>();
+			services.AddScoped<IAbstractTest, CandidatesAbstractTest>();
             services.AddLogging();
             _provider = services.BuildServiceProvider();
         }
@@ -29,20 +30,37 @@ namespace DotNetCore.CAP.Test
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
 
-            Assert.Equal(6, candidates.Count);
+            Assert.Equal(10, candidates.Count);
         }
 
-        [Fact]
-        public void CanFindSpecifiedTopic()
+        [Theory]
+        [InlineData("Candidates.Foo")]
+        [InlineData("Candidates.Foo3")]
+        [InlineData("Candidates.Foo4")]
+        public void CanFindSpecifiedTopic(string topic)
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
-            var bestCandidates = selector.SelectBestCandidate("Candidates.Foo", candidates);
+            var bestCandidates = selector.SelectBestCandidate(topic, candidates);
 
             Assert.NotNull(bestCandidates);
             Assert.NotNull(bestCandidates.MethodInfo);
             Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
         }
+		
+		[Theory]
+		[InlineData("Candidates.Abstract")]
+		[InlineData("Candidates.Abstract2")]
+		public void CanFindInheritedMethodsTopic(string topic)
+		{
+			var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+			var candidates = selector.SelectCandidates();
+			var bestCandidates = selector.SelectBestCandidate(topic, candidates);
+
+			Assert.NotNull(bestCandidates);
+			Assert.NotNull(bestCandidates.MethodInfo);
+			Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
+		}
 
 
         [Theory]
@@ -116,7 +134,7 @@ namespace DotNetCore.CAP.Test
 
     public class CandidatesTopic : TopicAttribute
     {
-        public CandidatesTopic(string topicName) : base(topicName)
+        public CandidatesTopic(string topicName, bool isPartial = false) : base(topicName, isPartial)
         {
         }
     }
@@ -129,6 +147,11 @@ namespace DotNetCore.CAP.Test
     {
     }
 
+    public interface IAbstractTest
+    {
+    }
+
+    [CandidatesTopic("Candidates")]
     public class CandidatesFooTest : IFooTest, ICapSubscribe
     {
         [CandidatesTopic("Candidates.Foo")]
@@ -142,6 +165,20 @@ namespace DotNetCore.CAP.Test
         public void GetFoo2()
         {
             Console.WriteLine("GetFoo2() method has bee excuted.");
+        }
+
+        [CandidatesTopic("Foo3", isPartial: true)]
+        public Task GetFoo3()
+        {
+            Console.WriteLine("GetFoo3() method has bee excuted.");
+            return Task.CompletedTask;
+        }
+
+        [CandidatesTopic(".Foo4", isPartial: true)]
+        public Task GetFoo4()
+        {
+            Console.WriteLine("GetFoo4() method has bee excuted.");
+            return Task.CompletedTask;
         }
 
         [CandidatesTopic("*.*.Asterisk")]
@@ -180,4 +217,31 @@ namespace DotNetCore.CAP.Test
             Console.WriteLine("GetBar3() method has bee excuted.");
         }
     }
+	
+	/// <summary>
+	/// Test to verify if an inherited class also gets the subscribed methods.
+	/// Abstract class doesn't have a subscribe topic, inherited class with a topic
+	/// should also get the partial subscribed methods.
+	/// </summary>
+	public abstract class CandidatesAbstractBaseTest : ICapSubscribe, IAbstractTest
+	{
+		[CandidatesTopic("Candidates.Abstract")]
+		public virtual Task GetAbstract()
+		{
+		  Console.WriteLine("GetAbstract() method has been excuted.");
+		  return Task.CompletedTask;
+		}
+
+		[CandidatesTopic("Abstract2", isPartial: true)]
+		public virtual Task GetAbstract2()
+		{
+		  Console.WriteLine("GetAbstract2() method has been excuted.");
+		  return Task.CompletedTask;
+		}
+	}
+
+	[CandidatesTopic("Candidates")]
+	public class CandidatesAbstractTest : CandidatesAbstractBaseTest
+	{
+	}
 }

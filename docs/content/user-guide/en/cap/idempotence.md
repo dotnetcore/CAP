@@ -8,7 +8,7 @@ Imdempotence (which you may read a formal definition of on [Wikipedia](https://e
 
 Before we talk about idempotency, let's talk about the delivery of messages on the consumer side.
 
-Since CAP is not a used MS DTC or other type of 2PC distributed transaction mechanism, there is a problem that at least the message is strictly delivered once. Specifically, in a message-based system, there are three possibilities:
+Since CAP doesn't uses MS DTC or other type of 2PC distributed transaction mechanism, there is a problem that the message is strictly delivered at least once. Specifically, in a message-based system, there are three possibilities:
 
 * Exactly Once(*)  
 * At Most Once 
@@ -35,9 +35,9 @@ This type of delivery guarantee can arise from your messaging system and your co
         2. Put message back into the queue
 ```
 
-In the sunshine scenario, this is all well and good – your messages will be received, and work transactions will be committed, and you will be happy.
+In the best case scenario, this is all well and good – your messages will be received, and work transactions will be committed, and you will be happy.
 
-However, the sun does not always shine, and stuff tends to fail – especially if you do enough stuff. Consider e.g. what would happen if anything fails after having performed step (1), and then – when you try to execute step (4)/(2) (i.e. put the message back into the queue) – the network was temporarily unavailable, or the message broker restarted, or the host machine decided to reboot because it had installed an update.
+However, the sun does not always shine, and stuff tends to fail – especially if you do alot of stuff. Consider e.g. what would happen if anything fails after having performed step (1), and then – when you try to execute step (4)/(2) (i.e. put the message back into the queue) – the network was temporarily unavailable, or the message broker restarted, or the host machine decided to reboot because it had installed an update.
 
 This can be OK if it's what you want, but most things in CAP revolve around the concept of DURABLE messages, i.e. messages whose contents is just as important as the data in your database.
 
@@ -72,7 +72,7 @@ The fact that the "work transaction" is just a conceptual thing is what makes it
 
 ## Idempotence at CAP
 
-In the CAP, the delivery guarantees we use is **At Least Once**.
+In CAP, **At Least Once**  delivery guarantee is used.
 
 Since we have a temporary storage medium (database table), we may be able to do At Most Once, but in order to strictly guarantee that the message will not be lost, we do not provide related functions or configurations.
 
@@ -83,9 +83,9 @@ Since we have a temporary storage medium (database table), we may be able to do 
     There are a lot of reasons why the Consumer method fails. I don't know if the specific scene is blindly retrying or not retrying is an incorrect choice.
     For example, if the consumer is debiting service, if the execution of the debit is successful, but fails to write the debit log, the CAP will judge that the consumer failed to execute and try again. If the client does not guarantee idempotency, the framework will retry it, which will inevitably lead to serious consequences for multiple debits.
 
-2. The implementation of the Consumer method succeeded, but received the same message.  
+2. The execution of the Consumer method succeeded, but received the same message.  
 
-    The scenario is also possible here. If the Consumer has been successfully executed at the beginning, but for some reason, such as the Broker recovery, and received the same message, the CAP will consider this a new after receiving the Broker message. The message will be executed again by the Consumer. Because it is a new message, the CAP cannot be idempotent at this time.
+    This scenario is also possible. If the Consumer has been successfully executed at the beginning, but for some reason, such as the Broker recovery, same message has been received, CAP will consider this as a new message after receiving the Broker message. Message will be executed again by the Consumer. Because it is a new message, CAP cannot be idempotent at this time.
 
 3. The current data storage mode can not be idempotent.  
 
@@ -95,7 +95,7 @@ Since we have a temporary storage medium (database table), we may be able to do 
 
     Many event-driven frameworks require users to ensure idempotent operations, such as ENode, RocketMQ, etc...
 
-From an implementation point of view, CAP can do some less stringent idempotence, but strict idempotent cannot.
+From an implementation point of view, CAP can do some less stringent idempotence, but strict idempotent can not be guaranteed.
 
 ### Naturally idempotent message processing
 
