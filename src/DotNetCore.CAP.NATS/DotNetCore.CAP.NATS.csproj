@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <AssemblyName>DotNetCore.CAP.NATS</AssemblyName>
+    <PackageTags>$(PackageTags);NATS</PackageTags>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <WarningsAsErrors>NU1605;NU1701</WarningsAsErrors>
+    <NoWarn>NU1701;CS1591</NoWarn>
+    <DocumentationFile>bin\$(Configuration)\netstandard2.1\DotNetCore.CAP.NATS.xml</DocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NATS.Client" Version="0.11.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+  </ItemGroup>
+
+</Project>
