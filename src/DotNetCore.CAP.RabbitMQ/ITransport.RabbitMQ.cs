@@ -9,7 +9,6 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Framing;
 
 namespace DotNetCore.CAP.RabbitMQ
 {
@@ -37,6 +36,8 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 channel = _connectionChannelPool.Rent();
 
+                channel.ConfirmSelect();
+
                 var props = channel.CreateBasicProperties();
                 props.DeliveryMode = 2;
                 props.Headers = message.Headers.ToDictionary(x => x.Key, x => (object) x.Value);
@@ -44,6 +45,8 @@ namespace DotNetCore.CAP.RabbitMQ
                 channel.ExchangeDeclare(_exchange, RabbitMQOptions.ExchangeType, true);
 
                 channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
+
+                channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
 
                 _logger.LogDebug($"RabbitMQ topic message [{message.GetName()}] has been published.");
 
