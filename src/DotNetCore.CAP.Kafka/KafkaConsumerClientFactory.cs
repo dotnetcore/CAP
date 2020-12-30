@@ -19,9 +19,7 @@ namespace DotNetCore.CAP.Kafka
         {
             try
             {
-                var client = new KafkaConsumerClient(groupId, _kafkaOptions);
-                client.Connect();
-                return client;
+                return new KafkaConsumerClient(groupId, _kafkaOptions);
             }
             catch (System.Exception e)
             {

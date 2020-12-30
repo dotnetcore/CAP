@@ -69,21 +69,26 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
         {
             try
             {
+                var healthCheck = new AgentServiceCheck
+                {
+                    DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30),
+                    Interval = TimeSpan.FromSeconds(10),
+                    Status = HealthStatus.Passing
+                };
+
+                if (_options.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase))
+                    healthCheck.HTTP = $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/health";
+                else if (_options.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                    healthCheck.TCP = $"{_options.CurrentNodeHostName}:{_options.CurrentNodePort}";
+
                 return _consul.Agent.ServiceRegister(new AgentServiceRegistration
                 {
                     ID = _options.NodeId,
                     Name = _options.NodeName,
                     Address = _options.CurrentNodeHostName,
                     Port = _options.CurrentNodePort,
-                    Tags = new[] {"CAP", "Client", "Dashboard"},
-                    Check = new AgentServiceCheck
-                    {
-                        DeregisterCriticalServiceAfter = TimeSpan.FromSeconds(30),
-                        Interval = TimeSpan.FromSeconds(10),
-                        Status = HealthStatus.Passing,
-                        HTTP =
-                            $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/health"
-                    }
+                    Tags = new[] { "CAP", "Client", "Dashboard" },
+                    Check = healthCheck
                 });
             }
             catch (Exception ex)

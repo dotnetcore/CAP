@@ -124,8 +124,8 @@ SELECT
                     {
                         Id = reader.GetInt64(index++),
                         Version = reader.GetString(index++),
-                        Group = queryDto.MessageType == MessageType.Subscribe ? reader.GetString(index++) : default,
                         Name = reader.GetString(index++),
+                        Group = queryDto.MessageType == MessageType.Subscribe ? reader.GetString(index++) : default,
                         Content = reader.GetString(index++),
                         Retries = reader.GetInt32(index++),
                         Added = reader.GetDateTime(index++),

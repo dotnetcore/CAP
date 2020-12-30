@@ -16,7 +16,7 @@ namespace Sample.ConsoleApp
             {
                 //console app does not support dashboard
 
-                x.UseMySql("Server=192.168.3.57;Port=3307;Database=captest;Uid=root;Pwd=123123;");
+                x.UseMySql("<ConnectionString>");
                 x.UseRabbitMQ(z =>
                 {
                     z.HostName = "192.168.3.57";

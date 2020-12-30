@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
 using Xunit;
 
@@ -15,10 +16,11 @@ namespace DotNetCore.CAP.MySql.Test
 
         public MySqlStorageConnectionTest()
         {
+            var serializer = GetService<ISerializer>();
             var options = GetService<IOptions<MySqlOptions>>();
             var capOptions = GetService<IOptions<CapOptions>>();
             var initializer = GetService<IStorageInitializer>();
-            _storage = new MySqlDataStorage(options, capOptions, initializer);
+            _storage = new MySqlDataStorage(options, capOptions, initializer, serializer);
         }
 
         [Fact]

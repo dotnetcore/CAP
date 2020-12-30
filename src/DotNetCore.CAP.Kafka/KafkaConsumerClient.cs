@@ -106,9 +106,15 @@ namespace DotNetCore.CAP.Kafka
             {
                 if (_consumerClient == null)
                 {
-                    _kafkaOptions.MainConfig["group.id"] = _groupId;
-                    _kafkaOptions.MainConfig["auto.offset.reset"] = "earliest";
-                    var config = _kafkaOptions.AsKafkaConfig();
+                    var config = new ConsumerConfig(new Dictionary<string, string>(_kafkaOptions.MainConfig))
+                    {
+                        BootstrapServers = _kafkaOptions.Servers,
+                        GroupId = _groupId,
+                        AutoOffsetReset = AutoOffsetReset.Earliest,
+                        AllowAutoCreateTopics = true,
+                        EnableAutoCommit = false,
+                        LogConnectionClose = false
+                    };
 
                     _consumerClient = new ConsumerBuilder<string, byte[]>(config)
                         .SetErrorHandler(ConsumerClient_OnConsumeError)

@@ -63,21 +63,22 @@ namespace DotNetCore.CAP.Internal
                 throw new ArgumentNullException(nameof(name));
             }
 
-            if (headers == null)
-            {
-                headers = new Dictionary<string, string>();
-            }
+            headers ??= new Dictionary<string, string>();
 
-            var messageId = SnowflakeId.Default().NextId().ToString();
-            headers.Add(Headers.MessageId, messageId);
+            if (!headers.ContainsKey(Headers.MessageId))
+            {
+                var messageId = SnowflakeId.Default().NextId().ToString();
+                headers.Add(Headers.MessageId, messageId);
+            }
+             
+            if (!headers.ContainsKey(Headers.CorrelationId))
+            {
+                headers.Add(Headers.CorrelationId, headers[Headers.MessageId]);
+                headers.Add(Headers.CorrelationSequence, 0.ToString());
+            }
             headers.Add(Headers.MessageName, name);
             headers.Add(Headers.Type, typeof(T).Name);
             headers.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
-            if (!headers.ContainsKey(Headers.CorrelationId))
-            {
-                headers.Add(Headers.CorrelationId, messageId);
-                headers.Add(Headers.CorrelationSequence, 0.ToString());
-            }
 
             var message = new Message(headers, value);
 

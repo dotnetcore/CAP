@@ -1,8 +1,8 @@
 ﻿@* Generator: Template TypeVisibility: Internal GeneratePrettyNames: True *@
+@using System.Text.Json
 @using DotNetCore.CAP.Dashboard.Pages
 @using DotNetCore.CAP.Dashboard.Resources
 @using DotNetCore.CAP.Messages
-@using Newtonsoft.Json
 @inherits DotNetCore.CAP.Dashboard.RazorPage
 @{
     Layout = new LayoutPage(Strings.HomePage_Title);
@@ -52,12 +52,12 @@
         </h3>
 
         <div id="historyGraph"
-             data-published-succeeded="@JsonConvert.SerializeObject(publishedSucceeded)"
-             data-published-failed="@JsonConvert.SerializeObject(publishedFailed)"
+             data-published-succeeded="@JsonSerializer.Serialize(publishedSucceeded)"
+             data-published-failed="@JsonSerializer.Serialize(publishedFailed)"
              data-published-succeeded-string="@Strings.HomePage_GraphHover_PSucceeded"
              data-published-failed-string="@Strings.HomePage_GraphHover_PFailed"
-             data-received-succeeded="@JsonConvert.SerializeObject(receivedSucceeded)"
-             data-received-failed="@JsonConvert.SerializeObject(receivedFailed)"
+             data-received-succeeded="@JsonSerializer.Serialize(receivedSucceeded)"
+             data-received-failed="@JsonSerializer.Serialize(receivedFailed)"
              data-received-succeeded-string="@Strings.HomePage_GraphHover_RSucceeded"
              data-received-failed-string="@Strings.HomePage_GraphHover_RFailed">
         </div>

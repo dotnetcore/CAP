@@ -10,6 +10,7 @@ namespace DotNetCore.CAP.Messages
     /// <summary>
     /// Message content field
     /// </summary>
+    [Serializable]
     public class TransportMessage
     {
         public TransportMessage(IDictionary<string, string> headers, [CanBeNull] byte[] body)
@@ -42,6 +43,11 @@ namespace DotNetCore.CAP.Messages
         public string GetGroup()
         {
             return Headers.TryGetValue(Messages.Headers.Group, out var value) ? value : null;
+        }
+        
+        public string GetCorrelationId()
+        {
+            return Headers.TryGetValue(Messages.Headers.CorrelationId, out var value) ? value : null;
         }
     }
 }

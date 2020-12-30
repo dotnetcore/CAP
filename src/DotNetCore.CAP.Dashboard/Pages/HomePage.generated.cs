@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.Dashboard.Pages
     #line hidden
     
     #line 5 "..\..\Pages\HomePage.cshtml"
-    using Newtonsoft.Json;
+    using System.Text.Json;
     
     #line default
     #line hidden
@@ -252,7 +252,7 @@ WriteLiteral("\r\n        </h3>\r\n\r\n        <div id=\"historyGraph\"\r\n     
 
             
             #line 55 "..\..\Pages\HomePage.cshtml"
-                                  Write(JsonConvert.SerializeObject(publishedSucceeded));
+                                  Write(JsonSerializer.Serialize(publishedSucceeded));
 
             
             #line default
@@ -262,7 +262,7 @@ WriteLiteral("\"\r\n             data-published-failed=\"");
 
             
             #line 56 "..\..\Pages\HomePage.cshtml"
-                               Write(JsonConvert.SerializeObject(publishedFailed));
+                               Write(JsonSerializer.Serialize(publishedFailed));
 
             
             #line default
@@ -292,7 +292,7 @@ WriteLiteral("\"\r\n             data-received-succeeded=\"");
 
             
             #line 59 "..\..\Pages\HomePage.cshtml"
-                                 Write(JsonConvert.SerializeObject(receivedSucceeded));
+                                 Write(JsonSerializer.Serialize(receivedSucceeded));
 
             
             #line default
@@ -302,7 +302,7 @@ WriteLiteral("\"\r\n             data-received-failed=\"");
 
             
             #line 60 "..\..\Pages\HomePage.cshtml"
-                              Write(JsonConvert.SerializeObject(receivedFailed));
+                              Write(JsonSerializer.Serialize(receivedFailed));
 
             
             #line default
