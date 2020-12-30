@@ -2,10 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using Newtonsoft.Json.Serialization;
+using System.Text.Json;
+using System.Threading.Tasks; 
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -30,19 +28,8 @@ namespace DotNetCore.CAP.Dashboard
             if (_command != null)
             {
                 var result = _command(context);
-
-                var settings = new JsonSerializerSettings
-                {
-                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                    Converters = new JsonConverter[]
-                    {
-                        new StringEnumConverter
-                        { 
-                            NamingStrategy = new CamelCaseNamingStrategy()
-                        }
-                    }
-                };
-                serialized = JsonConvert.SerializeObject(result, settings);
+                 
+                serialized = JsonSerializer.Serialize(result);
             }
 
             if (_jsonCommand != null)

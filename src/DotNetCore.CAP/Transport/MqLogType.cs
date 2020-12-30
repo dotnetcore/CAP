@@ -20,6 +20,9 @@ namespace DotNetCore.CAP.Transport
         //AzureServiceBus
         ExceptionReceived,
 
+        //NATS
+        AsyncErrorEvent,
+
         //Amazon SQS
         InvalidIdFormat,
         MessageNotInflight

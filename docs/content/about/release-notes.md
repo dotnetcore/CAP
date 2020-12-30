@@ -1,5 +1,38 @@
 # Release Notes
 
+## Version 3.1.1 (2020-09-23)
+
+**Features:**
+
+* Add consumer parameter with interface suppport. (#669)
+* Add custom correlation id and message id support. (#668)
+* Enhanced custom serialization support. (#641)
+
+**Bug Fixed:**
+
+* Solve the issue of being duplicated executors from different assemblies. (#666)
+* Added comparer to remove duplicate ConsumerExecutors. (#653)
+* Add re-enable the auto create topics configuration item for Kafka, it's false by default. now is true. (#635)
+* Fixed postgresql transaction rollback invoke bug. (#640)
+* Fixed SQLServer table name customize bug. (#632)
+
+## Version 3.1.0 (2020-08-15)
+
+**Features:**
+
+* Add Amazon SQS support. (#597)
+* Remove Dapper and replace with ADO.NET in storage project. (#583)
+* Add debug symbols package to nuget.
+* Upgrade dependent nuget package version to latest.
+* English docs grammar correction. Thanks @mzorec
+
+**Bug Fixed:**
+
+* Fix mysql transaction rollback bug. (#598)
+* Fix dashboard query bug. (#600)
+* Fix mongo db query bug. (#611)
+* Fix dashboard browser language detection bug. (#631)
+
 ## Version 3.0.4 (2020-05-27)
 
 **Bug Fixed:**

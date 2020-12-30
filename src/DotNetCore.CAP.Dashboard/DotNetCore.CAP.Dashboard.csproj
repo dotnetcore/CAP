@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <NoWarn>1591</NoWarn>
   </PropertyGroup>
 
@@ -40,8 +40,6 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Consul" Version="1.6.1.1" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="5.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -232,6 +230,6 @@
       <Generator>RazorGenerator</Generator>
       <LastGenOutput>_SidebarMenu.generated.cs</LastGenOutput>
     </None>
-  </ItemGroup>
+  </ItemGroup> 
 
 </Project>

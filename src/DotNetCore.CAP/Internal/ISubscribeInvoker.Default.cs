@@ -8,10 +8,10 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json.Linq;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -19,13 +19,15 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ConcurrentDictionary<int, ObjectMethodExecutor> _executors;
+        private readonly ISerializer _serializer;
+        private readonly ConcurrentDictionary<string, ObjectMethodExecutor> _executors;
 
-        public SubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider)
+        public SubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, ISerializer serializer)
         {
             _serviceProvider = serviceProvider;
+            _serializer = serializer;
             _logger = loggerFactory.CreateLogger<SubscribeInvoker>();
-            _executors = new ConcurrentDictionary<int, ObjectMethodExecutor>();
+            _executors = new ConcurrentDictionary<string, ObjectMethodExecutor>();
         }
 
         public async Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context, CancellationToken cancellationToken = default)
@@ -33,10 +35,12 @@ namespace DotNetCore.CAP.Internal
             cancellationToken.ThrowIfCancellationRequested();
 
             var methodInfo = context.ConsumerDescriptor.MethodInfo;
+            var reflectedType = methodInfo.ReflectedType.Name;
 
             _logger.LogDebug("Executing subscriber method : {0}", methodInfo.Name);
 
-            var executor = _executors.GetOrAdd(methodInfo.MetadataToken, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
+            var key = $"{methodInfo.Module.Name}_{reflectedType}_{methodInfo.MetadataToken}";
+            var executor = _executors.GetOrAdd(key, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
             using var scope = _serviceProvider.CreateScope();
 
@@ -57,9 +61,9 @@ namespace DotNetCore.CAP.Internal
                 {
                     if (message.Value != null)
                     {
-                        if (message.Value is JToken jToken)  //reading from storage
+                        if (_serializer.IsJsonType(message.Value))  // use ISerializer when reading from storage, skip other objects if not Json
                         {
-                            executeParameters[i] = jToken.ToObject(parameterDescriptors[i].ParameterType);
+                            executeParameters[i] = _serializer.Deserialize(message.Value, parameterDescriptors[i].ParameterType);
                         }
                         else
                         {
@@ -70,7 +74,14 @@ namespace DotNetCore.CAP.Internal
                             }
                             else
                             {
-                                executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
+                                if (parameterDescriptors[i].ParameterType.IsInstanceOfType(message.Value))
+                                {
+                                    executeParameters[i] = message.Value;
+                                }
+                                else
+                                {
+                                    executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
+                                }
                             }
                         }
                     }

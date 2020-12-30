@@ -2,12 +2,13 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Linq;
+using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
+using DotNetCore.CAP.Dashboard.Resources;
 using DotNetCore.CAP.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -36,7 +37,6 @@ namespace DotNetCore.CAP
                 {
                     app.UseMiddleware<GatewayProxyMiddleware>();
                 }
-
                 app.UseMiddleware<DashboardMiddleware>();
             }
 
@@ -77,7 +77,7 @@ namespace DotNetCore.CAP
                 app.UseCapDashboard();
 
                 next(app);
-            };
+            };  
         }
     }
 
@@ -105,6 +105,9 @@ namespace DotNetCore.CAP
                 await _next(context);
                 return;
             }
+
+            var userLanguages = context.Request.Headers["Accept-Language"].ToString();
+            Strings.Culture = userLanguages.Contains("zh-") ? new CultureInfo("zh-CN") : new CultureInfo("en-US");
 
             // Update the path
             var path = context.Request.Path;

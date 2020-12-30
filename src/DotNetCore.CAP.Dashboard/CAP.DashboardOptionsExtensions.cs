@@ -6,6 +6,7 @@ using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+using DotNetCore.CAP.Serialization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -26,7 +27,7 @@ namespace DotNetCore.CAP
             _options?.Invoke(dashboardOptions);
             services.AddTransient<IStartupFilter, CapStartupFilter>();
             services.AddSingleton(dashboardOptions);
-            services.AddSingleton(DashboardRoutes.Routes);
+            services.AddSingleton(x => DashboardRoutes.GetDashboardRoutes(x.GetRequiredService<ISerializer>()));
             services.AddSingleton<IHttpRequester, HttpClientHttpRequester>();
             services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
             services.AddSingleton<IRequestMapper, RequestMapper>();
