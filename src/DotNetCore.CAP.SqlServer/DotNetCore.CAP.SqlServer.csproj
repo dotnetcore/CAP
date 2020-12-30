@@ -13,15 +13,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.7" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.7" />
-=======
     <PackageReference Include="Microsoft.Data.SqlClient" Version="2.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.1" />
->>>>>>> upstream/master
   </ItemGroup>
 
   <ItemGroup>
