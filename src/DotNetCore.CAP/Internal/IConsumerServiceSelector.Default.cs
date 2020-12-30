@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -100,8 +101,13 @@ namespace DotNetCore.CAP.Internal
         protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
+            Assembly entryAssembly = (new StackTrace().GetFrames() ?? Array.Empty<StackFrame>()).Last().GetMethod().Module.Assembly;
 
-            var types = Assembly.GetEntryAssembly().ExportedTypes;
+            var types = entryAssembly.ExportedTypes;
+            if (types == null)
+            {
+                throw new NullReferenceException("找不到相关类型");
+            }
             foreach (var type in types)
             {
                 var typeInfo = type.GetTypeInfo();
