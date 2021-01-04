@@ -10,6 +10,7 @@ namespace DotNetCore.CAP.Messages
     /// <summary>
     /// Message content field
     /// </summary>
+    [Serializable]
     public class TransportMessage
     {
         public TransportMessage(IDictionary<string, string> headers, [CanBeNull] byte[] body)

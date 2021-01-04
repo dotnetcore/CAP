@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>DotNetCore.CAP.Kafka</AssemblyName>
     <PackageTags>$(PackageTags);Kafka</PackageTags>
   </PropertyGroup>
@@ -9,15 +9,15 @@
   <PropertyGroup>
     <WarningsAsErrors>NU1605;NU1701</WarningsAsErrors>
     <NoWarn>NU1701;CS1591</NoWarn>
-    <DocumentationFile>bin\$(Configuration)\netstandard2.0\DotNetCore.CAP.Kafka.xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\netstandard2.1\DotNetCore.CAP.Kafka.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Confluent.Kafka" Version="1.5.2" />
+    <PackageReference Include="Confluent.Kafka" Version="1.5.3" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
-  </ItemGroup>
+  </ItemGroup> 
 
 </Project>

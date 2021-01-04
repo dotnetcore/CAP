@@ -272,6 +272,9 @@ namespace DotNetCore.CAP.Internal
                 case MqLogType.ExceptionReceived:
                     _logger.LogError("AzureServiceBus subscriber received an error. --> " + logmsg.Reason);
                     break;
+                case MqLogType.AsyncErrorEvent:
+                    _logger.LogError("NATS subscriber received an error. --> " + logmsg.Reason);
+                    break;
                 case MqLogType.InvalidIdFormat:
                     _logger.LogError("AmazonSQS subscriber delete inflight message failed, invalid id. --> " + logmsg.Reason);
                     break;

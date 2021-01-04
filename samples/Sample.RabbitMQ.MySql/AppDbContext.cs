@@ -32,7 +32,7 @@ namespace Sample.RabbitMQ.MySql
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySql(ConnectionString);
+            optionsBuilder.UseMySql(ConnectionString, ServerVersion.FromString("mysql"));
         }
     }
 }

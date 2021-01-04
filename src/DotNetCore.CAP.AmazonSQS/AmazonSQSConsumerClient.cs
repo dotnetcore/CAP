@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Amazon.SimpleNotificationService;
@@ -14,7 +15,6 @@ using Amazon.SQS.Model;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Headers = DotNetCore.CAP.Messages.Headers;
 
 namespace DotNetCore.CAP.AmazonSQS
@@ -83,7 +83,7 @@ namespace DotNetCore.CAP.AmazonSQS
 
                 if (response.Messages.Count == 1)
                 {
-                    var messageObj = JsonConvert.DeserializeObject<SQSReceivedMessage>(response.Messages[0].Body);
+                    var messageObj = JsonSerializer.Deserialize<SQSReceivedMessage>(response.Messages[0].Body);
 
                     var header = messageObj.MessageAttributes.ToDictionary(x => x.Key, x => x.Value.Value);
                     var body = messageObj.Message;

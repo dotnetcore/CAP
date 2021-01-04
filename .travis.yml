@@ -2,8 +2,10 @@ language: csharp
 sudo: required
 dist: xenial
 solution: CAP.sln
-dotnet: 3.1.100
+dotnet: 5.0.100
 mono: none
+before_script:
+ - sudo apt-get install dotnet-sdk-3.0
 env:
  - Cap_MySql_ConnectionString="Server=127.0.0.1;Database=cap_test;Uid=root;Pwd=;Allow User Variables=True;SslMode=none"
 
