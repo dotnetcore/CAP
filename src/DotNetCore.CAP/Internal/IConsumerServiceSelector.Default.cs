@@ -84,16 +84,27 @@ namespace DotNetCore.CAP.Internal
 
             var capSubscribeTypeInfo = typeof(ICapSubscribe).GetTypeInfo();
 
-            foreach (var service in ServiceCollectionExtensions.ServiceCollection.Where(o => o.ImplementationType != null && o.ServiceType != null))
+            foreach (var service in ServiceCollectionExtensions.ServiceCollection
+                .Where(o => o.ImplementationType != null || o.ImplementationFactory != null))
             {
-                var typeInfo = service.ImplementationType.GetTypeInfo();
-                if (!capSubscribeTypeInfo.IsAssignableFrom(typeInfo))
+                var detectType = service.ImplementationType ?? service.ServiceType;
+                if (!capSubscribeTypeInfo.IsAssignableFrom(detectType))
                 {
                     continue;
                 }
-                var serviceTypeInfo = service.ServiceType.GetTypeInfo();
 
-                executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo, serviceTypeInfo));
+                var actualType = service.ImplementationType;
+                if (actualType == null && service.ImplementationFactory != null)
+                {
+                    actualType = provider.GetRequiredService(service.ServiceType).GetType();
+                }
+
+                if (actualType == null)
+                {
+                    throw new NullReferenceException(nameof(service.ServiceType));
+                }
+
+                executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(), service.ServiceType.GetTypeInfo()));
             }
 
             return executorDescriptorList;
