@@ -87,7 +87,8 @@ namespace DotNetCore.CAP.Internal
             foreach (var service in ServiceCollectionExtensions.ServiceCollection
                 .Where(o => o.ImplementationType != null || o.ImplementationFactory != null))
             {
-                if (!capSubscribeTypeInfo.IsAssignableFrom(service.ServiceType))
+                var detectType = service.ImplementationType ?? service.ServiceType;
+                if (!capSubscribeTypeInfo.IsAssignableFrom(detectType))
                 {
                     continue;
                 }
