@@ -137,6 +137,7 @@ nav:
           - 性能追踪: user-guide/zh/monitoring/diagnostics.md
           - 健康检查: user-guide/zh/monitoring/health-checks.md
       - 示例:
+          - Castle DynamicProxy: user-guide/zh/samples/castle.dynamicproxy.md
           - Github: user-guide/zh/samples/github.md
           - eShopOnContainers: user-guide/zh/samples/eshoponcontainers.md
           - FAQ: user-guide/zh/samples/faq.md
