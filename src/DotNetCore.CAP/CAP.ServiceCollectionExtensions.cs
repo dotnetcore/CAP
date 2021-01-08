@@ -45,8 +45,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();
 
             //Processors
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerRegister>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
 
             //Queue's message processor
             services.TryAddSingleton<MessageNeedToRetryProcessor>();
