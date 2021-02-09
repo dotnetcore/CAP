@@ -24,6 +24,8 @@ namespace DotNetCore.CAP.Internal
 
         public IList<ParameterDescriptor> Parameters { get; set; }
 
+        public string TopicNamePrefix { get; set; }
+
         private string _topicName;
         /// <summary>
         /// Topic name based on both <see cref="Attribute"/> and <see cref="ClassAttribute"/>.
@@ -42,6 +44,11 @@ namespace DotNetCore.CAP.Internal
                     else
                     {
                         _topicName = Attribute.Name;
+                    }
+
+                    if (!string.IsNullOrEmpty(TopicNamePrefix) && !string.IsNullOrEmpty(_topicName))
+                    {
+                        _topicName = $"{TopicNamePrefix}.{_topicName}";
                     }
                 }
                 return _topicName;
