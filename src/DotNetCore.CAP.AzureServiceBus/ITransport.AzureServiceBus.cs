@@ -76,10 +76,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             try
             {
-                if (_topicClient == null)
-                {
-                    _topicClient = new TopicClient(BrokerAddress.Endpoint, _asbOptions.Value.TopicPath, RetryPolicy.NoRetry);
-                }
+                _topicClient ??= new TopicClient(BrokerAddress.Endpoint, _asbOptions.Value.TopicPath, RetryPolicy.NoRetry);
             }
             finally
             {

@@ -62,12 +62,15 @@ namespace DotNetCore.CAP.AmazonSQS
                     await _snsClient.PublishAsync(request);
 
                     _logger.LogDebug($"SNS topic message [{message.GetName().NormalizeForAws()}] has been published.");
+                    return OperateResult.Success;
                 }
-                else
+
+                _logger.LogWarning($"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]");
+                return OperateResult.Failed(new OperateError
                 {
-                    _logger.LogWarning($"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]");
-                }
-                return OperateResult.Success;
+                    Code = "SNS",
+                    Description = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]"
+                });
             }
             catch (Exception ex)
             {
@@ -100,12 +103,21 @@ namespace DotNetCore.CAP.AmazonSQS
                 if (_topicArnMaps == null)
                 {
                     _topicArnMaps = new Dictionary<string, string>();
-                    var topics = await _snsClient.ListTopicsAsync();
-                    topics.Topics.ForEach(x =>
+                    
+                    string nextToken = null;
+                    do
                     {
-                        var name = x.TopicArn.Split(':').Last();
-                        _topicArnMaps.Add(name, x.TopicArn);
-                    });
+                        var topics = nextToken == null
+                            ? await _snsClient.ListTopicsAsync()
+                            : await _snsClient.ListTopicsAsync(nextToken);
+                        topics.Topics.ForEach(x =>
+                        {
+                            var name = x.TopicArn.Split(':').Last();
+                            _topicArnMaps.Add(name, x.TopicArn);
+                        });
+                        nextToken = topics.NextToken;
+                    }
+                    while (!string.IsNullOrEmpty(nextToken));
 
                     return true;
                 }

@@ -116,7 +116,8 @@ namespace DotNetCore.CAP.RabbitMQ
 
                     var arguments = new Dictionary<string, object>
                     {
-                        {"x-message-ttl", _rabbitMQOptions.QueueMessageExpires}
+                        {"x-queue-mode", _rabbitMQOptions.QueueArguments.QueueMode},
+                        {"x-message-ttl", _rabbitMQOptions.QueueArguments.MessageTTL}
                     };
                     _channel.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false, arguments: arguments);
                 }

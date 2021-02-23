@@ -241,7 +241,7 @@ services.AddCap(x =>
 
 ### Dashboard
 
-CAP v2.1+ provides dashboard pages, you can easily view messages that were sent and received. In addition, you can also view the message status in real time in the dashboard. Use the following command to install the Dashboard in your project.
+CAP also provides dashboard pages, you can easily view messages that were sent and received. In addition, you can also view the message status in real time in the dashboard. Use the following command to install the Dashboard in your project.
 
 ```
 PM> Install-Package DotNetCore.CAP.Dashboard
