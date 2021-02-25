@@ -89,7 +89,7 @@ namespace DotNetCore.CAP
             /// <summary>
             /// Gets or sets queue message automatic deletion time (in milliseconds) "x-message-ttl", Default 864000000 ms (10 days).
             /// </summary>
-            public string MessageTTL { get; set; } = "864000000";
+            public int MessageTTL { get; set; } = 864000000;
         }
     }
 }
