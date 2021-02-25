@@ -3,7 +3,7 @@
 
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
-    internal interface IDiscoveryProviderFactory
+    public interface IDiscoveryProviderFactory
     {
         INodeDiscoveryProvider Create(DiscoveryOptions options);
     }
