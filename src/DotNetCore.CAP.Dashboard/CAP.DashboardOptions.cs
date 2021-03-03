@@ -15,7 +15,13 @@ namespace DotNetCore.CAP
             PathMatch = "/cap";
             Authorization = new[] {new LocalRequestsOnlyAuthorizationFilter()};
             StatsPollingInterval = 2000;
+            UseChallengeOnAuth = false;
         }
+
+        /// <summary>
+        /// Indicates if executes a Challenge for Auth within ASP.NET middlewares
+        /// </summary>
+        public bool UseChallengeOnAuth { get; set; }
 
         /// <summary>
         /// The path for the Back To Site link. Set to <see langword="null" /> in order to hide the Back To Site link.
