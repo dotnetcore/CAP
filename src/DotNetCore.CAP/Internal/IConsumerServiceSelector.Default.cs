@@ -59,6 +59,11 @@ namespace DotNetCore.CAP.Internal
                 return null;
             }
 
+            if (!string.IsNullOrEmpty(_capOptions.TopicNamePrefix))
+            {
+                key = $"{_capOptions.TopicNamePrefix}.{key}";
+            }
+
             var result = MatchUsingName(key, executeDescriptor);
             if (result != null)
             {
@@ -165,10 +170,13 @@ namespace DotNetCore.CAP.Internal
 
         protected virtual void SetSubscribeAttribute(TopicAttribute attribute)
         {
-            attribute.Group = (attribute.Group ?? _capOptions.DefaultGroup) + "." + _capOptions.Version;
+            var prefix = !string.IsNullOrEmpty(_capOptions.GroupNamePrefix)
+                ? $"{_capOptions.GroupNamePrefix}."
+                : string.Empty;
+            attribute.Group =  $"{prefix}{attribute.Group ?? _capOptions.DefaultGroup}.{_capOptions.Version}";
         }
 
-        private static ConsumerExecutorDescriptor InitDescriptor(
+        private ConsumerExecutorDescriptor InitDescriptor(
             TopicAttribute attr,
             MethodInfo methodInfo,
             TypeInfo implType,
@@ -183,7 +191,8 @@ namespace DotNetCore.CAP.Internal
                 MethodInfo = methodInfo,
                 ImplTypeInfo = implType,
                 ServiceTypeInfo = serviceTypeInfo,
-                Parameters = parameters
+                Parameters = parameters,
+                TopicNamePrefix = _capOptions.TopicNamePrefix
             };
 
             return descriptor;
