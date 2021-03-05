@@ -104,7 +104,7 @@ namespace DotNetCore.CAP.Test
                 {
                     if (attr.Group == null)
                     {
-                        attr.Group = _capOptions.DefaultGroup + "." + _capOptions.Version;
+                        attr.Group = _capOptions.DefaultGroupName + "." + _capOptions.Version;
                     }
                     else
                     {

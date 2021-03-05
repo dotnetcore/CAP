@@ -173,7 +173,7 @@ namespace DotNetCore.CAP.Internal
             var prefix = !string.IsNullOrEmpty(_capOptions.GroupNamePrefix)
                 ? $"{_capOptions.GroupNamePrefix}."
                 : string.Empty;
-            attribute.Group =  $"{prefix}{attribute.Group ?? _capOptions.DefaultGroup}.{_capOptions.Version}";
+            attribute.Group =  $"{prefix}{attribute.Group ?? _capOptions.DefaultGroupName}.{_capOptions.Version}";
         }
 
         private ConsumerExecutorDescriptor InitDescriptor(
