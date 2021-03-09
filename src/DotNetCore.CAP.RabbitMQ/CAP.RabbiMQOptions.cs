@@ -82,9 +82,9 @@ namespace DotNetCore.CAP
         public class QueueArgumentsOptions
         {
             /// <summary>
-            /// Gets or sets queue mode by supplying the 'x-queue-mode' declaration argument with a string specifying the desired mode. Default 'default'
+            /// Gets or sets queue mode by supplying the 'x-queue-mode' declaration argument with a string specifying the desired mode.
             /// </summary>
-            public string QueueMode { get; set; } = "default";
+            public string QueueMode { get; set; }
 
             /// <summary>
             /// Gets or sets queue message automatic deletion time (in milliseconds) "x-message-ttl", Default 864000000 ms (10 days).
