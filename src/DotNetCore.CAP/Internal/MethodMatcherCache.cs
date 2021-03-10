@@ -43,6 +43,21 @@ namespace DotNetCore.CAP.Internal
             return Entries;
         }
 
+        public List<string> GetAllTopics()
+        {
+            if (Entries.Count == 0)
+            {
+                GetCandidatesMethodsOfGroupNameGrouped();
+            }
+
+            var result = new List<string>();
+            foreach (var item in Entries.Values)
+            {
+                result.AddRange(item.Select(x => x.TopicName));
+            }
+            return result;
+        }
+
         /// <summary>
         /// Attempts to get the topic executor associated with the specified topic name and group name from the
         /// <see cref="Entries" />.
@@ -63,7 +78,7 @@ namespace DotNetCore.CAP.Internal
 
             if (Entries.TryGetValue(groupName, out var groupMatchTopics))
             {
-                matchTopic =  _selector.SelectBestCandidate(topicName, groupMatchTopics);
+                matchTopic = _selector.SelectBestCandidate(topicName, groupMatchTopics);
 
                 return matchTopic != null;
             }
