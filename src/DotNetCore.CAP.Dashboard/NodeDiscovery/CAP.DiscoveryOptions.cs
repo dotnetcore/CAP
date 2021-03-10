@@ -40,5 +40,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
         public string MatchPath { get; set; }
 
         public string Scheme { get; set; }
+
+        public string[] CustomTags { get; set; }
     }
 }

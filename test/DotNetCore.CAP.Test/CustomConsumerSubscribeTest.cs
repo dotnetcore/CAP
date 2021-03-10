@@ -12,6 +12,9 @@ namespace DotNetCore.CAP.Test
 {
     public class CustomConsumerSubscribeTest
     {
+        private const string TopicNamePrefix = "topic";
+        private const string GroupNamePrefix = "group";
+
         private readonly IServiceProvider _provider;
 
         public CustomConsumerSubscribeTest()
@@ -20,7 +23,11 @@ namespace DotNetCore.CAP.Test
             services.AddSingleton<IConsumerServiceSelector, MyConsumerServiceSelector>();
             services.AddTransient<IMySubscribe, CustomInterfaceTypesClass>();
             services.AddLogging();
-            services.AddCap(x => { });
+            services.AddCap(x =>
+            {
+                x.TopicNamePrefix = TopicNamePrefix;
+                x.GroupNamePrefix = GroupNamePrefix;
+            });
             _provider = services.BuildServiceProvider();
         }
 
@@ -42,6 +49,8 @@ namespace DotNetCore.CAP.Test
 
             Assert.NotNull(bestCandidates);
             Assert.NotNull(bestCandidates.MethodInfo);
+            Assert.StartsWith(GroupNamePrefix, bestCandidates.Attribute.Group);
+            Assert.StartsWith(TopicNamePrefix, bestCandidates.TopicName);
             Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
         }
     }
@@ -95,11 +104,16 @@ namespace DotNetCore.CAP.Test
                 {
                     if (attr.Group == null)
                     {
-                        attr.Group = _capOptions.DefaultGroup + "." + _capOptions.Version;
+                        attr.Group = _capOptions.DefaultGroupName + "." + _capOptions.Version;
                     }
                     else
                     {
                         attr.Group = attr.Group + "." + _capOptions.Version;
+                    }
+
+                    if (!string.IsNullOrEmpty(_capOptions.GroupNamePrefix))
+                    {
+                        attr.Group = $"{_capOptions.GroupNamePrefix}.{attr.Group}";
                     }
 
                     yield return new ConsumerExecutorDescriptor
@@ -109,7 +123,8 @@ namespace DotNetCore.CAP.Test
                             Group = attr.Group
                         },
                         MethodInfo = method,
-                        ImplTypeInfo = typeInfo
+                        ImplTypeInfo = typeInfo,
+                        TopicNamePrefix = _capOptions.TopicNamePrefix
                     };
                 }
             }

@@ -81,13 +81,19 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                 else if (_options.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
                     healthCheck.TCP = $"{_options.CurrentNodeHostName}:{_options.CurrentNodePort}";
 
+                var tags = new[] { "CAP", "Client", "Dashboard" };
+                if (_options.CustomTags != null && _options.CustomTags.Length > 0)
+                {
+                    tags = tags.Union(this._options.CustomTags).ToArray();
+                }
+
                 return _consul.Agent.ServiceRegister(new AgentServiceRegistration
                 {
                     ID = _options.NodeId,
                     Name = _options.NodeName,
                     Address = _options.CurrentNodeHostName,
                     Port = _options.CurrentNodePort,
-                    Tags = new[] { "CAP", "Client", "Dashboard" },
+                    Tags = tags,
                     Check = healthCheck
                 });
             }

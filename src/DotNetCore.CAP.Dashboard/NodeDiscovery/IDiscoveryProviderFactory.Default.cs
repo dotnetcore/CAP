@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
-    internal class DiscoveryProviderFactory : IDiscoveryProviderFactory
+    public class DiscoveryProviderFactory : IDiscoveryProviderFactory
     {
         private readonly ILoggerFactory _loggerFactory;
 

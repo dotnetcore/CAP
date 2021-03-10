@@ -11,6 +11,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -18,6 +19,7 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly IDispatcher _dispatcher;
         private readonly IDataStorage _storage;
+        private readonly CapOptions _capOptions;
 
         // ReSharper disable once InconsistentNaming
         protected static readonly DiagnosticListener s_diagnosticListener =
@@ -28,6 +30,7 @@ namespace DotNetCore.CAP.Internal
             ServiceProvider = service;
             _dispatcher = service.GetRequiredService<IDispatcher>();
             _storage = service.GetRequiredService<IDataStorage>();
+            _capOptions = service.GetService<IOptions<CapOptions>>().Value;
             Transaction = new AsyncLocal<ICapTransaction>();
         }
 
@@ -61,6 +64,11 @@ namespace DotNetCore.CAP.Internal
             if (string.IsNullOrEmpty(name))
             {
                 throw new ArgumentNullException(nameof(name));
+            }
+
+            if (!string.IsNullOrEmpty(_capOptions.TopicNamePrefix))
+            {
+                name = $"{_capOptions.TopicNamePrefix}.{name}";
             }
 
             headers ??= new Dictionary<string, string>();

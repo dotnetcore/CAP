@@ -89,26 +89,26 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private static Func<IConnection> CreateConnection(RabbitMQOptions options)
         {
-            var serviceName = Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
-
             var factory = new ConnectionFactory
             {
                 UserName = options.UserName,
                 Port = options.Port,
                 Password = options.Password,
-                VirtualHost = options.VirtualHost
+                VirtualHost = options.VirtualHost,
+                ClientProvidedName = Assembly.GetEntryAssembly()?.GetName().Name.ToLower()
             };
 
             if (options.HostName.Contains(","))
             {
                 options.ConnectionFactoryOptions?.Invoke(factory);
+ 
                 return () => factory.CreateConnection(
-                    options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries), serviceName);
+                    options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries));
             }
 
             factory.HostName = options.HostName;
             options.ConnectionFactoryOptions?.Invoke(factory);
-            return () => factory.CreateConnection(serviceName);
+            return () => factory.CreateConnection();
         }
 
         private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)

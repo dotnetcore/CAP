@@ -24,7 +24,7 @@ namespace DotNetCore.CAP
             ProducerThreadCount = 1;
             Extensions = new List<ICapOptionsExtension>();
             Version = "v1";
-            DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
+            DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
         }
 
         internal IList<ICapOptionsExtension> Extensions { get; }
@@ -32,7 +32,17 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Subscriber default group name. kafka-->group name. rabbitmq --> queue name.
         /// </summary>
-        public string DefaultGroup { get; set; }
+        public string DefaultGroupName { get; set; }
+
+        /// <summary>
+        /// Subscriber group prefix.
+        /// </summary>
+        public string GroupNamePrefix { get; set; }
+        
+        /// <summary>
+        /// Topic prefix.
+        /// </summary>
+        public string TopicNamePrefix { get; set; }
 
         /// <summary>
         /// The default version of the message, configured to isolate data in the same instance. The length must not exceed 20

@@ -10,6 +10,7 @@ using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using DotNetCore.CAP.Dashboard.Resources;
 using DotNetCore.CAP.Persistence;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -74,9 +75,9 @@ namespace DotNetCore.CAP
         {
             return app =>
             {
-                app.UseCapDashboard();
-
                 next(app);
+                
+                app.UseCapDashboard();
             };  
         }
     }
@@ -132,6 +133,12 @@ namespace DotNetCore.CAP
                     if (authenticateResult) continue;
 
                     var isAuthenticated = context.User?.Identity?.IsAuthenticated;
+
+                    if (_options.UseChallengeOnAuth)
+                    {
+                        await context.ChallengeAsync();
+                        return;
+                    }
 
                     context.Response.StatusCode = isAuthenticated == true
                         ? (int)HttpStatusCode.Forbidden
