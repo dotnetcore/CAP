@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Data;
 using System.Diagnostics;
 using System.Threading;
@@ -85,7 +86,7 @@ namespace DotNetCore.CAP
 
         public override void Dispose()
         {
-            (DbTransaction as IDbTransaction)?.Dispose();
+            (DbTransaction as IDisposable)?.Dispose();
             DbTransaction = null;
         }
     }
