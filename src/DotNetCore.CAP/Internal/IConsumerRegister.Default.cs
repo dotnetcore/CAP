@@ -181,7 +181,7 @@ namespace DotNetCore.CAP.Internal
                     }
                     catch (Exception e)
                     {
-                        transportMessage.Headers.Add(Headers.Exception, nameof(SerializationException) + "-->" + e.Message);
+                        transportMessage.Headers.Add(Headers.Exception, e.GetType().Name + "-->" + e.Message);
                         if (transportMessage.Headers.TryGetValue(Headers.Type, out var val))
                         {
                             var dataUri = $"data:{val};base64," + Convert.ToBase64String(transportMessage.Body);
