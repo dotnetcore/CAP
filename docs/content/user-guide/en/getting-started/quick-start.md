@@ -36,7 +36,7 @@ public void ConfigureServices(IServiceCollection services)
 public class PublishController : Controller
 {
     [Route("~/send")]
-    public IActionResult SendMessage([FromService]ICapPublisher capBus)
+    public IActionResult SendMessage([FromServices]ICapPublisher capBus)
     {
         capBus.Publish("test.show.time", DateTime.Now);
 
