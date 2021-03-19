@@ -12,9 +12,9 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.1" />
-    <PackageReference Include="Npgsql" Version="5.0.1.1" /> 
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.4" />
+    <PackageReference Include="Npgsql" Version="5.0.3" /> 
   </ItemGroup>
 
   <ItemGroup>
