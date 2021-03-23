@@ -46,6 +46,8 @@ namespace DotNetCore.CAP.Kafka
                 RequestTimeoutMs = 3000
             };
 
+            _options.ClientConfig?.Invoke(config);
+
             producer = new ProducerBuilder<string, byte[]>(config).Build();
 
             return producer;

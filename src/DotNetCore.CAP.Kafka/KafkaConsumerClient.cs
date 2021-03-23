@@ -116,6 +116,8 @@ namespace DotNetCore.CAP.Kafka
                         LogConnectionClose = false
                     };
 
+                    _kafkaOptions.ClientConfig?.Invoke(config);
+
                     _consumerClient = new ConsumerBuilder<string, byte[]>(config)
                         .SetErrorHandler(ConsumerClient_OnConsumeError)
                         .Build();

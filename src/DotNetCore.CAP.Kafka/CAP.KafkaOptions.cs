@@ -43,5 +43,10 @@ namespace DotNetCore.CAP
         /// If you need to get offset and partition and so on.., you can use this function to write additional header into <see cref="CapHeader"/>
         /// </summary>
         public Func<ConsumeResult<string, byte[]>, List<KeyValuePair<string, string>>> CustomHeaders { get; set; }
+
+        /// <summary>
+        /// Kafka native client config
+        /// </summary>
+        public Action<ClientConfig> ClientConfig { get; set; }
     }
 }
