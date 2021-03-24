@@ -59,11 +59,6 @@ namespace DotNetCore.CAP.Internal
                 return null;
             }
 
-            if (!string.IsNullOrEmpty(_capOptions.TopicNamePrefix))
-            {
-                key = $"{_capOptions.TopicNamePrefix}.{key}";
-            }
-
             var result = MatchUsingName(key, executeDescriptor);
             if (result != null)
             {

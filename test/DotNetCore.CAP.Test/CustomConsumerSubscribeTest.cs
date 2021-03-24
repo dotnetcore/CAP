@@ -45,7 +45,7 @@ namespace DotNetCore.CAP.Test
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
-            var bestCandidates = selector.SelectBestCandidate("Candidates.Foo", candidates);
+            var bestCandidates = selector.SelectBestCandidate($"{TopicNamePrefix}.Candidates.Foo", candidates);
 
             Assert.NotNull(bestCandidates);
             Assert.NotNull(bestCandidates.MethodInfo);
