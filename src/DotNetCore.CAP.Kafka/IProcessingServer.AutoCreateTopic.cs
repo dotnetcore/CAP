@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.Kafka
         {
             try
             {
-                var config = new AdminClientConfig { BootstrapServers = _kafkaOptions.Servers };
+                var config = new AdminClientConfig(_kafkaOptions.MainConfig) { BootstrapServers = _kafkaOptions.Servers };
 
                 var topics = _selector.GetAllTopics();
 
