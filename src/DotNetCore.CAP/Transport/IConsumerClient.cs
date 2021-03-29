@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using DotNetCore.CAP.Messages;
 using JetBrains.Annotations;
@@ -16,6 +17,16 @@ namespace DotNetCore.CAP.Transport
     public interface IConsumerClient : IDisposable
     {
         BrokerAddress BrokerAddress { get; }
+
+        /// <summary>
+        /// Create (if necessary) and get topic identifiers
+        /// </summary>
+        /// <param name="topicNames">Names of the requested topics</param>
+        /// <returns>Topic identifiers</returns>
+        ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+        {
+            return topicNames.ToList();
+        }
 
         /// <summary>
         /// Subscribe to a set of topics to the message queue

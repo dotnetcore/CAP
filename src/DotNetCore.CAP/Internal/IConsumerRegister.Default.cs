@@ -2,9 +2,9 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
@@ -67,8 +67,15 @@ namespace DotNetCore.CAP.Internal
 
             foreach (var matchGroup in groupingMatches)
             {
+                ICollection<string> topics;
+                using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                {
+                    topics = client.FetchTopics(matchGroup.Value.Select(x => x.TopicName));
+                }
+
                 for (int i = 0; i < _options.ConsumerThreadCount; i++)
                 {
+                    var topicIds = topics.Select(t => t);
                     Task.Factory.StartNew(() =>
                     {
                         try
@@ -79,7 +86,7 @@ namespace DotNetCore.CAP.Internal
 
                                 RegisterMessageProcessor(client);
 
-                                client.Subscribe(matchGroup.Value.Select(x => x.TopicName));
+                                client.Subscribe(topicIds);
 
                                 client.Listening(_pollingDelay, _cts.Token);
                             }
