@@ -81,7 +81,7 @@ namespace DotNetCore.CAP.PostgreSql
 
             if (!string.IsNullOrEmpty(queryDto.Group)) where += " and Lower(\"Group\") = Lower(@Group)";
 
-            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and \"Content\" ILike concat('%',@Content,'%')";
+            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and \"Content\" ILike @Content";
 
             var sqlQuery =
                 $"select * from {tableName} where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
