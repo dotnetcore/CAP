@@ -9,7 +9,8 @@ namespace DotNetCore.CAP.Internal
 {
     public static class Helper
     {
-        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local);
+        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local)
+            .AddHours(TimeZoneInfo.Local.BaseUtcOffset.Hours);
 
         public static long ToTimestamp(DateTime value)
         {
