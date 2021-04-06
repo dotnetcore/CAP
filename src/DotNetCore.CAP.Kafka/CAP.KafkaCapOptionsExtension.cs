@@ -2,11 +2,9 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Kafka;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -29,7 +27,6 @@ namespace DotNetCore.CAP
             services.AddSingleton<ITransport, KafkaTransport>();
             services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
             services.AddSingleton<IConnectionPool, ConnectionPool>();
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, AutoCreateTopic>());
         }
     }
 }
