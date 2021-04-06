@@ -24,8 +24,8 @@ namespace DotNetCore.CAP.Dashboard
                 var value = metric.Func(page);
                 result.Add(metric.Name, value);
             }
-             
-            var serialized = JsonSerializer.Serialize(result);
+
+            var serialized = JsonSerializer.Serialize(result, JsonSerializeOptions.Default);
 
             context.Response.ContentType = "application/json";
             await context.Response.WriteAsync(serialized);
