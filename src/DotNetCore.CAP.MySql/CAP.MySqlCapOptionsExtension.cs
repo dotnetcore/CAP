@@ -26,7 +26,6 @@ namespace DotNetCore.CAP
             services.AddSingleton<IDataStorage, MySqlDataStorage>();
             
             services.TryAddSingleton<IStorageInitializer, MySqlStorageInitializer>();
-            services.AddTransient<ICapTransaction, MySqlCapTransaction>();
 
             //Add MySqlOptions
             services.Configure(_configure);
