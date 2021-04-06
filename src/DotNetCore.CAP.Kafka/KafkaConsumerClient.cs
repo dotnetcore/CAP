@@ -142,15 +142,13 @@ namespace DotNetCore.CAP.Kafka
             {
                 if (_consumerClient == null)
                 {
-                    var config = new ConsumerConfig(new Dictionary<string, string>(_kafkaOptions.MainConfig))
-                    {
-                        BootstrapServers = _kafkaOptions.Servers,
-                        GroupId = _groupId,
-                        AutoOffsetReset = AutoOffsetReset.Earliest,
-                        AllowAutoCreateTopics = true,
-                        EnableAutoCommit = false,
-                        LogConnectionClose = false
-                    };
+                    var config = new ConsumerConfig(new Dictionary<string, string>(_kafkaOptions.MainConfig));
+                    config.BootstrapServers ??= _kafkaOptions.Servers;
+                    config.GroupId ??= _groupId;
+                    config.AutoOffsetReset ??= AutoOffsetReset.Earliest;
+                    config.AllowAutoCreateTopics ??= true;
+                    config.EnableAutoCommit ??= false;
+                    config.LogConnectionClose ??= false;
 
                     _consumerClient = new ConsumerBuilder<string, byte[]>(config)
                         .SetErrorHandler(ConsumerClient_OnConsumeError)
