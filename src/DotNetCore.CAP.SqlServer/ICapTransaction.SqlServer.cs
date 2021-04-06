@@ -46,14 +46,14 @@ namespace DotNetCore.CAP
                 if (dbTransaction == null) throw new ArgumentNullException(nameof(DbTransaction));
             }
 
-            var transactionKey = ((SqlConnection) dbTransaction.Connection).ClientConnectionId;
+            var transactionKey = ((SqlConnection)dbTransaction.Connection).ClientConnectionId;
             if (_diagnosticProcessor.BufferList.TryGetValue(transactionKey, out var list))
             {
                 list.Add(msg);
             }
             else
             {
-                var msgList = new List<MediumMessage>(1) {msg};
+                var msgList = new List<MediumMessage>(1) { msg };
                 _diagnosticProcessor.BufferList.TryAdd(transactionKey, msgList);
             }
         }
@@ -163,11 +163,10 @@ namespace DotNetCore.CAP
             ICapPublisher publisher, bool autoCommit = false)
         {
             if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
-
             var dbTransaction = dbConnection.BeginTransaction();
-            publisher.Transaction.Value = publisher.ServiceProvider.GetService<ICapTransaction>();
+            publisher.Transaction.Value = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
             var capTransaction = publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
-            return (IDbTransaction) capTransaction.DbTransaction;
+            return (IDbTransaction)capTransaction.DbTransaction;
         }
 
         /// <summary>
@@ -181,7 +180,7 @@ namespace DotNetCore.CAP
             ICapPublisher publisher, bool autoCommit = false)
         {
             var trans = database.BeginTransaction();
-            publisher.Transaction.Value = publisher.ServiceProvider.GetService<ICapTransaction>();
+            publisher.Transaction.Value = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
             var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
             return new CapEFDbTransaction(capTrans);
         }

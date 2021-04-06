@@ -3,6 +3,7 @@
 
 using System.Collections.Generic;
 using DotNetCore.CAP.Dashboard;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -18,6 +19,11 @@ namespace DotNetCore.CAP
             UseChallengeOnAuth = false;
         }
 
+        /// <summary>
+        /// Default ChallengeScheme used for Dashboard authentication. If no scheme is set, the DefaultScheme set up in AddAuthentication will be used.
+        /// </summary>
+        public string DefaultChallengeScheme { get; set; }
+        
         /// <summary>
         /// Indicates if executes a Challenge for Auth within ASP.NET middlewares
         /// </summary>

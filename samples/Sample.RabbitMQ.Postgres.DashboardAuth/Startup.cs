@@ -62,6 +62,7 @@ namespace Sample.RabbitMQ.Postgres.DashboardAuth
                 cap.UseDashboard(d =>
                 {
                     d.UseChallengeOnAuth = true;
+                    d.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                     d.Authorization = new[] {new HttpContextDashboardFilter()};
                 });
             });

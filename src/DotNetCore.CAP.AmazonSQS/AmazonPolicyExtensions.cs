@@ -74,7 +74,9 @@ namespace DotNetCore.CAP.AmazonSQS
         public static void AddSqsPermissions(this Policy policy, IEnumerable<string> topicArns, string sqsQueueArn)
         {
             var statement = new Statement(Statement.StatementEffect.Allow);
+#pragma warning disable CS0618 // Type or member is obsolete
             statement.Actions.Add(SQSActionIdentifiers.SendMessage);
+#pragma warning restore CS0618 // Type or member is obsolete
             statement.Resources.Add(new Resource(sqsQueueArn));
             statement.Principals.Add(new Principal("*"));
             foreach (var topicArn in topicArns)
@@ -152,7 +154,9 @@ namespace DotNetCore.CAP.AmazonSQS
         {
             var statementsToCompact = policy.Statements
                 .Where(s => s.Effect == Statement.StatementEffect.Allow)
+#pragma warning disable CS0618 // Type or member is obsolete
                 .Where(s => s.Actions.All(a => string.Equals(a.ActionName, SQSActionIdentifiers.SendMessage.ActionName, StringComparison.OrdinalIgnoreCase)))
+#pragma warning restore CS0618 // Type or member is obsolete
                 .Where(s => s.Resources.All(r => string.Equals(r.Id, sqsQueueArn, StringComparison.OrdinalIgnoreCase)))
                 .Where(s => s.Principals.All(r => string.Equals(r.Id, "*", StringComparison.OrdinalIgnoreCase)))
                 .ToList();

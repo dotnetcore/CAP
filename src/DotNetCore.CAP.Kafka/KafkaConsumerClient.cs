@@ -3,9 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using Confluent.Kafka;
+using Confluent.Kafka.Admin;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
@@ -31,6 +33,40 @@ namespace DotNetCore.CAP.Kafka
         public event EventHandler<LogMessageEventArgs> OnLog;
 
         public BrokerAddress BrokerAddress => new BrokerAddress("Kafka", _kafkaOptions.Servers);
+
+        public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+        {
+            if (topicNames == null)
+            {
+                throw new ArgumentNullException(nameof(topicNames));
+            }
+
+            try
+            {
+                var config = new AdminClientConfig(_kafkaOptions.MainConfig) { BootstrapServers = _kafkaOptions.Servers };
+
+                using var adminClient = new AdminClientBuilder(config).Build();
+
+                adminClient.CreateTopicsAsync(topicNames.Select(x => new TopicSpecification
+                {
+                    Name = x
+                })).GetAwaiter().GetResult();
+            }
+            catch (CreateTopicsException ex) when (ex.Message.Contains("already exists"))
+            {
+            }
+            catch (Exception ex)
+            {
+                var logArgs = new LogMessageEventArgs
+                {
+                    LogType = MqLogType.ConsumeError,
+                    Reason = $"An error was encountered when automatically creating topic! -->" + ex.Message
+                };
+                OnLog?.Invoke(null, logArgs);
+            }
+
+            return topicNames.ToList();
+        }
 
         public void Subscribe(IEnumerable<string> topics)
         {
@@ -106,15 +142,13 @@ namespace DotNetCore.CAP.Kafka
             {
                 if (_consumerClient == null)
                 {
-                    var config = new ConsumerConfig(new Dictionary<string, string>(_kafkaOptions.MainConfig))
-                    {
-                        BootstrapServers = _kafkaOptions.Servers,
-                        GroupId = _groupId,
-                        AutoOffsetReset = AutoOffsetReset.Earliest,
-                        AllowAutoCreateTopics = true,
-                        EnableAutoCommit = false,
-                        LogConnectionClose = false
-                    };
+                    var config = new ConsumerConfig(new Dictionary<string, string>(_kafkaOptions.MainConfig));
+                    config.BootstrapServers ??= _kafkaOptions.Servers;
+                    config.GroupId ??= _groupId;
+                    config.AutoOffsetReset ??= AutoOffsetReset.Earliest;
+                    config.AllowAutoCreateTopics ??= true;
+                    config.EnableAutoCommit ??= false;
+                    config.LogConnectionClose ??= false;
 
                     _consumerClient = new ConsumerBuilder<string, byte[]>(config)
                         .SetErrorHandler(ConsumerClient_OnConsumeError)
