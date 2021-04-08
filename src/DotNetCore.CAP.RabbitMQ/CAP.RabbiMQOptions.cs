@@ -4,7 +4,9 @@
 // ReSharper disable once CheckNamespace
 
 using System;
+using System.Collections.Generic;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -73,6 +75,11 @@ namespace DotNetCore.CAP
         /// is a map (dictionary) of arbitrary key/value pairs that can be provided by clients when a queue is declared.
         /// </summary>
         public QueueArgumentsOptions QueueArguments { get; set; } = new QueueArgumentsOptions();
+
+        /// <summary>
+        /// If you need to get additional native delivery args, you can use this function to write into <see cref="CapHeader"/>.
+        /// </summary>
+        public Func<BasicDeliverEventArgs, List<KeyValuePair<string, string>>> CustomHeaders { get; set; }
 
         /// <summary>
         /// RabbitMQ native connection factory options
