@@ -46,6 +46,12 @@ namespace DotNetCore.CAP.AzureServiceBus
                     CorrelationId = transportMessage.GetCorrelationId()
                 };
 
+                if (_asbOptions.Value.EnableSessions)
+                {
+                    transportMessage.Headers.TryGetValue(AzureServiceBusHeaders.SessionId, out var sessionId);
+                    message.SessionId = string.IsNullOrEmpty(sessionId) ? transportMessage.GetId() : sessionId;
+                }
+
                 foreach (var header in transportMessage.Headers)
                 {
                     message.UserProperties.Add(header.Key, header.Value);
