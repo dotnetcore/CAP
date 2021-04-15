@@ -1,5 +1,61 @@
 # Release Notes
 
+## Version 5.0.1 (2021-04-07)
+
+**Features:**
+
+* Add KafkaOptions.MainConfig to AutoCreateTopic. (#810)
+* Add support rewriting the default configuration of Kafka consumer. (#822)
+* Add DefaultChallengeScheme dashboard options to specify dashboard auth challenge scheme. (#815)
+
+**Bug Fixed:**
+ 
+* Fixed topic selector in IConsumerServiceSelector. (#806)
+* Update AWS topic subscription and SQS access policy generation. (#808)
+* Fixed memory leak when using transction to publish message. (#816)
+* Fixed SQL content filter on IMonitoringApi.PostgreSql.cs. (#814)
+* Fixed the expiration time display problem in the dashboard due to time zone issues (#820)
+* Fixed the creation timing of Kafka automatically creating Topic. (#823)
+* Fixed Dashboard metric not update. (#819)
+
+## Version 5.0.0 (2021-03-23)
+ 
+**Features:**
+
+* Upgrade to .NET Standard 2.1 and support .NET 5. (#727)
+* Replace Newtonsoft.Json to System.Text.Json. (#740)
+* Support NATS Transport. (#595,#743)
+* Enabling publiser confirms for RabbitMQ. (#730)
+* Support query subscription from DI implementation factory. (#756)
+* Add options to create lazy queue for RabbitMQ. (#772)
+* Support to add custom tags for Consul. (#786)
+* Support custom group and topic prefiex. (#780)
+* Renemae DefaultGroup option to DefaultGroupName.
+* Add auto create topic at startup for Kafka. (#795,#744)
+
+**Bug Fixed:**
+
+* Fixed retrying process earlier than consumer registration to DI. (#760)
+* Fixed Amazon SQS missing pagination topics. (#765)
+* Fixed RabbitMQ MessageTTL option to int type. (#787)
+* Fixed Dashboard auth. (#793)
+* Fixed ClientProvidedName could not be renamed for RabbitMQ. (#791)
+* Fixed EntityFramework transaction will not rollback when exception occurred. (#798)
+
+## Version 3.1.2 (2020-12-03)
+
+**Features:**
+* Support record the exception message in the headers. (#679)
+* Support consul service check for https. (#722)
+* Support custom producer threads count options for sending. (#731)
+* Upgrade dependent nuget packages to latest.
+
+**Bug Fixed:**
+
+* Fixed InmemoryQueue expired messages are not removed bug. (#691)
+* Fixed Executor key change lead to possible null reference exception. (#698)
+* Fixed Postgresql delete expires data logic error. (#714)
+
 ## Version 3.1.1 (2020-09-23)
 
 **Features:**

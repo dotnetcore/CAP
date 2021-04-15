@@ -19,18 +19,26 @@ theme:
   palette:
     primary: 'deep purple'
     accent: 'indigo'  
-  language: 'en'
+  language: en
   include_sidebar: true
   logo: 'img/logo.svg'
   favicon: 'img/favicon.ico'
   features:
-    - tabs
+    - navigation.tabs
+    - navigation.instant
   i18n:
     prev: 'Previous'
     next: 'Next'
 
 #Customization
 extra:
+  alternate:
+    - name: English
+      link: /user-guide/en/getting-started/quick-start
+      lang: en
+    - name: 中文
+      link: /user-guide/zh/getting-started/quick-start
+      lang: zh
   social:
     - icon: 'fontawesome/brands/github'
       link: 'https://github.com/dotnetcore/CAP'

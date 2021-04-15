@@ -25,6 +25,8 @@ CAP 采用模块化设计，具有高度的可扩展性。你有许多选项可�
 
 [Article: CAP 介绍及使用](http://www.cnblogs.com/savorboard/p/cap.html)
 
+[Article: CAP 5.0 版本中的新特性](https://www.cnblogs.com/savorboard/p/cap-5-0.html)
+
 [Article: CAP 3.0 版本中的新特性](https://www.cnblogs.com/savorboard/p/cap-3-0.html)
 
 [Article: CAP 2.6 版本中的新特性](https://www.cnblogs.com/savorboard/p/cap-2-6.html)

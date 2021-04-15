@@ -45,4 +45,23 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 ConnectionString | Endpoint 地址 | string | 
 TopicPath | Topic entity path | string | cap
+EnableSessions | 启用 [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions) | bool | false 
 ManagementTokenProvider | Token提供 | ITokenProvider | null
+
+#### Sessions
+
+当使用 `EnableSessions` 选项启用 sessions 后，每个发送的消息都会具有一个 session id。 要控制 seesion id 你可以在发送消息时在消息头中使用 `AzureServiceBusHeaders.SessionId` 携带它。
+
+
+```csharp
+ICapPublisher capBus = ...;
+string yourEventName = ...;
+YourEventType yourEvent = ...;
+
+Dictionary<string, string> extraHeaders = new Dictionary<string, string>();
+extraHeaders.Add(AzureServiceBusHeaders.SessionId, <your-session-id>);
+
+capBus.Publish(yourEventName, yourEvent, extraHeaders);
+```
+
+如果头中没有 session id , 那么消息 Id 仍然使用的 Message Id.
