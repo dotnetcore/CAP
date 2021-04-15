@@ -78,13 +78,25 @@ namespace DotNetCore.CAP.AzureServiceBus
         {
             ConnectAsync().GetAwaiter().GetResult();
 
-            _consumerClient.RegisterMessageHandler(OnConsumerReceived,
-                new MessageHandlerOptions(OnExceptionReceived)
-                {
-                    AutoComplete = false,
-                    MaxConcurrentCalls = 10,
-                    MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
-                });
+            if (_asbOptions.EnableSessions)
+            {
+                _consumerClient.RegisterSessionHandler(OnConsumerReceivedWithSession,
+                    new SessionHandlerOptions(OnExceptionReceived)
+                    {
+                        AutoComplete = false,
+                        MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
+                    });
+            }
+            else
+            {
+                _consumerClient.RegisterMessageHandler(OnConsumerReceived,
+                    new MessageHandlerOptions(OnExceptionReceived)
+                    {
+                        AutoComplete = false,
+                        MaxConcurrentCalls = 10,
+                        MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
+                    });
+            }
 
             while (true)
             {
@@ -96,7 +108,15 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public void Commit(object sender)
         {
-            _consumerClient.CompleteAsync((string)sender);
+            var commitInput = (AzureServiceBusConsumerCommitInput) sender;
+            if (_asbOptions.EnableSessions)
+            {
+                commitInput.Session.CompleteAsync(commitInput.LockToken);
+            }
+            else
+            {
+                _consumerClient.CompleteAsync(commitInput.LockToken);
+            }
         }
 
         public void Reject(object sender)
@@ -141,7 +161,13 @@ namespace DotNetCore.CAP.AzureServiceBus
 
                     if (!await mClient.SubscriptionExistsAsync(_asbOptions.TopicPath, _subscriptionName))
                     {
-                        await mClient.CreateSubscriptionAsync(_asbOptions.TopicPath, _subscriptionName);
+                        var subscriptionDescription =
+                            new SubscriptionDescription(_asbOptions.TopicPath, _subscriptionName)
+                            {
+                                RequiresSession = _asbOptions.EnableSessions
+                            };
+
+                        await mClient.CreateSubscriptionAsync(subscriptionDescription);
                         _logger.LogInformation($"Azure Service Bus topic {_asbOptions.TopicPath} created subscription: {_subscriptionName}");
                     }
 
@@ -157,14 +183,28 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         #region private methods
 
-        private Task OnConsumerReceived(Message message, CancellationToken token)
+        private TransportMessage ConvertMessage(Message message)
         {
             var header = message.UserProperties.ToDictionary(x => x.Key, y => y.Value?.ToString());
             header.Add(Headers.Group, _subscriptionName);
 
-            var context = new TransportMessage(header, message.Body);
+            return new TransportMessage(header, message.Body);
+        }
+        
+        private Task OnConsumerReceivedWithSession(IMessageSession session, Message message, CancellationToken token)
+        {
+            var context = ConvertMessage(message);
 
-            OnMessageReceived?.Invoke(message.SystemProperties.LockToken, context);
+            OnMessageReceived?.Invoke(new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken, session), context);
+            
+            return Task.CompletedTask;
+        }
+
+        private Task OnConsumerReceived(Message message, CancellationToken token)
+        {
+            var context = ConvertMessage(message);
+
+            OnMessageReceived?.Invoke(new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken), context);
 
             return Task.CompletedTask;
         }
