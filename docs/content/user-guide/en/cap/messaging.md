@@ -70,23 +70,25 @@ cap-msg-name | string | The name of the message
 cap-msg-type | string | The type of message, `typeof(T).FullName`(not required)
 cap-senttime | string | sending time (not required)
 
-Take the Java system sending RabbitMQ as an example:
-
-```java
-
-Map<String, Object> headers = new HashMap<String, Object>();
-headers.put("cap-msg-id",  UUID.randomUUID().toString());
-headers.put("cap-msg-name", routingKey);
-
-channel.basicPublish(exchangeName, routingKey,
-             new AMQP.BasicProperties.Builder()
-               .headers(headers)
-               .build(),
-               messageBodyBytes);
-// messageBodyBytes = "json".getBytes(Charset.forName("UTF-8"))
-// Note that messageBody defaults to byte[] of json. If other serialization is used, the deserializer needs to be customized on the CAP side
-
+### Custom headers
+To consume messages sent without CAP headers, both Kafka and RabbitMQ consumers can inject a minimal set of headers using custom headers as shown below:
+```C#
+container.AddCap(x =>
+{
+    x.UseRabbitMQ(z =>
+    {
+        z.ExchangeName = "TestExchange";
+        z.CustomHeaders = e => new List<KeyValuePair<string, string>>
+        {
+            new KeyValuePair<string, string>(DotNetCore.CAP.Messages.Headers.MessageId, SnowflakeId.Default().NextId().ToString()),
+            new KeyValuePair<string, string>(DotNetCore.CAP.Messages.Headers.MessageName, e.RoutingKey)
+        };
+    });
+});
 ```
+
+After adding `cap-msg-id` and `cap-msg-name`, CAP consumers receive messages sent directly from the RabbitMQ management tool.
+
 ## Scheduling
 
 After CAP receives a message, it sends the message to Transport(RabitMq, Kafka...), which is transported by transport.
