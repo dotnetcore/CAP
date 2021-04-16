@@ -18,6 +18,9 @@ namespace Microsoft.Extensions.DependencyInjection
     public static class ServiceCollectionExtensions
     {
         internal static IServiceCollection ServiceCollection;
+        
+        //Options and extension service
+        private static CapOptions options = new CapOptions();  
 
         /// <summary>
         /// Adds and configures the consistence services for the consistency.
@@ -62,9 +65,8 @@ namespace Microsoft.Extensions.DependencyInjection
             // Warning: IPublishMessageSender need to inject at extension project. 
             services.TryAddSingleton<ISubscribeDispatcher, SubscribeDispatcher>();
 
-            //Options and extension service
-            var options = new CapOptions();
             setupAction(options);
+
             foreach (var serviceExtension in options.Extensions)
             {
                 serviceExtension.AddServices(services);
