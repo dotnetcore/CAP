@@ -7,7 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MyConsumerSelector
 {
-    class Program
+    public class Program
     {
         private static bool _useCustomSelector = true;
         public static void Main(string[] args)
@@ -17,32 +17,30 @@ namespace MyConsumerSelector
             container.AddLogging(x => x.AddConsole());
             
             if (_useCustomSelector)
-                container.AddSingleton<IConsumerServiceSelector, MyConsumerServiceSelector>();
+                container.AddSingleton<IConsumerServiceSelector, GenericConsumerServiceSelector<IMessageSubscriber, MessageSubscriptionAttribute>>();
             
-            container.AddTransient<IMySubscribe, CustomInterfaceTypesClass>();
-            container.AddTransient<ICapSubscribe, CapSubscriber>();
+            container.AddTransient<IMessageSubscriber, CustomSubscriber>();
+            container.AddTransient<ICapSubscribe, CustomSubscriber>();
             
             container.AddCap(x =>
             {
                 x.UseInMemoryStorage();
                 x.UseRabbitMQ(z =>
                 {
-                    z.ExchangeName = "MyConsumerSelector";
+                    z.ExchangeName = "MyConsumerSelector.Generic";
                     z.HostName = "localhost";
                     z.UserName = "guest";
                     z.Password = "guest";
                     z.CustomHeaders = e => new List<KeyValuePair<string, string>>
                     {
-                        new KeyValuePair<string, string>(DotNetCore.CAP.Messages.Headers.MessageId, SnowflakeId.Default().NextId().ToString()),
-                        new KeyValuePair<string, string>(DotNetCore.CAP.Messages.Headers.MessageName, e.RoutingKey)
+                        new(DotNetCore.CAP.Messages.Headers.MessageId, SnowflakeId.Default().NextId().ToString()),
+                        new(DotNetCore.CAP.Messages.Headers.MessageName, e.RoutingKey)
                     };
                 });
             });
 
             var sp = container.BuildServiceProvider();
-
-            sp.GetService<IBootstrapper>().BootstrapAsync(default);
-
+            sp.GetRequiredService<IBootstrapper>().BootstrapAsync(default);
             Console.ReadLine();
         }
     }
