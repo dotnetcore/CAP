@@ -15,10 +15,10 @@ namespace DotNetCore.CAP.Redis
     class RedisConsumerClientFactory : IConsumerClientFactory
     {
         private readonly CapRedisOptions redisOptions;
-        private readonly IRedisCacheManager redis;
+        private readonly IRedisStreamManager redis;
         private readonly ILogger<RedisConsumerClient> logger;
 
-        public RedisConsumerClientFactory(IOptions<CapRedisOptions> redisOptions, IRedisCacheManager redis, ILogger<RedisConsumerClient> logger)
+        public RedisConsumerClientFactory(IOptions<CapRedisOptions> redisOptions, IRedisStreamManager redis, ILogger<RedisConsumerClient> logger)
         {
             this.redisOptions = redisOptions.Value;
             this.redis = redis;

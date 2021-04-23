@@ -8,11 +8,11 @@ using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.Redis
 {
-    class RedisCacheLogger : TextWriter
+    class RedisLogger : TextWriter
     {
         private readonly ILogger logger;
 
-        public RedisCacheLogger(ILogger logger)
+        public RedisLogger(ILogger logger)
         {
             this.logger = logger;
         }

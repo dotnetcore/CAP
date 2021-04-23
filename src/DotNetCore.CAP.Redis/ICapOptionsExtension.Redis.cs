@@ -30,10 +30,10 @@ namespace DotNetCore.CAP.Redis
         public void AddServices(IServiceCollection services)
         {
             services.AddSingleton<CapMessageQueueMakerService>();
-            services.AddSingleton<IRedisCacheManager, RedisCacheManager>();
+            services.AddSingleton<IRedisStreamManager, RedisStreamManager>();
             services.AddSingleton<IConsumerClientFactory, RedisConsumerClientFactory>();
             services.AddSingleton<ITransport, RedisTransport>();
-
+            services.AddSingleton<IRedisConnectionPool, RedisConnectionPool>();
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IPostConfigureOptions<CapRedisOptions>, CapRedisOptionsPostConfigure>());
             services.AddOptions<CapRedisOptions>().Configure(configure);
         }

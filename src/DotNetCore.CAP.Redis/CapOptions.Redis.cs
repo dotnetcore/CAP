@@ -17,6 +17,7 @@ namespace DotNetCore.CAP.Redis
 
         internal string Endpoint { get; set; }
 
-        internal string DefaultChannel { get; set; }
+        public uint StreamEntriesCount { get; set; }
+        public uint ConnectionPoolSize { get; set; }
     }
 }

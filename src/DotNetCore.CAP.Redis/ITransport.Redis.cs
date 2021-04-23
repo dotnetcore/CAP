@@ -15,12 +15,12 @@ namespace DotNetCore.CAP.Redis
 {
     class RedisTransport : ITransport
     {
-        private readonly IRedisCacheManager redis;
+        private readonly IRedisStreamManager redis;
         private readonly ILogger<RedisTransport> logger;
         private readonly MethodMatcherCache selector;
         private readonly CapRedisOptions options;
 
-        public RedisTransport(IRedisCacheManager redis, MethodMatcherCache selector, IOptions<CapRedisOptions> options, ILogger<RedisTransport> logger)
+        public RedisTransport(IRedisStreamManager redis, MethodMatcherCache selector, IOptions<CapRedisOptions> options, ILogger<RedisTransport> logger)
         {
             this.redis = redis;
             this.selector = selector;
@@ -34,11 +34,7 @@ namespace DotNetCore.CAP.Redis
         {
             try
             {
-                var redisMessage = new RedisMessage(message.Headers, message.Body).AsRedisValue();
-
-                var channelName = selector.GetGroupByTopic(message.GetName()) ?? options.DefaultChannel;
-
-                await redis.PublishAsync(channelName, redisMessage);
+                await redis.PublishAsync(message.GetName(), message.AsStreamEntries());
 
                 logger.LogDebug($"Redis message [{message.GetName()}] has been published.");
 

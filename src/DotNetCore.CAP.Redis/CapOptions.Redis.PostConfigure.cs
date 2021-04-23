@@ -13,20 +13,19 @@ namespace DotNetCore.CAP.Redis
 {
     class CapRedisOptionsPostConfigure : IPostConfigureOptions<CapRedisOptions>
     {
-        private readonly CapOptions capOptions;
-
-        public CapRedisOptionsPostConfigure(IOptions<CapOptions> options)
+        public CapRedisOptionsPostConfigure()
         {
-            capOptions = options.Value;
         }
 
         public void PostConfigure(string name, CapRedisOptions options)
         {
-            var groupPrefix = string.IsNullOrWhiteSpace(capOptions.GroupNamePrefix) ? string.Empty : $"{capOptions.GroupNamePrefix}.";
-            
-            options.DefaultChannel = $"{groupPrefix}{capOptions.DefaultGroupName}";
-
             options.Configuration ??= new ConfigurationOptions();
+
+            if (options.StreamEntriesCount == default)
+                options.StreamEntriesCount = 10;
+
+            if (options.ConnectionPoolSize == default)
+                options.ConnectionPoolSize= 10;
 
             if (!options.Configuration.EndPoints.Any())
             {

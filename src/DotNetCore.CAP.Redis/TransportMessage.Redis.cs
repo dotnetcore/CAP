@@ -3,51 +3,50 @@ using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Messages = DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Redis
 {
-    class RedisMessage : TransportMessage
+    static class RedisMessage
     {
-        public RedisMessage(IDictionary<string, string> headers, byte[] body) : base(headers, body) { }
+        const string HEADERS = "headers";
+        const string BODY = "body";
 
-        public string GroupId
+        public static NameValueEntry[] AsStreamEntries(this TransportMessage message)
         {
-            get => Headers.TryGetValue(Messages.Headers.Group, out var value) ? value : default;
-            set => Headers.TryAdd(Messages.Headers.Group, value);
+            return new[]{
+                new NameValueEntry(HEADERS,ToJson(message.Headers)),
+                new NameValueEntry(BODY,ToJson(message.Body))
+            };
         }
 
-        internal RedisValue AsRedisValue()
+        public static TransportMessage Create(StreamEntry streamEntry, string groupId = null)
         {
-            return JsonSerializer.Serialize(new RedisMessageValue
-            {
-                Headers = Headers,
-                Body = Body
-            }, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+            if (streamEntry.IsNull)
+                return null;
+
+            var headersRaw = streamEntry[HEADERS];
+            if (headersRaw.IsNullOrEmpty)
+                throw new ArgumentException($"Redis stream entry with id {streamEntry.Id} missing cap headers");
+
+            var headers = JsonSerializer.Deserialize<IDictionary<string, string>>(headersRaw);
+            
+            var bodyRaw = streamEntry[BODY];
+            
+            var body = !bodyRaw.IsNullOrEmpty ? JsonSerializer.Deserialize<byte[]>(bodyRaw) : null;
+
+            headers.TryAdd(Headers.Group, groupId);
+
+            return new TransportMessage(headers, body);
         }
 
-        public static RedisMessage Create(RedisValue redisValue)
+        private static string ToJson(object obj)
         {
-            if (redisValue.IsNullOrEmpty)
-                return Empty();
-
-            var value = JsonSerializer.Deserialize<RedisMessageValue>(redisValue, new JsonSerializerOptions(JsonSerializerDefaults.Web));
-
-            return new RedisMessage(value.Headers, value.Body);
+            return JsonSerializer.Serialize(obj, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         }
 
-        public static RedisMessage Empty()
-        {
-            return new RedisMessage(new Dictionary<string, string>(), Array.Empty<byte>());
-        }
-    }
-
-    class RedisMessageValue
-    {
-        public IDictionary<string, string> Headers { get; set; }
-        public byte[] Body { get; set; }
     }
 }
