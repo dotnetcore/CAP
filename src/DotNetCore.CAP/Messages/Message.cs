@@ -7,7 +7,7 @@ using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Messages
 {
-    public class Message
+    public class Message : IMessage
     {
         /// <summary>
         /// System.Text.Json requires that class explicitly has a parameterless constructor
@@ -21,10 +21,38 @@ namespace DotNetCore.CAP.Messages
             Value = value;
         }
 
+
         public IDictionary<string, string> Headers { get; set; }
 
         [CanBeNull]
         public object Value { get; set; }
+
+
+
+    }
+
+    public class Message<T> : IMessage<T>
+    {
+        /// <summary>
+        /// System.Text.Json requires that class explicitly has a parameterless constructor
+        /// and public properties have a setter.
+        /// </summary>
+        public Message() { }
+
+        public Message(IDictionary<string, string> headers, [CanBeNull] T value)
+        {
+            Headers = headers ?? throw new ArgumentNullException(nameof(headers));
+            Value = value;
+        }
+        public IDictionary<string, string> Headers { get; set; }
+
+
+        [CanBeNull]
+        public T Value
+        {
+            get; set;
+        }
+
     }
 
     public static class MessageExtensions
@@ -79,5 +107,58 @@ namespace DotNetCore.CAP.Messages
         {
             message.Headers.Remove(Headers.Exception);
         }
+
+        public static string GetId<T>(this Message<T> message)
+        {
+            message.Headers.TryGetValue(Headers.MessageId, out var value);
+            return value;
+        }
+
+        public static string GetName<T>(this Message<T> message)
+        {
+            message.Headers.TryGetValue(Headers.MessageName, out var value);
+            return value;
+        }
+
+        public static string GetCallbackName<T>(this Message<T> message)
+        {
+            message.Headers.TryGetValue(Headers.CallbackName, out var value);
+            return value;
+        }
+
+        public static string GetGroup<T>(this Message<T> message)
+        {
+            message.Headers.TryGetValue(Headers.Group, out var value);
+            return value;
+        }
+
+        public static int GetCorrelationSequence<T>(this Message<T> message)
+        {
+            if (message.Headers.TryGetValue(Headers.CorrelationSequence, out var value))
+            {
+                return int.Parse(value);
+            }
+
+            return 0;
+        }
+
+        public static bool HasException<T>(this Message<T> message)
+        {
+            return message.Headers.ContainsKey(Headers.Exception);
+        }
+
+        public static void AddOrUpdateException<T>(this Message<T> message, Exception ex)
+        {
+            var msg = $"{ex.GetType().Name}-->{ex.Message}";
+
+            message.Headers[Headers.Exception] = msg;
+        }
+
+        public static void RemoveException<T>(this Message<T> message)
+        {
+            message.Headers.Remove(Headers.Exception);
+        }
+
     }
+
 }

@@ -8,26 +8,46 @@ using DotNetCore.CAP.Monitoring;
 
 namespace DotNetCore.CAP.Persistence
 {
-    public interface IDataStorage
+    public partial interface IDataStorage
     {
-        Task ChangePublishStateAsync(MediumMessage message, StatusName state);
+        Task ChangePublishStateAsync(IMediumMessage message, StatusName state);
 
-        Task ChangeReceiveStateAsync(MediumMessage message, StatusName state);
+        Task ChangeReceiveStateAsync(IMediumMessage message, StatusName state);
 
-        MediumMessage StoreMessage(string name, Message content, object dbTransaction = null);
+        IMediumMessage StoreMessage(string name, ICapMessage content, object dbTransaction = null);
+
 
         void StoreReceivedExceptionMessage(string name, string group, string content);
 
-        MediumMessage StoreReceivedMessage(string name, string group, Message content);
+        IMediumMessage StoreReceivedMessage(string name, string group, ICapMessage content);
 
         Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
             CancellationToken token = default);
 
-        Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry();
+        Task<IEnumerable<IMediumMessage>> GetPublishedMessagesOfNeedRetry();
 
-        Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry();
+        Task<IEnumerable<IMediumMessage>> GetReceivedMessagesOfNeedRetry();
 
         //dashboard api
         IMonitoringApi GetMonitoringApi();
+    }
+
+    public partial interface IDataStorage
+    {
+        IMediumMessage StoreMessage<T>(string name, ICapMessage content, object dbTransaction = null);
+        Task ChangePublishStateAsync<T>(IMediumMessage message, StatusName state);
+
+        Task ChangeReceiveStateAsync<T>(IMediumMessage message, StatusName state);
+
+        void StoreReceivedExceptionMessage<T>(string name, string group, string content);
+
+        IMediumMessage StoreReceivedMessage<T>(string name, string group, ICapMessage content);
+
+        Task<int> DeleteExpiresAsync<T>(string table, DateTime timeout, int batchCount = 1000,
+            CancellationToken token = default);
+
+        Task<IEnumerable<IMediumMessage>> GetPublishedMessagesOfNeedRetry<T>();
+
+        Task<IEnumerable<IMediumMessage>> GetReceivedMessagesOfNeedRetry<T>();
     }
 }

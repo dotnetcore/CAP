@@ -2,14 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Transport
 {
     public interface IDispatcher
     {
-        void EnqueueToPublish(MediumMessage message);
+        void EnqueueToPublish(IMediumMessage message);
 
-        void EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor);
+        void EnqueueToExecute(IMediumMessage message, ConsumerExecutorDescriptor descriptor);
     }
 }

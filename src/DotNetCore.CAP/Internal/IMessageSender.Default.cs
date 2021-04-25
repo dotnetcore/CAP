@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Internal
 {
-    internal class MessageSender : IMessageSender
+    internal partial class MessageSender : IMessageSender
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
@@ -24,6 +24,7 @@ namespace DotNetCore.CAP.Internal
         private readonly ISerializer _serializer;
         private readonly ITransport _transport;
         private readonly IOptions<CapOptions> _options;
+        private readonly ISerializerRegistry _serializerRegistry;
 
         // ReSharper disable once InconsistentNaming
         protected static readonly DiagnosticListener s_diagnosticListener =
@@ -31,7 +32,8 @@ namespace DotNetCore.CAP.Internal
 
         public MessageSender(
             ILogger<MessageSender> logger,
-            IServiceProvider serviceProvider)
+            IServiceProvider serviceProvider,
+            IMessageSerializerProvider messageSerializerProvider)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
@@ -40,9 +42,10 @@ namespace DotNetCore.CAP.Internal
             _dataStorage = serviceProvider.GetService<IDataStorage>();
             _serializer = serviceProvider.GetService<ISerializer>();
             _transport = serviceProvider.GetService<ITransport>();
+            _serializerRegistry = serviceProvider.GetRequiredService<ISerializerRegistry>();
         }
 
-        public async Task<OperateResult> SendAsync(MediumMessage message)
+        public async Task<OperateResult> SendAsync(IMediumMessage message)
         {
             bool retry;
             OperateResult result;
@@ -60,9 +63,10 @@ namespace DotNetCore.CAP.Internal
             return result;
         }
 
-        private async Task<(bool, OperateResult)> SendWithoutRetryAsync(MediumMessage message)
+        private async Task<(bool, OperateResult)> SendWithoutRetryAsync(IMediumMessage message)
         {
-            var transportMsg = await _serializer.SerializeAsync(message.Origin);
+            //var transportMsg = await _serializer.SerializeAsync(message.Origin);
+            var transportMsg = await _serializerRegistry.GetMessageSerializer(message.GetOriginType()).SerializeAsync(message.Origin);
 
             var tracingTimestamp = TracingBefore(transportMsg, _transport.BrokerAddress);
 
@@ -86,13 +90,13 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private async Task SetSuccessfulState(MediumMessage message)
+        private async Task SetSuccessfulState(IMediumMessage message)
         {
             message.ExpiresAt = DateTime.Now.AddSeconds(_options.Value.SucceedMessageExpiredAfter);
             await _dataStorage.ChangePublishStateAsync(message, StatusName.Succeeded);
         }
 
-        private async Task<bool> SetFailedState(MediumMessage message, Exception ex)
+        private async Task<bool> SetFailedState(IMediumMessage message, Exception ex)
         {
             var needRetry = UpdateMessageForRetry(message);
 
@@ -104,7 +108,7 @@ namespace DotNetCore.CAP.Internal
             return needRetry;
         }
 
-        private bool UpdateMessageForRetry(MediumMessage message)
+        private bool UpdateMessageForRetry(IMediumMessage message)
         {
             var retries = ++message.Retries;
             var retryCount = Math.Min(_options.Value.FailedRetryCount, 3);
@@ -199,4 +203,7 @@ namespace DotNetCore.CAP.Internal
 
         #endregion
     }
+
+
+
 }

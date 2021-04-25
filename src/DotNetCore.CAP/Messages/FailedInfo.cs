@@ -8,6 +8,6 @@ namespace DotNetCore.CAP.Messages
 
         public MessageType MessageType { get; set; }
 
-        public Message Message { get; set; }
+        public ICapMessage Message { get; set; }
     }
 }

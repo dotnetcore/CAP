@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.Internal
 
         private readonly IConsumerClientFactory _consumerClientFactory;
         private readonly IDispatcher _dispatcher;
-        private readonly ISerializer _serializer;
+        //private readonly ISerializer _serializer;
         private readonly IDataStorage _storage;
         private readonly MethodMatcherCache _selector;
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
@@ -37,6 +37,8 @@ namespace DotNetCore.CAP.Internal
         private bool _disposed;
         private static bool _isHealthy = true;
 
+        private readonly ISerializerRegistry _serializerRegistry;
+
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
         private static readonly DiagnosticListener s_diagnosticListener =
@@ -46,14 +48,14 @@ namespace DotNetCore.CAP.Internal
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-
             _options = serviceProvider.GetService<IOptions<CapOptions>>().Value;
             _selector = serviceProvider.GetService<MethodMatcherCache>();
             _consumerClientFactory = serviceProvider.GetService<IConsumerClientFactory>();
             _dispatcher = serviceProvider.GetService<IDispatcher>();
-            _serializer = serviceProvider.GetService<ISerializer>();
+            //_serializer = serviceProvider.GetService<ISerializer>();
             _storage = serviceProvider.GetService<IDataStorage>();
             _cts = new CancellationTokenSource();
+            _serializerRegistry = serviceProvider.GetService<ISerializerRegistry>();
         }
 
         public bool IsHealthy()
@@ -167,7 +169,9 @@ namespace DotNetCore.CAP.Internal
                     var name = transportMessage.GetName();
                     var group = transportMessage.GetGroup();
 
-                    Message message;
+                    ICapMessage message;
+
+                    IMessageSerializer messageSerializer;
 
                     var canFindSubscriber = _selector.TryGetTopicExecutor(name, group, out var executor);
                     try
@@ -183,8 +187,16 @@ namespace DotNetCore.CAP.Internal
                         }
 
                         var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
-                        message = await _serializer.DeserializeAsync(transportMessage, type);
+
+                        // end
+
+                        messageSerializer = _serializerRegistry.GetMessageSerializer(type);
+
+                        message = await messageSerializer.DeserializeAsync(transportMessage);
+
                         message.RemoveException();
+
+
                     }
                     catch (Exception e)
                     {
@@ -203,7 +215,9 @@ namespace DotNetCore.CAP.Internal
 
                     if (message.HasException())
                     {
-                        var content = _serializer.Serialize(message);
+                        messageSerializer = _serializerRegistry.GetMessageSerializer();
+
+                        var content = messageSerializer.Serialize(message);
 
                         _storage.StoreReceivedExceptionMessage(name, group, content);
 

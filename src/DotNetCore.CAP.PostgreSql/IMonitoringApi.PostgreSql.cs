@@ -27,9 +27,9 @@ namespace DotNetCore.CAP.PostgreSql
             _recName = initializer.GetReceivedTableName();
         }
 
-        public async Task<MediumMessage> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
+        public async Task<IMediumMessage> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
 
-        public async Task<MediumMessage> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
+        public async Task<IMediumMessage> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
 
         public StatisticsDto GetStatistics()
         {

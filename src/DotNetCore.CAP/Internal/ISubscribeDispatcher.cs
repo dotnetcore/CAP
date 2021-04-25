@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 
 namespace DotNetCore.CAP.Internal
@@ -12,8 +13,14 @@ namespace DotNetCore.CAP.Internal
     /// </summary>
     public interface ISubscribeDispatcher
     {
-        Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken = default);
+        Task<OperateResult> DispatchAsync(IMediumMessage message, CancellationToken cancellationToken = default);
 
-        Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken = default);
+        Task<OperateResult> DispatchAsync(IMediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken = default);
+
+        Task<OperateResult> DispatchAsync<T>(IMediumMessage message, CancellationToken cancellationToken = default)
+            where T : new();
+
+        Task<OperateResult> DispatchAsync<T>(IMediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken = default)
+            where T : new();
     }
 }

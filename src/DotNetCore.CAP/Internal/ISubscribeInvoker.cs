@@ -9,7 +9,7 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// Perform user definition method of consumers.
     /// </summary>
-    public interface ISubscribeInvoker
+    public partial interface ISubscribeInvoker
     {
         /// <summary>
         /// Invoke subscribe method with the consumer context.
@@ -18,4 +18,19 @@ namespace DotNetCore.CAP.Internal
         /// <param name="cancellationToken">The object of <see cref="CancellationToken"/>.</param>
         Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context, CancellationToken cancellationToken = default);
     }
+
+    /// <summary>
+    /// Perform user definition method of consumers.
+    /// </summary>
+    public partial interface ISubscribeInvoker
+    {
+        /// <summary>
+        /// Invoke subscribe method with the consumer context.
+        /// </summary>
+        /// <param name="context">consumer execute context</param>
+        /// <param name="cancellationToken">The object of <see cref="CancellationToken"/>.</param>
+        Task<ConsumerExecutedResult> InvokeAsync<T>(ConsumerContext<T> context, CancellationToken cancellationToken = default)
+            where T : new();
+    }
+
 }

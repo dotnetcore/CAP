@@ -30,7 +30,23 @@ namespace DotNetCore.CAP.Diagnostics
 
         public string Operation { get; set; }
 
-        public Message Message { get; set; }
+        public ICapMessage Message { get; set; }
+
+        [CanBeNull]
+        public MethodInfo MethodInfo { get; set; }
+
+        public long? ElapsedTimeMs { get; set; }
+
+        public Exception Exception { get; set; }
+    }
+
+    public class CapEventDataSubExecute<T>
+    {
+        public long? OperationTimestamp { get; set; }
+
+        public string Operation { get; set; }
+
+        public ICapMessage Message { get; set; }
 
         [CanBeNull]
         public MethodInfo MethodInfo { get; set; }

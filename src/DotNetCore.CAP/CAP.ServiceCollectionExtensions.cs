@@ -77,5 +77,19 @@ namespace Microsoft.Extensions.DependencyInjection
 
             return new CapBuilder(services);
         }
+
+
+        /// <summary>
+        /// add generic publisher
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="services"></param>
+        public static void AddPublisher<T>(this IServiceCollection services)
+            where T : new()
+        {
+
+            services.TryAddSingleton<IPublisher<T>, Publisher<T>>();
+
+        }
     }
 }

@@ -11,9 +11,9 @@ namespace DotNetCore.CAP.Monitoring
 {
     public interface IMonitoringApi
     {
-        Task<MediumMessage> GetPublishedMessageAsync(long id);
+        Task<IMediumMessage> GetPublishedMessageAsync(long id);
 
-        Task<MediumMessage> GetReceivedMessageAsync(long id);
+        Task<IMediumMessage> GetReceivedMessageAsync(long id);
 
         StatisticsDto GetStatistics();
 

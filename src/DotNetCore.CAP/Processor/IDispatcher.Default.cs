@@ -22,8 +22,9 @@ namespace DotNetCore.CAP.Processor
         private readonly ISubscribeDispatcher _executor;
         private readonly ILogger<Dispatcher> _logger;
 
-        private readonly Channel<MediumMessage> _publishedChannel;
-        private readonly Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel;
+        // need improve
+        private readonly Channel<IMediumMessage> _publishedChannel;
+        private readonly Channel<(IMediumMessage, ConsumerExecutorDescriptor)> _receivedChannel;
 
         public Dispatcher(ILogger<Dispatcher> logger,
             IMessageSender sender,
@@ -34,8 +35,8 @@ namespace DotNetCore.CAP.Processor
             _sender = sender;
             _executor = executor;
 
-            _publishedChannel = Channel.CreateUnbounded<MediumMessage>(new UnboundedChannelOptions() { SingleReader = false, SingleWriter = true });
-            _receivedChannel = Channel.CreateUnbounded<(MediumMessage, ConsumerExecutorDescriptor)>();
+            _publishedChannel = Channel.CreateUnbounded<IMediumMessage>(new UnboundedChannelOptions() { SingleReader = false, SingleWriter = true });
+            _receivedChannel = Channel.CreateUnbounded<(IMediumMessage, ConsumerExecutorDescriptor)>();
 
             Task.WhenAll(Enumerable.Range(0, options.Value.ProducerThreadCount)
                 .Select(_ => Task.Factory.StartNew(Sending, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
@@ -44,12 +45,12 @@ namespace DotNetCore.CAP.Processor
                 .Select(_ => Task.Factory.StartNew(Processing, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
         }
 
-        public void EnqueueToPublish(MediumMessage message)
+        public void EnqueueToPublish(IMediumMessage message)
         {
             _publishedChannel.Writer.TryWrite(message);
         }
 
-        public void EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
+        public void EnqueueToExecute(IMediumMessage message, ConsumerExecutorDescriptor descriptor)
         {
             _receivedChannel.Writer.TryWrite((message, descriptor));
         }

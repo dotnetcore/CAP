@@ -16,7 +16,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Internal
 {
-    internal class SubscribeDispatcher : ISubscribeDispatcher
+    internal partial class SubscribeDispatcher : ISubscribeDispatcher
     {
         private readonly IDataStorage _dataStorage;
         private readonly ILogger _logger;
@@ -43,7 +43,7 @@ namespace DotNetCore.CAP.Internal
 
         private ISubscribeInvoker Invoker { get; }
 
-        public Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken)
+        public Task<OperateResult> DispatchAsync(IMediumMessage message, CancellationToken cancellationToken)
         {
             var selector = _provider.GetService<MethodMatcherCache>();
             if (!selector.TryGetTopicExecutor(message.Origin.GetName(), message.Origin.GetGroup(), out var executor))
@@ -60,7 +60,7 @@ namespace DotNetCore.CAP.Internal
             return DispatchAsync(message, executor, cancellationToken);
         }
 
-        public async Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
+        public async Task<OperateResult> DispatchAsync(IMediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
         {
             bool retry;
             OperateResult result;
@@ -78,7 +78,7 @@ namespace DotNetCore.CAP.Internal
             return result;
         }
 
-        private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
+        private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync(IMediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
         {
             if (message == null)
             {
@@ -109,13 +109,13 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private Task SetSuccessfulState(MediumMessage message)
+        private Task SetSuccessfulState(IMediumMessage message)
         {
             message.ExpiresAt = DateTime.Now.AddSeconds(_options.SucceedMessageExpiredAfter);
             return _dataStorage.ChangeReceiveStateAsync(message, StatusName.Succeeded);
         }
 
-        private async Task<bool> SetFailedState(MediumMessage message, Exception ex)
+        private async Task<bool> SetFailedState(IMediumMessage message, Exception ex)
         {
             if (ex is SubscriberNotFoundException)
             {
@@ -132,7 +132,7 @@ namespace DotNetCore.CAP.Internal
             return needRetry;
         }
 
-        private bool UpdateMessageForRetry(MediumMessage message)
+        private bool UpdateMessageForRetry(IMediumMessage message)
         {
             var retries = ++message.Retries;
 
@@ -165,7 +165,7 @@ namespace DotNetCore.CAP.Internal
             return true;
         }
 
-        private async Task InvokeConsumerMethodAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
+        private async Task InvokeConsumerMethodAsync(IMediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
         {
             var consumerContext = new ConsumerContext(descriptor, message.Origin);
             var tracingTimestamp = TracingBefore(message.Origin, descriptor.MethodInfo);
@@ -202,7 +202,7 @@ namespace DotNetCore.CAP.Internal
 
         #region tracing
 
-        private long? TracingBefore(Message message, MethodInfo method)
+        private long? TracingBefore(ICapMessage message, MethodInfo method)
         {
             if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforeSubscriberInvoke))
             {
@@ -222,7 +222,7 @@ namespace DotNetCore.CAP.Internal
             return null;
         }
 
-        private void TracingAfter(long? tracingTimestamp, Message message, MethodInfo method)
+        private void TracingAfter(long? tracingTimestamp, ICapMessage message, MethodInfo method)
         {
             if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterSubscriberInvoke))
             {
@@ -240,7 +240,234 @@ namespace DotNetCore.CAP.Internal
             }
         }
 
-        private void TracingError(long? tracingTimestamp, Message message, MethodInfo method, Exception ex)
+        private void TracingError(long? tracingTimestamp, ICapMessage message, MethodInfo method, Exception ex)
+        {
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.ErrorSubscriberInvoke))
+            {
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var eventData = new CapEventDataSubExecute()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    Message = message,
+                    MethodInfo = method,
+                    ElapsedTimeMs = now - tracingTimestamp.Value,
+                    Exception = ex
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.ErrorSubscriberInvoke, eventData);
+            }
+        }
+
+        #endregion
+    }
+
+
+
+    internal partial class SubscribeDispatcher : ISubscribeDispatcher
+    {
+        public Task<OperateResult> DispatchAsync<T>(IMediumMessage message, CancellationToken cancellationToken)
+        where T : new()
+        {
+            var selector = _provider.GetService<MethodMatcherCache>();
+            if (!selector.TryGetTopicExecutor(message.Origin.GetName(), message.Origin.GetGroup(), out var executor))
+            {
+                var error = $"Message (Name:{message.Origin.GetName()},Group:{message.Origin.GetGroup()}) can not be found subscriber." +
+                            $"{Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
+                _logger.LogError(error);
+
+                TracingError<T>(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), message.Origin, null, new Exception(error));
+
+                return Task.FromResult(OperateResult.Failed(new SubscriberNotFoundException(error)));
+            }
+
+            return DispatchAsync<T>(message, executor, cancellationToken);
+        }
+
+        public async Task<OperateResult> DispatchAsync<T>(IMediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
+        where T : new()
+        {
+            bool retry;
+            OperateResult result;
+            do
+            {
+                var executedResult = await ExecuteWithoutRetryAsync<T>(message, descriptor, cancellationToken);
+                result = executedResult.Item2;
+                if (result == OperateResult.Success)
+                {
+                    return result;
+                }
+                retry = executedResult.Item1;
+            } while (retry);
+
+            return result;
+        }
+
+        private async Task<(bool, OperateResult)> ExecuteWithoutRetryAsync<T>(IMediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
+        where T : new()
+        {
+            if (message == null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            try
+            {
+                var sp = Stopwatch.StartNew();
+
+                await InvokeConsumerMethodAsync<T>(message, descriptor, cancellationToken);
+
+                sp.Stop();
+
+                await SetSuccessfulState<T>(message);
+
+                _logger.ConsumerExecuted(sp.Elapsed.TotalMilliseconds);
+
+                return (false, OperateResult.Success);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"An exception occurred while executing the subscription method. Topic:{message.Origin.GetName()}, Id:{message.DbId}");
+
+                return (await SetFailedState<T>(message, ex), OperateResult.Failed(ex));
+            }
+        }
+
+        private Task SetSuccessfulState<T>(IMediumMessage message)
+        {
+            message.ExpiresAt = DateTime.Now.AddSeconds(_options.SucceedMessageExpiredAfter);
+            return _dataStorage.ChangeReceiveStateAsync(message, StatusName.Succeeded);
+        }
+
+        private async Task<bool> SetFailedState<T>(IMediumMessage message, Exception ex)
+        {
+            if (ex is SubscriberNotFoundException)
+            {
+                message.Retries = _options.FailedRetryCount; // not retry if SubscriberNotFoundException
+            }
+
+            var needRetry = UpdateMessageForRetry<T>(message);
+
+            message.Origin.AddOrUpdateException(ex);
+            message.ExpiresAt = message.Added.AddDays(15);
+
+            await _dataStorage.ChangeReceiveStateAsync(message, StatusName.Failed);
+
+            return needRetry;
+        }
+
+        private bool UpdateMessageForRetry<T>(IMediumMessage message)
+        {
+            var retries = ++message.Retries;
+
+            var retryCount = Math.Min(_options.FailedRetryCount, 3);
+            if (retries >= retryCount)
+            {
+                if (retries == _options.FailedRetryCount)
+                {
+                    try
+                    {
+                        _options.FailedThresholdCallback?.Invoke(new FailedInfo
+                        {
+                            ServiceProvider = _provider,
+                            MessageType = MessageType.Subscribe,
+                            Message = message.Origin
+                        });
+
+                        _logger.ConsumerExecutedAfterThreshold(message.DbId, _options.FailedRetryCount);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.ExecutedThresholdCallbackFailed(ex);
+                    }
+                }
+                return false;
+            }
+
+            _logger.ConsumerExecutionRetrying(message.DbId, retries);
+
+            return true;
+        }
+
+        private async Task InvokeConsumerMethodAsync<T>(IMediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken)
+        where T : new()
+        {
+            var consumerContext = new ConsumerContext<T>(descriptor, message.Origin);
+            var tracingTimestamp = TracingBefore<T>(message.Origin, descriptor.MethodInfo);
+            try
+            {
+                var ret = await Invoker.InvokeAsync<T>(consumerContext, cancellationToken);
+
+                TracingAfter(tracingTimestamp, message.Origin, descriptor.MethodInfo);
+
+                if (!string.IsNullOrEmpty(ret.CallbackName))
+                {
+                    var header = new Dictionary<string, string>()
+                    {
+                        [Headers.CorrelationId] = message.Origin.GetId(),
+                        [Headers.CorrelationSequence] = (message.Origin.GetCorrelationSequence() + 1).ToString()
+                    };
+
+                    await _provider.GetService<ICapPublisher>().PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                //ignore
+            }
+            catch (Exception ex)
+            {
+                var e = new SubscriberExecutionFailedException(ex.Message, ex);
+
+                TracingError(tracingTimestamp, message.Origin, descriptor.MethodInfo, e);
+
+                throw e;
+            }
+        }
+
+        #region tracing
+
+        private long? TracingBefore<T>(ICapMessage message, MethodInfo method)
+        {
+            if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforeSubscriberInvoke))
+            {
+                var eventData = new CapEventDataSubExecute<T>()
+                {
+                    OperationTimestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    Operation = message.GetName(),
+                    Message = message,
+                    MethodInfo = method
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.BeforeSubscriberInvoke, eventData);
+
+                return eventData.OperationTimestamp;
+            }
+
+            return null;
+        }
+
+        private void TracingAfter<T>(long? tracingTimestamp, ICapMessage message, MethodInfo method)
+        {
+            if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterSubscriberInvoke))
+            {
+                var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                var eventData = new CapEventDataSubExecute()
+                {
+                    OperationTimestamp = now,
+                    Operation = message.GetName(),
+                    Message = message,
+                    MethodInfo = method,
+                    ElapsedTimeMs = now - tracingTimestamp.Value
+                };
+
+                s_diagnosticListener.Write(CapDiagnosticListenerNames.AfterSubscriberInvoke, eventData);
+            }
+        }
+
+        private void TracingError<T>(long? tracingTimestamp, ICapMessage message, MethodInfo method, Exception ex)
         {
             if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.ErrorSubscriberInvoke))
             {
