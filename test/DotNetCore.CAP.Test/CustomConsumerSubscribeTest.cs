@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace DotNetCore.CAP.Test
@@ -20,7 +16,8 @@ namespace DotNetCore.CAP.Test
         public CustomConsumerSubscribeTest()
         {
             var services = new ServiceCollection();
-            services.AddSingleton<IConsumerServiceSelector, MyConsumerServiceSelector>();
+            // Declare subscribe interface and attribute when configuring services.
+            services.AddSingleton<IConsumerServiceSelector, GenericConsumerServiceSelector<IMySubscribe, MySubscribeAttribute>>();
             services.AddTransient<IMySubscribe, CustomInterfaceTypesClass>();
             services.AddLogging();
             services.AddCap(x =>
@@ -37,7 +34,7 @@ namespace DotNetCore.CAP.Test
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
 
-            Assert.Equal(2, candidates.Count);
+            Assert.Equal(3, candidates.Count);
         }
 
         [Fact]
@@ -53,87 +50,25 @@ namespace DotNetCore.CAP.Test
             Assert.StartsWith(TopicNamePrefix, bestCandidates.TopicName);
             Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
         }
-    }
-
-    public class MyConsumerServiceSelector : ConsumerServiceSelector
-    {
-        private readonly CapOptions _capOptions;
-
-        public MyConsumerServiceSelector(IServiceProvider serviceProvider)
-            : base(serviceProvider)
+        
+        [Fact]
+        public void CanFindTopicWithParameters()
         {
-            _capOptions = serviceProvider.GetService<IOptions<CapOptions>>().Value;
-        }
+            var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+            var candidates = selector.SelectCandidates();
+            var bestCandidates = selector.SelectBestCandidate($"{TopicNamePrefix}.Candidates.Foo3", candidates);
 
-        protected override IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(IServiceProvider provider)
-        {
-            var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
-
-            using (var scoped = provider.CreateScope())
-            {
-                var scopedProvider = scoped.ServiceProvider;
-                var consumerServices = scopedProvider.GetServices<IMySubscribe>();
-                foreach (var service in consumerServices)
-                {
-                    var typeInfo = service.GetType().GetTypeInfo();
-                    if (!typeof(IMySubscribe).GetTypeInfo().IsAssignableFrom(typeInfo))
-                    {
-                        continue;
-                    }
-
-                    executorDescriptorList.AddRange(GetMyDescription(typeInfo));
-                }
-
-                return executorDescriptorList;
-            }
-        }
-
-        private IEnumerable<ConsumerExecutorDescriptor> GetMyDescription(TypeInfo typeInfo)
-        {
-            foreach (var method in typeInfo.DeclaredMethods)
-            {
-                var topicAttr = method.GetCustomAttributes<MySubscribeAttribute>(true);
-                var topicAttributes = topicAttr as IList<MySubscribeAttribute> ?? topicAttr.ToList();
-
-                if (!topicAttributes.Any())
-                {
-                    continue;
-                }
-
-                foreach (var attr in topicAttributes)
-                {
-                    if (attr.Group == null)
-                    {
-                        attr.Group = _capOptions.DefaultGroupName + "." + _capOptions.Version;
-                    }
-                    else
-                    {
-                        attr.Group = attr.Group + "." + _capOptions.Version;
-                    }
-
-                    if (!string.IsNullOrEmpty(_capOptions.GroupNamePrefix))
-                    {
-                        attr.Group = $"{_capOptions.GroupNamePrefix}.{attr.Group}";
-                    }
-
-                    yield return new ConsumerExecutorDescriptor
-                    {
-                        Attribute = new CapSubscribeAttribute(attr.Name)
-                        {
-                            Group = attr.Group
-                        },
-                        MethodInfo = method,
-                        ImplTypeInfo = typeInfo,
-                        TopicNamePrefix = _capOptions.TopicNamePrefix
-                    };
-                }
-            }
+            Assert.NotNull(bestCandidates);
+            Assert.NotNull(bestCandidates.Parameters);
+            Assert.StartsWith(GroupNamePrefix, bestCandidates.Attribute.Group);
+            Assert.StartsWith(TopicNamePrefix, bestCandidates.TopicName);
+            Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
         }
     }
 
     public interface IMySubscribe { }
 
-    public class MySubscribeAttribute : Attribute
+    public class MySubscribeAttribute : Attribute, INamedGroup
     {
         public MySubscribeAttribute(string name)
         {
@@ -150,19 +85,26 @@ namespace DotNetCore.CAP.Test
         [MySubscribe("Candidates.Foo")]
         public Task GetFoo()
         {
-            Console.WriteLine("GetFoo() method has been excuted.");
+            Console.WriteLine("GetFoo() method has been executed.");
             return Task.CompletedTask;
         }
 
         [MySubscribe("Candidates.Foo2")]
         public void GetFoo2()
         {
-            Console.WriteLine("GetFoo2() method has been excuted.");
+            Console.WriteLine("GetFoo2() method has been executed.");
+        }
+        
+        [MySubscribe("Candidates.Foo3")]
+        public Task GetFoo3(string message)
+        {
+            Console.WriteLine($"GetFoo3() received message {message}.");
+            return Task.CompletedTask;
         }
 
         public void DistracterMethod()
         {
-            Console.WriteLine("DistracterMethod() method has been excuted.");
+            Console.WriteLine("DistracterMethod() method has been executed.");
         }
     }
 }

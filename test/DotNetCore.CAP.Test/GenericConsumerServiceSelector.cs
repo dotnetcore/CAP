@@ -2,13 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace MyConsumerSelector
+namespace DotNetCore.CAP.Test
 {
+    /// <summary>
+    /// Allows caller to supply subscribe interface and attribute when adding services.
+    /// </summary>
+    /// <typeparam name="TSubscriber"></typeparam>
+    /// <typeparam name="TSubscriptionAttribute"></typeparam>
     public class GenericConsumerServiceSelector<TSubscriber, TSubscriptionAttribute> : ConsumerServiceSelector
         where TSubscriptionAttribute : Attribute, INamedGroup
     {
@@ -20,6 +24,7 @@ namespace MyConsumerSelector
             _capOptions = serviceProvider.GetRequiredService<IOptions<CapOptions>>().Value;
         }
 
+        /// <inheritdoc cref="ConsumerServiceSelector"/>
         protected override IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(IServiceProvider provider)
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
@@ -31,8 +36,8 @@ namespace MyConsumerSelector
                 var subscriberTypeInfo = typeof(TSubscriber).GetTypeInfo();
                 foreach (var service in subscribers)
                 {
-                    var serviceTypeInfo = service.GetType().GetTypeInfo();
-                    if (!subscriberTypeInfo.IsAssignableFrom(serviceTypeInfo))
+                    var serviceTypeInfo = service?.GetType().GetTypeInfo();
+                    if (serviceTypeInfo == null || !subscriberTypeInfo.IsAssignableFrom(serviceTypeInfo))
                     {
                         continue;
                     }
