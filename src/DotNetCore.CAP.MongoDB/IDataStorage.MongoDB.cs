@@ -22,7 +22,6 @@ namespace DotNetCore.CAP.MongoDB
         private readonly IMongoClient _client;
         private readonly IMongoDatabase _database;
         private readonly IOptions<MongoDBOptions> _options;
-        //private readonly ISerializer _serializer;
         private readonly ISerializerRegistry _serializerRegistry;
         private readonly IMessageSerializer _messageSerializer;
 
