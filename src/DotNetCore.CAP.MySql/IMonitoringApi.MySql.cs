@@ -238,9 +238,9 @@ WHERE `Key` >= @minKey
             return result;
         }
 
-        public async Task<MediumMessage> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
+        public async Task<IMediumMessage> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
 
-        public async Task<MediumMessage> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
+        public async Task<IMediumMessage> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
 
         private async Task<MediumMessage> GetMessageAsync(string tableName, long id)
         {

@@ -17,12 +17,13 @@ using MySqlConnector;
 
 namespace DotNetCore.CAP.MySql
 {
-    public class MySqlDataStorage : IDataStorage
+    public partial class MySqlDataStorage : IDataStorage
     {
         private readonly IOptions<MySqlOptions> _options;
         private readonly IOptions<CapOptions> _capOptions;
         private readonly IStorageInitializer _initializer;
-        private readonly ISerializer _serializer;
+        //private readonly ISerializer _serializer;
+        private readonly ISerializerRegistry _serializerRegistry;
         private readonly string _pubName;
         private readonly string _recName;
 
@@ -30,32 +31,37 @@ namespace DotNetCore.CAP.MySql
             IOptions<MySqlOptions> options,
             IOptions<CapOptions> capOptions,
             IStorageInitializer initializer,
-            ISerializer serializer)
+            //ISerializer serializer,
+            ISerializerRegistry serializerRegistry
+            )
         {
             _options = options;
             _capOptions = capOptions;
             _initializer = initializer;
-            _serializer = serializer;
+            //_serializer = serializer;
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
+            _serializerRegistry = serializerRegistry;
         }
 
-        public async Task ChangePublishStateAsync(MediumMessage message, StatusName state) =>
+        public async Task ChangePublishStateAsync(IMediumMessage message, StatusName state) =>
             await ChangeMessageStateAsync(_pubName, message, state);
 
-        public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state) =>
+        public async Task ChangeReceiveStateAsync(IMediumMessage message, StatusName state) =>
             await ChangeMessageStateAsync(_recName, message, state);
 
-        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
+        public IMediumMessage StoreMessage(string name, ICapMessage content, object dbTransaction = null)
         {
             var sql = $"INSERT INTO `{_pubName}`(`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)" +
                       $" VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+
+            var serilizer = _serializerRegistry.GetMessageSerializer(content.GetMessageType());
 
             var message = new MediumMessage
             {
                 DbId = content.GetId(),
                 Origin = content,
-                Content = _serializer.Serialize(content),
+                Content = serilizer.Serialize(content),
                 Added = DateTime.Now,
                 ExpiresAt = null,
                 Retries = 0
@@ -109,7 +115,7 @@ namespace DotNetCore.CAP.MySql
             StoreReceivedMessage(sqlParams);
         }
 
-        public MediumMessage StoreReceivedMessage(string name, string group, Message message)
+        public IMediumMessage StoreReceivedMessage(string name, string group, ICapMessage message)
         {
             var mdMessage = new MediumMessage
             {
@@ -120,12 +126,14 @@ namespace DotNetCore.CAP.MySql
                 Retries = 0
             };
 
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.GetMessageType());
+
             object[] sqlParams =
             {
                 new MySqlParameter("@Id", mdMessage.DbId),
                 new MySqlParameter("@Name", name),
                 new MySqlParameter("@Group", group),
-                new MySqlParameter("@Content", _serializer.Serialize(mdMessage.Origin)),
+                new MySqlParameter("@Content", serilizer.Serialize(mdMessage.Origin)),
                 new MySqlParameter("@Retries", mdMessage.Retries),
                 new MySqlParameter("@Added", mdMessage.Added),
                 new MySqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
@@ -144,10 +152,10 @@ namespace DotNetCore.CAP.MySql
                 new MySqlParameter("@timeout", timeout), new MySqlParameter("@batchCount", batchCount));
         }
 
-        public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
+        public async Task<IEnumerable<IMediumMessage>> GetPublishedMessagesOfNeedRetry() =>
             await GetMessagesOfNeedRetryAsync(_pubName);
 
-        public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry() =>
+        public async Task<IEnumerable<IMediumMessage>> GetReceivedMessagesOfNeedRetry() =>
             await GetMessagesOfNeedRetryAsync(_recName);
 
         public IMonitoringApi GetMonitoringApi()
@@ -155,15 +163,18 @@ namespace DotNetCore.CAP.MySql
             return new MySqlMonitoringApi(_options, _initializer);
         }
 
-        private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
+        private async Task ChangeMessageStateAsync(string tableName, IMediumMessage message, StatusName state)
         {
             var sql =
                 $"UPDATE `{tableName}` SET `Content`=@Content,`Retries`=@Retries,`ExpiresAt`=@ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
 
+
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.Origin.GetMessageType());
+
             object[] sqlParams =
             {
                 new MySqlParameter("@Id", message.DbId),
-                new MySqlParameter("@Content", _serializer.Serialize(message.Origin)),
+                new MySqlParameter("@Content", serilizer.Serialize(message.Origin)),
                 new MySqlParameter("@Retries", message.Retries),
                 new MySqlParameter("@ExpiresAt", message.ExpiresAt),
                 new MySqlParameter("@StatusName", state.ToString("G"))
@@ -182,7 +193,7 @@ namespace DotNetCore.CAP.MySql
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
         }
 
-        private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
+        private async Task<IEnumerable<IMediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
             var sql =
@@ -190,6 +201,9 @@ namespace DotNetCore.CAP.MySql
                 $"AND `Version`='{_capOptions.Value.Version}' AND `Added`<'{fourMinAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
 
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+
+            var serilizer = _serializerRegistry.GetMessageSerializer();
+
             var result = connection.ExecuteReader(sql, reader =>
             {
                 var messages = new List<MediumMessage>();
@@ -198,7 +212,181 @@ namespace DotNetCore.CAP.MySql
                     messages.Add(new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
-                        Origin = _serializer.Deserialize(reader.GetString(1)),
+                        Origin = serilizer.Deserialize(reader.GetString(1)),
+                        Retries = reader.GetInt32(2),
+                        Added = reader.GetDateTime(3)
+                    });
+                }
+
+                return messages;
+            });
+
+            return result;
+        }
+    }
+
+
+
+    public partial class MySqlDataStorage: IDataStorage
+    {
+        public async Task ChangePublishStateAsync<T>(IMediumMessage message, StatusName state) =>
+            await ChangeMessageStateAsync(_pubName, message, state);
+
+        public async Task ChangeReceiveStateAsync<T>(IMediumMessage message, StatusName state) =>
+            await ChangeMessageStateAsync(_recName, message, state);
+
+        public IMediumMessage StoreMessage<T>(string name, ICapMessage content, object dbTransaction = null)
+        {
+            var sql = $"INSERT INTO `{_pubName}`(`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)" +
+                      $" VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
+
+            var serilizer = _serializerRegistry.GetMessageSerializer(content.GetMessageType());
+
+            var message = new MediumMessage<T>
+            {
+                DbId = content.GetId(),
+                Origin = content,
+                Content = serilizer.Serialize(content),
+                Added = DateTime.Now,
+                ExpiresAt = null,
+                Retries = 0
+            };
+
+            object[] sqlParams =
+            {
+                new MySqlParameter("@Id", message.DbId),
+                new MySqlParameter("@Name", name),
+                new MySqlParameter("@Content", message.Content),
+                new MySqlParameter("@Retries", message.Retries),
+                new MySqlParameter("@Added", message.Added),
+                new MySqlParameter("@ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
+                new MySqlParameter("@StatusName", nameof(StatusName.Scheduled)),
+            };
+
+            if (dbTransaction == null)
+            {
+                using var connection = new MySqlConnection(_options.Value.ConnectionString);
+                connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+            }
+            else
+            {
+                var dbTrans = dbTransaction as IDbTransaction;
+                if (dbTrans == null && dbTransaction is IDbContextTransaction dbContextTrans)
+                {
+                    dbTrans = dbContextTrans.GetDbTransaction();
+                }
+
+                var conn = dbTrans?.Connection;
+                conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
+            }
+
+            return message;
+        }
+
+        public void StoreReceivedExceptionMessage<T>(string name, string group, string content)
+        {
+            object[] sqlParams =
+            {
+                new MySqlParameter("@Id", SnowflakeId.Default().NextId().ToString()),
+                new MySqlParameter("@Name", name),
+                new MySqlParameter("@Group", group),
+                new MySqlParameter("@Content", content),
+                new MySqlParameter("@Retries", _capOptions.Value.FailedRetryCount),
+                new MySqlParameter("@Added", DateTime.Now),
+                new MySqlParameter("@ExpiresAt", DateTime.Now.AddDays(15)),
+                new MySqlParameter("@StatusName", nameof(StatusName.Failed))
+            };
+
+            StoreReceivedMessage(sqlParams);
+        }
+
+        public IMediumMessage StoreReceivedMessage<T>(string name, string group, ICapMessage message)
+        {
+            var mdMessage = new MediumMessage<T>
+            {
+                DbId = SnowflakeId.Default().NextId().ToString(),
+                Origin = message,
+                Added = DateTime.Now,
+                ExpiresAt = null,
+                Retries = 0
+            };
+
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.GetMessageType());
+
+            object[] sqlParams =
+            {
+                new MySqlParameter("@Id", mdMessage.DbId),
+                new MySqlParameter("@Name", name),
+                new MySqlParameter("@Group", group),
+                new MySqlParameter("@Content", serilizer.Serialize(mdMessage.Origin)),
+                new MySqlParameter("@Retries", mdMessage.Retries),
+                new MySqlParameter("@Added", mdMessage.Added),
+                new MySqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
+                new MySqlParameter("@StatusName", nameof(StatusName.Scheduled))
+            };
+
+            StoreReceivedMessage(sqlParams);
+            return mdMessage;
+        }
+
+        public async Task<int> DeleteExpiresAsync<T>(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default)
+        {
+            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+            return connection.ExecuteNonQuery(
+                $@"DELETE FROM `{table}` WHERE ExpiresAt < @timeout limit @batchCount;", null,
+                new MySqlParameter("@timeout", timeout), new MySqlParameter("@batchCount", batchCount));
+        }
+
+        public async Task<IEnumerable<IMediumMessage>> GetPublishedMessagesOfNeedRetry<T>() =>
+            await GetMessagesOfNeedRetryAsync<T>(_pubName);
+
+        public async Task<IEnumerable<IMediumMessage>> GetReceivedMessagesOfNeedRetry<T>() =>
+            await GetMessagesOfNeedRetryAsync<T>(_recName);
+
+
+        private async Task ChangeMessageStateAsync<T>(string tableName, IMediumMessage message, StatusName state)
+        {
+            var sql =
+                $"UPDATE `{tableName}` SET `Content`=@Content,`Retries`=@Retries,`ExpiresAt`=@ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
+
+
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.Origin.GetMessageType());
+
+            object[] sqlParams =
+            {
+                new MySqlParameter("@Id", message.DbId),
+                new MySqlParameter("@Content", serilizer.Serialize(message.Origin)),
+                new MySqlParameter("@Retries", message.Retries),
+                new MySqlParameter("@ExpiresAt", message.ExpiresAt),
+                new MySqlParameter("@StatusName", state.ToString("G"))
+            };
+
+            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+            connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+        }
+
+
+
+        private async Task<IEnumerable<IMediumMessage>> GetMessagesOfNeedRetryAsync<T>(string tableName)
+        {
+            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
+            var sql =
+                $"SELECT `Id`,`Content`,`Retries`,`Added` FROM `{tableName}` WHERE `Retries`<{_capOptions.Value.FailedRetryCount} " +
+                $"AND `Version`='{_capOptions.Value.Version}' AND `Added`<'{fourMinAgo}' AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
+
+            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+
+            var serilizer = _serializerRegistry.GetMessageSerializer();
+
+            var result = connection.ExecuteReader(sql, reader =>
+            {
+                var messages = new List<MediumMessage<T>>();
+                while (reader.Read())
+                {
+                    messages.Add(new MediumMessage<T>
+                    {
+                        DbId = reader.GetInt64(0).ToString(),
+                        Origin = serilizer.Deserialize(reader.GetString(1)),
                         Retries = reader.GetInt32(2),
                         Added = reader.GetDateTime(3)
                     });
