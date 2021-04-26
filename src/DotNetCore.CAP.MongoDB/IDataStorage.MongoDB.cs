@@ -30,14 +30,12 @@ namespace DotNetCore.CAP.MongoDB
             IOptions<CapOptions> capOptions,
             IOptions<MongoDBOptions> options,
             IMongoClient client,
-            //ISerializer serializer,
             ISerializerRegistry serializerRegistry)
         {
             _capOptions = capOptions;
             _options = options;
             _client = client;
             _database = _client.GetDatabase(_options.Value.DatabaseName);
-            //_serializer = serializer;
             _serializerRegistry = serializerRegistry;
             _messageSerializer = _serializerRegistry.GetMessageSerializer();
         }
