@@ -15,14 +15,14 @@ namespace DotNetCore.CAP.InMemoryStorage
 {
     internal class InMemoryMonitoringApi : IMonitoringApi
     {
-        public Task<MediumMessage> GetPublishedMessageAsync(long id)
+        public Task<IMediumMessage> GetPublishedMessageAsync(long id)
         {
-            return Task.FromResult((MediumMessage)InMemoryStorage.PublishedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
+            return Task.FromResult((IMediumMessage)InMemoryStorage.PublishedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
         }
 
-        public Task<MediumMessage> GetReceivedMessageAsync(long id)
+        public Task<IMediumMessage> GetReceivedMessageAsync(long id)
         {
-            return Task.FromResult((MediumMessage)InMemoryStorage.ReceivedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
+            return Task.FromResult((IMediumMessage)InMemoryStorage.ReceivedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
         }
 
         public StatisticsDto GetStatistics()
