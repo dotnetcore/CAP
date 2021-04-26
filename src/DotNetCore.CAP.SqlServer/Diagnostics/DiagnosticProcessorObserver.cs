@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
 
@@ -18,10 +19,10 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
         public DiagnosticProcessorObserver(IDispatcher dispatcher)
         {
             _dispatcher = dispatcher;
-            BufferList = new ConcurrentDictionary<Guid, List<MediumMessage>>();
+            BufferList = new ConcurrentDictionary<Guid, List<IMediumMessage>>();
         }
 
-        public ConcurrentDictionary<Guid, List<MediumMessage>> BufferList { get; }
+        public ConcurrentDictionary<Guid, List<IMediumMessage>> BufferList { get; }
 
         public void OnCompleted()
         {

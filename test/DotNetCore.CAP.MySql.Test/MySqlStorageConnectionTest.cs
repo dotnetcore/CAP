@@ -16,7 +16,7 @@ namespace DotNetCore.CAP.MySql.Test
 
         public MySqlStorageConnectionTest()
         {
-            var serializer = GetService<ISerializer>();
+            var serializer = GetService<ISerializerRegistry>();
             var options = GetService<IOptions<MySqlOptions>>();
             var capOptions = GetService<IOptions<CapOptions>>();
             var initializer = GetService<IStorageInitializer>();

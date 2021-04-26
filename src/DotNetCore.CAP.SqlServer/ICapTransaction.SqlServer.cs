@@ -7,6 +7,7 @@ using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
+using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using DotNetCore.CAP.Transport;
@@ -29,7 +30,7 @@ namespace DotNetCore.CAP
             _diagnosticProcessor = diagnosticProcessor;
         }
 
-        protected override void AddToSent(MediumMessage msg)
+        protected override void AddToSent(IMediumMessage msg)
         {
             if (DbTransaction is NoopTransaction)
             {
@@ -53,7 +54,7 @@ namespace DotNetCore.CAP
             }
             else
             {
-                var msgList = new List<MediumMessage>(1) { msg };
+                var msgList = new List<IMediumMessage>(1) { msg };
                 _diagnosticProcessor.BufferList.TryAdd(transactionKey, msgList);
             }
         }

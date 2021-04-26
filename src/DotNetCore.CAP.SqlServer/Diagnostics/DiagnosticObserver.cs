@@ -5,6 +5,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Reflection;
+using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
 using Microsoft.Data.SqlClient;
@@ -18,11 +19,11 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
         public const string SqlErrorCommitTransaction = "System.Data.SqlClient.WriteTransactionCommitError";
         public const string SqlErrorCommitTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionCommitError";
 
-        private readonly ConcurrentDictionary<Guid, List<MediumMessage>> _bufferList;
+        private readonly ConcurrentDictionary<Guid, List<IMediumMessage>> _bufferList;
         private readonly IDispatcher _dispatcher;
 
         public DiagnosticObserver(IDispatcher dispatcher,
-            ConcurrentDictionary<Guid, List<MediumMessage>> bufferList)
+            ConcurrentDictionary<Guid, List<IMediumMessage>> bufferList)
         {
             _dispatcher = dispatcher;
             _bufferList = bufferList;
