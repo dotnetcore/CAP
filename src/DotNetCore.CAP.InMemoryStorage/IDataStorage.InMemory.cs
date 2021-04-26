@@ -15,17 +15,18 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.InMemoryStorage
 {
-    internal class InMemoryStorage : IDataStorage
+    internal partial class InMemoryStorage : IDataStorage
     {
         private readonly IOptions<CapOptions> _capOptions;
-        private readonly ISerializer _serializer;
-
+        //private readonly ISerializer _serializer;
+        private readonly ISerializerRegistry _serializerRegistry;
 
         public InMemoryStorage(
-            IOptions<CapOptions> capOptions)
+            IOptions<CapOptions> capOptions, ISerializerRegistry serializerRegistry)
         {
             _capOptions = capOptions;
-            _defaultSerializer = defaultSerializer;
+            //_defaultSerializer = defaultSerializer;
+            _serializerRegistry = serializerRegistry;
         }
 
         public static Dictionary<string, MemoryMessage> PublishedMessages { get; } = new Dictionary<string, MemoryMessage>();
@@ -34,27 +35,33 @@ namespace DotNetCore.CAP.InMemoryStorage
 
         public Task ChangePublishStateAsync(IMediumMessage message, StatusName state)
         {
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.Origin.GetMessageType());
+
             PublishedMessages[message.DbId].StatusName = state;
             PublishedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
-            PublishedMessages[message.DbId].Content = _serializer.Serialize(message.Origin);
+            PublishedMessages[message.DbId].Content = serilizer.Serialize(message.Origin);
             return Task.CompletedTask;
         }
 
-        public Task ChangeReceiveStateAsync(MediumMessage message, StatusName state)
+        public Task ChangeReceiveStateAsync(IMediumMessage message, StatusName state)
         {
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.Origin.GetMessageType());
+
             ReceivedMessages[message.DbId].StatusName = state;
             ReceivedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
-            ReceivedMessages[message.DbId].Content = _serializer.Serialize(message.Origin);
+            ReceivedMessages[message.DbId].Content = serilizer.Serialize(message.Origin);
             return Task.CompletedTask;
         }
 
-        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
+        public IMediumMessage StoreMessage(string name, ICapMessage content, object dbTransaction = null)
         {
+            var serilizer = _serializerRegistry.GetMessageSerializer(content.GetMessageType());
+
             var message = new MediumMessage
             {
                 DbId = content.GetId(),
                 Origin = content,
-                Content = _serializer.Serialize(content),
+                Content = serilizer.Serialize(content),
                 Added = DateTime.Now,
                 ExpiresAt = null,
                 Retries = 0
@@ -92,8 +99,10 @@ namespace DotNetCore.CAP.InMemoryStorage
             };
         }
 
-        public MediumMessage StoreReceivedMessage(string name, string @group, Message message)
+        public IMediumMessage StoreReceivedMessage(string name, string @group, ICapMessage message)
         {
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.GetMessageType());
+
             var mdMessage = new MediumMessage
             {
                 DbId = SnowflakeId.Default().NextId().ToString(),
@@ -109,7 +118,7 @@ namespace DotNetCore.CAP.InMemoryStorage
                 Origin = mdMessage.Origin,
                 Group = group,
                 Name = name,
-                Content = _serializer.Serialize(mdMessage.Origin),
+                Content = serilizer.Serialize(mdMessage.Origin),
                 Retries = mdMessage.Retries,
                 Added = mdMessage.Added,
                 ExpiresAt = mdMessage.ExpiresAt,
@@ -155,35 +164,39 @@ namespace DotNetCore.CAP.InMemoryStorage
             return Task.FromResult(removed);
         }
 
-        public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
+        public Task<IEnumerable<IMediumMessage>> GetPublishedMessagesOfNeedRetry()
         {
+            var serilizer = _serializerRegistry.GetMessageSerializer();
+
             var ret = PublishedMessages.Values
                 .Where(x => x.Retries < _capOptions.Value.FailedRetryCount
                             && x.Added < DateTime.Now.AddSeconds(-10)
                             && (x.StatusName == StatusName.Scheduled || x.StatusName == StatusName.Failed))
                 .Take(200)
-                .Select(x => (MediumMessage)x);
+                .Select(x => (IMediumMessage)x);
 
             foreach (var message in ret)
             {
-                message.Origin = _serializer.Deserialize(message.Content);
+                message.Origin = serilizer.Deserialize(message.Content);
             }
 
             return Task.FromResult(ret);
         }
 
-        public Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
+        public Task<IEnumerable<IMediumMessage>> GetReceivedMessagesOfNeedRetry()
         {
+            var serilizer = _serializerRegistry.GetMessageSerializer();
+
             var ret = ReceivedMessages.Values
                  .Where(x => x.Retries < _capOptions.Value.FailedRetryCount
                              && x.Added < DateTime.Now.AddSeconds(-10)
                              && (x.StatusName == StatusName.Scheduled || x.StatusName == StatusName.Failed))
                  .Take(200)
-                 .Select(x => (MediumMessage)x);
+                 .Select(x => (IMediumMessage)x);
 
             foreach (var message in ret)
             {
-                message.Origin = _serializer.Deserialize(message.Content);
+                message.Origin = serilizer.Deserialize(message.Content);
             }
 
             return Task.FromResult(ret);
@@ -192,6 +205,179 @@ namespace DotNetCore.CAP.InMemoryStorage
         public IMonitoringApi GetMonitoringApi()
         {
             return new InMemoryMonitoringApi();
+        }
+    }
+
+
+    internal partial class InMemoryStorage : IDataStorage
+    {
+        public Task ChangePublishStateAsync<T>(IMediumMessage message, StatusName state)
+        {
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.Origin.GetMessageType());
+
+            PublishedMessages[message.DbId].StatusName = state;
+            PublishedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
+            PublishedMessages[message.DbId].Content = serilizer.Serialize(message.Origin);
+            return Task.CompletedTask;
+        }
+
+        public Task ChangeReceiveStateAsync<T>(IMediumMessage message, StatusName state)
+        {
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.Origin.GetMessageType());
+
+            ReceivedMessages[message.DbId].StatusName = state;
+            ReceivedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
+            ReceivedMessages[message.DbId].Content = serilizer.Serialize(message.Origin);
+            return Task.CompletedTask;
+        }
+
+        public IMediumMessage StoreMessage<T>(string name, ICapMessage content, object dbTransaction = null)
+        {
+            var serilizer = _serializerRegistry.GetMessageSerializer(content.GetMessageType());
+
+            var message = new MediumMessage<T>
+            {
+                DbId = content.GetId(),
+                Origin = content,
+                Content = serilizer.Serialize(content),
+                Added = DateTime.Now,
+                ExpiresAt = null,
+                Retries = 0
+            };
+
+            PublishedMessages[message.DbId] = new MemoryMessage()
+            {
+                DbId = message.DbId,
+                Name = name,
+                Content = message.Content,
+                Retries = message.Retries,
+                Added = message.Added,
+                ExpiresAt = message.ExpiresAt,
+                StatusName = StatusName.Scheduled
+            };
+
+            return message;
+        }
+
+        public void StoreReceivedExceptionMessage<T>(string name, string group, string content)
+        {
+            var id = SnowflakeId.Default().NextId().ToString();
+
+            ReceivedMessages[id] = new MemoryMessage
+            {
+                DbId = id,
+                Group = group,
+                Origin = null,
+                Name = name,
+                Content = content,
+                Retries = _capOptions.Value.FailedRetryCount,
+                Added = DateTime.Now,
+                ExpiresAt = DateTime.Now.AddDays(15),
+                StatusName = StatusName.Failed
+            };
+        }
+
+        public IMediumMessage StoreReceivedMessage<T>(string name, string @group, ICapMessage message)
+        {
+            var serilizer = _serializerRegistry.GetMessageSerializer(message.GetMessageType());
+
+            var mdMessage = new MediumMessage<T>
+            {
+                DbId = SnowflakeId.Default().NextId().ToString(),
+                Origin = message,
+                Added = DateTime.Now,
+                ExpiresAt = null,
+                Retries = 0
+            };
+
+            ReceivedMessages[mdMessage.DbId] = new MemoryMessage
+            {
+                DbId = mdMessage.DbId,
+                Origin = mdMessage.Origin,
+                Group = group,
+                Name = name,
+                Content = serilizer.Serialize(mdMessage.Origin),
+                Retries = mdMessage.Retries,
+                Added = mdMessage.Added,
+                ExpiresAt = mdMessage.ExpiresAt,
+                StatusName = StatusName.Scheduled
+            };
+            return mdMessage;
+        }
+
+        public Task<int> DeleteExpiresAsync<T>(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default)
+        {
+            var removed = 0;
+            if (table == nameof(PublishedMessages))
+            {
+                var ids = PublishedMessages.Values
+                    .Where(x => x.ExpiresAt < timeout)
+                    .Select(x => x.DbId)
+                    .Take(batchCount);
+
+                foreach (var id in ids)
+                {
+                    if (PublishedMessages.Remove(id))
+                    {
+                        removed++;
+                    }
+                }
+            }
+            else
+            {
+                var ids = ReceivedMessages.Values
+                    .Where(x => x.ExpiresAt < timeout)
+                    .Select(x => x.DbId)
+                    .Take(batchCount);
+
+                foreach (var id in ids)
+                {
+                    if (ReceivedMessages.Remove(id))
+                    {
+                        removed++;
+                    }
+                }
+            }
+
+            return Task.FromResult(removed);
+        }
+
+        public Task<IEnumerable<IMediumMessage>> GetPublishedMessagesOfNeedRetry<T>()
+        {
+            var serilizer = _serializerRegistry.GetMessageSerializer(typeof(T));
+
+            var ret = PublishedMessages.Values
+                .Where(x => x.Retries < _capOptions.Value.FailedRetryCount
+                            && x.Added < DateTime.Now.AddSeconds(-10)
+                            && (x.StatusName == StatusName.Scheduled || x.StatusName == StatusName.Failed))
+                .Take(200)
+                .Select(x => (IMediumMessage)x);
+
+            foreach (var message in ret)
+            {
+                message.Origin = serilizer.Deserialize(message.Content);
+            }
+
+            return Task.FromResult(ret);
+        }
+
+        public Task<IEnumerable<IMediumMessage>> GetReceivedMessagesOfNeedRetry<T>()
+        {
+            var serilizer = _serializerRegistry.GetMessageSerializer(typeof(T));
+
+            var ret = ReceivedMessages.Values
+                 .Where(x => x.Retries < _capOptions.Value.FailedRetryCount
+                             && x.Added < DateTime.Now.AddSeconds(-10)
+                             && (x.StatusName == StatusName.Scheduled || x.StatusName == StatusName.Failed))
+                 .Take(200)
+                 .Select(x => (IMediumMessage)x);
+
+            foreach (var message in ret)
+            {
+                message.Origin = serilizer.Deserialize(message.Content);
+            }
+
+            return Task.FromResult(ret);
         }
     }
 }
