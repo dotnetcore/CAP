@@ -21,7 +21,6 @@ namespace DotNetCore.CAP.Internal
         private readonly CapOptions _capOptions;
         private readonly ISerializerRegistry _serializerRegistry;
 
-
         public IServiceProvider ServiceProvider { get; }
         public AsyncLocal<ICapTransaction> Transaction { get; }
 

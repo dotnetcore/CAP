@@ -81,7 +81,6 @@ namespace DotNetCore.CAP.Serialization
                 }
 
                 return CreateSerializer(serializerType);
-
             }
 
             return null;

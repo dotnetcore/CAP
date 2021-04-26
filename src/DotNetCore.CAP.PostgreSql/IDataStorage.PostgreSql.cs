@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.PostgreSql
         private readonly IOptions<CapOptions> _capOptions;
         private readonly IStorageInitializer _initializer;
         private readonly IOptions<PostgreSqlOptions> _options;
-        private readonly ISerializer _serializer;
+        //private readonly ISerializer _serializer;
         private readonly string _pubName;
         private readonly string _recName;
         private readonly ISerializerRegistry _serializerRegistry;
@@ -32,13 +32,14 @@ namespace DotNetCore.CAP.PostgreSql
             IOptions<PostgreSqlOptions> options,
             IOptions<CapOptions> capOptions,
             IStorageInitializer initializer,
-            ISerializer serializer,
-            ISerializerRegistry serializerRegistry)
+            //ISerializer serializer,
+            ISerializerRegistry serializerRegistry
+            )
         {
             _capOptions = capOptions;
             _initializer = initializer;
             _options = options;
-            _serializer = serializer;
+            //_serializer = serializer;
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
             _serializerRegistry = serializerRegistry;
@@ -206,6 +207,9 @@ namespace DotNetCore.CAP.PostgreSql
                 $"AND \"Version\"='{_capOptions.Value.Version}' AND \"Added\"<'{fourMinAgo}' AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";
 
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+
+            var serializer = _serializerRegistry.GetMessageSerializer();
+
             var result = connection.ExecuteReader(sql, reader =>
             {
                 var messages = new List<IMediumMessage>();
@@ -214,7 +218,7 @@ namespace DotNetCore.CAP.PostgreSql
                     messages.Add(new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
-                        Origin = _serializer.Deserialize(reader.GetString(1)),
+                        Origin = serializer.Deserialize(reader.GetString(1)),
                         Retries = reader.GetInt32(2),
                         Added = reader.GetDateTime(3)
                     });

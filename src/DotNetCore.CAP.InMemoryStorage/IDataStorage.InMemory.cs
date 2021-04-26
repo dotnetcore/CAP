@@ -20,17 +20,19 @@ namespace DotNetCore.CAP.InMemoryStorage
         private readonly IOptions<CapOptions> _capOptions;
         private readonly ISerializer _serializer;
 
-        public InMemoryStorage(IOptions<CapOptions> capOptions, ISerializer serializer)
+
+        public InMemoryStorage(
+            IOptions<CapOptions> capOptions)
         {
             _capOptions = capOptions;
-            _serializer = serializer;
+            _defaultSerializer = defaultSerializer;
         }
 
         public static Dictionary<string, MemoryMessage> PublishedMessages { get; } = new Dictionary<string, MemoryMessage>();
 
         public static Dictionary<string, MemoryMessage> ReceivedMessages { get; } = new Dictionary<string, MemoryMessage>();
 
-        public Task ChangePublishStateAsync(MediumMessage message, StatusName state)
+        public Task ChangePublishStateAsync(IMediumMessage message, StatusName state)
         {
             PublishedMessages[message.DbId].StatusName = state;
             PublishedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
