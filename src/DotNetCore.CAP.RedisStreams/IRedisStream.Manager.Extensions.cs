@@ -39,6 +39,8 @@ namespace StackExchange.Redis
                                 created = true;
                             }
                         }
+                        else
+                            created = true;
                     }
                 }
                 catch (Exception ex)
