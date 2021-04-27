@@ -65,12 +65,16 @@ namespace DotNetCore.CAP.AmazonSQS
                     return OperateResult.Success;
                 }
 
-                _logger.LogWarning($"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]");
-                return OperateResult.Failed(new OperateError
-                {
-                    Code = "SNS",
-                    Description = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]"
-                });
+                var errorMessage = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]";
+                _logger.LogWarning(errorMessage);
+
+                return OperateResult.Failed(
+                    new PublisherSentFailedException(errorMessage),
+                    new OperateError
+                    {
+                        Code = "SNS",
+                        Description = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]"
+                    });
             }
             catch (Exception ex)
             {
