@@ -1,12 +1,12 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Redis
+namespace DotNetCore.CAP.RedisStreams
 {
     class RedisLogger : TextWriter
     {

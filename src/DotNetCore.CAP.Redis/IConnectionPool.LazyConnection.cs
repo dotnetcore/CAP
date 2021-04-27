@@ -1,7 +1,7 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using System;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Redis
+namespace DotNetCore.CAP.RedisStreams
 {
     public class AsyncLazyRedisConnection : Lazy<Task<RedisConnection>>
     {

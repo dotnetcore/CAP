@@ -1,10 +1,10 @@
-﻿using StackExchange.Redis;
-using System;
+﻿using System;
+using StackExchange.Redis;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Redis
+namespace DotNetCore.CAP.RedisStreams
 {
     interface IRedisConnectionPool
     {

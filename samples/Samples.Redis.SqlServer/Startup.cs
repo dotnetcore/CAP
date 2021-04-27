@@ -1,4 +1,4 @@
-using DotNetCore.CAP.Redis;
+using DotNetCore.CAP.RedisStreams;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;

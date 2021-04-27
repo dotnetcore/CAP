@@ -1,4 +1,5 @@
-﻿using DotNetCore.CAP.Redis;
+﻿using System;
+using DotNetCore.CAP.RedisStreams;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Configuration;
@@ -6,13 +7,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using StackExchange.Redis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Redis
+namespace DotNetCore.CAP
 {
     class RedisOptionsExtension : ICapOptionsExtension
     {

@@ -13,7 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\DotNetCore.CAP.Redis\DotNetCore.CAP.Redis.csproj" />
+    <ProjectReference Include="..\..\src\DotNetCore.CAP.Redis\DotNetCore.CAP.RedisStreams.csproj" />
     <ProjectReference Include="..\..\src\DotNetCore.CAP.SqlServer\DotNetCore.CAP.SqlServer.csproj" />
   </ItemGroup>
 

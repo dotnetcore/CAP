@@ -1,14 +1,15 @@
-﻿using DotNetCore.CAP;
+﻿using System;
+using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using StackExchange.Redis;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Reflection;
+using DotNetCore.CAP.RedisStreams;
 
-namespace DotNetCore.CAP.Redis
+namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CapRedisOptionsExtensions
     {
@@ -21,8 +22,7 @@ namespace DotNetCore.CAP.Redis
 
         public static CapOptions UseRedis(this CapOptions options, Action<CapRedisOptions> configure)
         {
-            if (configure is null)
-                throw new ArgumentNullException(nameof(configure));
+            if (configure is null) throw new ArgumentNullException(nameof(configure));
 
             options.RegisterExtension(new RedisOptionsExtension(configure));
 

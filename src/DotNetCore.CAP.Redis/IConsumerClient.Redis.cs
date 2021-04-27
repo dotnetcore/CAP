@@ -1,9 +1,9 @@
-﻿using DotNetCore.CAP.Redis;
+﻿using System;
+using DotNetCore.CAP.RedisStreams;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,7 +14,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace DotNetCore.CAP.Redis
+namespace DotNetCore.CAP.RedisStreams
 {
     class RedisConsumerClient : IConsumerClient
     {
