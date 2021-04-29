@@ -1,29 +1,32 @@
-﻿using Microsoft.Extensions.Logging;
-using StackExchange.Redis;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
-namespace StackExchange.Redis
+namespace DotNetCore.CAP.RedisStreams
 {
-    static class RedisStreamManagerExtensions
+    internal static class RedisStreamManagerExtensions
     {
         public static async IAsyncEnumerable<StreamPosition> TryCreateConsumerGroup(this IDatabase database, StreamPosition[] positions, string consumerGroup, ILogger logger = null)
         {
             foreach (var position in positions)
             {
-                bool created = false;
+                var created = false;
                 try
                 {
                     var stream = position.Key;
                     var streamExist = await database.KeyTypeAsync(stream);
                     if (streamExist == RedisType.None)
                     {
-                        if (await database.StreamCreateConsumerGroupAsync(stream, consumerGroup, StreamPosition.NewMessages, true))
+                        if (await database.StreamCreateConsumerGroupAsync(stream, consumerGroup,
+                            StreamPosition.NewMessages))
                         {
-                            logger.LogInformation($"Redis stream [{position.Key}] created with consumer group [{consumerGroup}]");
+                            logger.LogInformation(
+                                $"Redis stream [{position.Key}] created with consumer group [{consumerGroup}]");
                             created = true;
                         }
                     }
@@ -33,19 +36,24 @@ namespace StackExchange.Redis
 
                         if (groupInfo.All(g => g.Name != consumerGroup))
                         {
-                            if (await database.StreamCreateConsumerGroupAsync(stream, consumerGroup, StreamPosition.NewMessages))
+                            if (await database.StreamCreateConsumerGroupAsync(stream, consumerGroup,
+                                StreamPosition.NewMessages))
                             {
-                                logger.LogInformation($"Redis stream [{position.Key}] created with consumer group [{consumerGroup}]");
+                                logger.LogInformation(
+                                    $"Redis stream [{position.Key}] created with consumer group [{consumerGroup}]");
                                 created = true;
                             }
                         }
                         else
+                        {
                             created = true;
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
-                    logger?.LogError(ex, $"Redis error while creating consumer group [{consumerGroup}] of stream [{position.Key}]");
+                    logger?.LogError(ex,
+                        $"Redis error while creating consumer group [{consumerGroup}] of stream [{position.Key}]");
                 }
 
                 if (created)

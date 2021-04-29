@@ -1,24 +1,20 @@
-﻿using System;
-using DotNetCore.CAP.RedisStreams;
-using DotNetCore.CAP;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.RedisStreams
 {
-    class RedisConsumerClientFactory : IConsumerClientFactory
+    internal class RedisConsumerClientFactory : IConsumerClientFactory
     {
-        private readonly CapRedisOptions redisOptions;
-        private readonly IRedisStreamManager redis;
         private readonly ILogger<RedisConsumerClient> logger;
+        private readonly IRedisStreamManager redis;
+        private readonly CapRedisOptions redisOptions;
 
-        public RedisConsumerClientFactory(IOptions<CapRedisOptions> redisOptions, IRedisStreamManager redis, ILogger<RedisConsumerClient> logger)
+        public RedisConsumerClientFactory(IOptions<CapRedisOptions> redisOptions, IRedisStreamManager redis,
+            ILogger<RedisConsumerClient> logger)
         {
             this.redisOptions = redisOptions.Value;
             this.redis = redis;

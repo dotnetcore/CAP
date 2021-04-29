@@ -1,31 +1,33 @@
-﻿using System;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using StackExchange.Redis;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using StackExchange.Redis;
 
 namespace DotNetCore.CAP.RedisStreams
 {
     public class AsyncLazyRedisConnection : Lazy<Task<RedisConnection>>
     {
-        public AsyncLazyRedisConnection(CapRedisOptions redisOptions, ILogger<AsyncLazyRedisConnection> logger)
-            : base(() => ConnectAsync(redisOptions, logger))
+        public AsyncLazyRedisConnection(CapRedisOptions redisOptions,
+            ILogger<AsyncLazyRedisConnection> logger) : base(() => ConnectAsync(redisOptions, logger))
         {
         }
 
-        public TaskAwaiter<RedisConnection> GetAwaiter() { return Value.GetAwaiter(); }
+        public TaskAwaiter<RedisConnection> GetAwaiter()
+        {
+            return Value.GetAwaiter();
+        }
 
-        static async Task<RedisConnection> ConnectAsync(CapRedisOptions redisOptions, ILogger<AsyncLazyRedisConnection> logger)
+        private static async Task<RedisConnection> ConnectAsync(CapRedisOptions redisOptions,
+            ILogger<AsyncLazyRedisConnection> logger)
         {
             var redisLogger = new RedisLogger(logger);
 
-            var connection = await ConnectionMultiplexer.ConnectAsync(redisOptions.Configuration, redisLogger).ConfigureAwait(false);
+            var connection = await ConnectionMultiplexer.ConnectAsync(redisOptions.Configuration, redisLogger)
+                .ConfigureAwait(false);
 
             connection.LogEvents(logger);
 
@@ -33,9 +35,9 @@ namespace DotNetCore.CAP.RedisStreams
         }
     }
 
-    public class RedisConnection:IDisposable
+    public class RedisConnection : IDisposable
     {
-        private bool isDisposed;
+        private bool _isDisposed;
 
         public RedisConnection(IConnectionMultiplexer connection)
         {
@@ -51,17 +53,14 @@ namespace DotNetCore.CAP.RedisStreams
             GC.SuppressFinalize(this);
         }
 
-        void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
-            if (isDisposed)
+            if (_isDisposed)
                 return;
 
-            if (disposing)
-            {
-                Connection.Dispose();
-            }
+            if (disposing) Connection.Dispose();
 
-            isDisposed = true;
+            _isDisposed = true;
         }
     }
 }

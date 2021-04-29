@@ -1,23 +1,24 @@
-﻿using System;
-using DotNetCore.CAP;
-using DotNetCore.CAP.Internal;
-using StackExchange.Redis;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Reflection;
-using DotNetCore.CAP.RedisStreams;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
+using DotNetCore.CAP;
+using StackExchange.Redis;
+
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CapRedisOptionsExtensions
     {
-        public static CapOptions UseRedis(this CapOptions options) =>
-            options.UseRedis(_ => { });
+        public static CapOptions UseRedis(this CapOptions options)
+        {
+            return options.UseRedis(_ => { });
+        }
 
-        public static CapOptions UseRedis(this CapOptions options, string connection) =>
-            options.UseRedis(opt => opt.Configuration = ConfigurationOptions.Parse(connection));
+        public static CapOptions UseRedis(this CapOptions options, string connection)
+        {
+            return options.UseRedis(opt => opt.Configuration = ConfigurationOptions.Parse(connection));
+        }
 
 
         public static CapOptions UseRedis(this CapOptions options, Action<CapRedisOptions> configure)

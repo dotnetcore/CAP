@@ -1,58 +1,53 @@
-﻿using System;
-using DotNetCore.CAP.RedisStreams;
+﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 using StackExchange.Redis;
 
 namespace DotNetCore.CAP.RedisStreams
 {
-    class RedisConsumerClient : IConsumerClient
+    internal class RedisConsumerClient : IConsumerClient
     {
-        private readonly ILogger<RedisConsumerClient> logger;
-        private readonly IRedisStreamManager redis;
-        private readonly CapRedisOptions options;
-        private readonly string groupId;
-        private string[] topics;
+        private readonly string _groupId;
+        private readonly ILogger<RedisConsumerClient> _logger;
+        private readonly IOptions<CapRedisOptions>  _options;
+        private readonly IRedisStreamManager _redis;
+        private string[] _topics;
 
-        public RedisConsumerClient(
-            string groubId,
+        public RedisConsumerClient(string groupId,
             IRedisStreamManager redis,
-            CapRedisOptions options,
+            IOptions<CapRedisOptions> options,
             ILogger<RedisConsumerClient> logger
-            )
+        )
         {
-            this.groupId = groubId;
-            this.redis = redis;
-            this.options = options;
-            this.logger = logger;
+            _groupId = groupId;
+            _redis = redis;
+            _options = options;
+            _logger = logger;
         }
 
         public event EventHandler<TransportMessage> OnMessageReceived;
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("redis", options.Endpoint);
+        public BrokerAddress BrokerAddress => new BrokerAddress("redis", _options.Value.Endpoint);
 
         public void Subscribe(IEnumerable<string> topics)
         {
             if (topics == null) throw new ArgumentNullException(nameof(topics));
 
             foreach (var topic in topics)
-            {
-                redis.CreateStreamWithConsumerGroupAsync(topic, groupId).GetAwaiter().GetResult();
-            }
+                _redis.CreateStreamWithConsumerGroupAsync(topic, _groupId).GetAwaiter().GetResult();
 
-            this.topics = topics.ToArray();
+            _topics = topics.ToArray();
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
@@ -66,59 +61,11 @@ namespace DotNetCore.CAP.RedisStreams
             }
         }
 
-        private async Task ListeningForMessagesAsync(TimeSpan timeout, CancellationToken cancellationToken)
-        {
-            //first time, we want to read our pending messages, in case we crashed and are recovering.
-            var pendingMsgs = redis.PollStreamsPendingMessagesAsync(topics, groupId, timeout, cancellationToken);
-
-            await ConsumeMessages(pendingMsgs, StreamPosition.Beginning);
-
-            //Once we consumed our history, we can start getting new messages.
-            var newMsgs = redis.PollStreamsLatestMessagesAsync(topics, groupId, timeout, cancellationToken);
-
-            _ = ConsumeMessages(newMsgs, StreamPosition.NewMessages);
-        }
-
-        private async Task ConsumeMessages(IAsyncEnumerable<RedisStream[]> streamsSet, RedisValue position)
-        {
-            await foreach (var set in streamsSet)
-            {
-                foreach (var stream in set)
-                {
-                    foreach (var entry in stream.Entries)
-                    {
-                        if (entry.IsNull)
-                            return;
-                        try
-                        {
-                            var message = RedisMessage.Create(entry, groupId);
-                            OnMessageReceived?.Invoke((stream.Key.ToString(), groupId, entry.Id.ToString()), message);
-                        }
-                        catch (Exception ex)
-                        {
-                            logger.LogError(ex.Message, ex);
-                            var logArgs = new LogMessageEventArgs
-                            {
-                                LogType = MqLogType.ConsumeError,
-                                Reason = ex.ToString()
-                            };
-                            OnLog?.Invoke(entry, logArgs);
-                        }
-                        finally
-                        {
-                            string positionName = position == StreamPosition.Beginning ? nameof(StreamPosition.Beginning) : nameof(StreamPosition.NewMessages);
-                            logger.LogDebug($"Redis stream entry [{entry.Id}] [position : {positionName}] was delivered.");
-                        }
-                    }
-                }
-            }
-        }
-
         public void Commit(object sender)
         {
-            var (stream, group, id) = ((string stream, string group, string id))sender;
+            var (stream, group, id) = ((string stream, string group, string id)) sender;
 
-            redis.Ack(stream, group, id).GetAwaiter().GetResult();
+            _redis.Ack(stream, group, id).GetAwaiter().GetResult();
         }
 
         public void Reject(object sender)
@@ -131,5 +78,50 @@ namespace DotNetCore.CAP.RedisStreams
             //ignore
         }
 
+        private async Task ListeningForMessagesAsync(TimeSpan timeout, CancellationToken cancellationToken)
+        {
+            //first time, we want to read our pending messages, in case we crashed and are recovering.
+            var pendingMsgs = _redis.PollStreamsPendingMessagesAsync(_topics, _groupId, timeout, cancellationToken);
+
+            await ConsumeMessages(pendingMsgs, StreamPosition.Beginning);
+
+            //Once we consumed our history, we can start getting new messages.
+            var newMsgs = _redis.PollStreamsLatestMessagesAsync(_topics, _groupId, timeout, cancellationToken);
+
+            _ = ConsumeMessages(newMsgs, StreamPosition.NewMessages);
+        }
+
+        private async Task ConsumeMessages(IAsyncEnumerable<RedisStream[]> streamsSet, RedisValue position)
+        {
+            await foreach (var set in streamsSet)
+            foreach (var stream in set)
+            foreach (var entry in stream.Entries)
+            {
+                if (entry.IsNull)
+                    return;
+                try
+                {
+                    var message = RedisMessage.Create(entry, _groupId);
+                    OnMessageReceived?.Invoke((stream.Key.ToString(), _groupId, entry.Id.ToString()), message);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.Message, ex);
+                    var logArgs = new LogMessageEventArgs
+                    {
+                        LogType = MqLogType.ConsumeError,
+                        Reason = ex.ToString()
+                    };
+                    OnLog?.Invoke(entry, logArgs);
+                }
+                finally
+                {
+                    var positionName = position == StreamPosition.Beginning
+                        ? nameof(StreamPosition.Beginning)
+                        : nameof(StreamPosition.NewMessages);
+                    _logger.LogDebug($"Redis stream entry [{entry.Id}] [position : {positionName}] was delivered.");
+                }
+            }
+        }
     }
 }
