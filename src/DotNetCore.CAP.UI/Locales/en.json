@@ -1,0 +1,26 @@
+{
+  "BootstrapBlazorApp.Shared.Pages.Foo": {
+    "Name": "Name",
+    "DateTime": "DateTime",
+    "Address": "Address",
+    "Count": "Count",
+    "Complete": "Complete",
+    "Education": "Education",
+    "Hobby": "Hobby",
+    "Name.Required": "{0} is required.",
+    "Address.Required": "{0} is required.",
+    "Education.Required": "{0} is required.",
+    "Hobby.Required": "{0} is required.",
+    "Name.PlaceHolder": "required",
+    "Hobbys": "Swimming,Climb,Shoot,Chess",
+    "Foo.Name": "Zhangsan {0}",
+    "Foo.Address": "Lane {0} of Jinshajiang Road, Putuo District, Shanghai",
+    "Foo.Address2": "Earth, China, Lane {0} of Jinshajiang Road, Putuo District, Shanghai. Here is an example of super long cell",
+    "Foo.BindValue": "BindValue"
+  },
+  "BootstrapBlazorApp.Shared.Pages.EnumEducation": {
+    "PlaceHolder": "Click to select ...",
+    "Primary": "Primary",
+    "Middel": "Middel"
+  }
+}

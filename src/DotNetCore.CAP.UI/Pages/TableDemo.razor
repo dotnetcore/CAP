@@ -1,0 +1,12 @@
+@page "/table"
+
+<h1>Table</h1>
+
+<Table TItem="Foo" IsPagination="true" PageItemsSource="@PageItemsSource"
+       IsStriped="true" IsBordered="true" ShowSkeleton="true" IsMultipleSelect="true"
+       ShowToolbar="true" ShowSearch="true" ShowExtendButtons="true"
+       UseInjectDataService="true" AutoGenerateColumns="true">
+    <TableColumns>
+        <TableColumn @bind-Field="@context.Hobby" Data="@Hobbys" />
+    </TableColumns>
+</Table>
