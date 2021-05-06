@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Sample.RabbitMQ.Postgres.DashboardAuth
+namespace Sample.Dashboard.Blazor
 {
     public class Program
     {

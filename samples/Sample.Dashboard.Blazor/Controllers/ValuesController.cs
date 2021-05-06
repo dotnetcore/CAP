@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Sample.RabbitMQ.Postgres.DashboardAuth.Controllers
+namespace Sample.Dashboard.Blazor.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
