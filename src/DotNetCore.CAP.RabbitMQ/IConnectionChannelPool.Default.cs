@@ -73,7 +73,6 @@ namespace DotNetCore.CAP.RabbitMQ
             }
 
             _connection = _connectionActivator();
-            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
             return _connection;
         }
 
@@ -109,11 +108,6 @@ namespace DotNetCore.CAP.RabbitMQ
             factory.HostName = options.HostName;
             options.ConnectionFactoryOptions?.Invoke(factory);
             return () => factory.CreateConnection();
-        }
-
-        private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
-        {
-            _logger.LogWarning($"RabbitMQ client connection closed! --> {e.ReplyText}");
         }
 
         public virtual IModel Rent()
