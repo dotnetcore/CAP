@@ -17,11 +17,12 @@ namespace Sample.Dashboard.Blazor
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddBootstrapBlazor();
             services.AddCap(cap =>
             {
-               cap.UseInMemoryStorage();
-               cap.UseDashboard();
-               cap.UseInMemoryMessageQueue();
+                cap.UseInMemoryStorage();
+                cap.UseDashboard();
+                cap.UseInMemoryMessageQueue();
             });
 
             services.AddControllers();

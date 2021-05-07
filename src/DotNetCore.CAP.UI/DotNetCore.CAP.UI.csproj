@@ -23,7 +23,7 @@
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Consul" Version="1.6.1.1" />
-		<PackageReference Include="BootstrapBlazor" Version="5.0.28" />
+		<PackageReference Include="BootstrapBlazor" Version="5.0.29" />
 	</ItemGroup>
 
 	<ItemGroup>
