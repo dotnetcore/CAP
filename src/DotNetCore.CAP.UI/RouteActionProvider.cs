@@ -53,7 +53,11 @@ namespace DotNetCore.CAP.UI
             if (long.TryParse(_routeData.Values["id"]?.ToString() ?? string.Empty, out long id))
             {
                 var message = await MonitoringApi.GetPublishedMessageAsync(id);
-
+                if (message == null)
+                {
+                    _response.StatusCode = StatusCodes.Status404NotFound;
+                    return;
+                }
                 await _response.WriteAsJsonAsync(message.Content);
             }
             else
@@ -68,7 +72,11 @@ namespace DotNetCore.CAP.UI
             if (long.TryParse(_routeData.Values["id"]?.ToString() ?? string.Empty, out long id))
             {
                 var message = await MonitoringApi.GetReceivedMessageAsync(id);
-
+                if (message == null)
+                {
+                    _response.StatusCode = StatusCodes.Status404NotFound;
+                    return;
+                }
                 await _response.WriteAsJsonAsync(message.Content);
             }
             else
