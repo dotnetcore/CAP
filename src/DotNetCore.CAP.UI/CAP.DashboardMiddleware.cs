@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
-using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.UI;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
@@ -17,7 +16,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualBasic;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -35,13 +33,68 @@ namespace DotNetCore.CAP
 
             var provider = app.ApplicationServices;
 
-            if (provider.GetService<DashboardOptions>() != null)
+            var option = provider.GetService<DashboardOptions>();
+            if (option != null)
             {
                 if (provider.GetService<DiscoveryOptions>() != null)
                 {
                     app.UseMiddleware<GatewayProxyMiddleware>();
                 }
-                // app.UseMiddleware<DashboardMiddleware>();
+
+                app.Map(option.PathMatch, false, x =>
+                {
+                    var builder = new RouteBuilder(x);
+
+                    var methods = typeof(RouteActionProvider).GetMethods(BindingFlags.Instance | BindingFlags.Public);
+
+                    foreach (var method in methods)
+                    {
+                        var getAttr = method.GetCustomAttribute<HttpGetAttribute>();
+                        if (getAttr != null)
+                        {
+                            builder.MapGet(getAttr.Template, (request, response, data) =>
+                            {
+                                var provider = new RouteActionProvider(request, response, data);
+                                try
+                                {
+                                    method.Invoke(provider, null);
+                                }
+                                catch (Exception ex)
+                                {
+                                    response.StatusCode = StatusCodes.Status500InternalServerError;
+                                    response.WriteAsync(ex.Message);
+                                }
+
+                                return Task.CompletedTask;
+                            });
+                        }
+
+                        var postAttr = method.GetCustomAttribute<HttpPostAttribute>();
+                        if (postAttr != null)
+                        {
+                            builder.MapPost(postAttr.Template, (request, response, data) =>
+                            {
+                                var provider = new RouteActionProvider(request, response, data);
+                                try
+                                {
+                                    method.Invoke(provider, null);
+                                }
+                                catch (Exception ex)
+                                {
+                                    response.StatusCode = StatusCodes.Status500InternalServerError;
+                                    response.WriteAsync(ex.Message);
+                                }
+
+                                return Task.CompletedTask;
+                            });
+                        }
+                    }
+
+                    var capRouter = builder.Build();
+
+                    x.UseRouter(capRouter);
+
+                });
             }
 
             return app;
@@ -80,40 +133,7 @@ namespace DotNetCore.CAP
             {
                 next(app);
 
-
-                var option = app.ApplicationServices.GetRequiredService<DashboardOptions>();
-                var builder = new RouteBuilder(app);
-
-                var methods = typeof(RouteActionProvider).GetMethods(BindingFlags.Instance| BindingFlags.Public);
-
-                foreach (var method in methods)
-                {
-                    var getAttr = method.GetCustomAttribute<HttpGetAttribute>();
-                    if (getAttr != null)
-                    {
-                        builder.MapGet(getAttr.Template, (request, response, data) =>
-                       {
-                           var provider = new RouteActionProvider(request, response, data);
-                           method.Invoke(provider, null);
-                           return Task.CompletedTask;
-                       });
-                    }
-                }
-
-                //builder.MapGet("/cap/hello", async (request, response, data) =>
-                //{
-                //    await response.WriteAsJsonAsync(new
-                //    {
-                //        name = "Yang",
-                //        age = 11
-                //    });
-                //});
-
-                var capRouter = builder.Build();
-
-                app.UseRouter(capRouter);
-
-                // app.UseCapDashboard();
+                app.UseCapDashboard();               
             };
         }
     }

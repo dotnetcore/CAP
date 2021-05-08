@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Primitives;
 
 namespace DotNetCore.CAP.UI
 {
@@ -124,11 +125,11 @@ namespace DotNetCore.CAP.UI
         public async Task PublishedList()
         {
             var routeValue = _routeData.Values;
-            var pageSize = int.Parse(_request.Query["count"]);
-            var pageIndex = int.Parse(_request.Query["from"]);
+            var pageSize = _request.Query["count"].ToInt32OrDefault(20);
+            var pageIndex = _request.Query["from"].ToInt32OrDefault(1);
             var name = _request.Query["name"].ToString();
             var content = _request.Query["content"].ToString();
-            var status = routeValue["status"]?.ToString();
+            var status = routeValue["status"]?.ToString() ?? nameof(StatusName.Succeeded);
 
             var queryDto = new MessageQueryDto
             {
@@ -153,12 +154,12 @@ namespace DotNetCore.CAP.UI
         public async Task ReceivedList()
         {
             var routeValue = _routeData.Values;
-            var pageSize = int.Parse(_request.Query["count"]);
-            var pageIndex = int.Parse(_request.Query["from"]);
+            var pageSize = _request.Query["count"].ToInt32OrDefault(20);
+            var pageIndex = _request.Query["from"].ToInt32OrDefault(1);
             var name = _request.Query["name"].ToString();
             var group = _request.Query["group"].ToString();
             var content = _request.Query["content"].ToString();
-            var status = routeValue["status"]?.ToString();
+            var status = routeValue["status"]?.ToString() ?? nameof(StatusName.Succeeded);
 
             var queryDto = new MessageQueryDto
             {
@@ -231,6 +232,15 @@ namespace DotNetCore.CAP.UI
             public string ImplName { get; set; }
 
             public string MethodEscaped { get; set; }
+        }
+    }
+
+    public static class IntExtension
+    {
+        public static int ToInt32OrDefault(this StringValues value, int defaultValue = 0)
+        {
+            int result;
+            return int.TryParse(value, out result) ? result : defaultValue;
         }
     }
 }
