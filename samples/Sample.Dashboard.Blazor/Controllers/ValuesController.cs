@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 
 namespace Sample.Dashboard.Blazor.Controllers
 {
-    [Authorize]
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {

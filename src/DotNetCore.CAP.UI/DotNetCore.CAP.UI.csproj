@@ -10,17 +10,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<EmbeddedResource Include="Locales\*.json" />
-	</ItemGroup>
-
-	<ItemGroup>
-		<None Include="Pages\Counter.razor" />
-		<None Include="Pages\FetchData.razor" />
-		<None Include="Pages\Index.razor" />
-		<None Include="Pages\TableDemo.razor" />
-	</ItemGroup>
-
-	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Consul" Version="1.6.1.1" />
 		<PackageReference Include="BootstrapBlazor" Version="5.0.28" />

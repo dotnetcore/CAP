@@ -2,11 +2,10 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using BootstrapBlazor.Components;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP
 {
@@ -21,27 +20,12 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddRazorPages();
-            services.AddServerSideBlazor();
-
             var dashboardOptions = new DashboardOptions();
             _options?.Invoke(dashboardOptions);
             services.AddSingleton(dashboardOptions);
+            services.AddTransient<IStartupFilter, CapStartupFilter>();
             services.AddSingleton<IHttpRequester, HttpClientHttpRequester>();
             services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
-
-            services.AddBootstrapBlazor(setupAction: options =>
-            {
-                options.AdditionalJsonAssemblies = new[] { GetType().Assembly };
-            });
-
-            services.AddRequestLocalization<IOptions<BootstrapBlazorOptions>>((localizerOption, blazorOption) =>
-            {
-                var supportedCultures = blazorOption.Value.GetSupportedCultures();
-
-                localizerOption.SupportedCultures = supportedCultures;
-                localizerOption.SupportedUICultures = supportedCultures;
-            });
         }
     }
 }
@@ -54,7 +38,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return capOptions.UseDashboard(opt => { });
         }
-
+        
         public static CapOptions UseDashboard(this CapOptions capOptions, Action<DashboardOptions> options)
         {
             if (options == null)
