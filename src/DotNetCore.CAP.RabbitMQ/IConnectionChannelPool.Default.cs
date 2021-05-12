@@ -67,13 +67,17 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public IConnection GetConnection()
         {
-            if (_connection != null && _connection.IsOpen)
+            lock (SLock)
             {
+                if (_connection != null && _connection.IsOpen)
+                {
+                    return _connection;
+                }
+
+                _connection?.Dispose();
+                _connection = _connectionActivator();
                 return _connection;
             }
-
-            _connection = _connectionActivator();
-            return _connection;
         }
 
         public void Dispose()
@@ -84,6 +88,7 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 context.Dispose();
             }
+            _connection?.Dispose();
         }
 
         private static Func<IConnection> CreateConnection(RabbitMQOptions options)
