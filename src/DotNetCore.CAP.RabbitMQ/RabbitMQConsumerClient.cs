@@ -92,7 +92,8 @@ namespace DotNetCore.CAP.RabbitMQ
         public void Dispose()
         {
             _channel?.Dispose();
-            _connection?.Dispose();
+            //The connection should not be closed here, because the connection is still in use elsewhere. 
+            //_connection?.Dispose();
         }
 
         public void Connect()
