@@ -15,7 +15,7 @@ namespace DotNetCore.CAP
         // ReSharper disable once InconsistentNaming
 
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        private List<OperateError> _errors = new List<OperateError>();
+        private readonly List<OperateError> _errors = new List<OperateError>();
 
         /// <summary>
         /// Flag indicating whether if the operation succeeded or not.
