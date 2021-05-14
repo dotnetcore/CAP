@@ -7,7 +7,7 @@ namespace DotNetCore.CAP.Monitoring
 {
     public class MessageDto
     {
-        public long Id { get; set; }
+        public string Id { get; set; }
 
         public string Version { get; set; }
 

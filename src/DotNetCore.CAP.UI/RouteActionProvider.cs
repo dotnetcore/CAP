@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
+using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
@@ -34,10 +35,10 @@ namespace DotNetCore.CAP.UI
         }
 
         [HttpGet("/stats")]
-        public Task Stats()
+        public async Task Stats()
         {
-            //TODO
-            return Task.CompletedTask;
+            var result = MonitoringApi.GetStatistics();
+            await _response.WriteAsJsonAsync(result);
         }
 
         [HttpGet("/health")]
@@ -133,8 +134,8 @@ namespace DotNetCore.CAP.UI
         public async Task PublishedList()
         {
             var routeValue = _routeData.Values;
-            var pageSize = _request.Query["count"].ToInt32OrDefault(20);
-            var pageIndex = _request.Query["from"].ToInt32OrDefault(1);
+            var pageSize = _request.Query["perPage"].ToInt32OrDefault(20);
+            var pageIndex = _request.Query["currentPage"].ToInt32OrDefault(1);
             var name = _request.Query["name"].ToString();
             var content = _request.Query["content"].ToString();
             var status = routeValue["status"]?.ToString() ?? nameof(StatusName.Succeeded);
@@ -151,19 +152,15 @@ namespace DotNetCore.CAP.UI
 
             var result = MonitoringApi.Messages(queryDto);
 
-            var count = string.Equals(status, nameof(StatusName.Succeeded), StringComparison.CurrentCultureIgnoreCase)
-                ? MonitoringApi.PublishedSucceededCount()
-                : MonitoringApi.PublishedFailedCount();
-
-            await _response.WriteAsJsonAsync(new { count, result });
+            await _response.WriteAsJsonAsync(result);
         }
 
         [HttpGet("/received/{status}")]
         public async Task ReceivedList()
         {
             var routeValue = _routeData.Values;
-            var pageSize = _request.Query["count"].ToInt32OrDefault(20);
-            var pageIndex = _request.Query["from"].ToInt32OrDefault(1);
+            var pageSize = _request.Query["perPage"].ToInt32OrDefault(20);
+            var pageIndex = _request.Query["currentPage"].ToInt32OrDefault(1);
             var name = _request.Query["name"].ToString();
             var group = _request.Query["group"].ToString();
             var content = _request.Query["content"].ToString();
@@ -182,11 +179,7 @@ namespace DotNetCore.CAP.UI
 
             var result = MonitoringApi.Messages(queryDto);
 
-            var count = string.Equals(status, nameof(StatusName.Succeeded), StringComparison.CurrentCultureIgnoreCase)
-                ? MonitoringApi.ReceivedSucceededCount()
-                : MonitoringApi.ReceivedFailedCount();
-
-            await _response.WriteAsJsonAsync(new { count, result });
+            await _response.WriteAsJsonAsync(result);
         }
 
         [HttpGet("/subscriber")]
@@ -215,6 +208,22 @@ namespace DotNetCore.CAP.UI
                 }
                 result.Add(inner);
             }
+
+            await _response.WriteAsJsonAsync(result);
+        }
+
+        [HttpGet("/nodes")]
+        public async Task Nodes()
+        {
+            IList<Node> result = new List<Node>();
+            var discoveryProvider = ServiceProvider.GetService<INodeDiscoveryProvider>();
+            if (discoveryProvider == null)
+            {
+                await _response.WriteAsJsonAsync(result);
+                return;
+            }
+
+            result = await discoveryProvider.GetNodes();
 
             await _response.WriteAsJsonAsync(result);
         }
