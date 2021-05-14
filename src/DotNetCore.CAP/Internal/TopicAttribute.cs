@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.Internal
         public string Name { get; }
 
         /// <summary>
-        /// Defines wether this attribute defines a topic subscription partial.
+        /// Defines whether this attribute defines a topic subscription partial.
         /// The defined topic will be combined with a topic subscription defined on class level,
         /// which results for example in subscription on "class.method".
         /// </summary>
