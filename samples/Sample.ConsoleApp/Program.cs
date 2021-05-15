@@ -26,6 +26,7 @@ namespace Sample.ConsoleApp
             });
 
             container.AddSingleton<EventSubscriber>();
+            container.AddTransient<IBootstrapperCallback, SampleBootStrapperCallback>();
 
             var sp = container.BuildServiceProvider();
 

@@ -21,27 +21,39 @@ namespace DotNetCore.CAP.Internal
         public Bootstrapper(
             ILogger<Bootstrapper> logger,
             IStorageInitializer storage,
-            IEnumerable<IProcessingServer> processors)
+            IEnumerable<IProcessingServer> processors,
+            IEnumerable<IBootstrapperCallback> bootstrapperCallbacks)
         {
             _logger = logger;
             Storage = storage;
             Processors = processors;
+            BootstrapperCallbacks = bootstrapperCallbacks;
         }
 
         private IStorageInitializer Storage { get; }
 
         private IEnumerable<IProcessingServer> Processors { get; }
 
+        private IEnumerable<IBootstrapperCallback> BootstrapperCallbacks { get; }
+
         public async Task BootstrapAsync(CancellationToken stoppingToken)
         {
+            BootstrapperCallbacks?.BootStrappingStarted();
+
             _logger.LogDebug("### CAP background task is starting.");
 
             try
             {
+                BootstrapperCallbacks?.StorageInitStarted();
+
                 await Storage.InitializeAsync(stoppingToken);
+
+                BootstrapperCallbacks?.StorageInitSuccess();
             }
             catch (Exception e)
             {
+                BootstrapperCallbacks?.StorageInitFailed(e);
+
                 _logger.LogError(e, "Initializing the storage structure failed!");
             }
 
@@ -60,11 +72,15 @@ namespace DotNetCore.CAP.Internal
                         _logger.ExpectedOperationCanceledException(ex);
                     }
                 }
+
+                BootstrapperCallbacks.OnStop();
             });
 
             await BootstrapCoreAsync();
 
             _logger.LogInformation("### CAP started!");
+
+            BootstrapperCallbacks?.OnStart();
         }
 
         protected virtual Task BootstrapCoreAsync()
