@@ -44,8 +44,6 @@ namespace DotNetCore.CAP.MySql
             await using (var connection = new MySqlConnection(_options.Value.ConnectionString))
                 connection.ExecuteNonQuery(sql);
 
-            await Task.CompletedTask;
-
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
 

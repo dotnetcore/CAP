@@ -258,7 +258,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
                 return message;
             });
 
-            return await Task.FromResult(mediumMessage);
+            return mediumMessage;
         }
     } 
 }
