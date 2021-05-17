@@ -231,7 +231,8 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
 
             foreach (var key in keyMaps.Keys)
             {
-                if (!valuesMap.ContainsKey(key)) valuesMap.Add(key, 0);
+                if (!valuesMap.ContainsKey(key))
+                    valuesMap.Add(key, 0);
             }
 
             var result = new Dictionary<DateTime, int>();
@@ -248,7 +249,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
         {
             var sql = $@"SELECT TOP 1 Id AS DbId, Content, Added, ExpiresAt, Retries FROM {tableName} WITH (readpast) WHERE Id={id}";
 
-            using var connection = new SqlConnection(_options.ConnectionString);
+            await using var connection = new SqlConnection(_options.ConnectionString);
             var mediumMessage = connection.ExecuteReader(sql, reader =>
             {
                 MediumMessage message = null;
@@ -268,7 +269,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
                 return message;
             });
 
-            return await Task.FromResult(mediumMessage);
+            return mediumMessage;
         }
-    } 
+    }
 }

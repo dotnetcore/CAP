@@ -160,8 +160,7 @@ namespace DotNetCore.CAP.PostgreSql
                 $"select count(\"Id\") from {tableName} where Lower(\"StatusName\") = Lower(@state)";
 
             using var connection = new NpgsqlConnection(_options.ConnectionString);
-            var count = connection.ExecuteScalar<int>(sqlQuery, new NpgsqlParameter("@state", statusName));
-            return count;
+            return connection.ExecuteScalar<int>(sqlQuery, new NpgsqlParameter("@state", statusName));
         }
 
         private Dictionary<DateTime, int> GetHourlyTimelineStats(string tableName, string statusName)
@@ -258,7 +257,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
                 return message;
             });
 
-            return await Task.FromResult(mediumMessage);
+            return mediumMessage;
         }
-    } 
+    }
 }

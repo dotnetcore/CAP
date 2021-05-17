@@ -139,11 +139,9 @@ namespace DotNetCore.CAP.PostgreSql
             CancellationToken token = default)
         {
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            var count = connection.ExecuteNonQuery(
+            return connection.ExecuteNonQuery(
                 $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout LIMIT @batchCount);", null,
                 new NpgsqlParameter("@timeout", timeout), new NpgsqlParameter("@batchCount", batchCount));
-
-            return await Task.FromResult(count);
         }
 
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
@@ -173,8 +171,6 @@ namespace DotNetCore.CAP.PostgreSql
 
             await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
-
-            await Task.CompletedTask;
         }
 
         private void StoreReceivedMessage(object[] sqlParams)
