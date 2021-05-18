@@ -35,16 +35,11 @@ namespace DotNetCore.CAP.MySql
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
         {
-            if (cancellationToken.IsCancellationRequested)
-            {
-                return;
-            }
+            if (cancellationToken.IsCancellationRequested) return;
 
             var sql = CreateDbTablesScript();
             await using (var connection = new MySqlConnection(_options.Value.ConnectionString))
                 connection.ExecuteNonQuery(sql);
-
-            await Task.CompletedTask;
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
