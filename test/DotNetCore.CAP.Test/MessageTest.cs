@@ -16,6 +16,7 @@ namespace DotNetCore.CAP.Test
             var services = new ServiceCollection();
             ServiceCollectionExtensions.ServiceCollection = services;
 
+            services.AddOptions();
             services.AddSingleton<ISerializer, JsonUtf8Serializer>();
             _provider = services.BuildServiceProvider();
         }
