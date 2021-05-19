@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.Dashboard
 {
     public class UiMiddleware
     {
-        private const string EmbeddedFileNamespace = "DotNetCore.CAP.UI.wwwroot.dist";
+        private const string EmbeddedFileNamespace = "DotNetCore.CAP.Dashboard.wwwroot.dist";
 
         private readonly DashboardOptions _options;
         private readonly StaticFileMiddleware _staticFileMiddleware;
