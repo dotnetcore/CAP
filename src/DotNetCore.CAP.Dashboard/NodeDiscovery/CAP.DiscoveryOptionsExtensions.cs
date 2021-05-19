@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -24,14 +23,8 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             _options?.Invoke(discoveryOptions);
             services.AddSingleton(discoveryOptions);
 
-            services.AddSingleton<IDiscoveryProviderFactory, DiscoveryProviderFactory>();
             services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
-            services.AddSingleton(x =>
-            {
-                var configOptions = x.GetService<DiscoveryOptions>();
-                var factory = x.GetService<IDiscoveryProviderFactory>();
-                return factory.Create(configOptions);
-            });
+            services.AddSingleton<INodeDiscoveryProvider, ConsulNodeDiscoveryProvider>();
         }
     }
 

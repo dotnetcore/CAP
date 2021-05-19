@@ -8,7 +8,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
     public interface INodeDiscoveryProvider
     {
-        Task<IList<Node>> GetNodes();
+        IList<Node> GetNodes();
 
         Task RegisterNode();
     }

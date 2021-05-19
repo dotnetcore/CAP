@@ -70,7 +70,7 @@ namespace DotNetCore.CAP.PostgreSql
             return statistics;
         }
 
-        public IList<MessageDto> Messages(MessageQueryDto queryDto)
+        public PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto)
         {
             var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
             var where = string.Empty;
@@ -86,6 +86,14 @@ namespace DotNetCore.CAP.PostgreSql
             var sqlQuery =
                 $"select * from {tableName} where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
 
+            using var connection = new NpgsqlConnection(_options.ConnectionString);
+
+            var count = connection.ExecuteScalar<int>($"select count(1) from {tableName} where 1=1 {where}",
+                new NpgsqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
+                new NpgsqlParameter("@Group", queryDto.Group ?? string.Empty),
+                new NpgsqlParameter("@Name", queryDto.Name ?? string.Empty),
+                new NpgsqlParameter("@Content", $"%{queryDto.Content}%"));
+
             object[] sqlParams =
             {
                 new NpgsqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
@@ -96,8 +104,7 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@Limit", queryDto.PageSize)
             };
 
-            using var connection = new NpgsqlConnection(_options.ConnectionString);
-            return connection.ExecuteReader(sqlQuery, reader =>
+            var items = connection.ExecuteReader(sqlQuery, reader =>
             {
                 var messages = new List<MessageDto>();
 
@@ -106,7 +113,7 @@ namespace DotNetCore.CAP.PostgreSql
                     var index = 0;
                     messages.Add(new MessageDto
                     {
-                        Id = reader.GetInt64(index++),
+                        Id = reader.GetInt64(index++).ToString(),
                         Version = reader.GetString(index++),
                         Name = reader.GetString(index++),
                         Group = queryDto.MessageType == MessageType.Subscribe ? reader.GetString(index++) : default,
@@ -120,6 +127,8 @@ namespace DotNetCore.CAP.PostgreSql
 
                 return messages;
             }, sqlParams);
+
+            return new PagedQueryResult<MessageDto> { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
         }
 
         public int PublishedFailedCount()

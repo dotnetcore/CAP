@@ -1,0 +1,15 @@
+{
+    "vetur.format.defaultFormatter.html": "js-beautify-html",
+    "vetur.format.defaultFormatter.js": "vscode-typescript",
+    "vetur.format.defaultFormatterOptions": {
+        "js-beautify-html": {
+            "wrap_attributes": "auto"
+        },
+        "prettyhtml": {
+            "printWidth": 100,
+            "singleQuote": false,
+            "wrapAttributes": false,
+            "sortAttributes": false
+        }
+    }
+}

@@ -126,7 +126,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 
         private bool TryGetRemoteNode(string requestNodeId, out Node node)
         {
-            var nodes = _discoveryProvider.GetNodes().GetAwaiter().GetResult();
+            var nodes = _discoveryProvider.GetNodes();
             node = nodes.FirstOrDefault(x => x.Id == requestNodeId);
             return node != null;
         }
