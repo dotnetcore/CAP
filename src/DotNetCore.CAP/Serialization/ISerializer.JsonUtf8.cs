@@ -6,11 +6,19 @@ using System.Buffers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Serialization
 {
     public class JsonUtf8Serializer : ISerializer
     {
+        private readonly JsonSerializerOptions _jsonSerializerOptions;
+
+        public JsonUtf8Serializer(IOptions<CapOptions> capOptions)
+        {
+            _jsonSerializerOptions = capOptions.Value.JsonSerializerOptions;
+        }
+
         public Task<TransportMessage> SerializeAsync(Message message)
         {
             if (message == null)
@@ -23,7 +31,7 @@ namespace DotNetCore.CAP.Serialization
                 return Task.FromResult(new TransportMessage(message.Headers, null));
             }
 
-            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(message.Value);
+            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(message.Value, _jsonSerializerOptions);
             return Task.FromResult(new TransportMessage(message.Headers, jsonBytes));
         }
 
@@ -34,19 +42,19 @@ namespace DotNetCore.CAP.Serialization
                 return Task.FromResult(new Message(transportMessage.Headers, null));
             }
 
-            var obj = JsonSerializer.Deserialize(transportMessage.Body, valueType);
+            var obj = JsonSerializer.Deserialize(transportMessage.Body, valueType, _jsonSerializerOptions);
 
             return Task.FromResult(new Message(transportMessage.Headers, obj));
         }
 
         public string Serialize(Message message)
         {
-            return JsonSerializer.Serialize(message);
+            return JsonSerializer.Serialize(message, _jsonSerializerOptions);
         }
 
         public Message Deserialize(string json)
         {
-            return JsonSerializer.Deserialize<Message>(json);
+            return JsonSerializer.Deserialize<Message>(json, _jsonSerializerOptions);
         }
 
         public object Deserialize(object value, Type valueType)
@@ -58,7 +66,7 @@ namespace DotNetCore.CAP.Serialization
                 {
                     jToken.WriteTo(writer);
                 }
-                return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, valueType);
+                return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, valueType, _jsonSerializerOptions);
             }
             throw new NotSupportedException("Type is not of type JToken");
         }
@@ -67,6 +75,6 @@ namespace DotNetCore.CAP.Serialization
         {
             return jsonObject is JsonElement;
         }
-         
+
     }
 }
