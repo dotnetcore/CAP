@@ -44,6 +44,21 @@ namespace DotNetCore.CAP.Internal
             return !CanConvertFromString(type);
         }
 
+        public static string WildcardToRegex(string wildcard)
+        {
+            if (wildcard.IndexOf('*') >= 0)
+            {
+                return ("^" + wildcard + "$").Replace("*", "[0-9a-zA-Z]+").Replace(".", "\\.");
+            }
+
+            if (wildcard.IndexOf('#') >= 0)
+            {
+                return ("^" + wildcard.Replace(".", "\\.") + "$").Replace("#", "[0-9a-zA-Z\\.]+");
+            }
+
+            return wildcard;
+        }
+
         public static bool IsInnerIP(string ipAddress)
         {
             bool isInnerIp;

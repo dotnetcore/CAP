@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
@@ -41,13 +42,15 @@ namespace DotNetCore.CAP.Kafka
                 throw new ArgumentNullException(nameof(topicNames));
             }
 
+            var regexTopicNames = topicNames.Select(Helper.WildcardToRegex).ToList();
+
             try
             {
                 var config = new AdminClientConfig(_kafkaOptions.MainConfig) { BootstrapServers = _kafkaOptions.Servers };
 
                 using var adminClient = new AdminClientBuilder(config).Build();
 
-                adminClient.CreateTopicsAsync(topicNames.Select(x => new TopicSpecification
+                adminClient.CreateTopicsAsync(regexTopicNames.Select(x => new TopicSpecification
                 {
                     Name = x
                 })).GetAwaiter().GetResult();
@@ -65,7 +68,7 @@ namespace DotNetCore.CAP.Kafka
                 OnLog?.Invoke(null, logArgs);
             }
 
-            return topicNames.ToList();
+            return regexTopicNames;
         }
 
         public void Subscribe(IEnumerable<string> topics)
@@ -169,6 +172,6 @@ namespace DotNetCore.CAP.Kafka
                 Reason = $"An error occurred during connect kafka --> {e.Reason}"
             };
             OnLog?.Invoke(null, logArgs);
-        }
+        } 
     }
 }
