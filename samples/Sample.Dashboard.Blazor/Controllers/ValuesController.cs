@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Sample.Dashboard.Blazor.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
@@ -36,6 +37,33 @@ namespace Sample.Dashboard.Blazor.Controllers
         [NonAction]
         [CapSubscribe(CapGroup)]
         public void Subscribe(Person p, [FromCap] CapHeader header)
+        {
+            var id = header[Headers.MessageId];
+
+            _logger.LogInformation($@"{DateTime.Now} Subscriber invoked for message {id}, Info: {p}");
+        }
+
+        [NonAction]
+        [CapSubscribe(CapGroup,Group = "foo")]
+        public void Subscribe2(Person p, [FromCap] CapHeader header)
+        {
+            var id = header[Headers.MessageId];
+
+            _logger.LogInformation($@"{DateTime.Now} Subscriber invoked for message {id}, Info: {p}");
+        }
+
+        [NonAction]
+        [CapSubscribe(CapGroup, Group = "bar")]
+        public void Subscribe3(Person p, [FromCap] CapHeader header)
+        {
+            var id = header[Headers.MessageId];
+
+            _logger.LogInformation($@"{DateTime.Now} Subscriber invoked for message {id}, Info: {p}");
+        }
+
+        [NonAction]
+        [CapSubscribe("MSubscribe.AAA")]
+        public void MSubscribe(Person p, [FromCap] CapHeader header)
         {
             var id = header[Headers.MessageId];
 

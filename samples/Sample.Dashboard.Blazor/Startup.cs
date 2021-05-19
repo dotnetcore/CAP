@@ -1,9 +1,8 @@
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Savorboard.CAP.InMemoryMessageQueue;
 
 namespace Sample.Dashboard.Blazor
 {
@@ -18,27 +17,64 @@ namespace Sample.Dashboard.Blazor
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services
+               .AddAuthorization()
+               .AddAuthentication(options =>
+               {
+                   options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                   options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+               })
+               .AddCookie()
+               .AddOpenIdConnect(options =>
+               {
+                   options.Authority = "https://demo.identityserver.io/";
+                   options.ClientId = "interactive.confidential";
+                   options.ClientSecret = "secret";
+                   options.ResponseType = "code";
+                   options.UsePkce = true;
+
+                   options.Scope.Clear();
+                   options.Scope.Add("openid");
+                   options.Scope.Add("profile");
+               });
+
             services.AddCap(cap =>
             {
-               cap.UseInMemoryStorage();
-               cap.UseDashboard();
-               cap.UseInMemoryMessageQueue();
+                cap.UseDashboard(d =>
+                {
+                    d.UseChallengeOnAuth = true;
+                    d.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                });
+                cap.UseMySql(_configuration.GetValue<string>("ConnectionString"));
+                cap.UseRabbitMQ(aa =>
+                {
+                    aa.HostName = "192.168.3.57";
+                    aa.UserName = "user";
+                    aa.Password = "wJ0p5gSs17";
+                });
+                //cap.UseDiscovery(_ =>
+                //{
+                //    _.DiscoveryServerHostName = "localhost";
+                //    _.DiscoveryServerPort = 8500;
+                //    _.CurrentNodeHostName = _configuration.GetValue<string>("ASPNETCORE_HOSTNAME");
+                //    _.CurrentNodePort = _configuration.GetValue<int>("ASPNETCORE_PORT");
+                //    _.NodeId = _configuration.GetValue<string>("NodeId");
+                //    _.NodeName = _configuration.GetValue<string>("NodeName");
+                //});
             });
 
-            services.AddControllers();
+            services.AddControllers();//.AddJsonOptions(x=>x.JsonSerializerOptions);
         }
 
         public void Configure(IApplicationBuilder app)
         {
+            app.UseAuthentication();
             app.UseRouting();
-           // app.UseRequestLocalization(app.ApplicationServices.GetService<IOptions<RequestLocalizationOptions>>().Value);
-            app.UseStaticFiles();
+            app.UseAuthorization();
+            app.UseCookiePolicy();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
-                
-              //  endpoints.MapBlazorHub();
-              //  endpoints.MapFallbackToPage("/_Host");
+                endpoints.MapControllers(); 
             });
         }
     }

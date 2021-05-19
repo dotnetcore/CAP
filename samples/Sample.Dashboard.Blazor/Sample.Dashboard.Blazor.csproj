@@ -5,13 +5,14 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard\DotNetCore.CAP.Dashboard.csproj" />
         <ProjectReference Include="..\..\src\DotNetCore.CAP.InMemoryStorage\DotNetCore.CAP.InMemoryStorage.csproj" />
-        <ProjectReference Include="..\..\src\DotNetCore.CAP.UI\DotNetCore.CAP.UI.csproj" />
+        <ProjectReference Include="..\..\src\DotNetCore.CAP.MySql\DotNetCore.CAP.MySql.csproj" />
+        <ProjectReference Include="..\..\src\DotNetCore.CAP.RabbitMQ\DotNetCore.CAP.RabbitMQ.csproj" />
         <ProjectReference Include="..\..\src\DotNetCore.CAP\DotNetCore.CAP.csproj" />
     </ItemGroup>
     
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.4" />
-        <PackageReference Include="Savorboard.CAP.InMemoryMessageQueue" Version="3.1.1" />
     </ItemGroup>
 </Project>

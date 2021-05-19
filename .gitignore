@@ -1,4 +1,5 @@
-﻿[Oo]bj/
+﻿node_modules
+[Oo]bj/
 [Bb]in/
 TestResults/
 .nuget/
@@ -12,8 +13,6 @@ PublishProfiles/
 *.docstates
 _ReSharper.*
 nuget.exe
-*net45.csproj
-*net451.csproj
 *k10.csproj
 *.psess
 *.vsp
@@ -24,21 +23,11 @@ nuget.exe
 *.*sdf
 *.ipch
 *.sln.ide
-project.lock.json
 .vs
 .build/
-.testPublish/
-obj/
-bin/
-/.idea/.idea.CAP
 /.idea/.idea.CAP
 /.idea
 Properties
 /pack.bat
-/src/DotNetCore.CAP/project.json
-/src/DotNetCore.CAP/packages.config
-/src/DotNetCore.CAP/DotNetCore.CAP.Net47.csproj
-/NuGet.config
 .vscode/*
-samples/Sample.RabbitMQ.MongoDB/appsettings.Development.json
 site/
