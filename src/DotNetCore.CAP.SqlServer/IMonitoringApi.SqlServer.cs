@@ -108,7 +108,13 @@ SELECT
             };
 
             using var connection = new SqlConnection(_options.ConnectionString);
-            var count = connection.ExecuteScalar<int>($"select count(1) from {tableName} where 1=1 {where}", sqlParams);
+
+            var count = connection.ExecuteScalar<int>($"select count(1) from {tableName} where 1=1 {where}",
+                new SqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
+                new SqlParameter("@Group", queryDto.Group ?? string.Empty),
+                new SqlParameter("@Name", queryDto.Name ?? string.Empty),
+                new SqlParameter("@Content", $"%{queryDto.Content}%"));
+
             var items = connection.ExecuteReader(_options.IsSqlServer2008 ? sqlQuery2008 : sqlQuery, reader =>
             {
                 var messages = new List<MessageDto>();

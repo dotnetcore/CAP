@@ -113,7 +113,13 @@ SELECT
             };
 
             using var connection = new MySqlConnection(_options.ConnectionString);
-            var count = connection.ExecuteScalar<int>($"select count(1) from `{tableName}` where 1=1 {where}", sqlParams);
+
+            var count = connection.ExecuteScalar<int>($"select count(1) from `{tableName}` where 1=1 {where}",
+                new MySqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
+                new MySqlParameter("@Group", queryDto.Group ?? string.Empty),
+                new MySqlParameter("@Name", queryDto.Name ?? string.Empty),
+                new MySqlParameter("@Content", $"%{queryDto.Content}%"));
+
             var items = connection.ExecuteReader(sqlQuery, reader =>
             {
                 var messages = new List<MessageDto>();
