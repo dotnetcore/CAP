@@ -56,7 +56,7 @@ namespace DotNetCore.CAP.SqlServer
             {
                 result = readerFunc(reader);
             }
-
+            command.Parameters.Clear();
             return result;
         }
 
@@ -91,7 +91,7 @@ namespace DotNetCore.CAP.SqlServer
                     result = (T)Convert.ChangeType(objValue, returnType);
                 }
             }
-
+            command.Parameters.Clear();
             return result;
         }
     }
