@@ -10,7 +10,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import store from '@/store/store.js'
 import axios from "axios";
 
-axios.defaults.baseURL =  window.serverUrl; // "http://localhost:5001/cap"
+axios.defaults.baseURL = window.serverUrl;
 axios.defaults.withCredentials = true
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 axios.interceptors.request.use(

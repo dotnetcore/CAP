@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using DotNetCore.CAP.Internal;
@@ -31,8 +32,8 @@ namespace DotNetCore.CAP.Dashboard
             _request = request;
             _response = response;
             _routeData = routeData;
-            _response.StatusCode = StatusCodes.Status200OK; 
-        } 
+            _response.StatusCode = StatusCodes.Status200OK;
+        }
 
         [HttpGet("/stats")]
         public async Task Stats()
@@ -57,6 +58,37 @@ namespace DotNetCore.CAP.Dashboard
                     }
                 }
             }
+        }
+
+        [HttpGet("/metrics")]
+        public async Task Metrics()
+        {
+            const string cacheKey = "dashboard.metrics";
+            if (CapCache.Global.TryGet(cacheKey, out var ret))
+            {
+                await _response.WriteAsJsonAsync(ret);
+                return;
+            }
+
+            var ps = MonitoringApi.HourlySucceededJobs(MessageType.Publish);
+            var pf = MonitoringApi.HourlyFailedJobs(MessageType.Publish);
+            var ss = MonitoringApi.HourlySucceededJobs(MessageType.Subscribe);
+            var sf = MonitoringApi.HourlyFailedJobs(MessageType.Subscribe);
+
+            var dayHour = ps.Keys.Select(x => x.ToString("MM-dd HH:00")).ToList(); 
+
+            var result = new
+            {
+                DayHour = dayHour,
+                PublishSuccessed = ps.Values,
+                PublishFailed = pf.Values,
+                SubscribeSuccessed = ss.Values,
+                SubscribeFailed = sf.Values,
+            };
+
+            CapCache.Global.AddOrUpdate(cacheKey, result, TimeSpan.FromMinutes(10));
+
+            await _response.WriteAsJsonAsync(result);
         }
 
         [HttpGet("/health")]
