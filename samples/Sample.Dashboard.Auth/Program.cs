@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace Sample.Dashboard.Blazor
+namespace Sample.Dashboard.Auth
 {
     public class Program
     {

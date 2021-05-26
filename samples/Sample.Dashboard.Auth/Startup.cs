@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sample.Dashboard.Blazor
+namespace Sample.Dashboard.Auth
 {
     public class Startup
     {
@@ -38,6 +38,14 @@ namespace Sample.Dashboard.Blazor
                    options.Scope.Add("profile");
                });
 
+            services.AddCors(x =>
+            {
+                x.AddDefaultPolicy(p =>
+                {
+                    p.WithOrigins("http://localhost:8080").AllowCredentials().AllowAnyHeader().AllowAnyMethod();
+                });
+            });
+      
             services.AddCap(cap =>
             {
                 cap.UseDashboard(d =>
@@ -63,12 +71,13 @@ namespace Sample.Dashboard.Blazor
                 //});
             });
 
-            services.AddControllers();//.AddJsonOptions(x=>x.JsonSerializerOptions);
+            services.AddControllers();
         }
 
         public void Configure(IApplicationBuilder app)
         {
             app.UseAuthentication();
+            app.UseCors();
             app.UseRouting();
             app.UseAuthorization();
             app.UseCookiePolicy();
@@ -77,5 +86,6 @@ namespace Sample.Dashboard.Blazor
                 endpoints.MapControllers(); 
             });
         }
-    }
+    } 
+
 }
