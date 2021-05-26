@@ -72,6 +72,8 @@ namespace DotNetCore.CAP
                     dbContextTransaction.Commit();
                     break;
             }
+
+            Completed = true;
         }
 
         public override async Task CommitAsync(CancellationToken cancellationToken = default)
@@ -88,6 +90,8 @@ namespace DotNetCore.CAP
                     await dbContextTransaction.CommitAsync(cancellationToken);
                     break;
             }
+
+            Completed = true;
         }
 
         public override void Rollback()
@@ -121,9 +125,17 @@ namespace DotNetCore.CAP
             switch (DbTransaction)
             {
                 case IDbTransaction dbTransaction:
+                    if (!Completed)
+                    { //未提交事务,Dispose前rollback,以便DiagnosticObserver获取WriteTransactionRollbackAfter类型 ,去移除_bufferList
+                        dbTransaction.Rollback();
+                    }
                     dbTransaction.Dispose();
                     break;
                 case IDbContextTransaction dbContextTransaction:
+                    if (!Completed)
+                    {
+                        dbContextTransaction.Rollback();
+                    }
                     dbContextTransaction.Dispose();
                     break;
             }
@@ -159,14 +171,13 @@ namespace DotNetCore.CAP
         /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
         /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
         /// <returns>The <see cref="ICapTransaction" /> object.</returns>
-        public static IDbTransaction BeginTransaction(this IDbConnection dbConnection,
+        public static ICapTransaction BeginTransaction(this IDbConnection dbConnection,
             ICapPublisher publisher, bool autoCommit = false)
         {
             if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
             var dbTransaction = dbConnection.BeginTransaction();
             publisher.Transaction.Value = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
-            var capTransaction = publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
-            return (IDbTransaction)capTransaction.DbTransaction;
+            return publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
         }
 
         /// <summary>

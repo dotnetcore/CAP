@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
@@ -38,7 +39,7 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
                 using (var transaction = connection.BeginTransaction(_capBus, true))
                 {
                     //your business code
-                    connection.Execute("insert into test(name) values('test')", transaction: transaction);
+                    connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
 
                     _capBus.Publish("sample.rabbitmq.sqlserver", new Person()
                     {

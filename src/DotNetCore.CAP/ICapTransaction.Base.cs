@@ -15,6 +15,8 @@ namespace DotNetCore.CAP
 
         private readonly ConcurrentQueue<MediumMessage> _bufferList;
 
+        public bool Completed { get; set; } = false;
+
         protected CapTransactionBase(IDispatcher dispatcher)
         {
             _dispatcher = dispatcher;

@@ -15,6 +15,7 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
     {
         public const string SqlAfterCommitTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionCommitAfter";
         public const string SqlErrorCommitTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionCommitError";
+        public const string SqlAfterRollbackTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionRollbackAfter";
 
         private readonly ConcurrentDictionary<Guid, List<MediumMessage>> _bufferList;
         private readonly IDispatcher _dispatcher;
@@ -46,7 +47,7 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
                         _dispatcher.EnqueueToPublish(message);
                     }
             }
-            else if (evt.Key == SqlErrorCommitTransactionMicrosoft)
+            else if (evt.Key == SqlErrorCommitTransactionMicrosoft || evt.Key == SqlAfterRollbackTransactionMicrosoft)
             {
                 if (!TryGetSqlConnection(evt, out SqlConnection sqlConnection)) return;
                 var transactionKey = sqlConnection.ClientConnectionId;
