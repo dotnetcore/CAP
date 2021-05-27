@@ -15,6 +15,8 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
     {
         public const string SqlAfterCommitTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionCommitAfter";
         public const string SqlErrorCommitTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionCommitError";
+        public const string SqlAfterRollbackTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionRollbackAfter";
+        public const string SqlBeforeCloseConnectionMicrosoft = "Microsoft.Data.SqlClient.WriteConnectionCloseBefore";
 
         private readonly ConcurrentDictionary<Guid, List<MediumMessage>> _bufferList;
         private readonly IDispatcher _dispatcher;
@@ -41,17 +43,22 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
                 if (!TryGetSqlConnection(evt, out SqlConnection sqlConnection)) return;
                 var transactionKey = sqlConnection.ClientConnectionId;
                 if (_bufferList.TryRemove(transactionKey, out var msgList))
+                {
                     foreach (var message in msgList)
                     {
                         _dispatcher.EnqueueToPublish(message);
                     }
+                }
             }
-            else if (evt.Key == SqlErrorCommitTransactionMicrosoft)
+            else if (evt.Key == SqlErrorCommitTransactionMicrosoft || evt.Key == SqlAfterRollbackTransactionMicrosoft || evt.Key == SqlBeforeCloseConnectionMicrosoft)
             {
-                if (!TryGetSqlConnection(evt, out SqlConnection sqlConnection)) return;
-                var transactionKey = sqlConnection.ClientConnectionId;
+                if (!_bufferList.IsEmpty)
+                {
+                    if (!TryGetSqlConnection(evt, out SqlConnection sqlConnection)) return;
+                    var transactionKey = sqlConnection.ClientConnectionId;
 
-                _bufferList.TryRemove(transactionKey, out _);
+                    _bufferList.TryRemove(transactionKey, out _);
+                }
             }
         }
 
