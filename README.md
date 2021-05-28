@@ -272,14 +272,6 @@ services.AddCap(x =>
 
 The default dashboard address is :[http://localhost:xxx/cap](http://localhost:xxx/cap), you can configure relative path `/cap` with `x.UseDashboard(opt =>{ opt.MatchPath="/mycap"; })`.
 
-![dashboard](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220827302-189215107.png)
-
-![received](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220934115-1107747665.png)
-
-![subscibers](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004220949193-884674167.png)
-
-![nodes](http://images2017.cnblogs.com/blog/250417/201710/250417-20171004221001880-1162918362.png)
-
 
 ## Contribute
 
