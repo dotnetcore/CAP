@@ -11,6 +11,12 @@ namespace DotNetCore.CAP.Internal
     /// </summary>
     public class ConsumerContext
     {
+        public ConsumerContext(ConsumerContext context)
+        : this(context.ConsumerDescriptor, context.DeliverMessage)
+        {
+
+        }
+
         /// <summary>
         /// create a new instance of  <see cref="ConsumerContext" /> .
         /// </summary>

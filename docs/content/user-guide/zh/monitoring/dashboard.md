@@ -51,12 +51,14 @@ services.AddCap(x =>
 ```C#
 public class TestAuthorizationFilter : IDashboardAuthorizationFilter
 {
-    public bool Authorize(DashboardContext context)
+    public Task<bool> AuthorizeAsync(DashboardContext context)
     {
-        if(context.Request.GetQuery("accesskey")=="xxxxxx"){
-            return true;
+        if (context.Request.GetQuery("accesskey") == "xxxxxx")
+        {
+            return Task.FromResult(true);
         }
-        return false;
+        
+        return Task.FromResult(false);
     }
 }
 ```

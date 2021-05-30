@@ -83,7 +83,7 @@ namespace DotNetCore.CAP.MongoDB
             return GetHourlyTimelineStats(type, nameof(StatusName.Succeeded));
         }
 
-        public IList<MessageDto> Messages(MessageQueryDto queryDto)
+        public PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto)
         {
             var name = queryDto.MessageType == MessageType.Publish
                 ? _options.PublishedCollection
@@ -102,14 +102,16 @@ namespace DotNetCore.CAP.MongoDB
             if (!string.IsNullOrEmpty(queryDto.Content))
                 filter &= builder.Regex(x => x.Content, ".*" + queryDto.Content + ".*");
 
-            var result = collection
+            var items = collection
                 .Find(filter)
                 .SortByDescending(x => x.Added)
                 .Skip(queryDto.PageSize * queryDto.CurrentPage)
                 .Limit(queryDto.PageSize)
                 .ToList();
 
-            return result;
+            var count = collection.CountDocuments(filter);
+
+            return new PagedQueryResult<MessageDto> { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
         }
 
         public int PublishedFailedCount()

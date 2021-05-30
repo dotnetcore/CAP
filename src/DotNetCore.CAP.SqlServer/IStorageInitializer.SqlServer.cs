@@ -38,10 +38,8 @@ namespace DotNetCore.CAP.SqlServer
             if (cancellationToken.IsCancellationRequested) return;
 
             var sql = CreateDbTablesScript(_options.Value.Schema);
-            using (var connection = new SqlConnection(_options.Value.ConnectionString))
+            await using (var connection = new SqlConnection(_options.Value.ConnectionString))
                 connection.ExecuteNonQuery(sql);
-
-            await Task.CompletedTask;
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }

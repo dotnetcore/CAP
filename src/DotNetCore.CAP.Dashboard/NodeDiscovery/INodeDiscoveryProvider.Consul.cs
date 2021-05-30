@@ -10,34 +10,34 @@ using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
-    public class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider, IDisposable
+    public class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider
     {
         private readonly ILogger<ConsulNodeDiscoveryProvider> _logger;
         private readonly DiscoveryOptions _options;
-        private ConsulClient _consul;
 
         public ConsulNodeDiscoveryProvider(ILoggerFactory logger, DiscoveryOptions options)
         {
             _logger = logger.CreateLogger<ConsulNodeDiscoveryProvider>();
             _options = options;
-
-            InitClient();
         }
 
-        public void Dispose()
-        {
-            _consul.Dispose();
-        }
-
-        public async Task<IList<Node>> GetNodes()
+        public IList<Node> GetNodes()
         {
             try
             {
                 var nodes = new List<Node>();
-                var services = await _consul.Catalog.Services();
+
+                using var consul = new ConsulClient(config =>
+                {
+                    config.WaitTime = TimeSpan.FromSeconds(5);
+                    config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
+                });
+
+                var services = consul.Catalog.Services().GetAwaiter().GetResult();
+
                 foreach (var service in services.Response)
                 {
-                    var serviceInfo = await _consul.Catalog.Service(service.Key);
+                    var serviceInfo = consul.Catalog.Service(service.Key).GetAwaiter().GetResult();
                     var node = serviceInfo.Response.SkipWhile(x => !x.ServiceTags.Contains("CAP"))
                         .Select(info => new Node
                         {
@@ -65,7 +65,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             }
         }
 
-        public Task RegisterNode()
+        public async Task RegisterNode()
         {
             try
             {
@@ -87,7 +87,13 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                     tags = tags.Union(this._options.CustomTags).ToArray();
                 }
 
-                return _consul.Agent.ServiceRegister(new AgentServiceRegistration
+                using var consul = new ConsulClient(config =>
+                {
+                    config.WaitTime = TimeSpan.FromSeconds(5);
+                    config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
+                });
+
+                var result = await consul.Agent.ServiceRegister(new AgentServiceRegistration
                 {
                     ID = _options.NodeId,
                     Name = _options.NodeName,
@@ -96,22 +102,16 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                     Tags = tags,
                     Check = healthCheck
                 });
+
+                if (result.StatusCode == System.Net.HttpStatusCode.OK)
+                {
+                    _logger.LogInformation("Consul node registe success!");
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(
-                    $"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException.Message}");
-                return null;
+                _logger.LogError($"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException.Message}");
             }
-        }
-
-        private void InitClient()
-        {
-            _consul = new ConsulClient(config =>
-            {
-                config.WaitTime = TimeSpan.FromSeconds(5);
-                config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
-            });
         }
     }
 }

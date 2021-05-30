@@ -7,6 +7,8 @@ namespace DotNetCore.CAP.Monitoring
     {
         public int Servers { get; set; }
 
+        public int Subscribers { get; set; }
+
         public int PublishedSucceeded { get; set; }
         public int ReceivedSucceeded { get; set; }
 

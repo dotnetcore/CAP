@@ -116,12 +116,21 @@ namespace DotNetCore.CAP.Test
                         attr.Group = $"{_capOptions.GroupNamePrefix}.{attr.Group}";
                     }
 
+                    var parameters = method.GetParameters()
+                    .Select(parameter => new ParameterDescriptor
+                    {
+                        Name = parameter.Name,
+                        ParameterType = parameter.ParameterType,
+                        IsFromCap = parameter.GetCustomAttributes(typeof(FromCapAttribute)).Any()
+                    }).ToList();
+
                     yield return new ConsumerExecutorDescriptor
                     {
                         Attribute = new CapSubscribeAttribute(attr.Name)
                         {
                             Group = attr.Group
                         },
+                        Parameters = parameters,
                         MethodInfo = method,
                         ImplTypeInfo = typeInfo,
                         TopicNamePrefix = _capOptions.TopicNamePrefix

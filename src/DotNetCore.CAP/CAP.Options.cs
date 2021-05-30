@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.Json;
 using DotNetCore.CAP.Messages;
 
 // ReSharper disable InconsistentNaming
@@ -97,5 +98,10 @@ namespace DotNetCore.CAP
 
             Extensions.Add(extension);
         }
+
+        /// <summary>
+        /// Configure JSON serialization settings
+        /// </summary>
+        public JsonSerializerOptions JsonSerializerOptions { get; } = new JsonSerializerOptions();
     }
 }

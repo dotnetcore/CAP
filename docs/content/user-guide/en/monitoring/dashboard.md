@@ -45,12 +45,14 @@ The following is a sample code that determines if access is allowed by reading t
 ```C#
 public class TestAuthorizationFilter : IDashboardAuthorizationFilter
 {
-    public bool Authorize(DashboardContext context)
+    public Task<bool> AuthorizeAsync(DashboardContext context)
     {
-        if(context.Request.GetQuery("accesskey")=="xxxxxx"){
-            return true;
+        if (context.Request.GetQuery("accesskey") == "xxxxxx")
+        {
+            return Task.FromResult(true);
         }
-        return false;
+        
+        return Task.FromResult(false);
     }
 }
 ```

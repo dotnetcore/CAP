@@ -137,12 +137,10 @@ namespace DotNetCore.CAP.SqlServer
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
             CancellationToken token = default)
         {
-            using var connection = new SqlConnection(_options.Value.ConnectionString);
-            var count = connection.ExecuteNonQuery(
+            await using var connection = new SqlConnection(_options.Value.ConnectionString);
+            return connection.ExecuteNonQuery(
                 $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout;", null,
                 new SqlParameter("@timeout", timeout), new SqlParameter("@batchCount", batchCount));
-
-            return await Task.FromResult(count);
         }
 
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
@@ -170,10 +168,8 @@ namespace DotNetCore.CAP.SqlServer
                 new SqlParameter("@StatusName", state.ToString("G"))
             };
 
-            using var connection = new SqlConnection(_options.Value.ConnectionString);
+            await using var connection = new SqlConnection(_options.Value.ConnectionString);
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
-
-            await Task.CompletedTask;
         }
 
         private void StoreReceivedMessage(object[] sqlParams)
@@ -194,7 +190,7 @@ namespace DotNetCore.CAP.SqlServer
                 $"AND Version='{_capOptions.Value.Version}' AND Added<'{fourMinAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
 
             List<MediumMessage> result;
-            using (var connection = new SqlConnection(_options.Value.ConnectionString))
+            await using (var connection = new SqlConnection(_options.Value.ConnectionString))
             {
                 result = connection.ExecuteReader(sql, reader =>
                 {
@@ -214,7 +210,7 @@ namespace DotNetCore.CAP.SqlServer
                 });
             }
 
-            return await Task.FromResult(result);
+            return result;
         }
     }
 }

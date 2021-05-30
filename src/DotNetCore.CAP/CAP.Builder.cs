@@ -1,8 +1,9 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
+using DotNetCore.CAP.Filter;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace DotNetCore.CAP
 {
@@ -42,31 +43,9 @@ namespace DotNetCore.CAP
         /// </summary>
         public IServiceCollection Services { get; }
 
-        /// <summary>
-        /// Add an <see cref="ICapPublisher" />.
-        /// </summary>
-        /// <typeparam name="T">The type of the service.</typeparam>
-        public CapBuilder AddProducerService<T>()
-            where T : class, ICapPublisher
+        public CapBuilder AddSubscribeFilter<T>() where T : class, ISubscribeFilter
         {
-            return AddScoped(typeof(ICapPublisher), typeof(T));
-        }
-
-        /// <summary>
-        /// Adds a scoped service of the type specified in serviceType with an implementation
-        /// </summary>
-        private CapBuilder AddScoped(Type serviceType, Type concreteType)
-        {
-            Services.AddScoped(serviceType, concreteType);
-            return this;
-        }
-
-        /// <summary>
-        /// Adds a singleton service of the type specified in serviceType with an implementation
-        /// </summary>
-        private CapBuilder AddSingleton(Type serviceType, Type concreteType)
-        {
-            Services.AddSingleton(serviceType, concreteType);
+            Services.TryAddScoped<ISubscribeFilter, T>();
             return this;
         }
     }

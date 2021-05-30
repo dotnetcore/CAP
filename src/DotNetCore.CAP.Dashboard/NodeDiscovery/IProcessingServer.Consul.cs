@@ -7,22 +7,16 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
     internal class ConsulProcessingNodeServer : IProcessingServer
     {
-        private readonly DiscoveryOptions _dashboardOptions;
-        private readonly IDiscoveryProviderFactory _discoveryProviderFactory;
+        private readonly INodeDiscoveryProvider _discoveryProvider;
 
-        public ConsulProcessingNodeServer(
-            DiscoveryOptions dashboardOptions,
-            IDiscoveryProviderFactory discoveryProviderFactory)
+        public ConsulProcessingNodeServer(INodeDiscoveryProvider discoveryProvider)
         {
-            _dashboardOptions = dashboardOptions;
-            _discoveryProviderFactory = discoveryProviderFactory;
+            _discoveryProvider = discoveryProvider;
         }
 
         public void Start()
         {
-            var discoveryProvider = _discoveryProviderFactory.Create(_dashboardOptions);
-
-            discoveryProvider.RegisterNode();
+            _discoveryProvider.RegisterNode().GetAwaiter().GetResult();
         }
 
         public void Pulse()
