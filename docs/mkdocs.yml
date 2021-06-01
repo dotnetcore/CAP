@@ -153,3 +153,8 @@ nav:
       - Contact Us: about/contact-us.md
       - Release Notes: about/release-notes.md
       - License: about/license.md
+
+# Google Analytics
+google_analytics:
+  - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+  - auto
