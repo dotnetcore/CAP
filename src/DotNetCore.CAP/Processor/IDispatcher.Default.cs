@@ -98,7 +98,15 @@ namespace DotNetCore.CAP.Processor
                 {
                     while (_receivedChannel.Reader.TryRead(out var message))
                     {
-                        await _executor.DispatchAsync(message.Item1, message.Item2, _cts.Token);
+                        try
+                        {
+                            await _executor.DispatchAsync(message.Item1, message.Item2, _cts.Token);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError(e,
+                                $"An exception occurred when invoke subscriber. MessageId:{message.Item1.DbId}");
+                        }
                     }
                 }
             }
