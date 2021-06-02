@@ -11,6 +11,7 @@ CAP 支持以下几种运输方式：
 * [Azure Service Bus](azure-service-bus.md)
 * [Amazon SQS](aws-sqs.md)
 * [In-Memory Queue](in-memory-queue.md)
+* [Redis Streams](redis-streams.md)
 
 ## 怎么选择运输器
 
