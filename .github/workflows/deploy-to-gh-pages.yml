@@ -9,7 +9,12 @@ jobs:
     outputs:
       docs: ${{ steps.filter.outputs.docs }}
     steps:
-    - uses: dorny/paths-filter@v2
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false 
+    - name: Check for changes 🎯
+      uses: dorny/paths-filter@v2
       id: filter
       with:
         filters: |
@@ -21,14 +26,9 @@ jobs:
     if: ${{ needs.changes.outputs.docs == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout 🛎️
-        uses: actions/checkout@v2
-        with:
-          persist-credentials: false 
-
-      - name: Deploy docs 🚀
-        uses: mhausenblas/mkdocs-deploy-gh-pages@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GOOGLE_ANALYTICS_KEY: ${{ secrets.GOOGLE_ANALYTICS_KEY }}
-          CONFIG_FILE: docs/mkdocs.yml
+    - name: Deploy docs 🚀
+      uses: mhausenblas/mkdocs-deploy-gh-pages@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GOOGLE_ANALYTICS_KEY: ${{ secrets.GOOGLE_ANALYTICS_KEY }}
+        CONFIG_FILE: docs/mkdocs.yml
