@@ -38,7 +38,7 @@ export default {
   },
   data() {
     return {
-      brandTitle: "CAP Dashbaord",
+      brandTitle: "CAP Dashboard",
       menus: [
         { name: "Published", path: "/published", variant: "danger", badge: "publishedFailed" },
         { name: "Received", path: "/received", variant: "danger", badge: "receivedFailed" },
