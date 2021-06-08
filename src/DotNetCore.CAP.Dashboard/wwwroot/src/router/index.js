@@ -4,6 +4,7 @@ import Home from '../pages/Home.vue'
 
 Vue.use(VueRouter)
 
+
 const routes = [
     {
         path: '/',
@@ -46,4 +47,4 @@ const router = new VueRouter({
     routes
 })
 
-export default router
+export default router;

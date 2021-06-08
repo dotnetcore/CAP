@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-
+import baseURL from './global'
 import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
@@ -10,7 +10,7 @@ import 'bootstrap-vue/dist/bootstrap-vue.css'
 import store from '@/store/store.js'
 import axios from "axios";
 
-axios.defaults.baseURL = window.serverUrl;
+axios.defaults.baseURL = baseURL;
 axios.defaults.withCredentials = true
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 axios.interceptors.request.use(
