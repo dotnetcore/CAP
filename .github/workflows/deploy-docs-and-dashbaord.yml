@@ -1,4 +1,4 @@
-name: Publish docs via GitHub Pages
+name: Publish docs & Build dashboard
 on:
   push:
     branches:
@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       docs: ${{ steps.filter.outputs.docs }}
+      dashboard: ${{ steps.filter.outputs.dashboard }}
     steps:
     - name: Checkout 🛎️
       uses: actions/checkout@v2
@@ -22,23 +23,31 @@ jobs:
             - 'docs/**'
           dashboard:
             - 'src/DotNetCore.CAP.Dashboard/wwwroot/src/**'
+  
   build-dashbaord-and-push:
     needs: changes
-    if: ${{ needs.changes.outputs.dashboard == 'true' }}
+    if: ${{ needs.changes.outputs.dashboard == 'true' }}    
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/DotNetCore.CAP.Dashboard/wwwroot  
     steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false 
     - name: Use Node.js 🥽
       uses: actions/setup-node@v1
       with:
         node-version: '14.x'
     - name: Install dependencies 🧵
-      run: npm install      
-    - name: Build to dist 构建 🧨
+      run: npm install
+    - name: Build to dist 🧨
       run: npm run build
-    - name: Push dist 🚀
-      run: |       
-        git commit -am "build dashboard to dist" --author="Github Action <>"
-        git push
+    - name: Commit & Push dist changes 🚀
+      uses: actions-js/push@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build-docs-and-deploy:
     needs: changes
