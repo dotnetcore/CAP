@@ -20,8 +20,27 @@ jobs:
         filters: |
           docs:
             - 'docs/**'
+          dashboard:
+            - 'src/DotNetCore.CAP.Dashboard/wwwroot/src/**'
+  build-dashbaord-and-push:
+    needs: changes
+    if: ${{ needs.changes.outputs.dashboard == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Use Node.js 🥽
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+    - name: Install dependencies 🧵
+      run: npm install      
+    - name: Build to dist 构建 🧨
+      run: npm run build
+    - name: Push dist 🚀
+      run: |       
+        git commit -am "build dashboard to dist" --author="Github Action <>"
+        git push
 
-  build-and-deploy:
+  build-docs-and-deploy:
     needs: changes
     if: ${{ needs.changes.outputs.docs == 'true' }}
     runs-on: ubuntu-latest
