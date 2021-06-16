@@ -5,7 +5,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -47,25 +46,12 @@ namespace DotNetCore.CAP.Dashboard
 
             if (httpMethod == "GET" && Regex.IsMatch(path, $"^/?{Regex.Escape(_options.PathMatch)}/?index.html$", RegexOptions.IgnoreCase))
             {
-                if (_options.UseAuth)
+                if (!await CapBuilderExtension.Authentication(httpContext, _options))
                 {
-                    var result = await httpContext.AuthenticateAsync(_options.DefaultAuthenticationScheme);
-
-                    if (result.Succeeded && result.Principal != null)
-                    {
-                        httpContext.User = result.Principal;
-                    }
-                }
-
-                var isAuthenticated = httpContext.User?.Identity?.IsAuthenticated;
-
-                if (isAuthenticated == false && _options.UseChallengeOnAuth)
-                {
-                    await httpContext.ChallengeAsync(_options.DefaultChallengeScheme);
-
+                    httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     return;
                 }
-
+                
                 httpContext.Response.StatusCode = 200;
                 httpContext.Response.ContentType = "text/html;charset=utf-8";
 

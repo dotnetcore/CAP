@@ -3,9 +3,11 @@
 
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -29,8 +31,8 @@ namespace DotNetCore.CAP
 
             var provider = app.ApplicationServices;
 
-            var option = provider.GetService<DashboardOptions>();
-            if (option != null)
+            var options = provider.GetService<DashboardOptions>();
+            if (options != null)
             {
                 if (provider.GetService<DiscoveryOptions>() != null)
                 {
@@ -39,7 +41,7 @@ namespace DotNetCore.CAP
 
                 app.UseMiddleware<UiMiddleware>();
 
-                app.Map(option.PathMatch + "/api", false, x =>
+                app.Map(options.PathMatch + "/api", false, x =>
                 {
 
                     var builder = new RouteBuilder(x);
@@ -55,18 +57,24 @@ namespace DotNetCore.CAP
                         {
 
                             builder.MapGet(getAttr.Template, async (request, response, data) =>
-                               {
-                                   var actionProvider = new RouteActionProvider(request, response, data);
-                                   try
-                                   {
-                                       await executor.ExecuteAsync(actionProvider, null);
-                                   }
-                                   catch (Exception ex)
-                                   {
-                                       response.StatusCode = StatusCodes.Status500InternalServerError;
-                                       await response.WriteAsync(ex.Message);
-                                   }
-                               });
+                            {
+                                if (!await Authentication(request.HttpContext, options))
+                                {
+                                    response.StatusCode = StatusCodes.Status401Unauthorized;
+                                    return;
+                                }
+
+                                var actionProvider = new RouteActionProvider(request, response, data);
+                                try
+                                {
+                                    await executor.ExecuteAsync(actionProvider, null);
+                                }
+                                catch (Exception ex)
+                                {
+                                    response.StatusCode = StatusCodes.Status500InternalServerError;
+                                    await response.WriteAsync(ex.Message);
+                                }
+                            });
                         }
 
                         var postAttr = method.GetCustomAttribute<HttpPostAttribute>();
@@ -74,6 +82,12 @@ namespace DotNetCore.CAP
                         {
                             builder.MapPost(postAttr.Template, async (request, response, data) =>
                             {
+                                if (!await Authentication(request.HttpContext, options))
+                                {
+                                    response.StatusCode = StatusCodes.Status401Unauthorized;
+                                    return;
+                                }
+
                                 var actionProvider = new RouteActionProvider(request, response, data);
                                 try
                                 {
@@ -95,6 +109,34 @@ namespace DotNetCore.CAP
             }
 
             return app;
+        }
+
+        internal static async Task<bool> Authentication(HttpContext context, DashboardOptions options)
+        {
+            if (options.UseAuth)
+            {
+                var result = await context.AuthenticateAsync(options.DefaultAuthenticationScheme);
+
+                if (result.Succeeded && result.Principal != null)
+                {
+                    context.User = result.Principal;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            var isAuthenticated = context.User?.Identity?.IsAuthenticated;
+
+            if (isAuthenticated == false && options.UseChallengeOnAuth)
+            {
+                await context.ChallengeAsync(options.DefaultChallengeScheme);
+
+                return false;
+            }
+
+            return true;
         }
 
         private static void CheckRequirement(IApplicationBuilder app)
