@@ -51,7 +51,7 @@ namespace DotNetCore.CAP.Dashboard
                     httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     return;
                 }
-                
+
                 httpContext.Response.StatusCode = 200;
                 httpContext.Response.ContentType = "text/html;charset=utf-8";
 
@@ -60,7 +60,7 @@ namespace DotNetCore.CAP.Dashboard
 
                 using var sr = new StreamReader(stream);
                 var htmlBuilder = new StringBuilder(await sr.ReadToEndAsync());
-                htmlBuilder.Replace("%(servicePrefix)", _options.PathMatch + "/api");
+                htmlBuilder.Replace("%(servicePrefix)", _options.PathBase + _options.PathMatch + "/api");
                 htmlBuilder.Replace("%(pollingInterval)", _options.StatsPollingInterval.ToString());
                 await httpContext.Response.WriteAsync(htmlBuilder.ToString(), Encoding.UTF8);
 

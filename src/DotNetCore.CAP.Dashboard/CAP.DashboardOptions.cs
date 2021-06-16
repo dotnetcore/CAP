@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 // ReSharper disable once CheckNamespace
+
 namespace DotNetCore.CAP
 {
     public class DashboardOptions
@@ -12,6 +13,14 @@ namespace DotNetCore.CAP
             StatsPollingInterval = 2000;
         }
 
+        /// <summary>
+        /// When behind the proxy, specify the base path to allow spa call prefix.
+        /// </summary>
+        public string PathBase { get; set; }
+
+        /// <summary>
+        /// Path prefix to match from url path.
+        /// </summary>
         public string PathMatch { get; set; }
 
         /// <summary>
