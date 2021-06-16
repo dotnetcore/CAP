@@ -47,11 +47,22 @@ namespace DotNetCore.CAP.Dashboard
 
             if (httpMethod == "GET" && Regex.IsMatch(path, $"^/?{Regex.Escape(_options.PathMatch)}/?index.html$", RegexOptions.IgnoreCase))
             {
+                if (_options.UseAuth)
+                {
+                    var result = await httpContext.AuthenticateAsync(_options.DefaultAuthenticationScheme);
+
+                    if (result.Succeeded && result.Principal != null)
+                    {
+                        httpContext.User = result.Principal;
+                    }
+                }
+
                 var isAuthenticated = httpContext.User?.Identity?.IsAuthenticated;
 
                 if (isAuthenticated == false && _options.UseChallengeOnAuth)
                 {
                     await httpContext.ChallengeAsync(_options.DefaultChallengeScheme);
+
                     return;
                 }
 
