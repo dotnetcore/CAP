@@ -54,6 +54,10 @@ jobs:
     if: ${{ needs.changes.outputs.docs == 'true' }}
     runs-on: ubuntu-latest
     steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false 
     - name: Deploy docs 🚀
       uses: mhausenblas/mkdocs-deploy-gh-pages@master
       env:
