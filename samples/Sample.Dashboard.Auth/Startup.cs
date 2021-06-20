@@ -21,7 +21,7 @@ namespace Sample.Dashboard.Auth
                .AddAuthorization()
                .AddAuthentication(options =>
                {
-                   options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                   options.DefaultScheme =  CookieAuthenticationDefaults.AuthenticationScheme;
                    options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                })
                .AddCookie()
@@ -36,7 +36,8 @@ namespace Sample.Dashboard.Auth
                    options.Scope.Clear();
                    options.Scope.Add("openid");
                    options.Scope.Add("profile");
-               });
+               })
+               .AddScheme<MyDashboardAuthenticationSchemeOptions, MyDashboardAuthenticationHandler>("MyDashboardScheme",null);
 
             services.AddCors(x =>
             {
@@ -45,13 +46,15 @@ namespace Sample.Dashboard.Auth
                     p.WithOrigins("http://localhost:8080").AllowCredentials().AllowAnyHeader().AllowAnyMethod();
                 });
             });
-      
+
             services.AddCap(cap =>
             {
                 cap.UseDashboard(d =>
                 {
                     d.UseChallengeOnAuth = true;
                     d.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+                    d.UseAuth = true;
+                    d.DefaultAuthenticationScheme = "MyDashboardScheme";
                 });
                 cap.UseMySql(_configuration.GetValue<string>("ConnectionString"));
                 cap.UseRabbitMQ(aa =>
@@ -76,16 +79,16 @@ namespace Sample.Dashboard.Auth
 
         public void Configure(IApplicationBuilder app)
         {
-            app.UseAuthentication();
             app.UseCors();
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
             app.UseCookiePolicy();
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers(); 
+                endpoints.MapControllers();
             });
         }
-    } 
+    }
 
 }
