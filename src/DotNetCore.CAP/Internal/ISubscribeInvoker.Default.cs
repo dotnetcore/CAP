@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.Internal
             cancellationToken.ThrowIfCancellationRequested();
 
             var methodInfo = context.ConsumerDescriptor.MethodInfo;
-            var reflectedType = methodInfo.ReflectedType.Name;
+            var reflectedType = methodInfo.ReflectedType.TypeHandle.Value;
 
             _logger.LogDebug("Executing subscriber method : {0}", methodInfo.Name);
 
@@ -54,9 +54,10 @@ namespace DotNetCore.CAP.Internal
             var executeParameters = new object[parameterDescriptors.Count];
             for (var i = 0; i < parameterDescriptors.Count; i++)
             {
-                if (parameterDescriptors[i].IsFromCap)
+                var parameterDescriptor = parameterDescriptors[i];
+                if (parameterDescriptor.IsFromCap)
                 {
-                    executeParameters[i] = new CapHeader(message.Headers);
+                    executeParameters[i] = GetCapProvidedParameter(parameterDescriptor, message, cancellationToken);
                 }
                 else
                 {
@@ -64,24 +65,24 @@ namespace DotNetCore.CAP.Internal
                     {
                         if (_serializer.IsJsonType(message.Value))  // use ISerializer when reading from storage, skip other objects if not Json
                         {
-                            executeParameters[i] = _serializer.Deserialize(message.Value, parameterDescriptors[i].ParameterType);
+                            executeParameters[i] = _serializer.Deserialize(message.Value, parameterDescriptor.ParameterType);
                         }
                         else
                         {
-                            var converter = TypeDescriptor.GetConverter(parameterDescriptors[i].ParameterType);
+                            var converter = TypeDescriptor.GetConverter(parameterDescriptor.ParameterType);
                             if (converter.CanConvertFrom(message.Value.GetType()))
                             {
                                 executeParameters[i] = converter.ConvertFrom(message.Value);
                             }
                             else
                             {
-                                if (parameterDescriptors[i].ParameterType.IsInstanceOfType(message.Value))
+                                if (parameterDescriptor.ParameterType.IsInstanceOfType(message.Value))
                                 {
                                     executeParameters[i] = message.Value;
                                 }
                                 else
                                 {
-                                    executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptors[i].ParameterType);
+                                    executeParameters[i] = Convert.ChangeType(message.Value, parameterDescriptor.ParameterType);
                                 }
                             }
                         }
@@ -132,6 +133,22 @@ namespace DotNetCore.CAP.Internal
             }
 
             return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName());
+        }
+
+        private static object GetCapProvidedParameter(ParameterDescriptor parameterDescriptor, Message message,
+            CancellationToken cancellationToken)
+        {
+            if (typeof(CancellationToken).IsAssignableFrom(parameterDescriptor.ParameterType))
+            {
+                return cancellationToken;
+            }
+
+            if (parameterDescriptor.ParameterType.IsAssignableFrom(typeof(CapHeader)))
+            {
+                return new CapHeader(message.Headers);
+            }
+
+            throw new ArgumentException(parameterDescriptor.Name);
         }
 
         protected virtual object GetInstance(IServiceProvider provider, ConsumerContext context)

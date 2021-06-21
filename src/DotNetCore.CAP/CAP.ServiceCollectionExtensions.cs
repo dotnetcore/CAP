@@ -1,4 +1,4 @@
-﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
@@ -72,8 +72,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(setupAction);
 
             //Startup and Hosted 
-            services.AddSingleton<IBootstrapper, Bootstrapper>();
-            services.AddHostedService<Bootstrapper>();
+            services.AddSingleton<Bootstrapper>();
+            services.AddHostedService(sp => sp.GetRequiredService<Bootstrapper>());
+            services.AddSingleton<IBootstrapper>(sp => sp.GetRequiredService<Bootstrapper>());
 
             return new CapBuilder(services);
         }

@@ -125,11 +125,16 @@ namespace DotNetCore.CAP.RedisStreams
 
                 return (true, await readSet.ConfigureAwait(false));
             }
+            catch (OperationCanceledException)
+            {
+                // ignore
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Redis error when trying read consumer group {consumerGroup}");
-                return (false, Array.Empty<RedisStream>());
             }
+
+            return (false, Array.Empty<RedisStream>());
         }
 
         private async Task ConnectAsync()

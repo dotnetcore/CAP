@@ -17,6 +17,7 @@ namespace DotNetCore.CAP.Internal
     internal class Bootstrapper : BackgroundService, IBootstrapper
     {
         private readonly ILogger<Bootstrapper> _logger;
+        private CancellationTokenSource _cts = new CancellationTokenSource();
 
         public Bootstrapper(
             ILogger<Bootstrapper> logger,
@@ -32,23 +33,23 @@ namespace DotNetCore.CAP.Internal
 
         private IEnumerable<IProcessingServer> Processors { get; }
 
-        public async Task BootstrapAsync(CancellationToken stoppingToken)
+        public async Task BootstrapAsync()
         {
             _logger.LogDebug("### CAP background task is starting.");
 
             try
             {
-                await Storage.InitializeAsync(stoppingToken);
+                await Storage.InitializeAsync(_cts.Token);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Initializing the storage structure failed!");
             }
 
-            stoppingToken.Register(() =>
+            _cts.Token.Register(() =>
             {
                 _logger.LogDebug("### CAP background task is stopping.");
-
+                
                 foreach (var item in Processors)
                 {
                     try
@@ -71,9 +72,15 @@ namespace DotNetCore.CAP.Internal
         {
             foreach (var item in Processors)
             {
+                _cts.Token.ThrowIfCancellationRequested();
+
                 try
                 {
-                    item.Start();
+                    item.Start(_cts.Token);
+                }
+                catch (OperationCanceledException)
+                {
+                    // ignore
                 }
                 catch (Exception ex)
                 {
@@ -84,9 +91,23 @@ namespace DotNetCore.CAP.Internal
             return Task.CompletedTask;
         }
 
+        public override void Dispose()
+        {
+            _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
+        }
+
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            await BootstrapAsync(stoppingToken);
+            await BootstrapAsync();
+        }
+
+        public override async Task StopAsync(CancellationToken cancellationToken)
+        {
+            _cts?.Cancel();
+            
+            await base.StopAsync(cancellationToken);
         }
     }
 }

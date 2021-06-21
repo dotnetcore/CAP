@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -147,6 +148,7 @@ namespace DotNetCore.CAP.Internal
                             Name = parameter.Name,
                             ParameterType = parameter.ParameterType,
                             IsFromCap = parameter.GetCustomAttributes(typeof(FromCapAttribute)).Any()
+                                || typeof(CancellationToken).IsAssignableFrom(parameter.ParameterType)
                         }).ToList();
 
                     yield return InitDescriptor(attr, method, typeInfo, serviceTypeInfo, parameters, topicClassAttribute);
