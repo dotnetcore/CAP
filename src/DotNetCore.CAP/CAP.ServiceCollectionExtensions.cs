@@ -1,4 +1,4 @@
-// Copyright (c) .NET Core Community. All rights reserved.
+﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
@@ -17,8 +17,6 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class ServiceCollectionExtensions
     {
-        internal static IServiceCollection ServiceCollection;
-
         /// <summary>
         /// Adds and configures the consistence services for the consistency.
         /// </summary>
@@ -32,8 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(setupAction));
             }
 
-            ServiceCollection = services;
-
+            services.AddSingleton(_ => services);
             services.TryAddSingleton<CapMarkerService>();
 
             services.TryAddSingleton<ICapPublisher, CapPublisher>();

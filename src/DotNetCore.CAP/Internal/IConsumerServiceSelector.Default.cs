@@ -75,8 +75,9 @@ namespace DotNetCore.CAP.Internal
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
             var capSubscribeTypeInfo = typeof(ICapSubscribe).GetTypeInfo();
+            var serviceCollection = provider.GetRequiredService<IServiceCollection>();
 
-            foreach (var service in ServiceCollectionExtensions.ServiceCollection
+            foreach (var service in serviceCollection
                 .Where(o => o.ImplementationType != null || o.ImplementationFactory != null))
             {
                 var detectType = service.ImplementationType ?? service.ServiceType;

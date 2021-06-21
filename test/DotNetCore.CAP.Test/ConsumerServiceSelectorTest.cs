@@ -16,9 +16,9 @@ namespace DotNetCore.CAP.Test
         public ConsumerServiceSelectorTest()
         {
             var services = new ServiceCollection();
-            ServiceCollectionExtensions.ServiceCollection = services;
             services.AddOptions();
             services.PostConfigure<CapOptions>(x=>{});
+            services.AddSingleton<IServiceCollection>(_ => services);
             services.AddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
             services.AddScoped<IFooTest, CandidatesFooTest>();			
             services.AddScoped<IBarTest, CandidatesBarTest>();
