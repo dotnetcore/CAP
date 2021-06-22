@@ -93,7 +93,7 @@ namespace DotNetCore.CAP.MongoDB
             var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
-                filter &= builder.Regex("StatusName", new BsonRegularExpression($"/{queryDto.StatusName}/i"));
+                filter &= builder.Regex("StatusName", $"/{queryDto.StatusName}/i");
 
             if (!string.IsNullOrEmpty(queryDto.Name)) filter &= builder.Eq("Name", queryDto.Name);
 
