@@ -14,6 +14,27 @@ using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB
 {
+    public class MongoDBMessageDto
+    {
+        public long Id { get; set; }
+
+        public string Version { get; set; }
+
+        public string Group { get; set; }
+
+        public string Name { get; set; }
+
+        public string Content { get; set; }
+
+        public DateTime Added { get; set; }
+
+        public DateTime? ExpiresAt { get; set; }
+
+        public int Retries { get; set; }
+
+        public string StatusName { get; set; }
+    }
+
     public class MongoDBMonitoringApi : IMonitoringApi
     {
         private readonly IMongoDatabase _database;
@@ -88,25 +109,40 @@ namespace DotNetCore.CAP.MongoDB
             var name = queryDto.MessageType == MessageType.Publish
                 ? _options.PublishedCollection
                 : _options.ReceivedCollection;
-            var collection = _database.GetCollection<MessageDto>(name);
+            var collection = _database.GetCollection<BsonDocument>(name);
 
-            var builder = Builders<MessageDto>.Filter;
+            var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
-                filter &= builder.Where(x => x.StatusName.ToLower() == queryDto.StatusName);
+                filter &= builder.Regex("StatusName", new BsonRegularExpression($"/{queryDto.StatusName}/i"));
 
-            if (!string.IsNullOrEmpty(queryDto.Name)) filter &= builder.Eq(x => x.Name, queryDto.Name);
+            if (!string.IsNullOrEmpty(queryDto.Name)) filter &= builder.Eq("Name", queryDto.Name);
 
-            if (!string.IsNullOrEmpty(queryDto.Group)) filter &= builder.Eq(x => x.Group, queryDto.Group);
+            if (!string.IsNullOrEmpty(queryDto.Group)) filter &= builder.Eq("Group", queryDto.Group);
 
             if (!string.IsNullOrEmpty(queryDto.Content))
-                filter &= builder.Regex(x => x.Content, ".*" + queryDto.Content + ".*");
+                filter &= builder.Regex("Content", $".*{queryDto.Content}.*");
+
+            ProjectionDefinition<BsonDocument, MessageDto> projection =
+                new FindExpressionProjectionDefinition<BsonDocument, MessageDto>(p => new MessageDto
+                {
+                    Id = p["_id"].ToString(),
+                    Version = p["Version"].ToString(),
+                    Group = p["Group"] == null ? null : p["Group"].ToString(),
+                    Name = p["Name"].ToString(),
+                    Content = p["Content"].ToString(),
+                    Added = p["Added"].ToLocalTime(),
+                    ExpiresAt = p["ExpiresAt"].ToNullableLocalTime(),
+                    Retries = p["Retries"].ToInt32(),
+                    StatusName = p["StatusName"].ToString()
+                });
 
             var items = collection
                 .Find(filter)
-                .SortByDescending(x => x.Added)
+                .SortByDescending(x => x["Added"])
                 .Skip(queryDto.PageSize * queryDto.CurrentPage)
                 .Limit(queryDto.PageSize)
+                .Project(projection)
                 .ToList();
 
             var count = collection.CountDocuments(filter);
