@@ -111,7 +111,7 @@ export default {
           key: "added",
           label: "Added",
           formatter: (val) => {
-            return new Date(val).format("yyyy-MM-dd hh:mm:ss");
+            if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
           },
         },
 
@@ -119,7 +119,7 @@ export default {
           key: "expiresAt",
           label: "Expires",
           formatter: (val) => {
-            return new Date(val).format("yyyy-MM-dd hh:mm:ss");
+            if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
           },
         },
       ],
