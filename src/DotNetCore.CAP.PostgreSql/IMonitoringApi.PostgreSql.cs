@@ -120,7 +120,7 @@ namespace DotNetCore.CAP.PostgreSql
                         Content = reader.GetString(index++),
                         Retries = reader.GetInt32(index++),
                         Added = reader.GetDateTime(index++),
-                        ExpiresAt = reader.GetDateTime(index++),
+                        ExpiresAt = reader.IsDBNull(index++) ? (DateTime?)null : reader.GetDateTime(index - 1),
                         StatusName = reader.GetString(index)
                     });
                 }
