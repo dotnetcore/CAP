@@ -77,7 +77,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                 };
 
                 if (_options.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase))
-                    healthCheck.HTTP = $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/health";
+                    healthCheck.HTTP = $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/api/health";
                 else if (_options.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
                     healthCheck.TCP = $"{_options.CurrentNodeHostName}:{_options.CurrentNodePort}";
 
