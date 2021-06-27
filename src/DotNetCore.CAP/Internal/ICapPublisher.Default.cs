@@ -38,11 +38,6 @@ namespace DotNetCore.CAP.Internal
 
         public AsyncLocal<ICapTransaction> Transaction { get; }
 
-        public void Start(CancellationToken stoppingToken)
-        {
-            _dispatcher.Start(stoppingToken);
-        }
-
         public Task PublishAsync<T>(string name, T value, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
         {
             return Task.Run(() => Publish(name, value, headers), cancellationToken);

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -22,14 +23,17 @@ namespace DotNetCore.CAP.Internal
         public Bootstrapper(
             ILogger<Bootstrapper> logger,
             IStorageInitializer storage,
+            IDispatcher dispatcher,
             IEnumerable<IProcessingServer> processors)
         {
             _logger = logger;
             Storage = storage;
+            Dispatcher = dispatcher;
             Processors = processors;
         }
 
         private IStorageInitializer Storage { get; }
+        public IDispatcher Dispatcher { get; }
 
         private IEnumerable<IProcessingServer> Processors { get; }
 
@@ -44,6 +48,15 @@ namespace DotNetCore.CAP.Internal
             catch (Exception e)
             {
                 _logger.LogError(e, "Initializing the storage structure failed!");
+            }
+
+            try
+            {
+                Dispatcher.Start(_cts.Token);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Initializing the dispatcher failed!");
             }
 
             _cts.Token.Register(() =>

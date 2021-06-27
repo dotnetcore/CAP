@@ -36,12 +36,14 @@ namespace DotNetCore.CAP.Internal
             cancellationToken.ThrowIfCancellationRequested();
 
             var methodInfo = context.ConsumerDescriptor.MethodInfo;
-            var reflectedType = methodInfo.ReflectedType.TypeHandle.Value;
+            var reflectedTypeHandle = methodInfo.ReflectedType.TypeHandle.Value;
+            var methodHandle = methodInfo.MethodHandle.Value;
+            var key = $"{reflectedTypeHandle}_{methodHandle}";
 
             _logger.LogDebug("Executing subscriber method : {0}", methodInfo.Name);
 
-            var key = $"{methodInfo.Module.Name}_{reflectedType}_{methodInfo.MetadataToken}";
-            var executor = _executors.GetOrAdd(key, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
+            var executor = _executors.GetOrAdd(key,
+                x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
             using var scope = _serviceProvider.CreateScope();
 

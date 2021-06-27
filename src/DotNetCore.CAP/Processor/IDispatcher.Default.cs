@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class Dispatcher : IDispatcher
+    public class Dispatcher : IDispatcher, IDisposable
     {
         private readonly IMessageSender _sender;
         private readonly CapOptions _options;
@@ -24,6 +24,8 @@ namespace DotNetCore.CAP.Processor
 
         private Channel<MediumMessage> _publishedChannel;
         private Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel;
+
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         public Dispatcher(ILogger<Dispatcher> logger,
             IMessageSender sender,
@@ -39,6 +41,7 @@ namespace DotNetCore.CAP.Processor
         public void Start(CancellationToken stoppingToken)
         {
             stoppingToken.ThrowIfCancellationRequested();
+            stoppingToken.Register(() => _cts.Cancel());
 
             _publishedChannel = Channel.CreateUnbounded<MediumMessage>(new UnboundedChannelOptions() { SingleReader = false, SingleWriter = true });
             _receivedChannel = Channel.CreateUnbounded<(MediumMessage, ConsumerExecutorDescriptor)>();
@@ -115,6 +118,12 @@ namespace DotNetCore.CAP.Processor
             {
                 // expected
             }
+        }
+
+        public void Dispose()
+        {
+            if (!_cts.IsCancellationRequested)
+                _cts.Cancel();
         }
     }
 }

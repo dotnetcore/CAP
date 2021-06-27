@@ -65,8 +65,6 @@ namespace DotNetCore.CAP.Internal
         {
             stoppingToken.Register(() => _cts?.Cancel());
 
-            _dispatcher.Start(stoppingToken);
-
             Execute();
         }
 
