@@ -44,13 +44,15 @@ namespace Microsoft.Extensions.DependencyInjection
             //Processors
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerRegister>());
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, IDispatcher>(sp =>
+                sp.GetRequiredService<IDispatcher>()));
 
             //Queue's message processor
             services.TryAddSingleton<MessageNeedToRetryProcessor>();
             services.TryAddSingleton<TransportCheckProcessor>();
             services.TryAddSingleton<CollectorProcessor>();
 
-            //Sender and Executors   
+            //Sender and Executors
             services.TryAddSingleton<IMessageSender, MessageSender>();
             services.TryAddSingleton<IDispatcher, Dispatcher>();
 
