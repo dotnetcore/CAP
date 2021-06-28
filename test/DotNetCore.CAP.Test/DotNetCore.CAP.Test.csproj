@@ -27,7 +27,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\src\DotNetCore.CAP.InMemoryStorage\DotNetCore.CAP.InMemoryStorage.csproj" />
     <ProjectReference Include="..\..\src\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+    <ProjectReference Include="..\DotNetCore.CAP.MultiModuleSubscriberTests\DotNetCore.CAP.MultiModuleSubscriberTests.csproj" />
   </ItemGroup>
 
 </Project>

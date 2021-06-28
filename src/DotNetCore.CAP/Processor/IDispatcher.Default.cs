@@ -15,15 +15,17 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class Dispatcher : IDispatcher, IDisposable
+    public class Dispatcher : IDispatcher
     {
-        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
         private readonly IMessageSender _sender;
+        private readonly CapOptions _options;
         private readonly ISubscribeDispatcher _executor;
         private readonly ILogger<Dispatcher> _logger;
 
-        private readonly Channel<MediumMessage> _publishedChannel;
-        private readonly Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel;
+        private Channel<MediumMessage> _publishedChannel;
+        private Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel;
+
+        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         public Dispatcher(ILogger<Dispatcher> logger,
             IMessageSender sender,
@@ -32,16 +34,23 @@ namespace DotNetCore.CAP.Processor
         {
             _logger = logger;
             _sender = sender;
+            _options = options.Value;
             _executor = executor;
+        }
+
+        public void Start(CancellationToken stoppingToken)
+        {
+            stoppingToken.ThrowIfCancellationRequested();
+            stoppingToken.Register(() => _cts.Cancel());
 
             _publishedChannel = Channel.CreateUnbounded<MediumMessage>(new UnboundedChannelOptions() { SingleReader = false, SingleWriter = true });
             _receivedChannel = Channel.CreateUnbounded<(MediumMessage, ConsumerExecutorDescriptor)>();
 
-            Task.WhenAll(Enumerable.Range(0, options.Value.ProducerThreadCount)
-                .Select(_ => Task.Factory.StartNew(Sending, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
+            Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
+                .Select(_ => Task.Factory.StartNew(() => Sending(stoppingToken), stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
 
-            Task.WhenAll(Enumerable.Range(0, options.Value.ConsumerThreadCount)
-                .Select(_ => Task.Factory.StartNew(Processing, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
+            Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
+                .Select(_ => Task.Factory.StartNew(() => Processing(stoppingToken), stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
         }
 
         public void EnqueueToPublish(MediumMessage message)
@@ -54,16 +63,11 @@ namespace DotNetCore.CAP.Processor
             _receivedChannel.Writer.TryWrite((message, descriptor));
         }
 
-        public void Dispose()
-        {
-            _cts.Cancel();
-        }
-
-        private async Task Sending()
+        private async Task Sending(CancellationToken cancellationToken)
         {
             try
             {
-                while (await _publishedChannel.Reader.WaitToReadAsync(_cts.Token))
+                while (await _publishedChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
                     while (_publishedChannel.Reader.TryRead(out var message))
                     {
@@ -90,17 +94,17 @@ namespace DotNetCore.CAP.Processor
             }
         }
 
-        private async Task Processing()
+        private async Task Processing(CancellationToken cancellationToken)
         {
             try
             {
-                while (await _receivedChannel.Reader.WaitToReadAsync(_cts.Token))
+                while (await _receivedChannel.Reader.WaitToReadAsync(cancellationToken))
                 {
                     while (_receivedChannel.Reader.TryRead(out var message))
                     {
                         try
                         {
-                            await _executor.DispatchAsync(message.Item1, message.Item2, _cts.Token);
+                            await _executor.DispatchAsync(message.Item1, message.Item2, cancellationToken);
                         }
                         catch (Exception e)
                         {
@@ -114,6 +118,12 @@ namespace DotNetCore.CAP.Processor
             {
                 // expected
             }
+        }
+
+        public void Dispose()
+        {
+            if (!_cts.IsCancellationRequested)
+                _cts.Cancel();
         }
     }
 }

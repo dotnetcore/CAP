@@ -29,7 +29,7 @@ namespace Sample.ConsoleApp
 
             var sp = container.BuildServiceProvider();
 
-            sp.GetService<IBootstrapper>().BootstrapAsync(default);
+            sp.GetService<IBootstrapper>().BootstrapAsync();
 
             Console.ReadLine();
         }

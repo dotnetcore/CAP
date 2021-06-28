@@ -76,6 +76,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.RedisStreams
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Dashboard.Auth", "samples\Sample.Dashboard.Auth\Sample.Dashboard.Auth.csproj", "{6E059983-DE89-4D53-88F5-D9083BCE257F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.MultiModuleSubscriberTests", "test\DotNetCore.CAP.MultiModuleSubscriberTests\DotNetCore.CAP.MultiModuleSubscriberTests.csproj", "{23684403-7DA8-489A-8A1E-8056D7683E18}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -178,6 +180,10 @@ Global
 		{6E059983-DE89-4D53-88F5-D9083BCE257F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E059983-DE89-4D53-88F5-D9083BCE257F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E059983-DE89-4D53-88F5-D9083BCE257F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23684403-7DA8-489A-8A1E-8056D7683E18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23684403-7DA8-489A-8A1E-8056D7683E18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23684403-7DA8-489A-8A1E-8056D7683E18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23684403-7DA8-489A-8A1E-8056D7683E18}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -207,6 +213,7 @@ Global
 		{375AF85D-8C81-47C6-BE5B-D0874D4971EA} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 		{54458B54-49CC-454C-82B2-4AED681D9D07} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{6E059983-DE89-4D53-88F5-D9083BCE257F} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{23684403-7DA8-489A-8A1E-8056D7683E18} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E70565D-94CF-40B4-BFE1-AC18D5F736AB}

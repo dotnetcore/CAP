@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Consul;
 using Microsoft.Extensions.Logging;
@@ -21,7 +22,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             _options = options;
         }
 
-        public IList<Node> GetNodes()
+        public IList<Node> GetNodes(CancellationToken cancellationToken)
         {
             try
             {
@@ -33,11 +34,11 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                     config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
                 });
 
-                var services = consul.Catalog.Services().GetAwaiter().GetResult();
+                var services = consul.Catalog.Services(cancellationToken).GetAwaiter().GetResult();
 
                 foreach (var service in services.Response)
                 {
-                    var serviceInfo = consul.Catalog.Service(service.Key).GetAwaiter().GetResult();
+                    var serviceInfo = consul.Catalog.Service(service.Key, cancellationToken).GetAwaiter().GetResult();
                     var node = serviceInfo.Response.SkipWhile(x => !x.ServiceTags.Contains("CAP"))
                         .Select(info => new Node
                         {
@@ -65,7 +66,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             }
         }
 
-        public async Task RegisterNode()
+        public async Task RegisterNode(CancellationToken cancellationToken)
         {
             try
             {
@@ -84,7 +85,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                 var tags = new[] { "CAP", "Client", "Dashboard" };
                 if (_options.CustomTags != null && _options.CustomTags.Length > 0)
                 {
-                    tags = tags.Union(this._options.CustomTags).ToArray();
+                    tags = tags.Union(_options.CustomTags).ToArray();
                 }
 
                 using var consul = new ConsulClient(config =>
@@ -101,11 +102,11 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                     Port = _options.CurrentNodePort,
                     Tags = tags,
                     Check = healthCheck
-                });
+                }, cancellationToken);
 
                 if (result.StatusCode == System.Net.HttpStatusCode.OK)
                 {
-                    _logger.LogInformation("Consul node registe success!");
+                    _logger.LogInformation("Consul node register success!");
                 }
             }
             catch (Exception ex)

@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.Internal
         // ReSharper disable once InconsistentNaming
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
-
+        
         public ConsumerRegister(ILogger<ConsumerRegister> logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
@@ -61,7 +61,14 @@ namespace DotNetCore.CAP.Internal
             return _isHealthy;
         }
 
-        public void Start()
+        public void Start(CancellationToken stoppingToken)
+        {
+            stoppingToken.Register(() => _cts?.Cancel());
+
+            Execute();
+        }
+
+        public void Execute()
         {
             var groupingMatches = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
@@ -116,10 +123,11 @@ namespace DotNetCore.CAP.Internal
             {
                 Pulse();
 
+                _cts.Dispose();
                 _cts = new CancellationTokenSource();
                 _isHealthy = true;
 
-                Start();
+                Execute();
             }
         }
 
@@ -151,6 +159,8 @@ namespace DotNetCore.CAP.Internal
         public void Pulse()
         {
             _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
         }
 
         private void RegisterMessageProcessor(IConsumerClient client)

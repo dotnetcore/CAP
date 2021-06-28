@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System.Threading;
 using DotNetCore.CAP.Internal;
 
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery
@@ -14,9 +15,9 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             _discoveryProvider = discoveryProvider;
         }
 
-        public void Start()
+        public void Start(CancellationToken stoppingToken)
         {
-            _discoveryProvider.RegisterNode().GetAwaiter().GetResult();
+            _discoveryProvider.RegisterNode(stoppingToken).GetAwaiter().GetResult();
         }
 
         public void Pulse()
