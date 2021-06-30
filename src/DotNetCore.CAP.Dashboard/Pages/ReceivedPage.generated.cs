@@ -84,7 +84,6 @@ WriteLiteral("\r\n");
     var content = Query("content");
 
     var monitor = Storage.GetMonitoringApi();
-    var pager = new Pager(from, perPage, GetTotal(monitor));
     var queryDto = new MessageQueryDto
     {
         MessageType = MessageType.Subscribe,
@@ -92,9 +91,11 @@ WriteLiteral("\r\n");
         Name = name,
         Content = content,
         StatusName = StatusName,
-        CurrentPage = pager.CurrentPage - 1,
-        PageSize = pager.RecordsPerPage
     };
+    var total = monitor.MessagesCount(queryDto);
+    var pager = new Pager(from, perPage, total, queryDto);
+    queryDto.CurrentPage = pager.CurrentPage - 1;
+    queryDto.PageSize = pager.RecordsPerPage;
     var succeededMessages = monitor.Messages(queryDto);
 
 
@@ -236,8 +237,9 @@ WriteLiteral("\"/>\r\n                                <span class=\"input-group-
 WriteLiteral(@"</button>
                                 </span>
                             </div>
-                        </div>
-                    </form>
+                        </div>");
+WriteLiteral($"<input type=\"hidden\"  name=\"count\" value=\"{pager.RecordsPerPage}\" />");
+WriteLiteral(@"</form>
                 </div>
                 <div class=""btn-toolbar btn-toolbar-top"">
                     <button class=""js-jobs-list-command btn btn-sm btn-primary""

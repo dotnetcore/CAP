@@ -133,6 +133,37 @@ SELECT
             }, sqlParams);
         }
 
+        public int MessagesCount(MessageQueryDto queryDto)
+        {
+            var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
+            var where = string.Empty;
+            if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " and statusname=@StatusName";
+
+            if (!string.IsNullOrEmpty(queryDto.Name)) where += " and name=@Name";
+
+            if (!string.IsNullOrEmpty(queryDto.Group)) where += " and [group]=@Group";
+
+            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and content like @Content";
+
+            var sqlQuery = $"select count(1) as qty from {tableName} where 1=1 {where}";
+
+            object[] sqlParams =
+            {
+                new SqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
+                new SqlParameter("@Group", queryDto.Group ?? string.Empty),
+                new SqlParameter("@Name", queryDto.Name ?? string.Empty),
+                new SqlParameter("@Content", $"%{queryDto.Content}%")
+            };
+
+            using var connection = new SqlConnection(_options.ConnectionString);
+            return connection.ExecuteReader(sqlQuery, reader =>
+            {
+                var messages = 0;
+                if (reader.Read()) messages = reader.GetInt32(0);
+                return messages;
+            }, sqlParams);
+        }
+
         public int PublishedFailedCount()
         {
             return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));

@@ -19,6 +19,8 @@ namespace DotNetCore.CAP.Monitoring
 
         IList<MessageDto> Messages(MessageQueryDto queryDto);
 
+        int MessagesCount(MessageQueryDto queryDto);
+
         int PublishedFailedCount();
 
         int PublishedSucceededCount();

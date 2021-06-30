@@ -125,6 +125,57 @@ namespace DotNetCore.CAP.InMemoryStorage
             }
         }
 
+        public int MessagesCount(MessageQueryDto queryDto)
+        {
+            if (queryDto.MessageType == MessageType.Publish)
+            {
+                var expression = InMemoryStorage.PublishedMessages.Values.Where(x => true);
+
+                if (!string.IsNullOrEmpty(queryDto.StatusName))
+                {
+                    expression = expression.Where(x => x.StatusName.ToString().Equals(queryDto.StatusName, StringComparison.InvariantCultureIgnoreCase));
+                }
+
+                if (!string.IsNullOrEmpty(queryDto.Name))
+                {
+                    expression = expression.Where(x => x.Name.Equals(queryDto.Name, StringComparison.InvariantCultureIgnoreCase));
+                }
+
+                if (!string.IsNullOrEmpty(queryDto.Content))
+                {
+                    expression = expression.Where(x => x.Content.Contains(queryDto.Content));
+                }
+
+                return expression.Count();
+            }
+            else
+            {
+                var expression = InMemoryStorage.ReceivedMessages.Values.Where(x => true);
+
+                if (!string.IsNullOrEmpty(queryDto.StatusName))
+                {
+                    expression = expression.Where(x => x.StatusName.ToString().Equals(queryDto.StatusName, StringComparison.InvariantCultureIgnoreCase));
+                }
+
+                if (!string.IsNullOrEmpty(queryDto.Name))
+                {
+                    expression = expression.Where(x => x.Name.Equals(queryDto.Name, StringComparison.InvariantCultureIgnoreCase));
+                }
+
+                if (!string.IsNullOrEmpty(queryDto.Group))
+                {
+                    expression = expression.Where(x => x.Group.Equals(queryDto.Group, StringComparison.InvariantCultureIgnoreCase));
+                }
+
+                if (!string.IsNullOrEmpty(queryDto.Content))
+                {
+                    expression = expression.Where(x => x.Content.Contains(queryDto.Content));
+                }
+
+                return expression.Count();
+            }
+        }
+
         public int PublishedFailedCount()
         {
             return InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Failed);

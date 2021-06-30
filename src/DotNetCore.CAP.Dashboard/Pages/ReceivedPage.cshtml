@@ -18,7 +18,6 @@
     var content = Query("content");
 
     var monitor = Storage.GetMonitoringApi();
-    var pager = new Pager(from, perPage, GetTotal(monitor));
     var queryDto = new MessageQueryDto
     {
         MessageType = MessageType.Subscribe,
@@ -26,9 +25,11 @@
         Name = name,
         Content = content,
         StatusName = StatusName,
-        CurrentPage = pager.CurrentPage - 1,
-        PageSize = pager.RecordsPerPage
     };
+    var total = monitor.MessagesCount(queryDto);
+    var pager = new Pager(from, perPage, total,queryDto);
+    queryDto.CurrentPage = pager.CurrentPage - 1;
+    queryDto.PageSize = pager.RecordsPerPage;
     var succeededMessages = monitor.Messages(queryDto);
 }
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using DotNetCore.CAP.Monitoring;
 
 namespace DotNetCore.CAP.Dashboard
 {
@@ -13,6 +14,7 @@ namespace DotNetCore.CAP.Dashboard
         private int _endPageIndex = 1;
 
         private int _startPageIndex = 1;
+        public MessageQueryDto QueryDto { get; }
 
         public Pager(int from, int perPage, long total)
         {
@@ -23,6 +25,10 @@ namespace DotNetCore.CAP.Dashboard
             TotalPageCount = (int) Math.Ceiling((double) TotalRecordCount / RecordsPerPage);
 
             PagerItems = GenerateItems();
+        }
+        public Pager(int from, int perPage, long total, MessageQueryDto queryDto) : this(from, perPage, total)
+        {
+            QueryDto = queryDto;
         }
 
         public string BasePageUrl { get; set; }
@@ -43,7 +49,28 @@ namespace DotNetCore.CAP.Dashboard
                 return "#";
             }
 
-            return BasePageUrl + "?from=" + (page - 1) * RecordsPerPage + "&count=" + RecordsPerPage;
+            // return BasePageUrl + "?from=" + (page - 1) * RecordsPerPage + "&count=" + RecordsPerPage;
+            var queryStr = "";
+            if (QueryDto != null)
+            {
+                if (!string.IsNullOrWhiteSpace(QueryDto.Name))
+                {
+                    queryStr = $"{queryStr}&name={QueryDto.Name?.Trim()}";
+                }
+
+                if (!string.IsNullOrWhiteSpace(QueryDto.Group))
+                {
+                    queryStr = $"{queryStr}&group={QueryDto.Group?.Trim()}";
+                }
+
+                if (!string.IsNullOrWhiteSpace(QueryDto.Content))
+                {
+                    queryStr = $"{queryStr}&content={QueryDto.Content?.Trim()}";
+                }
+            }
+
+            return BasePageUrl + "?from=" + (page - 1) * RecordsPerPage + "&count=" + RecordsPerPage + queryStr;
+
         }
 
         public string RecordsPerPageUrl(int perPage)
@@ -53,7 +80,26 @@ namespace DotNetCore.CAP.Dashboard
                 return "#";
             }
 
-            return BasePageUrl + "?from=0&count=" + perPage;
+            // return BasePageUrl + "?from=0&count=" + perPage;
+            var queryStr = "";
+            if (QueryDto != null)
+            {
+                if (!string.IsNullOrWhiteSpace(QueryDto.Name))
+                {
+                    queryStr = $"{queryStr}&name={QueryDto.Name?.Trim()}";
+                }
+
+                if (!string.IsNullOrWhiteSpace(QueryDto.Group))
+                {
+                    queryStr = $"{queryStr}&group={QueryDto.Group?.Trim()}";
+                }
+
+                if (!string.IsNullOrWhiteSpace(QueryDto.Content))
+                {
+                    queryStr = $"{queryStr}&content={QueryDto.Content?.Trim()}";
+                }
+            }
+            return BasePageUrl + "?from=0&count=" + perPage + queryStr;
         }
 
         private ICollection<Item> GenerateItems()

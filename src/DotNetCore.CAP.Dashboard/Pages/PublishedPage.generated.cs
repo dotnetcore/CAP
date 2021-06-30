@@ -82,24 +82,25 @@ WriteLiteral("\r\n");
     var name = Query("name");
     var content = Query("content");
 
-    var monitor = Storage.GetMonitoringApi();
-    var pager = new Pager(from, perPage, GetTotal(monitor));
+    var monitor = Storage.GetMonitoringApi(); 
     var queryDto = new MessageQueryDto
     {
         MessageType = MessageType.Publish,
         Name = name,
         Content = content,
         StatusName = Name,
-        CurrentPage = pager.CurrentPage - 1,
-        PageSize = pager.RecordsPerPage
     };
+    var total = monitor.MessagesCount(queryDto);
+    var pager = new Pager(from, perPage, total, queryDto);
+    queryDto.CurrentPage = pager.CurrentPage - 1;
+    queryDto.PageSize = pager.RecordsPerPage;
     var succeededMessages = monitor.Messages(queryDto);
 
 
-            
-            #line default
-            #line hidden
-WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-3\">\r\n        ");
+
+#line default
+#line hidden
+            WriteLiteral("\r\n<div class=\"row\">\r\n    <div class=\"col-md-3\">\r\n        ");
 
 
             
@@ -212,8 +213,9 @@ WriteLiteral("\"/>\r\n                                <span class=\"input-group-
 WriteLiteral(@"</button>
                                 </span>
                             </div>
-                        </div>
-                    </form>
+                        </div>");
+WriteLiteral($"<input type=\"hidden\"  name=\"count\" value=\"{pager.RecordsPerPage}\" />");
+WriteLiteral(@"</form>
                 </div>
                 <div class=""btn-toolbar btn-toolbar-top"">
                     <button class=""js-jobs-list-command btn btn-sm btn-primary""

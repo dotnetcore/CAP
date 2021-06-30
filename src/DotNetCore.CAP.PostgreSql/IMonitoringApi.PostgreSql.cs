@@ -122,6 +122,39 @@ namespace DotNetCore.CAP.PostgreSql
             }, sqlParams);
         }
 
+        public int MessagesCount(MessageQueryDto queryDto)
+        {
+            var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
+            var where = string.Empty;
+
+            if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " and Lower(\"StatusName\") = Lower(@StatusName)";
+
+            if (!string.IsNullOrEmpty(queryDto.Name)) where += " and Lower(\"Name\") = Lower(@Name)";
+
+            if (!string.IsNullOrEmpty(queryDto.Group)) where += " and Lower(\"Group\") = Lower(@Group)";
+
+            if (!string.IsNullOrEmpty(queryDto.Content)) where += " and \"Content\" ILike concat('%',@Content,'%')";
+
+            var sqlQuery =
+                $"select count(1) as qty from {tableName} where 1=1 {where} ";
+
+            object[] sqlParams =
+            {
+                new NpgsqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
+                new NpgsqlParameter("@Group", queryDto.Group ?? string.Empty),
+                new NpgsqlParameter("@Name", queryDto.Name ?? string.Empty),
+                new NpgsqlParameter("@Content", $"%{queryDto.Content}%")
+            };
+
+            using var connection = new NpgsqlConnection(_options.ConnectionString);
+            return connection.ExecuteReader(sqlQuery, reader =>
+            {
+                var messages = 0;
+                if (reader.Read()) messages = reader.GetInt32(0);
+                return messages;
+            }, sqlParams);
+        }
+
         public int PublishedFailedCount()
         {
             return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));

@@ -111,6 +111,31 @@ namespace DotNetCore.CAP.MongoDB
 
             return result;
         }
+        public int MessagesCount(MessageQueryDto queryDto)
+        {
+            var name = queryDto.MessageType == MessageType.Publish
+                ? _options.PublishedCollection
+                : _options.ReceivedCollection;
+            var collection = _database.GetCollection<MessageDto>(name);
+
+            var builder = Builders<MessageDto>.Filter;
+            var filter = builder.Empty;
+            if (!string.IsNullOrEmpty(queryDto.StatusName))
+                filter &= builder.Where(x => x.StatusName.ToLower() == queryDto.StatusName);
+
+            if (!string.IsNullOrEmpty(queryDto.Name)) filter &= builder.Eq(x => x.Name, queryDto.Name);
+
+            if (!string.IsNullOrEmpty(queryDto.Group)) filter &= builder.Eq(x => x.Group, queryDto.Group);
+
+            if (!string.IsNullOrEmpty(queryDto.Content))
+                filter &= builder.Regex(x => x.Content, ".*" + queryDto.Content + ".*");
+
+            var result = collection
+                .Find(filter)
+                .CountDocuments();
+
+            return (int)result;
+        }
 
         public int PublishedFailedCount()
         {
