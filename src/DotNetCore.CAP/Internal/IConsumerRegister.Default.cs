@@ -22,15 +22,15 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
-
-        private readonly IConsumerClientFactory _consumerClientFactory;
-        private readonly IDispatcher _dispatcher;
-        private readonly ISerializer _serializer;
-        private readonly IDataStorage _storage;
-        private readonly MethodMatcherCache _selector;
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly CapOptions _options;
 
+        private IConsumerClientFactory _consumerClientFactory;
+        private IDispatcher _dispatcher;
+        private ISerializer _serializer;
+        private IDataStorage _storage;
+
+        private MethodMatcherCache _selector;
         private CancellationTokenSource _cts;
         private BrokerAddress _serverAddress;
         private Task _compositeTask;
@@ -41,18 +41,12 @@ namespace DotNetCore.CAP.Internal
         // ReSharper disable once InconsistentNaming
         private static readonly DiagnosticListener s_diagnosticListener =
             new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
-        
+
         public ConsumerRegister(ILogger<ConsumerRegister> logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-
             _options = serviceProvider.GetService<IOptions<CapOptions>>().Value;
-            _selector = serviceProvider.GetService<MethodMatcherCache>();
-            _consumerClientFactory = serviceProvider.GetService<IConsumerClientFactory>();
-            _dispatcher = serviceProvider.GetService<IDispatcher>();
-            _serializer = serviceProvider.GetService<ISerializer>();
-            _storage = serviceProvider.GetService<IDataStorage>();
             _cts = new CancellationTokenSource();
         }
 
@@ -63,6 +57,12 @@ namespace DotNetCore.CAP.Internal
 
         public void Start(CancellationToken stoppingToken)
         {
+            _selector = _serviceProvider.GetService<MethodMatcherCache>();
+            _dispatcher = _serviceProvider.GetService<IDispatcher>();
+            _serializer = _serviceProvider.GetService<ISerializer>();
+            _storage = _serviceProvider.GetService<IDataStorage>();
+            _consumerClientFactory = _serviceProvider.GetService<IConsumerClientFactory>();
+
             stoppingToken.Register(() => _cts?.Cancel());
 
             Execute();

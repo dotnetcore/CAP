@@ -27,8 +27,6 @@ namespace DotNetCore.CAP
                 throw new ArgumentNullException(nameof(app));
             }
 
-            CheckRequirement(app);
-
             var provider = app.ApplicationServices;
 
             var options = provider.GetService<DashboardOptions>();
@@ -137,30 +135,6 @@ namespace DotNetCore.CAP
             }
 
             return true;
-        }
-
-        private static void CheckRequirement(IApplicationBuilder app)
-        {
-            var marker = app.ApplicationServices.GetService<CapMarkerService>();
-            if (marker == null)
-            {
-                throw new InvalidOperationException(
-                    "AddCap() must be called on the service collection.   eg: services.AddCap(...)");
-            }
-
-            var messageQueueMarker = app.ApplicationServices.GetService<CapMessageQueueMakerService>();
-            if (messageQueueMarker == null)
-            {
-                throw new InvalidOperationException(
-                    "You must be config used message queue provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseKafka(...) })");
-            }
-
-            var databaseMarker = app.ApplicationServices.GetService<CapStorageMarkerService>();
-            if (databaseMarker == null)
-            {
-                throw new InvalidOperationException(
-                    "You must be config used database provider at AddCap() options!   eg: services.AddCap(options=>{ options.UseSqlServer(...) })");
-            }
-        }
+        } 
     }
 }
