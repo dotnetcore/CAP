@@ -87,14 +87,9 @@ Maximum number of retries. When this value is reached, retry will stop and the m
 
 > Default: NULL
 
-Type: `Action<MessageType, string, string>`
+Type: `Action<FailedInfo>`
 
->
-T1 : Message Type  
-T2 : Message Name  
-T3 : Message Content
-
-Failure threshold callback. This action is called when the retry reaches the value set by `FailedRetryCount`, you can receive notification by specifying this parameter to make a manual intervention. For example, send an email or notification.
+Failure threshold callback. This action is called when the retry reaches the value set by `FailedRetryCount`, you can receive notification by specifying this parameter to make a manual intervention. For example, send an email or notification. 
 
 #### SucceedMessageExpiredAfter
 

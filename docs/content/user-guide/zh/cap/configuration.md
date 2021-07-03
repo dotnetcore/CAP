@@ -86,12 +86,7 @@ services.AddCap(config =>
 
 默认值：NULL
 
-类型：`Action<MessageType, string, string>`
-
->
-T1 : Message Type  
-T2 : Message Name  
-T3 : Message Content
+类型：`Action<FailedInfo>`
 
 重试阈值的失败回调。当重试达到 FailedRetryCount 设置的值的时候，将调用此 Action 回调，你可以通过指定此回调来接收失败达到最大的通知，以做出人工介入。例如发送邮件或者短信。
 
