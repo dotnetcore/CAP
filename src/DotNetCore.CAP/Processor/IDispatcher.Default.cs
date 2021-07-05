@@ -106,6 +106,10 @@ namespace DotNetCore.CAP.Processor
                         {
                             await _executor.DispatchAsync(message.Item1, message.Item2, cancellationToken);
                         }
+                        catch (OperationCanceledException)
+                        {
+                            //expected
+                        }
                         catch (Exception e)
                         {
                             _logger.LogError(e,
