@@ -1,10 +1,6 @@
 ﻿using DotNetCore.CAP;
-using DotNetCore.CAP.Messages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Samples.Redis.SqlServer.Controllers
@@ -14,26 +10,37 @@ namespace Samples.Redis.SqlServer.Controllers
     public class HomeController : ControllerBase
     {
         private readonly ILogger<HomeController> _logger;
-        private readonly ICapPublisher publisher;
+        private readonly ICapPublisher _publisher;
 
         public HomeController(ILogger<HomeController> logger, ICapPublisher publisher)
         {
             _logger = logger;
-            this.publisher = publisher;
+            _publisher = publisher;
         }
 
         [HttpGet]
         public async Task Publish()
         {
-            await publisher.PublishAsync("test-message", DateTime.UtcNow);
+            await _publisher.PublishAsync("test-message", new Person() { Age = 11, Name = "James" });
         }
 
         [CapSubscribe("test-message")]
         [NonAction]
-        public void Subscribe(DateTime date, [FromCap] IDictionary<string, string> headers)
+        public void Subscribe(Person p)
         {
-            var str = string.Join(",", headers.Select(kv => $"({kv.Key}:{kv.Value})"));
-            _logger.LogInformation($"test-message subscribed with value {date}, headers : {str}");
+            _logger.LogInformation($"test-message subscribed with value --> " + p);
+        }
+    }
+
+    public class Person
+    {
+        public string Name { get; set; }
+
+        public int Age { get; set; }
+
+        public override string ToString()
+        {
+            return "Name:" + Name + ", Age:" + Age;
         }
     }
 }
