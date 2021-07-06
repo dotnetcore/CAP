@@ -31,7 +31,7 @@ For specific transport and storage configuration, you can take a look at the con
 
 The `CapOptions` is used to store configuration information. By default they have default values, sometimes you may need to customize them.
 
-#### DefaultGroup
+#### DefaultGroupName
 
 > Default: cap.queue.{assembly name}
 
@@ -41,6 +41,20 @@ The default consumer group name, corresponds to different names in different Tra
     Map to [Queue Names](https://www.rabbitmq.com/queues.html#names) in RabbitMQ.  
     Map to [Consumer Group Id](http://kafka.apache.org/documentation/#group.id) in Apache Kafka.  
     Map to Subscription Name in Azure Service Bus.  
+    Map to [Queue Group Name](https://docs.nats.io/nats-concepts/queue) in NATS.
+    Map to [Consumer Group](https://redis.io/topics/streams-intro#creating-a-consumer-group) in Redis Streams.
+
+#### GroupNamePrefix
+
+> Default: Null
+
+Add unified prefixes for consumer group.  https://github.com/dotnetcore/CAP/pull/780
+
+#### TopicNamePrefix
+
+> Default: Null
+
+Add unified prefixes for topic/queue name.  https://github.com/dotnetcore/CAP/pull/780
 
 #### Versioning
 

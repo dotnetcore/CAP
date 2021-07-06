@@ -30,15 +30,31 @@ services.AddCap(config =>
 
 在 `AddCap` 中 `CapOptions` 对象是用来存储配置相关信息，默认情况下它们都具有一些默认值，有些时候你可能需要自定义。
 
-#### DefaultGroup
+#### DefaultGroupName
 
 默认值：cap.queue.{程序集名称}
 
 默认的消费者组的名字，在不同的 Transports 中对应不同的名字，可以通过自定义此值来自定义不同 Transports 中的名字，以便于查看。
 
-> 在 RabbitMQ 中映射到 [Queue Names](https://www.rabbitmq.com/queues.html#names)。  
-> 在 Apache Kafka 中映射到 [Consumer Group Id](http://kafka.apache.org/documentation/#group.id)。  
-> 在 Azure Service Bus 中映射到 Subscription Name。  
+!!! info "Mapping"
+    在 RabbitMQ 中映射到 [Queue Names](https://www.rabbitmq.com/queues.html#names)。  
+    在 Apache Kafka 中映射到 [Consumer Group Id](http://kafka.apache.org/documentation/#group.id)。  
+    在 Azure Service Bus 中映射到 Subscription Name。  
+    在 NATS 中映射到 [Queue Group Name](https://docs.nats.io/nats-concepts/queue).
+    在 Redis Streams 中映射到 [Consumer Group](https://redis.io/topics/streams-intro#creating-a-consumer-group).
+
+
+#### GroupNamePrefix
+
+默认值：Null
+
+为订阅 Group 统一添加前缀。 https://github.com/dotnetcore/CAP/pull/780
+
+#### TopicNamePrefix
+
+默认值： Null
+
+为 Topic 统一添加前缀。 https://github.com/dotnetcore/CAP/pull/780
 
 #### Version
 
