@@ -165,7 +165,8 @@ namespace DotNetCore.CAP.Internal
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
-            client.OnMessageReceived += async (sender, transportMessage) =>
+            // Cannot set subscription to asynchronous
+            client.OnMessageReceived += (sender, transportMessage) =>
             {
                 _logger.MessageReceived(transportMessage.GetId(), transportMessage.GetName());
 
@@ -193,7 +194,7 @@ namespace DotNetCore.CAP.Internal
                         }
 
                         var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
-                        message = await _serializer.DeserializeAsync(transportMessage, type);
+                        message = _serializer.DeserializeAsync(transportMessage, type).GetAwaiter().GetResult();
                         message.RemoveException();
                     }
                     catch (Exception e)

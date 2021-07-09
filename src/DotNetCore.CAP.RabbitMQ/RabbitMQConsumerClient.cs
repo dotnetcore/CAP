@@ -81,16 +81,23 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public void Commit(object sender)
         {
-            _channel.BasicAck((ulong)sender, false);
+            if (_channel.IsOpen)
+            {
+                _channel.BasicAck((ulong)sender, false);
+            }
         }
 
         public void Reject(object sender)
         {
-            _channel.BasicReject((ulong)sender, true);
+            if (_channel.IsOpen)
+            {
+                _channel.BasicReject((ulong)sender, true);
+            }
         }
 
         public void Dispose()
         {
+
             _channel?.Dispose();
             //The connection should not be closed here, because the connection is still in use elsewhere. 
             //_connection?.Dispose();
