@@ -21,12 +21,17 @@ namespace DotNetCore.CAP.Dashboard
 
         private readonly DashboardOptions _options;
         private readonly StaticFileMiddleware _staticFileMiddleware;
+        private readonly Regex _redirectUrlCheckRegex;
+        private readonly Regex _homeUrlCheckRegex;
 
         public UiMiddleware(RequestDelegate next, IWebHostEnvironment hostingEnv, ILoggerFactory loggerFactory, DashboardOptions options)
         {
             _options = options ?? new DashboardOptions();
 
             _staticFileMiddleware = CreateStaticFileMiddleware(next, hostingEnv, loggerFactory, options);
+
+            _redirectUrlCheckRegex = new Regex($"^/?{Regex.Escape(_options.PathMatch)}/?$", RegexOptions.IgnoreCase);
+            _homeUrlCheckRegex = new Regex($"^/?{Regex.Escape(_options.PathMatch)}/?index.html$", RegexOptions.IgnoreCase);
         }
 
         public async Task Invoke(HttpContext httpContext)
@@ -34,37 +39,39 @@ namespace DotNetCore.CAP.Dashboard
             var httpMethod = httpContext.Request.Method;
             var path = httpContext.Request.Path.Value;
 
-
-            if (httpMethod == "GET" && Regex.IsMatch(path, $"^/?{Regex.Escape(_options.PathMatch)}/?$", RegexOptions.IgnoreCase))
+            if (httpMethod == "GET")
             {
-                var redirectUrl = string.IsNullOrEmpty(path) || path.EndsWith("/") ? "index.html" : $"{path.Split('/').Last()}/index.html";
-
-                httpContext.Response.StatusCode = 301;
-                httpContext.Response.Headers["Location"] = redirectUrl;
-                return;
-            }
-
-            if (httpMethod == "GET" && Regex.IsMatch(path, $"^/?{Regex.Escape(_options.PathMatch)}/?index.html$", RegexOptions.IgnoreCase))
-            {
-                if (!await CapBuilderExtension.Authentication(httpContext, _options))
+                if (_redirectUrlCheckRegex.IsMatch(path))
                 {
-                    httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                    var redirectUrl = string.IsNullOrEmpty(path) || path.EndsWith("/") ? "index.html" : $"{path.Split('/').Last()}/index.html";
+
+                    httpContext.Response.StatusCode = 301;
+                    httpContext.Response.Headers["Location"] = redirectUrl;
                     return;
                 }
 
-                httpContext.Response.StatusCode = 200;
-                httpContext.Response.ContentType = "text/html;charset=utf-8";
+                if (_homeUrlCheckRegex.IsMatch(path))
+                {
+                    if (!await CapBuilderExtension.Authentication(httpContext, _options))
+                    {
+                        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        return;
+                    }
 
-                await using var stream = GetType().Assembly.GetManifestResourceStream(EmbeddedFileNamespace + ".index.html");
-                if (stream == null) throw new InvalidOperationException();
+                    httpContext.Response.StatusCode = 200;
+                    httpContext.Response.ContentType = "text/html;charset=utf-8";
 
-                using var sr = new StreamReader(stream);
-                var htmlBuilder = new StringBuilder(await sr.ReadToEndAsync());
-                htmlBuilder.Replace("%(servicePrefix)", _options.PathBase + _options.PathMatch + "/api");
-                htmlBuilder.Replace("%(pollingInterval)", _options.StatsPollingInterval.ToString());
-                await httpContext.Response.WriteAsync(htmlBuilder.ToString(), Encoding.UTF8);
+                    await using var stream = GetType().Assembly.GetManifestResourceStream(EmbeddedFileNamespace + ".index.html");
+                    if (stream == null) throw new InvalidOperationException();
 
-                return;
+                    using var sr = new StreamReader(stream);
+                    var htmlBuilder = new StringBuilder(await sr.ReadToEndAsync());
+                    htmlBuilder.Replace("%(servicePrefix)", _options.PathBase + _options.PathMatch + "/api");
+                    htmlBuilder.Replace("%(pollingInterval)", _options.StatsPollingInterval.ToString());
+                    await httpContext.Response.WriteAsync(htmlBuilder.ToString(), Encoding.UTF8);
+
+                    return;
+                }
             }
 
             await _staticFileMiddleware.Invoke(httpContext);
