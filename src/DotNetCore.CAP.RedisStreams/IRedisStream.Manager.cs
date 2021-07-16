@@ -14,10 +14,10 @@ namespace DotNetCore.CAP.RedisStreams
         Task CreateStreamWithConsumerGroupAsync(string stream, string consumerGroup);
         Task PublishAsync(string stream, NameValueEntry[] message);
 
-        IAsyncEnumerable<RedisStream[]> PollStreamsLatestMessagesAsync(string[] streams, string consumerGroup,
+        IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsLatestMessagesAsync(string[] streams, string consumerGroup,
             TimeSpan pollDelay, CancellationToken token);
 
-        IAsyncEnumerable<RedisStream[]> PollStreamsPendingMessagesAsync(string[] streams, string consumerGroup,
+        IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsPendingMessagesAsync(string[] streams, string consumerGroup,
             TimeSpan pollDelay, CancellationToken token);
 
         Task Ack(string stream, string consumerGroup, string messageId);
