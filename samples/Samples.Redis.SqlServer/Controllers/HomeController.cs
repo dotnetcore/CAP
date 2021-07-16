@@ -1,8 +1,6 @@
 ﻿using DotNetCore.CAP;
-using DotNetCore.CAP.Messages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using System.Threading.Tasks;
 
 namespace Samples.Redis.SqlServer.Controllers
@@ -13,31 +11,25 @@ namespace Samples.Redis.SqlServer.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ICapPublisher _publisher;
-        private readonly IOptions<CapOptions> options;
 
-        public HomeController(ILogger<HomeController> logger, ICapPublisher publisher, IOptions<CapOptions> options)
+        public HomeController(ILogger<HomeController> logger, ICapPublisher publisher)
         {
             _logger = logger;
             _publisher = publisher;
-            this.options = options;
         }
 
         [HttpGet]
-        public async Task Publish([FromQuery] string message = "test-message")
+        public async Task Publish()
         {
-            await _publisher.PublishAsync(message, new Person() { Age = 11, Name = "James" });
+            await _publisher.PublishAsync("test-message", new Person() { Age = 11, Name = "James" });
         }
 
         [CapSubscribe("test-message")]
-        [CapSubscribe("test-message-1")]
-        [CapSubscribe("test-message-2")]
-        [CapSubscribe("test-message-3")]
         [NonAction]
-        public void Subscribe(Person p, [FromCap] CapHeader header)
+        public void Subscribe(Person p)
         {
-            _logger.LogInformation($"{header[Headers.MessageName]} subscribed with value --> " + p);
+            _logger.LogInformation($"test-message subscribed with value --> " + p);
         }
-
     }
 
     public class Person

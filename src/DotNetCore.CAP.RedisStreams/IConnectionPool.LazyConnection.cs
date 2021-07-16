@@ -24,30 +24,12 @@ namespace DotNetCore.CAP.RedisStreams
         private static async Task<RedisConnection> ConnectAsync(CapRedisOptions redisOptions,
             ILogger<AsyncLazyRedisConnection> logger)
         {
-            int attemp = 1;
-
             var redisLogger = new RedisLogger(logger);
 
-            ConnectionMultiplexer connection = null;
-
-            while (attemp <= 5)
-            {
-                connection = await ConnectionMultiplexer.ConnectAsync(redisOptions.Configuration, redisLogger)
+            var connection = await ConnectionMultiplexer.ConnectAsync(redisOptions.Configuration, redisLogger)
                 .ConfigureAwait(false);
 
-                connection.LogEvents(logger);
-
-                if (!connection.IsConnected)
-                {
-                    logger.LogWarning($"Can't establish redis connection,trying to establish connection [attemp {attemp}].");
-                    await Task.Delay(TimeSpan.FromSeconds(2));
-                    ++attemp;
-                }
-                else
-                    attemp = 6;
-            }
-            if (connection == null)
-                throw new Exception($"Can't establish redis connection,after [{attemp}] attemps.");
+            connection.LogEvents(logger);
 
             return new RedisConnection(connection);
         }
