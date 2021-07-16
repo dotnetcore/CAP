@@ -13,13 +13,13 @@ namespace Samples.Redis.SqlServer.Controllers
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ICapPublisher _publisher;
-        private readonly IOptions<CapOptions> options;
+        private readonly IOptions<CapOptions> _options;
 
         public HomeController(ILogger<HomeController> logger, ICapPublisher publisher, IOptions<CapOptions> options)
         {
             _logger = logger;
             _publisher = publisher;
-            this.options = options;
+            this._options = options;
         }
 
         [HttpGet]
