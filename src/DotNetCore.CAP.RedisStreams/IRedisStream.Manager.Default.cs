@@ -56,7 +56,7 @@ namespace DotNetCore.CAP.RedisStreams
             await _redis.GetDatabase().StreamAddAsync(stream, message);
         }
 
-        public async IAsyncEnumerable<RedisStream[]> PollStreamsLatestMessagesAsync(string[] streams,
+        public async IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsLatestMessagesAsync(string[] streams,
             string consumerGroup, TimeSpan pollDelay, [EnumeratorCancellation] CancellationToken token)
         {
             var positions = streams.Select(stream => new StreamPosition(stream, StreamPosition.NewMessages));
@@ -66,13 +66,13 @@ namespace DotNetCore.CAP.RedisStreams
                 var result = await TryReadConsumerGroup(consumerGroup, positions.ToArray(), token)
                     .ConfigureAwait(false);
 
-                yield return result.streams;
+                yield return result;
 
                 token.WaitHandle.WaitOne(pollDelay);
             }
         }
 
-        public async IAsyncEnumerable<RedisStream[]> PollStreamsPendingMessagesAsync(string[] streams,
+        public async IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsPendingMessagesAsync(string[] streams,
             string consumerGroup, TimeSpan pollDelay, [EnumeratorCancellation] CancellationToken token)
         {
             var positions = streams.Select(stream => new StreamPosition(stream, StreamPosition.Beginning));
@@ -84,10 +84,10 @@ namespace DotNetCore.CAP.RedisStreams
                 var result = await TryReadConsumerGroup(consumerGroup, positions.ToArray(), token)
                     .ConfigureAwait(false);
 
-                yield return result.streams;
+                yield return result;
 
                 //Once we consumed our history of pending messages, we can break the loop.
-                if (result.canRead && result.streams.All(s => s.Entries.Length < _options.StreamEntriesCount))
+                if (result.All(s => s.Entries.Length < _options.StreamEntriesCount))
                     break;
 
                 token.WaitHandle.WaitOne(pollDelay);
@@ -101,7 +101,7 @@ namespace DotNetCore.CAP.RedisStreams
             await _redis.GetDatabase().StreamAcknowledgeAsync(stream, consumerGroup, messageId).ConfigureAwait(false);
         }
 
-        private async Task<(bool canRead, RedisStream[] streams)> TryReadConsumerGroup(string consumerGroup,
+        private async Task<IEnumerable<RedisStream>> TryReadConsumerGroup(string consumerGroup,
             StreamPosition[] positions, CancellationToken token)
         {
             try
@@ -118,12 +118,16 @@ namespace DotNetCore.CAP.RedisStreams
                     .WithCancellation(token))
                     createdPositions.Add(position);
 
-                if (!createdPositions.Any()) return (false, Array.Empty<RedisStream>());
+                if (!createdPositions.Any()) return Array.Empty<RedisStream>();
 
-                var readSet = database.StreamReadGroupAsync(createdPositions.ToArray(), consumerGroup, consumerGroup,
-                    (int) _options.StreamEntriesCount);
+                //calculate keys HashSlots to start reading per HashSlot
+                var groupedPositions = createdPositions.GroupBy(s => _redis.GetHashSlot(s.Key))
+                    .Select(group => database.StreamReadGroupAsync(group.ToArray(), consumerGroup, consumerGroup, (int)_options.StreamEntriesCount));
 
-                return (true, await readSet.ConfigureAwait(false));
+                var readSet = await Task.WhenAll(groupedPositions)
+                    .ConfigureAwait(false);
+
+                return readSet.SelectMany(set => set);
             }
             catch (OperationCanceledException)
             {
@@ -134,7 +138,7 @@ namespace DotNetCore.CAP.RedisStreams
                 _logger.LogError(ex, $"Redis error when trying read consumer group {consumerGroup}");
             }
 
-            return (false, Array.Empty<RedisStream>());
+            return Array.Empty<RedisStream>();
         }
 
         private async Task ConnectAsync()

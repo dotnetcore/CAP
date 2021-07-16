@@ -91,7 +91,7 @@ namespace DotNetCore.CAP.RedisStreams
             _ = ConsumeMessages(newMsgs, StreamPosition.NewMessages);
         }
 
-        private async Task ConsumeMessages(IAsyncEnumerable<RedisStream[]> streamsSet, RedisValue position)
+        private async Task ConsumeMessages(IAsyncEnumerable<IEnumerable<RedisStream>> streamsSet, RedisValue position)
         {
             await foreach (var set in streamsSet)
             foreach (var stream in set)
