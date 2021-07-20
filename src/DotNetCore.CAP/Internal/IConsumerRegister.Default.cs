@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.Internal
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-            _options = serviceProvider.GetService<IOptions<CapOptions>>().Value;
+            _options = serviceProvider.GetRequiredService<IOptions<CapOptions>>().Value;
             _cts = new CancellationTokenSource();
         }
 
@@ -123,7 +123,6 @@ namespace DotNetCore.CAP.Internal
             {
                 Pulse();
 
-                _cts.Dispose();
                 _cts = new CancellationTokenSource();
                 _isHealthy = true;
 
