@@ -3,8 +3,9 @@
 
 using System;
 using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
@@ -31,14 +32,10 @@ namespace DotNetCore.CAP.NATS
 
             try
             {
-                var binFormatter = new BinaryFormatter();
-                using var mStream = new MemoryStream();
-                binFormatter.Serialize(mStream, message);
-
-                //connection.Publish(message.GetName(), mStream.ToArray());
-                //return Task.FromResult(OperateResult.Success);
-
-                var reply = connection.Request(message.GetName(), mStream.ToArray(), 2000);
+                var json= JsonSerializer.Serialize(message);
+                var data=UTF8Encoding.UTF8.GetBytes(json);
+              
+                var reply = connection.Request(message.GetName(), data, 2000);
                 if (reply.Data != null && reply.Data[0] == 1)
                 {
                     _logger.LogDebug($"NATS subject message [{message.GetName()}] has been consumed.");
