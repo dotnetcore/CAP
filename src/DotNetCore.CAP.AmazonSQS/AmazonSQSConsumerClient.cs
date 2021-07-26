@@ -77,8 +77,7 @@ namespace DotNetCore.CAP.AmazonSQS
 
             Connect();
 
-            _snsClient.SubscribeQueueToTopicsAsync(topics.ToList(), _sqsClient, _queueUrl)
-                .GetAwaiter().GetResult();
+            SubscribeToTopics(topics).GetAwaiter().GetResult();
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
@@ -247,6 +246,23 @@ namespace DotNetCore.CAP.AmazonSQS
 
             var setAttributes = new Dictionary<string, string> { { "Policy", policy.ToJson() } };
             await _sqsClient.SetAttributesAsync(_queueUrl, setAttributes).ConfigureAwait(false);
+        }
+        
+        private async Task SubscribeToTopics(IEnumerable<string> topics)
+        {
+            var queueAttributes = await _sqsClient.GetAttributesAsync(_queueUrl).ConfigureAwait(false);
+
+            var sqsQueueArn = queueAttributes["QueueArn"];
+            foreach (var topicArn in topics)
+            {
+                await _snsClient.SubscribeAsync(new SubscribeRequest
+                    {
+                        TopicArn = topicArn,
+                        Protocol = "sqs",
+                        Endpoint = sqsQueueArn,
+                    })
+                    .ConfigureAwait(false);
+            }
         }
 
         #endregion
