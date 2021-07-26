@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.AmazonSQS
             {
                 await TryAddTopicArns();
 
-                if (_topicArnMaps.TryGetValue(message.GetName().NormalizeForAws(), out var arn))
+                if (TryGetOrCreateTopic(message.GetName().NormalizeForAws(), out var arn))
                 {
                     string bodyJson = null;
                     if (message.Body != null)
@@ -136,6 +136,27 @@ namespace DotNetCore.CAP.AmazonSQS
             }
 
             return false;
+        }
+        
+        private bool TryGetOrCreateTopic(string topicName, out string topicArn)
+        {
+            topicArn = null;
+            if (_topicArnMaps.TryGetValue(topicName, out topicArn))
+            {
+                return true;
+            }
+
+            var response = _snsClient.CreateTopicAsync(topicName).GetAwaiter().GetResult();
+
+            if (string.IsNullOrEmpty(response.TopicArn))
+            {
+                return false;
+            }
+            
+            topicArn = response.TopicArn;
+            
+            _topicArnMaps.Add(topicName, topicArn);
+            return true;
         }
     }
 }
