@@ -7,7 +7,6 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
-using DotNetCore.CAP.Serialization;
 using NATS.Client;
 
 namespace DotNetCore.CAP.NATS
