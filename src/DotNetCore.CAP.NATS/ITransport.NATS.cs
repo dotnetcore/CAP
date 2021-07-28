@@ -2,13 +2,12 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
+using NATS.Client;
 
 namespace DotNetCore.CAP.NATS
 {
@@ -31,14 +30,14 @@ namespace DotNetCore.CAP.NATS
 
             try
             {
-                var binFormatter = new BinaryFormatter();
-                using var mStream = new MemoryStream();
-                binFormatter.Serialize(mStream, message);
+                var msg = new Msg(message.GetName(), message.Body);
+                foreach (var header in message.Headers)
+                {
+                    msg.Header[header.Key] = header.Value;
+                }
+                
+                var reply=  connection.Request(msg);
 
-                //connection.Publish(message.GetName(), mStream.ToArray());
-                //return Task.FromResult(OperateResult.Success);
-
-                var reply = connection.Request(message.GetName(), mStream.ToArray(), 2000);
                 if (reply.Data != null && reply.Data[0] == 1)
                 {
                     _logger.LogDebug($"NATS subject message [{message.GetName()}] has been consumed.");

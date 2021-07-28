@@ -3,8 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Threading;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
@@ -71,22 +69,21 @@ namespace DotNetCore.CAP.NATS
 
         private void Subscription_MessageHandler(object sender, MsgHandlerEventArgs e)
         {
-            using var mStream = new MemoryStream();
-            var binFormatter = new BinaryFormatter();
-
-            mStream.Write(e.Message.Data, 0, e.Message.Data.Length);
-            mStream.Position = 0;
-
-            var message = (TransportMessage)binFormatter.Deserialize(mStream);
-            message.Headers.Add(Headers.Group, _groupId);
-            OnMessageReceived?.Invoke(e.Message.Reply, message);
+            var headers = new Dictionary<string, string>();
+            foreach (string h in e.Message.Header.Keys)
+            {
+                headers.Add(h, e.Message.Header[h]);
+            }
+            var tranmessage = new TransportMessage(headers, e.Message.Data);
+            tranmessage.Headers.Add(Headers.Group, _groupId);
+            OnMessageReceived?.Invoke(e.Message.Reply, tranmessage);
         }
 
         public void Commit(object sender)
         {
             if (sender is string reply)
             {
-                _consumerClient.Publish(reply, new byte[] { 1 });
+                _consumerClient.Publish(reply, new byte[] {1});
             }
         }
 
@@ -94,7 +91,7 @@ namespace DotNetCore.CAP.NATS
         {
             if (sender is string reply)
             {
-                _consumerClient.Publish(reply, new byte[] { 0 });
+                _consumerClient.Publish(reply, new byte[] {0});
             }
         }
 
