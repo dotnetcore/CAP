@@ -37,9 +37,9 @@ namespace DotNetCore.CAP.AmazonSQS
         {
             try
             {
-                await TryAddTopicArns();
+                await FetchExistingTopicArns();
 
-                if (_topicArnMaps.TryGetValue(message.GetName().NormalizeForAws(), out var arn))
+                if (TryGetOrCreateTopicArn(message.GetName().NormalizeForAws(), out var arn))
                 {
                     string bodyJson = null;
                     if (message.Body != null)
@@ -89,11 +89,11 @@ namespace DotNetCore.CAP.AmazonSQS
             }
         }
 
-        public async Task<bool> TryAddTopicArns()
+        private async Task FetchExistingTopicArns()
         {
             if (_topicArnMaps != null)
             {
-                return true;
+                return;
             }
 
             await _semaphore.WaitAsync();
@@ -122,8 +122,6 @@ namespace DotNetCore.CAP.AmazonSQS
                         nextToken = topics.NextToken;
                     }
                     while (!string.IsNullOrEmpty(nextToken));
-
-                    return true;
                 }
             }
             catch (Exception e)
@@ -134,8 +132,27 @@ namespace DotNetCore.CAP.AmazonSQS
             {
                 _semaphore.Release();
             }
+        }
+        
+        private bool TryGetOrCreateTopicArn(string topicName, out string topicArn)
+        {
+            topicArn = null;
+            if (_topicArnMaps.TryGetValue(topicName, out topicArn))
+            {
+                return true;
+            }
 
-            return false;
+            var response = _snsClient.CreateTopicAsync(topicName).GetAwaiter().GetResult();
+
+            if (string.IsNullOrEmpty(response.TopicArn))
+            {
+                return false;
+            }
+            
+            topicArn = response.TopicArn;
+            
+            _topicArnMaps.Add(topicName, topicArn);
+            return true;
         }
     }
 }
