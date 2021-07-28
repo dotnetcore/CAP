@@ -2,14 +2,13 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using System.Text.Json;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
+using DotNetCore.CAP.Serialization;
+using NATS.Client;
 
 namespace DotNetCore.CAP.NATS
 {
@@ -32,10 +31,14 @@ namespace DotNetCore.CAP.NATS
 
             try
             {
-                var json= JsonSerializer.Serialize(message);
-                var data=UTF8Encoding.UTF8.GetBytes(json);
-              
-                var reply = connection.Request(message.GetName(), data, 2000);
+                var msg = new Msg(message.GetName(), message.Body);
+                foreach (var header in message.Headers)
+                {
+                    msg.Header[header.Key] = header.Value;
+                }
+                
+                var reply=  connection.Request(msg);
+
                 if (reply.Data != null && reply.Data[0] == 1)
                 {
                     _logger.LogDebug($"NATS subject message [{message.GetName()}] has been consumed.");

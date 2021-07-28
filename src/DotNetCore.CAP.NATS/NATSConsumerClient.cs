@@ -3,10 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
-using System.Text.Json;
 using System.Threading;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
@@ -73,11 +69,14 @@ namespace DotNetCore.CAP.NATS
 
         private void Subscription_MessageHandler(object sender, MsgHandlerEventArgs e)
         {
-            var json = UTF8Encoding.Default.GetString(e.Message.Data);
-            var message = JsonSerializer.Deserialize<TransportMessage>(json);
-            
-            message.Headers.Add(Headers.Group, _groupId);
-            OnMessageReceived?.Invoke(e.Message.Reply, message);
+            var headers = new Dictionary<string, string>();
+            foreach (string h in e.Message.Header.Keys)
+            {
+                headers.Add(h, e.Message.Header[h]);
+            }
+            var tranmessage = new TransportMessage(headers, e.Message.Data);
+            tranmessage.Headers.Add(Headers.Group, _groupId);
+            OnMessageReceived?.Invoke(e.Message.Reply, tranmessage);
         }
 
         public void Commit(object sender)
