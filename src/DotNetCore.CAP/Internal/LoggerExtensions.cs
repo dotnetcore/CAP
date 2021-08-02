@@ -35,11 +35,6 @@ namespace DotNetCore.CAP.Internal
             logger.LogWarning($"The {retries}th retrying send a message failed. message id: {messageId} ");
         }
 
-        public static void MessageHasBeenSent(this ILogger logger, string name, string content)
-        {
-            logger.LogDebug($"Message published. name: {name}, content:{content}.");
-        }
-
         public static void MessageReceived(this ILogger logger, string messageId, string name)
         {
             logger.LogDebug($"Received message. id:{messageId}, name: {name}");
@@ -73,12 +68,6 @@ namespace DotNetCore.CAP.Internal
         public static void ExpectedOperationCanceledException(this ILogger logger, Exception ex)
         {
             logger.LogWarning(ex, $"Expected an OperationCanceledException, but found '{ex.Message}'.");
-        }
-
-        public static void ModelBinderFormattingException(this ILogger logger, string methodName, string parameterName,
-            string content, Exception ex)
-        {
-            logger.LogError(ex, $"When call subscribe method, a parameter format conversion exception occurs. MethodName:'{methodName}' ParameterName:'{parameterName}' Content:'{content}'.");
         }
     }
 }

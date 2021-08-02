@@ -75,9 +75,18 @@ namespace DotNetCore.CAP.Internal
             foreach (var matchGroup in groupingMatches)
             {
                 ICollection<string> topics;
-                using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                try
                 {
-                    topics = client.FetchTopics(matchGroup.Value.Select(x => x.TopicName));
+                    using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                    {
+                        topics = client.FetchTopics(matchGroup.Value.Select(x => x.TopicName));
+                    }
+                }
+                catch (BrokerConnectionException e)
+                {
+                    _isHealthy = false;
+                    _logger.LogError(e, e.Message);
+                    return;
                 }
 
                 for (int i = 0; i < _options.ConsumerThreadCount; i++)
@@ -122,7 +131,7 @@ namespace DotNetCore.CAP.Internal
             if (!IsHealthy() || force)
             {
                 Pulse();
-
+                
                 _cts = new CancellationTokenSource();
                 _isHealthy = true;
 
