@@ -35,8 +35,8 @@ namespace DotNetCore.CAP.NATS
                 {
                     msg.Header[header.Key] = header.Value;
                 }
-                
-                var reply=  connection.Request(msg);
+
+                var reply = connection.Request(msg);
 
                 if (reply.Data != null && reply.Data[0] == 1)
                 {
@@ -54,11 +54,7 @@ namespace DotNetCore.CAP.NATS
             }
             finally
             {
-                var returned = _connectionPool.Return(connection);
-                if (!returned)
-                {
-                    connection.Dispose();
-                }
+                _connectionPool.Return(connection);
             }
         }
     }

@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.NATS
         private readonly ConnectionFactory _connectionFactory;
         private int _pCount;
         private int _maxSize;
-        
+
         public ConnectionPool(ILogger<ConnectionPool> logger, IOptions<NATSOptions> options)
         {
             _options = options.Value;
@@ -51,7 +51,7 @@ namespace DotNetCore.CAP.NATS
             {
                 connection = _connectionFactory.CreateConnection(_options.Servers);
             }
-            
+
             return connection;
         }
 
@@ -63,6 +63,8 @@ namespace DotNetCore.CAP.NATS
 
                 return true;
             }
+
+            connection.Dispose();
 
             Interlocked.Decrement(ref _pCount);
 
