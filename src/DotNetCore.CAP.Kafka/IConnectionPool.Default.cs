@@ -60,6 +60,8 @@ namespace DotNetCore.CAP.Kafka
                 return true;
             }
 
+            producer.Dispose();
+
             Interlocked.Decrement(ref _pCount);
 
             return false;

@@ -67,11 +67,7 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 if (channel != null)
                 {
-                    var returned = _connectionChannelPool.Return(channel);
-                    if (!returned)
-                    {
-                        channel.Dispose();
-                    }
+                    _connectionChannelPool.Return(channel);
                 }
             }
         }
