@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
@@ -15,15 +16,16 @@ namespace DotNetCore.CAP.Processor
         private readonly IServiceProvider _serviceProvider;
 
         private const int ItemBatch = 1000;
-        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
+        private readonly TimeSpan _waitingInterval;
         private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
 
         private readonly string[] _tableNames;
 
-        public CollectorProcessor(ILogger<CollectorProcessor> logger, IServiceProvider serviceProvider)
+        public CollectorProcessor(ILogger<CollectorProcessor> logger, IOptions<CapOptions> options, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
+            _waitingInterval = TimeSpan.FromSeconds(options.Value.CollectorCleaningInterval);
 
             var initializer = _serviceProvider.GetService<IStorageInitializer>();
 
