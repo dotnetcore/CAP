@@ -92,6 +92,12 @@ services.AddCap(config =>
 
 消费者线程并行处理消息的线程数，当这个值大于1时，将不能保证消息执行的顺序。
 
+### CollectorCleaningInterval
+
+默认值：300 秒
+
+收集器删除已经过期消息的时间间隔。
+
 #### FailedRetryCount
 
 默认值：50
