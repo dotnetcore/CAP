@@ -92,7 +92,7 @@ services.AddCap(config =>
 
 消费者线程并行处理消息的线程数，当这个值大于1时，将不能保证消息执行的顺序。
 
-### CollectorCleaningInterval
+#### CollectorCleaningInterval
 
 默认值：300 秒
 
