@@ -239,6 +239,18 @@ services.AddCap(x =>
 
 ```
 
+### OpenTelemetry Rabbitmq
+You can use OpenTelemetry library for tracing microservices with jaeger or zipkin.
+
+```C#
+ services.AddOpenTelemetryTracing(builder => builder
+         .SetResourceBuilder(ResourceBuilder.CreateDefault()
+         .AddService("service-name"))
+         .AddAspNetCoreInstrumentation()
+         .AddSource(nameof(ITransport))
+         .AddJaegerExporter());
+```
+
 ### Dashboard
 
 CAP also provides dashboard pages, you can easily view messages that were sent and received. In addition, you can also view the message status in real time in the dashboard. Use the following command to install the Dashboard in your project.
