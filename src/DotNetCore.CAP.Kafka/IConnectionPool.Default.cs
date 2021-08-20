@@ -53,9 +53,7 @@ namespace DotNetCore.CAP.Kafka
 
         protected virtual IProducer<string, byte[]> BuildProducer(ProducerConfig config)
         {
-            IProducer<string, byte[]> producer;
-            producer = new ProducerBuilder<string, byte[]>(config).Build();
-            return producer;
+            return  new ProducerBuilder<string, byte[]>(config).Build();
         }
 
         public bool Return(IProducer<string, byte[]> producer)
