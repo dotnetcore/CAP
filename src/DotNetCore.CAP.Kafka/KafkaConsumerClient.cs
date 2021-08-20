@@ -15,7 +15,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
-    internal sealed class KafkaConsumerClient : IConsumerClient
+    public class KafkaConsumerClient : IConsumerClient
     {
         private static readonly SemaphoreSlim ConnectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
@@ -153,15 +153,20 @@ namespace DotNetCore.CAP.Kafka
                     config.EnableAutoCommit ??= false;
                     config.LogConnectionClose ??= false;
 
-                    _consumerClient = new ConsumerBuilder<string, byte[]>(config)
-                        .SetErrorHandler(ConsumerClient_OnConsumeError)
-                        .Build();
+                    BuildConsumer(config);
                 }
             }
             finally
             {
                 ConnectionLock.Release();
             }
+        }
+
+        protected virtual void BuildConsumer(ConsumerConfig config)
+        {
+            _consumerClient = new ConsumerBuilder<string, byte[]>(config)
+                .SetErrorHandler(ConsumerClient_OnConsumeError)
+                .Build();
         }
 
         private void ConsumerClient_OnConsumeError(IConsumer<string, byte[]> consumer, Error e)
