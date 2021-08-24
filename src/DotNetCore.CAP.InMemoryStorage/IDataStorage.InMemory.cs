@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -26,9 +27,9 @@ namespace DotNetCore.CAP.InMemoryStorage
             _serializer = serializer;
         }
 
-        public static Dictionary<string, MemoryMessage> PublishedMessages { get; } = new Dictionary<string, MemoryMessage>();
+        public static ConcurrentDictionary<string, MemoryMessage> PublishedMessages { get; } = new ConcurrentDictionary<string, MemoryMessage>();
 
-        public static Dictionary<string, MemoryMessage> ReceivedMessages { get; } = new Dictionary<string, MemoryMessage>();
+        public static ConcurrentDictionary<string, MemoryMessage> ReceivedMessages { get; } = new ConcurrentDictionary<string, MemoryMessage>();
 
         public Task ChangePublishStateAsync(MediumMessage message, StatusName state)
         {
@@ -125,10 +126,10 @@ namespace DotNetCore.CAP.InMemoryStorage
                     .Where(x => x.ExpiresAt < timeout)
                     .Select(x => x.DbId)
                     .Take(batchCount);
-                
+
                 foreach (var id in ids)
                 {
-                    if (PublishedMessages.Remove(id))
+                    if (PublishedMessages.TryRemove(id, out _))
                     {
                         removed++;
                     }
@@ -143,12 +144,12 @@ namespace DotNetCore.CAP.InMemoryStorage
 
                 foreach (var id in ids)
                 {
-                    if (ReceivedMessages.Remove(id))
+                    if (ReceivedMessages.TryRemove(id, out _))
                     {
                         removed++;
                     }
                 }
-            } 
+            }
 
             return Task.FromResult(removed);
         }
