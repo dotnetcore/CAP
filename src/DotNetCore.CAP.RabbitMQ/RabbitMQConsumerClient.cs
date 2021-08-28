@@ -3,11 +3,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
+using OpenTelemetry;
+using OpenTelemetry.Context.Propagation;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using Headers = DotNetCore.CAP.Messages.Headers;
@@ -22,6 +26,8 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly string _exchangeName;
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
+        private static readonly ActivitySource ActivitySource = new ActivitySource(nameof(ITransport));
+        private static readonly TextMapPropagator Propagator = new TraceContextPropagator();
         private IModel _channel;
 
         private IConnection _connection;
@@ -175,29 +181,40 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
-            var headers = new Dictionary<string, string>();
-            if (e.BasicProperties.Headers != null)
+            var parentContext = Propagator.Extract(default, e.BasicProperties, ExtractTraceContextFromBasicProperties);
+            Baggage.Current = parentContext.Baggage;
+            
+            var activityName = e.RoutingKey;
+
+            using (var activity = ActivitySource.StartActivity(activityName, ActivityKind.Consumer, parentContext.ActivityContext))
             {
-                foreach (var header in e.BasicProperties.Headers)
+                var headers = new Dictionary<string, string>();
+                if (e.BasicProperties.Headers != null)
                 {
-                    headers.Add(header.Key, header.Value == null ? null : Encoding.UTF8.GetString((byte[])header.Value));
+                    foreach (var header in e.BasicProperties.Headers)
+                    {
+                        headers.Add(header.Key,
+                            header.Value == null ? null : Encoding.UTF8.GetString((byte[]) header.Value));
+                    }
                 }
-            }
 
-            headers.Add(Headers.Group, _queueName);
+                headers.Add(Headers.Group, _queueName);
 
-            if (_rabbitMQOptions.CustomHeaders != null)
-            {
-                var customHeaders = _rabbitMQOptions.CustomHeaders(e);
-                foreach (var customHeader in customHeaders)
+                if (_rabbitMQOptions.CustomHeaders != null)
                 {
-                    headers[customHeader.Key] = customHeader.Value;
+                    var customHeaders = _rabbitMQOptions.CustomHeaders(e);
+                    foreach (var customHeader in customHeaders)
+                    {
+                        headers[customHeader.Key] = customHeader.Value;
+                    }
                 }
+
+                var message = new TransportMessage(headers, e.Body.ToArray());
+                
+                AddMessagingTags(activity, message);
+
+                OnMessageReceived?.Invoke(e.DeliveryTag, message);
             }
-
-            var message = new TransportMessage(headers, e.Body.ToArray());
-
-            OnMessageReceived?.Invoke(e.DeliveryTag, message);
         }
 
         private void OnConsumerShutdown(object sender, ShutdownEventArgs e)
@@ -209,6 +226,23 @@ namespace DotNetCore.CAP.RabbitMQ
             };
 
             OnLog?.Invoke(sender, args);
+        }
+        
+        private void AddMessagingTags(Activity activity, TransportMessage message)
+        {
+            activity?.SetTag("message_id", message.GetId());
+            activity?.SetTag("correlation_id", message.GetCorrelationId());
+            activity?.SetTag("messaging_system", "rabbitmq");
+            activity?.SetTag("destination_kind", "queue");
+            activity?.SetTag("exchange_name", _exchangeName);
+            activity?.SetTag("routing_key", message.GetName());
+        }
+        
+        private IEnumerable<string> ExtractTraceContextFromBasicProperties(IBasicProperties props, string key)
+        {
+            if (!props.Headers.TryGetValue(key, out var value)) return Enumerable.Empty<string>();
+            var bytes = value as byte[];
+            return new[] { Encoding.UTF8.GetString(bytes) };
         }
 
         #endregion
