@@ -153,7 +153,7 @@ namespace DotNetCore.CAP.Kafka
                     config.EnableAutoCommit ??= false;
                     config.LogConnectionClose ??= false;
 
-                    BuildConsumer(config);
+                    _consumerClient = BuildConsumer(config);
                 }
             }
             finally
@@ -162,9 +162,9 @@ namespace DotNetCore.CAP.Kafka
             }
         }
 
-        protected virtual void BuildConsumer(ConsumerConfig config)
+        protected virtual IConsumer<string, byte[]> BuildConsumer(ConsumerConfig config)
         {
-            _consumerClient = new ConsumerBuilder<string, byte[]>(config)
+            return new ConsumerBuilder<string, byte[]>(config)
                 .SetErrorHandler(ConsumerClient_OnConsumeError)
                 .Build();
         }
