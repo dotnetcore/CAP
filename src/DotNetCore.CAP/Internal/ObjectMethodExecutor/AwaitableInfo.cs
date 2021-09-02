@@ -6,9 +6,10 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.Internal
 {
-    internal struct AwaitableInfo
+    internal readonly struct AwaitableInfo
     {
         public Type AwaiterType { get; }
         public PropertyInfo AwaiterIsCompletedProperty { get; }
@@ -43,8 +44,7 @@ namespace Microsoft.Extensions.Internal
             // Awaitable must have method matching "object GetAwaiter()"
             var getAwaiterMethod = type.GetRuntimeMethods().FirstOrDefault(m =>
                 m.Name.Equals("GetAwaiter", StringComparison.OrdinalIgnoreCase)
-                && m.GetParameters().Length == 0
-                && m.ReturnType != null);
+                && m.GetParameters().Length == 0);
             if (getAwaiterMethod == null)
             {
                 awaitableInfo = default(AwaitableInfo);
