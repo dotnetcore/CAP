@@ -40,10 +40,7 @@ namespace DotNetCore.CAP.Internal
             var methodHandle = methodInfo.MethodHandle.Value;
             var key = $"{reflectedTypeHandle}_{methodHandle}";
 
-            _logger.LogDebug("Executing subscriber method : {0}", methodInfo.Name);
-
-            var executor = _executors.GetOrAdd(key,
-                x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
+            var executor = _executors.GetOrAdd(key, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
             using var scope = _serviceProvider.CreateScope();
 

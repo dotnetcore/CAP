@@ -40,15 +40,15 @@ namespace DotNetCore.CAP.RabbitMQ
 
                 var props = channel.CreateBasicProperties();
                 props.DeliveryMode = 2;
-                props.Headers = message.Headers.ToDictionary(x => x.Key, x => (object) x.Value);
-                
+                props.Headers = message.Headers.ToDictionary(x => x.Key, x => (object)x.Value);
+
                 channel.ExchangeDeclare(_exchange, RabbitMQOptions.ExchangeType, true);
 
                 channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
 
                 channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
 
-                _logger.LogDebug($"RabbitMQ topic message [{message.GetName()}] has been published.");
+                _logger.LogInformation("CAP message '{0}' published, internal id '{1}'", message.GetName(), message.GetId());
 
                 return Task.FromResult(OperateResult.Success);
             }
