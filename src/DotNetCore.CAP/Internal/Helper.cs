@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.Internal
                 return false;
             }
 
-            if (!typeInfo.ContainsGenericParameters)
+            if (typeInfo.ContainsGenericParameters)
             {
                 return false;
             }
