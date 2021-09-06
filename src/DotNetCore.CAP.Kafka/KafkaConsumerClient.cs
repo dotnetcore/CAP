@@ -96,6 +96,12 @@ namespace DotNetCore.CAP.Kafka
                     var val = header.GetValueBytes();
                     headers.Add(header.Key, val != null ? Encoding.UTF8.GetString(val) : null);
                 }
+
+                if (!headers.ContainsKey(Messages.Headers.MessageName))
+                {
+                    headers.Add(Messages.Headers.MessageName, consumerResult.Topic);
+                }
+
                 headers.Add(Messages.Headers.Group, _groupId);
 
                 if (_kafkaOptions.CustomHeaders != null)
