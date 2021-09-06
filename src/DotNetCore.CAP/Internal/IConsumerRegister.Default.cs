@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.Internal
         private BrokerAddress _serverAddress;
         private Task _compositeTask;
         private bool _disposed;
-        private static bool _isHealthy = true;
+        private bool _isHealthy = true;
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming

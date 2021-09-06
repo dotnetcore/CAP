@@ -35,6 +35,11 @@ namespace DotNetCore.CAP.Internal
                 return false;
             }
 
+            if (typeInfo.ContainsGenericParameters)
+            {
+                return false;
+            }
+
             return !typeInfo.ContainsGenericParameters
                    && typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase);
         }

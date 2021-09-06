@@ -3,6 +3,7 @@
 
 using System.Threading;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -16,6 +17,6 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         /// <param name="context">consumer execute context</param>
         /// <param name="cancellationToken">The object of <see cref="CancellationToken"/>.</param>
-        Task<ConsumerExecutedResult> InvokeAsync(ConsumerContext context, CancellationToken cancellationToken = default);
+        Task<ConsumerExecutedResult> InvokeAsync([NotNull] ConsumerContext context, CancellationToken cancellationToken = default);
     }
 }

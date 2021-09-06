@@ -10,6 +10,7 @@ CAP supports several transport methods:
 * [Kafka](kafka.md)
 * [Azure Service Bus](azure-service-bus.md)
 * [Amazon SQS](aws-sqs.md)
+* [NATS](nats.md)
 * [In-Memory Queue](in-memory-queue.md)
 * [Redis Streams](redis-streams.md)
 

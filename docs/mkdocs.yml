@@ -98,6 +98,7 @@ nav:
           - Amazon SQS: user-guide/en/transport/aws-sqs.md
           - Apache Kafka®: user-guide/en/transport/kafka.md
           - Azure Service Bus: user-guide/en/transport/azure-service-bus.md
+          - NATS: user-guide/en/transport/nats.md
           - RabbitMQ: user-guide/en/transport/rabbitmq.md
           - Redis Streams: user-guide/en/transport/redis-streams.md
           - In-Memory Queue: user-guide/en/transport/in-memory-queue.md
@@ -133,6 +134,7 @@ nav:
           - Amazon SQS: user-guide/zh/transport/aws-sqs.md   
           - Apache Kafka®: user-guide/zh/transport/kafka.md        
           - Azure Service Bus: user-guide/zh/transport/azure-service-bus.md
+          - NATS: user-guide/zh/transport/nats.md
           - RabbitMQ: user-guide/zh/transport/rabbitmq.md
           - Redis Streams: user-guide/zh/transport/redis-streams.md
           - In-Memory Queue: user-guide/zh/transport/in-memory-queue.md

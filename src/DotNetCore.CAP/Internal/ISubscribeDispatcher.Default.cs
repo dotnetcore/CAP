@@ -89,6 +89,8 @@ namespace DotNetCore.CAP.Internal
 
             try
             {
+                _logger.ConsumerExecuting(descriptor.MethodInfo.Name);
+
                 var sp = Stopwatch.StartNew();
 
                 await InvokeConsumerMethodAsync(message, descriptor, cancellationToken);
@@ -97,7 +99,7 @@ namespace DotNetCore.CAP.Internal
 
                 await SetSuccessfulState(message);
 
-                _logger.ConsumerExecuted(sp.Elapsed.TotalMilliseconds);
+                _logger.ConsumerExecuted(descriptor.MethodInfo.Name, sp.Elapsed.TotalMilliseconds);
 
                 return (false, OperateResult.Success);
             }
@@ -183,7 +185,7 @@ namespace DotNetCore.CAP.Internal
                         [Headers.CorrelationSequence] = (message.Origin.GetCorrelationSequence() + 1).ToString()
                     };
 
-                    await _provider.GetService<ICapPublisher>().PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken);
+                    await _provider.GetRequiredService<ICapPublisher>().PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken);
                 }
             }
             catch (OperationCanceledException)
