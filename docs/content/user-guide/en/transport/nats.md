@@ -2,6 +2,10 @@
 
 [NATS](https://nats.io/) is a simple, secure and performant communications system for digital systems, services and devices. NATS is part of the Cloud Native Computing Foundation (CNCF).
 
+!!! warning
+    We currently implement NATS provider based on Request/Response mode, and we plan to replace it with JetStream in future version.
+    see https://github.com/dotnetcore/CAP/issues/983 for more information.
+
 ## Configuration
 
 To use NATS transporter, you need to install the following package from NuGet:

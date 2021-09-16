@@ -4,7 +4,7 @@ Subscriber filters are similar to ASP.NET MVC filters and are mainly used to pro
 
 ## Create subscribe filter
 
-1. Create filter
+### Create Filter
 
 Create a new filter class and inherit the `SubscribeFilter` abstract class.
 
@@ -32,7 +32,15 @@ In some scenarios, if you want to terminate the subscriber method execution, you
 
 To ignore exceptions, you can setting `context.ExceptionHandled = true` in `ExceptionContext`
 
-2. Configuration
+
+```C#
+public override void OnSubscribeException(ExceptionContext context)
+{
+    context.ExceptionHandled = true;
+}
+```
+
+### Configuration Filter
 
 Use `AddSubscribeFilter<>` to add a filter.
 
