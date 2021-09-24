@@ -34,8 +34,8 @@ namespace DotNetCore.CAP.RedisStreams
 
             //The object returned from GetDatabase is a cheap pass - thru object, and does not need to be stored
             var database = _redis.GetDatabase();
-            var streamExist = await database.KeyTypeAsync(stream);
-            if (streamExist == RedisType.None)
+            var streamExist = await database.KeyExistsAsync(stream);
+            if (!streamExist)
             {
                 await database.StreamCreateConsumerGroupAsync(stream, consumerGroup, StreamPosition.NewMessages);
             }
