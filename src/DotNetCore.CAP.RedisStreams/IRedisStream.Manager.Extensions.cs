@@ -19,8 +19,8 @@ namespace DotNetCore.CAP.RedisStreams
                 try
                 {
                     var stream = position.Key;
-                    var streamExist = await database.KeyTypeAsync(stream);
-                    if (streamExist == RedisType.None)
+                    var streamExist = await database.KeyExistsAsync(stream);
+                    if (!streamExist)
                     {
                         if (await database.StreamCreateConsumerGroupAsync(stream, consumerGroup,
                             StreamPosition.NewMessages))
