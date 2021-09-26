@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Processor
             _serviceProvider = serviceProvider;
             _waitingInterval = TimeSpan.FromSeconds(options.Value.CollectorCleaningInterval);
 
-            var initializer = _serviceProvider.GetService<IStorageInitializer>();
+            var initializer = _serviceProvider.GetRequiredService<IStorageInitializer>();
 
             _tableNames = new[] { initializer.GetPublishedTableName(), initializer.GetReceivedTableName() };
         }
@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.Processor
                 var time = DateTime.Now;
                 do
                 {
-                    deletedCount = await _serviceProvider.GetService<IDataStorage>()
+                    deletedCount = await _serviceProvider.GetRequiredService<IDataStorage>()
                         .DeleteExpiresAsync(table, time, ItemBatch, context.CancellationToken);
 
                     if (deletedCount != 0)

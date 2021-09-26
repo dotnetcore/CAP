@@ -66,7 +66,6 @@ namespace DotNetCore.CAP.Internal
 
         public static bool IsInnerIP(string ipAddress)
         {
-            bool isInnerIp;
             var ipNum = GetIpNum(ipAddress);
 
             //Private IP：
@@ -80,9 +79,9 @@ namespace DotNetCore.CAP.Internal
             var bEnd = GetIpNum("172.31.255.255");
             var cBegin = GetIpNum("192.168.0.0");
             var cEnd = GetIpNum("192.168.255.255");
-            isInnerIp = IsInner(ipNum, aBegin, aEnd) || IsInner(ipNum, bBegin, bEnd) || IsInner(ipNum, cBegin, cEnd);
-            return isInnerIp;
+            return IsInner(ipNum, aBegin, aEnd) || IsInner(ipNum, bBegin, bEnd) || IsInner(ipNum, cBegin, cEnd);
         }
+
         private static long GetIpNum(string ipAddress)
         {
             var ip = ipAddress.Split('.');

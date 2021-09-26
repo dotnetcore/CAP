@@ -30,7 +30,7 @@ namespace DotNetCore.CAP.Internal
             ServiceProvider = service;
             _dispatcher = service.GetRequiredService<IDispatcher>();
             _storage = service.GetRequiredService<IDataStorage>();
-            _capOptions = service.GetService<IOptions<CapOptions>>().Value;
+            _capOptions = service.GetRequiredService<IOptions<CapOptions>>().Value;
             Transaction = new AsyncLocal<ICapTransaction>();
         }
 

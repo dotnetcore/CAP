@@ -70,13 +70,15 @@ namespace DotNetCore.CAP.NATS
         private void Subscription_MessageHandler(object sender, MsgHandlerEventArgs e)
         {
             var headers = new Dictionary<string, string>();
+          
             foreach (string h in e.Message.Header.Keys)
             {
                 headers.Add(h, e.Message.Header[h]);
             }
-            var tranmessage = new TransportMessage(headers, e.Message.Data);
-            tranmessage.Headers.Add(Headers.Group, _groupId);
-            OnMessageReceived?.Invoke(e.Message.Reply, tranmessage);
+
+            headers.Add(Headers.Group, _groupId);
+
+            OnMessageReceived?.Invoke(e.Message.Reply, new TransportMessage(headers, e.Message.Data));
         }
 
         public void Commit(object sender)
