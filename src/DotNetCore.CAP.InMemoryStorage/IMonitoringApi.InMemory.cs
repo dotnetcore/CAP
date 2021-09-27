@@ -17,12 +17,12 @@ namespace DotNetCore.CAP.InMemoryStorage
     {
         public Task<MediumMessage> GetPublishedMessageAsync(long id)
         {
-            return Task.FromResult((MediumMessage)InMemoryStorage.PublishedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
+            return Task.FromResult((MediumMessage)InMemoryStorage.PublishedMessages.Values.FirstOrDefault(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
         }
 
         public Task<MediumMessage> GetReceivedMessageAsync(long id)
         {
-            return Task.FromResult((MediumMessage)InMemoryStorage.ReceivedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
+            return Task.FromResult((MediumMessage)InMemoryStorage.ReceivedMessages.Values.FirstOrDefault(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
         }
 
         public StatisticsDto GetStatistics()
@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.InMemoryStorage
             return GetHourlyTimelineStats(type, nameof(StatusName.Succeeded));
         }
 
-        public IList<MessageDto> Messages(MessageQueryDto queryDto)
+        public PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto)
         {
             if (queryDto.MessageType == MessageType.Publish)
             {
@@ -71,17 +71,25 @@ namespace DotNetCore.CAP.InMemoryStorage
                 var offset = queryDto.CurrentPage * queryDto.PageSize;
                 var size = queryDto.PageSize;
 
-                return expression.Skip(offset).Take(size).Select(x => new MessageDto()
+                var allItems = expression.Select(x => new MessageDto()
                 {
                     Added = x.Added,
                     Version = "N/A",
                     Content = x.Content,
                     ExpiresAt = x.ExpiresAt,
-                    Id = long.Parse(x.DbId),
+                    Id = x.DbId,
                     Name = x.Name,
                     Retries = x.Retries,
                     StatusName = x.StatusName.ToString()
-                }).ToList();
+                });
+
+                return new PagedQueryResult<MessageDto>()
+                {
+                    Items = allItems.Skip(offset).Take(size).ToList(),
+                    PageIndex = queryDto.CurrentPage,
+                    PageSize = queryDto.PageSize,
+                    Totals = allItems.Count()
+                };
             }
             else
             {
@@ -110,18 +118,26 @@ namespace DotNetCore.CAP.InMemoryStorage
                 var offset = queryDto.CurrentPage * queryDto.PageSize;
                 var size = queryDto.PageSize;
 
-                return expression.Skip(offset).Take(size).Select(x => new MessageDto()
+                var allItems = expression.Select(x => new MessageDto()
                 {
                     Added = x.Added,
                     Group = x.Group,
                     Version = "N/A",
                     Content = x.Content,
                     ExpiresAt = x.ExpiresAt,
-                    Id = long.Parse(x.DbId),
+                    Id = x.DbId,
                     Name = x.Name,
                     Retries = x.Retries,
                     StatusName = x.StatusName.ToString()
-                }).ToList();
+                });
+
+                return new PagedQueryResult<MessageDto>()
+                {
+                    Items = allItems.Skip(offset).Take(size).ToList(),
+                    PageIndex = queryDto.CurrentPage,
+                    PageSize = queryDto.PageSize,
+                    Totals = allItems.Count()
+                };
             }
         }
 

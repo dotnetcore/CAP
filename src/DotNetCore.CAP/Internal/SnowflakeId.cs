@@ -47,6 +47,11 @@ namespace DotNetCore.CAP.Internal
 
         public static SnowflakeId Default()
         {
+            if (_snowflakeId != null)
+            {
+                return _snowflakeId;
+            }
+
             lock (SLock)
             {
                 if (_snowflakeId != null)

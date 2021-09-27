@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.1</TargetFramework>
     <AssemblyName>DotNetCore.CAP.AzureServiceBus</AssemblyName>
     <PackageTags>$(PackageTags);AzureServiceBus</PackageTags>
   </PropertyGroup>
@@ -9,15 +9,15 @@
   <PropertyGroup>
     <WarningsAsErrors>NU1605;NU1701</WarningsAsErrors>
     <NoWarn>NU1701;CS1591</NoWarn>
-    <DocumentationFile>bin\$(Configuration)\netstandard2.0\DotNetCore.CAP.AzureServiceBus.xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\netstandard2.1\DotNetCore.CAP.AzureServiceBus.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="4.1.3" />
+    <PackageReference Include="Microsoft.Azure.ServiceBus" Version="5.1.2" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
-  </ItemGroup>
+  </ItemGroup> 
 
 </Project>

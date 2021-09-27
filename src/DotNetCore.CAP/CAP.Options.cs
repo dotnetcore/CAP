@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text.Json;
 using DotNetCore.CAP.Messages;
 
 // ReSharper disable InconsistentNaming
@@ -21,9 +22,11 @@ namespace DotNetCore.CAP
             FailedRetryInterval = 60;
             FailedRetryCount = 50;
             ConsumerThreadCount = 1;
+            ProducerThreadCount = 1;
             Extensions = new List<ICapOptionsExtension>();
             Version = "v1";
-            DefaultGroup = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
+            DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
+            CollectorCleaningInterval = 300;
         }
 
         internal IList<ICapOptionsExtension> Extensions { get; }
@@ -31,7 +34,17 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Subscriber default group name. kafka-->group name. rabbitmq --> queue name.
         /// </summary>
-        public string DefaultGroup { get; set; }
+        public string DefaultGroupName { get; set; }
+
+        /// <summary>
+        /// Subscriber group prefix.
+        /// </summary>
+        public string GroupNamePrefix { get; set; }
+        
+        /// <summary>
+        /// Topic prefix.
+        /// </summary>
+        public string TopicNamePrefix { get; set; }
 
         /// <summary>
         /// The default version of the message, configured to isolate data in the same instance. The length must not exceed 20
@@ -68,6 +81,18 @@ namespace DotNetCore.CAP
         public int ConsumerThreadCount { get; set; }
 
         /// <summary>
+        /// The number of producer thread connections.
+        /// Default is 1
+        /// </summary>
+        public int ProducerThreadCount { get; set; }
+
+        /// <summary>
+        /// The interval of the collector processor deletes expired messages.
+        /// Default is 300 seconds.
+        /// </summary>
+        public int CollectorCleaningInterval { get; set; }
+
+        /// <summary>
         /// Registers an extension that will be executed when building services.
         /// </summary>
         /// <param name="extension"></param>
@@ -80,5 +105,10 @@ namespace DotNetCore.CAP
 
             Extensions.Add(extension);
         }
+
+        /// <summary>
+        /// Configure JSON serialization settings
+        /// </summary>
+        public JsonSerializerOptions JsonSerializerOptions { get; } = new JsonSerializerOptions();
     }
 }

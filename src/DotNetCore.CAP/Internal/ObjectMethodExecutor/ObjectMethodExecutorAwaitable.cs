@@ -1,9 +1,10 @@
-// Copyright (c) .NET Core Community. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Runtime.CompilerServices;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.Internal
 {
     /// <summary>
@@ -11,7 +12,7 @@ namespace Microsoft.Extensions.Internal
     /// return, regardless of whether the underlying value is a System.Task, an FSharpAsync, or an
     /// application-defined custom awaitable.
     /// </summary>
-    internal struct ObjectMethodExecutorAwaitable
+    internal readonly struct ObjectMethodExecutorAwaitable
     {
         private readonly object _customAwaitable;
         private readonly Func<object, object> _getAwaiterMethod;

@@ -40,19 +40,6 @@ namespace DotNetCore.CAP.Test
         }
 
         [Fact]
-        public void CanOverridePublishService()
-        {
-            var services = new ServiceCollection();
-            services.AddCap(x => { }).AddProducerService<MyProducerService>();
-
-            var thingy = services.BuildServiceProvider()
-                .GetRequiredService<ICapPublisher>() as MyProducerService;
-
-            Assert.NotNull(thingy);
-        }
-      
-
-        [Fact]
         public void CanResolveCapOptions()
         {
             var services = new ServiceCollection();

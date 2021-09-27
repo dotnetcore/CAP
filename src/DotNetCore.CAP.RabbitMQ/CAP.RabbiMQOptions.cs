@@ -4,7 +4,9 @@
 // ReSharper disable once CheckNamespace
 
 using System;
+using System.Collections.Generic;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -69,13 +71,32 @@ namespace DotNetCore.CAP
         public int Port { get; set; } = -1;
 
         /// <summary>
-        /// Gets or sets queue message automatic deletion time (in milliseconds). Default 864000000 ms (10 days).
+        /// Optional queue arguments, also known as "x-arguments" because of their field name in the AMQP 0-9-1 protocol,
+        /// is a map (dictionary) of arbitrary key/value pairs that can be provided by clients when a queue is declared.
         /// </summary>
-        public int QueueMessageExpires { get; set; } = 864000000;
+        public QueueArgumentsOptions QueueArguments { get; set; } = new QueueArgumentsOptions();
+
+        /// <summary>
+        /// If you need to get additional native delivery args, you can use this function to write into <see cref="CapHeader"/>.
+        /// </summary>
+        public Func<BasicDeliverEventArgs, List<KeyValuePair<string, string>>> CustomHeaders { get; set; }
 
         /// <summary>
         /// RabbitMQ native connection factory options
         /// </summary>
         public Action<ConnectionFactory> ConnectionFactoryOptions { get; set; }
+
+        public class QueueArgumentsOptions
+        {
+            /// <summary>
+            /// Gets or sets queue mode by supplying the 'x-queue-mode' declaration argument with a string specifying the desired mode.
+            /// </summary>
+            public string QueueMode { get; set; }
+
+            /// <summary>
+            /// Gets or sets queue message automatic deletion time (in milliseconds) "x-message-ttl", Default 864000000 ms (10 days).
+            /// </summary>
+            public int MessageTTL { get; set; } = 864000000;
+        }
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Text.Encodings.Web;
+using System.Text.Unicode;
 using DotNetCore.CAP.Messages;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +17,7 @@ namespace Sample.RabbitMQ.SqlServer
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ("192.168.2.120");
+                x.UseRabbitMQ("");
                 x.UseDashboard();
                 x.FailedRetryCount = 5;
                 x.FailedThresholdCallback = failed =>
@@ -24,6 +26,7 @@ namespace Sample.RabbitMQ.SqlServer
                     logger.LogError($@"A message of type {failed.MessageType} failed after executing {x.FailedRetryCount} several times, 
                         requiring manual troubleshooting. Message name: {failed.Message.GetName()}");
                 };
+                x.JsonSerializerOptions.Encoder = JavaScriptEncoder.Create(UnicodeRanges.All);
             });
 
             services.AddControllers();

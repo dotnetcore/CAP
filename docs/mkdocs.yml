@@ -10,7 +10,7 @@ edit_uri: 'edit/master/docs/content'
 docs_dir: 'content'
 
 # Copyright
-copyright: Copyright &copy; 2017 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
+copyright: Copyright &copy; 2021 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
 
 
 #theme: material
@@ -19,18 +19,26 @@ theme:
   palette:
     primary: 'deep purple'
     accent: 'indigo'  
-  language: 'en'
+  language: en
   include_sidebar: true
   logo: 'img/logo.svg'
   favicon: 'img/favicon.ico'
   features:
-    - tabs
+    - navigation.tabs
+    - navigation.instant
   i18n:
     prev: 'Previous'
     next: 'Next'
 
 #Customization
 extra:
+  alternate:
+    - name: English
+      link: /user-guide/en/getting-started/quick-start
+      lang: en
+    - name: 中文
+      link: /user-guide/zh/getting-started/quick-start
+      lang: zh
   social:
     - icon: 'fontawesome/brands/github'
       link: 'https://github.com/dotnetcore/CAP'
@@ -81,16 +89,18 @@ nav:
       - CAP:
           - Configuration: user-guide/en/cap/configuration.md
           - Messaging: user-guide/en/cap/messaging.md
-          - Sagas: user-guide/en/cap/sagas.md
+          - Filter: user-guide/en/cap/filter.md
           - Serialization: user-guide/en/cap/serialization.md
           - Transactions: user-guide/en/cap/transactions.md
           - Idempotence: user-guide/en/cap/idempotence.md
       - Transport:
-          - General: user-guide/en/transport/general.md
-          - RabbitMQ: user-guide/en/transport/rabbitmq.md
+          - General: user-guide/en/transport/general.md          
+          - Amazon SQS: user-guide/en/transport/aws-sqs.md
           - Apache Kafka®: user-guide/en/transport/kafka.md
           - Azure Service Bus: user-guide/en/transport/azure-service-bus.md
-          - Amazon SQS: user-guide/en/transport/aws-sqs.md
+          - NATS: user-guide/en/transport/nats.md
+          - RabbitMQ: user-guide/en/transport/rabbitmq.md
+          - Redis Streams: user-guide/en/transport/redis-streams.md
           - In-Memory Queue: user-guide/en/transport/in-memory-queue.md
       - Storage:
           - General: user-guide/en/storage/general.md
@@ -115,16 +125,18 @@ nav:
       - CAP:
           - 配置: user-guide/zh/cap/configuration.md
           - 消息: user-guide/zh/cap/messaging.md
-          - Sagas: user-guide/zh/cap/sagas.md
+          - 过滤器: user-guide/zh/cap/filter.md
           - 序列化: user-guide/zh/cap/serialization.md
-          - 运输: user-guide/zh/cap/transactions.md
+          - 事务: user-guide/zh/cap/transactions.md
           - 幂等性: user-guide/zh/cap/idempotence.md          
       - 传输:
-          - 简介: user-guide/zh/transport/general.md
-          - RabbitMQ: user-guide/zh/transport/rabbitmq.md
-          - Apache Kafka®: user-guide/zh/transport/kafka.md
+          - 简介: user-guide/zh/transport/general.md       
+          - Amazon SQS: user-guide/zh/transport/aws-sqs.md   
+          - Apache Kafka®: user-guide/zh/transport/kafka.md        
           - Azure Service Bus: user-guide/zh/transport/azure-service-bus.md
-          - Amazon SQS: user-guide/zh/transport/aws-sqs.md
+          - NATS: user-guide/zh/transport/nats.md
+          - RabbitMQ: user-guide/zh/transport/rabbitmq.md
+          - Redis Streams: user-guide/zh/transport/redis-streams.md
           - In-Memory Queue: user-guide/zh/transport/in-memory-queue.md
       - 存储:
           - 简介: user-guide/zh/storage/general.md
@@ -139,6 +151,7 @@ nav:
           - 性能追踪: user-guide/zh/monitoring/diagnostics.md
           - 健康检查: user-guide/zh/monitoring/health-checks.md
       - 示例:
+          - Castle DynamicProxy: user-guide/zh/samples/castle.dynamicproxy.md
           - Github: user-guide/zh/samples/github.md
           - eShopOnContainers: user-guide/zh/samples/eshoponcontainers.md
           - FAQ: user-guide/zh/samples/faq.md
@@ -146,3 +159,8 @@ nav:
       - Contact Us: about/contact-us.md
       - Release Notes: about/release-notes.md
       - License: about/license.md
+
+# Google Analytics
+google_analytics:
+  - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+  - auto

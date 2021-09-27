@@ -33,6 +33,19 @@ namespace DotNetCore.CAP.Test
             Assert.True(result);
         }
 
+        [Fact]
+        public void IsControllerAbstractTest()
+        {
+            //Arrange
+            var typeInfo = typeof(AbstractController).GetTypeInfo();
+
+            //Act
+            var result = Helper.IsController(typeInfo);
+
+            //Assert
+            Assert.False(result);
+        }
+
         [Theory]
         [InlineData(typeof(string))]
         [InlineData(typeof(decimal))]
@@ -75,5 +88,10 @@ namespace DotNetCore.CAP.Test
     public class HomeController
     {
         
+    }
+
+    public abstract class AbstractController
+    {
+
     }
 }

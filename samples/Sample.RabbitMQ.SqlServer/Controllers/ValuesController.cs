@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Messages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 
@@ -21,7 +21,7 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.rabbitmq.mysql", new Person()
+            await _capBus.PublishAsync("sample.rabbitmq.sqlserver", new Person()
             {
                 Id = 123,
                 Name = "Bar"
@@ -40,7 +40,11 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
                     //your business code
                     connection.Execute("insert into test(name) values('test')", transaction: transaction);
 
-                    _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+                    _capBus.Publish("sample.rabbitmq.sqlserver", new Person()
+                    {
+                        Id = 123,
+                        Name = "Bar"
+                    });
                 }
             }
 
@@ -54,22 +58,28 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
             {
                 dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
 
-                _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
+                _capBus.Publish("sample.rabbitmq.sqlserver", new Person()
+                {
+                    Id = 123,
+                    Name = "Bar"
+                });
             }
             return Ok();
         }
 
         [NonAction]
-        [CapSubscribe("sample.rabbitmq.mysql")]
-        public void Subscriber(DateTime p)
+        [CapSubscribe("sample.rabbitmq.sqlserver")]
+        public void Subscriber(Person p)
         {
             Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
         }
 
         [NonAction]
-        [CapSubscribe("sample.rabbitmq.mysql", Group = "group.test2")]
-        public void Subscriber2(DateTime p, [FromCap]CapHeader header)
+        [CapSubscribe("sample.rabbitmq.sqlserver", Group = "group.test2")]
+        public void Subscriber2(Person p, [FromCap]CapHeader header)
         {
+            var id = header[Headers.MessageId];
+
             Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
         }
     }

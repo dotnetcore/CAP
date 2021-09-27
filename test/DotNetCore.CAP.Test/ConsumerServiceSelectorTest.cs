@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,13 +15,15 @@ namespace DotNetCore.CAP.Test
 
         public ConsumerServiceSelectorTest()
         {
-            var services = new ServiceCollection(); 
-            ServiceCollectionExtensions.ServiceCollection = services;
+            var services = new ServiceCollection();
             services.AddOptions();
             services.PostConfigure<CapOptions>(x=>{});
+            services.AddSingleton<IServiceCollection>(_ => services);
             services.AddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
-            services.AddScoped<IFooTest, CandidatesFooTest>();
+            services.AddScoped<IFooTest, CandidatesFooTest>();			
             services.AddScoped<IBarTest, CandidatesBarTest>();
+			services.AddScoped<IAbstractTest, CandidatesAbstractTest>();
+			services.AddScoped<ICancellationTest, CancellationTokenTest>();
             services.AddLogging();
             _provider = services.BuildServiceProvider();
         }
@@ -28,8 +33,8 @@ namespace DotNetCore.CAP.Test
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
-
-            Assert.Equal(8, candidates.Count);
+            
+            Assert.Equal(13, candidates.Count);
         }
 
         [Theory]
@@ -46,6 +51,20 @@ namespace DotNetCore.CAP.Test
             Assert.NotNull(bestCandidates.MethodInfo);
             Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
         }
+		
+		[Theory]
+		[InlineData("Candidates.Abstract")]
+		[InlineData("Candidates.Abstract2")]
+		public void CanFindInheritedMethodsTopic(string topic)
+		{
+			var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+			var candidates = selector.SelectCandidates();
+			var bestCandidates = selector.SelectBestCandidate(topic, candidates);
+
+			Assert.NotNull(bestCandidates);
+			Assert.NotNull(bestCandidates.MethodInfo);
+			Assert.Equal(typeof(Task), bestCandidates.MethodInfo.ReturnType);
+		}
 
 
         [Theory]
@@ -115,6 +134,22 @@ namespace DotNetCore.CAP.Test
             var bestCandidates = selector.SelectBestCandidate(topic, candidates);
             Assert.Null(bestCandidates);
         }
+
+        [Theory]
+        [InlineData("CancellationToken.NoAdditionalParameters", 1, 1)]
+        [InlineData("CancellationToken.OneAdditionalParameter", 2, 2)]
+        [InlineData("CancellationToken.CommonArrangement", 3, 2)]
+        public void CanFindTopicSuccessfully(string topic, int parameterCount, int fromCapCount)
+        {
+            var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+            var candidates = selector.SelectCandidates();
+
+            var bestCandidate = selector.SelectBestCandidate(topic, candidates);
+            Assert.NotEqual(0, candidates.Count);
+            Assert.NotNull(bestCandidate);
+            Assert.Equal(bestCandidate.Parameters.Count, parameterCount);
+            Assert.Equal(fromCapCount, bestCandidate.Parameters.Count(x => x.IsFromCap));
+        }
     }
 
     public class CandidatesTopic : TopicAttribute
@@ -129,6 +164,14 @@ namespace DotNetCore.CAP.Test
     }
 
     public interface IBarTest
+    {
+    }
+
+    public interface IAbstractTest
+    {
+    }
+
+    public interface ICancellationTest
     {
     }
 
@@ -196,6 +239,58 @@ namespace DotNetCore.CAP.Test
         public void GetBar3()
         {
             Console.WriteLine("GetBar3() method has bee excuted.");
+        }
+    }
+	
+	/// <summary>
+	/// Test to verify if an inherited class also gets the subscribed methods.
+	/// Abstract class doesn't have a subscribe topic, inherited class with a topic
+	/// should also get the partial subscribed methods.
+	/// </summary>
+	public abstract class CandidatesAbstractBaseTest : ICapSubscribe, IAbstractTest
+	{
+		[CandidatesTopic("Candidates.Abstract")]
+		public virtual Task GetAbstract()
+		{
+		  Console.WriteLine("GetAbstract() method has been excuted.");
+		  return Task.CompletedTask;
+		}
+
+		[CandidatesTopic("Abstract2", isPartial: true)]
+		public virtual Task GetAbstract2()
+		{
+		  Console.WriteLine("GetAbstract2() method has been excuted.");
+		  return Task.CompletedTask;
+		}
+	}
+
+	[CandidatesTopic("Candidates")]
+	public class CandidatesAbstractTest : CandidatesAbstractBaseTest
+	{
+	}
+    
+    [CandidatesTopic("Candidates")]
+    public class CancellationTokenTest : ICancellationTest, ICapSubscribe
+    {
+        [CandidatesTopic("CancellationToken.NoAdditionalParameters")]
+        public Task NoAdditionalParameters(CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"{nameof(NoAdditionalParameters)} method has been executed.");
+            return Task.CompletedTask;
+        }
+
+        [CandidatesTopic("CancellationToken.OneAdditionalParameter")]
+        public Task OneAdditionalParameter([FromCap] CapHeader headers, CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"{nameof(OneAdditionalParameter)} method has been executed.");
+            return Task.CompletedTask;
+        }
+
+        [CandidatesTopic("CancellationToken.CommonArrangement")]
+        public Task CommonArrangement(DateTime date, [FromCap] IDictionary<string, string> headers, CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"{nameof(CommonArrangement)} method has been executed.");
+            return Task.CompletedTask;
         }
     }
 }

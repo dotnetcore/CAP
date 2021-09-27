@@ -31,7 +31,7 @@ For specific transport and storage configuration, you can take a look at the con
 
 The `CapOptions` is used to store configuration information. By default they have default values, sometimes you may need to customize them.
 
-#### DefaultGroup
+#### DefaultGroupName
 
 > Default: cap.queue.{assembly name}
 
@@ -41,6 +41,20 @@ The default consumer group name, corresponds to different names in different Tra
     Map to [Queue Names](https://www.rabbitmq.com/queues.html#names) in RabbitMQ.  
     Map to [Consumer Group Id](http://kafka.apache.org/documentation/#group.id) in Apache Kafka.  
     Map to Subscription Name in Azure Service Bus.  
+    Map to [Queue Group Name](https://docs.nats.io/nats-concepts/queue) in NATS.
+    Map to [Consumer Group](https://redis.io/topics/streams-intro#creating-a-consumer-group) in Redis Streams.
+
+#### GroupNamePrefix
+
+> Default: Null
+
+Add unified prefixes for consumer group.  https://github.com/dotnetcore/CAP/pull/780
+
+#### TopicNamePrefix
+
+> Default: Null
+
+Add unified prefixes for topic/queue name.  https://github.com/dotnetcore/CAP/pull/780
 
 #### Versioning
 
@@ -71,11 +85,17 @@ During the message sending process if consumption method fails, CAP will try to 
     By default if failure occurs on send or consume, retry will start after **4 minutes** in order to avoid possible problems caused by setting message state delays.    
     Failures in the process of sending and consuming messages will be retried 3 times immediately, and will be retried polling after 3 times, at which point the FailedRetryInterval configuration will take effect.
 
+#### CollectorCleaningInterval
+
+> Default: 300 sec
+
+The interval of the collector processor deletes expired messages.
+
 #### ConsumerThreadCount 
 
 > Default : 1
 
-Number of consumer threads, when this value is greater than 1, the order of message execution cannot be guaranteed
+Number of consumer threads, when this value is greater than 1, the order of message execution cannot be guaranteed.
 
 #### FailedRetryCount
 
@@ -87,14 +107,9 @@ Maximum number of retries. When this value is reached, retry will stop and the m
 
 > Default: NULL
 
-Type: `Action<MessageType, string, string>`
+Type: `Action<FailedInfo>`
 
->
-T1 : Message Type  
-T2 : Message Name  
-T3 : Message Content
-
-Failure threshold callback. This action is called when the retry reaches the value set by `FailedRetryCount`, you can receive notification by specifying this parameter to make a manual intervention. For example, send an email or notification.
+Failure threshold callback. This action is called when the retry reaches the value set by `FailedRetryCount`, you can receive notification by specifying this parameter to make a manual intervention. For example, send an email or notification. 
 
 #### SucceedMessageExpiredAfter
 

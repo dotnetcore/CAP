@@ -1,5 +1,154 @@
 # Release Notes
 
+
+## Version 5.1.2 (2021-07-26)
+
+**Bug Fixed:**
+
+* Fixed consumer register cancellation token source null referencee bug. (#952)
+* Fixed redis streams transport cluster keys cross-hashslot bug. (#944)
+
+
+## Version 5.1.1 (2021-07-09)
+
+**Features:**
+
+* Improve flow control for message cache of in memory. (#935)
+* Add cancellation token support to subscribers. (#912)
+* Add pathbase options for dashbaord. (#901)
+* Add custom authorization scheme support for dashbaord. (#906)
+
+**Bug Fixed:**
+
+* Fixed mysql connect timeout expired bug. (#931)
+* Fixed consul health check path invalid bug. (#921)
+* Fixed mongo dashbaord query bug. (#909)
+
+## Version 5.1.0 (2021-06-07)
+
+**Features:**
+
+* Add configure options for json serialization. (#879)
+* Add Redis Streams transport support. (#817)
+* New dashboard build with vue. (#880)
+* Add subscribe filter support. (#894)
+
+**Bug Fixed:**
+
+* Fixed use CapEFDbTransaction to get dbtransaction extension method bug. (#868)
+* Fixed pending message has not been deleted from buffer list in SQL Server. (#889)
+* Fixed dispatcher processing when storage message exception bug. (#900)
+
+
+## Version 5.0.3 (2021-05-14)
+
+**Bug Fixed:**
+
+* Fix the bug of getting db transaction through the IDbContextTransaction for SQLServer. (#867)
+* Fix RabbitMQ Connection close forced. (#861)
+
+## Version 5.0.2 (2021-04-28)
+
+**Features:**
+
+* Add support for Azure Service Bus sessions. (#829)
+* Add custom message headers support for RabbitMQ consumer. (#818)
+
+**Bug Fixed:**
+
+* Downgrading Microsoft.Data.SqlClient to 2.0.1. (#839)
+* DiagnosticObserver does not use null connection. (#845)
+* Fix null reference in AmazonSQSTransport. (#846)
+
+## Version 5.0.1 (2021-04-07)
+
+**Features:**
+
+* Add KafkaOptions.MainConfig to AutoCreateTopic. (#810)
+* Add support rewriting the default configuration of Kafka consumer. (#822)
+* Add DefaultChallengeScheme dashboard options to specify dashboard auth challenge scheme. (#815)
+
+**Bug Fixed:**
+ 
+* Fixed topic selector in IConsumerServiceSelector. (#806)
+* Update AWS topic subscription and SQS access policy generation. (#808)
+* Fixed memory leak when using transction to publish message. (#816)
+* Fixed SQL content filter on IMonitoringApi.PostgreSql.cs. (#814)
+* Fixed the expiration time display problem in the dashboard due to time zone issues (#820)
+* Fixed the creation timing of Kafka automatically creating Topic. (#823)
+* Fixed Dashboard metric not update. (#819)
+
+## Version 5.0.0 (2021-03-23)
+ 
+**Features:**
+
+* Upgrade to .NET Standard 2.1 and support .NET 5. (#727)
+* Replace Newtonsoft.Json to System.Text.Json. (#740)
+* Support NATS Transport. (#595,#743)
+* Enabling publiser confirms for RabbitMQ. (#730)
+* Support query subscription from DI implementation factory. (#756)
+* Add options to create lazy queue for RabbitMQ. (#772)
+* Support to add custom tags for Consul. (#786)
+* Support custom group and topic prefiex. (#780)
+* Renemae DefaultGroup option to DefaultGroupName.
+* Add auto create topic at startup for Kafka. (#795,#744)
+
+**Bug Fixed:**
+
+* Fixed retrying process earlier than consumer registration to DI. (#760)
+* Fixed Amazon SQS missing pagination topics. (#765)
+* Fixed RabbitMQ MessageTTL option to int type. (#787)
+* Fixed Dashboard auth. (#793)
+* Fixed ClientProvidedName could not be renamed for RabbitMQ. (#791)
+* Fixed EntityFramework transaction will not rollback when exception occurred. (#798)
+
+## Version 3.1.2 (2020-12-03)
+
+**Features:**
+* Support record the exception message in the headers. (#679)
+* Support consul service check for https. (#722)
+* Support custom producer threads count options for sending. (#731)
+* Upgrade dependent nuget packages to latest.
+
+**Bug Fixed:**
+
+* Fixed InmemoryQueue expired messages are not removed bug. (#691)
+* Fixed Executor key change lead to possible null reference exception. (#698)
+* Fixed Postgresql delete expires data logic error. (#714)
+
+## Version 3.1.1 (2020-09-23)
+
+**Features:**
+
+* Add consumer parameter with interface suppport. (#669)
+* Add custom correlation id and message id support. (#668)
+* Enhanced custom serialization support. (#641)
+
+**Bug Fixed:**
+
+* Solve the issue of being duplicated executors from different assemblies. (#666)
+* Added comparer to remove duplicate ConsumerExecutors. (#653)
+* Add re-enable the auto create topics configuration item for Kafka, it's false by default. now is true. (#635)
+* Fixed postgresql transaction rollback invoke bug. (#640)
+* Fixed SQLServer table name customize bug. (#632)
+
+## Version 3.1.0 (2020-08-15)
+
+**Features:**
+
+* Add Amazon SQS support. (#597)
+* Remove Dapper and replace with ADO.NET in storage project. (#583)
+* Add debug symbols package to nuget.
+* Upgrade dependent nuget package version to latest.
+* English docs grammar correction. Thanks @mzorec
+
+**Bug Fixed:**
+
+* Fix mysql transaction rollback bug. (#598)
+* Fix dashboard query bug. (#600)
+* Fix mongo db query bug. (#611)
+* Fix dashboard browser language detection bug. (#631)
+
 ## Version 3.0.4 (2020-05-27)
 
 **Bug Fixed:**

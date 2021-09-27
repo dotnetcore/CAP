@@ -1,12 +1,13 @@
-// Copyright (c) .NET Core Community. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
+// Copyright (c) .NET Foundation. All rights reserved.
+// Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using System;
 using System.Linq.Expressions;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.Internal
 {
-    internal struct CoercedAwaitableInfo
+    internal readonly struct CoercedAwaitableInfo
     {
         public AwaitableInfo AwaitableInfo { get; }
         public Expression CoercerExpression { get; }

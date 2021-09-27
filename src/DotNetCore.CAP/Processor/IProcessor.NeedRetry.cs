@@ -70,7 +70,7 @@ namespace DotNetCore.CAP.Processor
 
             foreach (var message in messages)
             {
-                await _subscribeDispatcher.DispatchAsync(message);
+                await _subscribeDispatcher.DispatchAsync(message, context.CancellationToken);
 
                 await context.WaitAsync(_delay);
             }

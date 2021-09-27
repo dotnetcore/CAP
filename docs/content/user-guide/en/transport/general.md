@@ -10,7 +10,9 @@ CAP supports several transport methods:
 * [Kafka](kafka.md)
 * [Azure Service Bus](azure-service-bus.md)
 * [Amazon SQS](aws-sqs.md)
+* [NATS](nats.md)
 * [In-Memory Queue](in-memory-queue.md)
+* [Redis Streams](redis-streams.md)
 
 ## How to select a transport
 
@@ -27,4 +29,16 @@ CAP supports several transport methods:
 
 >`Kafka` vs `RabbitMQ` :   
 > https://stackoverflow.com/questions/42151544/is-there-any-reason-to-use-rabbitmq-over-kafka
+
+## Community-supported extensions
+
+Thanks to the community for supporting CAP, the following is the implementation of community-supported transport
+
+* ActiveMQ (@[Lukas Zhang](https://github.com/lukazh/Lukaz.CAP.ActiveMQ)): https://github.com/lukazh
+
+* RedisMQ  ([@木木](https://github.com/difudotnet)) https://github.com/difudotnet/CAP.RedisMQ.Extensions
+
+* ZeroMQ ([@maikebing](https://github.com/maikebing))： https://github.com/maikebing/CAP.Extensions
+
+
 

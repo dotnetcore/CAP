@@ -2,9 +2,9 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
@@ -22,20 +22,20 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
-
-        private readonly IConsumerClientFactory _consumerClientFactory;
-        private readonly IDispatcher _dispatcher;
-        private readonly ISerializer _serializer;
-        private readonly IDataStorage _storage;
-        private readonly MethodMatcherCache _selector;
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly CapOptions _options;
 
+        private IConsumerClientFactory _consumerClientFactory;
+        private IDispatcher _dispatcher;
+        private ISerializer _serializer;
+        private IDataStorage _storage;
+
+        private MethodMatcherCache _selector;
         private CancellationTokenSource _cts;
         private BrokerAddress _serverAddress;
         private Task _compositeTask;
         private bool _disposed;
-        private static bool _isHealthy = true;
+        private bool _isHealthy = true;
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
@@ -46,13 +46,7 @@ namespace DotNetCore.CAP.Internal
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-
-            _options = serviceProvider.GetService<IOptions<CapOptions>>().Value;
-            _selector = serviceProvider.GetService<MethodMatcherCache>();
-            _consumerClientFactory = serviceProvider.GetService<IConsumerClientFactory>();
-            _dispatcher = serviceProvider.GetService<IDispatcher>();
-            _serializer = serviceProvider.GetService<ISerializer>();
-            _storage = serviceProvider.GetService<IDataStorage>();
+            _options = serviceProvider.GetRequiredService<IOptions<CapOptions>>().Value;
             _cts = new CancellationTokenSource();
         }
 
@@ -61,14 +55,43 @@ namespace DotNetCore.CAP.Internal
             return _isHealthy;
         }
 
-        public void Start()
+        public void Start(CancellationToken stoppingToken)
+        {
+            _selector = _serviceProvider.GetService<MethodMatcherCache>();
+            _dispatcher = _serviceProvider.GetService<IDispatcher>();
+            _serializer = _serviceProvider.GetService<ISerializer>();
+            _storage = _serviceProvider.GetService<IDataStorage>();
+            _consumerClientFactory = _serviceProvider.GetService<IConsumerClientFactory>();
+
+            stoppingToken.Register(() => _cts?.Cancel());
+
+            Execute();
+        }
+
+        public void Execute()
         {
             var groupingMatches = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
             foreach (var matchGroup in groupingMatches)
             {
+                ICollection<string> topics;
+                try
+                {
+                    using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                    {
+                        topics = client.FetchTopics(matchGroup.Value.Select(x => x.TopicName));
+                    }
+                }
+                catch (BrokerConnectionException e)
+                {
+                    _isHealthy = false;
+                    _logger.LogError(e, e.Message);
+                    return;
+                }
+
                 for (int i = 0; i < _options.ConsumerThreadCount; i++)
                 {
+                    var topicIds = topics.Select(t => t);
                     Task.Factory.StartNew(() =>
                     {
                         try
@@ -79,7 +102,7 @@ namespace DotNetCore.CAP.Internal
 
                                 RegisterMessageProcessor(client);
 
-                                client.Subscribe(matchGroup.Value.Select(x => x.TopicName));
+                                client.Subscribe(topicIds);
 
                                 client.Listening(_pollingDelay, _cts.Token);
                             }
@@ -108,11 +131,11 @@ namespace DotNetCore.CAP.Internal
             if (!IsHealthy() || force)
             {
                 Pulse();
-
+                
                 _cts = new CancellationTokenSource();
                 _isHealthy = true;
 
-                Start();
+                Execute();
             }
         }
 
@@ -144,11 +167,14 @@ namespace DotNetCore.CAP.Internal
         public void Pulse()
         {
             _cts?.Cancel();
+            _cts?.Dispose();
+            _cts = null;
         }
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
-            client.OnMessageReceived += async (sender, transportMessage) =>
+            // Cannot set subscription to asynchronous
+            client.OnMessageReceived += (sender, transportMessage) =>
             {
                 _logger.MessageReceived(transportMessage.GetId(), transportMessage.GetName());
 
@@ -176,11 +202,12 @@ namespace DotNetCore.CAP.Internal
                         }
 
                         var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
-                        message = await _serializer.DeserializeAsync(transportMessage, type);
+                        message = _serializer.DeserializeAsync(transportMessage, type).GetAwaiter().GetResult();
+                        message.RemoveException();
                     }
                     catch (Exception e)
                     {
-                        transportMessage.Headers.Add(Headers.Exception, nameof(SerializationException) + "-->" + e.Message);
+                        transportMessage.Headers[Headers.Exception] = e.GetType().Name + "-->" + e.Message;
                         if (transportMessage.Headers.TryGetValue(Headers.Type, out var val))
                         {
                             var dataUri = $"data:{val};base64," + Convert.ToBase64String(transportMessage.Body);
@@ -195,7 +222,7 @@ namespace DotNetCore.CAP.Internal
 
                     if (message.HasException())
                     {
-                        var content = StringSerializer.Serialize(message);
+                        var content = _serializer.Serialize(message);
 
                         _storage.StoreReceivedExceptionMessage(name, group, content);
 
@@ -271,12 +298,15 @@ namespace DotNetCore.CAP.Internal
                 case MqLogType.ExceptionReceived:
                     _logger.LogError("AzureServiceBus subscriber received an error. --> " + logmsg.Reason);
                     break;
+                case MqLogType.AsyncErrorEvent:
+                    _logger.LogError("NATS subscriber received an error. --> " + logmsg.Reason);
+                    break;
                 case MqLogType.InvalidIdFormat:
                     _logger.LogError("AmazonSQS subscriber delete inflight message failed, invalid id. --> " + logmsg.Reason);
                     break;
                 case MqLogType.MessageNotInflight:
                     _logger.LogError("AmazonSQS subscriber change message's visibility failed, message isn't in flight. --> " + logmsg.Reason);
-                    break; 
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

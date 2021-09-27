@@ -9,7 +9,8 @@ namespace DotNetCore.CAP.Internal
 {
     public static class Helper
     {
-        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local);
+        private static readonly DateTime Epoch = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Local)
+            .AddHours(TimeZoneInfo.Local.BaseUtcOffset.Hours);
 
         public static long ToTimestamp(DateTime value)
         {
@@ -34,6 +35,11 @@ namespace DotNetCore.CAP.Internal
                 return false;
             }
 
+            if (typeInfo.ContainsGenericParameters)
+            {
+                return false;
+            }
+
             return !typeInfo.ContainsGenericParameters
                    && typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase);
         }
@@ -43,9 +49,23 @@ namespace DotNetCore.CAP.Internal
             return !CanConvertFromString(type);
         }
 
+        public static string WildcardToRegex(string wildcard)
+        {
+            if (wildcard.IndexOf('*') >= 0)
+            {
+                return ("^" + wildcard + "$").Replace("*", "[0-9a-zA-Z]+").Replace(".", "\\.");
+            }
+
+            if (wildcard.IndexOf('#') >= 0)
+            {
+                return ("^" + wildcard.Replace(".", "\\.") + "$").Replace("#", "[0-9a-zA-Z\\.]+");
+            }
+
+            return wildcard;
+        }
+
         public static bool IsInnerIP(string ipAddress)
         {
-            bool isInnerIp;
             var ipNum = GetIpNum(ipAddress);
 
             //Private IP：
@@ -59,9 +79,9 @@ namespace DotNetCore.CAP.Internal
             var bEnd = GetIpNum("172.31.255.255");
             var cBegin = GetIpNum("192.168.0.0");
             var cEnd = GetIpNum("192.168.255.255");
-            isInnerIp = IsInner(ipNum, aBegin, aEnd) || IsInner(ipNum, bBegin, bEnd) || IsInner(ipNum, cBegin, cEnd);
-            return isInnerIp;
+            return IsInner(ipNum, aBegin, aEnd) || IsInner(ipNum, bBegin, bEnd) || IsInner(ipNum, cBegin, cEnd);
         }
+
         private static long GetIpNum(string ipAddress)
         {
             var ip = ipAddress.Split('.');

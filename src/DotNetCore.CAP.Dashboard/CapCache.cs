@@ -1,7 +1,4 @@
-// Copyright (c) .NET Core Community. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -18,7 +15,7 @@ namespace DotNetCore.CAP.Dashboard
     /// </summary>
     // ReSharper disable once InheritdocConsiderUsage
     // ReSharper disable once InconsistentNaming
-    internal class Cache<K, T> : IDisposable
+    public class Cache<K, T> : IDisposable
     {
         #region Constructor and class members
 
@@ -124,7 +121,7 @@ namespace DotNetCore.CAP.Dashboard
 
         private void RemoveByTimer(object state)
         {
-            Remove((K) state);
+            Remove((K)state);
         }
 
         #endregion
@@ -254,8 +251,8 @@ namespace DotNetCore.CAP.Dashboard
             try
             {
                 var removers = (from k in _cache.Keys.Cast<K>()
-                    where keyPattern(k)
-                    select k).ToList();
+                                where keyPattern(k)
+                                select k).ToList();
 
                 foreach (var workKey in removers)
                 {
@@ -357,7 +354,7 @@ namespace DotNetCore.CAP.Dashboard
     /// instance.
     /// The <c>.Global</c> member is lazy instanciated.
     /// </summary>
-    internal class CapCache : Cache<string, object>
+    public class CapCache : Cache<string, object>
     {
         #region Static Global Cache instance 
 

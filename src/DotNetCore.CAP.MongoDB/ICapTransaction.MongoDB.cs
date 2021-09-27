@@ -81,7 +81,7 @@ namespace DotNetCore.CAP
             ICapPublisher publisher, bool autoCommit = false)
         {
             var clientSessionHandle = client.StartSession();
-            publisher.Transaction.Value = publisher.ServiceProvider.GetService<ICapTransaction>();
+            publisher.Transaction.Value = ActivatorUtilities.CreateInstance<MongoDBCapTransaction>(publisher.ServiceProvider);
             var capTrans = publisher.Transaction.Value.Begin(clientSessionHandle, autoCommit);
             return new CapMongoDbClientSessionHandle(capTrans);
         }

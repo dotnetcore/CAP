@@ -5,8 +5,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Amazon.Auth.AccessControlPolicy;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using Amazon.SQS;
@@ -14,7 +16,6 @@ using Amazon.SQS.Model;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using Headers = DotNetCore.CAP.Messages.Headers;
 
 namespace DotNetCore.CAP.AmazonSQS
@@ -42,17 +43,17 @@ namespace DotNetCore.CAP.AmazonSQS
 
         public BrokerAddress BrokerAddress => new BrokerAddress("AmazonSQS", _queueUrl);
 
-        public void Subscribe(IEnumerable<string> topics)
+        public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
         {
-            if (topics == null)
+            if (topicNames == null)
             {
-                throw new ArgumentNullException(nameof(topics));
+                throw new ArgumentNullException(nameof(topicNames));
             }
-
+            
             Connect(initSNS: true, initSQS: false);
-
+            
             var topicArns = new List<string>();
-            foreach (var topic in topics)
+            foreach (var topic in topicNames)
             {
                 var createTopicRequest = new CreateTopicRequest(topic.NormalizeForAws());
 
@@ -60,11 +61,23 @@ namespace DotNetCore.CAP.AmazonSQS
 
                 topicArns.Add(createTopicResponse.TopicArn);
             }
-
-            Connect(initSNS: false, initSQS: true);
-
-            _snsClient.SubscribeQueueToTopicsAsync(topicArns, _sqsClient, _queueUrl)
+            
+            GenerateSqsAccessPolicyAsync(topicArns)
                 .GetAwaiter().GetResult();
+
+            return topicArns;
+        }
+
+        public void Subscribe(IEnumerable<string> topics)
+        {
+            if (topics == null)
+            {
+                throw new ArgumentNullException(nameof(topics));
+            }
+
+            Connect();
+
+            SubscribeToTopics(topics).GetAwaiter().GetResult();
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
@@ -83,7 +96,7 @@ namespace DotNetCore.CAP.AmazonSQS
 
                 if (response.Messages.Count == 1)
                 {
-                    var messageObj = JsonConvert.DeserializeObject<SQSReceivedMessage>(response.Messages[0].Body);
+                    var messageObj = JsonSerializer.Deserialize<SQSReceivedMessage>(response.Messages[0].Body);
 
                     var header = messageObj.MessageAttributes.ToDictionary(x => x.Key, x => x.Value.Value);
                     var body = messageObj.Message;
@@ -205,6 +218,51 @@ namespace DotNetCore.CAP.AmazonSQS
             OnLog?.Invoke(null, logArgs);
 
             return Task.CompletedTask;
+        }
+
+        private async Task GenerateSqsAccessPolicyAsync(IEnumerable<string> topicArns)
+        {
+            Connect(initSNS: false, initSQS: true);
+
+            var queueAttributes = await _sqsClient.GetAttributesAsync(_queueUrl).ConfigureAwait(false);
+
+            var sqsQueueArn = queueAttributes["QueueArn"];
+
+            var policy = queueAttributes.TryGetValue("Policy", out var policyStr) && !string.IsNullOrEmpty(policyStr)
+                ? Policy.FromJson(policyStr)
+                : new Policy();
+
+            var topicArnsToAllow = topicArns
+                .Where(a => !policy.HasSqsPermission(a, sqsQueueArn))
+                .ToList();
+
+            if (!topicArnsToAllow.Any())
+            {
+                return;
+            }
+
+            policy.AddSqsPermissions(topicArnsToAllow, sqsQueueArn);
+            policy.CompactSqsPermissions(sqsQueueArn);
+
+            var setAttributes = new Dictionary<string, string> { { "Policy", policy.ToJson() } };
+            await _sqsClient.SetAttributesAsync(_queueUrl, setAttributes).ConfigureAwait(false);
+        }
+        
+        private async Task SubscribeToTopics(IEnumerable<string> topics)
+        {
+            var queueAttributes = await _sqsClient.GetAttributesAsync(_queueUrl).ConfigureAwait(false);
+
+            var sqsQueueArn = queueAttributes["QueueArn"];
+            foreach (var topicArn in topics)
+            {
+                await _snsClient.SubscribeAsync(new SubscribeRequest
+                    {
+                        TopicArn = topicArn,
+                        Protocol = "sqs",
+                        Endpoint = sqsQueueArn,
+                    })
+                    .ConfigureAwait(false);
+            }
         }
 
         #endregion

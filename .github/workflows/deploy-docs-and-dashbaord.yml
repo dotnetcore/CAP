@@ -1,0 +1,66 @@
+name: Publish docs & Build dashboard
+on:
+  push:
+    branches:
+      - master
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      docs: ${{ steps.filter.outputs.docs }}
+      dashboard: ${{ steps.filter.outputs.dashboard }}
+    steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false 
+    - name: Check for changes 🎯
+      uses: dorny/paths-filter@v2
+      id: filter
+      with:
+        filters: |
+          docs:
+            - 'docs/**'
+          dashboard:
+            - 'src/DotNetCore.CAP.Dashboard/wwwroot/src/**'
+  
+  build-dashbaord-and-push:
+    needs: changes
+    if: ${{ needs.changes.outputs.dashboard == 'true' }}    
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src/DotNetCore.CAP.Dashboard/wwwroot  
+    steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false 
+    - name: Use Node.js 🥽
+      uses: actions/setup-node@v1
+      with:
+        node-version: '14.x'
+    - name: Install dependencies 🧵
+      run: npm install
+    - name: Build to dist 🧨
+      run: npm run build
+    - name: Commit & Push dist changes 🚀
+      uses: actions-js/push@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
+  build-docs-and-deploy:
+    needs: changes
+    if: ${{ needs.changes.outputs.docs == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout 🛎️
+      uses: actions/checkout@v2
+      with:
+        persist-credentials: false 
+    - name: Deploy docs 🚀
+      uses: mhausenblas/mkdocs-deploy-gh-pages@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GOOGLE_ANALYTICS_KEY: ${{ secrets.GOOGLE_ANALYTICS_KEY }}
+        CONFIG_FILE: docs/mkdocs.yml

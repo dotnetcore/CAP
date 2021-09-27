@@ -67,14 +67,17 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public IConnection GetConnection()
         {
-            if (_connection != null && _connection.IsOpen)
+            lock (SLock)
             {
+                if (_connection != null && _connection.IsOpen)
+                {
+                    return _connection;
+                }
+
+                _connection?.Dispose();
+                _connection = _connectionActivator();
                 return _connection;
             }
-
-            _connection = _connectionActivator();
-            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
-            return _connection;
         }
 
         public void Dispose()
@@ -85,35 +88,31 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 context.Dispose();
             }
+            _connection?.Dispose();
         }
 
         private static Func<IConnection> CreateConnection(RabbitMQOptions options)
         {
-            var serviceName = Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
-
             var factory = new ConnectionFactory
             {
                 UserName = options.UserName,
                 Port = options.Port,
                 Password = options.Password,
-                VirtualHost = options.VirtualHost
+                VirtualHost = options.VirtualHost,
+                ClientProvidedName = Assembly.GetEntryAssembly()?.GetName().Name.ToLower()
             };
 
             if (options.HostName.Contains(","))
             {
                 options.ConnectionFactoryOptions?.Invoke(factory);
+
                 return () => factory.CreateConnection(
-                    options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries), serviceName);
+                    options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries));
             }
 
             factory.HostName = options.HostName;
             options.ConnectionFactoryOptions?.Invoke(factory);
-            return () => factory.CreateConnection(serviceName);
-        }
-
-        private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
-        {
-            _logger.LogWarning($"RabbitMQ client connection closed! --> {e.ReplyText}");
+            return () => factory.CreateConnection();
         }
 
         public virtual IModel Rent()
@@ -149,6 +148,8 @@ namespace DotNetCore.CAP.RabbitMQ
 
                 return true;
             }
+
+            connection.Dispose();
 
             Interlocked.Decrement(ref _count);
 

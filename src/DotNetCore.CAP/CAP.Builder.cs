@@ -2,7 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Linq;
+using System.Reflection;
+using DotNetCore.CAP.Filter;
+using DotNetCore.CAP.Internal;
+using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+// ReSharper disable UnusedMember.Global
 
 namespace DotNetCore.CAP
 {
@@ -43,30 +50,40 @@ namespace DotNetCore.CAP
         public IServiceCollection Services { get; }
 
         /// <summary>
-        /// Add an <see cref="ICapPublisher" />.
+        /// Registers subscribers filter.
         /// </summary>
-        /// <typeparam name="T">The type of the service.</typeparam>
-        public CapBuilder AddProducerService<T>()
-            where T : class, ICapPublisher
+        /// <typeparam name="T">Type of filter</typeparam>
+        public CapBuilder AddSubscribeFilter<T>() where T : class, ISubscribeFilter
         {
-            return AddScoped(typeof(ICapPublisher), typeof(T));
-        }
-
-        /// <summary>
-        /// Adds a scoped service of the type specified in serviceType with an implementation
-        /// </summary>
-        private CapBuilder AddScoped(Type serviceType, Type concreteType)
-        {
-            Services.AddScoped(serviceType, concreteType);
+            Services.TryAddScoped<ISubscribeFilter, T>();
             return this;
         }
 
         /// <summary>
-        /// Adds a singleton service of the type specified in serviceType with an implementation
+        /// Registers subscribers from the specified assemblies.
         /// </summary>
-        private CapBuilder AddSingleton(Type serviceType, Type concreteType)
+        /// <param name="assemblies">Assemblies to scan subscriber</param>
+        public CapBuilder AddSubscriberAssembly(params Assembly[] assemblies)
         {
-            Services.AddSingleton(serviceType, concreteType);
+            if (assemblies == null) throw new ArgumentNullException(nameof(assemblies));
+
+            Services.Replace(new ServiceDescriptor(typeof(IConsumerServiceSelector),
+            x => new AssemblyConsumerServiceSelector(x, assemblies),
+            ServiceLifetime.Singleton));
+
+            return this;
+        }
+
+        /// <summary>
+        /// Registers subscribers from the specified types.
+        /// </summary>
+        /// <param name="handlerAssemblyMarkerTypes"></param>
+        public CapBuilder AddSubscriberAssembly([NotNull] params Type[] handlerAssemblyMarkerTypes)
+        {
+            if (handlerAssemblyMarkerTypes == null) throw new ArgumentNullException(nameof(handlerAssemblyMarkerTypes));
+
+            AddSubscriberAssembly(handlerAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly).ToArray());
+
             return this;
         }
     }

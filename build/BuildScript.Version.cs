@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Xml;
 using FlubuCore.Context;
 using FlubuCore.Scripting.Attributes;
@@ -11,7 +10,7 @@ namespace BuildScript
     {
         public BuildVersion FetchBuildVersion(ITaskContext context)
         {
-            var content = System.IO.File.ReadAllText(RootDirectory.CombineWith("build/version.props"));
+            var content = File.ReadAllText(RootDirectory.CombineWith("build/version.props"));
 
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(content);
@@ -26,13 +25,12 @@ namespace BuildScript
 
             bool isCi = false;
             bool isTagged = false;
-            if (!context.BuildSystems().IsLocalBuild)
+            if (!context.BuildServers().IsLocalBuild)
             {
                 isCi = true;
-                bool isTagAppveyor = context.BuildSystems().AppVeyor().IsTag;
-             
-                if (context.BuildSystems().RunningOn == BuildSystemType.AppVeyor && isTagAppveyor ||
-                    context.BuildSystems().RunningOn == BuildSystemType.TravisCI && string.IsNullOrWhiteSpace(context.BuildSystems().Travis().TagName))
+                bool isTagAppveyor = context.BuildServers().AppVeyor().IsTag;
+                if (context.BuildServers().RunningOn == BuildServerType.AppVeyor && isTagAppveyor ||
+                    context.BuildServers().RunningOn == BuildServerType.TravisCI && string.IsNullOrWhiteSpace(context.BuildServers().Travis().TagName))
                 {
                     isTagged = true;
                 }

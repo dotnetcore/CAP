@@ -32,39 +32,66 @@ You can change the path of the Dashboard by modifying this configuration option.
 
 This configuration option is used to configure the Dashboard front end to get the polling time of the status interface (/stats).
 
-* Authorization
+* UseAuth 
 
-This configuration option is used to configure the authorization filter when accessing the Dashboard. The default filter allows LAN access. When your application wants to provide external network access, you can customize authentication rules by setting this configuration. See the next section for details.
+> Default：false
 
-### Custom authentication
+Enable authentication on dashboard request.
 
-Dashboard authentication can be customized by implementing the `IDashboardAuthorizationFilter` interface.
+* DefaultAuthenticationScheme 
 
-The following is a sample code that determines if access is allowed by reading the accesskey from the url request parameter.
+Default scheme used for authentication. If no scheme is set, the DefaultScheme set up in AddAuthentication will be used.
+
+* UseChallengeOnAuth
+
+> Default：false
+
+Enable authentication challenge on dashboard request.
+
+* DefaultChallengeScheme 
+
+Default scheme used for authentication challenge. If no scheme is set, the DefaultChallengeScheme set up in AddAuthentication will be used.
+
+###  Custom authentication
+
+From version 5.1.0, Dashboard authorization uses ASP.NET Core style by default and no longer provides custom authorization filters.
+
+During Dashabord authentication, the value will be taken from `HttpContext.User?.Identity?.IsAuthenticated`. If it is not available, the authentication will fail and the `DefaultChallengeScheme` will be called (if configured).
+
+You can view the usage details in the sample project `Sample.Dashboard.Auth`.
 
 ```C#
-public class TestAuthorizationFilter : IDashboardAuthorizationFilter
-{
-    public bool Authorize(DashboardContext context)
+services
+    .AddAuthorization()
+    .AddAuthentication(options =>
     {
-        if(context.Request.GetQuery("accesskey")=="xxxxxx"){
-            return true;
-        }
-        return false;
-    }
-}
+        options.DefaultScheme =  CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+    })
+    .AddCookie()
+    .AddOpenIdConnect(options =>
+    {
+        options.Authority = "https://demo.identityserver.io/";
+        options.ClientId = "interactive.confidential";
+        options.ClientSecret = "secret";
+        options.ResponseType = "code";
+        options.UsePkce = true;
+
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+    })
 ```
 
-Then configure this filter when registration Dashboard.
+configuration:
 
 ```C#
-services.AddCap(x =>
+services.AddCap(cap =>
 {
-    //...
-
-    // Register Dashboard
-    x.UseDashboard(opt => {
-        opt.Authorization = new[] {new TestAuthorizationFilter()};
+    cap.UseDashboard(d =>
+    {
+        d.UseChallengeOnAuth = true;
+        d.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
     });
-});
+}
 ```

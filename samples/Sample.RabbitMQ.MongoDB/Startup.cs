@@ -20,7 +20,7 @@ namespace Sample.RabbitMQ.MongoDB
             services.AddCap(x =>
             {
                 x.UseMongoDB(Configuration.GetConnectionString("MongoDB"));
-                x.UseRabbitMQ("192.168.2.120");
+                x.UseRabbitMQ("");
                 x.UseDashboard();
             });
             services.AddControllers();

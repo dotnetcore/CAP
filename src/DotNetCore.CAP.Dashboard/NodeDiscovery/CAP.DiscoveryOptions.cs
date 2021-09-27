@@ -13,6 +13,8 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 
         public const string DefaultMatchPath = "/cap";
 
+        public const string DefaultScheme = "http";
+
         public DiscoveryOptions()
         {
             DiscoveryServerHostName = DefaultDiscoveryServerHost;
@@ -22,6 +24,8 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             CurrentNodePort = DefaultCurrentNodePort;
 
             MatchPath = DefaultMatchPath;
+
+            Scheme = DefaultScheme;
         }
 
         public string DiscoveryServerHostName { get; set; }
@@ -34,5 +38,9 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
         public string NodeName { get; set; }
 
         public string MatchPath { get; set; }
+
+        public string Scheme { get; set; }
+
+        public string[] CustomTags { get; set; }
     }
 }

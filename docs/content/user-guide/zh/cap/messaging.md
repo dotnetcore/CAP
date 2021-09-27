@@ -6,6 +6,54 @@
 
 你可以阅读 [quick-start](../getting-started/quick-start.md#_3) 来学习如何发送和处理消息。
 
+## 补偿事务
+
+[Compensating transaction](https://en.wikipedia.org/wiki/Compensating_transaction)
+
+某些情况下，消费者需要返回值以告诉发布者执行结果，以便于发布者实施一些动作，通常情况下这属于补偿范围。
+
+你可以在消费者执行的代码中通过重新发布一个新消息来通知上游，CAP 提供了一种简单的方式来做到这一点。 你可以在发送的时候指定 `callbackName` 来得到消费者的执行结果，通常这仅适用于点对点的消费。以下是一个示例。
+
+例如，在一个电商程序中，订单初始状态为 pending，当商品数量成功扣除时将状态标记为 succeeded ，否则为 failed。
+
+```C#
+// =============  Publisher =================
+
+_capBus.Publish("place.order.qty.deducted", 
+    contentObj: new { OrderId = 1234, ProductId = 23255, Qty = 1 }, 
+    callbackName: "place.order.mark.status");    
+
+// publisher using `callbackName` to subscribe consumer result
+
+[CapSubscribe("place.order.mark.status")]
+public void MarkOrderStatus(JsonElement param)
+{
+    var orderId = param.GetProperty("OrderId").GetInt32();
+    var isSuccess = param.GetProperty("IsSuccess").GetBoolean();
+    
+    if(isSuccess){
+        // mark order status to succeeded
+    }
+    else{
+       // mark order status to failed
+    }
+}
+
+// =============  Consumer ===================
+
+[CapSubscribe("place.order.qty.deducted")]
+public object DeductProductQty(JsonElement param)
+{
+    var orderId = param.GetProperty("OrderId").GetInt32();
+    var productId = param.GetProperty("ProductId").GetInt32();
+    var qty = param.GetProperty("Qty").GetInt32();
+
+    //business logic 
+
+    return new { OrderId = orderId, IsSuccess = true };
+}
+```
+
 ## 异构系统集成
 
 在 3.0+ 版本中，我们对消息结构进行了重构，我们利用了消息队列中消息协议中的 Header 来传输一些额外信息，以便于在 Body 中我们可以做到不需要修改或包装使用者的原始消息数据格式和内容进行发送。
@@ -45,7 +93,6 @@ channel.basicPublish(exchangeName, routingKey,
 
 ```
 
-
 ## 消息调度
 
 CAP 接收到消息之后会将消息发送到 Transport, 由 Transport 进行运输。
@@ -66,7 +113,7 @@ CAP 接收到消息之后会将消息进行 Persistent（持久化）， 有关 
 
 在消息发送过程中，当出现 Broker 宕机或者连接失败的情况亦或者出现异常的情况下，这个时候 CAP 会对发送的重试，第一次重试次数为 3，4分钟后以后每分钟重试一次，进行次数 +1，当总次数达到50次后，CAP将不对其进行重试。
 
-你可以在 CapOptions 中设置FailedRetryCount来调整默认重试的总次数。
+你可以在 CapOptions 中设置 [FailedRetryCount](../configuration#failedretrycount) 来调整默认重试的总次数。
 
 当失败总次数达到默认失败总次数后，就不会进行重试了，你可以在 Dashboard 中查看消息失败的原因，然后进行人工重试处理。
 
@@ -78,4 +125,5 @@ CAP 接收到消息之后会将消息进行 Persistent（持久化）， 有关 
 
 数据库消息表中具有一个 ExpiresAt 字段表示消息的过期时间，当消息发送成功或者消费成功后，CAP会将消息状态为 Successed 的 ExpiresAt 设置为 1天 后过期，会将消息状态为 Failed 的 ExpiresAt 设置为 15天 后过期。
 
-CAP 默认情况下会每隔一个小时将消息表的数据进行清理删除，避免数据量过多导致性能的降低。清理规则为 ExpiresAt 不为空并且小于当前时间的数据。 也就是说状态为Failed的消息（正常情况他们已经被重试了 50 次），如果你15天没有人工介入处理，同样会被清理掉。
+CAP 默认情况下会每隔**5分钟**将消息表的数据进行清理删除，避免数据量过多导致性能的降低。清理规则为 ExpiresAt 不为空并且小于当前时间的数据。 也就是说状态为Failed的消息（正常情况他们已经被重试了 50 次），如果你15天没有人工介入处理，同样会被清理掉。你可以通过 [CollectorCleaningInterval](../configuration#collectorcleaninginterval) 配置项来自定义间隔时间。
+

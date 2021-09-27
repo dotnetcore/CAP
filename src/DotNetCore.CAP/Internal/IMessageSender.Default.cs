@@ -96,6 +96,7 @@ namespace DotNetCore.CAP.Internal
         {
             var needRetry = UpdateMessageForRetry(message);
 
+            message.Origin.AddOrUpdateException(ex);
             message.ExpiresAt = message.Added.AddDays(15);
 
             await _dataStorage.ChangePublishStateAsync(message, StatusName.Failed);
@@ -118,7 +119,7 @@ namespace DotNetCore.CAP.Internal
                             ServiceProvider = _serviceProvider,
                             MessageType = MessageType.Publish,
                             Message = message.Origin
-                        }); 
+                        });
 
                         _logger.SenderAfterThreshold(message.DbId, _options.Value.FailedRetryCount);
                     }

@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -11,8 +12,8 @@ namespace DotNetCore.CAP.Internal
     /// </summary>
     public interface IProcessingServer : IDisposable
     {
-        void Pulse();
+        void Pulse() { }
 
-        void Start();
+        void Start(CancellationToken stoppingToken);
     }
 }

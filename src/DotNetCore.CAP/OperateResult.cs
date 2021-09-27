@@ -15,7 +15,7 @@ namespace DotNetCore.CAP
         // ReSharper disable once InconsistentNaming
 
         // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        private List<OperateError> _errors = new List<OperateError>();
+        private readonly List<OperateError> _errors = new List<OperateError>();
 
         /// <summary>
         /// Flag indicating whether if the operation succeeded or not.
@@ -41,22 +41,12 @@ namespace DotNetCore.CAP
         /// Creates an <see cref="OperateResult" /> indicating a failed operation, with a list of <paramref name="errors" /> if
         /// applicable.
         /// </summary>
+        /// <param name="ex">Operate Result exception</param>
         /// <param name="errors">An optional array of <see cref="OperateError" />s which caused the operation to fail.</param>
         /// <returns>
         /// An <see cref="OperateResult" /> indicating a failed operation, with a list of <paramref name="errors" /> if
         /// applicable.
         /// </returns>
-        public static OperateResult Failed(params OperateError[] errors)
-        {
-            var result = new OperateResult {Succeeded = false};
-            if (errors != null)
-            {
-                result._errors.AddRange(errors);
-            }
-
-            return result;
-        }
-
         public static OperateResult Failed(Exception ex, params OperateError[] errors)
         {
             var result = new OperateResult

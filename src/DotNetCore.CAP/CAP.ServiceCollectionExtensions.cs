@@ -17,8 +17,6 @@ namespace Microsoft.Extensions.DependencyInjection
     /// </summary>
     public static class ServiceCollectionExtensions
     {
-        internal static IServiceCollection ServiceCollection;
-
         /// <summary>
         /// Adds and configures the consistence services for the consistency.
         /// </summary>
@@ -32,8 +30,7 @@ namespace Microsoft.Extensions.DependencyInjection
                 throw new ArgumentNullException(nameof(setupAction));
             }
 
-            ServiceCollection = services;
-
+            services.AddSingleton(_ => services);
             services.TryAddSingleton<CapMarkerService>();
 
             services.TryAddSingleton<ICapPublisher, CapPublisher>();
@@ -45,15 +42,16 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();
 
             //Processors
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, IDispatcher>(sp => sp.GetRequiredService<IDispatcher>()));
+            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, IConsumerRegister>(sp => sp.GetRequiredService<IConsumerRegister>()));
             services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerRegister>());
 
             //Queue's message processor
             services.TryAddSingleton<MessageNeedToRetryProcessor>();
             services.TryAddSingleton<TransportCheckProcessor>();
             services.TryAddSingleton<CollectorProcessor>();
 
-            //Sender and Executors   
+            //Sender and Executors
             services.TryAddSingleton<IMessageSender, MessageSender>();
             services.TryAddSingleton<IDispatcher, Dispatcher>();
 
@@ -72,8 +70,9 @@ namespace Microsoft.Extensions.DependencyInjection
             services.Configure(setupAction);
 
             //Startup and Hosted 
-            services.AddSingleton<IBootstrapper, Bootstrapper>();
-            services.AddHostedService<Bootstrapper>();
+            services.AddSingleton<Bootstrapper>();
+            services.AddHostedService(sp => sp.GetRequiredService<Bootstrapper>());
+            services.AddSingleton<IBootstrapper>(sp => sp.GetRequiredService<Bootstrapper>());
 
             return new CapBuilder(services);
         }

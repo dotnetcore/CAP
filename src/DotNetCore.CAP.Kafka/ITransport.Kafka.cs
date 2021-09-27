@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.Kafka
                         ? new Header(header.Key, Encoding.UTF8.GetBytes(header.Value))
                         : new Header(header.Key, null));
                 }
-
+               
                 var result = await producer.ProduceAsync(message.GetName(), new Message<string, byte[]>
                 {
                     Headers = headers,
@@ -64,11 +64,7 @@ namespace DotNetCore.CAP.Kafka
             }
             finally
             {
-                var returned = _connectionPool.Return(producer);
-                if (!returned)
-                {
-                    producer.Dispose();
-                }
+                _connectionPool.Return(producer);
             }
         }
     }

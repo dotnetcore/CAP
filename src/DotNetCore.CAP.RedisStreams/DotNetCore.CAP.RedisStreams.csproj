@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<AssemblyName>DotNetCore.CAP.RedisStreams</AssemblyName>
+		<PackageTags>$(PackageTags);RedisStreams</PackageTags>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<DocumentationFile>bin\$(Configuration)\netstandard2.1\DotNetCore.CAP.RedisStreams.xml</DocumentationFile>
+		<NoWarn>1701;1702;1705;CS1591</NoWarn>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="StackExchange.Redis" Version="2.2.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+	</ItemGroup>
+
+</Project>

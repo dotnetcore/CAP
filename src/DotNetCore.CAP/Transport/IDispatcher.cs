@@ -6,7 +6,7 @@ using DotNetCore.CAP.Persistence;
 
 namespace DotNetCore.CAP.Transport
 {
-    public interface IDispatcher
+    public interface IDispatcher : IProcessingServer
     {
         void EnqueueToPublish(MediumMessage message);
 

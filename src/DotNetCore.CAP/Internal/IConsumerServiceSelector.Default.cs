@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
@@ -24,8 +25,7 @@ namespace DotNetCore.CAP.Internal
         /// <summary>
         /// since this class be designed as a Singleton service,the following two list must be thread safe!
         /// </summary>
-        private readonly ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _asteriskList;
-        private readonly ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _poundList;
+        private readonly ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _cacheList;
 
         /// <summary>
         /// Creates a new <see cref="ConsumerServiceSelector" />.
@@ -35,8 +35,7 @@ namespace DotNetCore.CAP.Internal
             _serviceProvider = serviceProvider;
             _capOptions = serviceProvider.GetService<IOptions<CapOptions>>().Value;
 
-            _asteriskList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
-            _poundList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
+            _cacheList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
         }
 
         public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates()
@@ -46,6 +45,8 @@ namespace DotNetCore.CAP.Internal
             executorDescriptorList.AddRange(FindConsumersFromInterfaceTypes(_serviceProvider));
 
             executorDescriptorList.AddRange(FindConsumersFromControllerTypes());
+
+            executorDescriptorList = executorDescriptorList.Distinct(new ConsumerExecutorDescriptorComparer()).ToList();
 
             return executorDescriptorList;
         }
@@ -64,15 +65,8 @@ namespace DotNetCore.CAP.Internal
             }
 
             //[*] match with regex, i.e.  foo.*.abc
-            result = MatchAsteriskUsingRegex(key, executeDescriptor);
-            if (result != null)
-            {
-                return result;
-            }
-
             //[#] match regex, i.e. foo.#
-            result = MatchPoundUsingRegex(key, executeDescriptor);
-            return result;
+            return MatchWildcardUsingRegex(key, executeDescriptor);
         }
 
         protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
@@ -81,17 +75,29 @@ namespace DotNetCore.CAP.Internal
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
             var capSubscribeTypeInfo = typeof(ICapSubscribe).GetTypeInfo();
+            var serviceCollection = provider.GetRequiredService<IServiceCollection>();
 
-            foreach (var service in ServiceCollectionExtensions.ServiceCollection.Where(o => o.ImplementationType != null && o.ServiceType != null))
+            foreach (var service in serviceCollection
+                .Where(o => o.ImplementationType != null || o.ImplementationFactory != null))
             {
-                var typeInfo = service.ImplementationType.GetTypeInfo();
-                if (!capSubscribeTypeInfo.IsAssignableFrom(typeInfo))
+                var detectType = service.ImplementationType ?? service.ServiceType;
+                if (!capSubscribeTypeInfo.IsAssignableFrom(detectType))
                 {
                     continue;
                 }
-                var serviceTypeInfo = service.ServiceType.GetTypeInfo();
 
-                executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo, serviceTypeInfo));
+                var actualType = service.ImplementationType;
+                if (actualType == null && service.ImplementationFactory != null)
+                {
+                    actualType = provider.GetRequiredService(service.ServiceType).GetType();
+                }
+
+                if (actualType == null)
+                {
+                    throw new NullReferenceException(nameof(service.ServiceType));
+                }
+
+                executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(), service.ServiceType.GetTypeInfo()));
             }
 
             return executorDescriptorList;
@@ -118,12 +124,12 @@ namespace DotNetCore.CAP.Internal
         {
             var topicClassAttribute = typeInfo.GetCustomAttribute<TopicAttribute>(true);
 
-            foreach (var method in typeInfo.DeclaredMethods)
+            foreach (var method in typeInfo.GetRuntimeMethods())
             {
                 var topicMethodAttributes = method.GetCustomAttributes<TopicAttribute>(true);
 
                 // Ignore partial attributes when no topic attribute is defined on class.
-                if (topicClassAttribute is null) 
+                if (topicClassAttribute is null)
                 {
                     topicMethodAttributes = topicMethodAttributes.Where(x => !x.IsPartial);
                 }
@@ -143,6 +149,7 @@ namespace DotNetCore.CAP.Internal
                             Name = parameter.Name,
                             ParameterType = parameter.ParameterType,
                             IsFromCap = parameter.GetCustomAttributes(typeof(FromCapAttribute)).Any()
+                                || typeof(CancellationToken).IsAssignableFrom(parameter.ParameterType)
                         }).ToList();
 
                     yield return InitDescriptor(attr, method, typeInfo, serviceTypeInfo, parameters, topicClassAttribute);
@@ -152,10 +159,13 @@ namespace DotNetCore.CAP.Internal
 
         protected virtual void SetSubscribeAttribute(TopicAttribute attribute)
         {
-            attribute.Group = (attribute.Group ?? _capOptions.DefaultGroup) + "." + _capOptions.Version;
+            var prefix = !string.IsNullOrEmpty(_capOptions.GroupNamePrefix)
+                ? $"{_capOptions.GroupNamePrefix}."
+                : string.Empty;
+            attribute.Group = $"{prefix}{attribute.Group ?? _capOptions.DefaultGroupName}.{_capOptions.Version}";
         }
 
-        private static ConsumerExecutorDescriptor InitDescriptor(
+        private ConsumerExecutorDescriptor InitDescriptor(
             TopicAttribute attr,
             MethodInfo methodInfo,
             TypeInfo implType,
@@ -170,7 +180,8 @@ namespace DotNetCore.CAP.Internal
                 MethodInfo = methodInfo,
                 ImplTypeInfo = implType,
                 ServiceTypeInfo = serviceTypeInfo,
-                Parameters = parameters
+                Parameters = parameters,
+                TopicNamePrefix = _capOptions.TopicNamePrefix
             };
 
             return descriptor;
@@ -181,18 +192,17 @@ namespace DotNetCore.CAP.Internal
             return executeDescriptor.FirstOrDefault(x => x.TopicName.Equals(key, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        private ConsumerExecutorDescriptor MatchAsteriskUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
+        private ConsumerExecutorDescriptor MatchWildcardUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
             var group = executeDescriptor.First().Attribute.Group;
-            if (!_asteriskList.TryGetValue(group, out var tmpList))
+            if (!_cacheList.TryGetValue(group, out var tmpList))
             {
-                tmpList = executeDescriptor.Where(x => x.TopicName.IndexOf('*') >= 0)
-                    .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
-                    {
-                        Name = ("^" + x.TopicName + "$").Replace("*", "[0-9_a-zA-Z]+").Replace(".", "\\."),
-                        Descriptor = x
-                    }).ToList();
-                _asteriskList.TryAdd(group, tmpList);
+                tmpList = executeDescriptor.Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
+                {
+                    Name = Helper.WildcardToRegex(x.TopicName),
+                    Descriptor = x
+                }).ToList();
+                _cacheList.TryAdd(group, tmpList);
             }
 
             foreach (var red in tmpList)
@@ -205,33 +215,6 @@ namespace DotNetCore.CAP.Internal
 
             return null;
         }
-
-        private ConsumerExecutorDescriptor MatchPoundUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
-        {
-            var group = executeDescriptor.First().Attribute.Group;
-            if (!_poundList.TryGetValue(group, out var tmpList))
-            {
-                tmpList = executeDescriptor
-                    .Where(x => x.TopicName.IndexOf('#') >= 0)
-                    .Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
-                    {
-                        Name = ("^" + x.TopicName.Replace(".", "\\.") + "$").Replace("#", "[0-9_a-zA-Z\\.]+"),
-                        Descriptor = x
-                    }).ToList();
-                _poundList.TryAdd(group, tmpList);
-            }
-
-            foreach (var red in tmpList)
-            {
-                if (Regex.IsMatch(key, red.Name, RegexOptions.Singleline))
-                {
-                    return red.Descriptor;
-                }
-            }
-
-            return null;
-        }
-
 
         private class RegexExecuteDescriptor<T>
         {

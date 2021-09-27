@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace DotNetCore.CAP.Kafka
 {
@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.Kafka
             _producerPool = new ConcurrentQueue<IProducer<string, byte[]>>();
             _maxSize = _options.ConnectionPoolSize;
 
-            logger.LogDebug("CAP Kafka configuration: {0}", JsonConvert.SerializeObject(_options.AsKafkaConfig(), Formatting.Indented));
+            logger.LogDebug("CAP Kafka servers: {0}", _options.Servers);
         }
 
         public string ServersAddress => _options.Servers;
@@ -38,9 +38,22 @@ namespace DotNetCore.CAP.Kafka
                 return producer;
             }
 
-            producer = new ProducerBuilder<string, byte[]>(_options.AsKafkaConfig()).Build();
+            var config = new ProducerConfig(new Dictionary<string, string>(_options.MainConfig))
+            {
+                BootstrapServers = _options.Servers,
+                QueueBufferingMaxMessages = 10,
+                MessageTimeoutMs = 5000,
+                RequestTimeoutMs = 3000
+            };
+
+            producer = BuildProducer(config);
 
             return producer;
+        }
+
+        protected virtual IProducer<string, byte[]> BuildProducer(ProducerConfig config)
+        {
+            return  new ProducerBuilder<string, byte[]>(config).Build();
         }
 
         public bool Return(IProducer<string, byte[]> producer)
@@ -51,6 +64,8 @@ namespace DotNetCore.CAP.Kafka
 
                 return true;
             }
+
+            producer.Dispose();
 
             Interlocked.Decrement(ref _pCount);
 

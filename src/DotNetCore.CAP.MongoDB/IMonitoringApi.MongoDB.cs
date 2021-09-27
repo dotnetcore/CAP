@@ -83,33 +83,50 @@ namespace DotNetCore.CAP.MongoDB
             return GetHourlyTimelineStats(type, nameof(StatusName.Succeeded));
         }
 
-        public IList<MessageDto> Messages(MessageQueryDto queryDto)
+        public PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto)
         {
             var name = queryDto.MessageType == MessageType.Publish
                 ? _options.PublishedCollection
                 : _options.ReceivedCollection;
-            var collection = _database.GetCollection<MessageDto>(name);
+            var collection = _database.GetCollection<BsonDocument>(name);
 
-            var builder = Builders<MessageDto>.Filter;
+            var builder = Builders<BsonDocument>.Filter;
             var filter = builder.Empty;
             if (!string.IsNullOrEmpty(queryDto.StatusName))
-                filter &= builder.Where(x => x.StatusName.ToLower() == queryDto.StatusName);
+                filter &= builder.Regex("StatusName", $"/{queryDto.StatusName}/i");
 
-            if (!string.IsNullOrEmpty(queryDto.Name)) filter &= builder.Eq(x => x.Name, queryDto.Name);
+            if (!string.IsNullOrEmpty(queryDto.Name)) filter &= builder.Eq("Name", queryDto.Name);
 
-            if (!string.IsNullOrEmpty(queryDto.Group)) filter &= builder.Eq(x => x.Group, queryDto.Group);
+            if (!string.IsNullOrEmpty(queryDto.Group)) filter &= builder.Eq("Group", queryDto.Group);
 
             if (!string.IsNullOrEmpty(queryDto.Content))
-                filter &= builder.Regex(x => x.Content, ".*" + queryDto.Content + ".*");
+                filter &= builder.Regex("Content", $".*{queryDto.Content}.*");
 
-            var result = collection
+            ProjectionDefinition<BsonDocument, MessageDto> projection =
+                new FindExpressionProjectionDefinition<BsonDocument, MessageDto>(p => new MessageDto
+                {
+                    Id = p["_id"].ToString(),
+                    Version = p["Version"].ToString(),
+                    Group = p["Group"] == null ? null : p["Group"].ToString(),
+                    Name = p["Name"].ToString(),
+                    Content = p["Content"].ToString(),
+                    Added = p["Added"].ToLocalTime(),
+                    ExpiresAt = p["ExpiresAt"].ToNullableLocalTime(),
+                    Retries = p["Retries"].ToInt32(),
+                    StatusName = p["StatusName"].ToString()
+                });
+
+            var items = collection
                 .Find(filter)
-                .SortByDescending(x => x.Added)
+                .SortByDescending(x => x["Added"])
                 .Skip(queryDto.PageSize * queryDto.CurrentPage)
                 .Limit(queryDto.PageSize)
+                .Project(projection)
                 .ToList();
 
-            return result;
+            var count = collection.CountDocuments(filter);
+
+            return new PagedQueryResult<MessageDto> { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
         }
 
         public int PublishedFailedCount()

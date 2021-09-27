@@ -1,7 +1,8 @@
-﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.Diagnostics;
+using System.Threading;
 using DotNetCore.CAP.Internal;
 
 namespace DotNetCore.CAP.SqlServer.Diagnostics
@@ -25,7 +26,7 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
             
         }
 
-        public void Start()
+        public void Start(CancellationToken stoppingToken)
         {
             DiagnosticListener.AllListeners.Subscribe(_diagnosticProcessorObserver);
         }

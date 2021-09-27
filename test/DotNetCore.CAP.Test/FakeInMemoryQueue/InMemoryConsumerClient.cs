@@ -68,6 +68,8 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
 
         private void OnConsumerReceived(TransportMessage e)
         {
+            var headers = e.Headers;
+            headers.TryAdd(Messages.Headers.Group, _subscriptionName);
             OnMessageReceived?.Invoke(null, e);
         }
         #endregion private methods

@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.Monitoring
 
         StatisticsDto GetStatistics();
 
-        IList<MessageDto> Messages(MessageQueryDto queryDto);
+        PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto);
 
         int PublishedFailedCount();
 

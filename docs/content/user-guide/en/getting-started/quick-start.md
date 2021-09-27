@@ -36,13 +36,26 @@ public void ConfigureServices(IServiceCollection services)
 public class PublishController : Controller
 {
     [Route("~/send")]
-    public IActionResult SendMessage([FromService]ICapPublisher capBus)
+    public IActionResult SendMessage([FromServices]ICapPublisher capBus)
     {
         capBus.Publish("test.show.time", DateTime.Now);
 
         return Ok();
     }
 }
+```
+
+### Publish with extra header
+
+```c#
+var header = new Dictionary<string, string>()
+{
+    ["my.header.first"] = "first",
+    ["my.header.second"] = "second"
+};
+
+capBus.Publish("test.show.time", DateTime.Now, header);
+
 ```
 
 ## Process Message
@@ -57,6 +70,19 @@ public class ConsumerController : Controller
         Console.WriteLine("message time is:" + time);
     }
 }
+```
+
+### Process with extra header
+
+```c#
+[CapSubscribe("test.show.time")]
+public void ReceiveMessage(DateTime time, [FromCap]CapHeader header)
+{
+    Console.WriteLine("message time is:" + time);
+    Console.WriteLine("message firset header :" + header["my.header.first"]);
+    Console.WriteLine("message second header :" + header["my.header.second"]);
+}
+
 ```
 
 ## Summary
