@@ -4,6 +4,7 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -62,6 +63,16 @@ namespace DotNetCore.CAP.Internal
             }
 
             return wildcard;
+        }
+
+        public static string Normalized(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return name;
+            }
+            var pattern = "[\\>\\.\\ \\*]";
+            return Regex.IsMatch(name, pattern) ? Regex.Replace(name, pattern, "_") : name;
         }
 
         public static bool IsInnerIP(string ipAddress)

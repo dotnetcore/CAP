@@ -3,11 +3,14 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 using NATS.Client;
+using NATS.Client.JetStream;
 
 namespace DotNetCore.CAP.NATS
 {
@@ -17,14 +20,12 @@ namespace DotNetCore.CAP.NATS
 
         private readonly string _groupId;
         private readonly NATSOptions _natsOptions;
-        private readonly IList<IAsyncSubscription> _asyncSubscriptions;
 
         private IConnection _consumerClient;
 
         public NATSConsumerClient(string groupId, IOptions<NATSOptions> options)
         {
             _groupId = groupId;
-            _asyncSubscriptions = new List<IAsyncSubscription>();
             _natsOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
@@ -33,6 +34,41 @@ namespace DotNetCore.CAP.NATS
         public event EventHandler<LogMessageEventArgs> OnLog;
 
         public BrokerAddress BrokerAddress => new BrokerAddress("NATS", _natsOptions.Servers);
+
+        public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+        {
+            var jsm = _consumerClient.CreateJetStreamManagementContext();
+
+            foreach (var topic in topicNames)
+            {
+                var norTopic = Helper.Normalized(topic);
+                try
+                {
+                    jsm.GetStreamInfo(norTopic); // this throws if the stream does not exist
+                }
+                catch (NATSJetStreamException)
+                {
+                    var builder = StreamConfiguration.Builder()
+                        .WithName(norTopic)
+                        .WithNoAck(false)
+                        .WithStorageType(StorageType.Memory)
+                        .WithSubjects(topic);
+
+                    _natsOptions.StreamOptions?.Invoke(builder);
+
+                    try
+                    {
+                        jsm.AddStream(builder.Build());
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+            }
+
+            return topicNames.ToList();
+        }
 
         public void Subscribe(IEnumerable<string> topics)
         {
@@ -43,21 +79,29 @@ namespace DotNetCore.CAP.NATS
 
             Connect();
 
+            var js = _consumerClient.CreateJetStreamContext();
+
             foreach (var topic in topics)
             {
-                _asyncSubscriptions.Add(_consumerClient.SubscribeAsync(topic, _groupId));
+                var pso = PushSubscribeOptions.Builder()
+                    .WithStream(Helper.Normalized(topic))
+                    .WithConfiguration(ConsumerConfiguration.Builder().WithDeliverPolicy(DeliverPolicy.New).Build())
+                    .WithDeliverGroup(_groupId)
+                    .Build();
+
+                js.PushSubscribeAsync(topic, Subscription_MessageHandler, false, pso);
             }
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            Connect();
+            //Connect();
 
-            foreach (var subscription in _asyncSubscriptions)
-            {
-                subscription.MessageHandler += Subscription_MessageHandler;
-                subscription.Start();
-            }
+            //foreach (var subscription in _asyncSubscriptions)
+            //{
+            //    subscription.MessageHandler += Subscription_MessageHandler;
+            //    subscription.Start();
+            //}
 
             while (true)
             {
@@ -66,11 +110,11 @@ namespace DotNetCore.CAP.NATS
             }
             // ReSharper disable once FunctionNeverReturns
         }
-
+         
         private void Subscription_MessageHandler(object sender, MsgHandlerEventArgs e)
         {
             var headers = new Dictionary<string, string>();
-          
+
             foreach (string h in e.Message.Header.Keys)
             {
                 headers.Add(h, e.Message.Header[h]);
@@ -78,22 +122,22 @@ namespace DotNetCore.CAP.NATS
 
             headers.Add(Headers.Group, _groupId);
 
-            OnMessageReceived?.Invoke(e.Message.Reply, new TransportMessage(headers, e.Message.Data));
+            OnMessageReceived?.Invoke(e.Message, new TransportMessage(headers, e.Message.Data));
         }
 
         public void Commit(object sender)
         {
-            if (sender is string reply)
+            if (sender is Msg msg)
             {
-                _consumerClient.Publish(reply, new byte[] {1});
+                msg.Ack();
             }
         }
 
         public void Reject(object sender)
         {
-            if (sender is string reply)
+            if (sender is Msg msg)
             {
-                _consumerClient.Publish(reply, new byte[] {0});
+                msg.Nak();
             }
         }
 
@@ -120,6 +164,7 @@ namespace DotNetCore.CAP.NATS
                     opts.ClosedEventHandler = ConnectedEventHandler;
                     opts.DisconnectedEventHandler = ConnectedEventHandler;
                     opts.AsyncErrorEventHandler = AsyncErrorEventHandler;
+                    opts.Timeout = 5000;
                     _consumerClient = new ConnectionFactory().CreateConnection(opts);
                 }
             }
@@ -133,8 +178,8 @@ namespace DotNetCore.CAP.NATS
         {
             var logArgs = new LogMessageEventArgs
             {
-                LogType = MqLogType.ServerConnError,
-                Reason = $"An error occurred during connect NATS --> {e.Error}"
+                LogType = MqLogType.ConnectError,
+                Reason = e.Error?.ToString()
             };
             OnLog?.Invoke(null, logArgs);
         }
@@ -144,7 +189,7 @@ namespace DotNetCore.CAP.NATS
             var logArgs = new LogMessageEventArgs
             {
                 LogType = MqLogType.AsyncErrorEvent,
-                Reason = $"An error occurred out of band --> {e.Error}"
+                Reason = e.Error
             };
             OnLog?.Invoke(null, logArgs);
         }

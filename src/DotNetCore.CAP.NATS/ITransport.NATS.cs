@@ -8,6 +8,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using NATS.Client;
+using NATS.Client.JetStream;
 
 namespace DotNetCore.CAP.NATS
 {
@@ -15,16 +16,19 @@ namespace DotNetCore.CAP.NATS
     {
         private readonly IConnectionPool _connectionPool;
         private readonly ILogger _logger;
+        private readonly JetStreamOptions _jetStreamOptions;
 
         public NATSTransport(ILogger<NATSTransport> logger, IConnectionPool connectionPool)
         {
             _logger = logger;
             _connectionPool = connectionPool;
+
+            _jetStreamOptions = JetStreamOptions.Builder().WithPublishNoAck(false).WithRequestTimeout(3000).Build();
         }
 
         public BrokerAddress BrokerAddress => new BrokerAddress("NATS", _connectionPool.ServersAddress);
 
-        public Task<OperateResult> SendAsync(TransportMessage message)
+        public async Task<OperateResult> SendAsync(TransportMessage message)
         {
             var connection = _connectionPool.RentConnection();
 
@@ -36,21 +40,26 @@ namespace DotNetCore.CAP.NATS
                     msg.Header[header.Key] = header.Value;
                 }
 
-                var reply = connection.Request(msg);
+                var js = connection.CreateJetStreamContext(_jetStreamOptions);
 
-                if (reply.Data != null && reply.Data[0] == 1)
+                var builder = PublishOptions.Builder().WithExpectedStream(Helper.Normalized(message.GetName())).WithMessageId(message.GetId());
+
+                var resp = await js.PublishAsync(msg, builder.Build());
+
+                if (resp.Seq > 0)
                 {
-                    _logger.LogDebug($"NATS subject message [{message.GetName()}] has been consumed.");
+                    _logger.LogDebug($"NATS stream message [{message.GetName()}] has been published.");
 
-                    return Task.FromResult(OperateResult.Success);
+                    return OperateResult.Success;
                 }
+                
                 throw new PublisherSentFailedException("NATS message send failed, no consumer reply!");
             }
             catch (Exception ex)
             {
                 var warpEx = new PublisherSentFailedException(ex.Message, ex);
 
-                return Task.FromResult(OperateResult.Failed(warpEx));
+                return OperateResult.Failed(warpEx);
             }
             finally
             {
