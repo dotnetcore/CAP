@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Pulsar.Client" Version="1.4.3" />
+    <PackageReference Include="Pulsar.Client" Version="2.8.1" />
   </ItemGroup>
 
 </Project>

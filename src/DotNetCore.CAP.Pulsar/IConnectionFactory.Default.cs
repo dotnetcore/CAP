@@ -59,7 +59,7 @@ namespace DotNetCore.CAP.Pulsar
                         builder.TlsProtocols(_options.TlsOptions.TlsProtocols);
                     }
 
-                    _client = builder.Build();
+                    _client = builder.BuildAsync().Result;
                 }
 
                 return _client;
