@@ -22,6 +22,7 @@ namespace DotNetCore.CAP.Transport
 
         //NATS
         AsyncErrorEvent,
+        ConnectError,
 
         //Amazon SQS
         InvalidIdFormat,

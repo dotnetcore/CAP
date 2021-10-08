@@ -301,6 +301,9 @@ namespace DotNetCore.CAP.Internal
                 case MqLogType.AsyncErrorEvent:
                     _logger.LogError("NATS subscriber received an error. --> " + logmsg.Reason);
                     break;
+                case MqLogType.ConnectError:
+                    _logger.LogError("NATS server connection error. -->  " + logmsg.Reason);
+                    break;
                 case MqLogType.InvalidIdFormat:
                     _logger.LogError("AmazonSQS subscriber delete inflight message failed, invalid id. --> " + logmsg.Reason);
                     break;
