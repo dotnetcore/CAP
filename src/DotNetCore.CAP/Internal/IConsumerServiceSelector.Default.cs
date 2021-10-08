@@ -131,7 +131,7 @@ namespace DotNetCore.CAP.Internal
                 // Ignore partial attributes when no topic attribute is defined on class.
                 if (topicClassAttribute is null)
                 {
-                    topicMethodAttributes = topicMethodAttributes.Where(x => !x.IsPartial);
+                    topicMethodAttributes = topicMethodAttributes.Where(x => !x.IsPartial && x.Name != null);
                 }
 
                 if (!topicMethodAttributes.Any())
@@ -189,6 +189,11 @@ namespace DotNetCore.CAP.Internal
 
         private ConsumerExecutorDescriptor MatchUsingName(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
+            if (key == null)
+            {
+                throw new ArgumentNullException(nameof(key));
+            }
+
             return executeDescriptor.FirstOrDefault(x => x.TopicName.Equals(key, StringComparison.InvariantCultureIgnoreCase));
         }
 
