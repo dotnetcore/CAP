@@ -3,9 +3,9 @@
 [NATS](https://nats.io/)是一个简单、安全、高性能的数字系统、服务和设备通信系统。NATS 是 CNCF 的一部分。
 
 !!! warning
-    我们当前基于 Request/Response 实现，我们计划将来版本中替换为 JetStream 。
+    CAP 5.2.0 以下的版本基于 Request/Response 实现, 现在我们已经基于  JetStream 实现。
     查看 https://github.com/dotnetcore/CAP/issues/983 了解更多。 
-    
+
 ## 配置
 
 要使用NATS 传输器，你需要安装下面的NuGet包：
