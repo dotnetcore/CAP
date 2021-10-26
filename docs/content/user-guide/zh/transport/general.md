@@ -13,6 +13,7 @@ CAP 支持以下几种运输方式：
 * [NATS](nats.md)
 * [In-Memory Queue](in-memory-queue.md)
 * [Redis Streams](redis-streams.md)
+* [Apache Pulsar](pulsar.md)
 
 ## 怎么选择运输器
 

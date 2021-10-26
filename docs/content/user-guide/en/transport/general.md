@@ -13,6 +13,7 @@ CAP supports several transport methods:
 * [NATS](nats.md)
 * [In-Memory Queue](in-memory-queue.md)
 * [Redis Streams](redis-streams.md)
+* [Apache Pulsar](pulsar.md)
 
 ## How to select a transport
 
@@ -30,7 +31,7 @@ CAP supports several transport methods:
 >`Kafka` vs `RabbitMQ` :   
 > https://stackoverflow.com/questions/42151544/is-there-any-reason-to-use-rabbitmq-over-kafka
 
-## Community-supported extensions
+## Community-supported transport extensions
 
 Thanks to the community for supporting CAP, the following is the implementation of community-supported transport
 
