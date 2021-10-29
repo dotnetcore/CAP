@@ -13,6 +13,7 @@
     "bootstrap-vue": "^2.21.2",
     "core-js": "^3.6.5",
     "echarts": "^5.1.1",
+    "json-bigint": "^1.0.0",
     "vue": "^2.6.11",
     "vue-echarts": "^6.0.0-rc.5",
     "vue-json-pretty": "^1.8.0",

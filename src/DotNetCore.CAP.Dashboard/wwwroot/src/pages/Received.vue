@@ -71,12 +71,13 @@
       </b-col>
     </b-row>
     <b-modal size="lg" :id="infoModal.id" :title="'Id: ' + infoModal.title" ok-only>
-      <vue-json-pretty showSelectController :key="infoModal.id" :data="JSON.parse(infoModal.content.trim())" />
+      <vue-json-pretty showSelectController :key="infoModal.id" :data="infoModal.content" />
     </b-modal>
   </div>
 </template>
 <script>
 import axios from "axios";
+import JSONBIG from "json-bigint";
 
 const formDataTpl = {
   currentPage: 1,
@@ -204,7 +205,7 @@ export default {
     },
     info(item, button) {
       this.infoModal.title = item.id.toString();
-      this.infoModal.content = item.content;
+      this.infoModal.content = JSONBIG({ storeAsString: true }).parse(item.content.trim());
       this.$root.$emit("bv::show::modal", this.infoModal.id, button);
     },
     pageSizeChange: function (size) {
