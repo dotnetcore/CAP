@@ -119,7 +119,7 @@ namespace DotNetCore.CAP.AmazonSQS
         {
             try
             {
-                var ret = _sqsClient.DeleteMessageAsync(_queueUrl, (string)sender).GetAwaiter().GetResult();
+                _ = _sqsClient.DeleteMessageAsync(_queueUrl, (string)sender).GetAwaiter().GetResult();
             }
             catch (InvalidIdFormatException ex)
             {
@@ -132,7 +132,7 @@ namespace DotNetCore.CAP.AmazonSQS
             try
             {
                 // Visible again in 3 seconds
-                var ret = _sqsClient.ChangeMessageVisibilityAsync(_queueUrl, (string)sender, 3).GetAwaiter().GetResult();
+                _ = _sqsClient.ChangeMessageVisibilityAsync(_queueUrl, (string)sender, 3).GetAwaiter().GetResult();
             }
             catch (MessageNotInflightException ex)
             {
