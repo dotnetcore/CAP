@@ -13,5 +13,16 @@ namespace DotNetCore.CAP
         public RegionEndpoint Region { get; set; }
 
         public AWSCredentials Credentials { get; set; }
+
+        /// <summary>
+        /// Overrides Service Url deduced from AWS Region. To use in local development environments like localstack.
+        /// </summary>
+        public string SNSServiceUrl { get; set; }
+
+        /// <summary>
+        /// Overrides Service Url deduced from AWS Region. To use in local development environments like localstack.
+        /// </summary>
+        public string SQSServiceUrl { get; set; }
+
     }
 }
