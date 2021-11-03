@@ -227,7 +227,8 @@ public void ShowTime2(DateTime datetime)
 }
 
 ```
-`ShowTime1` and `ShowTime2` will be called at the same time.
+`ShowTime1` and `ShowTime2` will be called one after another because all received messages are processed linear.
+You can change that behaviour increasing `ConsumerThreadCount`.
 
 BTW, You can specify the default group name in the configuration:
 
