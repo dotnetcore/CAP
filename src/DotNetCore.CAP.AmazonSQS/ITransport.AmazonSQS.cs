@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.AmazonSQS
             _sqsOptions = sqsOptions;
         }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("RabbitMQ", string.Empty);
+        public BrokerAddress BrokerAddress => new BrokerAddress("AmazonSQS", string.Empty);
 
         public async Task<OperateResult> SendAsync(TransportMessage message)
         {
@@ -100,9 +100,18 @@ namespace DotNetCore.CAP.AmazonSQS
 
             try
             {
-                _snsClient = _sqsOptions.Value.Credentials != null
-                    ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, _sqsOptions.Value.Region)
-                    : new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Region);
+                if (string.IsNullOrWhiteSpace(_sqsOptions.Value.SNSServiceUrl))
+                {
+                    _snsClient = _sqsOptions.Value.Credentials != null
+                        ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, _sqsOptions.Value.Region)
+                        : new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Region);
+                }
+                else
+                {
+                    _snsClient = _sqsOptions.Value.Credentials != null
+                        ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl })
+                        : new AmazonSimpleNotificationServiceClient(new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl });
+                }
 
                 if (_topicArnMaps == null)
                 {
