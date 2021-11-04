@@ -45,14 +45,14 @@ namespace DotNetCore.CAP.Internal
             logger.LogError(ex, $"An exception occured while publishing a message, reason:{reason}. message id:{messageId}");
         }
 
-        public static void ConsumerExecuting(this ILogger logger, string methodName)
+        public static void ConsumerExecuting(this ILogger logger, string className, string methodName, string group)
         {
-            logger.LogInformation($"Executing subscriber method '{methodName}'");
+            logger.LogInformation($"Executing subscriber method '{className}.{methodName}' on group '{group}'");
         }
 
-        public static void ConsumerExecuted(this ILogger logger, string methodName, double milliseconds)
+        public static void ConsumerExecuted(this ILogger logger, string className, string methodName, string group, double milliseconds)
         {
-            logger.LogInformation($"Executed subscriber method '{methodName}' in {milliseconds} ms");
+            logger.LogInformation($"Executed subscriber method '{className}.{methodName}' on group '{group}' in {milliseconds} ms");
         }
 
         public static void ServerStarting(this ILogger logger)
