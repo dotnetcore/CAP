@@ -6,11 +6,11 @@ using Sample.RabbitMQ.SqlServer.DispatcherPerGroup.TypedConsumers;
 namespace Sample.RabbitMQ.SqlServer.DispatcherPerGroup.Messages
 {
     [QueueHandlerTopic("slowtopic")]
-    public class SlowProcessingReceiver : QueueHandler
+    public class XSlowProcessingReceiver : QueueHandler
     {
-        private readonly ILogger<SlowProcessingReceiver> _logger;
+        private readonly ILogger<XSlowProcessingReceiver> _logger;
 
-        public SlowProcessingReceiver(ILogger<SlowProcessingReceiver> logger)
+        public XSlowProcessingReceiver(ILogger<XSlowProcessingReceiver> logger)
         {
             _logger = logger;
         }

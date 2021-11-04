@@ -6,11 +6,11 @@ using Sample.RabbitMQ.SqlServer.DispatcherPerGroup.TypedConsumers;
 namespace Sample.RabbitMQ.SqlServer.DispatcherPerGroup.Messages
 {
     [QueueHandlerTopic("fasttopic")]
-    public class FastProcessingReceiver : QueueHandler
+    public class VeryFastProcessingReceiver : QueueHandler
     {
-        private readonly ILogger<FastProcessingReceiver> _logger;
+        private readonly ILogger<VeryFastProcessingReceiver> _logger;
 
-        public FastProcessingReceiver(ILogger<FastProcessingReceiver> logger)
+        public VeryFastProcessingReceiver(ILogger<VeryFastProcessingReceiver> logger)
         {
             _logger = logger;
         }
@@ -18,7 +18,7 @@ namespace Sample.RabbitMQ.SqlServer.DispatcherPerGroup.Messages
         public async Task Handle(TestMessage value)
         {
             _logger.LogInformation($"Starting FAST processing handler {DateTime.Now:O}: {value.Text}");
-            await Task.Delay(200);
+            await Task.Delay(50);
             _logger.LogInformation($"Ending   FAST processing handler {DateTime.Now:O}: {value.Text}");
         }
     }
