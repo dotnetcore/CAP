@@ -89,7 +89,7 @@ namespace DotNetCore.CAP.Internal
                     return;
                 }
 
-                for (int i = 0; i < _options.ConsumerThreadCount; i++)
+                for (int i = 0; i < _options.ConsumerCount; i++)
                 {
                     var topicIds = topics.Select(t => t);
                     Task.Factory.StartNew(() =>

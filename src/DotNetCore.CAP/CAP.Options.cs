@@ -21,9 +21,10 @@ namespace DotNetCore.CAP
             SucceedMessageExpiredAfter = 24 * 3600;
             FailedRetryInterval = 60;
             FailedRetryCount = 50;
-            ConsumerThreadCount = 1;
+            ConsumerCount = 1;
             ProducerThreadCount = 1;
             Extensions = new List<ICapOptionsExtension>();
+            ConsumerGroupThreadCount = new Dictionary<string, int>();
             Version = "v1";
             DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
             CollectorCleaningInterval = 300;
@@ -40,7 +41,7 @@ namespace DotNetCore.CAP
         /// Subscriber group prefix.
         /// </summary>
         public string GroupNamePrefix { get; set; }
-        
+
         /// <summary>
         /// Topic prefix.
         /// </summary>
@@ -78,7 +79,7 @@ namespace DotNetCore.CAP
         /// The number of consumer thread connections.
         /// Default is 1
         /// </summary>
-        public int ConsumerThreadCount { get; set; }
+        public int ConsumerCount { get; set; }
 
         /// <summary>
         /// The number of producer thread connections.
@@ -91,6 +92,8 @@ namespace DotNetCore.CAP
         /// Default is 300 seconds.
         /// </summary>
         public int CollectorCleaningInterval { get; set; }
+
+        public Dictionary<string, int> ConsumerGroupThreadCount { get; set; }
 
         /// <summary>
         /// Registers an extension that will be executed when building services.

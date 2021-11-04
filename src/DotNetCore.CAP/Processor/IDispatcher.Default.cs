@@ -6,43 +6,50 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using System.Collections.Concurrent;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Processor
 {
     public class Dispatcher : IDispatcher
     {
         private readonly IMessageSender _sender;
+        private readonly IServiceProvider _sp;
         private readonly CapOptions _options;
         private readonly ISubscribeDispatcher _executor;
         private readonly ILogger<Dispatcher> _logger;
         private readonly CancellationTokenSource _cts = new CancellationTokenSource();
 
         private Channel<MediumMessage> _publishedChannel;
-        private Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel;
+        private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>> _receivedChannel;
 
         public Dispatcher(ILogger<Dispatcher> logger,
             IMessageSender sender,
             IOptions<CapOptions> options,
+            IServiceProvider serviceProvider,
             ISubscribeDispatcher executor)
         {
             _logger = logger;
             _sender = sender;
+            _sp = serviceProvider;
             _options = options.Value;
             _executor = executor;
+            _receivedChannel = new ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>>();
         }
 
         public void Start(CancellationToken stoppingToken)
         {
             stoppingToken.ThrowIfCancellationRequested();
-            stoppingToken.Register(() => _cts.Cancel()); 
+            stoppingToken.Register(() => _cts.Cancel());
 
             var capacity = _options.ProducerThreadCount * 500;
+
             _publishedChannel = Channel.CreateBounded<MediumMessage>(new BoundedChannelOptions(capacity > 5000 ? 5000 : capacity)
             {
                 AllowSynchronousContinuations = true,
@@ -51,21 +58,38 @@ namespace DotNetCore.CAP.Processor
                 FullMode = BoundedChannelFullMode.Wait
             });
 
-            capacity = _options.ConsumerThreadCount * 300;
-            _receivedChannel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor)>(new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
-            {
-                AllowSynchronousContinuations = true,
-                SingleReader = _options.ConsumerThreadCount == 1,
-                SingleWriter = true,
-                FullMode = BoundedChannelFullMode.Wait
-            });
 
+            var selector = _sp.GetService<MethodMatcherCache>();
+
+            foreach (var item in selector.GetCandidatesMethodsOfGroupNameGrouped())
+            {
+                var key = item.Key.Replace("." + _options.Version, "");
+                if (!_options.ConsumerGroupThreadCount.TryGetValue(key, out int threadCount))
+                {
+                    threadCount = 1;
+                }
+
+                capacity = threadCount * 300;
+
+                _receivedChannel.TryAdd(item.Key, Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor)>(
+                    new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
+                    {
+                        AllowSynchronousContinuations = true,
+                        SingleReader = threadCount == 1,
+                        SingleWriter = true,
+                        FullMode = BoundedChannelFullMode.Wait
+                    }));
+
+                Task.WhenAll(Enumerable.Range(0, threadCount)
+                    .Select(_ => Task.Factory.StartNew(
+                        () => Processing(item.Key, stoppingToken), stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)
+                    ).ToArray()
+                );
+            }
 
             Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
                 .Select(_ => Task.Factory.StartNew(() => Sending(stoppingToken), stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
 
-            Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
-                .Select(_ => Task.Factory.StartNew(() => Processing(stoppingToken), stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
         }
 
         public void EnqueueToPublish(MediumMessage message)
@@ -93,11 +117,12 @@ namespace DotNetCore.CAP.Processor
         {
             try
             {
-                if (!_receivedChannel.Writer.TryWrite((message, descriptor)))
+                var channel = _receivedChannel[message.Origin.GetGroup()];
+                if (!channel.Writer.TryWrite((message, descriptor)))
                 {
-                    while (_receivedChannel.Writer.WaitToWriteAsync(_cts.Token).AsTask().ConfigureAwait(false).GetAwaiter().GetResult())
+                    while (channel.Writer.WaitToWriteAsync(_cts.Token).AsTask().ConfigureAwait(false).GetAwaiter().GetResult())
                     {
-                        if (_receivedChannel.Writer.TryWrite((message, descriptor)))
+                        if (channel.Writer.TryWrite((message, descriptor)))
                         {
                             return;
                         }
@@ -141,13 +166,13 @@ namespace DotNetCore.CAP.Processor
             }
         }
 
-        private async Task Processing(CancellationToken cancellationToken)
+        private async Task Processing(string group, CancellationToken cancellationToken)
         {
             try
             {
-                while (await _receivedChannel.Reader.WaitToReadAsync(cancellationToken))
+                while (await _receivedChannel[group].Reader.WaitToReadAsync(cancellationToken))
                 {
-                    while (_receivedChannel.Reader.TryRead(out var message))
+                    while (_receivedChannel[group].Reader.TryRead(out var message))
                     {
                         try
                         {
