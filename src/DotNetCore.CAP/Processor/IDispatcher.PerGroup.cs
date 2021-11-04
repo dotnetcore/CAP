@@ -16,7 +16,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Processor
 {
-    public class DispatcherPerGroup : IDispatcher
+    internal class DispatcherPerGroup : IDispatcher
     {
         private readonly IMessageSender _sender;
         private readonly CapOptions _options;
