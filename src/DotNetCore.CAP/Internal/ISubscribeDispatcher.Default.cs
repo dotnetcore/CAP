@@ -45,7 +45,7 @@ namespace DotNetCore.CAP.Internal
 
         public Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken)
         {
-            var selector = _provider.GetService<MethodMatcherCache>();
+            var selector = _provider.GetRequiredService<MethodMatcherCache>();
             if (!selector.TryGetTopicExecutor(message.Origin.GetName(), message.Origin.GetGroup(), out var executor))
             {
                 var error = $"Message (Name:{message.Origin.GetName()},Group:{message.Origin.GetGroup()}) can not be found subscriber." +
@@ -66,13 +66,13 @@ namespace DotNetCore.CAP.Internal
             OperateResult result;
             do
             {
-                var executedResult = await ExecuteWithoutRetryAsync(message, descriptor, cancellationToken);
-                result = executedResult.Item2;
+                var (shouldRetry, operateResult) = await ExecuteWithoutRetryAsync(message, descriptor, cancellationToken);
+                result = operateResult;
                 if (result == OperateResult.Success)
                 {
                     return result;
                 }
-                retry = executedResult.Item1;
+                retry = shouldRetry;
             } while (retry);
 
             return result;
@@ -89,7 +89,10 @@ namespace DotNetCore.CAP.Internal
 
             try
             {
-                _logger.ConsumerExecuting(descriptor.MethodInfo.Name);
+                _logger.ConsumerExecuting(
+                    descriptor.ImplTypeInfo.Name,
+                    descriptor.MethodInfo.Name,
+                    descriptor.Attribute.Group ?? _options.DefaultGroupName);
 
                 var sp = Stopwatch.StartNew();
 
@@ -99,7 +102,11 @@ namespace DotNetCore.CAP.Internal
 
                 await SetSuccessfulState(message);
 
-                _logger.ConsumerExecuted(descriptor.MethodInfo.Name, sp.Elapsed.TotalMilliseconds);
+                _logger.ConsumerExecuted(
+                    descriptor.ImplTypeInfo.Name,
+                    descriptor.MethodInfo.Name,
+                    descriptor.Attribute.Group ?? _options.DefaultGroupName,
+                    sp.Elapsed.TotalMilliseconds);
 
                 return (false, OperateResult.Success);
             }

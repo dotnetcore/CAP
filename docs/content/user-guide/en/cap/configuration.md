@@ -93,7 +93,7 @@ The interval of the collector processor deletes expired messages.
 
 #### ConsumerThreadCount 
 
-> Default : 1
+> Default: 1
 
 Number of consumer threads, when this value is greater than 1, the order of message execution cannot be guaranteed.
 
@@ -116,3 +116,9 @@ Failure threshold callback. This action is called when the retry reaches the val
 > Default: 24*3600 sec (1 days)
 
 The expiration time (in seconds) of the success message. When the message is sent or consumed successfully, it will be removed from database storage when the time reaches `SucceedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.
+
+#### UseDispatchingPerGroup
+
+> Default: false
+
+If `true` then all consumers within the same group pushes received messages to own dispatching pipeline channel. Each channel has set thread count to `ConsumerThreadCount` value.
