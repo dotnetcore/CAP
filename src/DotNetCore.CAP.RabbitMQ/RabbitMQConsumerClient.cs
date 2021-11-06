@@ -172,6 +172,25 @@ namespace DotNetCore.CAP.RabbitMQ
             };
             OnLog?.Invoke(sender, args);
         }
+        
+        private byte[] ObjectToByteArray(object obj)
+        {
+            if(obj == null)
+                return null;
+            var bf = new BinaryFormatter();
+            using (MemoryStream ms = new MemoryStream())
+            {
+                try
+                {
+                    bf.Serialize(ms, obj);
+                    return ms.ToArray();
+                }
+                catch
+                {
+                    return null;
+                }
+            }
+        }
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
@@ -180,7 +199,8 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 foreach (var header in e.BasicProperties.Headers)
                 {
-                    headers.Add(header.Key, header.Value == null ? null : Encoding.UTF8.GetString((byte[])header.Value));
+                    var value = ObjectToByteArray(header.Value);
+                    headers.Add(header.Key, header.Value == null || value == null ? null : Encoding.UTF8.GetString(value));
                 }
             }
 
