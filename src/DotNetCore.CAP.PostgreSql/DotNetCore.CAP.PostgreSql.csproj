@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.4" />
-    <PackageReference Include="Npgsql" Version="5.0.3" /> 
+    <PackageReference Include="Npgsql" Version="5.0.10" /> 
   </ItemGroup>
 
   <ItemGroup>
