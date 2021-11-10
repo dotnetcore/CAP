@@ -176,11 +176,19 @@ namespace DotNetCore.CAP.RabbitMQ
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
             var headers = new Dictionary<string, string>();
+
             if (e.BasicProperties.Headers != null)
             {
                 foreach (var header in e.BasicProperties.Headers)
                 {
-                    headers.Add(header.Key, header.Value == null ? null : Encoding.UTF8.GetString((byte[])header.Value));
+                    if (header.Value is byte[] val)
+                    {
+                        headers.Add(header.Key, Encoding.UTF8.GetString(val));
+                    }
+                    else
+                    {
+                        headers.Add(header.Key, header.Value?.ToString());
+                    }
                 }
             }
 
