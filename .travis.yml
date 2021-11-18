@@ -2,7 +2,7 @@ language: csharp
 sudo: required
 dist: xenial
 solution: CAP.sln
-dotnet: 5.0.100
+dotnet: 6.0.100
 mono: none
 env:
  - Cap_MySql_ConnectionString="Server=127.0.0.1;Database=cap_test;Uid=root;Pwd=;Allow User Variables=True;SslMode=none"
@@ -12,5 +12,5 @@ services:
 
 script:
  - export PATH="$PATH:$HOME/.dotnet/tools"
- - dotnet tool install --global FlubuCore.GlobalTool --version 6.1.0
+ - dotnet tool install --global FlubuCore.GlobalTool --version 6.3.2
  - flubu build tests
