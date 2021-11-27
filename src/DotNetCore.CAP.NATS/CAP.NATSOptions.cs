@@ -30,5 +30,7 @@ namespace DotNetCore.CAP
         public Options Options { get; set; }
 
         public Action<StreamConfiguration.StreamConfigurationBuilder> StreamOptions { get; set; }
+
+        public Func<string, string> NormalizeStreamName { get; set; } = origin => origin.Split('.')[0];
     }
 }
