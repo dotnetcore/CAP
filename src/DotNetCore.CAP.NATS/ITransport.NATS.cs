@@ -42,7 +42,7 @@ namespace DotNetCore.CAP.NATS
 
                 var js = connection.CreateJetStreamContext(_jetStreamOptions);
 
-                var builder = PublishOptions.Builder().WithExpectedStream(Helper.Normalized(message.GetName())).WithMessageId(message.GetId());
+                var builder = PublishOptions.Builder().WithMessageId(message.GetId());
 
                 var resp = await js.PublishAsync(msg, builder.Build());
 
