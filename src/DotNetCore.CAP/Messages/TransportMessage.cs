@@ -8,7 +8,7 @@ using JetBrains.Annotations;
 namespace DotNetCore.CAP.Messages
 {
     /// <summary>
-    /// Message content field
+    /// Message content field.
     /// </summary>
     [Serializable]
     public class TransportMessage
@@ -20,12 +20,12 @@ namespace DotNetCore.CAP.Messages
         }
 
         /// <summary>
-        /// Gets the headers of this message
+        /// Gets the headers of this message.
         /// </summary>
         public IDictionary<string, string> Headers { get; }
 
         /// <summary>
-        /// Gets the body object of this message
+        /// Gets the body object of this message.
         /// </summary>
         [CanBeNull]
         public byte[] Body { get; }

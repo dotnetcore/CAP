@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.Messages
         public const string Group = "cap-msg-group";
 
         /// <summary>
-        /// Message value .NET type
+        /// Message value .NET type.
         /// </summary>
         public const string Type = "cap-msg-type";
 

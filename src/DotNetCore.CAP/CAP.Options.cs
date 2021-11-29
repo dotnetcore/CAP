@@ -89,7 +89,7 @@ namespace DotNetCore.CAP
 
         /// <summary>
         /// The number of producer thread connections.
-        /// Default is 1
+        /// Default is 1.
         /// </summary>
         public int ProducerThreadCount { get; set; }
 
@@ -114,7 +114,7 @@ namespace DotNetCore.CAP
         }
 
         /// <summary>
-        /// Configure JSON serialization settings
+        /// Configure JSON serialization settings.
         /// </summary>
         public JsonSerializerOptions JsonSerializerOptions { get; } = new JsonSerializerOptions();
     }

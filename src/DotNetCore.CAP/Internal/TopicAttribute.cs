@@ -7,7 +7,7 @@ namespace DotNetCore.CAP.Internal
 {
     /// <inheritdoc />
     /// <summary>
-    /// An abstract attribute that for kafka attribute or rabbit mq attribute
+    /// An abstract attribute that for kafka attribute or rabbit mq attribute.
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
     public abstract class TopicAttribute : Attribute

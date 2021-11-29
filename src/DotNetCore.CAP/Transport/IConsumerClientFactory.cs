@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.Transport
         /// <summary>
         /// Create a new instance of <see cref="IConsumerClient" />.
         /// </summary>
-        /// <param name="groupId">message group number</param>
+        /// <param name="groupId">message group number.</param>
         IConsumerClient Create(string groupId);
     }
 }

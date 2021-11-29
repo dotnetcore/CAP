@@ -14,21 +14,21 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace DotNetCore.CAP
 {
     /// <summary>
-    /// Used to verify cap service was called on a ServiceCollection
+    /// Used to verify cap service was called on a ServiceCollection.
     /// </summary>
     public class CapMarkerService
     {
     }
 
     /// <summary>
-    /// Used to verify cap storage extension was added on a ServiceCollection
+    /// Used to verify cap storage extension was added on a ServiceCollection.
     /// </summary>
     public class CapStorageMarkerService
     {
     }
 
     /// <summary>
-    /// Used to verify cap message queue extension was added on a ServiceCollection
+    /// Used to verify cap message queue extension was added on a ServiceCollection.
     /// </summary>
     public class CapMessageQueueMakerService
     {

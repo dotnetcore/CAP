@@ -17,14 +17,14 @@ namespace DotNetCore.CAP
         public string Schema { get; set; } = DefaultSchema;
 
         /// <summary>
-        /// EF DbContext
+        /// EF DbContext.
         /// </summary>
         internal Type DbContextType { get; set; }
 
         internal bool IsSqlServer2008 { get; set; }
 
         /// <summary>
-        /// Data version
+        /// Data version.
         /// </summary>
         internal string Version { get; set; }
 

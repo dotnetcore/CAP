@@ -4,7 +4,7 @@
 namespace DotNetCore.CAP.Diagnostics
 {
     /// <summary>
-    /// Extension methods on the DiagnosticListener class to log CAP data
+    /// Extension methods on the DiagnosticListener class to log CAP data.
     /// </summary>
     public static class CapDiagnosticListenerNames
     {

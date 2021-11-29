@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.Serialization
     public interface ISerializer
     {
         /// <summary>
-        /// Serializes the given <see cref="Message"/> into a string
+        /// Serializes the given <see cref="Message"/> into a string.
         /// </summary>
         string Serialize(Message message);
 
@@ -31,13 +31,13 @@ namespace DotNetCore.CAP.Serialization
         Task<Message> DeserializeAsync(TransportMessage transportMessage, [CanBeNull] Type valueType);
 
         /// <summary>
-        /// Deserialize the given object with the given Type into an object
+        /// Deserialize the given object with the given Type into an object.
         /// </summary>
         object Deserialize(object value, Type valueType);
 
         /// <summary>
         /// Check if the given object is of Json type, e.g. JToken or JsonElement
-        /// depending on the type of serializer implemented
+        /// depending on the type of serializer implemented.
         /// </summary>
         /// <example>
         /// <code>

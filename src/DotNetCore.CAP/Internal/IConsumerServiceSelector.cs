@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.Internal
     public interface IConsumerServiceSelector
     {
         /// <summary>
-        /// Selects a set of <see cref="ConsumerExecutorDescriptor" /> candidates for the current message associated with
+        /// Selects a set of <see cref="ConsumerExecutorDescriptor" /> candidates for the current message associated with.
         /// </summary>
         /// <returns>A set of <see cref="ConsumerExecutorDescriptor" /> candidates or <c>null</c>.</returns>
         IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates();

@@ -12,14 +12,14 @@ namespace DotNetCore.CAP.Transport
 {
     /// <inheritdoc />
     /// <summary>
-    /// Message queue consumer client
+    /// Message queue consumer client.
     /// </summary>
     public interface IConsumerClient : IDisposable
     {
         BrokerAddress BrokerAddress { get; }
 
         /// <summary>
-        /// Create (if necessary) and get topic identifiers
+        /// Create (if necessary) and get topic identifiers.
         /// </summary>
         /// <param name="topicNames">Names of the requested topics</param>
         /// <returns>Topic identifiers</returns>
@@ -29,23 +29,23 @@ namespace DotNetCore.CAP.Transport
         }
 
         /// <summary>
-        /// Subscribe to a set of topics to the message queue
+        /// Subscribe to a set of topics to the message queue.
         /// </summary>
         /// <param name="topics"></param>
         void Subscribe([NotNull] IEnumerable<string> topics);
 
         /// <summary>
-        /// Start listening
+        /// Start listening.
         /// </summary>
         void Listening(TimeSpan timeout, CancellationToken cancellationToken);
 
         /// <summary>
-        /// Manual submit message offset when the message consumption is complete
+        /// Manual submit message offset when the message consumption is complete.
         /// </summary>
         void Commit([NotNull] object sender);
 
         /// <summary>
-        /// Reject message and resumption
+        /// Reject message and resumption.
         /// </summary>
         void Reject([CanBeNull] object sender);
 
