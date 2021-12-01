@@ -81,18 +81,24 @@ namespace DotNetCore.CAP.Internal
             {
                 var timestamp = TimeGen();
 
-                if (timestamp < _lastTimestamp)
-                    throw new Exception(
-                        $"InvalidSystemClock: Clock moved backwards, Refusing to generate id for {_lastTimestamp - timestamp} milliseconds");
-
-                if (_lastTimestamp == timestamp)
+                if (timestamp > _lastTimestamp)
+                    Sequence = 0L;
+                else if (_lastTimestamp == timestamp)
                 {
                     Sequence = (Sequence + 1) & SequenceMask;
-                    if (Sequence == 0) timestamp = TilNextMillis(_lastTimestamp);
+                    if (Sequence == 0)
+                        timestamp = TilNextMillis(_lastTimestamp);
                 }
                 else
                 {
-                    Sequence = 0;
+                    Sequence = (Sequence + 1) & SequenceMask;
+                    if (Sequence > 0)
+                        timestamp = _lastTimestamp; 
+                    else 
+                        timestamp = _lastTimestamp + 1;
+
+                    //  throw new Exception(
+                    //  $"InvalidSystemClock: Clock moved backwards, Refusing to generate id for {_lastTimestamp - timestamp} milliseconds");
                 }
 
                 _lastTimestamp = timestamp;
