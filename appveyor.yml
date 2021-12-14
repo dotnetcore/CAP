@@ -1,5 +1,5 @@
 version: '{build}'
-os: Visual Studio 2019
+os: Visual Studio 2022
 environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
@@ -7,7 +7,7 @@ environment:
 services:
   - mysql
 before_build:
-  - ps: dotnet tool install --global FlubuCore.GlobalTool --version 6.1.0
+  - ps: dotnet tool install --global FlubuCore.GlobalTool --version 6.3.2
 build_script:
   - ps: flubu
 test: off

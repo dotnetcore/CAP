@@ -26,6 +26,8 @@ namespace DotNetCore.CAP
             Extensions = new List<ICapOptionsExtension>();
             Version = "v1";
             DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
+            CollectorCleaningInterval = 300;
+            UseDispatchingPerGroup = false;
         }
 
         internal IList<ICapOptionsExtension> Extensions { get; }
@@ -80,10 +82,22 @@ namespace DotNetCore.CAP
         public int ConsumerThreadCount { get; set; }
 
         /// <summary>
+        /// If true then each message group will have own independent dispatching pipeline. Each pipeline use as many threads as <see cref="ConsumerThreadCount"/> value is.
+        /// Default is false.
+        /// </summary>
+        public bool UseDispatchingPerGroup { get; set; }
+
+        /// <summary>
         /// The number of producer thread connections.
         /// Default is 1
         /// </summary>
         public int ProducerThreadCount { get; set; }
+
+        /// <summary>
+        /// The interval of the collector processor deletes expired messages.
+        /// Default is 300 seconds.
+        /// </summary>
+        public int CollectorCleaningInterval { get; set; }
 
         /// <summary>
         /// Registers an extension that will be executed when building services.

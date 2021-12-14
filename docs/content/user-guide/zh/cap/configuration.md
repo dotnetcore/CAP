@@ -92,6 +92,12 @@ services.AddCap(config =>
 
 消费者线程并行处理消息的线程数，当这个值大于1时，将不能保证消息执行的顺序。
 
+#### CollectorCleaningInterval
+
+默认值：300 秒
+
+收集器删除已经过期消息的时间间隔。
+
 #### FailedRetryCount
 
 默认值：50
@@ -111,3 +117,10 @@ services.AddCap(config =>
 默认值：24*3600 秒（1天后）
 
 成功消息的过期时间（秒）。 当消息发送或者消费成功时候，在时间达到 `SucceedMessageExpiredAfter` 秒时候将会从 Persistent 中删除，你可以通过指定此值来设置过期的时间。
+
+#### UseDispatchingPerGroup
+
+> 默认值: false
+
+默认情况下，CAP会将所有消费者组的消息都先放置到内存同一个Channel中，然后线性处理。
+如果设置为 true，则每个消费者组都会根据 `ConsumerThreadCount` 设置的值创建单独的线程进行处理。

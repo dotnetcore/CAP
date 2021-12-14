@@ -3,6 +3,7 @@
 
 using System;
 using DotNetCore.CAP;
+using JetBrains.Annotations;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection
@@ -14,9 +15,13 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="options">CAP configuration options</param>
         /// <param name="bootstrapServers">NATS bootstrap server urls.</param>
-        public static CapOptions UseNATS(this CapOptions options, string bootstrapServers)
+        public static CapOptions UseNATS(this CapOptions options, [CanBeNull] string bootstrapServers = null)
         {
-            return options.UseNATS(opt => { opt.Servers = bootstrapServers; });
+            return options.UseNATS(opt =>
+            {
+                if (bootstrapServers != null)
+                    opt.Servers = bootstrapServers;
+            });
         }
 
         /// <summary>

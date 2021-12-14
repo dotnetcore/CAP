@@ -4,9 +4,10 @@
 using System;
 using System.Linq.Expressions;
 
+// ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.Internal
 {
-    internal struct CoercedAwaitableInfo
+    internal readonly struct CoercedAwaitableInfo
     {
         public AwaitableInfo AwaitableInfo { get; }
         public Expression CoercerExpression { get; }

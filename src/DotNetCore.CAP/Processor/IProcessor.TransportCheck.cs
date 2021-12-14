@@ -28,6 +28,8 @@ namespace DotNetCore.CAP.Processor
                 throw new ArgumentNullException(nameof(context));
             }
 
+            context.ThrowIfStopping();
+
             _logger.LogDebug("Transport connection checking...");
 
             if (!_register.IsHealthy())

@@ -31,15 +31,15 @@ namespace DotNetCore.CAP.AmazonSQS
             _sqsOptions = sqsOptions;
         }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("RabbitMQ", string.Empty);
+        public BrokerAddress BrokerAddress => new BrokerAddress("AmazonSQS", string.Empty);
 
         public async Task<OperateResult> SendAsync(TransportMessage message)
         {
             try
             {
-                await TryAddTopicArns();
+                await FetchExistingTopicArns();
 
-                if (_topicArnMaps.TryGetValue(message.GetName().NormalizeForAws(), out var arn))
+                if (TryGetOrCreateTopicArn(message.GetName().NormalizeForAws(), out var arn))
                 {
                     string bodyJson = null;
                     if (message.Body != null)
@@ -89,20 +89,29 @@ namespace DotNetCore.CAP.AmazonSQS
             }
         }
 
-        public async Task<bool> TryAddTopicArns()
+        private async Task FetchExistingTopicArns()
         {
             if (_topicArnMaps != null)
             {
-                return true;
+                return;
             }
 
             await _semaphore.WaitAsync();
 
             try
             {
-                _snsClient = _sqsOptions.Value.Credentials != null
-                    ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, _sqsOptions.Value.Region)
-                    : new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Region);
+                if (string.IsNullOrWhiteSpace(_sqsOptions.Value.SNSServiceUrl))
+                {
+                    _snsClient = _sqsOptions.Value.Credentials != null
+                        ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, _sqsOptions.Value.Region)
+                        : new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Region);
+                }
+                else
+                {
+                    _snsClient = _sqsOptions.Value.Credentials != null
+                        ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl })
+                        : new AmazonSimpleNotificationServiceClient(new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl });
+                }
 
                 if (_topicArnMaps == null)
                 {
@@ -122,8 +131,6 @@ namespace DotNetCore.CAP.AmazonSQS
                         nextToken = topics.NextToken;
                     }
                     while (!string.IsNullOrEmpty(nextToken));
-
-                    return true;
                 }
             }
             catch (Exception e)
@@ -134,8 +141,27 @@ namespace DotNetCore.CAP.AmazonSQS
             {
                 _semaphore.Release();
             }
+        }
+        
+        private bool TryGetOrCreateTopicArn(string topicName, out string topicArn)
+        {
+            topicArn = null;
+            if (_topicArnMaps.TryGetValue(topicName, out topicArn))
+            {
+                return true;
+            }
 
-            return false;
+            var response = _snsClient.CreateTopicAsync(topicName).GetAwaiter().GetResult();
+
+            if (string.IsNullOrEmpty(response.TopicArn))
+            {
+                return false;
+            }
+            
+            topicArn = response.TopicArn;
+            
+            _topicArnMaps.Add(topicName, topicArn);
+            return true;
         }
     }
 }

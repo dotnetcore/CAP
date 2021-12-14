@@ -6,7 +6,9 @@
 
 ## 自定义过滤器
 
-1、创建一个过滤器类，并继承 `SubscribeFilter` 抽象类。
+### 添加过滤器
+
+创建一个过滤器类，并继承 `SubscribeFilter` 抽象类。
 
 ```C#
 public class MyCapFilter: SubscribeFilter
@@ -32,7 +34,14 @@ public class MyCapFilter: SubscribeFilter
 
 通过在 `ExceptionContext` 中设置 `context.ExceptionHandled = true` 来忽略异常。
 
-2、集成
+```C#
+public override void OnSubscribeException(ExceptionContext context)
+{
+    context.ExceptionHandled = true;
+}
+```
+
+### 配置过滤器
 
 ```C#
 services.AddCap(opt =>

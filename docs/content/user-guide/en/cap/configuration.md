@@ -85,11 +85,17 @@ During the message sending process if consumption method fails, CAP will try to 
     By default if failure occurs on send or consume, retry will start after **4 minutes** in order to avoid possible problems caused by setting message state delays.    
     Failures in the process of sending and consuming messages will be retried 3 times immediately, and will be retried polling after 3 times, at which point the FailedRetryInterval configuration will take effect.
 
+#### CollectorCleaningInterval
+
+> Default: 300 sec
+
+The interval of the collector processor deletes expired messages.
+
 #### ConsumerThreadCount 
 
-> Default : 1
+> Default: 1
 
-Number of consumer threads, when this value is greater than 1, the order of message execution cannot be guaranteed
+Number of consumer threads, when this value is greater than 1, the order of message execution cannot be guaranteed.
 
 #### FailedRetryCount
 
@@ -110,3 +116,9 @@ Failure threshold callback. This action is called when the retry reaches the val
 > Default: 24*3600 sec (1 days)
 
 The expiration time (in seconds) of the success message. When the message is sent or consumed successfully, it will be removed from database storage when the time reaches `SucceedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.
+
+#### UseDispatchingPerGroup
+
+> Default: false
+
+If `true` then all consumers within the same group pushes received messages to own dispatching pipeline channel. Each channel has set thread count to `ConsumerThreadCount` value.

@@ -81,7 +81,7 @@ namespace DotNetCore.CAP
     /// <summary>
     /// Encapsulates an error from the operate subsystem.
     /// </summary>
-    public class OperateError
+    public record struct OperateError
     {
         /// <summary>
         /// Gets or sets ths code for this error.

@@ -105,7 +105,7 @@ namespace DotNetCore.CAP.RabbitMQ
             if (options.HostName.Contains(","))
             {
                 options.ConnectionFactoryOptions?.Invoke(factory);
- 
+
                 return () => factory.CreateConnection(
                     options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries));
             }
@@ -148,6 +148,8 @@ namespace DotNetCore.CAP.RabbitMQ
 
                 return true;
             }
+
+            connection.Dispose();
 
             Interlocked.Decrement(ref _count);
 

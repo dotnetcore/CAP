@@ -16,12 +16,12 @@ namespace Samples.Redis.SqlServer
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddControllers();
-
+             
             services.AddCap(options =>
             {
-                options.UseRedis("");
+                options.UseRedis("redis-node-0:6379,password=cap");
 
-                options.UseSqlServer("");
+                options.UseSqlServer("Server=db;Database=master;User=sa;Password=P@ssw0rd;");
             });
         }
 

@@ -35,11 +35,6 @@ namespace DotNetCore.CAP.Internal
             logger.LogWarning($"The {retries}th retrying send a message failed. message id: {messageId} ");
         }
 
-        public static void MessageHasBeenSent(this ILogger logger, string name, string content)
-        {
-            logger.LogDebug($"Message published. name: {name}, content:{content}.");
-        }
-
         public static void MessageReceived(this ILogger logger, string messageId, string name)
         {
             logger.LogDebug($"Received message. id:{messageId}, name: {name}");
@@ -50,9 +45,14 @@ namespace DotNetCore.CAP.Internal
             logger.LogError(ex, $"An exception occured while publishing a message, reason:{reason}. message id:{messageId}");
         }
 
-        public static void ConsumerExecuted(this ILogger logger, double milliseconds)
+        public static void ConsumerExecuting(this ILogger logger, string className, string methodName, string group)
         {
-            logger.LogDebug($"Consumer executed. Took: {milliseconds} ms.");
+            logger.LogInformation($"Executing subscriber method '{className}.{methodName}' on group '{group}'");
+        }
+
+        public static void ConsumerExecuted(this ILogger logger, string className, string methodName, string group, double milliseconds)
+        {
+            logger.LogInformation($"Executed subscriber method '{className}.{methodName}' on group '{group}' in {milliseconds} ms");
         }
 
         public static void ServerStarting(this ILogger logger)
@@ -73,12 +73,6 @@ namespace DotNetCore.CAP.Internal
         public static void ExpectedOperationCanceledException(this ILogger logger, Exception ex)
         {
             logger.LogWarning(ex, $"Expected an OperationCanceledException, but found '{ex.Message}'.");
-        }
-
-        public static void ModelBinderFormattingException(this ILogger logger, string methodName, string parameterName,
-            string content, Exception ex)
-        {
-            logger.LogError(ex, $"When call subscribe method, a parameter format conversion exception occurs. MethodName:'{methodName}' ParameterName:'{parameterName}' Content:'{content}'.");
         }
     }
 }

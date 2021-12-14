@@ -1,5 +1,65 @@
 # Release Notes
 
+
+## Version 5.1.2 (2021-07-26)
+
+**Bug Fixed:**
+
+* Fixed consumer register cancellation token source null referencee bug. (#952)
+* Fixed redis streams transport cluster keys cross-hashslot bug. (#944)
+
+
+## Version 5.1.1 (2021-07-09)
+
+**Features:**
+
+* Improve flow control for message cache of in memory. (#935)
+* Add cancellation token support to subscribers. (#912)
+* Add pathbase options for dashbaord. (#901)
+* Add custom authorization scheme support for dashbaord. (#906)
+
+**Bug Fixed:**
+
+* Fixed mysql connect timeout expired bug. (#931)
+* Fixed consul health check path invalid bug. (#921)
+* Fixed mongo dashbaord query bug. (#909)
+
+## Version 5.1.0 (2021-06-07)
+
+**Features:**
+
+* Add configure options for json serialization. (#879)
+* Add Redis Streams transport support. (#817)
+* New dashboard build with vue. (#880)
+* Add subscribe filter support. (#894)
+
+**Bug Fixed:**
+
+* Fixed use CapEFDbTransaction to get dbtransaction extension method bug. (#868)
+* Fixed pending message has not been deleted from buffer list in SQL Server. (#889)
+* Fixed dispatcher processing when storage message exception bug. (#900)
+
+
+## Version 5.0.3 (2021-05-14)
+
+**Bug Fixed:**
+
+* Fix the bug of getting db transaction through the IDbContextTransaction for SQLServer. (#867)
+* Fix RabbitMQ Connection close forced. (#861)
+
+## Version 5.0.2 (2021-04-28)
+
+**Features:**
+
+* Add support for Azure Service Bus sessions. (#829)
+* Add custom message headers support for RabbitMQ consumer. (#818)
+
+**Bug Fixed:**
+
+* Downgrading Microsoft.Data.SqlClient to 2.0.1. (#839)
+* DiagnosticObserver does not use null connection. (#845)
+* Fix null reference in AmazonSQSTransport. (#846)
+
 ## Version 5.0.1 (2021-04-07)
 
 **Features:**

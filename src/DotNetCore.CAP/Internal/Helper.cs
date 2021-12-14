@@ -4,6 +4,7 @@
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -35,6 +36,11 @@ namespace DotNetCore.CAP.Internal
                 return false;
             }
 
+            if (typeInfo.ContainsGenericParameters)
+            {
+                return false;
+            }
+
             return !typeInfo.ContainsGenericParameters
                    && typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase);
         }
@@ -59,9 +65,18 @@ namespace DotNetCore.CAP.Internal
             return wildcard;
         }
 
+        public static string Normalized(string name)
+        {
+            if (string.IsNullOrEmpty(name))
+            {
+                return name;
+            }
+            var pattern = "[\\>\\.\\ \\*]";
+            return Regex.IsMatch(name, pattern) ? Regex.Replace(name, pattern, "_") : name;
+        }
+
         public static bool IsInnerIP(string ipAddress)
         {
-            bool isInnerIp;
             var ipNum = GetIpNum(ipAddress);
 
             //Private IP：
@@ -75,9 +90,9 @@ namespace DotNetCore.CAP.Internal
             var bEnd = GetIpNum("172.31.255.255");
             var cBegin = GetIpNum("192.168.0.0");
             var cEnd = GetIpNum("192.168.255.255");
-            isInnerIp = IsInner(ipNum, aBegin, aEnd) || IsInner(ipNum, bBegin, bEnd) || IsInner(ipNum, cBegin, cEnd);
-            return isInnerIp;
+            return IsInner(ipNum, aBegin, aEnd) || IsInner(ipNum, bBegin, bEnd) || IsInner(ipNum, cBegin, cEnd);
         }
+
         private static long GetIpNum(string ipAddress)
         {
             var ip = ipAddress.Split('.');

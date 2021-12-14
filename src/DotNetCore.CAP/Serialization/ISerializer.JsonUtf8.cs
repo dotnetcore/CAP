@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Buffers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
@@ -59,16 +58,12 @@ namespace DotNetCore.CAP.Serialization
 
         public object Deserialize(object value, Type valueType)
         {
-            if (value is JsonElement jToken)
+            if (value is JsonElement jsonElement)
             {
-                var bufferWriter = new ArrayBufferWriter<byte>();
-                using (var writer = new Utf8JsonWriter(bufferWriter))
-                {
-                    jToken.WriteTo(writer);
-                }
-                return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, valueType, _jsonSerializerOptions);
+                return JsonSerializer.Deserialize(jsonElement, valueType, _jsonSerializerOptions);
             }
-            throw new NotSupportedException("Type is not of type JToken");
+
+            throw new NotSupportedException("Type is not of type JsonElement");
         }
 
         public bool IsJsonType(object jsonObject)

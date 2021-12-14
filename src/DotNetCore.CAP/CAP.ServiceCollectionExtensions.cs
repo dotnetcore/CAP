@@ -51,9 +51,8 @@ namespace Microsoft.Extensions.DependencyInjection
             services.TryAddSingleton<TransportCheckProcessor>();
             services.TryAddSingleton<CollectorProcessor>();
 
-            //Sender and Executors
+            //Sender
             services.TryAddSingleton<IMessageSender, MessageSender>();
-            services.TryAddSingleton<IDispatcher, Dispatcher>();
 
             services.TryAddSingleton<ISerializer, JsonUtf8Serializer>();
 
@@ -63,6 +62,17 @@ namespace Microsoft.Extensions.DependencyInjection
             //Options and extension service
             var options = new CapOptions();
             setupAction(options);
+
+            //Executors
+            if (options.UseDispatchingPerGroup)
+            {
+                services.TryAddSingleton<IDispatcher, DispatcherPerGroup>();
+            }
+            else
+            {
+                services.TryAddSingleton<IDispatcher, Dispatcher>();
+            }
+
             foreach (var serviceExtension in options.Extensions)
             {
                 serviceExtension.AddServices(services);

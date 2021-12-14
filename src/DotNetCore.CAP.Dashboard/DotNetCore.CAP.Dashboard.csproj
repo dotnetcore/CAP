@@ -1,24 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net5.0</TargetFramework>
+		<TargetFramework>net6.0</TargetFramework>
 		<LangVersion>default</LangVersion>
 	</PropertyGroup>
 
 	<ItemGroup>
+		<FrameworkReference Include="Microsoft.AspNetCore.App" />
+		<PackageReference Include="Consul" Version="1.6.10.3" />
 		<SupportedPlatform Include="browser" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<EmbeddedResource Include="wwwroot/dist/**/*" Exclude="**/*/*.map" />
-	</ItemGroup>
-	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Consul" Version="1.6.1.1" />
+		<Compile Include="..\DotNetCore.CAP\Internal\ObjectMethodExecutor\*.cs" Link="ObjectMethodExecutor\%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
-	</ItemGroup> 
+	</ItemGroup>
 
 </Project>

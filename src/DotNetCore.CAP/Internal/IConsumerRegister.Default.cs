@@ -35,7 +35,7 @@ namespace DotNetCore.CAP.Internal
         private BrokerAddress _serverAddress;
         private Task _compositeTask;
         private bool _disposed;
-        private static bool _isHealthy = true;
+        private bool _isHealthy = true;
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.Internal
         {
             _logger = logger;
             _serviceProvider = serviceProvider;
-            _options = serviceProvider.GetService<IOptions<CapOptions>>().Value;
+            _options = serviceProvider.GetRequiredService<IOptions<CapOptions>>().Value;
             _cts = new CancellationTokenSource();
         }
 
@@ -75,9 +75,18 @@ namespace DotNetCore.CAP.Internal
             foreach (var matchGroup in groupingMatches)
             {
                 ICollection<string> topics;
-                using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                try
                 {
-                    topics = client.FetchTopics(matchGroup.Value.Select(x => x.TopicName));
+                    using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                    {
+                        topics = client.FetchTopics(matchGroup.Value.Select(x => x.TopicName));
+                    }
+                }
+                catch (BrokerConnectionException e)
+                {
+                    _isHealthy = false;
+                    _logger.LogError(e, e.Message);
+                    return;
                 }
 
                 for (int i = 0; i < _options.ConsumerThreadCount; i++)
@@ -122,8 +131,7 @@ namespace DotNetCore.CAP.Internal
             if (!IsHealthy() || force)
             {
                 Pulse();
-
-                _cts.Dispose();
+                
                 _cts = new CancellationTokenSource();
                 _isHealthy = true;
 
@@ -165,7 +173,8 @@ namespace DotNetCore.CAP.Internal
 
         private void RegisterMessageProcessor(IConsumerClient client)
         {
-            client.OnMessageReceived += async (sender, transportMessage) =>
+            // Cannot set subscription to asynchronous
+            client.OnMessageReceived += (sender, transportMessage) =>
             {
                 _logger.MessageReceived(transportMessage.GetId(), transportMessage.GetName());
 
@@ -193,7 +202,7 @@ namespace DotNetCore.CAP.Internal
                         }
 
                         var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
-                        message = await _serializer.DeserializeAsync(transportMessage, type);
+                        message = _serializer.DeserializeAsync(transportMessage, type).GetAwaiter().GetResult();
                         message.RemoveException();
                     }
                     catch (Exception e)
@@ -291,6 +300,9 @@ namespace DotNetCore.CAP.Internal
                     break;
                 case MqLogType.AsyncErrorEvent:
                     _logger.LogError("NATS subscriber received an error. --> " + logmsg.Reason);
+                    break;
+                case MqLogType.ConnectError:
+                    _logger.LogError("NATS server connection error. -->  " + logmsg.Reason);
                     break;
                 case MqLogType.InvalidIdFormat:
                     _logger.LogError("AmazonSQS subscriber delete inflight message failed, invalid id. --> " + logmsg.Reason);

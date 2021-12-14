@@ -10,8 +10,10 @@ CAP 支持以下几种运输方式：
 * [Kafka](kafka.md)
 * [Azure Service Bus](azure-service-bus.md)
 * [Amazon SQS](aws-sqs.md)
+* [NATS](nats.md)
 * [In-Memory Queue](in-memory-queue.md)
 * [Redis Streams](redis-streams.md)
+* [Apache Pulsar](pulsar.md)
 
 ## 怎么选择运输器
 
