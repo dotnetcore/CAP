@@ -20,7 +20,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Database transaction object, can be converted to a specific database transaction object or IDBTransaction when used
         /// </summary>
-        object DbTransaction { get; set; }
+        object? DbTransaction { get; set; }
 
         /// <summary>
         /// Submit the transaction context of the CAP, we will send the message to the message queue at the time of submission

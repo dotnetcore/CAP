@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.Internal
         public ConsumerServiceSelector(IServiceProvider serviceProvider)
         {
             _serviceProvider = serviceProvider;
-            _capOptions = serviceProvider.GetService<IOptions<CapOptions>>().Value;
+            _capOptions = serviceProvider.GetRequiredService<IOptions<CapOptions>>().Value;
 
             _cacheList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
         }
@@ -51,7 +51,7 @@ namespace DotNetCore.CAP.Internal
             return executorDescriptorList;
         }
 
-        public ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
+        public ConsumerExecutorDescriptor? SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
             if (executeDescriptor.Count == 0)
             {
@@ -107,7 +107,7 @@ namespace DotNetCore.CAP.Internal
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
-            var types = Assembly.GetEntryAssembly().ExportedTypes;
+            var types = Assembly.GetEntryAssembly()!.ExportedTypes;
             foreach (var type in types)
             {
                 var typeInfo = type.GetTypeInfo();
@@ -120,7 +120,7 @@ namespace DotNetCore.CAP.Internal
             return executorDescriptorList;
         }
 
-        protected IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo, TypeInfo serviceTypeInfo = null)
+        protected IEnumerable<ConsumerExecutorDescriptor> GetTopicAttributesDescription(TypeInfo typeInfo, TypeInfo? serviceTypeInfo = null)
         {
             var topicClassAttribute = typeInfo.GetCustomAttribute<TopicAttribute>(true);
 
@@ -169,9 +169,9 @@ namespace DotNetCore.CAP.Internal
             TopicAttribute attr,
             MethodInfo methodInfo,
             TypeInfo implType,
-            TypeInfo serviceTypeInfo,
+            TypeInfo? serviceTypeInfo,
             IList<ParameterDescriptor> parameters,
-            TopicAttribute classAttr = null)
+            TopicAttribute? classAttr = null)
         {
             var descriptor = new ConsumerExecutorDescriptor
             {
@@ -187,7 +187,7 @@ namespace DotNetCore.CAP.Internal
             return descriptor;
         }
 
-        private ConsumerExecutorDescriptor MatchUsingName(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
+        private ConsumerExecutorDescriptor? MatchUsingName(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
             if (key == null)
             {
@@ -197,7 +197,7 @@ namespace DotNetCore.CAP.Internal
             return executeDescriptor.FirstOrDefault(x => x.TopicName.Equals(key, StringComparison.InvariantCultureIgnoreCase));
         }
 
-        private ConsumerExecutorDescriptor MatchWildcardUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
+        private ConsumerExecutorDescriptor? MatchWildcardUsingRegex(string key, IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
         {
             var group = executeDescriptor.First().Attribute.Group;
             if (!_cacheList.TryGetValue(group, out var tmpList))
@@ -223,9 +223,9 @@ namespace DotNetCore.CAP.Internal
 
         private class RegexExecuteDescriptor<T>
         {
-            public string Name { get; set; }
+            public string Name { get; set; } = default!;
 
-            public T Descriptor { get; set; }
+            public T Descriptor { get; set; } = default!;
         }
     }
 }

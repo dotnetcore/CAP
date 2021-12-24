@@ -26,8 +26,7 @@ namespace DotNetCore.CAP.Internal
         private readonly IOptions<CapOptions> _options;
 
         // ReSharper disable once InconsistentNaming
-        protected static readonly DiagnosticListener s_diagnosticListener =
-            new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
+        protected static readonly DiagnosticListener s_diagnosticListener = new(CapDiagnosticListenerNames.DiagnosticListenerName);
 
         public MessageSender(
             ILogger<MessageSender> logger,
@@ -36,10 +35,10 @@ namespace DotNetCore.CAP.Internal
             _logger = logger;
             _serviceProvider = serviceProvider;
 
-            _options = serviceProvider.GetService<IOptions<CapOptions>>();
-            _dataStorage = serviceProvider.GetService<IDataStorage>();
-            _serializer = serviceProvider.GetService<ISerializer>();
-            _transport = serviceProvider.GetService<ITransport>();
+            _options = serviceProvider.GetRequiredService<IOptions<CapOptions>>();
+            _dataStorage = serviceProvider.GetRequiredService<IDataStorage>();
+            _serializer = serviceProvider.GetRequiredService<ISerializer>();
+            _transport = serviceProvider.GetRequiredService<ITransport>();
         }
 
         public async Task<OperateResult> SendAsync(MediumMessage message)
@@ -80,9 +79,9 @@ namespace DotNetCore.CAP.Internal
             {
                 TracingError(tracingTimestamp, transportMsg, _transport.BrokerAddress, result);
 
-                var needRetry = await SetFailedState(message, result.Exception);
+                var needRetry = await SetFailedState(message, result.Exception!);
 
-                return (needRetry, OperateResult.Failed(result.Exception));
+                return (needRetry, OperateResult.Failed(result.Exception!));
             }
         }
 

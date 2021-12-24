@@ -22,7 +22,7 @@ namespace DotNetCore.CAP
         /// </summary>
         public bool Succeeded { get; set; }
 
-        public Exception Exception { get; set; }
+        public Exception? Exception { get; set; }
 
         /// <summary>
         /// An <see cref="IEnumerable{T}" /> of <see cref="OperateError" />s containing an errors

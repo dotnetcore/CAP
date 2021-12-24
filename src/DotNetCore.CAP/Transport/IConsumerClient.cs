@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.Transport
         /// <summary>
         /// Reject message and resumption
         /// </summary>
-        void Reject([CanBeNull] object sender);
+        void Reject(object? sender);
 
         event EventHandler<TransportMessage> OnMessageReceived;
 

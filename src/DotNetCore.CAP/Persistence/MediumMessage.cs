@@ -5,11 +5,11 @@ namespace DotNetCore.CAP.Persistence
 {
     public class MediumMessage
     {
-        public string DbId { get; set; }
+        public string DbId { get; set; } = default!;
 
-        public Message Origin { get; set; }
+        public Message Origin { get; set; } = default!;
 
-        public string Content { get; set; }
+        public string Content { get; set; } = default!;
 
         public DateTime Added { get; set; }
 

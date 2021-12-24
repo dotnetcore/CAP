@@ -4,7 +4,6 @@
 using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
-using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Serialization
 {
@@ -23,17 +22,17 @@ namespace DotNetCore.CAP.Serialization
         /// <summary>
         /// Deserialize the given string into a <see cref="Message"/>
         /// </summary>
-        Message Deserialize(string json);
+        Message? Deserialize(string json);
 
         /// <summary>
         /// Deserialize the given <see cref="TransportMessage"/> back into a <see cref="Message"/>
         /// </summary>
-        Task<Message> DeserializeAsync(TransportMessage transportMessage, [CanBeNull] Type valueType);
+        Task<Message> DeserializeAsync(TransportMessage transportMessage, Type? valueType);
 
         /// <summary>
         /// Deserialize the given object with the given Type into an object
         /// </summary>
-        object Deserialize(object value, Type valueType);
+        object? Deserialize(object value, Type valueType);
 
         /// <summary>
         /// Check if the given object is of Json type, e.g. JToken or JsonElement

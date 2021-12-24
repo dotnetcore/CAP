@@ -25,15 +25,15 @@ namespace DotNetCore.CAP.Internal
         private readonly TimeSpan _pollingDelay = TimeSpan.FromSeconds(1);
         private readonly CapOptions _options;
 
-        private IConsumerClientFactory _consumerClientFactory;
-        private IDispatcher _dispatcher;
-        private ISerializer _serializer;
-        private IDataStorage _storage;
+        private IConsumerClientFactory _consumerClientFactory = default!;
+        private IDispatcher _dispatcher = default!;
+        private ISerializer _serializer = default!;
+        private IDataStorage _storage = default!;
 
-        private MethodMatcherCache _selector;
+        private MethodMatcherCache _selector = default!;
         private CancellationTokenSource _cts;
         private BrokerAddress _serverAddress;
-        private Task _compositeTask;
+        private Task? _compositeTask;
         private bool _disposed;
         private bool _isHealthy = true;
 
@@ -57,13 +57,13 @@ namespace DotNetCore.CAP.Internal
 
         public void Start(CancellationToken stoppingToken)
         {
-            _selector = _serviceProvider.GetService<MethodMatcherCache>();
-            _dispatcher = _serviceProvider.GetService<IDispatcher>();
-            _serializer = _serviceProvider.GetService<ISerializer>();
-            _storage = _serviceProvider.GetService<IDataStorage>();
-            _consumerClientFactory = _serviceProvider.GetService<IConsumerClientFactory>();
+            _selector = _serviceProvider.GetRequiredService<MethodMatcherCache>();
+            _dispatcher = _serviceProvider.GetRequiredService<IDispatcher>();
+            _serializer = _serviceProvider.GetRequiredService<ISerializer>();
+            _storage = _serviceProvider.GetRequiredService<IDataStorage>();
+            _consumerClientFactory = _serviceProvider.GetRequiredService<IConsumerClientFactory>();
 
-            stoppingToken.Register(() => _cts?.Cancel());
+            stoppingToken.Register(() => _cts.Cancel());
 
             Execute();
         }
@@ -131,7 +131,7 @@ namespace DotNetCore.CAP.Internal
             if (!IsHealthy() || force)
             {
                 Pulse();
-                
+
                 _cts = new CancellationTokenSource();
                 _isHealthy = true;
 
@@ -166,9 +166,8 @@ namespace DotNetCore.CAP.Internal
 
         public void Pulse()
         {
-            _cts?.Cancel();
-            _cts?.Dispose();
-            _cts = null;
+            _cts.Cancel();
+            _cts.Dispose();
         }
 
         private void RegisterMessageProcessor(IConsumerClient client)
@@ -184,7 +183,7 @@ namespace DotNetCore.CAP.Internal
                     tracingTimestamp = TracingBefore(transportMessage, _serverAddress);
 
                     var name = transportMessage.GetName();
-                    var group = transportMessage.GetGroup();
+                    var group = transportMessage.GetGroup()!;
 
                     Message message;
 
@@ -201,21 +200,36 @@ namespace DotNetCore.CAP.Internal
                             throw ex;
                         }
 
-                        var type = executor.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
+                        var type = executor!.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
                         message = _serializer.DeserializeAsync(transportMessage, type).GetAwaiter().GetResult();
                         message.RemoveException();
                     }
                     catch (Exception e)
                     {
                         transportMessage.Headers[Headers.Exception] = e.GetType().Name + "-->" + e.Message;
+                        string? dataUri;
                         if (transportMessage.Headers.TryGetValue(Headers.Type, out var val))
                         {
-                            var dataUri = $"data:{val};base64," + Convert.ToBase64String(transportMessage.Body);
+                            if (transportMessage.Body != null)
+                            {
+                                dataUri = $"data:{val};base64," + Convert.ToBase64String(transportMessage.Body);
+                            }
+                            else
+                            {
+                                dataUri = null;
+                            }
                             message = new Message(transportMessage.Headers, dataUri);
                         }
                         else
                         {
-                            var dataUri = "data:UnknownType;base64," + Convert.ToBase64String(transportMessage.Body);
+                            if (transportMessage.Body != null)
+                            {
+                                dataUri = "data:UnknownType;base64," + Convert.ToBase64String(transportMessage.Body);
+                            }
+                            else
+                            {
+                                dataUri = null;
+                            }
                             message = new Message(transportMessage.Headers, dataUri);
                         }
                     }
@@ -255,7 +269,7 @@ namespace DotNetCore.CAP.Internal
 
                         TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
 
-                        _dispatcher.EnqueueToExecute(mediumMessage, executor);
+                        _dispatcher.EnqueueToExecute(mediumMessage, executor!);
                     }
                 }
                 catch (Exception e)

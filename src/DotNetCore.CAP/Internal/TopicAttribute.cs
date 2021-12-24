@@ -35,6 +35,6 @@ namespace DotNetCore.CAP.Internal
         /// kafka --> groups.id
         /// rabbit MQ --> queue.name
         /// </summary>
-        public string Group { get; set; }
+        public string Group { get; set; } = default!;
     }
 }

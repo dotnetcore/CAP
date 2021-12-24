@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.Internal
         {
         }
 
-        public PublisherSentFailedException(string message, Exception ex) : base(message, ex)
+        public PublisherSentFailedException(string message, Exception? ex) : base(message, ex)
         {
         }
     }

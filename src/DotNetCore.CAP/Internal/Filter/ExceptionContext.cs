@@ -19,6 +19,6 @@ namespace DotNetCore.CAP.Filter
 
         public bool ExceptionHandled { get; set; }
 
-        public object Result { get; set; }
+        public object? Result { get; set; }
     }
 }

@@ -1,11 +1,10 @@
 ﻿using System.Linq;
-using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Transport
 {
     public struct BrokerAddress
     {
-        public BrokerAddress([NotNull]string address)
+        public BrokerAddress(string address)
         {
             if (address.Contains("$"))
             {
@@ -21,7 +20,7 @@ namespace DotNetCore.CAP.Transport
             }
         }
 
-        public BrokerAddress([NotNull]string name, [CanBeNull]string endpoint)
+        public BrokerAddress(string name, string? endpoint)
         {
             Name = name;
             Endpoint = endpoint;
@@ -29,7 +28,7 @@ namespace DotNetCore.CAP.Transport
 
         public string Name { get; set; }
 
-        public string Endpoint { get; set; }
+        public string? Endpoint { get; set; }
 
         public override string ToString()
         {

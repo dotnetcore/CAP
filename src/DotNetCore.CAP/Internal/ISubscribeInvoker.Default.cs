@@ -12,22 +12,19 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
-using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
 {
     public class SubscribeInvoker : ISubscribeInvoker
     {
-        private readonly ILogger _logger;
         private readonly IServiceProvider _serviceProvider;
         private readonly ISerializer _serializer;
         private readonly ConcurrentDictionary<string, ObjectMethodExecutor> _executors;
 
-        public SubscribeInvoker(ILoggerFactory loggerFactory, IServiceProvider serviceProvider, ISerializer serializer)
+        public SubscribeInvoker(IServiceProvider serviceProvider, ISerializer serializer)
         {
             _serviceProvider = serviceProvider;
             _serializer = serializer;
-            _logger = loggerFactory.CreateLogger<SubscribeInvoker>();
             _executors = new ConcurrentDictionary<string, ObjectMethodExecutor>();
         }
 
@@ -36,11 +33,11 @@ namespace DotNetCore.CAP.Internal
             cancellationToken.ThrowIfCancellationRequested();
 
             var methodInfo = context.ConsumerDescriptor.MethodInfo;
-            var reflectedTypeHandle = methodInfo.ReflectedType.TypeHandle.Value;
+            var reflectedTypeHandle = methodInfo.ReflectedType!.TypeHandle.Value;
             var methodHandle = methodInfo.MethodHandle.Value;
             var key = $"{reflectedTypeHandle}_{methodHandle}";
 
-            var executor = _executors.GetOrAdd(key, x => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
+            var executor = _executors.GetOrAdd(key, _ => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
             using var scope = _serviceProvider.CreateScope();
 
@@ -50,7 +47,7 @@ namespace DotNetCore.CAP.Internal
 
             var message = context.DeliverMessage;
             var parameterDescriptors = context.ConsumerDescriptor.Parameters;
-            var executeParameters = new object[parameterDescriptors.Count];
+            var executeParameters = new object?[parameterDescriptors.Count];
             for (var i = 0; i < parameterDescriptors.Count; i++)
             {
                 var parameterDescriptor = parameterDescriptors[i];
@@ -90,7 +87,7 @@ namespace DotNetCore.CAP.Internal
             }
 
             var filter = provider.GetService<ISubscribeFilter>();
-            object resultObj = null;
+            object? resultObj = null;
             try
             {
                 if (filter != null)
@@ -155,10 +152,10 @@ namespace DotNetCore.CAP.Internal
             var srvType = context.ConsumerDescriptor.ServiceTypeInfo?.AsType();
             var implType = context.ConsumerDescriptor.ImplTypeInfo.AsType();
 
-            object obj = null;
+            object? obj = null;
             if (srvType != null)
             {
-                obj = provider.GetServices(srvType).FirstOrDefault(o => o.GetType() == implType);
+                obj = provider.GetServices(srvType).FirstOrDefault(o => o?.GetType() == implType);
             }
 
             if (obj == null)
@@ -169,7 +166,7 @@ namespace DotNetCore.CAP.Internal
             return obj;
         }
 
-        private async Task<object> ExecuteWithParameterAsync(ObjectMethodExecutor executor, object @class, object[] parameter)
+        private async Task<object?> ExecuteWithParameterAsync(ObjectMethodExecutor executor, object @class, object?[] parameter)
         {
             if (executor.IsMethodAsync)
             {

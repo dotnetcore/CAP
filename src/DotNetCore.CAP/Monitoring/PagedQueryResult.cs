@@ -4,7 +4,7 @@ namespace DotNetCore.CAP.Monitoring
 {
     public class PagedQueryResult<T>
     {
-        public IList<T> Items { get; set; }
+        public IList<T>? Items { get; set; }
 
         public long Totals { get; set; }
 

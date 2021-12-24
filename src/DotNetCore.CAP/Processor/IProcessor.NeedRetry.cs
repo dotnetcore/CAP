@@ -84,7 +84,7 @@ namespace DotNetCore.CAP.Processor
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(1, ex, "Get messages from storage failed. Retrying...", typeof(T).Name);
+                _logger.LogWarning(1, ex, "Get messages from storage failed. Retrying...");
 
                 return Enumerable.Empty<T>();
             }

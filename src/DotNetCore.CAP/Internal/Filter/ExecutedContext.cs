@@ -8,11 +8,11 @@ namespace DotNetCore.CAP.Filter
 {
     public class ExecutedContext : FilterContext
     {
-        public ExecutedContext(ConsumerContext context, object result) : base(context)
+        public ExecutedContext(ConsumerContext context, object? result) : base(context)
         {
             Result = result;
         }
 
-        public object Result { get; set; }
+        public object? Result { get; set; }
     }
 }

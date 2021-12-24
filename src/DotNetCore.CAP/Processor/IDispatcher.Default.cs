@@ -21,10 +21,10 @@ namespace DotNetCore.CAP.Processor
         private readonly CapOptions _options;
         private readonly ISubscribeDispatcher _executor;
         private readonly ILogger<Dispatcher> _logger;
-        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cts = new ();
 
-        private Channel<MediumMessage> _publishedChannel;
-        private Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel;
+        private Channel<MediumMessage> _publishedChannel = default!;
+        private Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel = default!;
 
         public Dispatcher(ILogger<Dispatcher> logger,
             IMessageSender sender,
@@ -125,7 +125,7 @@ namespace DotNetCore.CAP.Processor
                             var result = await _sender.SendAsync(message);
                             if (!result.Succeeded)
                             {
-                                _logger.MessagePublishException(message.Origin.GetId(), result.ToString(),
+                                _logger.MessagePublishException(message.Origin?.GetId(), result.ToString(),
                                     result.Exception);
                             }
                         }

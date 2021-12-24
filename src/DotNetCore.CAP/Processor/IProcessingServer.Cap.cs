@@ -19,8 +19,8 @@ namespace DotNetCore.CAP.Processor
         private readonly ILoggerFactory _loggerFactory;
         private readonly IServiceProvider _provider;
 
-        private Task _compositeTask;
-        private ProcessingContext _context;
+        private Task? _compositeTask;
+        private ProcessingContext _context = default!;
         private bool _disposed;
 
         public CapProcessingServer(

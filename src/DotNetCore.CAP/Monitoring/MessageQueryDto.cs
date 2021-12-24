@@ -9,13 +9,13 @@ namespace DotNetCore.CAP.Monitoring
     {
         public MessageType MessageType { get; set; }
 
-        public string Group { get; set; }
+        public string? Group { get; set; }
 
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
-        public string Content { get; set; }
+        public string? Content { get; set; }
 
-        public string StatusName { get; set; }
+        public string? StatusName { get; set; }
 
         public int CurrentPage { get; set; }
 
