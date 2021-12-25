@@ -20,6 +20,7 @@ namespace DotNetCore.CAP.Internal
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<Bootstrapper> _logger;
         private readonly CancellationTokenSource _cts = new ();
+        private bool _disposed;
         private IEnumerable<IProcessingServer> _processors = default!;
 
         public Bootstrapper(IServiceProvider serviceProvider, ILogger<Bootstrapper> logger)
@@ -93,8 +94,13 @@ namespace DotNetCore.CAP.Internal
 
         public override void Dispose()
         {
+            if (_disposed)
+            {
+                return;
+            }
             _cts.Cancel();
             _cts.Dispose();
+            _disposed = true;
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)

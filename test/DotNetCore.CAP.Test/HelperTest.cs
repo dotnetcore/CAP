@@ -11,13 +11,13 @@ namespace DotNetCore.CAP.Test
         public void ToTimestampTest()
         {
             //Arrange
-            var time = DateTime.Parse("2018-01-01 00:00:00");
+            var time = DateTimeOffset.Parse("2018-01-01T00:00:00Z");
 
             //Act
-            var result = Helper.ToTimestamp(time);
+            var result = Helper.ToTimestamp(time.DateTime);
 
             //Assert
-            Assert.Equal(1514764800, result);
+            Assert.Equal(1514736000, result);
         }
 
         [Fact]

@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.Internal
         private IDataStorage _storage = default!;
 
         private MethodMatcherCache _selector = default!;
-        private CancellationTokenSource _cts;
+        private CancellationTokenSource _cts = new();
         private BrokerAddress _serverAddress;
         private Task? _compositeTask;
         private bool _disposed;
@@ -47,7 +47,6 @@ namespace DotNetCore.CAP.Internal
             _logger = logger;
             _serviceProvider = serviceProvider;
             _options = serviceProvider.GetRequiredService<IOptions<CapOptions>>().Value;
-            _cts = new CancellationTokenSource();
         }
 
         public bool IsHealthy()
@@ -63,7 +62,7 @@ namespace DotNetCore.CAP.Internal
             _storage = _serviceProvider.GetRequiredService<IDataStorage>();
             _consumerClientFactory = _serviceProvider.GetRequiredService<IConsumerClientFactory>();
 
-            stoppingToken.Register(() => _cts.Cancel());
+            stoppingToken.Register(Dispose);
 
             Execute();
         }
