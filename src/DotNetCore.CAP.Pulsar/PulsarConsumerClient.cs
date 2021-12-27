@@ -15,23 +15,23 @@ namespace DotNetCore.CAP.Pulsar
 {
     internal sealed class PulsarConsumerClient : IConsumerClient
     {
-        private static PulsarClient _client;
+        private readonly PulsarClient _client;
         private readonly string _groupId;
         private readonly PulsarOptions _pulsarOptions;
-        private IConsumer<byte[]> _consumerClient;
+        private IConsumer<byte[]>? _consumerClient;
 
-        public PulsarConsumerClient(PulsarClient client,string groupId, IOptions<PulsarOptions> options)
+        public PulsarConsumerClient(PulsarClient client, string groupId, IOptions<PulsarOptions> options)
         {
-             _client = client;
+            _client = client;
             _groupId = groupId;
             _pulsarOptions = options.Value;
         }
 
-        public event EventHandler<TransportMessage> OnMessageReceived;
+        public event EventHandler<TransportMessage>? OnMessageReceived;
 
-        public event EventHandler<LogMessageEventArgs> OnLog;
+        public event EventHandler<LogMessageEventArgs>? OnLog;
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("Pulsar", _pulsarOptions.ServiceUrl);
+        public BrokerAddress BrokerAddress => new ("Pulsar", _pulsarOptions.ServiceUrl);
 
         public void Subscribe(IEnumerable<string> topics)
         {
@@ -47,16 +47,16 @@ namespace DotNetCore.CAP.Pulsar
                 .SubscriptionName(_groupId)
                 .ConsumerName(serviceName)
                 .SubscriptionType(SubscriptionType.Shared)
-                .SubscribeAsync().Result;
+                .SubscribeAsync().GetAwaiter().GetResult();
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var consumerResult = _consumerClient.ReceiveAsync().Result;
+                var consumerResult = _consumerClient!.ReceiveAsync(cancellationToken).Result;
 
-                var headers = new Dictionary<string, string>(consumerResult.Properties.Count);
+                var headers = new Dictionary<string, string?>(consumerResult.Properties.Count);
                 foreach (var header in consumerResult.Properties)
                 {
                     headers.Add(header.Key, header.Value);
@@ -72,27 +72,20 @@ namespace DotNetCore.CAP.Pulsar
 
         public void Commit(object sender)
         {
-            _consumerClient.AcknowledgeAsync((MessageId)sender);
+            _consumerClient!.AcknowledgeAsync((MessageId)sender);
         }
 
-        public void Reject(object sender)
+        public void Reject(object? sender)
         {
-            _consumerClient.NegativeAcknowledge((MessageId)sender);
+            if(sender is MessageId id)
+            {
+                _consumerClient!.NegativeAcknowledge(id);
+            }
         }
 
         public void Dispose()
         {
             _consumerClient?.DisposeAsync();
-        }
-
-        private void ConsumerClient_OnConsumeError(IConsumer<byte[]> consumer, Exception e)
-        {
-            var logArgs = new LogMessageEventArgs
-            {
-                LogType = MqLogType.ServerConnError,
-                Reason = $"An error occurred during connect pulsar --> {e.Message}"
-            };
-            OnLog?.Invoke(null, logArgs);
         }
     }
 }

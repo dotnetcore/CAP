@@ -2,14 +2,8 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>DotNetCore.CAP.Pulsar</AssemblyName>
+	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);Pulsar</PackageTags>
-  </PropertyGroup>
-
-  <PropertyGroup>
-    <WarningsAsErrors>NU1605;NU1701</WarningsAsErrors>
-    <NoWarn>NU1701;CS1591</NoWarn>
-    <DocumentationFile>bin\$(Configuration)\netstandard2.0\DotNetCore.CAP.Pulsar.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

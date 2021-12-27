@@ -22,7 +22,7 @@ namespace DotNetCore.CAP.Pulsar
             _connectionFactory = connectionFactory;
         }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("Pulsar", _connectionFactory.ServersAddress);
+        public BrokerAddress BrokerAddress => new ("Pulsar", _connectionFactory.ServersAddress);
 
         public async Task<OperateResult> SendAsync(TransportMessage message)
         {
@@ -30,9 +30,9 @@ namespace DotNetCore.CAP.Pulsar
 
             try
             {
-                var headerDic = new Dictionary<string, string>(message.Headers);
+                var headerDic = new Dictionary<string, string?>(message.Headers);
                 headerDic.TryGetValue(PulsarHeaders.PulsarKey, out var key);
-                var pulsarMessage = producer.NewMessage(message.Body, key, headerDic);
+                var pulsarMessage = producer.NewMessage(message.Body!, key, headerDic);
                 var result = await producer.SendAsync(pulsarMessage);
 
                 if (result.Type != null)
