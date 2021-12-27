@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.SqlServer
         public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state) =>
             await ChangeMessageStateAsync(_recName, message, state);
 
-        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
+        public MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null)
         {
             var sql = $"INSERT INTO {_pubName} ([Id],[Version],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
                       $"VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
@@ -84,7 +84,7 @@ namespace DotNetCore.CAP.SqlServer
                     dbTrans = dbContextTrans.GetDbTransaction();
 
                 var conn = dbTrans?.Connection;
-                conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
+                conn!.ExecuteNonQuery(sql, dbTrans, sqlParams);
             }
 
             return message;
@@ -126,7 +126,7 @@ namespace DotNetCore.CAP.SqlServer
                 new SqlParameter("@Content", _serializer.Serialize(mdMessage.Origin)),
                 new SqlParameter("@Retries", mdMessage.Retries),
                 new SqlParameter("@Added", mdMessage.Added),
-                new SqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
+                new SqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? mdMessage.ExpiresAt.Value : DBNull.Value),
                 new SqlParameter("@StatusName", nameof(StatusName.Scheduled))
             };
 
@@ -200,7 +200,7 @@ namespace DotNetCore.CAP.SqlServer
                         messages.Add(new MediumMessage
                         {
                             DbId = reader.GetInt64(0).ToString(),
-                            Origin = _serializer.Deserialize(reader.GetString(1)),
+                            Origin = _serializer.Deserialize(reader.GetString(1))!,
                             Retries = reader.GetInt32(2),
                             Added = reader.GetDateTime(3)
                         });

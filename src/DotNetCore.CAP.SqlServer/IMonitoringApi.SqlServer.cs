@@ -131,7 +131,7 @@ SELECT
                         Content = reader.GetString(index++),
                         Retries = reader.GetInt32(index++),
                         Added = reader.GetDateTime(index++),
-                        ExpiresAt = reader.IsDBNull(index++) ? (DateTime?)null : reader.GetDateTime(index - 1),
+                        ExpiresAt = reader.IsDBNull(index++) ? null : reader.GetDateTime(index - 1),
                         StatusName = reader.GetString(index)
                     });
                 }
@@ -162,9 +162,9 @@ SELECT
             return GetNumberOfMessage(_recName, nameof(StatusName.Succeeded));
         }
 
-        public async Task<MediumMessage> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
+        public async Task<MediumMessage?> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
 
-        public async Task<MediumMessage> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
+        public async Task<MediumMessage?> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
 
         private int GetNumberOfMessage(string tableName, string statusName)
         {
@@ -254,14 +254,14 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
             return result;
         }
 
-        private async Task<MediumMessage> GetMessageAsync(string tableName, long id)
+        private async Task<MediumMessage?> GetMessageAsync(string tableName, long id)
         {
             var sql = $@"SELECT TOP 1 Id AS DbId, Content, Added, ExpiresAt, Retries FROM {tableName} WITH (readpast) WHERE Id={id}";
 
             await using var connection = new SqlConnection(_options.ConnectionString);
             var mediumMessage = connection.ExecuteReader(sql, reader =>
             {
-                MediumMessage message = null;
+                MediumMessage? message = null;
 
                 while (reader.Read())
                 {

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
@@ -11,7 +12,7 @@ using Microsoft.Data.SqlClient;
 
 namespace DotNetCore.CAP.SqlServer.Diagnostics
 {
-    internal class DiagnosticObserver : IObserver<KeyValuePair<string, object>>
+    internal class DiagnosticObserver : IObserver<KeyValuePair<string, object?>>
     {
         public const string SqlAfterCommitTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionCommitAfter";
         public const string SqlErrorCommitTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionCommitError";
@@ -36,41 +37,48 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
         {
         }
 
-        public void OnNext(KeyValuePair<string, object> evt)
+        public void OnNext(KeyValuePair<string, object?> evt)
         {
-            if (evt.Key == SqlAfterCommitTransactionMicrosoft)
+            switch (evt.Key)
             {
-                if (!TryGetSqlConnection(evt, out SqlConnection sqlConnection)) return;
-                var transactionKey = sqlConnection.ClientConnectionId;
-                if (_bufferList.TryRemove(transactionKey, out var msgList))
+                case SqlAfterCommitTransactionMicrosoft:
                 {
-                    foreach (var message in msgList)
-                    {
-                        _dispatcher.EnqueueToPublish(message);
-                    }
-                }
-            }
-            else if (evt.Key == SqlErrorCommitTransactionMicrosoft || evt.Key == SqlAfterRollbackTransactionMicrosoft || evt.Key == SqlBeforeCloseConnectionMicrosoft)
-            {
-                if (!_bufferList.IsEmpty)
-                {
-                    if (!TryGetSqlConnection(evt, out SqlConnection sqlConnection)) return;
+                    if (!TryGetSqlConnection(evt, out SqlConnection? sqlConnection)) return;
                     var transactionKey = sqlConnection.ClientConnectionId;
+                    if (_bufferList.TryRemove(transactionKey, out var msgList))
+                    {
+                        foreach (var message in msgList)
+                        {
+                            _dispatcher.EnqueueToPublish(message);
+                        }
+                    }
 
-                    _bufferList.TryRemove(transactionKey, out _);
+                    break;
+                }
+                case SqlErrorCommitTransactionMicrosoft or SqlAfterRollbackTransactionMicrosoft or SqlBeforeCloseConnectionMicrosoft:
+                {
+                    if (!_bufferList.IsEmpty)
+                    {
+                        if (!TryGetSqlConnection(evt, out SqlConnection? sqlConnection)) return;
+                        var transactionKey = sqlConnection.ClientConnectionId;
+
+                        _bufferList.TryRemove(transactionKey, out _);
+                    }
+
+                    break;
                 }
             }
         }
 
-        private static bool TryGetSqlConnection(KeyValuePair<string, object> evt, out SqlConnection sqlConnection)
+        private static bool TryGetSqlConnection(KeyValuePair<string, object?> evt, [NotNullWhen(true)] out SqlConnection? sqlConnection)
         {
             sqlConnection = GetProperty(evt.Value, "Connection") as SqlConnection;
             return sqlConnection != null;
         }
 
-        private static object GetProperty(object _this, string propertyName)
+        private static object? GetProperty(object? @this, string propertyName)
         {
-            return _this.GetType().GetTypeInfo().GetDeclaredProperty(propertyName)?.GetValue(_this);
+            return @this?.GetType().GetTypeInfo().GetDeclaredProperty(propertyName)?.GetValue(@this);
         }
     }
 }
