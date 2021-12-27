@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>DotNetCore.CAP.InMemoryStorage</AssemblyName>
+	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);InMemory</PackageTags>
   </PropertyGroup>
 

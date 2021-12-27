@@ -26,9 +26,9 @@ namespace DotNetCore.CAP.InMemoryStorage
             _serializer = serializer;
         }
 
-        public static Dictionary<string, MemoryMessage> PublishedMessages { get; } = new Dictionary<string, MemoryMessage>();
+        public static Dictionary<string, MemoryMessage> PublishedMessages { get; } = new();
 
-        public static Dictionary<string, MemoryMessage> ReceivedMessages { get; } = new Dictionary<string, MemoryMessage>();
+        public static Dictionary<string, MemoryMessage> ReceivedMessages { get; } = new();
 
         public Task ChangePublishStateAsync(MediumMessage message, StatusName state)
         {
@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.InMemoryStorage
             return Task.CompletedTask;
         }
 
-        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
+        public MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null)
         {
             var message = new MediumMessage
             {
@@ -85,7 +85,7 @@ namespace DotNetCore.CAP.InMemoryStorage
                 {
                     DbId = id,
                     Group = group,
-                    Origin = null,
+                    Origin = null!,
                     Name = name,
                     Content = content,
                     Retries = _capOptions.Value.FailedRetryCount,
@@ -186,7 +186,7 @@ namespace DotNetCore.CAP.InMemoryStorage
 
             foreach (var message in result)
             {
-                message.Origin = _serializer.Deserialize(message.Content);
+                message.Origin = _serializer.Deserialize(message.Content)!;
             }
 
             return Task.FromResult(result);
@@ -208,7 +208,7 @@ namespace DotNetCore.CAP.InMemoryStorage
 
             foreach (var message in result)
             {
-                message.Origin = _serializer.Deserialize(message.Content);
+                message.Origin = _serializer.Deserialize(message.Content)!;
             }
 
             return Task.FromResult(result);
