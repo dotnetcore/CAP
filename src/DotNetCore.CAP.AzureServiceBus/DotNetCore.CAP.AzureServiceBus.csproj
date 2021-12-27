@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>DotNetCore.CAP.AzureServiceBus</AssemblyName>
+	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);AzureServiceBus</PackageTags>
   </PropertyGroup>
 
