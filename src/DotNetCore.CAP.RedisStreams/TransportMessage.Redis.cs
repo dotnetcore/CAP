@@ -23,16 +23,15 @@ namespace DotNetCore.CAP.RedisStreams
             };
         }
 
-        public static TransportMessage Create(StreamEntry streamEntry, string groupId = null)
+        public static TransportMessage Create(StreamEntry streamEntry, string? groupId = null)
         {
-            if (streamEntry.IsNull)
-                return null;
-
             var headersRaw = streamEntry[Headers];
             if (headersRaw.IsNullOrEmpty)
+            {
                 throw new ArgumentException($"Redis stream entry with id {streamEntry.Id} missing cap headers");
-
-            var headers = JsonSerializer.Deserialize<IDictionary<string, string>>(headersRaw);
+            }
+                
+            var headers = JsonSerializer.Deserialize<IDictionary<string, string?>>(headersRaw)!;
 
             var bodyRaw = streamEntry[Body];
 
@@ -43,8 +42,12 @@ namespace DotNetCore.CAP.RedisStreams
             return new TransportMessage(headers, body);
         }
 
-        private static string ToJson(object obj)
+        private static RedisValue ToJson(object? obj)
         {
+            if (obj == null)
+            {
+                return RedisValue.Null;
+            }
             return JsonSerializer.Serialize(obj, new JsonSerializerOptions(JsonSerializerDefaults.Web));
         }
     }

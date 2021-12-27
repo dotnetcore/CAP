@@ -9,11 +9,11 @@ namespace DotNetCore.CAP
     public class CapRedisOptions
     {
         /// <summary>
-        ///     Gets or sets the options of redis connections
+        ///     Gets or sets the native options of StackExchange.Redis
         /// </summary>
-        public ConfigurationOptions Configuration { get; set; }
+        public ConfigurationOptions? Configuration { get; set; }
 
-        internal string Endpoint { get; set; }
+        internal string Endpoint { get; set; } = default!;
 
         /// <summary>
         ///     Gets or sets the count of entries consumed from stream
