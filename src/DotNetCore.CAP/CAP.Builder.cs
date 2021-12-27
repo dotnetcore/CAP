@@ -6,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using DotNetCore.CAP.Filter;
 using DotNetCore.CAP.Internal;
-using JetBrains.Annotations;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 // ReSharper disable UnusedMember.Global
@@ -78,7 +77,7 @@ namespace DotNetCore.CAP
         /// Registers subscribers from the specified types.
         /// </summary>
         /// <param name="handlerAssemblyMarkerTypes"></param>
-        public CapBuilder AddSubscriberAssembly([NotNull] params Type[] handlerAssemblyMarkerTypes)
+        public CapBuilder AddSubscriberAssembly(params Type[] handlerAssemblyMarkerTypes)
         {
             if (handlerAssemblyMarkerTypes == null) throw new ArgumentNullException(nameof(handlerAssemblyMarkerTypes));
 
