@@ -8,19 +8,6 @@ namespace DotNetCore.CAP.Test
     public class HelperTest
     {
         [Fact]
-        public void ToTimestampTest()
-        {
-            //Arrange
-            var time = DateTimeOffset.Parse("2018-01-01T00:00:00Z");
-
-            //Act
-            var result = Helper.ToTimestamp(time.DateTime);
-
-            //Assert
-            Assert.Equal(1514736000, result);
-        }
-
-        [Fact]
         public void IsControllerTest()
         {
             //Arrange
