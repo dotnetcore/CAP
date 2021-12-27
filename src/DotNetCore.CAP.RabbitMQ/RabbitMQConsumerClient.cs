@@ -22,9 +22,8 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly string _exchangeName;
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
-        private IModel _channel;
-
-        private IConnection _connection;
+        private IModel? _channel;
+        private IConnection? _connection;
 
         public RabbitMQConsumerClient(string queueName,
             IConnectionChannelPool connectionChannelPool,
@@ -36,11 +35,11 @@ namespace DotNetCore.CAP.RabbitMQ
             _exchangeName = connectionChannelPool.Exchange;
         }
 
-        public event EventHandler<TransportMessage> OnMessageReceived;
+        public event EventHandler<TransportMessage>? OnMessageReceived;
 
-        public event EventHandler<LogMessageEventArgs> OnLog;
+        public event EventHandler<LogMessageEventArgs>? OnLog;
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("RabbitMQ", _rabbitMQOptions.HostName);
+        public BrokerAddress BrokerAddress => new("RabbitMQ", _rabbitMQOptions.HostName);
 
         public void Subscribe(IEnumerable<string> topics)
         {
@@ -81,17 +80,17 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public void Commit(object sender)
         {
-            if (_channel.IsOpen)
+            if (_channel!.IsOpen)
             {
                 _channel.BasicAck((ulong)sender, false);
             }
         }
 
-        public void Reject(object sender)
+        public void Reject(object? sender)
         {
-            if (_channel.IsOpen)
+            if (_channel!.IsOpen && sender is ulong val)
             {
-                _channel.BasicReject((ulong)sender, true);
+                _channel.BasicReject(val, true);
             }
         }
 
@@ -175,7 +174,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
         {
-            var headers = new Dictionary<string, string>();
+            var headers = new Dictionary<string, string?>();
 
             if (e.BasicProperties.Headers != null)
             {
