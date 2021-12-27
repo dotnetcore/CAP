@@ -21,7 +21,7 @@ namespace DotNetCore.CAP.Kafka
 
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;
-        private IConsumer<string, byte[]> _consumerClient;
+        private IConsumer<string, byte[]>? _consumerClient;
 
         public KafkaConsumerClient(string groupId, IOptions<KafkaOptions> options)
         {
@@ -29,11 +29,11 @@ namespace DotNetCore.CAP.Kafka
             _kafkaOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public event EventHandler<TransportMessage> OnMessageReceived;
+        public event EventHandler<TransportMessage>? OnMessageReceived;
 
-        public event EventHandler<LogMessageEventArgs> OnLog;
+        public event EventHandler<LogMessageEventArgs>? OnLog;
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("Kafka", _kafkaOptions.Servers);
+        public BrokerAddress BrokerAddress => new ("Kafka", _kafkaOptions.Servers);
 
         public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
         {
@@ -80,7 +80,7 @@ namespace DotNetCore.CAP.Kafka
 
             Connect();
 
-            _consumerClient.Subscribe(topics);
+            _consumerClient!.Subscribe(topics);
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
@@ -89,11 +89,11 @@ namespace DotNetCore.CAP.Kafka
 
             while (true)
             {
-                var consumerResult = _consumerClient.Consume(cancellationToken);
+                var consumerResult = _consumerClient!.Consume(cancellationToken);
 
                 if (consumerResult.IsPartitionEOF || consumerResult.Message.Value == null) continue;
 
-                var headers = new Dictionary<string, string>(consumerResult.Message.Headers.Count);
+                var headers = new Dictionary<string, string?>(consumerResult.Message.Headers.Count);
                 foreach (var header in consumerResult.Message.Headers)
                 {
                     var val = header.GetValueBytes();
@@ -119,12 +119,12 @@ namespace DotNetCore.CAP.Kafka
 
         public void Commit(object sender)
         {
-            _consumerClient.Commit((ConsumeResult<string, byte[]>)sender);
+            _consumerClient!.Commit((ConsumeResult<string, byte[]>)sender);
         }
 
-        public void Reject(object sender)
+        public void Reject(object? sender)
         {
-            _consumerClient.Assign(_consumerClient.Assignment);
+            _consumerClient!.Assign(_consumerClient.Assignment);
         }
 
         public void Dispose()
