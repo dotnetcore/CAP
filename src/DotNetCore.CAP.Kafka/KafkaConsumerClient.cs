@@ -106,7 +106,7 @@ namespace DotNetCore.CAP.Kafka
                     var customHeaders = _kafkaOptions.CustomHeaders(consumerResult);
                     foreach (var customHeader in customHeaders)
                     {
-                        headers.Add(customHeader.Key, customHeader.Value);
+                        headers[customHeader.Key] = customHeader.Value;
                     }
                 }
 
@@ -177,6 +177,6 @@ namespace DotNetCore.CAP.Kafka
                 Reason = $"An error occurred during connect kafka --> {e.Reason}"
             };
             OnLog?.Invoke(null, logArgs);
-        } 
+        }
     }
 }
