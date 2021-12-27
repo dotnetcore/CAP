@@ -13,6 +13,8 @@ namespace DotNetCore.CAP
     {
         public string ServiceUrl { get; set; } = default!;
 
+        public bool EnableClientLog { get; set; } = false;
+
         public TlsOptions? TlsOptions { get; set; }
     }
 }

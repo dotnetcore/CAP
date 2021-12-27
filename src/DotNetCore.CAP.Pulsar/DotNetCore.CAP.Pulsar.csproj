@@ -4,6 +4,7 @@
     <TargetFramework>netstandard2.1</TargetFramework>
 	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);Pulsar</PackageTags>
+	<NoWarn>CS0067</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

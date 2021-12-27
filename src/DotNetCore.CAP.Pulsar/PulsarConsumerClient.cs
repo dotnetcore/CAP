@@ -7,6 +7,8 @@ using System.Reflection;
 using System.Threading;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Pulsar.Client.Api;
 using Pulsar.Client.Common;
@@ -41,7 +43,7 @@ namespace DotNetCore.CAP.Pulsar
             }
 
             var serviceName = Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
-
+            
             _consumerClient = _client.NewConsumer()
                 .Topics(topics)
                 .SubscriptionName(_groupId)
@@ -87,5 +89,7 @@ namespace DotNetCore.CAP.Pulsar
         {
             _consumerClient?.DisposeAsync();
         }
-    }
+
+       
+    } 
 }
