@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.MySql
         public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state) =>
             await ChangeMessageStateAsync(_recName, message, state);
 
-        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
+        public MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null)
         {
             var sql = $"INSERT INTO `{_pubName}`(`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)" +
                       $" VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
@@ -68,7 +68,7 @@ namespace DotNetCore.CAP.MySql
                 new MySqlParameter("@Content", message.Content),
                 new MySqlParameter("@Retries", message.Retries),
                 new MySqlParameter("@Added", message.Added),
-                new MySqlParameter("@ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
+                new MySqlParameter("@ExpiresAt", message.ExpiresAt.HasValue ? message.ExpiresAt.Value : DBNull.Value),
                 new MySqlParameter("@StatusName", nameof(StatusName.Scheduled)),
             };
 
@@ -85,7 +85,7 @@ namespace DotNetCore.CAP.MySql
                     dbTrans = dbContextTrans.GetDbTransaction();
                 }
 
-                var conn = dbTrans?.Connection;
+                var conn = dbTrans!.Connection!;
                 conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
             }
 
@@ -128,7 +128,7 @@ namespace DotNetCore.CAP.MySql
                 new MySqlParameter("@Content", _serializer.Serialize(mdMessage.Origin)),
                 new MySqlParameter("@Retries", mdMessage.Retries),
                 new MySqlParameter("@Added", mdMessage.Added),
-                new MySqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
+                new MySqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? mdMessage.ExpiresAt.Value : DBNull.Value),
                 new MySqlParameter("@StatusName", nameof(StatusName.Scheduled))
             };
 
@@ -198,7 +198,7 @@ namespace DotNetCore.CAP.MySql
                     messages.Add(new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
-                        Origin = _serializer.Deserialize(reader.GetString(1)),
+                        Origin = _serializer.Deserialize(reader.GetString(1))!,
                         Retries = reader.GetInt32(2),
                         Added = reader.GetDateTime(3)
                     });
