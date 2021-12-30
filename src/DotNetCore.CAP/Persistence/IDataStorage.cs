@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.Persistence
 
         Task ChangeReceiveStateAsync(MediumMessage message, StatusName state);
 
-        MediumMessage StoreMessage(string name, Message content, object dbTransaction = null);
+        MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null);
 
         void StoreReceivedExceptionMessage(string name, string group, string content);
 

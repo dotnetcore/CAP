@@ -10,11 +10,7 @@ namespace DotNetCore.CAP.Processor
 {
     public class ProcessingContext : IDisposable
     {
-        private IServiceScope _scope;
-
-        public ProcessingContext()
-        {
-        }
+        private IServiceScope? _scope;
 
         private ProcessingContext(ProcessingContext other)
         {

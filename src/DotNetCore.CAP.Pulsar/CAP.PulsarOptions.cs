@@ -11,9 +11,11 @@ namespace DotNetCore.CAP
     /// </summary>
     public class PulsarOptions
     {
-        public string ServiceUrl { get; set; }
+        public string ServiceUrl { get; set; } = default!;
 
-        public TlsOptions TlsOptions { get; set; }
+        public bool EnableClientLog { get; set; } = false;
+
+        public TlsOptions? TlsOptions { get; set; }
     }
 }
 

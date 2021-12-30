@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly Func<IConnection> _connectionActivator;
         private readonly ILogger<ConnectionChannelPool> _logger;
         private readonly ConcurrentQueue<IModel> _pool;
-        private IConnection _connection;
+        private IConnection? _connection;
         private static readonly object SLock = new object();
 
         private int _count;

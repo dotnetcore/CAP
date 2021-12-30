@@ -34,7 +34,9 @@ namespace DotNetCore.CAP.SqlServer.Diagnostics
         public void OnNext(DiagnosticListener listener)
         {
             if (listener.Name == DiagnosticListenerName)
+            {
                 listener.Subscribe(new DiagnosticObserver(_dispatcher, BufferList));
+            }
         }
     }
 }

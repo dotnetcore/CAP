@@ -22,8 +22,8 @@ namespace DotNetCore.CAP.AmazonSQS
         private readonly ILogger _logger;
         private readonly IOptions<AmazonSQSOptions> _sqsOptions;
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-        private IAmazonSimpleNotificationService _snsClient;
-        private IDictionary<string, string> _topicArnMaps;
+        private IAmazonSimpleNotificationService? _snsClient;
+        private IDictionary<string, string>? _topicArnMaps;
 
         public AmazonSQSTransport(ILogger<AmazonSQSTransport> logger, IOptions<AmazonSQSOptions> sqsOptions)
         {
@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.AmazonSQS
 
                 if (TryGetOrCreateTopicArn(message.GetName().NormalizeForAws(), out var arn))
                 {
-                    string bodyJson = null;
+                    string? bodyJson = null;
                     if (message.Body != null)
                     {
                         bodyJson = Encoding.UTF8.GetString(message.Body);
@@ -59,7 +59,7 @@ namespace DotNetCore.CAP.AmazonSQS
                         MessageAttributes = attributes
                     };
 
-                    await _snsClient.PublishAsync(request);
+                    await _snsClient!.PublishAsync(request);
 
                     _logger.LogDebug($"SNS topic message [{message.GetName().NormalizeForAws()}] has been published.");
                     return OperateResult.Success;
@@ -117,7 +117,7 @@ namespace DotNetCore.CAP.AmazonSQS
                 {
                     _topicArnMaps = new Dictionary<string, string>();
                     
-                    string nextToken = null;
+                    string? nextToken = null;
                     do
                     {
                         var topics = nextToken == null
@@ -143,15 +143,15 @@ namespace DotNetCore.CAP.AmazonSQS
             }
         }
         
-        private bool TryGetOrCreateTopicArn(string topicName, out string topicArn)
+        private bool TryGetOrCreateTopicArn(string topicName,[System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? topicArn)
         {
             topicArn = null;
-            if (_topicArnMaps.TryGetValue(topicName, out topicArn))
+            if (_topicArnMaps!.TryGetValue(topicName, out topicArn))
             {
                 return true;
             }
 
-            var response = _snsClient.CreateTopicAsync(topicName).GetAwaiter().GetResult();
+            var response = _snsClient!.CreateTopicAsync(topicName).GetAwaiter().GetResult();
 
             if (string.IsNullOrEmpty(response.TopicArn))
             {

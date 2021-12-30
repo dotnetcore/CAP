@@ -13,7 +13,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Gets or sets the database's connection string that will be used to store database entities.
         /// </summary>
-        public string ConnectionString { get; set; }
+        public string ConnectionString { get; set; } = default!;
     }
 
     internal class ConfigurePostgreSqlOptions : IConfigureOptions<PostgreSqlOptions>

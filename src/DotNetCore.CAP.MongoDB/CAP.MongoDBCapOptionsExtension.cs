@@ -32,7 +32,7 @@ namespace DotNetCore.CAP.MongoDB
             //Try to add IMongoClient if does not exists
             services.TryAddSingleton<IMongoClient>(x =>
             {
-                var options = x.GetService<IOptions<MongoDBOptions>>().Value;
+                var options = x.GetRequiredService<IOptions<MongoDBOptions>>().Value;
                 return new MongoClient(options.DatabaseConnection);
             });
         }

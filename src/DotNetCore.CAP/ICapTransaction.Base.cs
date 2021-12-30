@@ -23,7 +23,7 @@ namespace DotNetCore.CAP
 
         public bool AutoCommit { get; set; }
 
-        public object DbTransaction { get; set; }
+        public object? DbTransaction { get; set; }
 
         protected internal virtual void AddToSent(MediumMessage msg)
         {

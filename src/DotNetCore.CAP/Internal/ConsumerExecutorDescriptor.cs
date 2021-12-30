@@ -12,21 +12,21 @@ namespace DotNetCore.CAP.Internal
     /// </summary>
     public class ConsumerExecutorDescriptor
     {
-        public TypeInfo ServiceTypeInfo { get; set; }
+        public TypeInfo? ServiceTypeInfo { get; set; }
 
-        public MethodInfo MethodInfo { get; set; }
+        public MethodInfo MethodInfo { get; set; } = default!;
 
-        public TypeInfo ImplTypeInfo { get; set; }
+        public TypeInfo ImplTypeInfo { get; set; } = default!;
 
-        public TopicAttribute Attribute { get; set; }
+        public TopicAttribute Attribute { get; set; } = default!;
 
-        public TopicAttribute ClassAttribute { get; set; }
+        public TopicAttribute? ClassAttribute { get; set; }
 
-        public IList<ParameterDescriptor> Parameters { get; set; }
+        public IList<ParameterDescriptor> Parameters { get; set; } = new List<ParameterDescriptor>();
 
-        public string TopicNamePrefix { get; set; }
+        public string? TopicNamePrefix { get; set; }
 
-        private string _topicName;
+        private string? _topicName;
         /// <summary>
         /// Topic name based on both <see cref="Attribute"/> and <see cref="ClassAttribute"/>.
         /// </summary>
@@ -58,7 +58,7 @@ namespace DotNetCore.CAP.Internal
 
     public class ConsumerExecutorDescriptorComparer : IEqualityComparer<ConsumerExecutorDescriptor>
     {
-        public bool Equals(ConsumerExecutorDescriptor x, ConsumerExecutorDescriptor y)
+        public bool Equals(ConsumerExecutorDescriptor? x, ConsumerExecutorDescriptor? y)
         {
             //Check whether the compared objects reference the same data.
             if (ReferenceEquals(x, y))
@@ -77,7 +77,7 @@ namespace DotNetCore.CAP.Internal
                 x.Attribute.Group.Equals(y.Attribute.Group, StringComparison.OrdinalIgnoreCase);
         }
 
-        public int GetHashCode(ConsumerExecutorDescriptor obj)
+        public int GetHashCode(ConsumerExecutorDescriptor? obj)
         {
             //Check whether the object is null
             if (obj is null) return 0;
@@ -95,9 +95,9 @@ namespace DotNetCore.CAP.Internal
 
     public class ParameterDescriptor
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
 
-        public Type ParameterType { get; set; }
+        public Type ParameterType { get; set; } = default!;
 
         public bool IsFromCap { get; set; }
     }

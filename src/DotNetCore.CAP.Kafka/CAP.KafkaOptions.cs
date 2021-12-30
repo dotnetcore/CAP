@@ -37,11 +37,11 @@ namespace DotNetCore.CAP
         /// Initial list of brokers as a CSV list of broker host or host:port.
         /// </para>
         /// </summary>
-        public string Servers { get; set; }
+        public string Servers { get; set; } = default!;
 
         /// <summary>
         /// If you need to get offset and partition and so on.., you can use this function to write additional header into <see cref="CapHeader"/>
         /// </summary>
-        public Func<ConsumeResult<string, byte[]>, List<KeyValuePair<string, string>>> CustomHeaders { get; set; }
+        public Func<ConsumeResult<string, byte[]>, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
     }
 }

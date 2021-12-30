@@ -40,12 +40,12 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Subscriber group prefix.
         /// </summary>
-        public string GroupNamePrefix { get; set; }
+        public string? GroupNamePrefix { get; set; }
         
         /// <summary>
         /// Topic prefix.
         /// </summary>
-        public string TopicNamePrefix { get; set; }
+        public string? TopicNamePrefix { get; set; }
 
         /// <summary>
         /// The default version of the message, configured to isolate data in the same instance. The length must not exceed 20
@@ -67,7 +67,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// We’ll invoke this call-back with message type,name,content when retry failed (send or executed) messages equals <see cref="FailedRetryCount"/> times.
         /// </summary>
-        public Action<FailedInfo> FailedThresholdCallback { get; set; }
+        public Action<FailedInfo>? FailedThresholdCallback { get; set; }
 
         /// <summary>
         /// The number of message retries, the retry will stop when the threshold is reached.
@@ -116,6 +116,6 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Configure JSON serialization settings
         /// </summary>
-        public JsonSerializerOptions JsonSerializerOptions { get; } = new JsonSerializerOptions();
+        public JsonSerializerOptions JsonSerializerOptions { get; } = new ();
     }
 }

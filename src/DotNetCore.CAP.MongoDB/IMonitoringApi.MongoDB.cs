@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.MongoDB
             _database = mongoClient.GetDatabase(_options.DatabaseName);
         }
 
-        public async Task<MediumMessage> GetPublishedMessageAsync(long id)
+        public async Task<MediumMessage?> GetPublishedMessageAsync(long id)
         {
             var collection = _database.GetCollection<PublishedMessage>(_options.PublishedCollection);
             var message = await collection.Find(x => x.Id == id).FirstOrDefaultAsync();
@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.MongoDB
             };
         }
 
-        public async Task<MediumMessage> GetReceivedMessageAsync(long id)
+        public async Task<MediumMessage?> GetReceivedMessageAsync(long id)
         {
             var collection = _database.GetCollection<ReceivedMessage>(_options.ReceivedCollection);
             var message = await collection.Find(x => x.Id == id).FirstOrDefaultAsync();

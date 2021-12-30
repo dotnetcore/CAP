@@ -9,7 +9,7 @@ namespace DotNetCore.CAP.SqlServer
 {
     internal static class DbConnectionExtensions
     {
-        public static int ExecuteNonQuery(this IDbConnection connection, string sql, IDbTransaction transaction = null,
+        public static int ExecuteNonQuery(this IDbConnection connection, string sql, IDbTransaction? transaction = null,
             params object[] sqlParams)
         {
             if (connection.State == ConnectionState.Closed)
@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.SqlServer
             return command.ExecuteNonQuery();
         }
 
-        public static T ExecuteReader<T>(this IDbConnection connection, string sql, Func<IDataReader, T> readerFunc,
+        public static T ExecuteReader<T>(this IDbConnection connection, string sql, Func<IDataReader, T>? readerFunc,
             params object[] sqlParams)
         {
             if (connection.State == ConnectionState.Closed)
@@ -51,7 +51,7 @@ namespace DotNetCore.CAP.SqlServer
 
             var reader = command.ExecuteReader();
 
-            T result = default;
+            T result = default!;
             if (readerFunc != null)
             {
                 result = readerFunc(reader);
@@ -77,14 +77,14 @@ namespace DotNetCore.CAP.SqlServer
 
             var objValue = command.ExecuteScalar();
 
-            T result = default;
+            T result = default!;
             if (objValue != null)
             {
                 var returnType = typeof(T);
                 var converter = TypeDescriptor.GetConverter(returnType);
                 if (converter.CanConvertFrom(objValue.GetType()))
                 {
-                    result = (T)converter.ConvertFrom(objValue);
+                    result = (T)converter.ConvertFrom(objValue)!;
                 }
                 else
                 {

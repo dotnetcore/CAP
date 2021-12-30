@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.Internal
         public const int TimestampLeftShift = SequenceBits + WorkerIdBits + DatacenterIdBits;
         private const long SequenceMask = -1L ^ (-1L << SequenceBits);
 
-        private static SnowflakeId _snowflakeId;
+        private static SnowflakeId? _snowflakeId;
 
         private readonly object _lock = new object();
         private static readonly object SLock = new object();

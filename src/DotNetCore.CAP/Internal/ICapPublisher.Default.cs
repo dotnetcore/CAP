@@ -22,8 +22,7 @@ namespace DotNetCore.CAP.Internal
         private readonly CapOptions _capOptions;
 
         // ReSharper disable once InconsistentNaming
-        protected static readonly DiagnosticListener s_diagnosticListener =
-            new DiagnosticListener(CapDiagnosticListenerNames.DiagnosticListenerName);
+        protected static readonly DiagnosticListener s_diagnosticListener = new(CapDiagnosticListenerNames.DiagnosticListenerName);
 
         public CapPublisher(IServiceProvider service)
         {
@@ -38,20 +37,20 @@ namespace DotNetCore.CAP.Internal
 
         public AsyncLocal<ICapTransaction> Transaction { get; }
 
-        public Task PublishAsync<T>(string name, T value, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+        public Task PublishAsync<T>(string name, T? value, IDictionary<string, string?> headers, CancellationToken cancellationToken = default)
         {
             return Task.Run(() => Publish(name, value, headers), cancellationToken);
         }
 
-        public Task PublishAsync<T>(string name, T value, string callbackName = null,
+        public Task PublishAsync<T>(string name, T? value, string? callbackName = null,
             CancellationToken cancellationToken = default)
         {
             return Task.Run(() => Publish(name, value, callbackName), cancellationToken);
         }
 
-        public void Publish<T>(string name, T value, string callbackName = null)
+        public void Publish<T>(string name, T? value, string? callbackName = null)
         {
-            var header = new Dictionary<string, string>
+            var header = new Dictionary<string, string?>
             {
                 {Headers.CallbackName, callbackName}
             };
@@ -59,7 +58,7 @@ namespace DotNetCore.CAP.Internal
             Publish(name, value, header);
         }
 
-        public void Publish<T>(string name, T value, IDictionary<string, string> headers)
+        public void Publish<T>(string name, T? value, IDictionary<string, string?> headers)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -71,14 +70,12 @@ namespace DotNetCore.CAP.Internal
                 name = $"{_capOptions.TopicNamePrefix}.{name}";
             }
 
-            headers ??= new Dictionary<string, string>();
-
             if (!headers.ContainsKey(Headers.MessageId))
             {
                 var messageId = SnowflakeId.Default().NextId().ToString();
                 headers.Add(Headers.MessageId, messageId);
             }
-             
+
             if (!headers.ContainsKey(Headers.CorrelationId))
             {
                 headers.Add(Headers.CorrelationId, headers[Headers.MessageId]);

@@ -25,6 +25,7 @@ namespace DotNetCore.CAP.Test.IntegrationTests
 
             // Explicitly stop Bootstrapper to prove the cancellation token works.
             var bootstrapper = Container.GetRequiredService<Bootstrapper>();
+       
             await bootstrapper.StopAsync(CancellationToken.None);
 
             var (message, token) = HandledMessages

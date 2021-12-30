@@ -47,7 +47,11 @@ namespace DotNetCore.CAP.Test
                 }
             };
 
-            var header = new Dictionary<string, string>();
+            var header = new Dictionary<string, string>()
+            {
+                [Headers.MessageId] = SnowflakeId.Default().NextId().ToString(),
+                [Headers.MessageName] = "fake.output.withcancellation"
+            };
             var message = new Message(header, null);
             var context = new ConsumerContext(descriptor, message);
 

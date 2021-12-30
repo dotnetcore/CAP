@@ -22,11 +22,10 @@ namespace DotNetCore.CAP.Processor
         private readonly CapOptions _options;
         private readonly ISubscribeDispatcher _executor;
         private readonly ILogger<Dispatcher> _logger;
-        private readonly CancellationTokenSource _cts = new CancellationTokenSource();
+        private readonly CancellationTokenSource _cts = new ();
 
-        private Channel<MediumMessage> _publishedChannel;
-        // private Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel;
-        private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>> _receivedChannels;
+        private Channel<MediumMessage> _publishedChannel = default!;
+        private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>> _receivedChannels = default!;
         private CancellationToken _stoppingToken;
 
         public DispatcherPerGroup(

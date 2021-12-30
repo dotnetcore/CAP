@@ -18,7 +18,7 @@ namespace Microsoft.EntityFrameworkCore.Storage
         public CapEFDbTransaction(ICapTransaction transaction)
         {
             _transaction = transaction;
-            var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction;
+            var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction!;
             TransactionId = dbContextTransaction.TransactionId;
         }
 
@@ -58,7 +58,7 @@ namespace Microsoft.EntityFrameworkCore.Storage
         {
             get
             {
-                var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction;
+                var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction!;
                 return dbContextTransaction.GetDbTransaction();
             }
         }

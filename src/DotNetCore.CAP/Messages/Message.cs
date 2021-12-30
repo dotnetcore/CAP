@@ -3,51 +3,50 @@
 
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
 namespace DotNetCore.CAP.Messages
 {
     public class Message
     {
         /// <summary>
-        /// System.Text.Json requires that class explicitly has a parameterless constructor
+        /// System.Text.Json requires that class explicitly has a parameter less constructor
         /// and public properties have a setter.
         /// </summary>
-        public Message() { }
+        public Message()
+        {
+            Headers = new Dictionary<string, string?>();
+        }
 
-        public Message(IDictionary<string, string> headers, [CanBeNull] object value)
+        public Message(IDictionary<string, string?> headers, object? value)
         {
             Headers = headers ?? throw new ArgumentNullException(nameof(headers));
             Value = value;
         }
 
-        public IDictionary<string, string> Headers { get; set; }
+        public IDictionary<string, string?> Headers { get; set; }
 
-        [CanBeNull]
-        public object Value { get; set; }
+        public object? Value { get; set; }
     }
 
     public static class MessageExtensions
     {
         public static string GetId(this Message message)
         {
-            message.Headers.TryGetValue(Headers.MessageId, out var value);
-            return value;
+           return message.Headers[Headers.MessageId]!;
         }
 
         public static string GetName(this Message message)
         {
-            message.Headers.TryGetValue(Headers.MessageName, out var value);
-            return value;
+            return message.Headers[Headers.MessageName]!;
         }
 
-        public static string GetCallbackName(this Message message)
+        public static string? GetCallbackName(this Message message)
         {
             message.Headers.TryGetValue(Headers.CallbackName, out var value);
             return value;
         }
 
-        public static string GetGroup(this Message message)
+        public static string? GetGroup(this Message message)
         {
             message.Headers.TryGetValue(Headers.Group, out var value);
             return value;

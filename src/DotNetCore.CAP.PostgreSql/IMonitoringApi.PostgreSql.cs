@@ -27,9 +27,9 @@ namespace DotNetCore.CAP.PostgreSql
             _recName = initializer.GetReceivedTableName();
         }
 
-        public async Task<MediumMessage> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
+        public async Task<MediumMessage?> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
 
-        public async Task<MediumMessage> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
+        public async Task<MediumMessage?> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
 
         public StatisticsDto GetStatistics()
         {
@@ -120,7 +120,7 @@ namespace DotNetCore.CAP.PostgreSql
                         Content = reader.GetString(index++),
                         Retries = reader.GetInt32(index++),
                         Added = reader.GetDateTime(index++),
-                        ExpiresAt = reader.IsDBNull(index++) ? (DateTime?)null : reader.GetDateTime(index - 1),
+                        ExpiresAt = reader.IsDBNull(index++) ? null : reader.GetDateTime(index - 1),
                         StatusName = reader.GetString(index)
                     });
                 }
@@ -242,14 +242,14 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
             return result;
         }
 
-        private async Task<MediumMessage> GetMessageAsync(string tableName, long id)
+        private async Task<MediumMessage?> GetMessageAsync(string tableName, long id)
         {
             var sql = $@"SELECT ""Id"" AS ""DbId"", ""Content"", ""Added"", ""ExpiresAt"", ""Retries"" FROM {tableName} WHERE ""Id""={id} FOR UPDATE SKIP LOCKED";
 
             await using var connection = new NpgsqlConnection(_options.ConnectionString);
             var mediumMessage = connection.ExecuteReader(sql, reader =>
             {
-                MediumMessage message = null;
+                MediumMessage? message = null;
 
                 while (reader.Read())
                 {

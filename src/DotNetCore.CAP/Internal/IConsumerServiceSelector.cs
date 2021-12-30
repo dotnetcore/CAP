@@ -22,6 +22,6 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         /// <param name="key">topic or exchange router key.</param>
         /// <param name="candidates">the set of <see cref="ConsumerExecutorDescriptor" /> candidates.</param>
-        ConsumerExecutorDescriptor SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> candidates);
+        ConsumerExecutorDescriptor? SelectBestCandidate(string key, IReadOnlyList<ConsumerExecutorDescriptor> candidates);
     }
 }

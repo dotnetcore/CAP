@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.RedisStreams
 
             var redisLogger = new RedisLogger(logger);
 
-            ConnectionMultiplexer connection = null;
+            ConnectionMultiplexer? connection = null;
 
             while (attemp <= 5)
             {

@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.RedisStreams
             _logger = logger;
         }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("redis", _options.Endpoint);
+        public BrokerAddress BrokerAddress => new ("redis", _options.Endpoint);
 
         public async Task<OperateResult> SendAsync(TransportMessage message)
         {

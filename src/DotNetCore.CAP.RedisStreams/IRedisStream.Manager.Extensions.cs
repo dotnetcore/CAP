@@ -11,7 +11,7 @@ namespace DotNetCore.CAP.RedisStreams
 {
     internal static class RedisStreamManagerExtensions
     {
-        public static async IAsyncEnumerable<StreamPosition> TryCreateConsumerGroup(this IDatabase database, StreamPosition[] positions, string consumerGroup, ILogger logger = null)
+        public static async IAsyncEnumerable<StreamPosition> TryCreateConsumerGroup(this IDatabase database, StreamPosition[] positions, string consumerGroup, ILogger logger)
         {
             foreach (var position in positions)
             {
@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.RedisStreams
                         if (await database.StreamCreateConsumerGroupAsync(stream, consumerGroup,
                             StreamPosition.NewMessages))
                         {
-                            logger.LogInformation(
+                            logger!.LogInformation(
                                 $"Redis stream [{position.Key}] created with consumer group [{consumerGroup}]");
                             created = true;
                         }
@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.RedisStreams
                             if (await database.StreamCreateConsumerGroupAsync(stream, consumerGroup,
                                 StreamPosition.NewMessages))
                             {
-                                logger.LogInformation(
+                                logger!.LogInformation(
                                     $"Redis stream [{position.Key}] created with consumer group [{consumerGroup}]");
                                 created = true;
                             }

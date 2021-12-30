@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.AzureServiceBus
         private readonly ILogger _logger;
         private readonly IOptions<AzureServiceBusOptions> _asbOptions;
 
-        private ITopicClient _topicClient;
+        private ITopicClient? _topicClient;
 
         public AzureServiceBusTransport(
             ILogger<AzureServiceBusTransport> logger,
@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                     message.UserProperties.Add(header.Key, header.Value);
                 }
 
-                await _topicClient.SendAsync(message);
+                await _topicClient!.SendAsync(message);
 
                 _logger.LogDebug($"Azure Service Bus message [{transportMessage.GetName()}] has been published.");
 

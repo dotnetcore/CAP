@@ -247,18 +247,18 @@ WHERE `Key` >= @minKey
             return result;
         }
 
-        public async Task<MediumMessage> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
+        public async Task<MediumMessage?> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
 
-        public async Task<MediumMessage> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
+        public async Task<MediumMessage?> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
 
-        private async Task<MediumMessage> GetMessageAsync(string tableName, long id)
+        private async Task<MediumMessage?> GetMessageAsync(string tableName, long id)
         {
             var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
 
             await using var connection = new MySqlConnection(_options.ConnectionString);
             var mediumMessage = connection.ExecuteReader(sql, reader =>
             {
-                MediumMessage message = null;
+                MediumMessage? message = null;
 
                 while (reader.Read())
                 {

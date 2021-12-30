@@ -46,7 +46,7 @@ namespace DotNetCore.CAP
                 if (dbTransaction == null) throw new ArgumentNullException(nameof(DbTransaction));
             }
 
-            var transactionKey = ((SqlConnection)dbTransaction.Connection).ClientConnectionId;
+            var transactionKey = ((SqlConnection)dbTransaction.Connection!).ClientConnectionId;
             if (_diagnosticProcessor.BufferList.TryGetValue(transactionKey, out var list))
             {
                 list.Add(msg);
@@ -166,7 +166,7 @@ namespace DotNetCore.CAP
             var dbTransaction = dbConnection.BeginTransaction();
             publisher.Transaction.Value = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
             var capTransaction = publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
-            return (IDbTransaction)capTransaction.DbTransaction;
+            return (IDbTransaction)capTransaction.DbTransaction!;
         }
 
         /// <summary>

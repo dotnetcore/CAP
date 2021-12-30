@@ -34,7 +34,7 @@ namespace DotNetCore.CAP.Serialization
             return Task.FromResult(new TransportMessage(message.Headers, jsonBytes));
         }
 
-        public Task<Message> DeserializeAsync(TransportMessage transportMessage, Type valueType)
+        public Task<Message> DeserializeAsync(TransportMessage transportMessage, Type? valueType)
         {
             if (valueType == null || transportMessage.Body == null)
             {
@@ -51,12 +51,12 @@ namespace DotNetCore.CAP.Serialization
             return JsonSerializer.Serialize(message, _jsonSerializerOptions);
         }
 
-        public Message Deserialize(string json)
+        public Message? Deserialize(string json)
         {
             return JsonSerializer.Deserialize<Message>(json, _jsonSerializerOptions);
         }
 
-        public object Deserialize(object value, Type valueType)
+        public object? Deserialize(object value, Type valueType)
         {
             if (value is JsonElement jsonElement)
             {

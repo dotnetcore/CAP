@@ -14,11 +14,10 @@ namespace DotNetCore.CAP.RedisStreams
 {
     internal class RedisConnectionPool : IRedisConnectionPool, IDisposable
     {
-        private readonly ConcurrentBag<AsyncLazyRedisConnection> _connections =
-            new ConcurrentBag<AsyncLazyRedisConnection>();
+        private readonly ConcurrentBag<AsyncLazyRedisConnection> _connections = new();
 
         private readonly ILoggerFactory _loggerFactory;
-        private readonly SemaphoreSlim _poolLock = new SemaphoreSlim(1);
+        private readonly SemaphoreSlim _poolLock = new(1);
         private readonly CapRedisOptions _redisOptions;
         private bool _isDisposed;
         private bool _poolAlreadyConfigured;
@@ -30,13 +29,11 @@ namespace DotNetCore.CAP.RedisStreams
             Init().GetAwaiter().GetResult();
         }
 
-        private AsyncLazyRedisConnection QuietConnection
+        private AsyncLazyRedisConnection? QuietConnection
         {
             get
             {
-                if (_poolAlreadyConfigured)
-                    return _connections.OrderBy(async c => (await c).ConnectionCapacity).First();
-                return null;
+                return _poolAlreadyConfigured ? _connections.OrderBy(async c => (await c).ConnectionCapacity).First() : null;
             }
         }
 

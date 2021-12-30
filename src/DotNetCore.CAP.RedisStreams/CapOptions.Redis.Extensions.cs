@@ -15,12 +15,22 @@ namespace Microsoft.Extensions.DependencyInjection
             return options.UseRedis(_ => { });
         }
 
+        /// <summary>
+        /// Use redis streams as the message transport.
+        /// </summary>
+        /// <param name="options">The <see cref="CapOptions"/>.</param>
+        /// <param name="connection">The StackExchange.Redis <see cref="ConfigurationOptions"/> comma-delimited configuration string.</param>
         public static CapOptions UseRedis(this CapOptions options, string connection)
         {
             return options.UseRedis(opt => opt.Configuration = ConfigurationOptions.Parse(connection));
         }
 
-
+        /// <summary>
+        /// Use redis streams as the message transport.
+        /// </summary>
+        /// <param name="options">The <see cref="CapOptions"/>.</param>
+        /// <param name="configure">The CAP redis client options.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="configure"/> is <c>null</c>.</exception>
         public static CapOptions UseRedis(this CapOptions options, Action<CapRedisOptions> configure)
         {
             if (configure is null) throw new ArgumentNullException(nameof(configure));

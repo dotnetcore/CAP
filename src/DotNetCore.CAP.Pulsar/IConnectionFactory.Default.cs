@@ -13,12 +13,14 @@ namespace DotNetCore.CAP.Pulsar
 {
     public class ConnectionFactory : IConnectionFactory, IAsyncDisposable
     {
-        private PulsarClient _client;
+        private readonly ILogger<ConnectionFactory> _logger;
+        private PulsarClient? _client;
         private readonly PulsarOptions _options;
         private readonly ConcurrentDictionary<string, Task<IProducer<byte[]>>> _topicProducers;
 
         public ConnectionFactory(ILogger<ConnectionFactory> logger, IOptions<PulsarOptions> options)
         {
+            _logger = logger;
             _options = options.Value;
             _topicProducers = new ConcurrentDictionary<string, Task<IProducer<byte[]>>>();
 

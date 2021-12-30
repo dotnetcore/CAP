@@ -63,7 +63,7 @@ namespace DotNetCore.CAP.MongoDB
             await collection.UpdateOneAsync(x => x.Id == long.Parse(message.DbId), updateDef);
         }
 
-        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
+        public MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null)
         {
             var insertOptions = new InsertOneOptions { BypassDocumentValidation = false };
 
@@ -188,7 +188,7 @@ namespace DotNetCore.CAP.MongoDB
             return queryResult.Select(x => new MediumMessage
             {
                 DbId = x.Id.ToString(),
-                Origin = _serializer.Deserialize(x.Content),
+                Origin = _serializer.Deserialize(x.Content)!,
                 Retries = x.Retries,
                 Added = x.Added
             }).ToList();
@@ -209,7 +209,7 @@ namespace DotNetCore.CAP.MongoDB
             return queryResult.Select(x => new MediumMessage
             {
                 DbId = x.Id.ToString(),
-                Origin = _serializer.Deserialize(x.Content),
+                Origin = _serializer.Deserialize(x.Content)!,
                 Retries = x.Retries,
                 Added = x.Added
             }).ToList();

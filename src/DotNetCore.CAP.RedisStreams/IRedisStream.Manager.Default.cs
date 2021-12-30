@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.RedisStreams
         private readonly IRedisConnectionPool _connectionsPool;
         private readonly ILogger<RedisStreamManager> _logger;
         private readonly CapRedisOptions _options;
-        private IConnectionMultiplexer _redis;
+        private IConnectionMultiplexer? _redis;
 
         public RedisStreamManager(IRedisConnectionPool connectionsPool, IOptions<CapRedisOptions> options,
             ILogger<RedisStreamManager> logger)
@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.RedisStreams
             await ConnectAsync();
 
             //The object returned from GetDatabase is a cheap pass - thru object, and does not need to be stored
-            var database = _redis.GetDatabase();
+            var database = _redis!.GetDatabase();
             var streamExist = await database.KeyExistsAsync(stream);
             if (!streamExist)
             {
@@ -53,7 +53,7 @@ namespace DotNetCore.CAP.RedisStreams
             await ConnectAsync();
 
             //The object returned from GetDatabase is a cheap pass - thru object, and does not need to be stored
-            await _redis.GetDatabase().StreamAddAsync(stream, message);
+            await _redis!.GetDatabase().StreamAddAsync(stream, message);
         }
 
         public async IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsLatestMessagesAsync(string[] streams,
@@ -98,7 +98,7 @@ namespace DotNetCore.CAP.RedisStreams
         {
             await ConnectAsync();
 
-            await _redis.GetDatabase().StreamAcknowledgeAsync(stream, consumerGroup, messageId).ConfigureAwait(false);
+            await _redis!.GetDatabase().StreamAcknowledgeAsync(stream, consumerGroup, messageId).ConfigureAwait(false);
         }
 
         private async Task<IEnumerable<RedisStream>> TryReadConsumerGroup(string consumerGroup,
@@ -112,7 +112,7 @@ namespace DotNetCore.CAP.RedisStreams
 
                 await ConnectAsync();
 
-                var database = _redis.GetDatabase();
+                var database = _redis!.GetDatabase();
 
                 await foreach (var position in database.TryCreateConsumerGroup(positions, consumerGroup, _logger)
                     .WithCancellation(token))

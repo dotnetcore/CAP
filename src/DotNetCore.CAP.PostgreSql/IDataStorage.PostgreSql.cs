@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state) =>
             await ChangeMessageStateAsync(_recName, message, state);
 
-        public MediumMessage StoreMessage(string name, Message content, object dbTransaction = null)
+        public MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null)
         {
             var sql =
                 $"INSERT INTO {_pubName} (\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
@@ -69,7 +69,7 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@Content", message.Content),
                 new NpgsqlParameter("@Retries", message.Retries),
                 new NpgsqlParameter("@Added", message.Added),
-                new NpgsqlParameter("@ExpiresAt", message.ExpiresAt.HasValue ? (object)message.ExpiresAt.Value : DBNull.Value),
+                new NpgsqlParameter("@ExpiresAt", message.ExpiresAt.HasValue ? message.ExpiresAt.Value : DBNull.Value),
                 new NpgsqlParameter("@StatusName", nameof(StatusName.Scheduled))
             };
 
@@ -84,7 +84,7 @@ namespace DotNetCore.CAP.PostgreSql
                 if (dbTrans == null && dbTransaction is IDbContextTransaction dbContextTrans)
                     dbTrans = dbContextTrans.GetDbTransaction();
 
-                var conn = dbTrans?.Connection;
+                var conn = dbTrans?.Connection!;
                 conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
             }
 
@@ -127,7 +127,7 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@Content", _serializer.Serialize(mdMessage.Origin)),
                 new NpgsqlParameter("@Retries", mdMessage.Retries),
                 new NpgsqlParameter("@Added", mdMessage.Added),
-                new NpgsqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? (object) mdMessage.ExpiresAt.Value : DBNull.Value),
+                new NpgsqlParameter("@ExpiresAt", mdMessage.ExpiresAt.HasValue ? mdMessage.ExpiresAt.Value : DBNull.Value),
                 new NpgsqlParameter("@StatusName", nameof(StatusName.Scheduled))
             };
 
@@ -199,7 +199,7 @@ namespace DotNetCore.CAP.PostgreSql
                     messages.Add(new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
-                        Origin = _serializer.Deserialize(reader.GetString(1)),
+                        Origin = _serializer.Deserialize(reader.GetString(1))!,
                         Retries = reader.GetInt32(2),
                         Added = reader.GetDateTime(3)
                     });

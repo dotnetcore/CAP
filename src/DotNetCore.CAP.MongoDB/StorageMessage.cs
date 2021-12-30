@@ -9,13 +9,13 @@ namespace DotNetCore.CAP.MongoDB
     {
         public long Id { get; set; }
 
-        public string Version { get; set; }
+        public string Version { get; set; } = default!;
 
-        public string Group { get; set; }
+        public string Group { get; set; } = default!;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
 
-        public string Content { get; set; }
+        public string Content { get; set; } = default!;
 
         public DateTime Added { get; set; }
 
@@ -23,18 +23,18 @@ namespace DotNetCore.CAP.MongoDB
 
         public int Retries { get; set; }
 
-        public string StatusName { get; set; }
+        public string StatusName { get; set; } = default!;
     }
 
     internal class PublishedMessage
     {
         public long Id { get; set; }
 
-        public string Version { get; set; }
+        public string Version { get; set; } = default!;
 
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
 
-        public string Content { get; set; }
+        public string Content { get; set; } = default!;
 
         public DateTime Added { get; set; }
 
@@ -42,6 +42,6 @@ namespace DotNetCore.CAP.MongoDB
 
         public int Retries { get; set; }
 
-        public string StatusName { get; set; }
+        public string StatusName { get; set; } = default!;
     }
 }

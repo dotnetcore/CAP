@@ -27,8 +27,8 @@ namespace DotNetCore.CAP.AmazonSQS
         private readonly string _groupId;
         private readonly AmazonSQSOptions _amazonSQSOptions;
 
-        private IAmazonSimpleNotificationService _snsClient;
-        private IAmazonSQS _sqsClient;
+        private IAmazonSimpleNotificationService? _snsClient;
+        private IAmazonSQS? _sqsClient;
         private string _queueUrl = string.Empty;
 
         public AmazonSQSConsumerClient(string groupId, IOptions<AmazonSQSOptions> options)
@@ -37,9 +37,9 @@ namespace DotNetCore.CAP.AmazonSQS
             _amazonSQSOptions = options.Value;
         }
 
-        public event EventHandler<TransportMessage> OnMessageReceived;
+        public event EventHandler<TransportMessage>? OnMessageReceived;
 
-        public event EventHandler<LogMessageEventArgs> OnLog;
+        public event EventHandler<LogMessageEventArgs>? OnLog;
 
         public BrokerAddress BrokerAddress => new BrokerAddress("AmazonSQS", _queueUrl);
 
@@ -57,7 +57,7 @@ namespace DotNetCore.CAP.AmazonSQS
             {
                 var createTopicRequest = new CreateTopicRequest(topic.NormalizeForAws());
 
-                var createTopicResponse = _snsClient.CreateTopicAsync(createTopicRequest).GetAwaiter().GetResult();
+                var createTopicResponse = _snsClient!.CreateTopicAsync(createTopicRequest).GetAwaiter().GetResult();
 
                 topicArns.Add(createTopicResponse.TopicArn);
             }
@@ -92,13 +92,13 @@ namespace DotNetCore.CAP.AmazonSQS
 
             while (true)
             {
-                var response = _sqsClient.ReceiveMessageAsync(request, cancellationToken).GetAwaiter().GetResult();
+                var response = _sqsClient!.ReceiveMessageAsync(request, cancellationToken).GetAwaiter().GetResult();
 
                 if (response.Messages.Count == 1)
                 {
                     var messageObj = JsonSerializer.Deserialize<SQSReceivedMessage>(response.Messages[0].Body);
 
-                    var header = messageObj.MessageAttributes.ToDictionary(x => x.Key, x => x.Value.Value);
+                    var header = messageObj!.MessageAttributes.ToDictionary(x => x.Key, x => x.Value.Value);
                     var body = messageObj.Message;
 
                     var message = new TransportMessage(header, body != null ? Encoding.UTF8.GetBytes(body) : null);
@@ -119,7 +119,7 @@ namespace DotNetCore.CAP.AmazonSQS
         {
             try
             {
-                _ = _sqsClient.DeleteMessageAsync(_queueUrl, (string)sender).GetAwaiter().GetResult();
+                _ = _sqsClient!.DeleteMessageAsync(_queueUrl, (string)sender).GetAwaiter().GetResult();
             }
             catch (InvalidIdFormatException ex)
             {
@@ -127,12 +127,12 @@ namespace DotNetCore.CAP.AmazonSQS
             }
         }
 
-        public void Reject(object sender)
+        public void Reject(object? sender)
         {
             try
             {
                 // Visible again in 3 seconds
-                _ = _sqsClient.ChangeMessageVisibilityAsync(_queueUrl, (string)sender, 3).GetAwaiter().GetResult();
+                _ = _sqsClient!.ChangeMessageVisibilityAsync(_queueUrl, (string)sender!, 3).GetAwaiter().GetResult();
             }
             catch (MessageNotInflightException ex)
             {
@@ -237,7 +237,7 @@ namespace DotNetCore.CAP.AmazonSQS
         {
             Connect(initSNS: false, initSQS: true);
 
-            var queueAttributes = await _sqsClient.GetAttributesAsync(_queueUrl).ConfigureAwait(false);
+            var queueAttributes = await _sqsClient!.GetAttributesAsync(_queueUrl).ConfigureAwait(false);
 
             var sqsQueueArn = queueAttributes["QueueArn"];
 
@@ -263,12 +263,12 @@ namespace DotNetCore.CAP.AmazonSQS
         
         private async Task SubscribeToTopics(IEnumerable<string> topics)
         {
-            var queueAttributes = await _sqsClient.GetAttributesAsync(_queueUrl).ConfigureAwait(false);
+            var queueAttributes = await _sqsClient!.GetAttributesAsync(_queueUrl).ConfigureAwait(false);
 
             var sqsQueueArn = queueAttributes["QueueArn"];
             foreach (var topicArn in topics)
             {
-                await _snsClient.SubscribeAsync(new SubscribeRequest
+                await _snsClient!.SubscribeAsync(new SubscribeRequest
                     {
                         TopicArn = topicArn,
                         Protocol = "sqs",
