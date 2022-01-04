@@ -196,7 +196,14 @@ namespace DotNetCore.CAP.AzureServiceBus
             {
                 foreach (var customHeader in customHeaders)
                 {
-                    headers.Add(customHeader.Key, customHeader.Value);
+                    var added = headers.TryAdd(customHeader.Key, customHeader.Value);
+
+                    if (!added)
+                    {
+                        _logger.LogWarning(
+                            "Not possible to add the custom header {Header}. A value with the same key already exists in the Message headers.", 
+                            customHeader.Key);
+                    }
                 }
             }
 

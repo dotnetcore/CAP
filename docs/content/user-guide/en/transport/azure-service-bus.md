@@ -38,13 +38,13 @@ public void ConfigureServices(IServiceCollection services)
 
 The AzureServiceBus configuration options provided directly by the CAP:
 
-NAME | DESCRIPTION                                                                                                  | TYPE | DEFAULT
-:---|:-------------------------------------------------------------------------------------------------------------|---|:---
-ConnectionString | Endpoint address                                                                                             | string | 
-EnableSessions | Enable [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions) | bool | false 
-TopicPath | Topic entity path                                                                                            | string | cap
-ManagementTokenProvider | Token provider                                                                                               | ITokenProvider | null
-CustomHeaders | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                       | Func<Message, List<KeyValuePair<string, string>>>? | null 
+| NAME                     | DESCRIPTION                                                                                                  | TYPE | DEFAULT |
+|:-------------------------|:-------------------------------------------------------------------------------------------------------------|---|:--- |
+| ConnectionString         | Endpoint address                                                                                             | string |
+| EnableSessions           | Enable [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions) | bool | false |
+| TopicPath                | Topic entity path                                                                                            | string | cap |
+| ManagementTokenProvider  | Token provider                                                                                               | ITokenProvider | null |
+| CustomHeaders            | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                       | Func<Message, List<KeyValuePair<string, string>>>? | null | 
 #### Sessions
 
 When sessions are enabled (see `EnableSessions` option above), every message sent will have a session id. To control the session id, include
@@ -79,3 +79,5 @@ Sometimes you might want to listen to a message that was published by an externa
         };
     });
 ```
+
+> Important: If a header with the same name (key) already exists in the message, the Custom Header won't be added.
