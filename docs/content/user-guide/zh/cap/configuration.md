@@ -19,8 +19,8 @@ services.AddCap(config=> {
 ```C#
 services.AddCap(config => 
 {
-     config.UseInMemoryQueue();
-     config.UseInmemoryStorage();
+     config.UseInMemoryMessageQueue();
+     config.UseInMemoryStorage();
 });
 ```
 
