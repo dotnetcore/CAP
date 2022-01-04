@@ -4,12 +4,21 @@
 using System;
 using System.Diagnostics;
 using DotNetCore.CAP.Diagnostics;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.OpenTelemetry
 {
     public class CapDiagnosticProcessorObserver : IObserver<DiagnosticListener>
     {
+        private readonly ILogger _logger;
+        private readonly CapDiagnosticObserver _capObserver;
         public const string DiagnosticListenerName = CapDiagnosticListenerNames.DiagnosticListenerName;
+
+        public CapDiagnosticProcessorObserver(ILogger<CapDiagnosticProcessorObserver> logger, CapDiagnosticObserver capObserver)
+        {
+            _logger = logger;
+            _capObserver = capObserver;
+        }
 
         public void OnCompleted()
         {
@@ -23,7 +32,8 @@ namespace DotNetCore.CAP.OpenTelemetry
         {
             if (listener.Name == DiagnosticListenerName)
             {
-                listener.Subscribe(new CapDiagnosticObserver());
+                listener.Subscribe(_capObserver);
+                _logger.LogInformation($"Loaded diagnostic listener [{DiagnosticListenerName}].");
             }
         }
     }

@@ -12,16 +12,15 @@ using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
 using OpenTelemetry.Trace;
 using CapEvents = DotNetCore.CAP.Diagnostics.CapDiagnosticListenerNames;
-using Status = OpenTelemetry.Trace.Status;
 
 namespace DotNetCore.CAP.OpenTelemetry
 {
-    internal class CapDiagnosticObserver : IObserver<KeyValuePair<string, object?>>
+    public class CapDiagnosticObserver : IObserver<KeyValuePair<string, object?>>
     {
-        private static readonly ActivitySource ActivitySource = new("DotNetCore.CAP.OpenTelemetry");
+        private static readonly ActivitySource ActivitySource = new("DotNetCore.CAP.OpenTelemetry", "1.0.0");
         private static readonly TextMapPropagator Propagator = new TraceContextPropagator();
 
-        private readonly ConcurrentDictionary<string, Activity> _contexts = new();
+        private readonly ConcurrentDictionary<string, ActivityContext> _contexts = new();
 
         private const string OperateNamePrefix = "CAP/";
         private const string ProducerOperateNameSuffix = "/Publisher";
@@ -42,49 +41,57 @@ namespace DotNetCore.CAP.OpenTelemetry
                 case CapEvents.BeforePublishMessageStore:
                     {
                         var eventData = (CapEventDataPubStore)evt.Value!;
+                        var useParent = false;
+                        if (Activity.Current != null)
+                        {
+                            if (_contexts.TryAdd(eventData.Message.GetId(), Activity.Current.Context))
+                            {
+                                useParent = true;
+                            }
+                        }
                         var activity = ActivitySource.StartActivity("Event Persistence: " + eventData.Operation);
                         if (activity != null)
                         {
-                            activity.SetTag("component", "CAP");
                             activity.SetTag("message.name", eventData.Operation);
                             activity.AddEvent(new ActivityEvent("CAP message persistence start...",
                                 DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
-                            _contexts.TryAdd(eventData.Message.GetId(), activity);
+
+                            if (!useParent)
+                            {
+                                _contexts[eventData.Message.GetId()] = Activity.Current!.Context;
+                            }
                         }
                     }
                     break;
                 case CapEvents.AfterPublishMessageStore:
                     {
                         var eventData = (CapEventDataPubStore)evt.Value!;
-                        if (_contexts.TryRemove(eventData.Message.GetId(), out Activity activity))
-                        {
-                            activity.AddEvent(new ActivityEvent("CAP message persistence succeeded!",
-                                DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value),
-                                new ActivityTagsCollection { new("cap.persistence.duration", eventData.ElapsedTimeMs) })
-                            );
-                            activity.Dispose();
-                        }
+
+                        Activity.Current?.AddEvent(new ActivityEvent("CAP message persistence succeeded!",
+                            DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value),
+                            new ActivityTagsCollection { new("cap.persistence.duration", eventData.ElapsedTimeMs) })
+                        );
+
+                        Activity.Current?.Stop();
                     }
                     break;
                 case CapEvents.ErrorPublishMessageStore:
                     {
                         var eventData = (CapEventDataPubStore)evt.Value!;
-                        if (_contexts.TryRemove(eventData.Message.GetId(), out Activity activity))
+                        if (Activity.Current is { } activity)
                         {
                             var exception = eventData.Exception!;
-
                             activity.SetStatus(Status.Error.WithDescription(exception.Message));
-
                             activity.RecordException(exception);
-
-                            activity.Dispose();
+                            activity.Stop();
                         }
                     }
                     break;
                 case CapEvents.BeforePublish:
                     {
                         var eventData = (CapEventDataPubSend)evt.Value!;
-                        var activity = ActivitySource.StartActivity(OperateNamePrefix + eventData.Operation + ProducerOperateNameSuffix, ActivityKind.Producer);
+                        _contexts.TryRemove(eventData.TransportMessage.GetId(), out var context);
+                        var activity = ActivitySource.StartActivity(OperateNamePrefix + eventData.Operation + ProducerOperateNameSuffix, ActivityKind.Producer, context);
                         if (activity != null)
                         {
                             activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
@@ -102,56 +109,52 @@ namespace DotNetCore.CAP.OpenTelemetry
                                 {
                                     msg.Headers[key] = value;
                                 });
-
-                            _contexts.TryAdd(eventData.TransportMessage.GetId(), activity);
                         }
                     }
                     break;
                 case CapEvents.AfterPublish:
                     {
                         var eventData = (CapEventDataPubSend)evt.Value!;
-                        if (_contexts.TryRemove(eventData.TransportMessage.GetId(), out Activity activity))
+                        if (Activity.Current is { } activity)
                         {
                             activity.AddEvent(new ActivityEvent("Message publishing succeeded!",
                                 DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value),
                                 new ActivityTagsCollection { new("cap.send.duration", eventData.ElapsedTimeMs) })
                             );
-                            activity.Dispose();
+                            activity.Stop();
                         }
                     }
                     break;
                 case CapEvents.ErrorPublish:
                     {
                         var eventData = (CapEventDataPubSend)evt.Value!;
-                        if (_contexts.TryRemove(eventData.TransportMessage.GetId(), out Activity activity))
+                        if (Activity.Current is { } activity)
                         {
                             var exception = eventData.Exception!;
                             activity.SetStatus(Status.Error.WithDescription(exception.Message));
-
                             activity.RecordException(exception);
-
-                            activity.Dispose();
+                            activity.Stop();
                         }
                     }
                     break;
                 case CapEvents.BeforeConsume:
                     {
-
                         var eventData = (CapEventDataSubStore)evt.Value!;
-                        var activity = ActivitySource.StartActivity(OperateNamePrefix + eventData.Operation + ConsumerOperateNameSuffix, ActivityKind.Consumer);
+                        var parentContext = Propagator.Extract(default, eventData.TransportMessage, (msg, key) =>
+                        {
+                            if (msg.Headers.TryGetValue(key, out string? value))
+                            {
+                                return new[] { value };
+                            }
+                            return Enumerable.Empty<string>();
+                        });
+
+                        var activity = ActivitySource.StartActivity(OperateNamePrefix + eventData.Operation + ConsumerOperateNameSuffix,
+                            ActivityKind.Consumer,
+                            parentContext.ActivityContext);
+
                         if (activity != null)
                         {
-                            var parentContext = Propagator.Extract(default, eventData.TransportMessage, (msg, key) =>
-                            {
-                                if (msg.Headers.TryGetValue(key, out string? value))
-                                {
-                                    return new[] { value };
-                                }
-                                return Enumerable.Empty<string>();
-                            });
-
-                            Baggage.Current = parentContext.Baggage;
-
                             activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
                             activity.SetTag("messaging.destination", eventData.Operation);
                             activity.SetTag("messaging.destination_kind", "topic");
@@ -162,66 +165,63 @@ namespace DotNetCore.CAP.OpenTelemetry
                             activity.AddEvent(new ActivityEvent("CAP message persistence start...",
                                 DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
 
-                            _contexts.TryAdd(eventData.TransportMessage.GetId(), activity);
-
+                            _contexts[eventData.TransportMessage.GetId() + eventData.TransportMessage.GetGroup()] = activity.Context;
                         }
                     }
                     break;
                 case CapEvents.AfterConsume:
                     {
                         var eventData = (CapEventDataSubStore)evt.Value!;
-                        if (_contexts.TryRemove(eventData.TransportMessage.GetId(), out Activity activity))
+                        if (Activity.Current is { } activity)
                         {
                             activity.AddEvent(new ActivityEvent("CAP message persistence succeeded!",
                                 DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value),
                                 new ActivityTagsCollection { new("cap.receive.duration", eventData.ElapsedTimeMs) }));
 
-                            _contexts.TryAdd(eventData.TransportMessage.GetId(), activity);
+                            activity.Stop();
                         }
                     }
                     break;
                 case CapEvents.ErrorConsume:
                     {
                         var eventData = (CapEventDataSubStore)evt.Value!;
-                        if (_contexts.TryRemove(eventData.TransportMessage.GetId(), out Activity activity))
+                        if (Activity.Current is { } activity)
                         {
                             var exception = eventData.Exception!;
                             activity.SetStatus(Status.Error.WithDescription(exception.Message));
 
                             activity.RecordException(exception);
 
-                            activity.Dispose();
+                            activity.Stop();
                         }
                     }
                     break;
                 case CapEvents.BeforeSubscriberInvoke:
                     {
                         var eventData = (CapEventDataSubExecute)evt.Value!;
-                        var activity = ActivitySource.StartActivity("Subscriber Invoke: " + eventData.MethodInfo!.Name);
+                        _contexts.TryRemove(eventData.Message.GetId() + eventData.Message.GetGroup(), out var context);
+                        var activity = ActivitySource.StartActivity("Subscriber Invoke: " + eventData.MethodInfo!.Name, ActivityKind.Internal,
+                            context);
                         if (activity != null)
                         {
-                            activity.SetTag("component", "CAP");
                             activity.SetTag("messaging.operation", "process");
                             activity.SetTag("code.function", eventData.MethodInfo.Name);
-                            activity.SetTag("code.namespace", eventData.MethodInfo.GetType().Namespace);
 
                             activity.AddEvent(new ActivityEvent("Begin invoke the subscriber:" + eventData.MethodInfo.Name,
                                 DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
-
-                            _contexts.TryAdd(eventData.Message.GetId(), activity);
                         }
                     }
                     break;
                 case CapEvents.AfterSubscriberInvoke:
                     {
                         var eventData = (CapEventDataSubExecute)evt.Value!;
-                        if (_contexts.TryRemove(eventData.Message.GetId(), out Activity activity))
+                        if (Activity.Current is { } activity)
                         {
                             activity.AddEvent(new ActivityEvent("Subscriber invoke succeeded!",
                                 DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value),
                                 new ActivityTagsCollection { new("cap.invoke.duration", eventData.ElapsedTimeMs) }));
-                             
-                            activity.Dispose();
+
+                            activity.Stop();
                         }
 
                     }
@@ -229,18 +229,16 @@ namespace DotNetCore.CAP.OpenTelemetry
                 case CapEvents.ErrorSubscriberInvoke:
                     {
                         var eventData = (CapEventDataSubExecute)evt.Value!;
-                        if (_contexts.TryRemove(eventData.Message.GetId(), out Activity activity))
+                        if (Activity.Current is { } activity)
                         {
                             var exception = eventData.Exception!;
                             activity.SetStatus(Status.Error.WithDescription(exception.Message));
                             activity.RecordException(exception);
-                            activity.Dispose();
+                            activity.Stop();
                         }
                     }
                     break;
-
             }
         }
-
     }
 }
