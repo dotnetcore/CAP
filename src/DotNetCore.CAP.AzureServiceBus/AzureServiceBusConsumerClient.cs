@@ -185,10 +185,29 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private TransportMessage ConvertMessage(Message message)
         {
-            var header = message.UserProperties.ToDictionary(x => x.Key, y => y.Value?.ToString());
-            header.Add(Headers.Group, _subscriptionName);
+            var headers = message.UserProperties
+                .ToDictionary(x => x.Key, y => y.Value?.ToString());
+            
+            headers.Add(Headers.Group, _subscriptionName);
 
-            return new TransportMessage(header, message.Body);
+            var customHeaders = _asbOptions.CustomHeaders?.Invoke(message);
+            
+            if (customHeaders?.Any() == true)
+            {
+                foreach (var customHeader in customHeaders)
+                {
+                    var added = headers.TryAdd(customHeader.Key, customHeader.Value);
+
+                    if (!added)
+                    {
+                        _logger.LogWarning(
+                            "Not possible to add the custom header {Header}. A value with the same key already exists in the Message headers.", 
+                            customHeader.Key);
+                    }
+                }
+            }
+
+            return new TransportMessage(headers, message.Body);
         }
         
         private Task OnConsumerReceivedWithSession(IMessageSession session, Message message, CancellationToken token)

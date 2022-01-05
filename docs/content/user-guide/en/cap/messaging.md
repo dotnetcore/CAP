@@ -73,7 +73,7 @@ cap-msg-type | string | The type of message, `typeof(T).FullName`(not required)
 cap-senttime | string | sending time (not required)
 
 ### Custom headers
-To consume messages sent without CAP headers, both Kafka and RabbitMQ consumers can inject a minimal set of headers using custom headers as shown below:
+To consume messages sent without CAP headers, both AzureServiceBus, Kafka and RabbitMQ consumers can inject a minimal set of headers using the `CustomHeaders` property as shown below (RabbitMQ example):
 ```C#
 container.AddCap(x =>
 {
@@ -89,7 +89,7 @@ container.AddCap(x =>
 });
 ```
 
-After adding `cap-msg-id` and `cap-msg-name`, CAP consumers receive messages sent directly from the RabbitMQ management tool.
+After adding `cap-msg-id` and `cap-msg-name`, CAP consumers receive messages sent directly from any external system, like the RabbitMQ management tool when using RabbitMQ as a transport.
 
 ## Scheduling
 

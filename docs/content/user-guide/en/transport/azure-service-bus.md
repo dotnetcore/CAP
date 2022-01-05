@@ -38,13 +38,13 @@ public void ConfigureServices(IServiceCollection services)
 
 The AzureServiceBus configuration options provided directly by the CAP:
 
-NAME | DESCRIPTION | TYPE | DEFAULT
-:---|:---|---|:---
-ConnectionString | Endpoint address | string | 
-EnableSessions | Enable [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions) | bool | false 
-TopicPath | Topic entity path | string | cap
-ManagementTokenProvider | Token provider | ITokenProvider | null
-
+| NAME                     | DESCRIPTION                                                                                                  | TYPE | DEFAULT |
+|:-------------------------|:-------------------------------------------------------------------------------------------------------------|---|:--- |
+| ConnectionString         | Endpoint address                                                                                             | string |
+| EnableSessions           | Enable [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions) | bool | false |
+| TopicPath                | Topic entity path                                                                                            | string | cap |
+| ManagementTokenProvider  | Token provider                                                                                               | ITokenProvider | null |
+| CustomHeaders            | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                       | Func<Message, List<KeyValuePair<string, string>>>? | null | 
 #### Sessions
 
 When sessions are enabled (see `EnableSessions` option above), every message sent will have a session id. To control the session id, include
@@ -62,3 +62,22 @@ capBus.Publish(yourEventName, yourEvent, extraHeaders);
 ```
 
 If no session id header is present, the message id will be used as the session id.
+
+#### Heterogeneous Systems
+
+Sometimes you might want to listen to a message that was published by an external system. In this case, you need to add a set of two mandatory headers for CAP compatibility as shown below.
+
+```csharp
+    c.UseAzureServiceBus(asb =>
+    {
+        asb.ConnectionString = ...
+        asb.CustomHeaders = message => new List<KeyValuePair<string, string>>()
+        {
+            new(DotNetCore.CAP.Messages.Headers.MessageId,
+                SnowflakeId.Default().NextId().ToString()),
+            new(DotNetCore.CAP.Messages.Headers.MessageName, message.Label)
+        };
+    });
+```
+
+> Important: If a header with the same name (key) already exists in the message, the Custom Header won't be added.
