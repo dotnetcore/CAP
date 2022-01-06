@@ -26,7 +26,7 @@ namespace DotNetCore.CAP.OpenTelemetry
         private const string OperateNamePrefix = "CAP/";
         private const string ProducerOperateNameSuffix = "/Publisher";
         private const string ConsumerOperateNameSuffix = "/Subscriber";
-        
+
         public void OnCompleted()
         {
         }
@@ -42,22 +42,25 @@ namespace DotNetCore.CAP.OpenTelemetry
                 case CapEvents.BeforePublishMessageStore:
                     {
                         var eventData = (CapEventDataPubStore)evt.Value!;
-                        var useParent = false;
-                        if (Activity.Current != null)
+                        ActivityContext parentContext = default;
+
+                        if (Activity.Current != null && Activity.Current.Source.Name == "OpenTelemetry.Instrumentation.AspNetCore")
                         {
-                            if (_contexts.TryAdd(eventData.Message.GetId(), Activity.Current.Context))
-                            {
-                                useParent = true;
-                            }
+                            _contexts.TryAdd(eventData.Message.GetId(), parentContext = Activity.Current.Context);
                         }
-                        var activity = ActivitySource.StartActivity("Event Persistence: " + eventData.Operation);
+                        else
+                        {
+                            Activity.Current = null;
+                        }
+
+                        var activity = ActivitySource.StartActivity("Event Persistence: " + eventData.Operation, ActivityKind.Internal, parentContext);
                         if (activity != null)
                         {
                             activity.SetTag("message.name", eventData.Operation);
                             activity.AddEvent(new ActivityEvent("CAP message persistence start...",
                                 DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
 
-                            if (!useParent)
+                            if (parentContext != default)
                             {
                                 _contexts[eventData.Message.GetId()] = Activity.Current!.Context;
                             }
