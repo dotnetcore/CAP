@@ -15,9 +15,10 @@ using CapEvents = DotNetCore.CAP.Diagnostics.CapDiagnosticListenerNames;
 
 namespace DotNetCore.CAP.OpenTelemetry
 {
-    public class CapDiagnosticObserver : IObserver<KeyValuePair<string, object?>>
+    internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
     {
-        private static readonly ActivitySource ActivitySource = new("DotNetCore.CAP.OpenTelemetry", "1.0.0");
+        public const string SourceName = "DotNetCore.CAP.OpenTelemetry";
+        private static readonly ActivitySource ActivitySource = new(SourceName, "1.0.0");
         private static readonly TextMapPropagator Propagator = new TraceContextPropagator();
 
         private readonly ConcurrentDictionary<string, ActivityContext> _contexts = new();
@@ -25,7 +26,7 @@ namespace DotNetCore.CAP.OpenTelemetry
         private const string OperateNamePrefix = "CAP/";
         private const string ProducerOperateNameSuffix = "/Publisher";
         private const string ConsumerOperateNameSuffix = "/Subscriber";
-
+        
         public void OnCompleted()
         {
         }
@@ -189,9 +190,7 @@ namespace DotNetCore.CAP.OpenTelemetry
                         {
                             var exception = eventData.Exception!;
                             activity.SetStatus(Status.Error.WithDescription(exception.Message));
-
                             activity.RecordException(exception);
-
                             activity.Stop();
                         }
                     }
@@ -223,7 +222,6 @@ namespace DotNetCore.CAP.OpenTelemetry
 
                             activity.Stop();
                         }
-
                     }
                     break;
                 case CapEvents.ErrorSubscriberInvoke:

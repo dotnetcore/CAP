@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public event EventHandler<LogMessageEventArgs>? OnLog;
 
-        public BrokerAddress BrokerAddress => new("RabbitMQ", _rabbitMQOptions.HostName);
+        public BrokerAddress BrokerAddress => new("RabbitMQ", $"{_rabbitMQOptions.HostName}:{_rabbitMQOptions.Port}");
 
         public void Subscribe(IEnumerable<string> topics)
         {
@@ -96,7 +96,6 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public void Dispose()
         {
-
             _channel?.Dispose();
             //The connection should not be closed here, because the connection is still in use elsewhere. 
             //_connection?.Dispose();

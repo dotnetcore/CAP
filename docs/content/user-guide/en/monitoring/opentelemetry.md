@@ -16,18 +16,7 @@ Install the CAP OpenTelemetry package into the project.
 dotnet add package DotNetCore.Cap.OpenTelemetry
 ```
 
-The OpenTelemetry data comes from [diagnostics](diagnostics.md), add the configuration to enable data collection.
-
-```C#
-services.AddCap(x =>
-{
-    //***
-    x.UseOpenTelemetry();  // <-- Add this line
-});
-
-```
-
-Add the instrumentation of CAP to the configuration of OpenTelemetry.
+The OpenTelemetry data comes from [diagnostics](diagnostics.md), add the instrumentation of CAP to the configuration of OpenTelemetry.
 
 ```C#
 services.AddOpenTelemetryTracing((builder) => builder
