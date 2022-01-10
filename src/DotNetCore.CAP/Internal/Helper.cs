@@ -3,6 +3,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -64,6 +65,14 @@ namespace DotNetCore.CAP.Internal
             }
             var pattern = "[\\>\\.\\ \\*]";
             return Regex.IsMatch(name, pattern) ? Regex.Replace(name, pattern, "_") : name;
+        }
+
+        public static bool IsUsingType<T>(in Type type)
+        {
+            BindingFlags flags = BindingFlags.Public | BindingFlags.NonPublic |
+                                 BindingFlags.Static | BindingFlags.Instance |
+                                 BindingFlags.DeclaredOnly;
+            return type.GetFields(flags).Any(x => x.FieldType == typeof(T));
         }
 
         public static bool IsInnerIP(string ipAddress)

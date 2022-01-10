@@ -19,7 +19,7 @@ namespace DotNetCore.CAP.Internal
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<Bootstrapper> _logger;
-        private readonly CancellationTokenSource _cts = new ();
+        private readonly CancellationTokenSource _cts = new();
         private bool _disposed;
         private IEnumerable<IProcessingServer> _processors = default!;
 
@@ -43,6 +43,10 @@ namespace DotNetCore.CAP.Internal
             }
             catch (Exception e)
             {
+                if (e is InvalidOperationException)
+                {
+                    throw;
+                }
                 _logger.LogError(e, "Initializing the storage structure failed!");
             }
 
