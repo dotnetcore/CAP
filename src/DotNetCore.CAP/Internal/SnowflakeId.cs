@@ -65,6 +65,7 @@ namespace DotNetCore.CAP.Internal
 
         public SnowflakeId(long workerId)
         {
+            InitTimestampAndSequence();
             // sanity check for workerId
             if (workerId > MaxWorkerId || workerId < 0)
                 throw new ArgumentException($"worker Id can't be greater than {MaxWorkerId} or less than 0");
@@ -103,6 +104,16 @@ namespace DotNetCore.CAP.Internal
                 long timestampWithSequence = this._timestampAndSequence & TimestampAndSequenceMask;
                 return this._workerId | timestampWithSequence;
             }
+        }
+
+        /// <summary>
+        /// init first timestamp and sequence immediately
+        /// </summary>
+        private void InitTimestampAndSequence()
+        {
+            long timestamp = GetNewestTimestamp();
+            long timestampWithSequence = timestamp << SequenceBits;
+            this._timestampAndSequence = timestampWithSequence;
         }
 
         /// <summary>
