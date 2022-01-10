@@ -70,7 +70,7 @@ namespace DotNetCore.CAP.Internal
             if (workerId > MaxWorkerId || workerId < 0)
                 throw new ArgumentException($"worker Id can't be greater than {MaxWorkerId} or less than 0");
 
-            this._workerId = workerId << (TimestampBits + SequenceBits);
+            _workerId = workerId << (TimestampBits + SequenceBits);
         }
 
         public static SnowflakeId Default()
@@ -101,8 +101,8 @@ namespace DotNetCore.CAP.Internal
             lock (_lock)
             {
                 WaitIfNecessary();
-                long timestampWithSequence = this._timestampAndSequence & TimestampAndSequenceMask;
-                return this._workerId | timestampWithSequence;
+                long timestampWithSequence = _timestampAndSequence & TimestampAndSequenceMask;
+                return _workerId | timestampWithSequence;
             }
         }
 
@@ -113,7 +113,7 @@ namespace DotNetCore.CAP.Internal
         {
             long timestamp = GetNewestTimestamp();
             long timestampWithSequence = timestamp << SequenceBits;
-            this._timestampAndSequence = timestampWithSequence;
+            _timestampAndSequence = timestampWithSequence;
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace DotNetCore.CAP.Internal
         /// </summary>
         private void WaitIfNecessary()
         {
-            long currentWithSequence = ++this._timestampAndSequence;
+            long currentWithSequence = ++_timestampAndSequence;
             long current = currentWithSequence >> SequenceBits;
             long newest = GetNewestTimestamp();
 
@@ -142,7 +142,7 @@ namespace DotNetCore.CAP.Internal
         }
     }
 
-    static class Util
+    internal static class Util
     {
         /// <summary>
         /// auto generate workerId, try using mac first, if failed, then randomly generate one
@@ -154,7 +154,7 @@ namespace DotNetCore.CAP.Internal
             {
                 return GenerateWorkerIdBaseOnMac();
             }
-            catch (Exception e)
+            catch
             {
                 return GenerateRandomWorkerId(maxWorkerId);
             }
@@ -173,7 +173,7 @@ namespace DotNetCore.CAP.Internal
                 throw new Exception("no available mac found");
             }
 
-            var adapter = nics.FirstOrDefault();
+            var adapter = nics[0];
             PhysicalAddress address = adapter.GetPhysicalAddress();
             byte[] mac = address.GetAddressBytes();
 
