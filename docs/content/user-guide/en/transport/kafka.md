@@ -46,7 +46,7 @@ CustomHeaders | Custom subscribe headers |  Func<> |  N/A
 
 When the message sent from a heterogeneous system, because of the CAP needs to define additional headers, so an exception will occur at this time. By providing this parameter to set the custom headersn to make the subscriber works.
 
-You can find the description of [Header Information](../cap/messaging#heterogeneous-system-integration) here.
+You can find the description of heterogeneous system integration [here](../../cap/messaging#heterogeneous-system-integration).
 
 Sometimes, if you want to get additional context information from Broker, you can also add it through this option. For example, add information such as Offset or Partition.
 

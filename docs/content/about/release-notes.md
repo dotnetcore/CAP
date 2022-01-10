@@ -1,5 +1,27 @@
 # Release Notes
 
+## Version 6.0.0 (2022-01-06)
+
+**Features:**
+
+* Fully support .NET 6.
+* Add support for OpenTelemetry. (#885)
+* Improve support for NATS JetStream wildcard topic. (#1047)
+* Add support customer header options for Azure Service Bus. (#1063) Thanks [@Mateus Viegas](https://github.com/mviegas)
+
+## Version 5.2.0 (2021-11-12)
+
+**Features:**
+
+* Add support for NATS JetStream. (#983)
+* Add support for Apache Pulsar. (#610)
+* Add possibility to process messages for each consumer group indepedently. (#1027)
+
+**Bug Fixed:**
+
+* Fixed message content of bigint type cannot be displayed correctly in dashboard. (#1028)
+* Fixed unobserved tasks of async method calls in Amazon SQS. (#1033)
+* Fixed RabbitMQ federation plugin message header object values cause exceptions. (#1036)
 
 ## Version 5.1.2 (2021-07-26)
 
