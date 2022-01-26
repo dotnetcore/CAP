@@ -34,7 +34,14 @@ namespace DotNetCore.CAP
         /// <summary>
         /// The name of the topic relative to the service namespace base address.
         /// </summary>
+        [Obsolete("Use the TopicPaths property instead for new support to producing and consuming from multiple ASB Topics..")]
         public string TopicPath { get; set; } = DefaultTopicPath;
+
+        /// <summary>
+        /// Allows CAP to connect to multiple Topics in a Service Bus namespace.
+        /// Has as default Value, a list with the <see cref="DefaultTopicPath"/>.
+        /// </summary>
+        public IEnumerable<string> TopicPaths { get; set; } = new List<string>() {DefaultTopicPath};
 
         /// <summary>
         /// Represents the Azure Active Directory token provider for Azure Managed Service Identity integration.

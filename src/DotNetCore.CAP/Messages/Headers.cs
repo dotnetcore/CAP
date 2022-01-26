@@ -30,5 +30,10 @@ namespace DotNetCore.CAP.Messages
         public const string SentTime = "cap-senttime";
 
         public const string Exception = "cap-exception";
+        
+        /// <summary>
+        /// Specifies a destination Topic where the Message will be sent to, if there are Multiple topics configured.
+        /// </summary>
+        public const string Destination = "cap-destination";
     }
 }

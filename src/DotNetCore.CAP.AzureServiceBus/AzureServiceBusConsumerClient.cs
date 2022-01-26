@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -23,8 +24,7 @@ namespace DotNetCore.CAP.AzureServiceBus
         private readonly ILogger _logger;
         private readonly string _subscriptionName;
         private readonly AzureServiceBusOptions _asbOptions;
-
-        private SubscriptionClient? _consumerClient;
+        private readonly ConcurrentDictionary<string, SubscriptionClient> _consumerClientPool = new();
 
         public AzureServiceBusConsumerClient(
             ILogger logger,
@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public event EventHandler<LogMessageEventArgs>? OnLog;
 
-        public BrokerAddress BrokerAddress => new ("AzureServiceBus", _asbOptions.ConnectionString);
+        public BrokerAddress BrokerAddress => new("AzureServiceBus", _asbOptions.ConnectionString);
 
         public void Subscribe(IEnumerable<string> topics)
         {
@@ -51,51 +51,60 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             ConnectAsync().GetAwaiter().GetResult();
 
-            var allRuleNames = _consumerClient!.GetRulesAsync().GetAwaiter().GetResult().Select(x => x.Name);
-
-            foreach (var newRule in topics.Except(allRuleNames))
+            Parallel.ForEach(_consumerClientPool, client =>
             {
-                CheckValidSubscriptionName(newRule);
+                var allRuleNames = client.Value.GetRulesAsync()
+                    .GetAwaiter()
+                    .GetResult()
+                    .Select(x => x.Name)
+                    .ToList();
 
-                _consumerClient.AddRuleAsync(new RuleDescription
+                foreach (var newRule in topics.Except(allRuleNames))
                 {
-                    Filter = new CorrelationFilter { Label = newRule },
-                    Name = newRule
-                }).GetAwaiter().GetResult();
+                    CheckValidSubscriptionName(newRule);
 
-                _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
-            }
+                    client.Value.AddRuleAsync(new RuleDescription
+                    {
+                        Filter = new CorrelationFilter {Label = newRule},
+                        Name = newRule
+                    }).GetAwaiter().GetResult();
 
-            foreach (var oldRule in allRuleNames.Except(topics))
-            {
-                _consumerClient.RemoveRuleAsync(oldRule).GetAwaiter().GetResult();
+                    _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
+                }
 
-                _logger.LogInformation($"Azure Service Bus remove rule: {oldRule}");
-            }
+                foreach (var oldRule in allRuleNames.Except(topics))
+                {
+                    client.Value.RemoveRuleAsync(oldRule).GetAwaiter().GetResult();
+
+                    _logger.LogInformation($"Azure Service Bus remove rule: {oldRule}");
+                }
+            });
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             ConnectAsync().GetAwaiter().GetResult();
-
-            if (_asbOptions.EnableSessions)
+            foreach (var client in _consumerClientPool)
             {
-                _consumerClient!.RegisterSessionHandler(OnConsumerReceivedWithSession,
-                    new SessionHandlerOptions(OnExceptionReceived)
-                    {
-                        AutoComplete = false,
-                        MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
-                    });
-            }
-            else
-            {
-                _consumerClient!.RegisterMessageHandler(OnConsumerReceived,
-                    new MessageHandlerOptions(OnExceptionReceived)
-                    {
-                        AutoComplete = false,
-                        MaxConcurrentCalls = 10,
-                        MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
-                    });
+                if (_asbOptions.EnableSessions)
+                {
+                    client.Value!.RegisterSessionHandler(OnConsumerReceivedWithSession,
+                        new SessionHandlerOptions(OnExceptionReceived)
+                        {
+                            AutoComplete = false,
+                            MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
+                        });
+                }
+                else
+                {
+                    client.Value!.RegisterMessageHandler(OnConsumerReceived,
+                        new MessageHandlerOptions(OnExceptionReceived)
+                        {
+                            AutoComplete = false,
+                            MaxConcurrentCalls = 10,
+                            MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
+                        });
+                }
             }
 
             while (true)
@@ -115,7 +124,8 @@ namespace DotNetCore.CAP.AzureServiceBus
             }
             else
             {
-                _consumerClient!.CompleteAsync(commitInput.LockToken);
+                throw new NotImplementedException("How do we complete a message for the given client?");
+                // _consumerClient!.CompleteAsync(commitInput.LockToken);
             }
         }
 
@@ -126,53 +136,58 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public void Dispose()
         {
-            _consumerClient?.CloseAsync().Wait(1500);
+            foreach (var client in _consumerClientPool)
+            {
+                client.Value.CloseAsync().GetAwaiter().GetResult();
+            }
         }
 
         public async Task ConnectAsync()
         {
-            if (_consumerClient != null)
+            // All clients are connected, need to think more about this
+            if (_consumerClientPool.Count.Equals(_asbOptions.TopicPaths.Count()))
             {
                 return;
             }
 
-            _connectionLock.Wait();
+            await _connectionLock.WaitAsync();
 
             try
             {
-                if (_consumerClient == null)
+                if (_consumerClientPool.Count == 0)
                 {
-                    ManagementClient mClient;
-                    if (_asbOptions.ManagementTokenProvider != null)
-                    {
-                        mClient = new ManagementClient(new ServiceBusConnectionStringBuilder(
-                            _asbOptions.ConnectionString), _asbOptions.ManagementTokenProvider);
-                    }
-                    else
-                    {
-                        mClient = new ManagementClient(_asbOptions.ConnectionString);
-                    }
+                    var connectionStringBuilder = new ServiceBusConnectionStringBuilder(_asbOptions.ConnectionString);
 
-                    if (!await mClient.TopicExistsAsync(_asbOptions.TopicPath))
+                    var managementClient =
+                        new ManagementClient(connectionStringBuilder, _asbOptions.ManagementTokenProvider);
+
+                    foreach (var topicPath in _asbOptions.TopicPaths)
                     {
-                        await mClient.CreateTopicAsync(_asbOptions.TopicPath);
-                        _logger.LogInformation($"Azure Service Bus created topic: {_asbOptions.TopicPath}");
+                        if (!await managementClient.TopicExistsAsync(topicPath))
+                        {
+                            await managementClient.CreateTopicAsync(topicPath);
+                            _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
+                        }
+
+                        if (!await managementClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
+                        {
+                            var subscriptionDescription =
+                                new SubscriptionDescription(topicPath, _subscriptionName)
+                                {
+                                    RequiresSession = _asbOptions.EnableSessions
+                                };
+
+                            await managementClient.CreateSubscriptionAsync(subscriptionDescription);
+                            _logger.LogInformation(
+                                $"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
+                        }
+
+                        _consumerClientPool.TryAdd(topicPath, new SubscriptionClient(
+                            connectionStringBuilder: connectionStringBuilder,
+                            subscriptionName: _subscriptionName,
+                            receiveMode: ReceiveMode.PeekLock,
+                            retryPolicy: RetryPolicy.Default));
                     }
-
-                    if (!await mClient.SubscriptionExistsAsync(_asbOptions.TopicPath, _subscriptionName))
-                    {
-                        var subscriptionDescription =
-                            new SubscriptionDescription(_asbOptions.TopicPath, _subscriptionName)
-                            {
-                                RequiresSession = _asbOptions.EnableSessions
-                            };
-
-                        await mClient.CreateSubscriptionAsync(subscriptionDescription);
-                        _logger.LogInformation($"Azure Service Bus topic {_asbOptions.TopicPath} created subscription: {_subscriptionName}");
-                    }
-
-                    _consumerClient = new SubscriptionClient(_asbOptions.ConnectionString, _asbOptions.TopicPath, _subscriptionName,
-                        ReceiveMode.PeekLock, RetryPolicy.Default);
                 }
             }
             finally
@@ -187,11 +202,11 @@ namespace DotNetCore.CAP.AzureServiceBus
         {
             var headers = message.UserProperties
                 .ToDictionary(x => x.Key, y => y.Value?.ToString());
-            
+
             headers.Add(Headers.Group, _subscriptionName);
 
             var customHeaders = _asbOptions.CustomHeaders?.Invoke(message);
-            
+
             if (customHeaders?.Any() == true)
             {
                 foreach (var customHeader in customHeaders)
@@ -201,7 +216,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                     if (!added)
                     {
                         _logger.LogWarning(
-                            "Not possible to add the custom header {Header}. A value with the same key already exists in the Message headers.", 
+                            "Not possible to add the custom header {Header}. A value with the same key already exists in the Message headers.",
                             customHeader.Key);
                     }
                 }
@@ -209,13 +224,14 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             return new TransportMessage(headers, message.Body);
         }
-        
+
         private Task OnConsumerReceivedWithSession(IMessageSession session, Message message, CancellationToken token)
         {
             var context = ConvertMessage(message);
 
-            OnMessageReceived?.Invoke(new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken, session), context);
-            
+            OnMessageReceived?.Invoke(
+                new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken, session), context);
+
             return Task.CompletedTask;
         }
 
@@ -223,7 +239,8 @@ namespace DotNetCore.CAP.AzureServiceBus
         {
             var context = ConvertMessage(message);
 
-            OnMessageReceived?.Invoke(new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken), context);
+            OnMessageReceived?.Invoke(new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken),
+                context);
 
             return Task.CompletedTask;
         }
@@ -252,7 +269,7 @@ namespace DotNetCore.CAP.AzureServiceBus
         {
             const string pathDelimiter = @"/";
             const int ruleNameMaximumLength = 50;
-            char[] invalidEntityPathCharacters = { '@', '?', '#', '*' };
+            char[] invalidEntityPathCharacters = {'@', '?', '#', '*'};
 
             if (string.IsNullOrWhiteSpace(subscriptionName))
             {
@@ -264,25 +281,31 @@ namespace DotNetCore.CAP.AzureServiceBus
             var tmpName = subscriptionName.Replace(@"\", pathDelimiter);
             if (tmpName.Length > ruleNameMaximumLength)
             {
-                throw new ArgumentOutOfRangeException(subscriptionName, $@"Subscribe name '{subscriptionName}' exceeds the '{ruleNameMaximumLength}' character limit.");
+                throw new ArgumentOutOfRangeException(subscriptionName,
+                    $@"Subscribe name '{subscriptionName}' exceeds the '{ruleNameMaximumLength}' character limit.");
             }
 
             if (tmpName.StartsWith(pathDelimiter, StringComparison.OrdinalIgnoreCase) ||
                 tmpName.EndsWith(pathDelimiter, StringComparison.OrdinalIgnoreCase))
             {
-                throw new ArgumentException($@"The subscribe name cannot contain '/' as prefix or suffix. The supplied value is '{subscriptionName}'", subscriptionName);
+                throw new ArgumentException(
+                    $@"The subscribe name cannot contain '/' as prefix or suffix. The supplied value is '{subscriptionName}'",
+                    subscriptionName);
             }
 
             if (tmpName.Contains(pathDelimiter))
             {
-                throw new ArgumentException($@"The subscribe name contains an invalid character '{pathDelimiter}'", subscriptionName);
+                throw new ArgumentException($@"The subscribe name contains an invalid character '{pathDelimiter}'",
+                    subscriptionName);
             }
 
             foreach (var uriSchemeKey in invalidEntityPathCharacters)
             {
                 if (subscriptionName.IndexOf(uriSchemeKey) >= 0)
                 {
-                    throw new ArgumentException($@"'{subscriptionName}' contains character '{uriSchemeKey}' which is not allowed because it is reserved in the Uri scheme.", subscriptionName);
+                    throw new ArgumentException(
+                        $@"'{subscriptionName}' contains character '{uriSchemeKey}' which is not allowed because it is reserved in the Uri scheme.",
+                        subscriptionName);
                 }
             }
         }
