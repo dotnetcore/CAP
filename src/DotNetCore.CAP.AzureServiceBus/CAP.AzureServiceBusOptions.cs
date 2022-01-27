@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using DotNetCore.CAP.AzureServiceBus;
-using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Primitives;
 
