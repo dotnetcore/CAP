@@ -19,21 +19,47 @@ namespace DotNetCore.CAP.AzureServiceBus
 {
     internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     {
-        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
-
+        private readonly SemaphoreSlim _connectionLock = new(1, 1);
         private readonly ILogger _logger;
-        private readonly string _subscriptionName;
         private readonly AzureServiceBusOptions _asbOptions;
-        private readonly ConcurrentDictionary<string, SubscriptionClient> _consumerClientPool = new();
+
+        public ConcurrentDictionary<AzureServiceBusSubscriptionConfigurator, SubscriptionClient?> ConsumerClientPool { get; private set; }  = new();
+
+        private AzureServiceBusSubscriptionConfigurator? DefaultSubscriptionConfigurator =>
+            ConsumerClientPool
+                .SingleOrDefault(c => c.Key.Default == true)
+                .Key;
 
         public AzureServiceBusConsumerClient(
             ILogger logger,
-            string subscriptionName,
+            string defaultSubscriptionName,
             IOptions<AzureServiceBusOptions> options)
         {
             _logger = logger;
-            _subscriptionName = subscriptionName;
             _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
+
+            SetupSubscriptionsPool(defaultSubscriptionName, _asbOptions);
+        }
+
+        private void SetupSubscriptionsPool(string defaultSubscriptionName, AzureServiceBusOptions options)
+        {
+            var defaultSubscriber = new AzureServiceBusSubscriptionConfigurator(
+                options.TopicPath, defaultSubscriptionName);
+
+            var customSubscribers = options.CustomSubscribersConfiguration
+                .Select(c => new AzureServiceBusSubscriptionConfigurator(c))
+                .ToList();
+
+            customSubscribers.Add(defaultSubscriber);
+
+            foreach (var customSubscriber in customSubscribers)
+            {
+                var added = ConsumerClientPool.TryAdd(customSubscriber, null);
+
+                if (!added)
+                    _logger.LogWarning("Subscription {SubscriptionName} for Topic {TopicName} was not created.",
+                        customSubscriber.SubscriptionName, customSubscriber.TopicPath);
+            }
         }
 
         public event EventHandler<TransportMessage>? OnMessageReceived;
@@ -41,6 +67,87 @@ namespace DotNetCore.CAP.AzureServiceBus
         public event EventHandler<LogMessageEventArgs>? OnLog;
 
         public BrokerAddress BrokerAddress => new("AzureServiceBus", _asbOptions.ConnectionString);
+
+
+        public async Task ConnectAsync()
+        {
+            if (ConsumerClientPool.All(c => c.Value != null))
+            {
+                return;
+            }
+
+            await _connectionLock.WaitAsync();
+
+            try
+            {
+                foreach (var consumerClient in
+                         ConsumerClientPool
+                             .Where(c => c.Value == null))
+                {
+                    var connectionStringBuilder = new ServiceBusConnectionStringBuilder(_asbOptions.ConnectionString);
+
+                    var managementClient =
+                        new ManagementClient(connectionStringBuilder, _asbOptions.ManagementTokenProvider);
+
+                    var client =
+                        await CreateSubscriptionClient(managementClient, consumerClient.Key, connectionStringBuilder);
+
+                    ConsumerClientPool.TryUpdate(consumerClient.Key, client, null);
+                }
+            }
+            finally
+
+            {
+                _connectionLock.Release();
+            }
+        }
+
+        private async Task<SubscriptionClient> CreateSubscriptionClient(ManagementClient managementClient,
+            AzureServiceBusSubscriptionConfigurator configurator,
+            ServiceBusConnectionStringBuilder connectionStringBuilder)
+        {
+            await CreateTopicIfNotExistsAsync(managementClient, configurator);
+
+            await CreateSubscriptionIfNotExistsAsync(managementClient, configurator);
+
+            return new SubscriptionClient(
+                connectionStringBuilder: connectionStringBuilder,
+                subscriptionName: configurator.SubscriptionName,
+                receiveMode: configurator.ReceiveMode ?? ReceiveMode.PeekLock,
+                retryPolicy: configurator.RetryPolicy ?? RetryPolicy.Default);
+        }
+
+        private async Task CreateSubscriptionIfNotExistsAsync(ManagementClient managementClient,
+            AzureServiceBusSubscriptionConfigurator customServiceBusSubscriberOptions)
+        {
+            if (!await managementClient.SubscriptionExistsAsync(customServiceBusSubscriberOptions.TopicPath,
+                    customServiceBusSubscriberOptions.SubscriptionName))
+            {
+                var subscriptionDescription =
+                    new SubscriptionDescription(
+                        customServiceBusSubscriberOptions.TopicPath,
+                        customServiceBusSubscriberOptions.SubscriptionName)
+                    {
+                        RequiresSession = _asbOptions.EnableSessions
+                    };
+
+                await managementClient.CreateSubscriptionAsync(subscriptionDescription);
+
+                _logger.LogInformation(
+                    $"Azure Service Bus topic {customServiceBusSubscriberOptions.TopicPath} created subscription: {customServiceBusSubscriberOptions.SubscriptionName}");
+            }
+        }
+
+        private async Task CreateTopicIfNotExistsAsync(ManagementClient managementClient,
+            AzureServiceBusSubscriptionConfigurator customServiceBusSubscriberOptions)
+        {
+            if (!await managementClient.TopicExistsAsync(customServiceBusSubscriberOptions.TopicPath))
+            {
+                await managementClient.CreateTopicAsync(customServiceBusSubscriberOptions.TopicPath);
+                _logger.LogInformation(
+                    $"Azure Service Bus created topic: {customServiceBusSubscriberOptions.TopicPath}");
+            }
+        }
 
         public void Subscribe(IEnumerable<string> topics)
         {
@@ -51,19 +158,19 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             ConnectAsync().GetAwaiter().GetResult();
 
-            Parallel.ForEach(_consumerClientPool, client =>
+            Parallel.ForEach(ConsumerClientPool, entry =>
             {
-                var allRuleNames = client.Value.GetRulesAsync()
+                var existingSubscriptionRules = entry.Value.GetRulesAsync()
                     .GetAwaiter()
                     .GetResult()
                     .Select(x => x.Name)
                     .ToList();
 
-                foreach (var newRule in topics.Except(allRuleNames))
+                foreach (var newRule in topics.Except(existingSubscriptionRules))
                 {
                     CheckValidSubscriptionName(newRule);
 
-                    client.Value.AddRuleAsync(new RuleDescription
+                    entry.Value.AddRuleAsync(new RuleDescription
                     {
                         Filter = new CorrelationFilter {Label = newRule},
                         Name = newRule
@@ -72,9 +179,9 @@ namespace DotNetCore.CAP.AzureServiceBus
                     _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
                 }
 
-                foreach (var oldRule in allRuleNames.Except(topics))
+                foreach (var oldRule in existingSubscriptionRules.Except(topics))
                 {
-                    client.Value.RemoveRuleAsync(oldRule).GetAwaiter().GetResult();
+                    entry.Value.RemoveRuleAsync(oldRule).GetAwaiter().GetResult();
 
                     _logger.LogInformation($"Azure Service Bus remove rule: {oldRule}");
                 }
@@ -84,11 +191,11 @@ namespace DotNetCore.CAP.AzureServiceBus
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             ConnectAsync().GetAwaiter().GetResult();
-            foreach (var client in _consumerClientPool)
+            foreach (var entry in ConsumerClientPool)
             {
-                if (_asbOptions.EnableSessions)
+                if (entry.Key.EnableSessions)
                 {
-                    client.Value!.RegisterSessionHandler(OnConsumerReceivedWithSession,
+                    entry.Value!.RegisterSessionHandler(OnConsumerReceivedWithSession,
                         new SessionHandlerOptions(OnExceptionReceived)
                         {
                             AutoComplete = false,
@@ -97,7 +204,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                 }
                 else
                 {
-                    client.Value!.RegisterMessageHandler(OnConsumerReceived,
+                    entry.Value!.RegisterMessageHandler(OnConsumerReceived,
                         new MessageHandlerOptions(OnExceptionReceived)
                         {
                             AutoComplete = false,
@@ -115,95 +222,48 @@ namespace DotNetCore.CAP.AzureServiceBus
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit(object sender)
+        private Task OnConsumerReceivedWithSession(IMessageSession session, Message message, CancellationToken token)
         {
-            var commitInput = (AzureServiceBusConsumerCommitInput) sender;
-            if (_asbOptions.EnableSessions)
-            {
-                commitInput.Session?.CompleteAsync(commitInput.LockToken);
-            }
-            else
-            {
-                throw new NotImplementedException("How do we complete a message for the given client?");
-                // _consumerClient!.CompleteAsync(commitInput.LockToken);
-            }
+            var context = ConvertMessage(message);
+
+            var destination = GetIncomingTopicPath(context);
+
+            var commitInput =
+                new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken, session, destination);
+
+            OnMessageReceived?.Invoke(commitInput, context);
+
+            return Task.CompletedTask;
         }
 
-        public void Reject(object? sender)
+        private Task OnConsumerReceived(Message message, CancellationToken token)
         {
-            // ignore
+            var context = ConvertMessage(message);
+
+            var destination = GetIncomingTopicPath(context);
+
+            var commitInput = new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken, destination);
+
+            OnMessageReceived?.Invoke(commitInput, context);
+
+            return Task.CompletedTask;
         }
 
-        public void Dispose()
+        private string? GetIncomingTopicPath(TransportMessage context)
         {
-            foreach (var client in _consumerClientPool)
-            {
-                client.Value.CloseAsync().GetAwaiter().GetResult();
-            }
+            var destination =
+                context.Headers.TryGetValue(CAP.Messages.Headers.Destination, out var destinationHeader)
+                    ? destinationHeader
+                    : DefaultSubscriptionConfigurator?.TopicPath;
+            return destination;
         }
-
-        public async Task ConnectAsync()
-        {
-            // All clients are connected, need to think more about this
-            if (_consumerClientPool.Count.Equals(_asbOptions.TopicPaths.Count()))
-            {
-                return;
-            }
-
-            await _connectionLock.WaitAsync();
-
-            try
-            {
-                if (_consumerClientPool.Count == 0)
-                {
-                    var connectionStringBuilder = new ServiceBusConnectionStringBuilder(_asbOptions.ConnectionString);
-
-                    var managementClient =
-                        new ManagementClient(connectionStringBuilder, _asbOptions.ManagementTokenProvider);
-
-                    foreach (var topicPath in _asbOptions.TopicPaths)
-                    {
-                        if (!await managementClient.TopicExistsAsync(topicPath))
-                        {
-                            await managementClient.CreateTopicAsync(topicPath);
-                            _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
-                        }
-
-                        if (!await managementClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
-                        {
-                            var subscriptionDescription =
-                                new SubscriptionDescription(topicPath, _subscriptionName)
-                                {
-                                    RequiresSession = _asbOptions.EnableSessions
-                                };
-
-                            await managementClient.CreateSubscriptionAsync(subscriptionDescription);
-                            _logger.LogInformation(
-                                $"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
-                        }
-
-                        _consumerClientPool.TryAdd(topicPath, new SubscriptionClient(
-                            connectionStringBuilder: connectionStringBuilder,
-                            subscriptionName: _subscriptionName,
-                            receiveMode: ReceiveMode.PeekLock,
-                            retryPolicy: RetryPolicy.Default));
-                    }
-                }
-            }
-            finally
-            {
-                _connectionLock.Release();
-            }
-        }
-
-        #region private methods
 
         private TransportMessage ConvertMessage(Message message)
         {
             var headers = message.UserProperties
                 .ToDictionary(x => x.Key, y => y.Value?.ToString());
 
-            headers.Add(Headers.Group, _subscriptionName);
+            headers.Add(Headers.Group, DefaultSubscriptionConfigurator?.SubscriptionName);
 
             var customHeaders = _asbOptions.CustomHeaders?.Invoke(message);
 
@@ -225,26 +285,6 @@ namespace DotNetCore.CAP.AzureServiceBus
             return new TransportMessage(headers, message.Body);
         }
 
-        private Task OnConsumerReceivedWithSession(IMessageSession session, Message message, CancellationToken token)
-        {
-            var context = ConvertMessage(message);
-
-            OnMessageReceived?.Invoke(
-                new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken, session), context);
-
-            return Task.CompletedTask;
-        }
-
-        private Task OnConsumerReceived(Message message, CancellationToken token)
-        {
-            var context = ConvertMessage(message);
-
-            OnMessageReceived?.Invoke(new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken),
-                context);
-
-            return Task.CompletedTask;
-        }
-
         private Task OnExceptionReceived(ExceptionReceivedEventArgs args)
         {
             var context = args.ExceptionReceivedContext;
@@ -263,6 +303,37 @@ namespace DotNetCore.CAP.AzureServiceBus
             OnLog?.Invoke(null, logArgs);
 
             return Task.CompletedTask;
+        }
+
+        public void Commit(object sender)
+        {
+            var commitInput = (AzureServiceBusConsumerCommitInput) sender;
+
+            var consumerClient = ConsumerClientPool
+                .SingleOrDefault(c => c.Key.TopicPath == commitInput.DestinationTopicPath)
+                .Value;
+
+            if (_asbOptions.EnableSessions)
+            {
+                commitInput.Session?.CompleteAsync(commitInput.LockToken);
+            }
+            else
+            {
+                consumerClient.CompleteAsync(commitInput.LockToken);
+            }
+        }
+
+        public void Reject(object? sender)
+        {
+            // ignore
+        }
+
+        public void Dispose()
+        {
+            foreach (var client in ConsumerClientPool)
+            {
+                client.Value.CloseAsync().GetAwaiter().GetResult();
+            }
         }
 
         private static void CheckValidSubscriptionName(string subscriptionName)
@@ -309,7 +380,5 @@ namespace DotNetCore.CAP.AzureServiceBus
                 }
             }
         }
-
-        #endregion private methods
     }
 }

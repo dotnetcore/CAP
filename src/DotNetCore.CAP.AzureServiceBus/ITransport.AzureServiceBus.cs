@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
@@ -36,11 +35,10 @@ namespace DotNetCore.CAP.AzureServiceBus
         public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {
             var destination =
-                _asbOptions.Value.TopicPaths.Count() == 1
-                ? _asbOptions.Value.TopicPaths.Single()
-                : transportMessage.Headers.TryGetValue(CAP.Messages.Headers.Destination, out var destinationHeader)
+                transportMessage.Headers.TryGetValue(Headers.Destination, out var destinationHeader)
                     ? destinationHeader
-                    : throw new InvalidOperationException("If more than one Topic Path is specified, the Destination Topic should be specified in Message Header.");
+                    : _asbOptions.Value.TopicPath;
+            
             try
             {
                 Connect(destination!);

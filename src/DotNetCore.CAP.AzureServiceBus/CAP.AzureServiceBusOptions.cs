@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using DotNetCore.CAP.AzureServiceBus;
+using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Primitives;
 
@@ -34,14 +35,7 @@ namespace DotNetCore.CAP
         /// <summary>
         /// The name of the topic relative to the service namespace base address.
         /// </summary>
-        [Obsolete("Use the TopicPaths property instead for new support to producing and consuming from multiple ASB Topics..")]
         public string TopicPath { get; set; } = DefaultTopicPath;
-
-        /// <summary>
-        /// Allows CAP to connect to multiple Topics in a Service Bus namespace.
-        /// Has as default Value, a list with the <see cref="DefaultTopicPath"/>.
-        /// </summary>
-        public IEnumerable<string> TopicPaths { get; set; } = new List<string>() {DefaultTopicPath};
 
         /// <summary>
         /// Represents the Azure Active Directory token provider for Azure Managed Service Identity integration.
@@ -52,5 +46,15 @@ namespace DotNetCore.CAP
         /// Use this function to write additional headers from the original ASB Message or any Custom Header, i.e. to allow compatibility with heterogeneous systems, into <see cref="CapHeader"/>
         /// </summary>
         public Func<Message, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
+
+        public ICollection<CustomAzureServiceBusSubscriberOptions> CustomSubscribersConfiguration { get; private set; }
+            = new List<CustomAzureServiceBusSubscriberOptions>();
+
+        public void ConfigureCustomSubscription<T>(Action<CustomAzureServiceBusSubscriberOptions> options)
+        {
+            var custom = new CustomAzureServiceBusSubscriberOptions();
+            options(custom);
+            CustomSubscribersConfiguration.Add(custom);
+        }
     }
 }
