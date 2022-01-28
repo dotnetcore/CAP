@@ -10,7 +10,7 @@
 
     Otherwise, look at Q&A below.
 
-!!! faq "How to use the same database for different applications? (Only for MySQL)"
+!!! faq "How to use the same database for different applications?"
     
     Define a table prefix name in `ConfigureServices` method.
     
