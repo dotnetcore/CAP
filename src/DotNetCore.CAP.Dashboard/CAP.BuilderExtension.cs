@@ -130,7 +130,7 @@ namespace DotNetCore.CAP
             if (isAuthenticated == false && options.UseChallengeOnAuth)
             {
                 await context.ChallengeAsync(options.DefaultChallengeScheme);
-
+                await context.Response.CompleteAsync();
                 return false;
             }
 
