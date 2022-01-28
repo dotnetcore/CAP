@@ -27,13 +27,19 @@ namespace DotNetCore.CAP
         /// </summary>
         void Commit();
 
+        /// <summary>
+        /// Submit the transaction context of the CAP, we will send the message to the message queue at the time of submission
+        /// </summary>
         Task CommitAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
-        /// We will delete the message data that has not been sstore in the buffer data of current transaction context.
+        /// We will delete the message data that has not been store in the buffer data of current transaction context.
         /// </summary>
         void Rollback();
 
+        /// <summary>
+        /// We will delete the message data that has not been store in the buffer data of current transaction context.
+        /// </summary>
         Task RollbackAsync(CancellationToken cancellationToken = default);
     }
 }
