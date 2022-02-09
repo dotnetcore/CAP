@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -33,7 +34,7 @@ namespace DotNetCore.CAP.Kafka
 
         public event EventHandler<LogMessageEventArgs>? OnLog;
 
-        public BrokerAddress BrokerAddress => new ("Kafka", _kafkaOptions.Servers);
+        public BrokerAddress BrokerAddress => new("Kafka", _kafkaOptions.Servers);
 
         public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
         {
@@ -89,7 +90,16 @@ namespace DotNetCore.CAP.Kafka
 
             while (true)
             {
-                var consumerResult = _consumerClient!.Consume(cancellationToken);
+                ConsumeResult<string, byte[]> consumerResult;
+
+                try
+                {
+                    consumerResult = _consumerClient!.Consume(cancellationToken);
+                }
+                catch (ConsumeException e) when (_kafkaOptions.RetriableErrorCodes.Contains(e.Error.Code))
+                {
+                    continue;
+                }
 
                 if (consumerResult.IsPartitionEOF || consumerResult.Message.Value == null) continue;
 
