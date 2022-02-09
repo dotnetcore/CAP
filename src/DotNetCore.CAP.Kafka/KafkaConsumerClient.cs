@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -18,7 +17,7 @@ namespace DotNetCore.CAP.Kafka
 {
     public class KafkaConsumerClient : IConsumerClient
     {
-        private static readonly SemaphoreSlim ConnectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+        private static readonly SemaphoreSlim ConnectionLock = new(initialCount: 1, maxCount: 1);
 
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;
