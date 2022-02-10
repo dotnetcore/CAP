@@ -97,6 +97,13 @@ namespace DotNetCore.CAP.Kafka
                 }
                 catch (ConsumeException e) when (_kafkaOptions.RetriableErrorCodes.Contains(e.Error.Code))
                 {
+                    var logArgs = new LogMessageEventArgs
+                    {
+                        LogType = MqLogType.ConsumeRetries,
+                        Reason = e.Error.ToString()
+                    };
+                    OnLog?.Invoke(null, logArgs);
+
                     continue;
                 }
 
