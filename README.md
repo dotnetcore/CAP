@@ -180,7 +180,6 @@ Then register your class that implements `ISubscriberService` in Startup.cs
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
-    //Note: The injection of services needs before of `services.AddCap()`
     services.AddTransient<ISubscriberService,SubscriberService>();
 
     services.AddCap(x=>
@@ -203,7 +202,6 @@ public class CustomersSubscriberService : ICapSubscribe
     }
 }
 ```
-
 
 #### Subscribe Group
 
