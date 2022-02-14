@@ -195,7 +195,6 @@ namespace xxx.Service
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
-    //注意: 注入的服务需要在 `services.AddCap()` 之前
     services.AddTransient<ISubscriberService,SubscriberService>();
 	
     services.AddCap(x=>{});
