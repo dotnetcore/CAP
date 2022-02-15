@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.Kafka
 {
     public class KafkaConsumerClient : IConsumerClient
     {
-        private static readonly SemaphoreSlim ConnectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+        private static readonly SemaphoreSlim ConnectionLock = new(initialCount: 1, maxCount: 1);
 
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;
@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.Kafka
 
         public event EventHandler<LogMessageEventArgs>? OnLog;
 
-        public BrokerAddress BrokerAddress => new ("Kafka", _kafkaOptions.Servers);
+        public BrokerAddress BrokerAddress => new("Kafka", _kafkaOptions.Servers);
 
         public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
         {
@@ -89,7 +89,23 @@ namespace DotNetCore.CAP.Kafka
 
             while (true)
             {
-                var consumerResult = _consumerClient!.Consume(cancellationToken);
+                ConsumeResult<string, byte[]> consumerResult;
+
+                try
+                {
+                    consumerResult = _consumerClient!.Consume(cancellationToken);
+                }
+                catch (ConsumeException e) when (_kafkaOptions.RetriableErrorCodes.Contains(e.Error.Code))
+                {
+                    var logArgs = new LogMessageEventArgs
+                    {
+                        LogType = MqLogType.ConsumeRetries,
+                        Reason = e.Error.ToString()
+                    };
+                    OnLog?.Invoke(null, logArgs);
+
+                    continue;
+                }
 
                 if (consumerResult.IsPartitionEOF || consumerResult.Message.Value == null) continue;
 

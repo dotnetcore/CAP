@@ -304,6 +304,9 @@ namespace DotNetCore.CAP.Internal
                 case MqLogType.ConsumeError:
                     _logger.LogError("Kafka client consume error. --> " + logmsg.Reason);
                     break;
+                case MqLogType.ConsumeRetries:
+                    _logger.LogWarning("Kafka client consume exception, retying... --> " + logmsg.Reason);
+                    break;
                 case MqLogType.ServerConnError:
                     _isHealthy = false;
                     _logger.LogCritical("Kafka server connection error. --> " + logmsg.Reason);

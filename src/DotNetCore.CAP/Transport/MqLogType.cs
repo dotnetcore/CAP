@@ -15,6 +15,7 @@ namespace DotNetCore.CAP.Transport
 
         //Kafka
         ConsumeError,
+        ConsumeRetries,
         ServerConnError,
 
         //AzureServiceBus
