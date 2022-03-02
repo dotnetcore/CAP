@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.Processor
             _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
         }
 
-        public async Task ProcessAsync(ProcessingContext context)
+        public virtual async Task ProcessAsync(ProcessingContext context)
         {
             if (context == null)
             {

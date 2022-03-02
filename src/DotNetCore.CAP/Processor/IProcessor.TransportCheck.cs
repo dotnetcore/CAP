@@ -21,7 +21,7 @@ namespace DotNetCore.CAP.Processor
             _waitingInterval = TimeSpan.FromSeconds(30);
         }
 
-        public async Task ProcessAsync(ProcessingContext context)
+        public virtual async Task ProcessAsync(ProcessingContext context)
         {
             if (context == null)
             {

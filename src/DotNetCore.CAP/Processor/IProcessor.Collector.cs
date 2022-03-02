@@ -32,7 +32,7 @@ namespace DotNetCore.CAP.Processor
             _tableNames = new[] { initializer.GetPublishedTableName(), initializer.GetReceivedTableName() };
         }
 
-        public async Task ProcessAsync(ProcessingContext context)
+        public virtual async Task ProcessAsync(ProcessingContext context)
         {
             foreach (var table in _tableNames)
             {
