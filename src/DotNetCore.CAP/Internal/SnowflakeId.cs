@@ -2,48 +2,76 @@
 // An object that generates IDs. This is broken into a separate class in case we ever want to support multiple worker threads per process
 
 using System;
+using System.Linq;
+using System.Net.NetworkInformation;
+using System.Threading;
 
 namespace DotNetCore.CAP.Internal
 {
     public class SnowflakeId
     {
+        /// <summary>
+        /// Start time 2010-11-04 09:42:54
+        /// </summary>
         public const long Twepoch = 1288834974657L;
 
-        private const int WorkerIdBits = 5;
-        private const int DatacenterIdBits = 5;
-        private const int SequenceBits = 12;
-        private const long MaxWorkerId = -1L ^ (-1L << WorkerIdBits);
-        private const long MaxDatacenterId = -1L ^ (-1L << DatacenterIdBits);
+        /// <summary>
+        /// The number of bits occupied by workerId
+        /// </summary>
+        private const int WorkerIdBits = 10;
 
-        private const int WorkerIdShift = SequenceBits;
-        private const int DatacenterIdShift = SequenceBits + WorkerIdBits;
-        public const int TimestampLeftShift = SequenceBits + WorkerIdBits + DatacenterIdBits;
-        private const long SequenceMask = -1L ^ (-1L << SequenceBits);
+        /// <summary>
+        /// The number of bits occupied by timestamp
+        /// </summary>
+        private const int TimestampBits = 41;
+
+        /// <summary>
+        /// The number of bits occupied by sequence
+        /// </summary>
+        private const int SequenceBits = 12;
+
+        /// <summary>
+        /// Maximum supported machine id, the result is 1023
+        /// </summary>
+        private const int MaxWorkerId = ~(-1 << WorkerIdBits);
+
+        /// <summary>
+        /// mask that help to extract timestamp and sequence from a long
+        /// </summary>
+        private const long TimestampAndSequenceMask = ~(-1L << (TimestampBits + SequenceBits));
+
+        /// <summary>
+        /// business meaning: machine ID (0 ~ 1023)
+        /// actual layout in memory:
+        /// highest 1 bit: 0
+        /// middle 10 bit: workerId
+        /// lowest 53 bit: all 0
+        /// </summary>
+        private long _workerId { get; set; }
+
+        /// <summary>
+        /// timestamp and sequence mix in one Long
+        /// highest 11 bit: not used
+        /// middle  41 bit: timestamp
+        /// lowest  12 bit: sequence
+        /// </summary>
+        private long _timestampAndSequence;
 
         private static SnowflakeId? _snowflakeId;
 
-        private readonly object _lock = new object();
         private static readonly object SLock = new object();
-        private long _lastTimestamp = -1L;
 
-        public SnowflakeId(long workerId, long datacenterId, long sequence = 0L)
+        private readonly object _lock = new object();
+
+        public SnowflakeId(long workerId)
         {
-            WorkerId = workerId;
-            DatacenterId = datacenterId;
-            Sequence = sequence;
-
+            InitTimestampAndSequence();
             // sanity check for workerId
             if (workerId > MaxWorkerId || workerId < 0)
                 throw new ArgumentException($"worker Id can't be greater than {MaxWorkerId} or less than 0");
 
-            if (datacenterId > MaxDatacenterId || datacenterId < 0)
-                throw new ArgumentException($"datacenter Id can't be greater than {MaxDatacenterId} or less than 0");
+            _workerId = workerId << (TimestampBits + SequenceBits);
         }
-
-        public long WorkerId { get; protected set; }
-        public long DatacenterId { get; protected set; }
-
-        public long Sequence { get; internal set; }
 
         public static SnowflakeId Default()
         {
@@ -59,19 +87,12 @@ namespace DotNetCore.CAP.Internal
                     return _snowflakeId;
                 }
 
-                var random = new Random();
-
-                if (!int.TryParse(Environment.GetEnvironmentVariable("CAP_WORKERID", EnvironmentVariableTarget.Machine), out var workerId))
+                if (!long.TryParse(Environment.GetEnvironmentVariable("CAP_WORKERID", EnvironmentVariableTarget.Machine), out var workerId))
                 {
-                    workerId = random.Next((int)MaxWorkerId);
+                    workerId = Util.GenerateWorkerId(MaxWorkerId);
                 }
 
-                if (!int.TryParse(Environment.GetEnvironmentVariable("CAP_DATACENTERID", EnvironmentVariableTarget.Machine), out var datacenterId))
-                {
-                    datacenterId = random.Next((int)MaxDatacenterId);
-                }
-
-                return _snowflakeId = new SnowflakeId(workerId, datacenterId);
+                return _snowflakeId = new SnowflakeId(workerId);
             }
         }
 
@@ -79,41 +100,93 @@ namespace DotNetCore.CAP.Internal
         {
             lock (_lock)
             {
-                var timestamp = TimeGen();
-
-                if (timestamp < _lastTimestamp)
-                    throw new Exception(
-                        $"InvalidSystemClock: Clock moved backwards, Refusing to generate id for {_lastTimestamp - timestamp} milliseconds");
-
-                if (_lastTimestamp == timestamp)
-                {
-                    Sequence = (Sequence + 1) & SequenceMask;
-                    if (Sequence == 0) timestamp = TilNextMillis(_lastTimestamp);
-                }
-                else
-                {
-                    Sequence = 0;
-                }
-
-                _lastTimestamp = timestamp;
-                var id = ((timestamp - Twepoch) << TimestampLeftShift) |
-                         (DatacenterId << DatacenterIdShift) |
-                         (WorkerId << WorkerIdShift) | Sequence;
-
-                return id;
+                WaitIfNecessary();
+                long timestampWithSequence = _timestampAndSequence & TimestampAndSequenceMask;
+                return _workerId | timestampWithSequence;
             }
         }
 
-        protected virtual long TilNextMillis(long lastTimestamp)
+        /// <summary>
+        /// init first timestamp and sequence immediately
+        /// </summary>
+        private void InitTimestampAndSequence()
         {
-            var timestamp = TimeGen();
-            while (timestamp <= lastTimestamp) timestamp = TimeGen();
-            return timestamp;
+            long timestamp = GetNewestTimestamp();
+            long timestampWithSequence = timestamp << SequenceBits;
+            _timestampAndSequence = timestampWithSequence;
         }
 
-        protected virtual long TimeGen()
+        /// <summary>
+        /// block current thread if the QPS of acquiring UUID is too high
+        /// that current sequence space is exhausted
+        /// </summary>
+        private void WaitIfNecessary()
         {
-            return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            long currentWithSequence = ++_timestampAndSequence;
+            long current = currentWithSequence >> SequenceBits;
+            long newest = GetNewestTimestamp();
+
+            if (current >= newest)
+            {
+                Thread.Sleep(5);
+            }
+        }
+
+        /// <summary>
+        /// get newest timestamp relative to twepoch
+        /// </summary>
+        /// <returns></returns>
+        private long GetNewestTimestamp()
+        {
+            return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Twepoch;
+        }
+    }
+
+    internal static class Util
+    {
+        /// <summary>
+        /// auto generate workerId, try using mac first, if failed, then randomly generate one
+        /// </summary>
+        /// <returns>workerId</returns>
+        public static long GenerateWorkerId(int maxWorkerId)
+        {
+            try
+            {
+                return GenerateWorkerIdBaseOnMac();
+            }
+            catch
+            {
+                return GenerateRandomWorkerId(maxWorkerId);
+            }
+        }
+
+        /// <summary>
+        /// use lowest 10 bit of available MAC as workerId
+        /// </summary>
+        /// <returns>workerId</returns>
+        private static long GenerateWorkerIdBaseOnMac()
+        {
+            NetworkInterface[] nics = NetworkInterface.GetAllNetworkInterfaces();
+
+            if (nics == null || nics.Length < 1)
+            {
+                throw new Exception("no available mac found");
+            }
+
+            var adapter = nics[0];
+            PhysicalAddress address = adapter.GetPhysicalAddress();
+            byte[] mac = address.GetAddressBytes();
+
+            return ((mac[4] & 0B11) << 8) | (mac[5] & 0xFF);
+        }
+
+        /// <summary>
+        /// randomly generate one as workerId
+        /// </summary>
+        /// <returns></returns>
+        private static long GenerateRandomWorkerId(int maxWorkerId)
+        {
+            return new Random().Next(maxWorkerId + 1);
         }
     }
 }
