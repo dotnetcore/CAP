@@ -111,6 +111,16 @@ namespace DotNetCore.CAP
 
         internal static async Task<bool> Authentication(HttpContext context, DashboardOptions options)
         {
+            var isAuthenticated = context.User?.Identity?.IsAuthenticated;
+
+            if (isAuthenticated == false && options.UseChallengeOnAuth)
+            {
+                await context.ChallengeAsync(options.DefaultChallengeScheme);
+                await context.Response.CompleteAsync();
+
+                return false;
+            }
+
             if (options.UseAuth)
             {
                 var result = await context.AuthenticateAsync(options.DefaultAuthenticationScheme);
@@ -125,16 +135,7 @@ namespace DotNetCore.CAP
                 }
             }
 
-            var isAuthenticated = context.User?.Identity?.IsAuthenticated;
-
-            if (isAuthenticated == false && options.UseChallengeOnAuth)
-            {
-                await context.ChallengeAsync(options.DefaultChallengeScheme);
-                await context.Response.CompleteAsync();
-                return false;
-            }
-
             return true;
-        } 
+        }
     }
 }
