@@ -15,9 +15,6 @@ namespace DotNetCore.CAP.Test
             var result = instance.NextId();
             var result2 = instance.NextId();
 
-            Assert.IsType<long>(result);
-            Assert.True(result > 0);
-            Assert.True(result.ToString().Length == long.MaxValue.ToString().Length);
             Assert.True(result2 - result == 1);
         }
 
