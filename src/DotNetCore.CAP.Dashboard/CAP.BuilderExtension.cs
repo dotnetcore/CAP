@@ -8,12 +8,14 @@ using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Internal;
+using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -121,13 +123,18 @@ namespace DotNetCore.CAP
                 return false;
             }
 
-            if (options.UseAuth)
+            if (isAuthenticated == false && options.UseAuth)
             {
                 var result = await context.AuthenticateAsync(options.DefaultAuthenticationScheme);
 
                 if (result.Succeeded && result.Principal != null)
                 {
-                    context.User = result.Principal;
+                    //If a cookie scheme is configured, the authentication result will be placed in a cookie to avoid re-authentication
+                    var defaultOptions = context.RequestServices.GetService<IOptions<AuthenticationOptions>>();
+                    if (defaultOptions != null && defaultOptions.Value.DefaultScheme == CookieAuthenticationDefaults.AuthenticationScheme)
+                    {
+                        await context.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, result.Principal);
+                    }
                 }
                 else
                 {
