@@ -17,8 +17,12 @@ namespace Sample.Dashboard.Auth
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services
-               .AddAuthorization()
+            services                
+               .AddAuthorization((options =>
+               {
+                   // only if you want to apply role filter to CAP Dashboard user 
+                   options.AddPolicy("PolicyCap", policy => policy.RequireRole("admin.events"));
+               }))
                .AddAuthentication(options =>
                {
                    options.DefaultScheme =  CookieAuthenticationDefaults.AuthenticationScheme;
@@ -55,6 +59,8 @@ namespace Sample.Dashboard.Auth
                     d.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
                     d.UseAuth = true;
                     d.DefaultAuthenticationScheme = "MyDashboardScheme";
+                    // only if you want to apply policy authorization filter to CAP Dashboard user 
+                    d.AuthorizationPolicy = "PolicyCap";
                 });
                 cap.UseMySql(_configuration.GetValue<string>("ConnectionString"));
                 cap.UseRabbitMQ(aa =>

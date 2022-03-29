@@ -47,5 +47,10 @@ namespace DotNetCore.CAP
         /// Default scheme used for authentication challenge. If no scheme is set, the DefaultChallengeScheme set up in AddAuthentication will be used.
         /// </summary>
         public string DefaultChallengeScheme { get; set; }
+
+        /// <summary>
+        /// Authorization policy. If no policy is set, authorization will be inactive.
+        /// </summary>
+        public string AuthorizationPolicy { get; set; }
     }
 }
