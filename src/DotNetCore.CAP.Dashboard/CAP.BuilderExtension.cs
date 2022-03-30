@@ -9,6 +9,7 @@ using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -44,6 +45,12 @@ namespace DotNetCore.CAP
                 app.Map(options.PathMatch + "/api", false, x =>
                 {
 
+                    IAuthorizationService authService = null;
+                    if (!String.IsNullOrEmpty(options.AuthorizationPolicy))
+                    {
+                        authService = app.ApplicationServices.GetService<IAuthorizationService>();
+                    }
+
                     var builder = new RouteBuilder(x);
 
                     var methods = typeof(RouteActionProvider).GetMethods(BindingFlags.Instance | BindingFlags.Public);
@@ -59,6 +66,12 @@ namespace DotNetCore.CAP
                             builder.MapGet(getAttr.Template, async (request, response, data) =>
                             {
                                 if (!await Authentication(request.HttpContext, options))
+                                {
+                                    response.StatusCode = StatusCodes.Status401Unauthorized;
+                                    return;
+                                }
+
+                                if (!await Authorize(request, response, options, authService))
                                 {
                                     response.StatusCode = StatusCodes.Status401Unauthorized;
                                     return;
@@ -83,6 +96,12 @@ namespace DotNetCore.CAP
                             builder.MapPost(postAttr.Template, async (request, response, data) =>
                             {
                                 if (!await Authentication(request.HttpContext, options))
+                                {
+                                    response.StatusCode = StatusCodes.Status401Unauthorized;
+                                    return;
+                                }
+
+                                if (!await Authorize(request, response, options, authService))
                                 {
                                     response.StatusCode = StatusCodes.Status401Unauthorized;
                                     return;
@@ -142,6 +161,19 @@ namespace DotNetCore.CAP
                 }
             }
 
+            return true;
+        }
+
+        internal static async Task<bool> Authorize(HttpRequest request, HttpResponse response, DashboardOptions options, IAuthorizationService authservice)
+        {
+            if (!String.IsNullOrEmpty(options.AuthorizationPolicy) && (authservice != null))
+            {
+                AuthorizationResult authorizationResult = await authservice.AuthorizeAsync(request.HttpContext.User, null, options.AuthorizationPolicy);
+                if (!authorizationResult.Succeeded)
+                {
+                    return false;
+                }
+            }
             return true;
         }
     }
