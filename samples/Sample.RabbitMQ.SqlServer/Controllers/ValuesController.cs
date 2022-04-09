@@ -57,7 +57,7 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
             using (dbContext.Database.BeginTransaction(_capBus, autoCommit: true))
             {
                 dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
-
+                dbContext.SaveChanges();
                 _capBus.Publish("sample.rabbitmq.sqlserver", new Person()
                 {
                     Id = 123,
