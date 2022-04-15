@@ -28,5 +28,7 @@ namespace DotNetCore.CAP.Messages
         public const string SentTime = "cap-senttime";
 
         public const string Exception = "cap-exception";
+        
+        public const string ExceptionDetails = "cap-exception-details";
     }
 }

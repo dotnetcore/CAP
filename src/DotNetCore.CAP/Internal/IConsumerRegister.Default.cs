@@ -206,6 +206,7 @@ namespace DotNetCore.CAP.Internal
                     catch (Exception e)
                     {
                         transportMessage.Headers[Headers.Exception] = e.GetType().Name + "-->" + e.Message;
+                        transportMessage.Headers[Headers.ExceptionDetails] = e.ToString();
                         string? dataUri;
                         if (transportMessage.Headers.TryGetValue(Headers.Type, out var val))
                         {

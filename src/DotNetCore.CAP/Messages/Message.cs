@@ -72,11 +72,13 @@ namespace DotNetCore.CAP.Messages
             var msg = $"{ex.GetType().Name}-->{ex.Message}";
 
             message.Headers[Headers.Exception] = msg;
+            message.Headers[Headers.ExceptionDetails] = ex.ToString();
         }
 
         public static void RemoveException(this Message message)
         {
             message.Headers.Remove(Headers.Exception);
+            message.Headers.Remove(Headers.ExceptionDetails);
         }
     }
 }
