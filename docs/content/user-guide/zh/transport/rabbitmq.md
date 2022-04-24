@@ -40,7 +40,7 @@ CAP 直接对外提供的 RabbitMQ 配置参数如下：
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-HostName | 宿主地址 | string | localhost
+HostName | 宿主地址，如果要配置集群可以使用逗号分隔，例如 `192.168.1.111,192.168.1.112` | string | localhost
 UserName | 用户名 | string | guest
 Password | 密码 | string | guest
 VirtualHost | 虚拟主机 | string | /
@@ -48,7 +48,7 @@ Port | 端口号 | int | -1
 ExchangeName | CAP默认Exchange名称 | string | cap.default.topic
 QueueArguments  | 创建队列额外参数 x-arguments | QueueArgumentsOptions  |  N/A
 ConnectionFactoryOptions  |  RabbitMQClient原生参数 | ConnectionFactory | N/A
-CustomHeaders  | 订阅者自定义头信息 |  Func<BasicDeliverEventArgs, List<KeyValuePair<string, string>>> |  N/A
+CustomHeaders  | 订阅者自定义头信息 |  `Func<BasicDeliverEventArgs, List<KeyValuePair<string, string>>>` |  N/A
 
 #### ConnectionFactory Options
 
