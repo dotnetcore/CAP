@@ -23,6 +23,16 @@ Since Kafka is born with message persistence using files, Kafka will ensure that
 
 ## Storage
 
+### Supported storages
+
+CAP supports the following types of transaction-enabled databases for storage:
+
+* [SQL Server](sqlserver.md)
+* [MySQL](mysql.md)
+* [PostgreSql](postgresql.md)
+* [MongoDB](mongodb.md)
+* [In-Memory Storage](in-memory-storage.md)
+
 After CAP is started, two tables are generated in used storage, by default the name is `Cap.Published` and `Cap.Received`.
 
 ### Storage Data Structure

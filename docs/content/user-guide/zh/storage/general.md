@@ -20,6 +20,16 @@ CAP 需要使用具有持久化功能的存储介质来存储事件消息，例�
 
 ## 消息存储
 
+### 支持的存储
+
+CAP 支持以下几种具有事务支持的数据库做为存储：
+
+* [SQL Server](sqlserver.md)
+* [MySQL](mysql.md)
+* [PostgreSql](postgresql.md)
+* [MongoDB](mongodb.md)
+* [In-Memory Storage](in-memory-storage.md)
+
 在 CAP 启动后，会向持久化介质中生成两个表，默认情况下名称为：`Cap.Published` `Cap.Received`。
 
 ### 存储格式
