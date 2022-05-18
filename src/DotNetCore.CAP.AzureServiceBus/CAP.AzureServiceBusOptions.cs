@@ -45,15 +45,5 @@ namespace DotNetCore.CAP
         /// Use this function to write additional headers from the original ASB Message or any Custom Header, i.e. to allow compatibility with heterogeneous systems, into <see cref="CapHeader"/>
         /// </summary>
         public Func<Message, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
-
-        public ICollection<CustomAzureServiceBusSubscriberOptions> CustomSubscribersConfiguration { get; private set; }
-            = new List<CustomAzureServiceBusSubscriberOptions>();
-
-        public void ConfigureCustomSubscription<T>(Action<CustomAzureServiceBusSubscriberOptions> options)
-        {
-            var custom = new CustomAzureServiceBusSubscriberOptions();
-            options(custom);
-            CustomSubscribersConfiguration.Add(custom);
-        }
     }
 }
