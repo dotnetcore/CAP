@@ -252,7 +252,7 @@ namespace DotNetCore.CAP.AzureServiceBus
         private string? GetIncomingTopicPath(TransportMessage context)
         {
             var destination =
-                context.Headers.TryGetValue(CAP.Messages.Headers.Destination, out var destinationHeader)
+                context.Headers.TryGetValue(AzureServiceBusHeaders.DestinationTopicPath, out var destinationHeader)
                     ? destinationHeader
                     : DefaultSubscriptionConfigurator?.TopicPath;
             return destination;

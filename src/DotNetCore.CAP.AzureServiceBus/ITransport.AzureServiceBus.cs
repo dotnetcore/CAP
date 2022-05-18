@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
@@ -20,7 +21,7 @@ namespace DotNetCore.CAP.AzureServiceBus
         private readonly ILogger _logger;
         private readonly IOptions<AzureServiceBusOptions> _asbOptions;
 
-        private ITopicClient? _topicClient;
+        private ConcurrentDictionary<string, ITopicClient?> _topicClients = new();
 
         public AzureServiceBusTransport(
             ILogger<AzureServiceBusTransport> logger,
@@ -34,14 +35,17 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {
-            var destination =
-                transportMessage.Headers.TryGetValue(Headers.Destination, out var destinationHeader)
+            var destinationTopicPath =
+                transportMessage.Headers.TryGetValue(AzureServiceBusHeaders.DestinationTopicPath, out var destinationHeader)
                     ? destinationHeader
                     : _asbOptions.Value.TopicPath;
+
+            if (string.IsNullOrWhiteSpace(destinationTopicPath)) 
+                throw new InvalidOperationException("The destination Topic Path must be set either in the TopicPath property of Azure Service Bus options or via the Destination header of AzureServiceBusHeaders.");
             
             try
             {
-                Connect(destination!);
+                Connect(destinationTopicPath!);
 
                 var message = new Microsoft.Azure.ServiceBus.Message
                 {
@@ -69,7 +73,9 @@ namespace DotNetCore.CAP.AzureServiceBus
                     message.UserProperties.Add(header.Key, header.Value);
                 }
 
-                await _topicClient!.SendAsync(message);
+                _topicClients.TryGetValue(destinationTopicPath, out var topicClient);
+
+                await topicClient!.SendAsync(message);
 
                 _logger.LogDebug($"Azure Service Bus message [{transportMessage.GetName()}] has been published.");
 
@@ -85,8 +91,9 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private void Connect(string topic)
         {
-            if (_topicClient != null)
+            if (_topicClients.TryGetValue(topic, out var _))
             {
+                _logger.LogTrace("Topic {TopicPath} connection already present as a Publish destination.");
                 return;
             }
 
@@ -94,7 +101,14 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             try
             {
-                _topicClient ??= new TopicClient(BrokerAddress.Endpoint, topic, RetryPolicy.NoRetry);
+                if (_topicClients.TryAdd(topic, new TopicClient(BrokerAddress.Endpoint, topic, RetryPolicy.NoRetry)))
+                {
+                    _logger.LogInformation("Topic {TopicPath} connection successfully added as a Publish destination.");
+                }
+                else
+                {
+                    _logger.LogError("Error adding Topic {TopicPath} connection as a Publish destination.");
+                }
             }
             finally
             {
