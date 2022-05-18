@@ -52,6 +52,13 @@ namespace DotNetCore.CAP.AzureServiceBus
                     message.SessionId = string.IsNullOrEmpty(sessionId) ? transportMessage.GetId() : sessionId;
                 }
 
+                if (
+                    transportMessage.Headers.TryGetValue(AzureServiceBusHeaders.ScheduledEnqueueTimeUtc, out var scheduledEnqueueTimeUtcString)
+                    && DateTimeOffset.TryParse(scheduledEnqueueTimeUtcString, out var scheduledEnqueueTimeUtc))
+                {
+                    message.ScheduledEnqueueTimeUtc = scheduledEnqueueTimeUtc.UtcDateTime;
+                }
+
                 foreach (var header in transportMessage.Headers)
                 {
                     message.UserProperties.Add(header.Key, header.Value);
