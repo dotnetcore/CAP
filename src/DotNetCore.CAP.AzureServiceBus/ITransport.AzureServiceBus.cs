@@ -45,7 +45,7 @@ namespace DotNetCore.CAP.AzureServiceBus
             
             try
             {
-                Connect(destinationTopicPath!);
+                Connect(destinationTopicPath);
 
                 var message = new Microsoft.Azure.ServiceBus.Message
                 {
@@ -91,9 +91,9 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private void Connect(string topic)
         {
-            if (_topicClients.TryGetValue(topic, out var _))
+            if (_topicClients.TryGetValue(topic, out _))
             {
-                _logger.LogTrace("Topic {TopicPath} connection already present as a Publish destination.");
+                _logger.LogTrace("Topic {TopicPath} connection already present as a Publish destination.", topic);
                 return;
             }
 
@@ -103,11 +103,11 @@ namespace DotNetCore.CAP.AzureServiceBus
             {
                 if (_topicClients.TryAdd(topic, new TopicClient(BrokerAddress.Endpoint, topic, RetryPolicy.NoRetry)))
                 {
-                    _logger.LogInformation("Topic {TopicPath} connection successfully added as a Publish destination.");
+                    _logger.LogInformation("Topic {TopicPath} connection successfully added as a Publish destination.", topic);
                 }
                 else
                 {
-                    _logger.LogError("Error adding Topic {TopicPath} connection as a Publish destination.");
+                    _logger.LogError("Error adding Topic {TopicPath} connection as a Publish destination.", topic);
                 }
             }
             finally
