@@ -102,7 +102,7 @@ namespace DotNetCore.CAP.MySql
                 new MySqlParameter("@Content", content),
                 new MySqlParameter("@Retries", _capOptions.Value.FailedRetryCount),
                 new MySqlParameter("@Added", DateTime.Now),
-                new MySqlParameter("@ExpiresAt", DateTime.Now.AddDays(15)),
+                new MySqlParameter("@ExpiresAt", DateTime.Now.AddSeconds(_capOptions.Value.FailedMessageExpiredAfter)),
                 new MySqlParameter("@StatusName", nameof(StatusName.Failed))
             };
 

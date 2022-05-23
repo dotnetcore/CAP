@@ -133,7 +133,7 @@ namespace DotNetCore.CAP.Internal
             var needRetry = UpdateMessageForRetry(message);
 
             message.Origin.AddOrUpdateException(ex);
-            message.ExpiresAt = message.Added.AddDays(15);
+            message.ExpiresAt = message.Added.AddSeconds(_options.FailedMessageExpiredAfter);
 
             await _dataStorage.ChangeReceiveStateAsync(message, StatusName.Failed);
 

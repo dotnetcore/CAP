@@ -19,6 +19,7 @@ namespace DotNetCore.CAP
         public CapOptions()
         {
             SucceedMessageExpiredAfter = 24 * 3600;
+            FailedMessageExpiredAfter = 15 * 24 * 3600;
             FailedRetryInterval = 60;
             FailedRetryCount = 50;
             ConsumerThreadCount = 1;
@@ -57,6 +58,12 @@ namespace DotNetCore.CAP
         /// Default is 24*3600 seconds.
         /// </summary>
         public int SucceedMessageExpiredAfter { get; set; }
+
+        /// <summary>
+        /// Sent or received failed message after time span of due, then the message will be deleted at due time.
+        /// Default is 15*24*3600 seconds.
+        /// </summary>
+        public int FailedMessageExpiredAfter { get; set; }
 
         /// <summary>
         /// Failed messages polling delay time.

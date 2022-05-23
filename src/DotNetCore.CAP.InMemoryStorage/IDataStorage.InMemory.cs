@@ -86,7 +86,7 @@ namespace DotNetCore.CAP.InMemoryStorage
                 Content = content,
                 Retries = _capOptions.Value.FailedRetryCount,
                 Added = DateTime.Now,
-                ExpiresAt = DateTime.Now.AddDays(15),
+                ExpiresAt = DateTime.Now.AddSeconds(_capOptions.Value.FailedMessageExpiredAfter),
                 StatusName = StatusName.Failed
             };
         }

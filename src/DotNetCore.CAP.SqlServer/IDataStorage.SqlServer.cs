@@ -100,7 +100,7 @@ namespace DotNetCore.CAP.SqlServer
                 new SqlParameter("@Content", content),
                 new SqlParameter("@Retries", _capOptions.Value.FailedRetryCount),
                 new SqlParameter("@Added", DateTime.Now),
-                new SqlParameter("@ExpiresAt", DateTime.Now.AddDays(15)),
+                new SqlParameter("@ExpiresAt", DateTime.Now.AddSeconds(_capOptions.Value.FailedMessageExpiredAfter)),
                 new SqlParameter("@StatusName", nameof(StatusName.Failed))
             };
 

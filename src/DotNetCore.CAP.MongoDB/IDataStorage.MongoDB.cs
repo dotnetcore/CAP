@@ -115,7 +115,7 @@ namespace DotNetCore.CAP.MongoDB
                 Name = name,
                 Content = content,
                 Added = DateTime.Now,
-                ExpiresAt = DateTime.Now.AddDays(15),
+                ExpiresAt = DateTime.Now.AddSeconds(_capOptions.Value.FailedMessageExpiredAfter),
                 Retries = _capOptions.Value.FailedRetryCount,
                 Version = _capOptions.Value.Version,
                 StatusName = nameof(StatusName.Failed)
