@@ -101,7 +101,7 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@Content", content),
                 new NpgsqlParameter("@Retries", _capOptions.Value.FailedRetryCount),
                 new NpgsqlParameter("@Added", DateTime.Now),
-                new NpgsqlParameter("@ExpiresAt", DateTime.Now.AddDays(15)),
+                new NpgsqlParameter("@ExpiresAt", DateTime.Now.AddSeconds(_capOptions.Value.FailedMessageExpiredAfter)),
                 new NpgsqlParameter("@StatusName", nameof(StatusName.Failed))
             };
 
