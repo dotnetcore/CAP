@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
@@ -11,53 +12,70 @@ namespace DotNetCore.CAP.RedisStreams
 {
     internal static class RedisStreamManagerExtensions
     {
-        public static async IAsyncEnumerable<StreamPosition> TryCreateConsumerGroup(this IDatabase database, StreamPosition[] positions, string consumerGroup, ILogger logger)
+        public static async IAsyncEnumerable<StreamPosition> TryGetOrCreateConsumerGroupPositionsAsync(this IDatabase database, StreamPosition[] positions, string consumerGroup, ILogger logger)
         {
             foreach (var position in positions)
             {
                 var created = false;
                 try
                 {
-                    var stream = position.Key;
-                    var streamExist = await database.KeyExistsAsync(stream);
-                    if (!streamExist)
-                    {
-                        if (await database.StreamCreateConsumerGroupAsync(stream, consumerGroup,
-                            StreamPosition.NewMessages))
-                        {
-                            logger!.LogInformation(
-                                $"Redis stream [{position.Key}] created with consumer group [{consumerGroup}]");
-                            created = true;
-                        }
-                    }
-                    else
-                    {
-                        var groupInfo = await database.StreamGroupInfoAsync(stream);
+                    await database.TryGetOrCreateStreamConsumerGroupAsync(position.Key, consumerGroup)
+                        .ConfigureAwait(false);
 
-                        if (groupInfo.All(g => g.Name != consumerGroup))
-                        {
-                            if (await database.StreamCreateConsumerGroupAsync(stream, consumerGroup,
-                                StreamPosition.NewMessages))
-                            {
-                                logger!.LogInformation(
-                                    $"Redis stream [{position.Key}] created with consumer group [{consumerGroup}]");
-                                created = true;
-                            }
-                        }
-                        else
-                        {
-                            created = true;
-                        }
-                    }
+                    created = true;
                 }
                 catch (Exception ex)
                 {
-                    logger?.LogError(ex,
+                    if (ex.GetRedisErrorType() == RedisErrorTypes.Unknown)
+                    {
+                        logger?.LogError(ex,
                         $"Redis error while creating consumer group [{consumerGroup}] of stream [{position.Key}]");
+                    }
                 }
 
                 if (created)
                     yield return position;
+            }
+        }
+
+        public static async Task TryGetOrCreateStreamConsumerGroupAsync(this IDatabase database, RedisKey stream, RedisValue consumerGroup)
+        {
+            var streamExist = await database.KeyExistsAsync(stream)
+                .ConfigureAwait(false);
+            if (streamExist)
+            {
+                await database.TryGetOrCreateStreamGroupAsync(stream, consumerGroup)
+                    .ConfigureAwait(false);
+                return;
+            }
+            try
+            {
+                await database.StreamCreateConsumerGroupAsync(stream, consumerGroup, StreamPosition.NewMessages)
+                    .ConfigureAwait(false);
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetRedisErrorType() != RedisErrorTypes.GroupAlreadyExists) throw;
+            }
+        }
+
+        private static async Task TryGetOrCreateStreamGroupAsync(this IDatabase database, RedisKey stream, RedisValue consumerGroup)
+        {
+            try
+            {
+                var groupInfo = await database.StreamGroupInfoAsync(stream);
+                if (groupInfo.Any(g => g.Name == consumerGroup))
+                    return;
+            }
+            catch (Exception ex)
+            {
+                if (ex.GetRedisErrorType() is var type && type == RedisErrorTypes.NoGroupInfoExists)
+                {
+                    await database.TryGetOrCreateStreamConsumerGroupAsync(stream, consumerGroup)
+                        .ConfigureAwait(false);
+                    return;
+                }
+                throw;
             }
         }
     }

@@ -31,7 +31,8 @@ namespace DotNetCore.CAP.RedisStreams
         {
             try
             {
-                await _redis.PublishAsync(message.GetName(), message.AsStreamEntries());
+                await _redis.PublishAsync(message.GetName(), message.AsStreamEntries())
+                    .ConfigureAwait(false);
 
                 _logger.LogDebug($"Redis message [{message.GetName()}] has been published.");
 

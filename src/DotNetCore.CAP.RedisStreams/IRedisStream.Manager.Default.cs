@@ -30,30 +30,24 @@ namespace DotNetCore.CAP.RedisStreams
 
         public async Task CreateStreamWithConsumerGroupAsync(string stream, string consumerGroup)
         {
-            await ConnectAsync();
+            await ConnectAsync()
+                .ConfigureAwait(false);
 
             //The object returned from GetDatabase is a cheap pass - thru object, and does not need to be stored
             var database = _redis!.GetDatabase();
-            var streamExist = await database.KeyExistsAsync(stream);
-            if (!streamExist)
-            {
-                await database.StreamCreateConsumerGroupAsync(stream, consumerGroup, StreamPosition.NewMessages);
-            }
-            else
-            {
-                var groupInfo = await database.StreamGroupInfoAsync(stream);
-                if (groupInfo.Any(g => g.Name == consumerGroup))
-                    return;
-                await database.StreamCreateConsumerGroupAsync(stream, consumerGroup, StreamPosition.NewMessages);
-            }
+
+            await database.TryGetOrCreateStreamConsumerGroupAsync(stream, consumerGroup)
+                .ConfigureAwait(false);
         }
 
         public async Task PublishAsync(string stream, NameValueEntry[] message)
         {
-            await ConnectAsync();
+            await ConnectAsync()
+                .ConfigureAwait(false);
 
             //The object returned from GetDatabase is a cheap pass - thru object, and does not need to be stored
-            await _redis!.GetDatabase().StreamAddAsync(stream, message);
+            await _redis!.GetDatabase().StreamAddAsync(stream, message)
+                .ConfigureAwait(false);
         }
 
         public async IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsLatestMessagesAsync(string[] streams,
@@ -63,7 +57,7 @@ namespace DotNetCore.CAP.RedisStreams
 
             while (true)
             {
-                var result = await TryReadConsumerGroup(consumerGroup, positions.ToArray(), token)
+                var result = await TryReadConsumerGroupAsync(consumerGroup, positions.ToArray(), token)
                     .ConfigureAwait(false);
 
                 yield return result;
@@ -81,7 +75,7 @@ namespace DotNetCore.CAP.RedisStreams
             {
                 token.ThrowIfCancellationRequested();
 
-                var result = await TryReadConsumerGroup(consumerGroup, positions.ToArray(), token)
+                var result = await TryReadConsumerGroupAsync(consumerGroup, positions.ToArray(), token)
                     .ConfigureAwait(false);
 
                 yield return result;
@@ -96,12 +90,14 @@ namespace DotNetCore.CAP.RedisStreams
 
         public async Task Ack(string stream, string consumerGroup, string messageId)
         {
-            await ConnectAsync();
+            await ConnectAsync()
+                .ConfigureAwait(false);
 
-            await _redis!.GetDatabase().StreamAcknowledgeAsync(stream, consumerGroup, messageId).ConfigureAwait(false);
+            await _redis!.GetDatabase().StreamAcknowledgeAsync(stream, consumerGroup, messageId)
+                .ConfigureAwait(false);
         }
 
-        private async Task<IEnumerable<RedisStream>> TryReadConsumerGroup(string consumerGroup,
+        private async Task<IEnumerable<RedisStream>> TryReadConsumerGroupAsync(string consumerGroup,
             StreamPosition[] positions, CancellationToken token)
         {
             try
@@ -110,13 +106,16 @@ namespace DotNetCore.CAP.RedisStreams
 
                 var createdPositions = new List<StreamPosition>();
 
-                await ConnectAsync();
+                await ConnectAsync()
+                    .ConfigureAwait(false);
 
                 var database = _redis!.GetDatabase();
 
-                await foreach (var position in database.TryCreateConsumerGroup(positions, consumerGroup, _logger)
-                    .WithCancellation(token))
+                await foreach (var position in database.TryGetOrCreateConsumerGroupPositionsAsync(positions, consumerGroup, _logger)
+                    .ConfigureAwait(false).WithCancellation(token))
+                {
                     createdPositions.Add(position);
+                }
 
                 if (!createdPositions.Any()) return Array.Empty<RedisStream>();
 
@@ -143,7 +142,8 @@ namespace DotNetCore.CAP.RedisStreams
 
         private async Task ConnectAsync()
         {
-            _redis = await _connectionsPool.ConnectAsync();
+            _redis = await _connectionsPool.ConnectAsync()
+                .ConfigureAwait(false);
         }
     }
 }
