@@ -88,8 +88,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.OpenTelemetr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AzureServiceBus.InMemory", "samples\Sample.AzureServiceBus.InMemory\Sample.AzureServiceBus.InMemory.csproj", "{0C734FB2-7D75-4FF3-B564-1E50E6280B14}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{6B6295D0-7A5C-4B4B-9D5E-C7A59863361A}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -216,10 +214,6 @@ Global
 		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B6295D0-7A5C-4B4B-9D5E-C7A59863361A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B6295D0-7A5C-4B4B-9D5E-C7A59863361A}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B6295D0-7A5C-4B4B-9D5E-C7A59863361A}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B6295D0-7A5C-4B4B-9D5E-C7A59863361A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
