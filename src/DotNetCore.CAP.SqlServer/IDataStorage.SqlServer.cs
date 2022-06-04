@@ -184,10 +184,17 @@ namespace DotNetCore.CAP.SqlServer
 
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
         {
-            var fourMinAgo = DateTime.Now.AddMinutes(-4).ToString("O");
+            var fourMinAgo = DateTime.Now.AddMinutes(-4);
             var sql =
-                $"SELECT TOP (200) Id, Content, Retries, Added FROM {tableName} WITH (readpast) WHERE Retries<{_capOptions.Value.FailedRetryCount} " +
-                $"AND Version='{_capOptions.Value.Version}' AND Added<'{fourMinAgo}' AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
+                $"SELECT TOP (200) Id, Content, Retries, Added FROM {tableName} WITH (readpast) WHERE Retries<@Retries " +
+                $"AND Version=@Version AND Added<@Added AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
+
+            object[] sqlParams =
+            {
+                new SqlParameter("@Retries", _capOptions.Value.FailedRetryCount),
+                new SqlParameter("@Version", _capOptions.Value.Version),
+                new SqlParameter("@Added", fourMinAgo)
+            };
 
             List<MediumMessage> result;
             await using (var connection = new SqlConnection(_options.Value.ConnectionString))
@@ -207,7 +214,7 @@ namespace DotNetCore.CAP.SqlServer
                     }
 
                     return messages;
-                });
+                }, sqlParams);
             }
 
             return result;
