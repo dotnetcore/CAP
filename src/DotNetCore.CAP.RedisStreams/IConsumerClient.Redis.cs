@@ -84,7 +84,8 @@ namespace DotNetCore.CAP.RedisStreams
             //first time, we want to read our pending messages, in case we crashed and are recovering.
             var pendingMsgs = _redis.PollStreamsPendingMessagesAsync(_topics, _groupId, timeout, cancellationToken);
 
-            await ConsumeMessages(pendingMsgs, StreamPosition.Beginning);
+            await ConsumeMessages(pendingMsgs, StreamPosition.Beginning)
+                .ConfigureAwait(false);
 
             //Once we consumed our history, we can start getting new messages.
             var newMsgs = _redis.PollStreamsLatestMessagesAsync(_topics, _groupId, timeout, cancellationToken);
