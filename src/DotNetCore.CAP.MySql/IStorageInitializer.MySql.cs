@@ -60,7 +60,8 @@ CREATE TABLE IF NOT EXISTS `{GetReceivedTableName()}` (
   `ExpiresAt` datetime DEFAULT NULL,
   `StatusName` varchar(50) NOT NULL,
   PRIMARY KEY (`Id`),
-  INDEX `IX_ExpiresAt`(`ExpiresAt`)
+  INDEX `IX_ExpiresAt`(`ExpiresAt`),
+  INDEX `IX_Retries_Version_Added_StatusName`(`Retries`, `Version`, `Added`, `StatusName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS `{GetPublishedTableName()}` (
@@ -73,7 +74,8 @@ CREATE TABLE IF NOT EXISTS `{GetPublishedTableName()}` (
   `ExpiresAt` datetime DEFAULT NULL,
   `StatusName` varchar(40) NOT NULL,
   PRIMARY KEY (`Id`),
-  INDEX `IX_ExpiresAt`(`ExpiresAt`)
+  INDEX `IX_ExpiresAt`(`ExpiresAt`),
+  INDEX `IX_Retries_Version_Added_StatusName`(`Retries`, `Version`, `Added`, `StatusName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
             return batchSql;
