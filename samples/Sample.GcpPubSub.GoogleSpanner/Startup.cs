@@ -18,8 +18,8 @@ namespace Sample.GcpPubSub.GoogleSpanner
 
         public void ConfigureServices(IServiceCollection services)
         {
-            const string connectionString = "Data Source=projects/digitalcore-sandbox/instances/sheeley-test/databases/cap";
-  
+            string connectionString = Configuration["ConnectionStrings:SpannerCapDB"];
+
             services.AddCap(x =>
             {
                 x.UseGoogleSpanner(connectionString);
