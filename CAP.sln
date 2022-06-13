@@ -86,7 +86,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.RabbitMQ.SqlServer.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.OpenTelemetry", "src\DotNetCore.CAP.OpenTelemetry\DotNetCore.CAP.OpenTelemetry.csproj", "{83DDB126-A00B-4064-86E7-568322CA67EC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.AzureServiceBus.InMemory", "samples\Sample.AzureServiceBus.InMemory\Sample.AzureServiceBus.InMemory.csproj", "{0C734FB2-7D75-4FF3-B564-1E50E6280B14}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AzureServiceBus.InMemory", "samples\Sample.AzureServiceBus.InMemory\Sample.AzureServiceBus.InMemory.csproj", "{0C734FB2-7D75-4FF3-B564-1E50E6280B14}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.GcpPubSub.GoogleSpanner", "samples\Sample.GcpPubSub.GoogleSpanner\Sample.GcpPubSub.GoogleSpanner.csproj", "{5F857ABF-449B-46C7-B160-CAC1C02DB782}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.GooglePubSub", "src\DotNetCore.CAP.GooglePubSub\DotNetCore.CAP.GooglePubSub.csproj", "{AB823637-CA8C-4139-B9EC-DD29494E2276}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.GoogleSpanner", "src\DotNetCore.CAP.GoogleSpanner\DotNetCore.CAP.GoogleSpanner.csproj", "{79278DDF-D699-4E1F-ACB4-907F8903E350}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -214,6 +220,18 @@ Global
 		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F857ABF-449B-46C7-B160-CAC1C02DB782}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F857ABF-449B-46C7-B160-CAC1C02DB782}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F857ABF-449B-46C7-B160-CAC1C02DB782}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5F857ABF-449B-46C7-B160-CAC1C02DB782}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB823637-CA8C-4139-B9EC-DD29494E2276}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB823637-CA8C-4139-B9EC-DD29494E2276}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB823637-CA8C-4139-B9EC-DD29494E2276}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB823637-CA8C-4139-B9EC-DD29494E2276}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79278DDF-D699-4E1F-ACB4-907F8903E350}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79278DDF-D699-4E1F-ACB4-907F8903E350}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79278DDF-D699-4E1F-ACB4-907F8903E350}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79278DDF-D699-4E1F-ACB4-907F8903E350}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -249,6 +267,9 @@ Global
 		{DCDF58E8-F823-4F04-9F8C-E8076DC16A68} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 		{83DDB126-A00B-4064-86E7-568322CA67EC} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{0C734FB2-7D75-4FF3-B564-1E50E6280B14} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{5F857ABF-449B-46C7-B160-CAC1C02DB782} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{AB823637-CA8C-4139-B9EC-DD29494E2276} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{79278DDF-D699-4E1F-ACB4-907F8903E350} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E70565D-94CF-40B4-BFE1-AC18D5F736AB}
