@@ -1,15 +1,15 @@
 <template>
   <b-row>
-    <h1 page-line mb-4>Subscriber</h1>
+    <h1 page-line mb-4>{{$t("Subscriber")}}</h1>
 
     <b-table-simple caption-top responsive>
-      <caption>The subscription methods under the node are grouped by Group</caption>
+      <caption>{{$t("SubscriberDescription")}}</caption>
 
       <b-thead head-variant="secondary">
         <b-tr>
-          <b-th>Group</b-th>
-          <b-th>Name</b-th>
-          <b-th>Method</b-th>
+          <b-th>{{$t("Group")}}</b-th>
+          <b-th>{{$t("Name")}}</b-th>
+          <b-th>{{$t("Method")}}</b-th>
         </b-tr>
       </b-thead>
       <b-tbody>
