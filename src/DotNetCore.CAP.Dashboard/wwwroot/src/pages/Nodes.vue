@@ -1,11 +1,11 @@
 <template>
   <div>
-    <h1 class="text-left mb-4">Nodes</h1>
+    <h1 class="text-left mb-4">{{$t("Nodes")}}</h1>
     <b-table :fields="fields" :items="items" :busy="isBusy" show-empty empty-text="Unconfigure node discovery !">
       <template #table-busy>
         <div class="text-center text-secondary my-2">
           <b-spinner class="align-middle"></b-spinner>
-          <strong class="ml-2">Loading...</strong>
+          <strong class="ml-2">{{$t("Loading")}}...</strong>
         </div>
       </template>
 
@@ -29,15 +29,19 @@ export default {
   data() {
     return {
       isBusy: false,
-      fields: [
-        { key: "id", label: "Id" },
-        { key: "name", label: "Node Name" },
-        { key: "address", label: "Ip Address" },
-        { key: "port", label: "Port" },
-        { key: "tags", label: "Tags" },
-        { key: "actions", label: "Actions" },
-      ],
       items: []
+    }
+  },
+  computed:{
+    fields(){
+      return [
+        { key: "id", label: this.$t("Id") },
+        { key: "name", label: this.$t("Node Name") },
+        { key: "address", label: this.$t("Ip Address") },
+        { key: "port", label: this.$t("Port") },
+        { key: "tags", label: this.$t("Tags") },
+        { key: "actions", label: this.$t("Actions") },
+      ];
     }
   },
   mounted() {

@@ -9,7 +9,9 @@ import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 import store from '@/store/store.js'
 import axios from "axios";
-
+import VueI18n from 'vue-i18n'
+//
+//
 axios.defaults.baseURL = baseURL;
 axios.defaults.withCredentials = true
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -34,9 +36,24 @@ Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
 Vue.component("vue-json-pretty", VueJsonPretty)
+Vue.use(VueI18n)
+
+const i18n = new VueI18n({
+    locale:(function(){
+        if(localStorage.getItem('lang')){
+            return localStorage.getItem('lang')
+        }
+        return 'en-us'
+    }()),
+    messages:{
+        'en-us':require('./assets/language/en-us'), //英文语言包
+        'zh-cn':require('./assets/language/zh-cn'), //中文繁体包
+    }
+})
 
 new Vue({
   router,
   store,
+    i18n,
   render: h => h(App)
 }).$mount('#app')

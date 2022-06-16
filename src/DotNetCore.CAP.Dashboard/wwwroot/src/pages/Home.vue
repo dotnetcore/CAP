@@ -1,8 +1,8 @@
 <template>
   <b-row>
     <b-col md="12">
-      <h1 class="page-line mb-4">Dashboard</h1>
-      <h3 class="mb-4">24h History Graph</h3>
+      <h1 class="page-line mb-4">{{$t("Dashboard")}}</h1>
+      <h3 class="mb-4">{{$t("24h History Graph")}}</h3>
       <v-chart class="chart" :option="option" />
     </b-col>
   </b-row>
@@ -69,7 +69,11 @@ export default {
           }
         },
         legend: {
-          data: ['Publish Succeeded', 'Publish Failed', 'Received Succeeded', 'Received Failed']
+          data: [
+            this.$t('Publish Succeeded'),
+            this.$t('Publish Failed'),
+            this.$t('Received Succeeded'),
+            this.$t('Received Failed')]
         },
         grid: {
           left: '3%',
@@ -96,7 +100,7 @@ export default {
         ],
         series: [
           {
-            name: 'Publish Succeeded',
+            name:  this.$t('Publish Succeeded'),
             type: 'line',
             stack: 'Number',
             smooth: true,
@@ -120,7 +124,7 @@ export default {
             data: publishSuccessed
           },
           {
-            name: 'Publish Failed',
+            name:  this.$t('Publish Failed'),
             type: 'line',
             stack: 'Number',
             smooth: true,
@@ -144,7 +148,7 @@ export default {
             data: publishFailed
           },
           {
-            name: 'Received Succeeded',
+            name: this.$t('Received Succeeded'),
             type: 'line',
             stack: 'Number',
             smooth: true,
@@ -168,7 +172,7 @@ export default {
             data: subscribeSuccessed
           },
           {
-            name: 'Received Failed',
+            name: this.$t('Received Failed'),
             type: 'line',
             stack: 'Number',
             smooth: true,

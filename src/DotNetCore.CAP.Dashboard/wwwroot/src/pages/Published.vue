@@ -4,31 +4,31 @@
       <b-col md="3">
         <b-list-group>
           <router-link class="list-group-item text-left list-group-item-secondary list-group-item-action" v-for="menu of subMens" :key="menu.text" active-class="active" :to="menu.name">
-            {{ menu.text }}
+            {{$t(menu.text) }}
             <b-badge :variant="menu.variant" class="float-right" pill> {{ onMetric[menu.num] }} </b-badge>
           </router-link>
         </b-list-group>
       </b-col>
       <b-col md="9">
-        <h1 class="page-line mb-4">Published Message</h1>
+        <h1 class="page-line mb-4">{{$t("Published Message")}}</h1>
         <b-form inline>
-          <label class="sr-only" for="inline-form-input-name">Name</label>
-          <b-form-input v-model="formData.name" id="inline-form-input-name" class="mb-2 mr-sm-2 col-3 mb-sm-0" placeholder="Name" />
+          <label class="sr-only" for="inline-form-input-name">{{$t("Name")}}</label>
+          <b-form-input v-model="formData.name" id="inline-form-input-name" class="mb-2 mr-sm-2 col-3 mb-sm-0" :placeholder="$t('Name')" />
 
-          <label class="sr-only" for="inline-form-input-content">Content</label>
-          <b-form-input v-model="formData.content" id="inline-form-input-content" class="mb-2 mr-sm-2 col-7 mb-sm-0" placeholder="Content" />
+          <label class="sr-only" for="inline-form-input-content">{{$t("Content")}}</label>
+          <b-form-input v-model="formData.content" id="inline-form-input-content" class="mb-2 mr-sm-2 col-7 mb-sm-0" :placeholder="$t('Content')" />
           <b-button variant="dark" @click="onSearch">
             <b-icon icon="search"></b-icon>
-            Search
+            {{$t("Search")}}
           </b-button>
         </b-form>
         <b-btn-toolbar class="mt-4">
           <b-button size="sm" variant="dark" @click="requeue" :disabled="!selectedItems.length">
             <b-icon icon="arrow-repeat" aria-hidden="true"></b-icon>
-            Requeue
+            {{$t("Requeue")}}
           </b-button>
           <div class="pagination">
-            <span style="font-size: 14px"> Page Size:</span>
+            <span style="font-size: 14px">{{$t("Page Size")}}:</span>
             <b-button-group class="ml-2">
               <b-button variant="outline-secondary" size="sm" v-for="size in pageOptions" :class="{ active: formData.perPage == size }" @click="pageSizeChange(size)" :key="size">{{ size }}</b-button>
             </b-button-group>
@@ -38,7 +38,7 @@
           <template #table-busy>
             <div class="text-center text-secondary my-2">
               <b-spinner class="align-middle"></b-spinner>
-              <strong class="ml-2">Loading...</strong>
+              <strong class="ml-2">{{$t("Loading")}}...</strong>
             </div>
           </template>
 
@@ -59,8 +59,13 @@
           </template>
  
         </b-table>
-        <span class="float-left"> Total: {{ totals }} </span>
-        <b-pagination first-text="First" prev-text="Prev" next-text="Next" last-text="Last" v-model="formData.currentPage" :total-rows="totals" :per-page="formData.perPage" class="capPagination" aria-controls="datatable"></b-pagination>
+        <span class="float-left"> {{$t("Total")}}: {{ totals }} </span>
+        <b-pagination
+            :first-text="$t('First')"
+            :prev-text="$t('Prev')"
+            :next-text="$t('Next')"
+            :last-text="$t('Last')"
+            v-model="formData.currentPage" :total-rows="totals" :per-page="formData.perPage" class="capPagination" aria-controls="datatable"></b-pagination>
       </b-col>
     </b-row>
     <b-modal size="lg" :id="infoModal.id" :title="'Id: ' + infoModal.title" ok-only>
@@ -80,7 +85,7 @@ const formDataTpl = {
 };
 export default {
   props: {
-    status: {},
+    status: {}
   },
   data() {
     return {
@@ -104,26 +109,6 @@ export default {
       tableValues: [],
       isSelectedAll: false,
       formData: { ...formDataTpl },
-      fields: [
-        { key: "checkbox", label: "" },
-        { key: "id", label: "Id / Name" },
-        { key: "retries", label: "Retries" },
-        {
-          key: "added",
-          label: "Added",
-          formatter: (val) => {
-            if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
-          },
-        },
-
-        {
-          key: "expiresAt",
-          label: "Expires",
-          formatter: (val) => {
-            if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
-          },
-        },
-      ],
       totals: 0,
       items: [],
       infoModal: {
@@ -136,6 +121,26 @@ export default {
   computed: {
     onMetric() {
       return this.$store.getters.getMetric;
+    },
+    fields(){
+      return [{ key: "checkbox", label: "" },
+        { key: "id", label: this.$t("IdName") },
+        { key: "retries", label: this.$t("Retries") },
+        {
+          key: "added",
+          label: this.$t("Added"),
+          formatter: (val) => {
+            if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
+          },
+        },
+
+        {
+          key: "expiresAt",
+          label: this.$t("Expires"),
+          formatter: (val) => {
+            if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
+          },
+        }];
     }
   },
   mounted() {
@@ -211,7 +216,7 @@ export default {
       const _this = this;
       axios.post('/published/requeue', this.selectedItems.map((item) => item.id)).then(() => {
         _this.clear();
-        _this.$bvToast.toast(`Requeue successsful!`, {
+        _this.$bvToast.toast(this.$t("RequeueSuccess"), {
           title: "Tips",
           autoHideDelay: 500,
           appendToast: false,
