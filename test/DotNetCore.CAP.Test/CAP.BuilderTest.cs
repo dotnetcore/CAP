@@ -76,6 +76,26 @@ namespace DotNetCore.CAP.Test
             {
                 throw new NotImplementedException();
             }
+
+            public Task PublishAsync<T>(object contentObj, string callbackName = null, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PublishAsync<T>(object contentObj, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Publish<T>(object contentObj, string callbackName = null)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void Pulish<T>(object contentObj, IDictionary<string, string> headers)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }
