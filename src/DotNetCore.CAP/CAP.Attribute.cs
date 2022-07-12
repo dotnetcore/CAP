@@ -17,6 +17,10 @@ namespace DotNetCore.CAP
 
         }
 
+        public CapSubscribeAttribute(Type type, bool isPartial = false) : base(type.FullName.ToLowerInvariant(), isPartial)
+        {
+        }
+
         public override string ToString()
         {
             return Name;
