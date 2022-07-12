@@ -37,6 +37,16 @@ namespace DotNetCore.CAP.Internal
 
         public AsyncLocal<ICapTransaction> Transaction { get; }
 
+        public Task PublishAsync<T>(object? contentObj, string? callbackName = null, CancellationToken cancellationToken = default)
+        {
+            return Task.Run(() => Publish(TypeToTopicName(typeof(T)), contentObj, callbackName), cancellationToken);
+        }
+
+        public Task PublishAsync<T>(object? contentObj, IDictionary<string, string?> headers, CancellationToken cancellationToken = default)
+        {
+            return Task.Run(() => Publish(TypeToTopicName(typeof(T)), contentObj, headers), cancellationToken);
+        }
+
         public Task PublishAsync<T>(string name, T? value, IDictionary<string, string?> headers, CancellationToken cancellationToken = default)
         {
             return Task.Run(() => Publish(name, value, headers), cancellationToken);
@@ -46,6 +56,16 @@ namespace DotNetCore.CAP.Internal
             CancellationToken cancellationToken = default)
         {
             return Task.Run(() => Publish(name, value, callbackName), cancellationToken);
+        }
+
+        public void Publish<T>(object? contentObj, string? callbackName = null)
+        {
+            Publish(TypeToTopicName(typeof(T)), contentObj, callbackName);
+        }
+
+        public void Pulish<T>(object? contentObj, IDictionary<string, string?> headers)
+        {
+            Publish(TypeToTopicName(typeof(T)), contentObj, headers);
         }
 
         public void Publish<T>(string name, T? value, string? callbackName = null)
@@ -122,6 +142,16 @@ namespace DotNetCore.CAP.Internal
 
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Convert type to topic name
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        internal static string TypeToTopicName(Type type)
+        {
+            return type.FullName.ToLowerInvariant();
         }
 
         #region tracing
