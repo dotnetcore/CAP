@@ -17,7 +17,7 @@ namespace DotNetCore.CAP
 
         }
 
-        public CapSubscribeAttribute(Type type, bool isPartial = false) : base(type.FullName.ToLowerInvariant(), isPartial)
+        public CapSubscribeAttribute(Type type, bool isPartial = false) : base(CapPublisher.TypeToTopicName(type), isPartial)
         {
         }
 
@@ -30,7 +30,7 @@ namespace DotNetCore.CAP
     [AttributeUsage(AttributeTargets.Parameter)]
     public class FromCapAttribute : Attribute
     {
-       
+
     }
 
     public class CapHeader : ReadOnlyDictionary<string, string?>
