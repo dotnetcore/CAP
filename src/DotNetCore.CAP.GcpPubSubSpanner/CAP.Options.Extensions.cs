@@ -27,14 +27,14 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         /// <param name="options">CAP configuration options</param>
         /// <param name="configure">Provides programmatic configuration for the Google Cloud Pub/Sub.</param>
-        public static CapOptions UseGooglePubSub(this CapOptions options, Action<GooglePubSubOptions> configure)
+        public static CapOptions UseGooglePubSub(this CapOptions options, Action<GcpPubSubSpannerOptions> configure)
         {
             if (configure == null)
             {
                 throw new ArgumentNullException(nameof(configure));
             }
 
-            options.RegisterExtension(new GooglePubSubOptionsExtension(configure));
+            options.RegisterExtension(new GcpPubSubSpannerOptionsExtension(configure));
 
             return options;
         }

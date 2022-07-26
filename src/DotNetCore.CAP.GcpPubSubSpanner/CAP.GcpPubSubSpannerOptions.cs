@@ -7,7 +7,7 @@ namespace DotNetCore.CAP
     /// <summary>
     /// Provides programmatic configuration for the CAP Google Cloud Platform Pub/Sub project.
     /// </summary>
-    public class GooglePubSubOptions
+    public class GcpPubSubSpannerOptions
     {
         /// <summary>
         /// The GCP <c>Project</c> ID.

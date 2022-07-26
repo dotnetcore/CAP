@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>DotNetCore.CAP.GooglePubSub</AssemblyName>
-    <PackageTags>$(PackageTags);PubSub;GCP;Google Cloud PubSub</PackageTags>
+    <AssemblyName>DotNetCore.CAP.GcpPubSubSpanner</AssemblyName>
+    <PackageTags>$(PackageTags);PubSub;GCP;Google Cloud PubSub;Google Spanner</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup>
     <WarningsAsErrors>NU1605;NU1701</WarningsAsErrors>
     <NoWarn>NU1701;CS1591</NoWarn>
-    <DocumentationFile>bin\$(Configuration)\netstandard2.0\DotNetCore.CAP.GooglePubSub.xml</DocumentationFile>
+    <DocumentationFile>bin\$(Configuration)\netstandard2.0\DotNetCore.CAP.GcpPubSubSpanner.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

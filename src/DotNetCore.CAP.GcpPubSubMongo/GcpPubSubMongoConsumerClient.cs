@@ -13,14 +13,14 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.GooglePubSub
 {
-    internal sealed class GooglePubSubConsumerClient : IConsumerClient
+    internal sealed class GcpPubSubMongoConsumerClient : IConsumerClient
     {
         private readonly ProjectName _projectName;
         private readonly SubscriptionName _subscriptionName;
         private readonly TopicName _topicName;
         private SubscriberServiceApiClient _subscriberClient;
 
-        public GooglePubSubConsumerClient(string subscriptionName, IOptions<GooglePubSubOptions> options)
+        public GcpPubSubMongoConsumerClient(string subscriptionName, IOptions<GcpPubSubMongoOptions> options)
         {
             _projectName = new ProjectName(options.Value.ProjectId);
             _subscriptionName = new SubscriptionName(options.Value.ProjectId, subscriptionName);
