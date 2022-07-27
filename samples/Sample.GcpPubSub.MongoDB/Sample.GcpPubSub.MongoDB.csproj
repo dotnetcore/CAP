@@ -13,7 +13,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard\DotNetCore.CAP.Dashboard.csproj" />
-    <ProjectReference Include="..\..\src\DotNetCore.CAP.GcpPubSubMongo\DotNetCore.CAP.GcpPubSubMongo.csproj" />
+    <ProjectReference Include="..\..\src\DotNetCore.CAP.GcpPubSub\DotNetCore.CAP.GcpPubSub.csproj" />
     <ProjectReference Include="..\..\src\DotNetCore.CAP.MongoDB\DotNetCore.CAP.MongoDB.csproj" />
     <ProjectReference Include="..\..\src\DotNetCore.CAP\DotNetCore.CAP.csproj" />
   </ItemGroup> 

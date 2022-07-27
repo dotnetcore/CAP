@@ -7,12 +7,12 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.GooglePubSub
 {
-    internal sealed class GcpPubSubMongoConsumerClientFactory : IConsumerClientFactory
+    internal sealed class GcpPubSubConsumerClientFactory : IConsumerClientFactory
     {
-        private readonly IOptions<GcpPubSubMongoOptions> _options;
-        private GcpPubSubMongoConsumerClient consumerClient;
+        private readonly IOptions<GcpPubSubOptions> _options;
+        private GcpPubSubConsumerClient consumerClient;
 
-        public GcpPubSubMongoConsumerClientFactory(IOptions<GcpPubSubMongoOptions> options)
+        public GcpPubSubConsumerClientFactory(IOptions<GcpPubSubOptions> options)
         {
             _options = options;
         }
@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.GooglePubSub
             {
                 if (consumerClient == null)
                 {
-                    consumerClient = new GcpPubSubMongoConsumerClient(groupId, _options);
+                    consumerClient = new GcpPubSubConsumerClient(groupId, _options);
                     consumerClient.Connect();
                 }
                 return consumerClient;

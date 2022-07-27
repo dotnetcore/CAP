@@ -9,11 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
-    internal sealed class GcpPubSubSpannerOptionsExtension : ICapOptionsExtension
+    internal sealed class GcpPubSubOptionsExtension : ICapOptionsExtension
     {
-        private readonly Action<GcpPubSubSpannerOptions> _configure;
+        private readonly Action<GcpPubSubOptions> _configure;
 
-        public GcpPubSubSpannerOptionsExtension(Action<GcpPubSubSpannerOptions> configure)
+        public GcpPubSubOptionsExtension(Action<GcpPubSubOptions> configure)
         {
             _configure = configure;
         }
@@ -24,8 +24,8 @@ namespace DotNetCore.CAP
 
             services.Configure(_configure);
 
-            services.AddSingleton<IConsumerClientFactory, GcpPubSubSpannerConsumerClientFactory>();
-            services.AddSingleton<ITransport, GcpPubSubSpannerTransport>();
+            services.AddSingleton<IConsumerClientFactory, GcpPubSubConsumerClientFactory>();
+            services.AddSingleton<ITransport, GcpPubSubTransport>();
         }
     }
 }

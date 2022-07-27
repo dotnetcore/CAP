@@ -13,14 +13,14 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.GooglePubSub
 {
-    internal sealed class GcpPubSubMongoConsumerClient : IConsumerClient
+    internal sealed class GcpPubSubConsumerClient : IConsumerClient
     {
         private readonly ProjectName _projectName;
         private readonly SubscriptionName _subscriptionName;
         private readonly TopicName _topicName;
         private SubscriberServiceApiClient _subscriberClient;
 
-        public GcpPubSubMongoConsumerClient(string subscriptionName, IOptions<GcpPubSubMongoOptions> options)
+        public GcpPubSubConsumerClient(string subscriptionName, IOptions<GcpPubSubOptions> options)
         {
             _projectName = new ProjectName(options.Value.ProjectId);
             _subscriptionName = new SubscriptionName(options.Value.ProjectId, subscriptionName);
@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.GooglePubSub
 
         public event EventHandler<LogMessageEventArgs> OnLog;
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("GooglePubSub", string.Empty);
+        public BrokerAddress BrokerAddress => new BrokerAddress("GcpPubSub", string.Empty);
 
         public void Subscribe(IEnumerable<string> topics)
         {

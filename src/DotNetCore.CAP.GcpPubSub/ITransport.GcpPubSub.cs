@@ -17,17 +17,17 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.GooglePubSub
 {
-    internal class GcpPubSubMongoTransport : ITransport
+    internal class GcpPubSubTransport : ITransport
     {
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
-        private readonly IOptions<GcpPubSubMongoOptions> _options;
+        private readonly IOptions<GcpPubSubOptions> _options;
         private readonly ILogger _logger;
 
         private PublisherServiceApiClient _publisherClient;
 
-        public GcpPubSubMongoTransport(IOptions<GcpPubSubMongoOptions> options,
-            ILogger<GcpPubSubMongoTransport> logger)
+        public GcpPubSubTransport(IOptions<GcpPubSubOptions> options,
+            ILogger<GcpPubSubTransport> logger)
         {
             _options = options;
             _logger = logger;
@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.GooglePubSub
             CreateTopic();
         }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("GooglePubSubMongo", string.Empty);
+        public BrokerAddress BrokerAddress => new BrokerAddress("GooglePubSub", string.Empty);
 
         public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {
