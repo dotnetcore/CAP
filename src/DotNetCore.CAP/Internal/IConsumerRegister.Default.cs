@@ -165,7 +165,7 @@ namespace DotNetCore.CAP.Internal
 
         public void Pulse()
         {
-            _cts.Cancel();
+            _cts.Cancel();  
             _cts.Dispose();
         }
 
@@ -319,6 +319,7 @@ namespace DotNetCore.CAP.Internal
                     _logger.LogError("NATS subscriber received an error. --> " + logmsg.Reason);
                     break;
                 case MqLogType.ConnectError:
+                    _isHealthy = false;
                     _logger.LogError("NATS server connection error. -->  " + logmsg.Reason);
                     break;
                 case MqLogType.InvalidIdFormat:

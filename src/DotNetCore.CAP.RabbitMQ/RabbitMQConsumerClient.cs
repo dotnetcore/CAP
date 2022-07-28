@@ -16,14 +16,13 @@ namespace DotNetCore.CAP.RabbitMQ
 {
     internal sealed class RabbitMQConsumerClient : IConsumerClient
     {
-        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+        private readonly object _syncLock = new();
 
         private readonly IConnectionChannelPool _connectionChannelPool;
         private readonly string _exchangeName;
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
         private IModel? _channel;
-        private IConnection? _connection;
 
         public RabbitMQConsumerClient(string queueName,
             IConnectionChannelPool connectionChannelPool,
@@ -103,20 +102,13 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public void Connect()
         {
-            if (_connection != null)
-            {
-                return;
-            }
+            var connection = _connectionChannelPool.GetConnection();
 
-            _connectionLock.Wait();
-
-            try
+            lock (_syncLock)
             {
-                if (_connection == null)
+                if (_channel == null || _channel.IsClosed)
                 {
-                    _connection = _connectionChannelPool.GetConnection();
-
-                    _channel = _connection.CreateModel();
+                    _channel = connection.CreateModel();
 
                     _channel.ExchangeDeclare(_exchangeName, RabbitMQOptions.ExchangeType, true);
 
@@ -132,10 +124,6 @@ namespace DotNetCore.CAP.RabbitMQ
 
                     _channel.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false, arguments: arguments);
                 }
-            }
-            finally
-            {
-                _connectionLock.Release();
             }
         }
 
