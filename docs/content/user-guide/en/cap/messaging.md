@@ -123,7 +123,7 @@ The consumer method is executed when the Consumer receives the message and will 
 
 There is an `ExpiresAt` field in the database message table indicating the expiration time of the message. When the message is sent successfully, status will be changed to `Successed`, and `ExpiresAt` will be set to **1 day** later. 
 
-Consuming failure will change the message status to `Failed` and `ExpiresAt` will be set to **15 days** later.
+Consuming failure will change the message status to `Failed` and `ExpiresAt` will be set to **15 days** later (You can use [FailedMessageExpiredAfter](../configuration#failedmessageexpiredafter) configuration items to custom).
 
 By default, the data of the message in the table is deleted every **5 minutes** to avoid performance degradation caused by too much data. The cleanup strategy `ExpiresAt` is performed when field is not empty and is less than the current time. 
 

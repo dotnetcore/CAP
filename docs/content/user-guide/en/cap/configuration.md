@@ -117,6 +117,12 @@ Failure threshold callback. This action is called when the retry reaches the val
 
 The expiration time (in seconds) of the success message. When the message is sent or consumed successfully, it will be removed from database storage when the time reaches `SucceedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.
 
+#### FailedMessageExpiredAfter
+
+> Default: 15*24*3600 sec(15 days)
+
+The expiration time (in seconds) of the failed message. When the message is sent or consumed failed, it will be removed from database storage when the time reaches `FailedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.
+
 #### UseDispatchingPerGroup
 
 > Default: false

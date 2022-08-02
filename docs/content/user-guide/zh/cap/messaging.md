@@ -123,7 +123,7 @@ CAP 接收到消息之后会将消息进行 Persistent（持久化）， 有关 
 
 ## 消息数据清理
 
-数据库消息表中具有一个 ExpiresAt 字段表示消息的过期时间，当消息发送成功或者消费成功后，CAP会将消息状态为 Successed 的 ExpiresAt 设置为 1天 后过期，会将消息状态为 Failed 的 ExpiresAt 设置为 15天 后过期。
+数据库消息表中具有一个 ExpiresAt 字段表示消息的过期时间，当消息发送成功或者消费成功后，CAP会将消息状态为 Successed 的 ExpiresAt 设置为 1天 后过期，会将消息状态为 Failed 的 ExpiresAt 设置为 15天 后过期（可通过 [FailedMessageExpiredAfter](../configuration#failedmessageexpiredafter) 配置)。
 
 CAP 默认情况下会每隔**5分钟**将消息表的数据进行清理删除，避免数据量过多导致性能的降低。清理规则为 ExpiresAt 不为空并且小于当前时间的数据。 也就是说状态为Failed的消息（正常情况他们已经被重试了 50 次），如果你15天没有人工介入处理，同样会被清理掉。你可以通过 [CollectorCleaningInterval](../configuration#collectorcleaninginterval) 配置项来自定义间隔时间。
 
