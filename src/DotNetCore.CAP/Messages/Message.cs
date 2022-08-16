@@ -32,7 +32,7 @@ namespace DotNetCore.CAP.Messages
     {
         public static string GetId(this Message message)
         {
-           return message.Headers[Headers.MessageId]!;
+            return message.Headers[Headers.MessageId]!;
         }
 
         public static string GetName(this Message message)
@@ -60,6 +60,12 @@ namespace DotNetCore.CAP.Messages
             }
 
             return 0;
+        }
+
+        public static string? GetExecutionInstanceId(this Message message)
+        {
+            message.Headers.TryGetValue(Headers.ExecutionInstanceId, out var value);
+            return value;
         }
 
         public static bool HasException(this Message message)

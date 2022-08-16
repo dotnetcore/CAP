@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Net;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -25,7 +26,7 @@ namespace DotNetCore.CAP.Internal
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
-        private static readonly DiagnosticListener s_diagnosticListener = new (CapDiagnosticListenerNames.DiagnosticListenerName);
+        private static readonly DiagnosticListener s_diagnosticListener = new(CapDiagnosticListenerNames.DiagnosticListenerName);
 
         public SubscribeDispatcher(
             ILogger<SubscribeDispatcher> logger,
@@ -63,6 +64,10 @@ namespace DotNetCore.CAP.Internal
         {
             bool retry;
             OperateResult result;
+
+            //record instance id
+            message.Origin.Headers[Headers.ExecutionInstanceId] = GenerateHostnameInstanceId();
+
             do
             {
                 var (shouldRetry, operateResult) = await ExecuteWithoutRetryAsync(message, descriptor, cancellationToken);
@@ -88,10 +93,7 @@ namespace DotNetCore.CAP.Internal
 
             try
             {
-                _logger.ConsumerExecuting(
-                    descriptor.ImplTypeInfo.Name,
-                    descriptor.MethodInfo.Name,
-                    descriptor.Attribute.Group ?? _options.DefaultGroupName);
+                _logger.ConsumerExecuting(descriptor.ImplTypeInfo.Name, descriptor.MethodInfo.Name, descriptor.Attribute.Group);
 
                 var sp = Stopwatch.StartNew();
 
@@ -101,17 +103,13 @@ namespace DotNetCore.CAP.Internal
 
                 await SetSuccessfulState(message);
 
-                _logger.ConsumerExecuted(
-                    descriptor.ImplTypeInfo.Name,
-                    descriptor.MethodInfo.Name,
-                    descriptor.Attribute.Group ?? _options.DefaultGroupName,
-                    sp.Elapsed.TotalMilliseconds);
+                _logger.ConsumerExecuted(descriptor.ImplTypeInfo.Name, descriptor.MethodInfo.Name, descriptor.Attribute.Group, sp.Elapsed.TotalMilliseconds, message.Origin.GetExecutionInstanceId());
 
                 return (false, OperateResult.Success);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An exception occurred while executing the subscription method. Topic:{message.Origin.GetName()}, Id:{message.DbId}");
+                _logger.ConsumerExecuteFailed(message.Origin.GetName(), message.DbId, message.Origin.GetExecutionInstanceId(), ex);
 
                 return (await SetFailedState(message, ex), OperateResult.Failed(ex));
             }
@@ -120,6 +118,7 @@ namespace DotNetCore.CAP.Internal
         private Task SetSuccessfulState(MediumMessage message)
         {
             message.ExpiresAt = DateTime.Now.AddSeconds(_options.SucceedMessageExpiredAfter);
+
             return _dataStorage.ChangeReceiveStateAsync(message, StatusName.Succeeded);
         }
 
@@ -205,6 +204,25 @@ namespace DotNetCore.CAP.Internal
                 TracingError(tracingTimestamp, message.Origin, descriptor.MethodInfo, e);
 
                 throw e;
+            }
+        }
+
+        private string? GenerateHostnameInstanceId()
+        {
+            try
+            {
+                var hostName = Dns.GetHostName();
+                if (hostName.Length <= 50)
+                {
+                    return hostName;
+                }
+                return hostName.Substring(0, 50);
+
+            }
+            catch (Exception e)
+            {
+                _logger.LogWarning("Couldn't get host name!", e);
+                return null;
             }
         }
 

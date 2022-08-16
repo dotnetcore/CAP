@@ -25,6 +25,8 @@ namespace DotNetCore.CAP.Messages
 
         public const string CallbackName = "cap-callback-name";
 
+        public const string ExecutionInstanceId = "cap-exec-instance-id";
+
         public const string SentTime = "cap-senttime";
 
         public const string Exception = "cap-exception";

@@ -2,12 +2,10 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
 {
-    [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static class LoggerExtensions
     {
         public static void ConsumerExecutedAfterThreshold(this ILogger logger, string messageId, int retries)
@@ -27,7 +25,7 @@ namespace DotNetCore.CAP.Internal
 
         public static void ConsumerDuplicates(this ILogger logger, string subscriber, string group)
         {
-            logger.LogWarning( $"We detected that you have duplicate subscribers ({subscriber}) in same group ({group}), this will cause diversity behavior.");
+            logger.LogWarning($"We detected that you have duplicate subscribers ({subscriber}) in same group ({group}), this will cause diversity behavior.");
         }
 
         public static void ConsumerExecutionRetrying(this ILogger logger, string messageId, int retries)
@@ -47,7 +45,7 @@ namespace DotNetCore.CAP.Internal
 
         public static void MessagePublishException(this ILogger logger, string? messageId, string reason, Exception? ex)
         {
-            logger.LogError(ex, $"An exception occured while publishing a message, reason:{reason}. message id:{messageId}");
+            logger.LogError(ex, $"An exception occurred while publishing a message, reason:{reason}. message id:{messageId}");
         }
 
         public static void ConsumerExecuting(this ILogger logger, string className, string methodName, string group)
@@ -55,11 +53,15 @@ namespace DotNetCore.CAP.Internal
             logger.LogInformation($"Executing subscriber method '{className}.{methodName}' on group '{group}'");
         }
 
-        public static void ConsumerExecuted(this ILogger logger, string className, string methodName, string group, double milliseconds)
+        public static void ConsumerExecuted(this ILogger logger, string className, string methodName, string group, double milliseconds, string? instance)
         {
-            logger.LogInformation($"Executed subscriber method '{className}.{methodName}' on group '{group}' in {milliseconds} ms");
+            logger.LogInformation($"Executed subscriber method '{className}.{methodName}' on group '{group}' with instance '{instance}' in {milliseconds}ms");
         }
 
+        public static void ConsumerExecuteFailed(this ILogger logger, string topic, string id, string? instance, Exception? ex)
+        {
+            logger.LogError(ex, $"An exception occurred while executing the subscription method. Topic:{topic}, Id:{id}, Instance: {instance}");
+        }
         public static void ServerStarting(this ILogger logger)
         {
             logger.LogInformation("Starting the processing server.");
