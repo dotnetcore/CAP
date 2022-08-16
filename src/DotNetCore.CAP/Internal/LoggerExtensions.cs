@@ -25,6 +25,11 @@ namespace DotNetCore.CAP.Internal
             logger.LogWarning(ex, "FailedThresholdCallback action raised an exception:" + ex.Message);
         }
 
+        public static void ConsumerDuplicates(this ILogger logger, string subscriber, string group)
+        {
+            logger.LogWarning( $"We detected that you have duplicate subscribers ({subscriber}) in same group ({group}), this will cause diversity behavior.");
+        }
+
         public static void ConsumerExecutionRetrying(this ILogger logger, string messageId, int retries)
         {
             logger.LogWarning($"The {retries}th retrying consume a message failed. message id: {messageId}");

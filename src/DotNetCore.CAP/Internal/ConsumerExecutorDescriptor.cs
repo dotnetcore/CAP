@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Internal
 {
@@ -58,11 +59,19 @@ namespace DotNetCore.CAP.Internal
 
     public class ConsumerExecutorDescriptorComparer : IEqualityComparer<ConsumerExecutorDescriptor>
     {
+        private readonly ILogger _logger;
+
+        public ConsumerExecutorDescriptorComparer(ILogger logger)
+        {
+            _logger = logger;
+        }
+
         public bool Equals(ConsumerExecutorDescriptor? x, ConsumerExecutorDescriptor? y)
         {
             //Check whether the compared objects reference the same data.
             if (ReferenceEquals(x, y))
             {
+                _logger.ConsumerDuplicates(x.TopicName,x.Attribute.Group);
                 return true;
             }
 
@@ -73,8 +82,15 @@ namespace DotNetCore.CAP.Internal
             }
 
             //Check whether the ConsumerExecutorDescriptor' properties are equal.
-            return x.TopicName.Equals(y.TopicName, StringComparison.OrdinalIgnoreCase) &&
+            var ret = x.TopicName.Equals(y.TopicName, StringComparison.OrdinalIgnoreCase) &&
                 x.Attribute.Group.Equals(y.Attribute.Group, StringComparison.OrdinalIgnoreCase);
+
+            if (ret)
+            {
+                _logger.ConsumerDuplicates(x.TopicName, x.Attribute.Group);
+            }
+
+            return ret;
         }
 
         public int GetHashCode(ConsumerExecutorDescriptor? obj)
