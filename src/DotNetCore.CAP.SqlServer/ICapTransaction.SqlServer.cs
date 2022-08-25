@@ -162,8 +162,22 @@ namespace DotNetCore.CAP
         public static IDbTransaction BeginTransaction(this IDbConnection dbConnection,
             ICapPublisher publisher, bool autoCommit = false)
         {
+            return dbConnection.BeginTransaction(publisher, IsolationLevel.Unspecified, autoCommit);
+        }
+
+        /// <summary>
+        /// Start the CAP transaction
+        /// </summary>
+        /// <param name="dbConnection">The <see cref="IDbConnection" />.</param>
+        /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+        /// <param name="isolationLevel">Transaction <see cref="IsolationLevel"/></param>
+        /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+        /// <returns>The <see cref="ICapTransaction" /> object.</returns>
+        public static IDbTransaction BeginTransaction(this IDbConnection dbConnection,
+            ICapPublisher publisher, IsolationLevel isolationLevel, bool autoCommit = false)
+        {
             if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
-            var dbTransaction = dbConnection.BeginTransaction();
+            var dbTransaction = dbConnection.BeginTransaction(isolationLevel);
             publisher.Transaction.Value = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
             var capTransaction = publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
             return (IDbTransaction)capTransaction.DbTransaction!;
