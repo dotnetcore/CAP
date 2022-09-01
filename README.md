@@ -191,6 +191,20 @@ public void ConfigureServices(IServiceCollection services)
     });
 }
 ```
+#### Async subscription
+
+You are able to implement async subscription. Subscription's method should return Task and receive CancellationToken as parameter.
+
+```c#
+public class AsyncSubscriber : ICapSubscribe
+{
+    [CapSubscribe("name")]
+    public async Task ProcessAsync(Message message, CancellationToken cancellationToken)
+    {
+        await SomeOperationAsync(message, cancellationToken);
+    }
+}
+```
 #### Use partials for topic subscriptions
 
 To group topic subscriptions on class level you're able to define a subscription on a method as a partial. Subscriptions on the message queue will then be a combination of the topic defined on the class and the topic defined on the method. In the following example the `Create(..)` function will be invoked when receiving a message on `customers.create`
