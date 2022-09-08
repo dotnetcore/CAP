@@ -30,12 +30,12 @@ namespace DotNetCore.CAP.Messages
 
         public string GetId()
         {
-            return Headers[Messages.Headers.MessageId]!;
+            return Headers.TryGetValue(Messages.Headers.MessageId, out var value) ? value! : "Unknown";
         }
 
         public string GetName()
         {
-            return Headers[Messages.Headers.MessageName]!;
+            return Headers.TryGetValue(Messages.Headers.MessageName, out var value) ? value! : "";
         }
 
         public string? GetGroup()
