@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.RedisStreams
 
             var body = !bodyRaw.IsNullOrEmpty ? JsonSerializer.Deserialize<byte[]>(bodyRaw) : null;
 
-            headers.TryAdd(Messages.Headers.Group, groupId);
+            try { headers.Add(Messages.Headers.Group, groupId); } catch { }
 
             return new TransportMessage(headers, body);
         }

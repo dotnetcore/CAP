@@ -40,6 +40,11 @@ namespace DotNetCore.CAP.RedisStreams
 
         public BrokerAddress BrokerAddress => new("redis", _options.Value.Endpoint);
 
+        public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+        {
+            return topicNames.ToList();
+        }
+
         public void Subscribe(IEnumerable<string> topics)
         {
             if (topics == null) throw new ArgumentNullException(nameof(topics));

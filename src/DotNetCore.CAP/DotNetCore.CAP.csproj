@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+	<TargetFrameworks>netstandard2.0;netstandard2.1;net472</TargetFrameworks>
 	<Nullable>enable</Nullable>
   </PropertyGroup>
   
@@ -9,14 +9,24 @@
     <DocumentationFile>bin\$(Configuration)\netstandard2.1\DotNetCore.CAP.xml</DocumentationFile>
     <NoWarn>1701;1702;1705;CS1591</NoWarn>
   </PropertyGroup>
-  
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net472'">
+	  <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="2.2.0" />
+	  <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="2.2.0" />
+	  <PackageReference Include="Microsoft.Extensions.Options" Version="2.2.0" />
+	  <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="5.0.1" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
+	<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
+	<PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
+	<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+  </ItemGroup>
+
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.0" />
-    <PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
+	<PackageReference Include="System.Text.Json" Version="6.0.0" />
     <PackageReference Include="System.Threading.Channels" Version="6.0.0" />
-    <PackageReference Include="System.Text.Json" Version="6.0.0" />
+    
   </ItemGroup>
  
 </Project>

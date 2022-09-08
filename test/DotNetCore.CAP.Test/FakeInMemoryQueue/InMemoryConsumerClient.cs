@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
@@ -28,6 +29,11 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
         public event EventHandler<LogMessageEventArgs> OnLog;
 
         public BrokerAddress BrokerAddress => new BrokerAddress("InMemory", string.Empty);
+
+        public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+        {
+            return topicNames.ToList();
+        }
 
         public void Subscribe(IEnumerable<string> topics)
         {

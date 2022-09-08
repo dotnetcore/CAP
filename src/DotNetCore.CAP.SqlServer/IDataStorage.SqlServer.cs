@@ -134,14 +134,20 @@ namespace DotNetCore.CAP.SqlServer
             return mdMessage;
         }
 
+#pragma warning disable CS1998
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
             CancellationToken token = default)
         {
+#if NETSTANDARD2_0 || NETFRAMEWORK
+            using var connection = new SqlConnection(_options.Value.ConnectionString);
+#else
             await using var connection = new SqlConnection(_options.Value.ConnectionString);
+#endif
             return connection.ExecuteNonQuery(
                 $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout;", null,
                 new SqlParameter("@timeout", timeout), new SqlParameter("@batchCount", batchCount));
         }
+#pragma warning restore CS1998
 
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
             await GetMessagesOfNeedRetryAsync(_pubName);
@@ -154,6 +160,7 @@ namespace DotNetCore.CAP.SqlServer
             return new SqlServerMonitoringApi(_options, _initializer);
         }
 
+#pragma warning disable CS1998
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
         {
             var sql =
@@ -168,9 +175,14 @@ namespace DotNetCore.CAP.SqlServer
                 new SqlParameter("@StatusName", state.ToString("G"))
             };
 
+#if NETSTANDARD2_0 || NETFRAMEWORK
+            using var connection = new SqlConnection(_options.Value.ConnectionString);
+#else
             await using var connection = new SqlConnection(_options.Value.ConnectionString);
+#endif
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
         }
+#pragma warning restore CS1998
 
         private void StoreReceivedMessage(object[] sqlParams)
         {
@@ -182,6 +194,7 @@ namespace DotNetCore.CAP.SqlServer
             connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
         }
 
+#pragma warning disable CS1998
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
         {
             var fourMinAgo = DateTime.Now.AddMinutes(-4);
@@ -197,7 +210,11 @@ namespace DotNetCore.CAP.SqlServer
             };
 
             List<MediumMessage> result;
+#if NETSTANDARD2_0 || NETFRAMEWORK
+            using (var connection = new SqlConnection(_options.Value.ConnectionString))
+#else
             await using (var connection = new SqlConnection(_options.Value.ConnectionString))
+#endif
             {
                 result = connection.ExecuteReader(sql, reader =>
                 {
@@ -219,5 +236,6 @@ namespace DotNetCore.CAP.SqlServer
 
             return result;
         }
+#pragma warning restore CS1998
     }
 }

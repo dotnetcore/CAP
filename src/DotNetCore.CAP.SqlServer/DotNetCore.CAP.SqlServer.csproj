@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+		<TargetFrameworks>net6.0;netstandard2.0;netstandard2.1;net472</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<PackageTags>$(PackageTags);SQL Server</PackageTags>
 	</PropertyGroup>
@@ -16,6 +16,12 @@
 		<PackageReference Include="Microsoft.Data.SqlClient" Version="3.0.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.12" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.12" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net472' ">
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="3.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.21" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="3.1.21" />
 	</ItemGroup>
 
 	<ItemGroup>

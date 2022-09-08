@@ -15,12 +15,13 @@ namespace DotNetCore.CAP.Internal
     /// <summary>
     /// Default implement of <see cref="T:DotNetCore.CAP.Internal.IBootstrapper" />.
     /// </summary>
-    internal class Bootstrapper : BackgroundService, IBootstrapper
+    public class Bootstrapper : BackgroundService, IBootstrapper
     {
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<Bootstrapper> _logger;
         private readonly CancellationTokenSource _cts = new();
         private bool _disposed;
+        private bool _running = false;
         private IEnumerable<IProcessingServer> _processors = default!;
 
         public Bootstrapper(IServiceProvider serviceProvider, ILogger<Bootstrapper> logger)
@@ -31,6 +32,7 @@ namespace DotNetCore.CAP.Internal
 
         public async Task BootstrapAsync()
         {
+            _running = true;
             _logger.LogDebug("### CAP background task is starting.");
 
             CheckRequirement();
@@ -66,6 +68,8 @@ namespace DotNetCore.CAP.Internal
                         _logger.ExpectedOperationCanceledException(ex);
                     }
                 }
+
+                _running = false;
             });
 
             await BootstrapCoreAsync();
@@ -117,6 +121,12 @@ namespace DotNetCore.CAP.Internal
             _cts.Cancel();
 
             await base.StopAsync(cancellationToken);
+        }
+
+        public async Task StartIfNotAlreadyRunning()
+        {
+            if (!_running)
+                await BootstrapAsync();
         }
 
         private void CheckRequirement()

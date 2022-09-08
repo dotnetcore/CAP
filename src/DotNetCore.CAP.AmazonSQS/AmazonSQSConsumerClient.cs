@@ -98,7 +98,7 @@ namespace DotNetCore.CAP.AmazonSQS
                 {
                     var messageObj = JsonSerializer.Deserialize<SQSReceivedMessage>(response.Messages[0].Body);
 
-                    var header = messageObj!.MessageAttributes.ToDictionary(x => x.Key, x => x.Value.Value);
+                    var header = messageObj!.MessageAttributes?.ToDictionary(x => x.Key, x => x.Value.Value) ?? new Dictionary<string, string?>();
                     var body = messageObj.Message;
 
                     var message = new TransportMessage(header, body != null ? Encoding.UTF8.GetBytes(body) : null);

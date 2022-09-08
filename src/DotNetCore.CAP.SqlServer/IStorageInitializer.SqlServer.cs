@@ -33,16 +33,22 @@ namespace DotNetCore.CAP.SqlServer
             return $"{_options.Value.Schema}.Received";
         }
 
+#pragma warning disable CS1998
         public async Task InitializeAsync(CancellationToken cancellationToken)
         {
             if (cancellationToken.IsCancellationRequested) return;
 
             var sql = CreateDbTablesScript(_options.Value.Schema);
+#if NETSTANDARD2_0 || NETFRAMEWORK
+            using (var connection = new SqlConnection(_options.Value.ConnectionString))
+#else
             await using (var connection = new SqlConnection(_options.Value.ConnectionString))
+#endif
                 connection.ExecuteNonQuery(sql);
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
+#pragma warning restore CS1998
 
         protected virtual string CreateDbTablesScript(string schema)
         {

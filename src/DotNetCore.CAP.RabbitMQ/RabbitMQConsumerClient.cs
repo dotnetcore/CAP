@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 using DotNetCore.CAP.Messages;
@@ -40,6 +41,10 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public BrokerAddress BrokerAddress => new("RabbitMQ", $"{_rabbitMQOptions.HostName}:{_rabbitMQOptions.Port}");
 
+        public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+        {
+            return topicNames.ToList();
+        }
         public void Subscribe(IEnumerable<string> topics)
         {
             if (topics == null)

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFrameworks>net6.0;netstandard2.1</TargetFrameworks>
+		<TargetFrameworks>net6.0;netstandard2.0;netstandard2.1;net472</TargetFrameworks>
 		<Nullable>enable</Nullable>
 		<PackageTags>$(PackageTags);PostgreSQL</PackageTags>
 	</PropertyGroup>
@@ -16,6 +16,12 @@
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.12" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.12" />
 		<PackageReference Include="Npgsql" Version="6.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' or '$(TargetFramework)' == 'net472' ">
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.2.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="2.2.0" />
+		<PackageReference Include="Npgsql" Version="4.1.6" />
 	</ItemGroup>
 
 	<ItemGroup>

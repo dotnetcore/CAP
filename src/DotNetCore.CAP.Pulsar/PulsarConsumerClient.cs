@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using DotNetCore.CAP.Messages;
@@ -32,6 +33,11 @@ namespace DotNetCore.CAP.Pulsar
         public event EventHandler<LogMessageEventArgs>? OnLog;
 
         public BrokerAddress BrokerAddress => new ("Pulsar", _pulsarOptions.ServiceUrl);
+
+        public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+        {
+            return topicNames.ToList();
+        }
 
         public void Subscribe(IEnumerable<string> topics)
         {

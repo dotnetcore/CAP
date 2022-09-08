@@ -143,7 +143,7 @@ namespace DotNetCore.CAP.AmazonSQS
             }
         }
         
-        private bool TryGetOrCreateTopicArn(string topicName,[System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? topicArn)
+        private bool TryGetOrCreateTopicArn(string topicName,out string? topicArn)
         {
             topicArn = null;
             if (_topicArnMaps!.TryGetValue(topicName, out topicArn))

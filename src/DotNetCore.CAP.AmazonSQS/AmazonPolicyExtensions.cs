@@ -191,7 +191,7 @@ namespace DotNetCore.CAP.AmazonSQS
                 foreach (var topicArn in statement.Conditions.SelectMany(c => c.Values))
                 {
                     topicArns.Add(
-                        groupName != null && topicArn.Contains(groupName, StringComparison.InvariantCultureIgnoreCase)
+                        groupName != null && topicArn.ContainsIgnoreCase(groupName)
                             ? $"{GetArnGroupPrefix(topicArn)}-*"
                             : topicArn);
                 }
@@ -223,7 +223,7 @@ namespace DotNetCore.CAP.AmazonSQS
                 return null;
             }
 
-            return string.Join(separator, groupPaths.Take(groupPaths.Length - 1));
+            return string.Join(new string(separator,1), groupPaths.Take(groupPaths.Length - 1));
         }
         
         /// <summary>
@@ -250,6 +250,25 @@ namespace DotNetCore.CAP.AmazonSQS
             }
 
             return GetArnGroupPrefix(name);
+        }
+
+        /// <summary>
+        /// Return whether stringToSearch contains substringToFind, regardless of case (framework-independent)
+        /// </summary>
+        /// <param name="stringToSearch"></param>
+        /// <param name="substringToFind"></param>
+        /// <returns></returns>
+        private static bool ContainsIgnoreCase(this string stringToSearch, string substringToFind)
+        {
+#if NETSTANDARD2_1_OR_GREATER
+            return stringToSearch.Contains(substringToFind, StringComparison.InvariantCultureIgnoreCase);
+#elif NET
+            return stringToSearch.Contains(substringToFind, StringComparison.InvariantCultureIgnoreCase);
+#else
+            stringToSearch = stringToSearch.ToUpperInvariant();
+            substringToFind = substringToFind.ToUpperInvariant();
+            return stringToSearch.Contains(substringToFind);
+#endif
         }
     }
 }

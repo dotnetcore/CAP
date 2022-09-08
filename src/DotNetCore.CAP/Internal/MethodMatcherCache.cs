@@ -67,7 +67,7 @@ namespace DotNetCore.CAP.Internal
         /// <param name="groupName">The group name of the value to get.</param>
         /// <param name="matchTopic">topic executor of the value.</param>
         /// <returns>true if the key was found, otherwise false. </returns>
-        public bool TryGetTopicExecutor(string topicName, string groupName, [NotNullWhen(true)] out ConsumerExecutorDescriptor? matchTopic)
+        public bool TryGetTopicExecutor(string topicName, string groupName, out ConsumerExecutorDescriptor? matchTopic)
         {
             if (Entries == null)
             {

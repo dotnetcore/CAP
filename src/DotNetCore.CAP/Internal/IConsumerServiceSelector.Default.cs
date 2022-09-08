@@ -23,6 +23,7 @@ namespace DotNetCore.CAP.Internal
         private readonly CapOptions _capOptions;
         private readonly IServiceProvider _serviceProvider;
         private readonly ILogger<ConsumerServiceSelector> _logger;
+        private readonly Assembly _consumingAssembly;
 
         /// <summary>
         /// since this class be designed as a Singleton service,the following two list must be thread safe!
@@ -37,6 +38,21 @@ namespace DotNetCore.CAP.Internal
             _serviceProvider = serviceProvider;
             _capOptions = serviceProvider.GetRequiredService<IOptions<CapOptions>>().Value;
             _logger = serviceProvider.GetRequiredService<ILogger<ConsumerServiceSelector>>();
+            _consumingAssembly = Assembly.GetEntryAssembly();
+
+            _cacheList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
+        }
+
+        /// <summary>
+        /// Creates a new <see cref="ConsumerServiceSelector" /> with optional assembly to search for listening controllers in
+        /// </summary>
+        public ConsumerServiceSelector(IServiceProvider serviceProvider, Assembly consumingAssembly)
+        {
+            _serviceProvider = serviceProvider;
+            _capOptions = serviceProvider.GetRequiredService<IOptions<CapOptions>>().Value;
+			_logger = serviceProvider.GetRequiredService<ILogger<ConsumerServiceSelector>>();
+            _consumingAssembly = consumingAssembly;
+
             _cacheList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
         }
 
@@ -109,13 +125,16 @@ namespace DotNetCore.CAP.Internal
         {
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
-            var types = Assembly.GetEntryAssembly()!.ExportedTypes;
-            foreach (var type in types)
+            if (_consumingAssembly != null)
             {
-                var typeInfo = type.GetTypeInfo();
-                if (Helper.IsController(typeInfo))
+                var types = _consumingAssembly.ExportedTypes;
+                foreach (var type in types)
                 {
-                    executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                    var typeInfo = type.GetTypeInfo();
+                    if (Helper.IsController(typeInfo))
+                    {
+                        executorDescriptorList.AddRange(GetTopicAttributesDescription(typeInfo));
+                    }
                 }
             }
 

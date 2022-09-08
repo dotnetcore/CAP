@@ -203,6 +203,8 @@ namespace DotNetCore.CAP.Processor
             }
         }
 
+        public void Pulse() { }
+
         public void Dispose()
         {
             if (!_cts.IsCancellationRequested)

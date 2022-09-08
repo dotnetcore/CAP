@@ -29,13 +29,16 @@ namespace Microsoft.Extensions.DependencyInjection
             {
                 throw new ArgumentNullException(nameof(setupAction));
             }
+            //Options and extension service
+            var options = new CapOptions();
+            setupAction(options);
 
             services.AddSingleton(_ => services);
             services.TryAddSingleton<CapMarkerService>();
 
             services.TryAddSingleton<ICapPublisher, CapPublisher>();
 
-            services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
+            services.TryAddSingleton<IConsumerServiceSelector>(x => new ConsumerServiceSelector(x, options.ConsumingAssembly));
             services.TryAddSingleton<ISubscribeInvoker, SubscribeInvoker>();
             services.TryAddSingleton<MethodMatcherCache>();
 
@@ -59,9 +62,7 @@ namespace Microsoft.Extensions.DependencyInjection
             // Warning: IPublishMessageSender need to inject at extension project. 
             services.TryAddSingleton<ISubscribeDispatcher, SubscribeDispatcher>();
 
-            //Options and extension service
-            var options = new CapOptions();
-            setupAction(options);
+            
 
             //Executors
             if (options.UseDispatchingPerGroup)
@@ -79,9 +80,13 @@ namespace Microsoft.Extensions.DependencyInjection
             }
             services.Configure(setupAction);
 
-            //Startup and Hosted 
+            //Startup and Hosted
             services.AddSingleton<Bootstrapper>();
+#if NETSTANDARD2_1_OR_GREATER
             services.AddHostedService(sp => sp.GetRequiredService<Bootstrapper>());
+#else
+            services.AddHostedService<Bootstrapper>();
+#endif
             services.AddSingleton<IBootstrapper>(sp => sp.GetRequiredService<Bootstrapper>());
 
             return new CapBuilder(services);

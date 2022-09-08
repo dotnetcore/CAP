@@ -22,10 +22,7 @@ namespace DotNetCore.CAP.Transport
         /// </summary>
         /// <param name="topicNames">Names of the requested topics</param>
         /// <returns>Topic identifiers</returns>
-        ICollection<string> FetchTopics(IEnumerable<string> topicNames)
-        {
-            return topicNames.ToList();
-        }
+        ICollection<string> FetchTopics(IEnumerable<string> topicNames);
 
         /// <summary>
         /// Subscribe to a set of topics to the message queue

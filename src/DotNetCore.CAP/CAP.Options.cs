@@ -26,9 +26,10 @@ namespace DotNetCore.CAP
             ProducerThreadCount = 1;
             Extensions = new List<ICapOptionsExtension>();
             Version = "v1";
-            DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
+            DefaultGroupName = "cap.queue." + (Assembly.GetEntryAssembly()?.GetName().Name.ToLower() ?? ConsumingAssembly?.GetName().Name.ToLower());
             CollectorCleaningInterval = 300;
             UseDispatchingPerGroup = false;
+            ConsumingAssembly = Assembly.GetEntryAssembly();
         }
 
         internal IList<ICapOptionsExtension> Extensions { get; }
@@ -124,5 +125,11 @@ namespace DotNetCore.CAP
         /// Configure JSON serialization settings
         /// </summary>
         public JsonSerializerOptions JsonSerializerOptions { get; } = new ();
+
+        /// <summary>
+        /// Define the assembly that is calling this (and so will be searched for CAPSubscribers and CAP publishing)
+        /// Defaults to Assembly.EntryAssembly() if not set
+        /// </summary>
+        public Assembly ConsumingAssembly { get; set; }
     }
 }

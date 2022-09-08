@@ -12,7 +12,7 @@ namespace DotNetCore.CAP.Internal
     /// </summary>
     public interface IProcessingServer : IDisposable
     {
-        void Pulse() { }
+        void Pulse();
 
         void Start(CancellationToken stoppingToken);
     }

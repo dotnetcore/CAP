@@ -42,6 +42,11 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public BrokerAddress BrokerAddress => new ("AzureServiceBus", _asbOptions.ConnectionString);
 
+        public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+        {
+            return topicNames.ToList();
+        }
+
         public void Subscribe(IEnumerable<string> topics)
         {
             if (topics == null)
@@ -196,9 +201,10 @@ namespace DotNetCore.CAP.AzureServiceBus
             {
                 foreach (var customHeader in customHeaders)
                 {
-                    var added = headers.TryAdd(customHeader.Key, customHeader.Value);
-
-                    if (!added)
+                    try
+                    {
+                        headers.Add(customHeader.Key, customHeader.Value);
+                    } catch
                     {
                         _logger.LogWarning(
                             "Not possible to add the custom header {Header}. A value with the same key already exists in the Message headers.", 
