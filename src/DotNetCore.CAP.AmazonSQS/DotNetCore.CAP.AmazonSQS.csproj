@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
@@ -12,8 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.2.64" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.7.1.36" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.4.3" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.2.100" />
   </ItemGroup>
 
   <ItemGroup>

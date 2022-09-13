@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
@@ -7,8 +7,8 @@
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Consul" Version="1.6.10.3" />
-		<SupportedPlatform Include="browser" />
+		<PackageReference Include="Consul" Version="1.6.10.7" />
+		<SupportedPlatform Include="browser"></SupportedPlatform>
 	</ItemGroup>
 
 	<ItemGroup>
