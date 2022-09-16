@@ -77,7 +77,11 @@ namespace DotNetCore.CAP.Internal
             var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
 
             var capSubscribeTypeInfo = typeof(ICapSubscribe).GetTypeInfo();
-            var serviceCollection = provider.GetRequiredService<IServiceCollection>();
+
+            using var scope = provider.CreateScope();
+            var scopeProvider = scope.ServiceProvider;
+
+            var serviceCollection = scopeProvider.GetRequiredService<IServiceCollection>();
 
             foreach (var service in serviceCollection
                 .Where(o => o.ImplementationType != null || o.ImplementationFactory != null))
@@ -91,7 +95,7 @@ namespace DotNetCore.CAP.Internal
                 var actualType = service.ImplementationType;
                 if (actualType == null && service.ImplementationFactory != null)
                 {
-                    actualType = provider.GetRequiredService(service.ServiceType).GetType();
+                    actualType = scopeProvider.GetRequiredService(service.ServiceType).GetType();
                 }
 
                 if (actualType == null)
