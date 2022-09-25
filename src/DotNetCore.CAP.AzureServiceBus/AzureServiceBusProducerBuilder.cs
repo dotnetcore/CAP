@@ -32,9 +32,9 @@ public class AzureServiceBusProducerBuilder<T>
         return this;
     }
 
-    public AzureServiceBusProducerBuilder<T> WithSessionEnabled()
+    public AzureServiceBusProducerBuilder<T> WithSessionEnabled(bool enabled = false)
     {
-        EnableSessions = true;
+        EnableSessions = enabled;
         return this;
     }
 
@@ -47,6 +47,6 @@ public class AzureServiceBusProducerBuilder<T>
 
     public AzureServiceBusProducer<T> Build()
     {
-        return new AzureServiceBusProducer<T>(ConnectionString, TopicPath, EnableSessions, RetryPolicy, CustomHeaders);
+        return new AzureServiceBusProducer<T>(TopicPath, EnableSessions, RetryPolicy, CustomHeaders);
     }
 }

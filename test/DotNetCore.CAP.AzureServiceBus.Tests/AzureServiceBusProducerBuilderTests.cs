@@ -14,14 +14,13 @@ public class AzureServiceBusProducerBuilderTests
         var producer = new AzureServiceBusProducerBuilder<MessagePublished>()
             .To("my-destination")
             .WithConnectionString("test")
-            .WithSessionEnabled()
+            .WithSessionEnabled(true)
             .WithRetryPolicy(new NoRetry())
             .WithCustomHeader("test-header", "test-header-value")
             .Build();
 
         producer.ShouldNotBeNull();
         producer.TopicPath.ShouldBe("my-destination");
-        producer.ConnectionString.ShouldBe("test");
         producer.EnableSessions.ShouldBeTrue();
         producer.RetryPolicy.ShouldBeOfType<NoRetry>();
         producer.CustomHeaders.ShouldNotBeNull();
