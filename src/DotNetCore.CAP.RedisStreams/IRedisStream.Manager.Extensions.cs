@@ -66,6 +66,9 @@ namespace DotNetCore.CAP.RedisStreams
                 var groupInfo = await database.StreamGroupInfoAsync(stream);
                 if (groupInfo.Any(g => g.Name == consumerGroup))
                     return;
+                
+                await database.StreamCreateConsumerGroupAsync(stream, consumerGroup, StreamPosition.NewMessages)
+                    .ConfigureAwait(false);
             }
             catch (Exception ex)
             {
