@@ -84,9 +84,9 @@ namespace DotNetCore.CAP.RabbitMQ
         {
             _maxSize = 0;
 
-            while (_pool.TryDequeue(out var context))
+            while (_pool.TryDequeue(out var channel))
             {
-                context.Dispose();
+                channel.Dispose();
             }
             _connection?.Dispose();
         }
@@ -140,16 +140,16 @@ namespace DotNetCore.CAP.RabbitMQ
             return model;
         }
 
-        public virtual bool Return(IModel connection)
+        public virtual bool Return(IModel channel)
         {
-            if (Interlocked.Increment(ref _count) <= _maxSize && connection.IsOpen)
+            if (Interlocked.Increment(ref _count) <= _maxSize && channel.IsOpen)
             {
-                _pool.Enqueue(connection);
+                _pool.Enqueue(channel);
 
                 return true;
             }
 
-            connection.Dispose();
+            channel.Dispose();
 
             Interlocked.Decrement(ref _count);
 
