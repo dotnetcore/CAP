@@ -43,10 +43,10 @@ namespace DotNetCore.CAP.AzureServiceBus
         public IAzureServiceBusProducer CreateProducerForMessage(TransportMessage transportMessage)
             => _asbOptions.Value
                    .CustomProducers
-                   .SingleOrDefault(p => p.MessageType == transportMessage.GetType())
+                   .SingleOrDefault(p => p.MessageTypeName == transportMessage.GetName())
                ??
                new AzureServiceBusProducer(
-                   type: transportMessage.GetType(),
+                   typeName: transportMessage.GetName(),
                    topicPath: _asbOptions.Value.TopicPath,
                    enableSessions: _asbOptions.Value.EnableSessions);
         

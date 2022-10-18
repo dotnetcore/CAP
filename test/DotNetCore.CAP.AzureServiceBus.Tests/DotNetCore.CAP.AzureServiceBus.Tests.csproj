@@ -22,6 +22,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\samples\Sample.AzureServiceBus.InMemory\Sample.AzureServiceBus.InMemory.csproj" />
       <ProjectReference Include="..\..\src\DotNetCore.CAP.AzureServiceBus\DotNetCore.CAP.AzureServiceBus.csproj" />
     </ItemGroup>
 

@@ -1,35 +1,30 @@
 using System;
-using System.Collections.Generic;
-using Microsoft.Azure.ServiceBus;
 
 namespace DotNetCore.CAP.AzureServiceBus.Producer;
 
 public interface IAzureServiceBusProducer : IAzureServiceBusTopicOptions
 {
-    /// <summary>
-    /// Type of the message that will be produced.
-    /// </summary>
-    Type MessageType { get; }
-
-    /// <summary>
-    /// Full name of <see cref="MessageType"/>.
-    /// </summary>
-    string MessageTypeFullName { get; }
+    string MessageTypeName { get; }
 }
 
 public class AzureServiceBusProducer : IAzureServiceBusProducer
 {
     public AzureServiceBusProducer(Type type, string topicPath, bool enableSessions)
     {
-        MessageType = type;
+        MessageTypeName = type.Name;
+        TopicPath = topicPath;
+        EnableSessions = enableSessions;
+    }
+    
+    public AzureServiceBusProducer(string typeName, string topicPath, bool enableSessions)
+    {
+        MessageTypeName = typeName;
         TopicPath = topicPath;
         EnableSessions = enableSessions;
     }
 
     public string TopicPath { get; set; }
-    public Type MessageType { get; }
-    public string MessageTypeFullName => MessageType.FullName;
-    public Func<Message, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
+    public string MessageTypeName { get; }
     public bool EnableSessions { get; set; }
 }
 
