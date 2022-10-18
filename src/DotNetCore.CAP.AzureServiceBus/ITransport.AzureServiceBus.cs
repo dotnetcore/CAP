@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.AzureServiceBus.Producer;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
@@ -16,7 +17,7 @@ using Message = Microsoft.Azure.ServiceBus.Message;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
-    internal class AzureServiceBusTransport : ITransport
+    internal class AzureServiceBusTransport : ITransport, IAzureServiceBusProducerFactory
     {
         private readonly SemaphoreSlim _connectionLock = new(1, 1);
 
@@ -34,11 +35,26 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public BrokerAddress BrokerAddress => new("AzureServiceBus", _asbOptions.Value.ConnectionString);
 
+        /// <summary>
+        /// Gets a custom Producer
+        /// </summary>
+        /// <param name="transportMessage"></param>
+        /// <returns></returns>
+        public IAzureServiceBusProducer CreateProducerForMessage(TransportMessage transportMessage)
+            => _asbOptions.Value
+                   .CustomProducers
+                   .SingleOrDefault(p => p.MessageType == transportMessage.GetType())
+               ??
+               new AzureServiceBusProducer(
+                   type: transportMessage.GetType(),
+                   topicPath: _asbOptions.Value.TopicPath,
+                   enableSessions: _asbOptions.Value.EnableSessions);
+        
         public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {
             try
             {
-                var producer = GetCustomProducerOrDefault(transportMessage);
+                var producer = CreateProducerForMessage(transportMessage);
 
                 var topicClient = GetTopicClientForProducer(producer);
 
@@ -50,7 +66,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                     CorrelationId = transportMessage.GetCorrelationId()
                 };
 
-                if (producer.EnableSessions)
+                if (_asbOptions.Value.EnableSessions)
                 {
                     transportMessage.Headers.TryGetValue(AzureServiceBusHeaders.SessionId, out var sessionId);
                     message.SessionId = string.IsNullOrEmpty(sessionId) ? transportMessage.GetId() : sessionId;
@@ -83,22 +99,6 @@ namespace DotNetCore.CAP.AzureServiceBus
         }
 
         /// <summary>
-        /// Gets a custom Producer
-        /// </summary>
-        /// <param name="transportMessage"></param>
-        /// <returns></returns>
-        private IAzureServiceBusProducer GetCustomProducerOrDefault(TransportMessage transportMessage)
-            => _asbOptions.Value
-                   .CustomProducers
-                   .SingleOrDefault(p => p.MessageType == transportMessage.GetType())
-               ??
-               new AzureServiceBusProducer(
-                   transportMessage.GetType(),
-                   _asbOptions.Value.TopicPath,
-                   _asbOptions.Value.EnableSessions,
-                   RetryPolicy.NoRetry);
-
-        /// <summary>
         /// Gets the Topic Client for the specified producer. If it does not exist, a new one is created and added to the Topic Client dictionary.
         /// </summary>
         /// <param name="producer"></param>
@@ -118,20 +118,13 @@ namespace DotNetCore.CAP.AzureServiceBus
             try
             {
                 topicClient = new TopicClient(
-                    connectionString: BrokerAddress.Endpoint,
-                    entityPath: producer.TopicPath,
-                    retryPolicy: producer.RetryPolicy ?? RetryPolicy.NoRetry);
+                    connectionString: BrokerAddress.Endpoint, 
+                    entityPath: producer.TopicPath);
 
-                if (_topicClients.TryAdd(producer.TopicPath, topicClient))
-                {
-                    _logger.LogInformation("Topic {TopicPath} connection successfully added as a Publish destination.",
-                        topicClient.Path);
-                }
-                else
-                {
-                    _logger.LogError("Error adding Topic {TopicPath} connection as a Publish destination.",
-                        topicClient.Path);
-                }
+                _topicClients.AddOrUpdate(
+                    key: producer.TopicPath,
+                    addValue: topicClient,
+                    updateValueFactory: (_, _) => topicClient);
 
                 return topicClient;
             }

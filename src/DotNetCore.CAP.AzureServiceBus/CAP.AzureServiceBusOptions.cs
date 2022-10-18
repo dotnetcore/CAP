@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using DotNetCore.CAP.AzureServiceBus;
+using DotNetCore.CAP.AzureServiceBus.Producer;
 using Microsoft.Azure.ServiceBus;
 using Microsoft.Azure.ServiceBus.Primitives;
 
@@ -13,7 +14,7 @@ namespace DotNetCore.CAP
     /// <summary>
     /// Provides programmatic configuration for the CAP Azure Service Bus project.
     /// </summary>
-    public class AzureServiceBusOptions
+    public class AzureServiceBusOptions : IAzureServiceBusTopicOptions
     {
         /// <summary>
         /// TopicPath default value for CAP.
@@ -46,9 +47,9 @@ namespace DotNetCore.CAP
         /// </summary>
         public Func<Message, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
 
-        public AzureServiceBusOptions ConfigureCustomProducer<T>(Action<AzureServiceBusProducerBuilder<T>> configuration)
+        public AzureServiceBusOptions ConfigureCustomProducer<T>(Action<AzureServiceBusTopicProducerBuilder<T>> configuration)
         {
-            var builder = new AzureServiceBusProducerBuilder<T>();
+            var builder = new AzureServiceBusTopicProducerBuilder<T>();
             configuration(builder);
             CustomProducers.Add(builder.Build());
 
