@@ -174,11 +174,13 @@ namespace DotNetCore.CAP.Internal
             // Cannot set subscription to asynchronous
             client.OnMessageReceived += (sender, transportMessage) =>
             {
-                _logger.MessageReceived(transportMessage.GetId(), transportMessage.GetName());
+                
 
                 long? tracingTimestamp = null;
                 try
                 {
+                    _logger.MessageReceived(transportMessage.GetId(), transportMessage.GetName());
+
                     tracingTimestamp = TracingBefore(transportMessage, _serverAddress);
 
                     var name = transportMessage.GetName();
