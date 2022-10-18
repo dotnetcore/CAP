@@ -1,17 +1,17 @@
 namespace DotNetCore.CAP.AzureServiceBus.Producer;
 
-public class AzureServiceBusTopicProducerBuilder<T>
+public class AzureServiceBusProducerBuilder<T>
 {
     private string TopicPath { get; set; }
     private bool EnableSessions { get; set; }
 
-    public AzureServiceBusTopicProducerBuilder<T> WithTopic(string topicPath)
+    public AzureServiceBusProducerBuilder<T> WithTopic(string topicPath)
     {
         TopicPath = topicPath;
         return this;
     }
 
-    public AzureServiceBusTopicProducerBuilder<T> WithSessionEnabled(bool enabled = false)
+    public AzureServiceBusProducerBuilder<T> WithSessionEnabled(bool enabled = false)
     {
         EnableSessions = enabled;
         return this;

@@ -47,9 +47,9 @@ namespace DotNetCore.CAP
         /// </summary>
         public Func<Message, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
 
-        public AzureServiceBusOptions ConfigureCustomProducer<T>(Action<AzureServiceBusTopicProducerBuilder<T>> configuration)
+        public AzureServiceBusOptions ConfigureCustomProducer<T>(Action<AzureServiceBusProducerBuilder<T>> configuration)
         {
-            var builder = new AzureServiceBusTopicProducerBuilder<T>();
+            var builder = new AzureServiceBusProducerBuilder<T>();
             configuration(builder);
             CustomProducers.Add(builder.Build());
 
