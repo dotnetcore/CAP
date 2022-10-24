@@ -152,7 +152,7 @@ namespace DotNetCore.CAP.MySql
 
         public IMonitoringApi GetMonitoringApi()
         {
-            return new MySqlMonitoringApi(_options, _initializer);
+            return new MySqlMonitoringApi(_options, _initializer, _serializer);
         }
 
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)

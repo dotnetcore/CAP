@@ -9,6 +9,7 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 
@@ -16,12 +17,14 @@ namespace DotNetCore.CAP.MySql
 {
     internal class MySqlMonitoringApi : IMonitoringApi
     {
+        private readonly ISerializer _serializer;
         private readonly MySqlOptions _options;
         private readonly string _pubName;
         private readonly string _recName;
 
-        public MySqlMonitoringApi(IOptions<MySqlOptions> options, IStorageInitializer initializer)
+        public MySqlMonitoringApi(IOptions<MySqlOptions> options, IStorageInitializer initializer, ISerializer serializer)
         {
+            _serializer = serializer;
             _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
@@ -256,15 +259,16 @@ WHERE `Key` >= @minKey
             var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
 
             await using var connection = new MySqlConnection(_options.ConnectionString);
-            var mediumMessage = await connection.ExecuteReaderAsync(sql, reader =>
+            var mediumMessage = await connection.ExecuteReaderAsync(sql, async reader => 
             {
                 MediumMessage? message = null;
 
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     message = new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
+                        Origin = (await _serializer.DeserializeAsync(reader.GetStream(1)))!,
                         Content = reader.GetString(1),
                         Added = reader.GetDateTime(2),
                         ExpiresAt = reader.GetDateTime(3),
@@ -272,7 +276,7 @@ WHERE `Key` >= @minKey
                     };
                 }
 
-                return Task.FromResult(message);
+                return message;
             });
 
             return mediumMessage;

@@ -154,8 +154,8 @@ namespace DotNetCore.CAP.Dashboard
             foreach (var messageId in messageIds)
             {
                 var message = await MonitoringApi.GetPublishedMessageAsync(messageId);
-                message!.Origin = ServiceProvider.GetRequiredService<ISerializer>().Deserialize(message.Content)!;
-                await ServiceProvider.GetRequiredService<IDispatcher>().EnqueueToPublish(message);
+                if (message != null)
+                    await ServiceProvider.GetRequiredService<IDispatcher>().EnqueueToPublish(message);
             }
 
             _response.StatusCode = StatusCodes.Status204NoContent;
@@ -176,8 +176,8 @@ namespace DotNetCore.CAP.Dashboard
             foreach (var messageId in messageIds)
             {
                 var message = await MonitoringApi.GetReceivedMessageAsync(messageId);
-                message.Origin = ServiceProvider.GetRequiredService<ISerializer>().Deserialize(message.Content);
-                await ServiceProvider.GetRequiredService<ISubscribeDispatcher>().DispatchAsync(message);
+                if (message != null)
+                    await ServiceProvider.GetRequiredService<ISubscribeDispatcher>().DispatchAsync(message);
             }
 
             _response.StatusCode = StatusCodes.Status204NoContent;

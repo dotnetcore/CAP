@@ -20,10 +20,10 @@ namespace DotNetCore.CAP.Serialization
         /// </summary>
         Task<TransportMessage> SerializeAsync(Message message);
 
-        /// <summary>
-        /// Deserialize the given string into a <see cref="Message"/>
-        /// </summary>
-        Message? Deserialize(string json);
+        ///// <summary>
+        ///// Deserialize the given string into a <see cref="Message"/>
+        ///// </summary>
+        //Message? Deserialize(string json);
 
         Task<Message?> DeserializeAsync(Stream utf8Json);
 

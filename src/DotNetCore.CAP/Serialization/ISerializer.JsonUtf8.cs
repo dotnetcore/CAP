@@ -52,10 +52,10 @@ namespace DotNetCore.CAP.Serialization
             return JsonSerializer.Serialize(message, _jsonSerializerOptions);
         }
 
-        public Message? Deserialize(string json)
-        {
-            return JsonSerializer.Deserialize<Message>(json, _jsonSerializerOptions);
-        }
+        //public Message? Deserialize(string json)
+        //{
+        //    return JsonSerializer.Deserialize<Message>(json, _jsonSerializerOptions);
+        //}
 
         public async Task<Message?> DeserializeAsync(Stream utf8Json)
         {
