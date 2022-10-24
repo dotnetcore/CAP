@@ -3,16 +3,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace DotNetCore.CAP.Messages
 {
+
     /// <summary>
-    /// Message content field
+    /// Represents message entry
     /// </summary>
-    [Serializable]
-    public class TransportMessage
+    [StructLayout(LayoutKind.Auto)]
+    public readonly struct TransportMessage
     {
-        public TransportMessage(IDictionary<string, string?> headers, byte[]? body)
+        public TransportMessage(IDictionary<string, string?> headers, ReadOnlyMemory<byte> body)
         {
             Headers = headers ?? throw new ArgumentNullException(nameof(headers));
             Body = body;
@@ -26,7 +28,7 @@ namespace DotNetCore.CAP.Messages
         /// <summary>
         /// Gets the body object of this message
         /// </summary>
-        public byte[]? Body { get; }
+        public ReadOnlyMemory<byte> Body { get; }
 
         public string GetId()
         {
@@ -42,7 +44,7 @@ namespace DotNetCore.CAP.Messages
         {
             return Headers.TryGetValue(Messages.Headers.Group, out var value) ? value : null;
         }
-        
+
         public string? GetCorrelationId()
         {
             return Headers.TryGetValue(Messages.Headers.CorrelationId, out var value) ? value : null;

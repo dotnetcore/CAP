@@ -44,7 +44,7 @@ namespace DotNetCore.CAP.Kafka
                 {
                     Headers = headers,
                     Key = message.Headers.TryGetValue(KafkaHeaders.KafkaKey, out string? kafkaMessageKey) && !string.IsNullOrEmpty(kafkaMessageKey) ? kafkaMessageKey : message.GetId(),
-                    Value = message.Body!
+                    Value = message.Body.ToArray()!
                 });
 
                 if (result.Status == PersistenceStatus.Persisted || result.Status == PersistenceStatus.PossiblyPersisted)

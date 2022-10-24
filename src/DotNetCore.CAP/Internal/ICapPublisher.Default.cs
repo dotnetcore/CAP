@@ -84,7 +84,7 @@ namespace DotNetCore.CAP.Internal
             headers.Add(Headers.MessageName, name);
             headers.Add(Headers.Type, typeof(T).Name);
             headers.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
-
+            
             var message = new Message(headers, value);
 
             long? tracingTimestamp = null;

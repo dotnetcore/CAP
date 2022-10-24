@@ -211,9 +211,9 @@ namespace DotNetCore.CAP.Internal
                         string? dataUri;
                         if (transportMessage.Headers.TryGetValue(Headers.Type, out var val))
                         {
-                            if (transportMessage.Body != null)
+                            if (transportMessage.Body.Length != 0)
                             {
-                                dataUri = $"data:{val};base64," + Convert.ToBase64String(transportMessage.Body);
+                                dataUri = $"data:{val};base64," + Convert.ToBase64String(transportMessage.Body.Span);
                             }
                             else
                             {
@@ -223,9 +223,9 @@ namespace DotNetCore.CAP.Internal
                         }
                         else
                         {
-                            if (transportMessage.Body != null)
+                            if (transportMessage.Body.Length != 0)
                             {
-                                dataUri = "data:UnknownType;base64," + Convert.ToBase64String(transportMessage.Body);
+                                dataUri = "data:UnknownType;base64," + Convert.ToBase64String(transportMessage.Body.Span);
                             }
                             else
                             {

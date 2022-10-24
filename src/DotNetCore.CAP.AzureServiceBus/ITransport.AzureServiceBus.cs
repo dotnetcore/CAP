@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                 var message = new Microsoft.Azure.ServiceBus.Message
                 {
                     MessageId = transportMessage.GetId(),
-                    Body = transportMessage.Body,
+                    Body = transportMessage.Body.ToArray(),
                     Label = transportMessage.GetName(),
                     CorrelationId = transportMessage.GetCorrelationId()
                 };

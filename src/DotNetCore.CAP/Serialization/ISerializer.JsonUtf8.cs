@@ -36,12 +36,12 @@ namespace DotNetCore.CAP.Serialization
 
         public Task<Message> DeserializeAsync(TransportMessage transportMessage, Type? valueType)
         {
-            if (valueType == null || transportMessage.Body == null || transportMessage.Body.Length == 0)
+            if (valueType == null ||  transportMessage.Body.Length == 0)
             {
                 return Task.FromResult(new Message(transportMessage.Headers, null));
             }
-
-            var obj = JsonSerializer.Deserialize(transportMessage.Body, valueType, _jsonSerializerOptions);
+            
+            var obj = JsonSerializer.Deserialize(transportMessage.Body.Span, valueType, _jsonSerializerOptions);
 
             return Task.FromResult(new Message(transportMessage.Headers, obj));
         }

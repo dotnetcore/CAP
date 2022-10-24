@@ -34,7 +34,7 @@ namespace DotNetCore.CAP.NATS
 
             try
             {
-                var msg = new Msg(message.GetName(), message.Body);
+                var msg = new Msg(message.GetName(), message.Body.ToArray());
                 foreach (var header in message.Headers)
                 {
                     msg.Header[header.Key] = header.Value;

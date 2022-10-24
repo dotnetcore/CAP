@@ -42,9 +42,9 @@ namespace DotNetCore.CAP.AmazonSQS
                 if (TryGetOrCreateTopicArn(message.GetName().NormalizeForAws(), out var arn))
                 {
                     string? bodyJson = null;
-                    if (message.Body != null)
+                    if (message.Body.Length > 0)
                     {
-                        bodyJson = Encoding.UTF8.GetString(message.Body);
+                        bodyJson = Encoding.UTF8.GetString(message.Body.Span);
                     }
 
                     var attributes = message.Headers.Where(x => x.Value != null).ToDictionary(x => x.Key,
@@ -53,7 +53,7 @@ namespace DotNetCore.CAP.AmazonSQS
                             StringValue = x.Value,
                             DataType = "String"
                         });
-                    
+
                     var request = new PublishRequest(arn, bodyJson)
                     {
                         MessageAttributes = attributes
@@ -116,7 +116,7 @@ namespace DotNetCore.CAP.AmazonSQS
                 if (_topicArnMaps == null)
                 {
                     _topicArnMaps = new Dictionary<string, string>();
-                    
+
                     string? nextToken = null;
                     do
                     {
@@ -142,8 +142,8 @@ namespace DotNetCore.CAP.AmazonSQS
                 _semaphore.Release();
             }
         }
-        
-        private bool TryGetOrCreateTopicArn(string topicName,[System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? topicArn)
+
+        private bool TryGetOrCreateTopicArn(string topicName, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? topicArn)
         {
             topicArn = null;
             if (_topicArnMaps!.TryGetValue(topicName, out topicArn))
@@ -157,9 +157,9 @@ namespace DotNetCore.CAP.AmazonSQS
             {
                 return false;
             }
-            
+
             topicArn = response.TopicArn;
-            
+
             _topicArnMaps.Add(topicName, topicArn);
             return true;
         }
