@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.Dashboard
         [HttpGet("/stats")]
         public async Task Stats()
         {
-            var result = MonitoringApi.GetStatistics();
+            var result = await MonitoringApi.GetStatistics();
             SetServersCount(result);
             await _response.WriteAsJsonAsync(result);
 
@@ -73,12 +73,12 @@ namespace DotNetCore.CAP.Dashboard
                 return;
             }
 
-            var ps = MonitoringApi.HourlySucceededJobs(MessageType.Publish);
-            var pf = MonitoringApi.HourlyFailedJobs(MessageType.Publish);
-            var ss = MonitoringApi.HourlySucceededJobs(MessageType.Subscribe);
-            var sf = MonitoringApi.HourlyFailedJobs(MessageType.Subscribe);
+            var ps = await MonitoringApi.HourlySucceededJobs(MessageType.Publish);
+            var pf = await MonitoringApi.HourlyFailedJobs(MessageType.Publish);
+            var ss = await MonitoringApi.HourlySucceededJobs(MessageType.Subscribe);
+            var sf = await MonitoringApi.HourlyFailedJobs(MessageType.Subscribe);
 
-            var dayHour = ps.Keys.Select(x => x.ToString("MM-dd HH:00")).ToList(); 
+            var dayHour = ps.Keys.Select(x => x.ToString("MM-dd HH:00")).ToList();
 
             var result = new
             {
@@ -154,8 +154,8 @@ namespace DotNetCore.CAP.Dashboard
             foreach (var messageId in messageIds)
             {
                 var message = await MonitoringApi.GetPublishedMessageAsync(messageId);
-                message.Origin = ServiceProvider.GetRequiredService<ISerializer>().Deserialize(message.Content);
-                ServiceProvider.GetRequiredService<IDispatcher>().EnqueueToPublish(message);
+                message!.Origin = ServiceProvider.GetRequiredService<ISerializer>().Deserialize(message.Content)!;
+                await ServiceProvider.GetRequiredService<IDispatcher>().EnqueueToPublish(message);
             }
 
             _response.StatusCode = StatusCodes.Status204NoContent;
@@ -203,7 +203,7 @@ namespace DotNetCore.CAP.Dashboard
                 PageSize = pageSize
             };
 
-            var result = MonitoringApi.Messages(queryDto);
+            var result = await MonitoringApi.Messages(queryDto);
 
             await _response.WriteAsJsonAsync(result);
         }
@@ -230,7 +230,7 @@ namespace DotNetCore.CAP.Dashboard
                 PageSize = pageSize
             };
 
-            var result = MonitoringApi.Messages(queryDto);
+            var result = await MonitoringApi.Messages(queryDto);
 
             await _response.WriteAsJsonAsync(result);
         }

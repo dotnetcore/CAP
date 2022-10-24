@@ -70,13 +70,13 @@ namespace DotNetCore.CAP.Processor
             _logger.LogInformation("Starting default Dispatcher");
         }
 
-        public void EnqueueToPublish(MediumMessage message)
+        public async Task EnqueueToPublish(MediumMessage message)
         {
             try
             {
                 if (!_publishedChannel.Writer.TryWrite(message))
                 {
-                    while (_publishedChannel.Writer.WaitToWriteAsync(_cts.Token).AsTask().ConfigureAwait(false).GetAwaiter().GetResult())
+                    while (await _publishedChannel.Writer.WaitToWriteAsync(_cts.Token).ConfigureAwait(false))
                     {
                         if (_publishedChannel.Writer.TryWrite(message))
                         {
@@ -91,13 +91,13 @@ namespace DotNetCore.CAP.Processor
             }
         }
 
-        public void EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
+        public async Task EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
         {
             try
             {
                 if (!_receivedChannel.Writer.TryWrite((message, descriptor)))
                 {
-                    while (_receivedChannel.Writer.WaitToWriteAsync(_cts.Token).AsTask().ConfigureAwait(false).GetAwaiter().GetResult())
+                    while (await _receivedChannel.Writer.WaitToWriteAsync(_cts.Token).ConfigureAwait(false))
                     {
                         if (_receivedChannel.Writer.TryWrite((message, descriptor)))
                         {
@@ -122,11 +122,10 @@ namespace DotNetCore.CAP.Processor
                     {
                         try
                         {
-                            var result = await _sender.SendAsync(message);
+                            var result = await _sender.SendAsync(message).ConfigureAwait(false);
                             if (!result.Succeeded)
                             {
-                                _logger.MessagePublishException(message.Origin?.GetId(), result.ToString(),
-                                    result.Exception);
+                                _logger.MessagePublishException(message.Origin?.GetId(), result.ToString(), result.Exception);
                             }
                         }
                         catch (Exception ex)
@@ -153,7 +152,7 @@ namespace DotNetCore.CAP.Processor
                     {
                         try
                         {
-                            await _executor.DispatchAsync(message.Item1, message.Item2, cancellationToken);
+                            await _executor.DispatchAsync(message.Item1, message.Item2, cancellationToken).ConfigureAwait(false);
                         }
                         catch (OperationCanceledException)
                         {

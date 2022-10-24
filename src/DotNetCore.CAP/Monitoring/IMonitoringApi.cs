@@ -15,20 +15,20 @@ namespace DotNetCore.CAP.Monitoring
 
         Task<MediumMessage?> GetReceivedMessageAsync(long id);
 
-        StatisticsDto GetStatistics();
+        Task<StatisticsDto> GetStatistics();
 
-        PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto);
+        Task<PagedQueryResult<MessageDto>> Messages(MessageQueryDto queryDto);
 
-        int PublishedFailedCount();
+        ValueTask<int> PublishedFailedCount();
 
-        int PublishedSucceededCount();
+        ValueTask<int> PublishedSucceededCount();
 
-        int ReceivedFailedCount();
+        ValueTask<int> ReceivedFailedCount();
 
-        int ReceivedSucceededCount();
+        ValueTask<int> ReceivedSucceededCount();
 
-        IDictionary<DateTime, int> HourlySucceededJobs(MessageType type);
+        Task<IDictionary<DateTime, int>> HourlySucceededJobs(MessageType type);
 
-        IDictionary<DateTime, int> HourlyFailedJobs(MessageType type);
+        Task<IDictionary<DateTime, int>> HourlyFailedJobs(MessageType type);
     }
 }

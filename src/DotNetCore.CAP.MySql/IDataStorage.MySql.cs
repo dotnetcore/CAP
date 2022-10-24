@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.MySql
         public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state) =>
             await ChangeMessageStateAsync(_recName, message, state);
 
-        public MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null)
+        public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object? dbTransaction = null)
         {
             var sql = $"INSERT INTO `{_pubName}`(`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)" +
                       $" VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
@@ -74,25 +74,25 @@ namespace DotNetCore.CAP.MySql
 
             if (dbTransaction == null)
             {
-                using var connection = new MySqlConnection(_options.Value.ConnectionString);
-                connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+                await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+                await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams);
             }
             else
             {
-                var dbTrans = dbTransaction as IDbTransaction;
+                var dbTrans = dbTransaction as DbTransaction;
                 if (dbTrans == null && dbTransaction is IDbContextTransaction dbContextTrans)
                 {
                     dbTrans = dbContextTrans.GetDbTransaction();
                 }
 
                 var conn = dbTrans!.Connection!;
-                conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
+                await conn.ExecuteNonQueryAsync(sql, dbTrans, sqlParams);
             }
 
             return message;
         }
 
-        public void StoreReceivedExceptionMessage(string name, string group, string content)
+        public async Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
         {
             object[] sqlParams =
             {
@@ -106,10 +106,10 @@ namespace DotNetCore.CAP.MySql
                 new MySqlParameter("@StatusName", nameof(StatusName.Failed))
             };
 
-            StoreReceivedMessage(sqlParams);
+            await StoreReceivedMessage(sqlParams);
         }
 
-        public MediumMessage StoreReceivedMessage(string name, string group, Message message)
+        public async Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message message)
         {
             var mdMessage = new MediumMessage
             {
@@ -132,14 +132,14 @@ namespace DotNetCore.CAP.MySql
                 new MySqlParameter("@StatusName", nameof(StatusName.Scheduled))
             };
 
-            StoreReceivedMessage(sqlParams);
+            await StoreReceivedMessage(sqlParams);
             return mdMessage;
         }
 
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default)
         {
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
-            return connection.ExecuteNonQuery(
+            return await connection.ExecuteNonQueryAsync(
                 $@"DELETE FROM `{table}` WHERE ExpiresAt < @timeout limit @batchCount;", null,
                 new MySqlParameter("@timeout", timeout), new MySqlParameter("@batchCount", batchCount));
         }
@@ -170,16 +170,16 @@ namespace DotNetCore.CAP.MySql
             };
 
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
-            connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams);
         }
 
-        private void StoreReceivedMessage(object[] sqlParams)
+        private async Task StoreReceivedMessage(object[] sqlParams)
         {
             var sql = $@"INSERT INTO `{_recName}`(`Id`,`Version`,`Name`,`Group`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`) " +
                       $"VALUES(@Id,'{_options.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
-            using var connection = new MySqlConnection(_options.Value.ConnectionString);
-            connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+            await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams);
         }
 
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
@@ -197,15 +197,15 @@ namespace DotNetCore.CAP.MySql
             };
 
             await using var connection = new MySqlConnection(_options.Value.ConnectionString);
-            var result = connection.ExecuteReader(sql, reader =>
+            var result = await connection.ExecuteReaderAsync(sql, async reader =>
             {
                 var messages = new List<MediumMessage>();
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     messages.Add(new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
-                        Origin = _serializer.Deserialize(reader.GetString(1))!,
+                        Origin = (await _serializer.DeserializeAsync(reader.GetStream(1)))!,
                         Retries = reader.GetInt32(2),
                         Added = reader.GetDateTime(3)
                     });

@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
@@ -54,6 +55,11 @@ namespace DotNetCore.CAP.Serialization
         public Message? Deserialize(string json)
         {
             return JsonSerializer.Deserialize<Message>(json, _jsonSerializerOptions);
+        }
+
+        public async Task<Message?> DeserializeAsync(Stream utf8Json)
+        {
+            return await JsonSerializer.DeserializeAsync<Message?>(utf8Json, _jsonSerializerOptions);
         }
 
         public object? Deserialize(object value, Type valueType)

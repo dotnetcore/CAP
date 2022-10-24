@@ -14,14 +14,13 @@ namespace DotNetCore.CAP.Persistence
 
         Task ChangeReceiveStateAsync(MediumMessage message, StatusName state);
 
-        MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null);
+        Task<MediumMessage> StoreMessageAsync(string name, Message content, object? dbTransaction = null);
 
-        void StoreReceivedExceptionMessage(string name, string group, string content);
+        Task StoreReceivedExceptionMessageAsync(string name, string group, string content);
 
-        MediumMessage StoreReceivedMessage(string name, string group, Message content);
+        Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message content);
 
-        Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
-            CancellationToken token = default);
+        Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default);
 
         Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry();
 

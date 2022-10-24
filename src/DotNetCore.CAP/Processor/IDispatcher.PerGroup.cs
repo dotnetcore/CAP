@@ -64,13 +64,13 @@ namespace DotNetCore.CAP.Processor
             _logger.LogInformation("Starting DispatcherPerGroup");
         }
 
-        public void EnqueueToPublish(MediumMessage message)
+        public async Task EnqueueToPublish(MediumMessage message)
         {
             try
             {
                 if (!_publishedChannel.Writer.TryWrite(message))
                 {
-                    while (_publishedChannel.Writer.WaitToWriteAsync(_cts.Token).AsTask().ConfigureAwait(false).GetAwaiter().GetResult())
+                    while ( await _publishedChannel.Writer.WaitToWriteAsync(_cts.Token))
                     {
                         if (_publishedChannel.Writer.TryWrite(message))
                         {
@@ -85,7 +85,7 @@ namespace DotNetCore.CAP.Processor
             }
         }
 
-        public void EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
+        public async Task EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
         {
             try
             {
@@ -100,7 +100,7 @@ namespace DotNetCore.CAP.Processor
 
                 if (!channel.Writer.TryWrite((message, descriptor)))
                 {
-                    while (channel.Writer.WaitToWriteAsync(_cts.Token).AsTask().ConfigureAwait(false).GetAwaiter().GetResult())
+                    while (await channel.Writer.WaitToWriteAsync(_cts.Token))
                     {
                         if (channel.Writer.TryWrite((message, descriptor)))
                         {

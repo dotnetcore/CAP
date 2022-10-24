@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.MySql
             _recName = initializer.GetReceivedTableName();
         }
 
-        public StatisticsDto GetStatistics()
+        public async Task<StatisticsDto> GetStatistics()
         {
             var sql = $@"
 SELECT
@@ -45,7 +45,7 @@ SELECT
 ) AS ReceivedFailed;";
 
             using var connection = new MySqlConnection(_options.ConnectionString);
-            var statistics = connection.ExecuteReader(sql, reader =>
+            var statistics = await connection.ExecuteReaderAsync(sql, reader =>
             {
                 var statisticsDto = new StatisticsDto();
 
@@ -57,25 +57,25 @@ SELECT
                     statisticsDto.ReceivedFailed = reader.GetInt32(3);
                 }
 
-                return statisticsDto;
+                return Task.FromResult( statisticsDto);
             });
 
             return statistics;
         }
 
-        public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
+        public async Task<IDictionary<DateTime, int>> HourlyFailedJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return GetHourlyTimelineStats(tableName, nameof(StatusName.Failed));
+            return await GetHourlyTimelineStats(tableName, nameof(StatusName.Failed));
         }
 
-        public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
+        public async Task<IDictionary<DateTime, int>> HourlySucceededJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded));
+            return await GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded));
         }
 
-        public PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto)
+        public async Task<PagedQueryResult<MessageDto>> Messages(MessageQueryDto queryDto)
         {
             var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
             var where = string.Empty;
@@ -112,15 +112,15 @@ SELECT
                 new MySqlParameter("@Limit", queryDto.PageSize)
             };
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
+            await using var connection = new MySqlConnection(_options.ConnectionString);
 
-            var count = connection.ExecuteScalar<int>($"select count(1) from `{tableName}` where 1=1 {where}",
+            var count = await connection.ExecuteScalarAsync<int>($"select count(1) from `{tableName}` where 1=1 {where}",
                 new MySqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
                 new MySqlParameter("@Group", queryDto.Group ?? string.Empty),
                 new MySqlParameter("@Name", queryDto.Name ?? string.Empty),
                 new MySqlParameter("@Content", $"%{queryDto.Content}%"));
 
-            var items = connection.ExecuteReader(sqlQuery, reader =>
+            var items = await connection.ExecuteReaderAsync(sqlQuery, reader =>
             {
                 var messages = new List<MessageDto>();
 
@@ -141,40 +141,40 @@ SELECT
                     });
                 }
 
-                return messages;
+                return Task.FromResult(messages);
             }, sqlParams);
 
             return new PagedQueryResult<MessageDto> { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
         }
 
-        public int PublishedFailedCount()
+        public ValueTask<int> PublishedFailedCount()
         {
             return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));
         }
 
-        public int PublishedSucceededCount()
+        public ValueTask<int> PublishedSucceededCount()
         {
             return GetNumberOfMessage(_pubName, nameof(StatusName.Succeeded));
         }
 
-        public int ReceivedFailedCount()
+        public ValueTask<int> ReceivedFailedCount()
         {
             return GetNumberOfMessage(_recName, nameof(StatusName.Failed));
         }
 
-        public int ReceivedSucceededCount()
+        public ValueTask<int> ReceivedSucceededCount()
         {
             return GetNumberOfMessage(_recName, nameof(StatusName.Succeeded));
         }
 
-        private int GetNumberOfMessage(string tableName, string statusName)
+        private async ValueTask<int> GetNumberOfMessage(string tableName, string statusName)
         {
             var sqlQuery = $"select count(Id) from `{tableName}` where StatusName = @state";
-            using var connection = new MySqlConnection(_options.ConnectionString);
-            return connection.ExecuteScalar<int>(sqlQuery, new MySqlParameter("@state", statusName));
+            await using var connection = new MySqlConnection(_options.ConnectionString);
+            return await connection.ExecuteScalarAsync<int>(sqlQuery, new MySqlParameter("@state", statusName));
         }
 
-        private Dictionary<DateTime, int> GetHourlyTimelineStats(string tableName, string statusName)
+        private Task<Dictionary<DateTime, int>> GetHourlyTimelineStats(string tableName, string statusName)
         {
             var endDate = DateTime.Now;
             var dates = new List<DateTime>();
@@ -189,7 +189,7 @@ SELECT
             return GetTimelineStats(tableName, statusName, keyMaps);
         }
 
-        private Dictionary<DateTime, int> GetTimelineStats(
+        private async Task<Dictionary<DateTime, int>> GetTimelineStats(
             string tableName,
             string statusName,
             IDictionary<string, DateTime> keyMaps)
@@ -214,9 +214,9 @@ WHERE `Key` >= @minKey
             };
 
             Dictionary<string, int> valuesMap;
-            using (var connection = new MySqlConnection(_options.ConnectionString))
+            await using (var connection = new MySqlConnection(_options.ConnectionString))
             {
-                valuesMap = connection.ExecuteReader(sqlQuery, reader =>
+                valuesMap = await connection.ExecuteReaderAsync(sqlQuery, reader =>
                 {
                     var dictionary = new Dictionary<string, int>();
 
@@ -225,7 +225,7 @@ WHERE `Key` >= @minKey
                         dictionary.Add(reader.GetString(0), reader.GetInt32(1));
                     }
 
-                    return dictionary;
+                    return Task.FromResult(dictionary);
                 }, sqlParams);
             }
 
@@ -256,7 +256,7 @@ WHERE `Key` >= @minKey
             var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
 
             await using var connection = new MySqlConnection(_options.ConnectionString);
-            var mediumMessage = connection.ExecuteReader(sql, reader =>
+            var mediumMessage = await connection.ExecuteReaderAsync(sql, reader =>
             {
                 MediumMessage? message = null;
 
@@ -272,7 +272,7 @@ WHERE `Key` >= @minKey
                     };
                 }
 
-                return message;
+                return Task.FromResult(message);
             });
 
             return mediumMessage;

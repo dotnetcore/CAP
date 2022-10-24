@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.IO;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 
@@ -23,6 +24,8 @@ namespace DotNetCore.CAP.Serialization
         /// Deserialize the given string into a <see cref="Message"/>
         /// </summary>
         Message? Deserialize(string json);
+
+        Task<Message?> DeserializeAsync(Stream utf8Json);
 
         /// <summary>
         /// Deserialize the given <see cref="TransportMessage"/> back into a <see cref="Message"/>

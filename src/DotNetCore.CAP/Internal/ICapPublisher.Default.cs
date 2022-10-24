@@ -37,28 +37,7 @@ namespace DotNetCore.CAP.Internal
 
         public AsyncLocal<ICapTransaction> Transaction { get; }
 
-        public Task PublishAsync<T>(string name, T? value, IDictionary<string, string?> headers, CancellationToken cancellationToken = default)
-        {
-            return Task.Run(() => Publish(name, value, headers), cancellationToken);
-        }
-
-        public Task PublishAsync<T>(string name, T? value, string? callbackName = null,
-            CancellationToken cancellationToken = default)
-        {
-            return Task.Run(() => Publish(name, value, callbackName), cancellationToken);
-        }
-
-        public void Publish<T>(string name, T? value, string? callbackName = null)
-        {
-            var header = new Dictionary<string, string?>
-            {
-                {Headers.CallbackName, callbackName}
-            };
-
-            Publish(name, value, header);
-        }
-
-        public void Publish<T>(string name, T? value, IDictionary<string, string?> headers)
+        public async Task PublishAsync<T>(string name, T? value, IDictionary<string, string?> headers, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrEmpty(name))
             {
@@ -84,7 +63,7 @@ namespace DotNetCore.CAP.Internal
             headers.Add(Headers.MessageName, name);
             headers.Add(Headers.Type, typeof(T).Name);
             headers.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
-            
+
             var message = new Message(headers, value);
 
             long? tracingTimestamp = null;
@@ -94,17 +73,17 @@ namespace DotNetCore.CAP.Internal
 
                 if (Transaction.Value?.DbTransaction == null)
                 {
-                    var mediumMessage = _storage.StoreMessage(name, message);
+                    var mediumMessage = await _storage.StoreMessageAsync(name, message);
 
                     TracingAfter(tracingTimestamp, message);
 
-                    _dispatcher.EnqueueToPublish(mediumMessage);
+                    await _dispatcher.EnqueueToPublish(mediumMessage);
                 }
                 else
                 {
                     var transaction = (CapTransactionBase)Transaction.Value;
 
-                    var mediumMessage = _storage.StoreMessage(name, message, transaction.DbTransaction);
+                    var mediumMessage = await _storage.StoreMessageAsync(name, message, transaction.DbTransaction);
 
                     TracingAfter(tracingTimestamp, message);
 
@@ -112,7 +91,7 @@ namespace DotNetCore.CAP.Internal
 
                     if (transaction.AutoCommit)
                     {
-                        transaction.Commit();
+                        await transaction.CommitAsync(cancellationToken);
                     }
                 }
             }
@@ -122,6 +101,31 @@ namespace DotNetCore.CAP.Internal
 
                 throw;
             }
+
+        }
+
+        public async Task PublishAsync<T>(string name, T? value, string? callbackName = null, CancellationToken cancellationToken = default)
+        {
+            var headers = new Dictionary<string, string?>
+            {
+                {Headers.CallbackName, callbackName}
+            };
+            await PublishAsync(name, value, headers, cancellationToken).ConfigureAwait(false);
+        }
+
+        public void Publish<T>(string name, T? value, string? callbackName = null)
+        {
+            var header = new Dictionary<string, string?>
+            {
+                {Headers.CallbackName, callbackName}
+            };
+
+            PublishAsync(name, value, header).ConfigureAwait(false);
+        }
+
+        public void Publish<T>(string name, T? value, IDictionary<string, string?> headers)
+        {
+            PublishAsync(name, value, headers).ConfigureAwait(false);
         }
 
         #region tracing

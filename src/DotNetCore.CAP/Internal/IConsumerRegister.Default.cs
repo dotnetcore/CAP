@@ -174,8 +174,6 @@ namespace DotNetCore.CAP.Internal
             // Cannot set subscription to asynchronous
             client.OnMessageReceived += (sender, transportMessage) =>
             {
-                
-
                 long? tracingTimestamp = null;
                 try
                 {
@@ -239,7 +237,7 @@ namespace DotNetCore.CAP.Internal
                     {
                         var content = _serializer.Serialize(message);
 
-                        _storage.StoreReceivedExceptionMessage(name, group, content);
+                        _storage.StoreReceivedExceptionMessageAsync(name, group, content);
 
                         client.Commit(sender);
 
@@ -263,7 +261,7 @@ namespace DotNetCore.CAP.Internal
                     }
                     else
                     {
-                        var mediumMessage = _storage.StoreReceivedMessage(name, group, message);
+                        var mediumMessage = _storage.StoreReceivedMessageAsync(name, group, message).GetAwaiter().GetResult();
                         mediumMessage.Origin = message;
 
                         client.Commit(sender);

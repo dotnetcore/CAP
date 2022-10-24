@@ -71,7 +71,7 @@ namespace DotNetCore.CAP.Internal
             //Check whether the compared objects reference the same data.
             if (ReferenceEquals(x, y))
             {
-                _logger.ConsumerDuplicates(x.TopicName,x.Attribute.Group);
+                _logger.ConsumerDuplicates(x!.TopicName,x.Attribute.Group);
                 return true;
             }
 
