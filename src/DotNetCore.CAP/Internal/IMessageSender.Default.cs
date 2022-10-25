@@ -65,11 +65,11 @@ namespace DotNetCore.CAP.Internal
 
             var tracingTimestamp = TracingBefore(transportMsg, _transport.BrokerAddress);
 
-            var result = await _transport.SendAsync(transportMsg);
+            var result = await _transport.SendAsync(transportMsg).ConfigureAwait(false);
 
             if (result.Succeeded)
             {
-                await SetSuccessfulState(message);
+                await SetSuccessfulState(message).ConfigureAwait(false);
 
                 TracingAfter(tracingTimestamp, transportMsg, _transport.BrokerAddress);
 

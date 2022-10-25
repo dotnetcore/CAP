@@ -73,7 +73,7 @@ namespace DotNetCore.CAP.Internal
 
                 if (Transaction.Value?.DbTransaction == null)
                 {
-                    var mediumMessage = await _storage.StoreMessageAsync(name, message);
+                    var mediumMessage = await _storage.StoreMessageAsync(name, message).ConfigureAwait(false);
 
                     TracingAfter(tracingTimestamp, message);
 
@@ -83,7 +83,7 @@ namespace DotNetCore.CAP.Internal
                 {
                     var transaction = (CapTransactionBase)Transaction.Value;
 
-                    var mediumMessage = await _storage.StoreMessageAsync(name, message, transaction.DbTransaction);
+                    var mediumMessage = await _storage.StoreMessageAsync(name, message, transaction.DbTransaction).ConfigureAwait(false);
 
                     TracingAfter(tracingTimestamp, message);
 

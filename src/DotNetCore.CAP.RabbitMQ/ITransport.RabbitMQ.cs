@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 channel = _connectionChannelPool.Rent();
 
-                channel.ConfirmSelect();
+                //channel.ConfirmSelect();
 
                 var props = channel.CreateBasicProperties();
                 props.DeliveryMode = 2;
@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
                 channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
 
-                channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
+                //channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
 
                 _logger.LogInformation("CAP message '{0}' published, internal id '{1}'", message.GetName(), message.GetId());
 
