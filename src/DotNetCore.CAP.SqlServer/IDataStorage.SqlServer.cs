@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
@@ -46,7 +47,7 @@ namespace DotNetCore.CAP.SqlServer
         public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state) =>
             await ChangeMessageStateAsync(_recName, message, state);
 
-        public MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null)
+        public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object? dbTransaction = null)
         {
             var sql = $"INSERT INTO {_pubName} ([Id],[Version],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
                       $"VALUES(@Id,'{_options.Value.Version}',@Name,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
@@ -74,23 +75,23 @@ namespace DotNetCore.CAP.SqlServer
 
             if (dbTransaction == null)
             {
-                using var connection = new SqlConnection(_options.Value.ConnectionString);
-                connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+                await using var connection = new SqlConnection(_options.Value.ConnectionString);
+                await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams);
             }
             else
             {
-                var dbTrans = dbTransaction as IDbTransaction;
+                var dbTrans = dbTransaction as DbTransaction;
                 if (dbTrans == null && dbTransaction is IDbContextTransaction dbContextTrans)
                     dbTrans = dbContextTrans.GetDbTransaction();
 
                 var conn = dbTrans?.Connection;
-                conn!.ExecuteNonQuery(sql, dbTrans, sqlParams);
+                await conn!.ExecuteNonQueryAsync(sql, dbTrans, sqlParams);
             }
 
             return message;
         }
 
-        public void StoreReceivedExceptionMessage(string name, string group, string content)
+        public async Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
         {
             object[] sqlParams =
             {
@@ -104,10 +105,10 @@ namespace DotNetCore.CAP.SqlServer
                 new SqlParameter("@StatusName", nameof(StatusName.Failed))
             };
 
-            StoreReceivedMessage(sqlParams);
+            await StoreReceivedMessage(sqlParams);
         }
 
-        public MediumMessage StoreReceivedMessage(string name, string group, Message message)
+        public async Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message message)
         {
             var mdMessage = new MediumMessage
             {
@@ -130,7 +131,8 @@ namespace DotNetCore.CAP.SqlServer
                 new SqlParameter("@StatusName", nameof(StatusName.Scheduled))
             };
 
-            StoreReceivedMessage(sqlParams);
+            await StoreReceivedMessage(sqlParams);
+
             return mdMessage;
         }
 
@@ -138,7 +140,7 @@ namespace DotNetCore.CAP.SqlServer
             CancellationToken token = default)
         {
             await using var connection = new SqlConnection(_options.Value.ConnectionString);
-            return connection.ExecuteNonQuery(
+            return await connection.ExecuteNonQueryAsync(
                 $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout;", null,
                 new SqlParameter("@timeout", timeout), new SqlParameter("@batchCount", batchCount));
         }
@@ -169,17 +171,17 @@ namespace DotNetCore.CAP.SqlServer
             };
 
             await using var connection = new SqlConnection(_options.Value.ConnectionString);
-            connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams);
         }
 
-        private void StoreReceivedMessage(object[] sqlParams)
+        private async Task StoreReceivedMessage(object[] sqlParams)
         {
             var sql =
                 $"INSERT INTO {_recName}([Id],[Version],[Name],[Group],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
                 $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName);";
 
-            using var connection = new SqlConnection(_options.Value.ConnectionString);
-            connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+            await using var connection = new SqlConnection(_options.Value.ConnectionString);
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams);
         }
 
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
@@ -197,25 +199,23 @@ namespace DotNetCore.CAP.SqlServer
             };
 
             List<MediumMessage> result;
-            await using (var connection = new SqlConnection(_options.Value.ConnectionString))
+            await using var connection = new SqlConnection(_options.Value.ConnectionString);
+            result = await connection.ExecuteReaderAsync(sql, async reader =>
             {
-                result = connection.ExecuteReader(sql, reader =>
+                var messages = new List<MediumMessage>();
+                while (await reader.ReadAsync())
                 {
-                    var messages = new List<MediumMessage>();
-                    while (reader.Read())
+                    messages.Add(new MediumMessage
                     {
-                        messages.Add(new MediumMessage
-                        {
-                            DbId = reader.GetInt64(0).ToString(),
-                            Origin = _serializer.Deserialize(reader.GetString(1))!,
-                            Retries = reader.GetInt32(2),
-                            Added = reader.GetDateTime(3)
-                        });
-                    }
+                        DbId = reader.GetInt64(0).ToString(),
+                        Origin = (await _serializer.DeserializeAsync(reader.GetStream(1)))!,
+                        Retries = reader.GetInt32(2),
+                        Added = reader.GetDateTime(3)
+                    });
+                }
 
-                    return messages;
-                }, sqlParams);
-            }
+                return messages;
+            }, sqlParams);
 
             return result;
         }

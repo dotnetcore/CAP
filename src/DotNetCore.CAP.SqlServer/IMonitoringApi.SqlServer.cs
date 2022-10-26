@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.SqlServer
             _recName = initializer.GetReceivedTableName();
         }
 
-        public StatisticsDto GetStatistics()
+        public async Task<StatisticsDto> GetStatistics()
         {
             var sql = $@"
 SELECT
@@ -44,8 +44,8 @@ SELECT
     SELECT COUNT(Id) FROM {_recName} WHERE StatusName = N'Failed'
 ) AS ReceivedFailed;";
 
-            using var connection = new SqlConnection(_options.ConnectionString);
-            var statistics = connection.ExecuteReader(sql, reader =>
+            await using var connection = new SqlConnection(_options.ConnectionString);
+            var statistics = await connection.ExecuteReaderAsync(sql, reader =>
             {
                 var statisticsDto = new StatisticsDto();
 
@@ -57,25 +57,25 @@ SELECT
                     statisticsDto.ReceivedFailed = reader.GetInt32(3);
                 }
 
-                return statisticsDto;
+                return Task.FromResult(statisticsDto);
             });
 
             return statistics;
         }
 
-        public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
+        public async Task<IDictionary<DateTime, int>> HourlyFailedJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return GetHourlyTimelineStats(tableName, nameof(StatusName.Failed));
+            return await GetHourlyTimelineStats(tableName, nameof(StatusName.Failed));
         }
 
-        public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
+        public async Task<IDictionary<DateTime, int>> HourlySucceededJobs(MessageType type)
         {
             var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded));
+            return await GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded));
         }
 
-        public PagedQueryResult<MessageDto> Messages(MessageQueryDto queryDto)
+        public async Task<PagedQueryResult<MessageDto>> Messages(MessageQueryDto queryDto)
         {
             var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
             var where = string.Empty;
@@ -107,19 +107,19 @@ SELECT
                 new SqlParameter("@Limit", queryDto.PageSize)
             };
 
-            using var connection = new SqlConnection(_options.ConnectionString);
+            await using var connection = new SqlConnection(_options.ConnectionString);
 
-            var count = connection.ExecuteScalar<int>($"select count(1) from {tableName} where 1=1 {where}",
+            var count = await connection.ExecuteScalarAsync<int>($"select count(1) from {tableName} where 1=1 {where}",
                 new SqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
                 new SqlParameter("@Group", queryDto.Group ?? string.Empty),
                 new SqlParameter("@Name", queryDto.Name ?? string.Empty),
                 new SqlParameter("@Content", $"%{queryDto.Content}%"));
 
-            var items = connection.ExecuteReader(_options.IsSqlServer2008 ? sqlQuery2008 : sqlQuery, reader =>
+            var items = await connection.ExecuteReaderAsync(_options.IsSqlServer2008 ? sqlQuery2008 : sqlQuery, async reader =>
             {
                 var messages = new List<MessageDto>();
 
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     var index = 0;
                     messages.Add(new MessageDto
@@ -142,22 +142,22 @@ SELECT
             return new PagedQueryResult<MessageDto> { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
         }
 
-        public int PublishedFailedCount()
+        public ValueTask<int> PublishedFailedCount()
         {
             return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));
         }
 
-        public int PublishedSucceededCount()
+        public ValueTask<int> PublishedSucceededCount()
         {
             return GetNumberOfMessage(_pubName, nameof(StatusName.Succeeded));
         }
 
-        public int ReceivedFailedCount()
+        public ValueTask<int> ReceivedFailedCount()
         {
             return GetNumberOfMessage(_recName, nameof(StatusName.Failed));
         }
 
-        public int ReceivedSucceededCount()
+        public ValueTask<int> ReceivedSucceededCount()
         {
             return GetNumberOfMessage(_recName, nameof(StatusName.Succeeded));
         }
@@ -166,15 +166,15 @@ SELECT
 
         public async Task<MediumMessage?> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
 
-        private int GetNumberOfMessage(string tableName, string statusName)
+        private async ValueTask<int> GetNumberOfMessage(string tableName, string statusName)
         {
             var sqlQuery =
                 $"select count(Id) from {tableName} with (nolock) where StatusName = @state";
-            using var connection = new SqlConnection(_options.ConnectionString);
-            return connection.ExecuteScalar<int>(sqlQuery, new SqlParameter("@state", statusName));
+            await using var connection = new SqlConnection(_options.ConnectionString);
+            return await connection.ExecuteScalarAsync<int>(sqlQuery, new SqlParameter("@state", statusName));
         }
 
-        private Dictionary<DateTime, int> GetHourlyTimelineStats(string tableName, string statusName)
+        private Task<Dictionary<DateTime, int>> GetHourlyTimelineStats(string tableName, string statusName)
         {
             var endDate = DateTime.Now;
             var dates = new List<DateTime>();
@@ -189,7 +189,7 @@ SELECT
             return GetTimelineStats(tableName, statusName, keyMaps);
         }
 
-        private Dictionary<DateTime, int> GetTimelineStats(
+        private async Task<Dictionary<DateTime, int>> GetTimelineStats(
             string tableName,
             string statusName,
             IDictionary<string, DateTime> keyMaps)
@@ -223,13 +223,13 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
             };
 
             Dictionary<string, int> valuesMap;
-            using (var connection = new SqlConnection(_options.ConnectionString))
+            await using (var connection = new SqlConnection(_options.ConnectionString))
             {
-                valuesMap = connection.ExecuteReader(_options.IsSqlServer2008 ? sqlQuery2008 : sqlQuery, reader =>
+                valuesMap = await connection.ExecuteReaderAsync(_options.IsSqlServer2008 ? sqlQuery2008 : sqlQuery, async reader =>
                 {
                     var dictionary = new Dictionary<string, int>();
 
-                    while (reader.Read())
+                    while (await reader.ReadAsync())
                     {
                         dictionary.Add(reader.GetString(0), reader.GetInt32(1));
                     }
@@ -259,11 +259,11 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
             var sql = $@"SELECT TOP 1 Id AS DbId, Content, Added, ExpiresAt, Retries FROM {tableName} WITH (readpast) WHERE Id={id}";
 
             await using var connection = new SqlConnection(_options.ConnectionString);
-            var mediumMessage = connection.ExecuteReader(sql, reader =>
+            var mediumMessage = await connection.ExecuteReaderAsync(sql, async reader =>
             {
                 MediumMessage? message = null;
 
-                while (reader.Read())
+                while (await reader.ReadAsync())
                 {
                     message = new MediumMessage
                     {
