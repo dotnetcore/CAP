@@ -23,6 +23,7 @@ namespace DotNetCore.CAP.Internal
         private readonly ILogger _logger;
         private readonly IServiceProvider _provider;
         private readonly CapOptions _options;
+        private readonly string? _hostName;
 
         // diagnostics listener
         // ReSharper disable once InconsistentNaming
@@ -39,6 +40,7 @@ namespace DotNetCore.CAP.Internal
 
             _dataStorage = _provider.GetRequiredService<IDataStorage>();
             Invoker = _provider.GetRequiredService<ISubscribeInvoker>();
+            _hostName = GenerateHostnameInstanceId();
         }
 
         private ISubscribeInvoker Invoker { get; }
@@ -66,13 +68,13 @@ namespace DotNetCore.CAP.Internal
             OperateResult result;
 
             //record instance id
-            message.Origin.Headers[Headers.ExecutionInstanceId] = GenerateHostnameInstanceId();
+            message.Origin.Headers[Headers.ExecutionInstanceId] = _hostName;
 
             do
             {
                 var (shouldRetry, operateResult) = await ExecuteWithoutRetryAsync(message, descriptor, cancellationToken);
                 result = operateResult;
-                if (result == OperateResult.Success)
+                if (result.Equals(OperateResult.Success))
                 {
                     return result;
                 }

@@ -3,78 +3,44 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace DotNetCore.CAP
 {
     /// <summary>
     /// Represents the result of an consistent message operation.
     /// </summary>
-    public class OperateResult
+    public struct OperateResult : IEqualityComparer<OperateResult>
     {
-        // ReSharper disable once InconsistentNaming
+        private readonly OperateError? _operateError = null;
 
-        // ReSharper disable once FieldCanBeMadeReadOnly.Local
-        private readonly List<OperateError> _errors = new List<OperateError>();
+        public OperateResult(bool succeeded, Exception? exception = null, OperateError? error = null)
+        {
+            Succeeded = succeeded;
+            Exception = exception;
+            _operateError = error;
+        }
 
-        /// <summary>
-        /// Flag indicating whether if the operation succeeded or not.
-        /// </summary>
         public bool Succeeded { get; set; }
 
         public Exception? Exception { get; set; }
 
-        /// <summary>
-        /// An <see cref="IEnumerable{T}" /> of <see cref="OperateError" />s containing an errors
-        /// that occurred during the operation.
-        /// </summary>
-        /// <value>An <see cref="IEnumerable{T}" /> of <see cref="OperateError" />s.</value>
-        public IEnumerable<OperateError> Errors => _errors;
+        public static OperateResult Success => new(true);
 
-        /// <summary>
-        /// Returns an <see cref="OperateResult" /> indicating a successful identity operation.
-        /// </summary>
-        /// <returns>An <see cref="OperateResult" /> indicating a successful operation.</returns>
-        public static OperateResult Success { get; } = new OperateResult {Succeeded = true};
+        public static OperateResult Failed(Exception ex, OperateError? errors = null) => new(false, ex, errors);
 
-        /// <summary>
-        /// Creates an <see cref="OperateResult" /> indicating a failed operation, with a list of <paramref name="errors" /> if
-        /// applicable.
-        /// </summary>
-        /// <param name="ex">Operate Result exception</param>
-        /// <param name="errors">An optional array of <see cref="OperateError" />s which caused the operation to fail.</param>
-        /// <returns>
-        /// An <see cref="OperateResult" /> indicating a failed operation, with a list of <paramref name="errors" /> if
-        /// applicable.
-        /// </returns>
-        public static OperateResult Failed(Exception ex, params OperateError[] errors)
-        {
-            var result = new OperateResult
-            {
-                Succeeded = false,
-                Exception = ex
-            };
-            if (errors != null)
-            {
-                result._errors.AddRange(errors);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Converts the value of the current <see cref="OperateResult" /> object to its equivalent string representation.
-        /// </summary>
-        /// <returns>A string representation of the current <see cref="OperateResult" /> object.</returns>
-        /// <remarks>
-        /// If the operation was successful the ToString() will return "Succeeded" otherwise it returned
-        /// "Failed : " followed by a comma delimited list of error codes from its <see cref="Errors" /> collection, if any.
-        /// </remarks>
         public override string ToString()
         {
-            return Succeeded
-                ? "Succeeded"
-                : string.Format("{0} : {1}", "Failed", string.Join(",", Errors.Select(x => x.Code).ToList()));
+            return Succeeded ? "Succeeded" : $"Failed : {_operateError?.Code}";
+        }
+
+        public bool Equals(OperateResult x, OperateResult y)
+        {
+            return x.Succeeded == y.Succeeded;
+        }
+
+        public int GetHashCode(OperateResult obj)
+        {
+            return HashCode.Combine(obj._operateError, obj.Succeeded, obj.Exception);
         }
     }
 

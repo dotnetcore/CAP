@@ -49,7 +49,7 @@ namespace DotNetCore.CAP.Internal
             {
                 var executedResult = await SendWithoutRetryAsync(message);
                 result = executedResult.Item2;
-                if (result == OperateResult.Success)
+                if (result.Equals(OperateResult.Success))
                 {
                     return result;
                 }
