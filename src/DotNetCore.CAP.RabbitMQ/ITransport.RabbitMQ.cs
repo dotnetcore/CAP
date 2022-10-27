@@ -58,7 +58,11 @@ namespace DotNetCore.CAP.RabbitMQ
                     channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
                 }
 
-                channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
+                // Enable publish confirms
+                if (channel.NextPublishSeqNo > 0)
+                {
+                    channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
+                }
 
                 _logger.LogInformation("CAP message '{0}' published, internal id '{1}'", message.GetName(), message.GetId());
 

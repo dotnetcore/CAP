@@ -16,11 +16,13 @@ namespace DotNetCore.CAP.RabbitMQ
     public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     {
         private const int DefaultPoolSize = 15;
+
         private readonly Func<IConnection> _connectionActivator;
         private readonly ILogger<ConnectionChannelPool> _logger;
         private readonly ConcurrentQueue<IModel> _pool;
+        private readonly bool _isPublishConfirms;
         private IConnection? _connection;
-        private static readonly object SLock = new object();
+        private static readonly object SLock = new();
 
         private int _count;
         private int _maxSize;
@@ -38,6 +40,7 @@ namespace DotNetCore.CAP.RabbitMQ
             var options = optionsAccessor.Value;
 
             _connectionActivator = CreateConnection(options);
+            _isPublishConfirms = options.PublishConfirms;
 
             HostAddress = $"{options.HostName}:{options.Port}";
             Exchange = "v1" == capOptions.Version ? options.ExchangeName : $"{options.ExchangeName}.{capOptions.Version}";
@@ -131,7 +134,10 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 model = GetConnection().CreateModel();
                 model.ExchangeDeclare(Exchange, RabbitMQOptions.ExchangeType, true);
-                model.ConfirmSelect();
+                if (_isPublishConfirms)
+                {
+                    model.ConfirmSelect(); 
+                }
             }
             catch (Exception e)
             {
