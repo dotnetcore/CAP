@@ -8,47 +8,50 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 
-namespace DotNetCore.CAP.MySql
+namespace DotNetCore.CAP.MySql;
+
+public class MySqlStorageInitializer : IStorageInitializer
 {
-    public class MySqlStorageInitializer : IStorageInitializer
+    private readonly ILogger _logger;
+    private readonly IOptions<MySqlOptions> _options;
+
+    public MySqlStorageInitializer(
+        ILogger<MySqlStorageInitializer> logger,
+        IOptions<MySqlOptions> options)
     {
-        private readonly IOptions<MySqlOptions> _options;
-        private readonly ILogger _logger;
+        _options = options;
+        _logger = logger;
+    }
 
-        public MySqlStorageInitializer(
-            ILogger<MySqlStorageInitializer> logger,
-            IOptions<MySqlOptions> options)
+    public virtual string GetPublishedTableName()
+    {
+        return $"{_options.Value.TableNamePrefix}.published";
+    }
+
+    public virtual string GetReceivedTableName()
+    {
+        return $"{_options.Value.TableNamePrefix}.received";
+    }
+
+    public async Task InitializeAsync(CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested) return;
+
+        var sql = CreateDbTablesScript();
+        var connection = new MySqlConnection(_options.Value.ConnectionString);
+        await using (connection.ConfigureAwait(false))
         {
-            _options = options;
-            _logger = logger;
+            await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
         }
 
-        public virtual string GetPublishedTableName()
-        {
-            return $"{_options.Value.TableNamePrefix}.published";
-        }
-
-        public virtual string GetReceivedTableName()
-        {
-            return $"{_options.Value.TableNamePrefix}.received";
-        }
-
-        public async Task InitializeAsync(CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested) return;
-
-            var sql = CreateDbTablesScript();
-            await using (var connection = new MySqlConnection(_options.Value.ConnectionString))
-                await connection.ExecuteNonQueryAsync(sql);
-
-            _logger.LogDebug("Ensuring all create database tables script are applied.");
-        }
+        _logger.LogDebug("Ensuring all create database tables script are applied.");
+    }
 
 
-        protected virtual string CreateDbTablesScript()
-        {
-            var batchSql =
-                $@"
+    protected virtual string CreateDbTablesScript()
+    {
+        var batchSql =
+            $@"
 CREATE TABLE IF NOT EXISTS `{GetReceivedTableName()}` (
   `Id` bigint NOT NULL,
   `Version` varchar(20) DEFAULT NULL,
@@ -76,7 +79,6 @@ CREATE TABLE IF NOT EXISTS `{GetPublishedTableName()}` (
   INDEX `IX_ExpiresAt`(`ExpiresAt`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 ";
-            return batchSql;
-        }
+        return batchSql;
     }
 }

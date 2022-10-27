@@ -5,12 +5,11 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
 
-namespace DotNetCore.CAP.Transport
-{
-    public interface IDispatcher : IProcessingServer
-    {
-        Task EnqueueToPublish(MediumMessage message);
+namespace DotNetCore.CAP.Transport;
 
-        Task EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor);
-    }
+public interface IDispatcher : IProcessingServer
+{
+    Task EnqueueToPublish(MediumMessage message);
+
+    Task EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor);
 }

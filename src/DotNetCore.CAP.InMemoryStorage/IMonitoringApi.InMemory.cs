@@ -25,7 +25,7 @@ namespace DotNetCore.CAP.InMemoryStorage
             return Task.FromResult<MediumMessage?>(InMemoryStorage.ReceivedMessages.Values.FirstOrDefault(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
         }
 
-        public Task<StatisticsDto> GetStatistics()
+        public Task<StatisticsDto> GetStatisticsAsync()
         {
             var stats = new StatisticsDto
             {
@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.InMemoryStorage
             return GetHourlyTimelineStats(type, nameof(StatusName.Succeeded));
         }
 
-        public Task<PagedQueryResult<MessageDto>> Messages(MessageQueryDto queryDto)
+        public Task<PagedQueryResult<MessageDto>> GetMessagesAsync(MessageQueryDto queryDto)
         {
             if (queryDto.MessageType == MessageType.Publish)
             {

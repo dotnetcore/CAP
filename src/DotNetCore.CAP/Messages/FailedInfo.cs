@@ -1,13 +1,12 @@
 ﻿using System;
 
-namespace DotNetCore.CAP.Messages
+namespace DotNetCore.CAP.Messages;
+
+public class FailedInfo
 {
-    public class FailedInfo
-    {
-        public IServiceProvider ServiceProvider { get; set; } = default!;
+    public IServiceProvider ServiceProvider { get; set; } = default!;
 
-        public MessageType MessageType { get; set; }
+    public MessageType MessageType { get; set; }
 
-        public Message Message { get; set; } = default!;
-    }
+    public Message Message { get; set; } = default!;
 }

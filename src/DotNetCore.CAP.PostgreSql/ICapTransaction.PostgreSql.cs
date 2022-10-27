@@ -3,6 +3,7 @@
 
 using System;
 using System.Data;
+using System.Data.Common;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -43,11 +44,11 @@ namespace DotNetCore.CAP
 
             switch (DbTransaction)
             {
-                case IDbTransaction dbTransaction:
-                    dbTransaction.Commit();
+                case DbTransaction dbTransaction:
+                    await dbTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
                     break;
                 case IDbContextTransaction dbContextTransaction:
-                    await dbContextTransaction.CommitAsync(cancellationToken);
+                    await dbContextTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
                     break;
             }
 
@@ -75,11 +76,11 @@ namespace DotNetCore.CAP
 
             switch (DbTransaction)
             {
-                case IDbTransaction dbTransaction:
-                    dbTransaction.Rollback();
+                case DbTransaction dbTransaction:
+                    await dbTransaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
                     break;
                 case IDbContextTransaction dbContextTransaction:
-                    await dbContextTransaction.RollbackAsync(cancellationToken);
+                    await dbContextTransaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
                     break;
             }
         }

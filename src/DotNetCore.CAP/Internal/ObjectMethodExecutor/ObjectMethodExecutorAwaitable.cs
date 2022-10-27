@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 namespace Microsoft.Extensions.Internal;
 
 /// <summary>
-/// Provides a common awaitable structure that <see cref="ObjectMethodExecutor.ExecuteAsync"/> can
+/// Provides a common awaitable structure that <see cref="ObjectMethodExecutor.ExecuteAsync" /> can
 /// return, regardless of whether the underlying value is a System.Task, an FSharpAsync, or an
 /// application-defined custom awaitable.
 /// </summary>
@@ -59,7 +59,8 @@ internal readonly struct ObjectMethodExecutorAwaitable
     public Awaiter GetAwaiter()
     {
         var customAwaiter = _getAwaiterMethod(_customAwaitable);
-        return new Awaiter(customAwaiter, _isCompletedMethod, _getResultMethod, _onCompletedMethod, _unsafeOnCompletedMethod);
+        return new Awaiter(customAwaiter, _isCompletedMethod, _getResultMethod, _onCompletedMethod,
+            _unsafeOnCompletedMethod);
     }
 
     public readonly struct Awaiter : ICriticalNotifyCompletion
@@ -86,7 +87,10 @@ internal readonly struct ObjectMethodExecutorAwaitable
 
         public bool IsCompleted => _isCompletedMethod(_customAwaiter);
 
-        public object GetResult() => _getResultMethod(_customAwaiter);
+        public object GetResult()
+        {
+            return _getResultMethod(_customAwaiter);
+        }
 
         public void OnCompleted(Action continuation)
         {

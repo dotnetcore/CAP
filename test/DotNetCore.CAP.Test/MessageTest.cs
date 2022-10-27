@@ -24,7 +24,7 @@ namespace DotNetCore.CAP.Test
         }
 
         [Fact]
-        public async Task Serialize_then_Deserialize_Message_With_Utf8JsonSerializer()
+        public void Serialize_then_Deserialize_Message_With_Utf8JsonSerializer()
         {
             // Given  
             var givenMessage = new Message(
@@ -39,7 +39,7 @@ namespace DotNetCore.CAP.Test
             // When
             var serializer = _provider.GetRequiredService<ISerializer>();
             var json = serializer.Serialize(givenMessage);
-            var deserializedMessage = await serializer.DeserializeAsync(GenerateStreamFromString(json));
+            var deserializedMessage = serializer.Deserialize(json);
 
             // Then
             Assert.True(serializer.IsJsonType(deserializedMessage.Value));
@@ -48,16 +48,6 @@ namespace DotNetCore.CAP.Test
             Assert.NotNull(result);
             Assert.Equal(result.Email, ((MessageValue)givenMessage.Value).Email);
             Assert.Equal(result.Name, ((MessageValue)givenMessage.Value).Name);
-        }
-
-        public Stream GenerateStreamFromString(string s)
-        {
-            var stream = new MemoryStream();
-            var writer = new StreamWriter(stream);
-            writer.Write(s);
-            writer.Flush();
-            stream.Position = 0;
-            return stream;
         }
     }
 

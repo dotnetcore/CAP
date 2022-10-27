@@ -13,26 +13,26 @@ using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 
-namespace DotNetCore.CAP.MySql
+namespace DotNetCore.CAP.MySql;
+
+internal class MySqlMonitoringApi : IMonitoringApi
 {
-    internal class MySqlMonitoringApi : IMonitoringApi
+    private readonly MySqlOptions _options;
+    private readonly string _pubName;
+    private readonly string _recName;
+    private readonly ISerializer _serializer;
+
+    public MySqlMonitoringApi(IOptions<MySqlOptions> options, IStorageInitializer initializer, ISerializer serializer)
     {
-        private readonly ISerializer _serializer;
-        private readonly MySqlOptions _options;
-        private readonly string _pubName;
-        private readonly string _recName;
+        _serializer = serializer;
+        _options = options.Value ?? throw new ArgumentNullException(nameof(options));
+        _pubName = initializer.GetPublishedTableName();
+        _recName = initializer.GetReceivedTableName();
+    }
 
-        public MySqlMonitoringApi(IOptions<MySqlOptions> options, IStorageInitializer initializer, ISerializer serializer)
-        {
-            _serializer = serializer;
-            _options = options.Value ?? throw new ArgumentNullException(nameof(options));
-            _pubName = initializer.GetPublishedTableName();
-            _recName = initializer.GetReceivedTableName();
-        }
-
-        public async Task<StatisticsDto> GetStatistics()
-        {
-            var sql = $@"
+    public async Task<StatisticsDto> GetStatisticsAsync()
+    {
+        var sql = $@"
 SELECT
 (
     SELECT COUNT(Id) FROM `{_pubName}` WHERE StatusName = N'Succeeded'
@@ -47,157 +47,160 @@ SELECT
     SELECT COUNT(Id) FROM `{_recName}` WHERE StatusName = N'Failed'
 ) AS ReceivedFailed;";
 
-            using var connection = new MySqlConnection(_options.ConnectionString);
-            var statistics = await connection.ExecuteReaderAsync(sql, reader =>
-            {
-                var statisticsDto = new StatisticsDto();
+        var connection = new MySqlConnection(_options.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var statistics = await connection.ExecuteReaderAsync(sql, async reader =>
+        {
+            var statisticsDto = new StatisticsDto();
 
-                while (reader.Read())
+            while (await reader.ReadAsync().ConfigureAwait(false))
+            {
+                statisticsDto.PublishedSucceeded = reader.GetInt32(0);
+                statisticsDto.ReceivedSucceeded = reader.GetInt32(1);
+                statisticsDto.PublishedFailed = reader.GetInt32(2);
+                statisticsDto.ReceivedFailed = reader.GetInt32(3);
+            }
+
+            return statisticsDto;
+        }).ConfigureAwait(false);
+
+        return statistics;
+    }
+
+    public async Task<IDictionary<DateTime, int>> HourlyFailedJobs(MessageType type)
+    {
+        var tableName = type == MessageType.Publish ? _pubName : _recName;
+        return await GetHourlyTimelineStats(tableName, nameof(StatusName.Failed)).ConfigureAwait(false);
+    }
+
+    public async Task<IDictionary<DateTime, int>> HourlySucceededJobs(MessageType type)
+    {
+        var tableName = type == MessageType.Publish ? _pubName : _recName;
+        return await GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded)).ConfigureAwait(false);
+    }
+
+    public async Task<PagedQueryResult<MessageDto>> GetMessagesAsync(MessageQueryDto queryDto)
+    {
+        var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
+        var where = string.Empty;
+        if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " and StatusName=@StatusName";
+
+        if (!string.IsNullOrEmpty(queryDto.Name)) where += " and Name=@Name";
+
+        if (!string.IsNullOrEmpty(queryDto.Group)) where += " and `Group`=@Group";
+
+        if (!string.IsNullOrEmpty(queryDto.Content)) where += " and Content like CONCAT('%',@Content,'%')";
+
+        var sqlQuery =
+            $"select * from `{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
+
+        object[] sqlParams =
+        {
+            new MySqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
+            new MySqlParameter("@Group", queryDto.Group ?? string.Empty),
+            new MySqlParameter("@Name", queryDto.Name ?? string.Empty),
+            new MySqlParameter("@Content", $"%{queryDto.Content}%"),
+            new MySqlParameter("@Offset", queryDto.CurrentPage * queryDto.PageSize),
+            new MySqlParameter("@Limit", queryDto.PageSize)
+        };
+
+        var connection = new MySqlConnection(_options.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+
+        var count = await connection.ExecuteScalarAsync<int>($"select count(1) from `{tableName}` where 1=1 {where}",
+            new MySqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
+            new MySqlParameter("@Group", queryDto.Group ?? string.Empty),
+            new MySqlParameter("@Name", queryDto.Name ?? string.Empty),
+            new MySqlParameter("@Content", $"%{queryDto.Content}%")).ConfigureAwait(false);
+
+        var items = await connection.ExecuteReaderAsync(sqlQuery, reader =>
+        {
+            var messages = new List<MessageDto>();
+
+            while (reader.Read())
+            {
+                var index = 0;
+                messages.Add(new MessageDto
                 {
-                    statisticsDto.PublishedSucceeded = reader.GetInt32(0);
-                    statisticsDto.ReceivedSucceeded = reader.GetInt32(1);
-                    statisticsDto.PublishedFailed = reader.GetInt32(2);
-                    statisticsDto.ReceivedFailed = reader.GetInt32(3);
-                }
-
-                return Task.FromResult( statisticsDto);
-            });
-
-            return statistics;
-        }
-
-        public async Task<IDictionary<DateTime, int>> HourlyFailedJobs(MessageType type)
-        {
-            var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return await GetHourlyTimelineStats(tableName, nameof(StatusName.Failed));
-        }
-
-        public async Task<IDictionary<DateTime, int>> HourlySucceededJobs(MessageType type)
-        {
-            var tableName = type == MessageType.Publish ? _pubName : _recName;
-            return await GetHourlyTimelineStats(tableName, nameof(StatusName.Succeeded));
-        }
-
-        public async Task<PagedQueryResult<MessageDto>> Messages(MessageQueryDto queryDto)
-        {
-            var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
-            var where = string.Empty;
-            if (!string.IsNullOrEmpty(queryDto.StatusName))
-            {
-                where += " and StatusName=@StatusName";
+                    Id = reader.GetInt64(index++).ToString(),
+                    Version = reader.GetString(index++),
+                    Name = reader.GetString(index++),
+                    Group = queryDto.MessageType == MessageType.Subscribe ? reader.GetString(index++) : default,
+                    Content = reader.GetString(index++),
+                    Retries = reader.GetInt32(index++),
+                    Added = reader.GetDateTime(index++),
+                    ExpiresAt = reader.IsDBNull(index++) ? null : reader.GetDateTime(index - 1),
+                    StatusName = reader.GetString(index)
+                });
             }
 
-            if (!string.IsNullOrEmpty(queryDto.Name))
-            {
-                where += " and Name=@Name";
-            }
+            return Task.FromResult(messages);
+        }, sqlParams).ConfigureAwait(false);
 
-            if (!string.IsNullOrEmpty(queryDto.Group))
-            {
-                where += " and `Group`=@Group";
-            }
+        return new PagedQueryResult<MessageDto>
+            { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
+    }
 
-            if (!string.IsNullOrEmpty(queryDto.Content))
-            {
-                where += " and Content like CONCAT('%',@Content,'%')";
-            }
+    public ValueTask<int> PublishedFailedCount()
+    {
+        return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));
+    }
 
-            var sqlQuery =
-                $"select * from `{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
+    public ValueTask<int> PublishedSucceededCount()
+    {
+        return GetNumberOfMessage(_pubName, nameof(StatusName.Succeeded));
+    }
 
-            object[] sqlParams =
-            {
-                new MySqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
-                new MySqlParameter("@Group", queryDto.Group ?? string.Empty),
-                new MySqlParameter("@Name", queryDto.Name ?? string.Empty),
-                new MySqlParameter("@Content", $"%{queryDto.Content}%"),
-                new MySqlParameter("@Offset", queryDto.CurrentPage * queryDto.PageSize),
-                new MySqlParameter("@Limit", queryDto.PageSize)
-            };
+    public ValueTask<int> ReceivedFailedCount()
+    {
+        return GetNumberOfMessage(_recName, nameof(StatusName.Failed));
+    }
 
-            await using var connection = new MySqlConnection(_options.ConnectionString);
+    public ValueTask<int> ReceivedSucceededCount()
+    {
+        return GetNumberOfMessage(_recName, nameof(StatusName.Succeeded));
+    }
 
-            var count = await connection.ExecuteScalarAsync<int>($"select count(1) from `{tableName}` where 1=1 {where}",
-                new MySqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
-                new MySqlParameter("@Group", queryDto.Group ?? string.Empty),
-                new MySqlParameter("@Name", queryDto.Name ?? string.Empty),
-                new MySqlParameter("@Content", $"%{queryDto.Content}%"));
+    public async Task<MediumMessage?> GetPublishedMessageAsync(long id)
+    {
+        return await GetMessageAsync(_pubName, id).ConfigureAwait(false);
+    }
 
-            var items = await connection.ExecuteReaderAsync(sqlQuery, reader =>
-            {
-                var messages = new List<MessageDto>();
+    public async Task<MediumMessage?> GetReceivedMessageAsync(long id)
+    {
+        return await GetMessageAsync(_recName, id).ConfigureAwait(false);
+    }
 
-                while (reader.Read())
-                {
-                    var index = 0;
-                    messages.Add(new MessageDto
-                    {
-                        Id = reader.GetInt64(index++).ToString(),
-                        Version = reader.GetString(index++),
-                        Name = reader.GetString(index++),
-                        Group = queryDto.MessageType == MessageType.Subscribe ? reader.GetString(index++) : default,
-                        Content = reader.GetString(index++),
-                        Retries = reader.GetInt32(index++),
-                        Added = reader.GetDateTime(index++),
-                        ExpiresAt = reader.IsDBNull(index++) ? (DateTime?)null : reader.GetDateTime(index - 1),
-                        StatusName = reader.GetString(index)
-                    });
-                }
+    private async ValueTask<int> GetNumberOfMessage(string tableName, string statusName)
+    {
+        var sqlQuery = $"select count(Id) from `{tableName}` where StatusName = @state";
+        var connection = new MySqlConnection(_options.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        return await connection.ExecuteScalarAsync<int>(sqlQuery, new MySqlParameter("@state", statusName))
+            .ConfigureAwait(false);
+    }
 
-                return Task.FromResult(messages);
-            }, sqlParams);
-
-            return new PagedQueryResult<MessageDto> { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
+    private Task<Dictionary<DateTime, int>> GetHourlyTimelineStats(string tableName, string statusName)
+    {
+        var endDate = DateTime.Now;
+        var dates = new List<DateTime>();
+        for (var i = 0; i < 24; i++)
+        {
+            dates.Add(endDate);
+            endDate = endDate.AddHours(-1);
         }
 
-        public ValueTask<int> PublishedFailedCount()
-        {
-            return GetNumberOfMessage(_pubName, nameof(StatusName.Failed));
-        }
+        var keyMaps = dates.ToDictionary(x => x.ToString("yyyy-MM-dd-HH"), x => x);
 
-        public ValueTask<int> PublishedSucceededCount()
-        {
-            return GetNumberOfMessage(_pubName, nameof(StatusName.Succeeded));
-        }
+        return GetTimelineStats(tableName, statusName, keyMaps);
+    }
 
-        public ValueTask<int> ReceivedFailedCount()
-        {
-            return GetNumberOfMessage(_recName, nameof(StatusName.Failed));
-        }
-
-        public ValueTask<int> ReceivedSucceededCount()
-        {
-            return GetNumberOfMessage(_recName, nameof(StatusName.Succeeded));
-        }
-
-        private async ValueTask<int> GetNumberOfMessage(string tableName, string statusName)
-        {
-            var sqlQuery = $"select count(Id) from `{tableName}` where StatusName = @state";
-            await using var connection = new MySqlConnection(_options.ConnectionString);
-            return await connection.ExecuteScalarAsync<int>(sqlQuery, new MySqlParameter("@state", statusName));
-        }
-
-        private Task<Dictionary<DateTime, int>> GetHourlyTimelineStats(string tableName, string statusName)
-        {
-            var endDate = DateTime.Now;
-            var dates = new List<DateTime>();
-            for (var i = 0; i < 24; i++)
-            {
-                dates.Add(endDate);
-                endDate = endDate.AddHours(-1);
-            }
-
-            var keyMaps = dates.ToDictionary(x => x.ToString("yyyy-MM-dd-HH"), x => x);
-
-            return GetTimelineStats(tableName, statusName, keyMaps);
-        }
-
-        private async Task<Dictionary<DateTime, int>> GetTimelineStats(
-            string tableName,
-            string statusName,
-            IDictionary<string, DateTime> keyMaps)
-        {
-            var sqlQuery = $@"
+    private async Task<Dictionary<DateTime, int>> GetTimelineStats(
+        string tableName,
+        string statusName,
+        IDictionary<string, DateTime> keyMaps)
+    {
+        var sqlQuery = $@"
 SELECT aggr.*
 FROM (
          SELECT date_format(`Added`, '%Y-%m-%d-%H') AS `Key`,
@@ -209,77 +212,65 @@ FROM (
 WHERE `Key` >= @minKey
   AND `Key` <= @maxKey;";
 
-            object[] sqlParams =
-            {
-                new MySqlParameter("@statusName", statusName),
-                new MySqlParameter("@minKey", keyMaps.Keys.Min()),
-                new MySqlParameter("@maxKey", keyMaps.Keys.Max())
-            };
-
-            Dictionary<string, int> valuesMap;
-            await using (var connection = new MySqlConnection(_options.ConnectionString))
-            {
-                valuesMap = await connection.ExecuteReaderAsync(sqlQuery, reader =>
-                {
-                    var dictionary = new Dictionary<string, int>();
-
-                    while (reader.Read())
-                    {
-                        dictionary.Add(reader.GetString(0), reader.GetInt32(1));
-                    }
-
-                    return Task.FromResult(dictionary);
-                }, sqlParams);
-            }
-
-            foreach (var key in keyMaps.Keys)
-            {
-                if (!valuesMap.ContainsKey(key))
-                {
-                    valuesMap.Add(key, 0);
-                }
-            }
-
-            var result = new Dictionary<DateTime, int>();
-            for (var i = 0; i < keyMaps.Count; i++)
-            {
-                var value = valuesMap[keyMaps.ElementAt(i).Key];
-                result.Add(keyMaps.ElementAt(i).Value, value);
-            }
-
-            return result;
-        }
-
-        public async Task<MediumMessage?> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id);
-
-        public async Task<MediumMessage?> GetReceivedMessageAsync(long id) => await GetMessageAsync(_recName, id);
-
-        private async Task<MediumMessage?> GetMessageAsync(string tableName, long id)
+        object[] sqlParams =
         {
-            var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
+            new MySqlParameter("@statusName", statusName),
+            new MySqlParameter("@minKey", keyMaps.Keys.Min()),
+            new MySqlParameter("@maxKey", keyMaps.Keys.Max())
+        };
 
-            await using var connection = new MySqlConnection(_options.ConnectionString);
-            var mediumMessage = await connection.ExecuteReaderAsync(sql, async reader => 
+        Dictionary<string, int> valuesMap;
+        var connection = new MySqlConnection(_options.ConnectionString);
+        await using (connection.ConfigureAwait(false))
+        {
+            valuesMap = await connection.ExecuteReaderAsync(sqlQuery, reader =>
             {
-                MediumMessage? message = null;
+                var dictionary = new Dictionary<string, int>();
 
-                while (await reader.ReadAsync())
-                {
-                    message = new MediumMessage
-                    {
-                        DbId = reader.GetInt64(0).ToString(),
-                        Origin = (await _serializer.DeserializeAsync(reader.GetStream(1)))!,
-                        Content = reader.GetString(1),
-                        Added = reader.GetDateTime(2),
-                        ExpiresAt = reader.GetDateTime(3),
-                        Retries = reader.GetInt32(4)
-                    };
-                }
+                while (reader.Read()) dictionary.Add(reader.GetString(0), reader.GetInt32(1));
 
-                return message;
-            });
-
-            return mediumMessage;
+                return Task.FromResult(dictionary);
+            }, sqlParams).ConfigureAwait(false);
         }
+
+        foreach (var key in keyMaps.Keys)
+            if (!valuesMap.ContainsKey(key))
+                valuesMap.Add(key, 0);
+
+        var result = new Dictionary<DateTime, int>();
+        for (var i = 0; i < keyMaps.Count; i++)
+        {
+            var value = valuesMap[keyMaps.ElementAt(i).Key];
+            result.Add(keyMaps.ElementAt(i).Value, value);
+        }
+
+        return result;
+    }
+
+    private async Task<MediumMessage?> GetMessageAsync(string tableName, long id)
+    {
+        var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
+
+        var connection = new MySqlConnection(_options.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var mediumMessage = await connection.ExecuteReaderAsync(sql, async reader =>
+        {
+            MediumMessage? message = null;
+
+            while (await reader.ReadAsync().ConfigureAwait(false))
+                message = new MediumMessage
+                {
+                    DbId = reader.GetInt64(0).ToString(),
+                    Origin = _serializer.Deserialize(reader.GetString(1))!,
+                    Content = reader.GetString(1),
+                    Added = reader.GetDateTime(2),
+                    ExpiresAt = reader.GetDateTime(3),
+                    Retries = reader.GetInt32(4)
+                };
+
+            return message;
+        }).ConfigureAwait(false);
+
+        return mediumMessage;
     }
 }

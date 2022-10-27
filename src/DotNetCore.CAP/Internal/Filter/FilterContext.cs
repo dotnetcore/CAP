@@ -4,13 +4,11 @@
 using DotNetCore.CAP.Internal;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP.Filter
-{
-    public class FilterContext : ConsumerContext
-    {
-        public FilterContext(ConsumerContext context) : base(context)
-        {
+namespace DotNetCore.CAP.Filter;
 
-        }
+public class FilterContext : ConsumerContext
+{
+    public FilterContext(ConsumerContext context) : base(context)
+    {
     }
 }

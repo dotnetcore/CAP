@@ -5,15 +5,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 
-namespace DotNetCore.CAP.Internal
-{
-    /// <summary>
-    /// Consumer executor
-    /// </summary>
-    public interface ISubscribeDispatcher
-    {
-        Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken = default);
+namespace DotNetCore.CAP.Internal;
 
-        Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor, CancellationToken cancellationToken = default);
-    }
+/// <summary>
+/// Consumer executor
+/// </summary>
+public interface ISubscribeDispatcher
+{
+    Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken = default);
+
+    Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor,
+        CancellationToken cancellationToken = default);
 }

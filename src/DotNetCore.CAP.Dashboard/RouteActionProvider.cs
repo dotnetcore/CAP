@@ -41,7 +41,7 @@ namespace DotNetCore.CAP.Dashboard
         [HttpGet("/stats")]
         public async Task Stats()
         {
-            var result = await MonitoringApi.GetStatistics();
+            var result = await MonitoringApi.GetStatisticsAsync();
             SetServersCount(result);
             await _response.WriteAsJsonAsync(result);
 
@@ -203,7 +203,7 @@ namespace DotNetCore.CAP.Dashboard
                 PageSize = pageSize
             };
 
-            var result = await MonitoringApi.Messages(queryDto);
+            var result = await MonitoringApi.GetMessagesAsync(queryDto);
 
             await _response.WriteAsJsonAsync(result);
         }
@@ -230,7 +230,7 @@ namespace DotNetCore.CAP.Dashboard
                 PageSize = pageSize
             };
 
-            var result = await MonitoringApi.Messages(queryDto);
+            var result = await MonitoringApi.GetMessagesAsync(queryDto);
 
             await _response.WriteAsJsonAsync(result);
         }

@@ -3,10 +3,9 @@
 
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Processor
+namespace DotNetCore.CAP.Processor;
+
+public interface IProcessor
 {
-    public interface IProcessor
-    {
-        Task ProcessAsync(ProcessingContext context);
-    }
+    Task ProcessAsync(ProcessingContext context);
 }

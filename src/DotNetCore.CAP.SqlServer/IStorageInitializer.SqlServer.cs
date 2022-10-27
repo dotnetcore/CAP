@@ -8,46 +8,47 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.SqlServer
+namespace DotNetCore.CAP.SqlServer;
+
+public class SqlServerStorageInitializer : IStorageInitializer
 {
-    public class SqlServerStorageInitializer : IStorageInitializer
+    private readonly ILogger _logger;
+    private readonly IOptions<SqlServerOptions> _options;
+
+    public SqlServerStorageInitializer(
+        ILogger<SqlServerStorageInitializer> logger,
+        IOptions<SqlServerOptions> options)
     {
-        private readonly ILogger _logger;
-        private readonly IOptions<SqlServerOptions> _options;
+        _options = options;
+        _logger = logger;
+    }
 
-        public SqlServerStorageInitializer(
-            ILogger<SqlServerStorageInitializer> logger,
-            IOptions<SqlServerOptions> options)
-        {
-            _options = options;
-            _logger = logger;
-        }
+    public virtual string GetPublishedTableName()
+    {
+        return $"{_options.Value.Schema}.Published";
+    }
 
-        public virtual string GetPublishedTableName()
-        {
-            return $"{_options.Value.Schema}.Published";
-        }
+    public virtual string GetReceivedTableName()
+    {
+        return $"{_options.Value.Schema}.Received";
+    }
 
-        public virtual string GetReceivedTableName()
-        {
-            return $"{_options.Value.Schema}.Received";
-        }
+    public async Task InitializeAsync(CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested) return;
 
-        public async Task InitializeAsync(CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested) return;
+        var sql = CreateDbTablesScript(_options.Value.Schema);
+        var connection = new SqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
 
-            var sql = CreateDbTablesScript(_options.Value.Schema);
-            await using var connection = new SqlConnection(_options.Value.ConnectionString);
-            await connection.ExecuteNonQueryAsync(sql);
+        _logger.LogDebug("Ensuring all create database tables script are applied.");
+    }
 
-            _logger.LogDebug("Ensuring all create database tables script are applied.");
-        }
-
-        protected virtual string CreateDbTablesScript(string schema)
-        {
-            var batchSql =
-                $@"
+    protected virtual string CreateDbTablesScript(string schema)
+    {
+        var batchSql =
+            $@"
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}')
 BEGIN
 	EXEC('CREATE SCHEMA [{schema}]')
@@ -89,7 +90,6 @@ CREATE TABLE {GetPublishedTableName()}(
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 END;";
-            return batchSql;
-        }
+        return batchSql;
     }
 }

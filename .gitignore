@@ -12,6 +12,8 @@ PublishProfiles/
 *.cache
 *.docstates
 _ReSharper.*
+*.[Rr]e[Ss]harper
+*.DotSettings.user
 nuget.exe
 *k10.csproj
 *.psess

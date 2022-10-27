@@ -10,81 +10,73 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+/// <summary>
+/// Contains extension methods to <see cref="IServiceCollection" /> for configuring consistence services.
+/// </summary>
+public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Contains extension methods to <see cref="IServiceCollection" /> for configuring consistence services.
+    /// Adds and configures the consistence services for the consistency.
     /// </summary>
-    public static class ServiceCollectionExtensions
+    /// <param name="services">The services available in the application.</param>
+    /// <param name="setupAction">An action to configure the <see cref="CapOptions" />.</param>
+    /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
+    public static CapBuilder AddCap(this IServiceCollection services, Action<CapOptions> setupAction)
     {
-        /// <summary>
-        /// Adds and configures the consistence services for the consistency.
-        /// </summary>
-        /// <param name="services">The services available in the application.</param>
-        /// <param name="setupAction">An action to configure the <see cref="CapOptions" />.</param>
-        /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
-        public static CapBuilder AddCap(this IServiceCollection services, Action<CapOptions> setupAction)
-        {
-            if (setupAction == null)
-            {
-                throw new ArgumentNullException(nameof(setupAction));
-            }
+        if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
-            services.AddSingleton(_ => services);
-            services.TryAddSingleton<CapMarkerService>();
+        services.AddSingleton(_ => services);
+        services.TryAddSingleton<CapMarkerService>();
 
-            services.TryAddSingleton<ICapPublisher, CapPublisher>();
+        services.TryAddSingleton<ICapPublisher, CapPublisher>();
 
-            services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
-            services.TryAddSingleton<ISubscribeInvoker, SubscribeInvoker>();
-            services.TryAddSingleton<MethodMatcherCache>();
+        services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
+        services.TryAddSingleton<ISubscribeInvoker, SubscribeInvoker>();
+        services.TryAddSingleton<MethodMatcherCache>();
 
-            services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();
+        services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();
 
-            //Processors
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, IDispatcher>(sp => sp.GetRequiredService<IDispatcher>()));
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, IConsumerRegister>(sp => sp.GetRequiredService<IConsumerRegister>()));
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
+        //Processors
+        services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<IProcessingServer, IDispatcher>(sp => sp.GetRequiredService<IDispatcher>()));
+        services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<IProcessingServer, IConsumerRegister>(sp =>
+                sp.GetRequiredService<IConsumerRegister>()));
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
 
-            //Queue's message processor
-            services.TryAddSingleton<MessageNeedToRetryProcessor>();
-            services.TryAddSingleton<TransportCheckProcessor>();
-            services.TryAddSingleton<CollectorProcessor>();
+        //Queue's message processor
+        services.TryAddSingleton<MessageNeedToRetryProcessor>();
+        services.TryAddSingleton<TransportCheckProcessor>();
+        services.TryAddSingleton<CollectorProcessor>();
 
-            //Sender
-            services.TryAddSingleton<IMessageSender, MessageSender>();
+        //Sender
+        services.TryAddSingleton<IMessageSender, MessageSender>();
 
-            services.TryAddSingleton<ISerializer, JsonUtf8Serializer>();
+        services.TryAddSingleton<ISerializer, JsonUtf8Serializer>();
 
-            // Warning: IPublishMessageSender need to inject at extension project. 
-            services.TryAddSingleton<ISubscribeDispatcher, SubscribeDispatcher>();
+        // Warning: IPublishMessageSender need to inject at extension project. 
+        services.TryAddSingleton<ISubscribeDispatcher, SubscribeDispatcher>();
 
-            //Options and extension service
-            var options = new CapOptions();
-            setupAction(options);
+        //Options and extension service
+        var options = new CapOptions();
+        setupAction(options);
 
-            //Executors
-            if (options.UseDispatchingPerGroup)
-            {
-                services.TryAddSingleton<IDispatcher, DispatcherPerGroup>();
-            }
-            else
-            {
-                services.TryAddSingleton<IDispatcher, Dispatcher>();
-            }
+        //Executors
+        if (options.UseDispatchingPerGroup)
+            services.TryAddSingleton<IDispatcher, DispatcherPerGroup>();
+        else
+            services.TryAddSingleton<IDispatcher, Dispatcher>();
 
-            foreach (var serviceExtension in options.Extensions)
-            {
-                serviceExtension.AddServices(services);
-            }
-            services.Configure(setupAction);
+        foreach (var serviceExtension in options.Extensions) serviceExtension.AddServices(services);
+        services.Configure(setupAction);
 
-            //Startup and Hosted 
-            services.AddSingleton<Bootstrapper>();
-            services.AddHostedService(sp => sp.GetRequiredService<Bootstrapper>());
-            services.AddSingleton<IBootstrapper>(sp => sp.GetRequiredService<Bootstrapper>());
+        //Startup and Hosted 
+        services.AddSingleton<Bootstrapper>();
+        services.AddHostedService(sp => sp.GetRequiredService<Bootstrapper>());
+        services.AddSingleton<IBootstrapper>(sp => sp.GetRequiredService<Bootstrapper>());
 
-            return new CapBuilder(services);
-        }
+        return new CapBuilder(services);
     }
 }
