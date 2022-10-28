@@ -17,7 +17,7 @@ public interface ISerializer
     /// <summary>
     /// Serializes the given <see cref="Message" /> into a <see cref="TransportMessage" />
     /// </summary>
-    Task<TransportMessage> SerializeAsync(Message message);
+    ValueTask<TransportMessage> SerializeAsync(Message message);
 
     /// <summary>
     /// Deserialize the given string into a <see cref="Message" />
@@ -27,7 +27,7 @@ public interface ISerializer
     /// <summary>
     /// Deserialize the given <see cref="TransportMessage" /> back into a <see cref="Message" />
     /// </summary>
-    Task<Message> DeserializeAsync(TransportMessage transportMessage, Type? valueType);
+    ValueTask<Message> DeserializeAsync(TransportMessage transportMessage, Type? valueType);
 
     /// <summary>
     /// Deserialize the given object with the given Type into an object

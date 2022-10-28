@@ -46,7 +46,7 @@ internal class SubscribeDispatcher : ISubscribeDispatcher
 
     private ISubscribeInvoker Invoker { get; }
 
-    public Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken)
+    public async Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken)
     {
         var selector = _provider.GetRequiredService<MethodMatcherCache>();
         if (!selector.TryGetTopicExecutor(message.Origin.GetName(), message.Origin.GetGroup()!, out var executor))
@@ -58,10 +58,10 @@ internal class SubscribeDispatcher : ISubscribeDispatcher
 
             TracingError(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), message.Origin, null, new Exception(error));
 
-            return Task.FromResult(OperateResult.Failed(new SubscriberNotFoundException(error)));
+            return OperateResult.Failed(new SubscriberNotFoundException(error));
         }
 
-        return DispatchAsync(message, executor, cancellationToken);
+        return await DispatchAsync(message, executor, cancellationToken).ConfigureAwait(false);
     }
 
     public async Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor,

@@ -9,7 +9,7 @@ namespace DotNetCore.CAP.Transport;
 
 public interface IDispatcher : IProcessingServer
 {
-    Task EnqueueToPublish(MediumMessage message);
+    ValueTask EnqueueToPublish(MediumMessage message);
 
-    Task EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor);
+    ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor);
 }

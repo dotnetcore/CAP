@@ -71,7 +71,7 @@ internal class DispatcherPerGroup : IDispatcher
         _logger.LogInformation("Starting DispatcherPerGroup");
     }
 
-    public async Task EnqueueToPublish(MediumMessage message)
+    public async ValueTask EnqueueToPublish(MediumMessage message)
     {
         try
         {
@@ -86,7 +86,7 @@ internal class DispatcherPerGroup : IDispatcher
         }
     }
 
-    public async Task EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
+    public async ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
     {
         try
         {

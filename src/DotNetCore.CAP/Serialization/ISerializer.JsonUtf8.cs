@@ -18,24 +18,25 @@ public class JsonUtf8Serializer : ISerializer
         _jsonSerializerOptions = capOptions.Value.JsonSerializerOptions;
     }
 
-    public Task<TransportMessage> SerializeAsync(Message message)
+    public ValueTask<TransportMessage> SerializeAsync(Message message)
     {
         if (message == null) throw new ArgumentNullException(nameof(message));
 
-        if (message.Value == null) return Task.FromResult(new TransportMessage(message.Headers, null));
+        if (message.Value == null) return new ValueTask<TransportMessage>(new TransportMessage(message.Headers, null));
 
         var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(message.Value, _jsonSerializerOptions);
-        return Task.FromResult(new TransportMessage(message.Headers, jsonBytes));
+
+        return new ValueTask<TransportMessage>(new TransportMessage(message.Headers, jsonBytes));
     }
 
-    public Task<Message> DeserializeAsync(TransportMessage transportMessage, Type? valueType)
+    public ValueTask<Message> DeserializeAsync(TransportMessage transportMessage, Type? valueType)
     {
         if (valueType == null || transportMessage.Body.Length == 0)
-            return Task.FromResult(new Message(transportMessage.Headers, null));
+            return new ValueTask<Message>(new Message(transportMessage.Headers, null));
 
         var obj = JsonSerializer.Deserialize(transportMessage.Body.Span, valueType, _jsonSerializerOptions);
 
-        return Task.FromResult(new Message(transportMessage.Headers, obj));
+        return new ValueTask<Message>(new Message(transportMessage.Headers, obj));
     }
 
     public string Serialize(Message message)

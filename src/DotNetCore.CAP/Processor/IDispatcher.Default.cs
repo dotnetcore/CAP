@@ -74,7 +74,7 @@ public class Dispatcher : IDispatcher
         _logger.LogInformation("Starting default Dispatcher");
     }
 
-    public async Task EnqueueToPublish(MediumMessage message)
+    public async ValueTask EnqueueToPublish(MediumMessage message)
     {
         try
         {
@@ -89,7 +89,7 @@ public class Dispatcher : IDispatcher
         }
     }
 
-    public async Task EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
+    public async ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
     {
         try
         {
@@ -110,7 +110,7 @@ public class Dispatcher : IDispatcher
             _cts.Cancel();
     }
 
-    private async Task Sending(CancellationToken cancellationToken)
+    private async ValueTask Sending(CancellationToken cancellationToken)
     {
         try
         {
@@ -134,7 +134,7 @@ public class Dispatcher : IDispatcher
         }
     }
 
-    private async Task Processing(CancellationToken cancellationToken)
+    private async ValueTask Processing(CancellationToken cancellationToken)
     {
         try
         {

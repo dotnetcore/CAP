@@ -113,11 +113,11 @@ SELECT
             new MySqlParameter("@Name", queryDto.Name ?? string.Empty),
             new MySqlParameter("@Content", $"%{queryDto.Content}%")).ConfigureAwait(false);
 
-        var items = await connection.ExecuteReaderAsync(sqlQuery, reader =>
+        var items = await connection.ExecuteReaderAsync(sqlQuery, async reader =>
         {
             var messages = new List<MessageDto>();
 
-            while (reader.Read())
+            while (await reader.ReadAsync())
             {
                 var index = 0;
                 messages.Add(new MessageDto
@@ -134,7 +134,7 @@ SELECT
                 });
             }
 
-            return Task.FromResult(messages);
+            return messages;
         }, sqlParams).ConfigureAwait(false);
 
         return new PagedQueryResult<MessageDto>
@@ -223,13 +223,13 @@ WHERE `Key` >= @minKey
         var connection = new MySqlConnection(_options.ConnectionString);
         await using (connection.ConfigureAwait(false))
         {
-            valuesMap = await connection.ExecuteReaderAsync(sqlQuery, reader =>
+            valuesMap = await connection.ExecuteReaderAsync(sqlQuery, async reader =>
             {
                 var dictionary = new Dictionary<string, int>();
 
-                while (reader.Read()) dictionary.Add(reader.GetString(0), reader.GetInt32(1));
+                while (await reader.ReadAsync()) dictionary.Add(reader.GetString(0), reader.GetInt32(1));
 
-                return Task.FromResult(dictionary);
+                return dictionary;
             }, sqlParams).ConfigureAwait(false);
         }
 
