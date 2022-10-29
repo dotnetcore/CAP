@@ -7,7 +7,7 @@
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Consul" Version="1.6.10.3" />
+		<PackageReference Include="Consul" Version="1.6.10.7" />
 		<SupportedPlatform Include="browser" />
 	</ItemGroup>
 
