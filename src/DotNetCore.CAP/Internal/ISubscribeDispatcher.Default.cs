@@ -104,6 +104,7 @@ internal class SubscribeDispatcher : ISubscribeDispatcher
 
             await SetSuccessfulState(message).ConfigureAwait(false);
 
+            CapEventCounterSource.Log.WriteInvokeTimeMetrics(sp.Elapsed.TotalMilliseconds);
             _logger.ConsumerExecuted(descriptor.ImplTypeInfo.Name, descriptor.MethodInfo.Name,
                 descriptor.Attribute.Group, sp.Elapsed.TotalMilliseconds, message.Origin.GetExecutionInstanceId());
 
@@ -248,6 +249,7 @@ internal class SubscribeDispatcher : ISubscribeDispatcher
 
     private void TracingAfter(long? tracingTimestamp, Message message, MethodInfo method)
     {
+        CapEventCounterSource.Log.WriteInvokeMetrics();
         if (tracingTimestamp != null &&
             s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterSubscriberInvoke))
         {

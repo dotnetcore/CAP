@@ -350,6 +350,7 @@ internal class ConsumerRegister : IConsumerRegister
 
     private void TracingAfter(long? tracingTimestamp, TransportMessage message, BrokerAddress broker)
     {
+        CapEventCounterSource.Log.WriteConsumeMetrics();
         if (tracingTimestamp != null && s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterConsume))
         {
             var now = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();

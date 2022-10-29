@@ -26,7 +26,7 @@ namespace DotNetCore.CAP
             MainConfig = new Dictionary<string, string>();
             RetriableErrorCodes = new List<ErrorCode>
             {
-                ErrorCode.GroupLoadInProress
+                ErrorCode.GroupLoadInProgress
             };
         }
 

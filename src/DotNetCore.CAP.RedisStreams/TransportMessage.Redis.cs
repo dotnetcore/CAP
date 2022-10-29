@@ -31,11 +31,11 @@ namespace DotNetCore.CAP.RedisStreams
                 throw new ArgumentException($"Redis stream entry with id {streamEntry.Id} missing cap headers");
             }
                 
-            var headers = JsonSerializer.Deserialize<IDictionary<string, string?>>(headersRaw)!;
+            var headers = JsonSerializer.Deserialize<IDictionary<string, string?>>(headersRaw!)!;
 
             var bodyRaw = streamEntry[Body];
 
-            var body = !bodyRaw.IsNullOrEmpty ? JsonSerializer.Deserialize<byte[]>(bodyRaw) : null;
+            var body = !bodyRaw.IsNullOrEmpty ? JsonSerializer.Deserialize<byte[]>(bodyRaw!) : null;
 
             headers.TryAdd(Messages.Headers.Group, groupId);
 
