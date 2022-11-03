@@ -14,7 +14,7 @@ namespace DotNetCore.CAP
     /// <summary>
     /// Provides programmatic configuration for the CAP Azure Service Bus project.
     /// </summary>
-    public class AzureServiceBusOptions : IAzureServiceBusTopicOptions
+    public class AzureServiceBusOptions
     {
         /// <summary>
         /// TopicPath default value for CAP.
@@ -47,16 +47,16 @@ namespace DotNetCore.CAP
         /// </summary>
         public Func<Message, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
 
-        public AzureServiceBusOptions ConfigureCustomProducer<T>(Action<AzureServiceBusProducerBuilder<T>> configuration)
+        public AzureServiceBusOptions ConfigureCustomProducer<T>(Action<ServiceBusProducerDescriptorBuilder<T>> configuration)
         {
-            var builder = new AzureServiceBusProducerBuilder<T>();
+            var builder = new ServiceBusProducerDescriptorBuilder<T>();
             configuration(builder);
             CustomProducers.Add(builder.Build());
 
             return this;
         }
 
-        internal ICollection<IAzureServiceBusProducer> CustomProducers { get; set; } =
-            new List<IAzureServiceBusProducer>();
+        internal ICollection<IServiceBusProducerDescriptor> CustomProducers { get; set; } =
+            new List<IServiceBusProducerDescriptor>();
     }
 }

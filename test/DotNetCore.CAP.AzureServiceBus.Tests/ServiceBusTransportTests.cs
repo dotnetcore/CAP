@@ -11,11 +11,11 @@ using Xunit;
 
 namespace DotNetCore.CAP.AzureServiceBus.Tests;
 
-public class AzureServiceBusTransportTests
+public class ServiceBusTransportTests
 {
     private readonly IOptions<AzureServiceBusOptions> _options;
 
-    public AzureServiceBusTransportTests()
+    public ServiceBusTransportTests()
     {
         var config = new AzureServiceBusOptions();
         config.ConfigureCustomProducer<EntityCreated>(cfg => cfg.WithTopic("entity-created"));

@@ -25,7 +25,7 @@ namespace DotNetCore.CAP
             services.Configure(_configure);
 
             services.AddSingleton<IConsumerClientFactory, AzureServiceBusConsumerClientFactory>();
-            services.AddSingleton<ITransport,AzureServiceBusTransport>();
+            services.AddSingleton<ITransport, AzureServiceBusTransport>();
         }
     }
 }

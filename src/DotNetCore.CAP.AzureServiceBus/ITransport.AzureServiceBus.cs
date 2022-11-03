@@ -17,7 +17,7 @@ using Message = Microsoft.Azure.ServiceBus.Message;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
-    internal class AzureServiceBusTransport : ITransport, IAzureServiceBusProducerFactory
+    internal class AzureServiceBusTransport : ITransport, IServiceBusProducerDescriptorFactory
     {
         private readonly SemaphoreSlim _connectionLock = new(1, 1);
 
@@ -40,15 +40,14 @@ namespace DotNetCore.CAP.AzureServiceBus
         /// </summary>
         /// <param name="transportMessage"></param>
         /// <returns></returns>
-        public IAzureServiceBusProducer CreateProducerForMessage(TransportMessage transportMessage)
+        public IServiceBusProducerDescriptor CreateProducerForMessage(TransportMessage transportMessage)
             => _asbOptions.Value
                    .CustomProducers
                    .SingleOrDefault(p => p.MessageTypeName == transportMessage.GetName())
                ??
-               new AzureServiceBusProducer(
+               new ServiceBusProducerDescriptorDescriptor(
                    typeName: transportMessage.GetName(),
-                   topicPath: _asbOptions.Value.TopicPath,
-                   enableSessions: _asbOptions.Value.EnableSessions);
+                   topicPath: _asbOptions.Value.TopicPath);
         
         public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {
@@ -101,14 +100,14 @@ namespace DotNetCore.CAP.AzureServiceBus
         /// <summary>
         /// Gets the Topic Client for the specified producer. If it does not exist, a new one is created and added to the Topic Client dictionary.
         /// </summary>
-        /// <param name="producer"></param>
+        /// <param name="producerDescriptor"></param>
         /// <returns><see cref="ITopicClient"/></returns>
-        private ITopicClient GetTopicClientForProducer(IAzureServiceBusProducer producer)
+        private ITopicClient GetTopicClientForProducer(IServiceBusProducerDescriptor producerDescriptor)
         {
-            if (_topicClients.TryGetValue(producer.TopicPath, out var topicClient) && topicClient != null)
+            if (_topicClients.TryGetValue(producerDescriptor.TopicPath, out var topicClient) && topicClient != null)
             {
                 _logger.LogTrace("Topic {TopicPath} connection already present as a Publish destination.",
-                    producer.TopicPath);
+                    producerDescriptor.TopicPath);
 
                 return topicClient;
             }
@@ -119,10 +118,10 @@ namespace DotNetCore.CAP.AzureServiceBus
             {
                 topicClient = new TopicClient(
                     connectionString: BrokerAddress.Endpoint, 
-                    entityPath: producer.TopicPath);
+                    entityPath: producerDescriptor.TopicPath);
 
                 _topicClients.AddOrUpdate(
-                    key: producer.TopicPath,
+                    key: producerDescriptor.TopicPath,
                     addValue: topicClient,
                     updateValueFactory: (_, _) => topicClient);
 
