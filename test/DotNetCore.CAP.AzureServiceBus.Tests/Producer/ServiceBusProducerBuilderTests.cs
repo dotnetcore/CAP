@@ -13,7 +13,6 @@ public class ServiceBusProducerBuilderTests
     {
         var producer = new ServiceBusProducerDescriptorBuilder<MessagePublished>()
             .WithTopic("my-destination")
-            .WithSessionEnabled(true)
             .Build();
 
         producer.ShouldNotBeNull();

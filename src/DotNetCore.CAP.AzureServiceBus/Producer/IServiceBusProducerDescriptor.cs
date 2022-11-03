@@ -29,9 +29,7 @@ public class ServiceBusProducerDescriptorDescriptor : IServiceBusProducerDescrip
 
 public class ServiceBusProducerDescriptorDescriptor<T> : ServiceBusProducerDescriptorDescriptor
 {
-    public ServiceBusProducerDescriptorDescriptor(
-        string topicPath,
-        bool enableSessions) : base(typeof(T), topicPath)
+    public ServiceBusProducerDescriptorDescriptor(string topicPath) : base(typeof(T), topicPath)
     {
     }
 }
