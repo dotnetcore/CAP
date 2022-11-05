@@ -16,7 +16,7 @@ namespace Sample.RabbitMQ.SqlServer
 
     public class AppDbContext : DbContext
     {
-        public const string ConnectionString = "";
+        public const string ConnectionString = "Server=127.0.0.1;Database=AppDB;User Id=sa;Password=pass";
 
         public DbSet<Person> Persons { get; set; }
 
