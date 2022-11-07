@@ -17,7 +17,12 @@ namespace Sample.RabbitMQ.SqlServer
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ("");
+                x.UseRabbitMQ(y =>
+                {
+                    y.UserName = "user";
+                    y.Password = "pass";
+                    y.HostName = "localhost:5672,localhost:5673,localhost:5674";
+                });
                 x.UseDashboard();
                 x.FailedRetryCount = 5;
                 x.FailedThresholdCallback = failed =>

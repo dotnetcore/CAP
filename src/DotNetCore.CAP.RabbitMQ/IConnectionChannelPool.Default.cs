@@ -106,10 +106,8 @@ namespace DotNetCore.CAP.RabbitMQ
             {
                 options.ConnectionFactoryOptions?.Invoke(factory);
 
-                return () => factory.CreateConnection(
-                    options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries));
+                return () => factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(options.HostName));
             }
-
             factory.HostName = options.HostName;
             options.ConnectionFactoryOptions?.Invoke(factory);
             return () => factory.CreateConnection();
