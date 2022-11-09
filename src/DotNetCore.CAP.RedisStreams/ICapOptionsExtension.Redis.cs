@@ -38,7 +38,7 @@ namespace DotNetCore.CAP
 
     internal class CapRedisOptionsPostConfigure : IPostConfigureOptions<CapRedisOptions>
     {
-        public void PostConfigure(string name, CapRedisOptions options)
+        public void PostConfigure(string? name, CapRedisOptions options)
         {
             options.Configuration ??= new ConfigurationOptions();
 
