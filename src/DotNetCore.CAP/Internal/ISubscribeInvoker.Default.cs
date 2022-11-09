@@ -61,8 +61,8 @@ public class SubscribeInvoker : ISubscribeInvoker
             {
                 if (message.Value != null)
                 {
-                    if (_serializer.IsJsonType(message
-                            .Value)) // use ISerializer when reading from storage, skip other objects if not Json
+                    // use ISerializer when reading from storage, skip other objects if not Json
+                    if (_serializer.IsJsonType(message.Value)) 
                     {
                         executeParameters[i] =
                             _serializer.Deserialize(message.Value, parameterDescriptor.ParameterType);
@@ -94,7 +94,7 @@ public class SubscribeInvoker : ISubscribeInvoker
             if (filter != null)
             {
                 var etContext = new ExecutingContext(context, executeParameters);
-                filter.OnSubscribeExecuting(etContext);
+                await filter.OnSubscribeExecutingAsync(etContext).ConfigureAwait(false);
                 executeParameters = etContext.Arguments;
             }
 
@@ -103,7 +103,7 @@ public class SubscribeInvoker : ISubscribeInvoker
             if (filter != null)
             {
                 var edContext = new ExecutedContext(context, resultObj);
-                filter.OnSubscribeExecuted(edContext);
+                await filter.OnSubscribeExecutedAsync(edContext).ConfigureAwait(false);
                 resultObj = edContext.Result;
             }
         }
@@ -112,7 +112,7 @@ public class SubscribeInvoker : ISubscribeInvoker
             if (filter != null)
             {
                 var exContext = new ExceptionContext(context, e);
-                filter.OnSubscribeException(exContext);
+                await filter.OnSubscribeExceptionAsync(exContext).ConfigureAwait(false);
                 if (!exContext.ExceptionHandled) throw exContext.Exception;
 
                 if (exContext.Result != null) resultObj = exContext.Result;

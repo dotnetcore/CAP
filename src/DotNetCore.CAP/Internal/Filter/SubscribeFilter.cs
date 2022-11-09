@@ -3,6 +3,8 @@
 
 // ReSharper disable once CheckNamespace
 
+using System.Threading.Tasks;
+
 namespace DotNetCore.CAP.Filter;
 
 /// <summary>
@@ -14,23 +16,28 @@ public abstract class SubscribeFilter : ISubscribeFilter
     /// Called before the subscriber executes.
     /// </summary>
     /// <param name="context">The <see cref="ExecutingContext" />.</param>
-    public virtual void OnSubscribeExecuting(ExecutingContext context)
+    public virtual Task OnSubscribeExecutingAsync(ExecutingContext context)
     {
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Called after the subscriber executes.
     /// </summary>
     /// <param name="context">The <see cref="ExecutedContext" />.</param>
-    public virtual void OnSubscribeExecuted(ExecutedContext context)
+    public virtual Task OnSubscribeExecutedAsync(ExecutedContext context)
     {
+        return Task.CompletedTask;
     }
 
     /// <summary>
     /// Called after the subscriber has thrown an <see cref="System.Exception" />.
     /// </summary>
     /// <param name="context">The <see cref="ExceptionContext" />.</param>
-    public virtual void OnSubscribeException(ExceptionContext context)
+    public virtual Task OnSubscribeExceptionAsync(ExceptionContext context)
     {
+        return Task.CompletedTask;
     }
+
+
 }
