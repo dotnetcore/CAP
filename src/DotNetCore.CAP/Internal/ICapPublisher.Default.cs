@@ -41,6 +41,64 @@ internal class CapPublisher : ICapPublisher
     public async Task PublishAsync<T>(string name, T? value, IDictionary<string, string?> headers,
         CancellationToken cancellationToken = default)
     {
+        await PublishInternalAsync(name, value, headers, null, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task PublishAsync<T>(string name, T? value, string? callbackName = null,
+        CancellationToken cancellationToken = default)
+    {
+        var headers = new Dictionary<string, string?>
+        {
+            { Headers.CallbackName, callbackName }
+        };
+        await PublishAsync(name, value, headers, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task PublishDelayAsync<T>(TimeSpan delayTime, string name, T? value, IDictionary<string, string?> headers,
+        CancellationToken cancellationToken = default)
+    {
+        if (delayTime <= TimeSpan.Zero)
+        {
+            throw new ArgumentException("Delay time span must be greater than 0", nameof(delayTime));
+        }
+
+        await PublishInternalAsync(name, value, headers, delayTime, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task PublishDelayAsync<T>(TimeSpan delayTime, string name, T? value, string? callbackName = null,
+        CancellationToken cancellationToken = default)
+    {
+        var header = new Dictionary<string, string?>
+        {
+            { Headers.CallbackName, callbackName }
+        };
+
+        await PublishDelayAsync(delayTime, name, value, header, cancellationToken).ConfigureAwait(false);
+    }
+
+    public void Publish<T>(string name, T? value, string? callbackName = null)
+    {
+        PublishAsync(name, value, callbackName).ConfigureAwait(false);
+    }
+
+    public void Publish<T>(string name, T? value, IDictionary<string, string?> headers)
+    {
+        PublishAsync(name, value, headers).ConfigureAwait(false);
+    }
+
+    public void PublishDelay<T>(TimeSpan delayTime, string name, T? value, IDictionary<string, string?> headers)
+    {
+        PublishDelayAsync(delayTime, name, value, headers).ConfigureAwait(false);
+    }
+
+    public void PublishDelay<T>(TimeSpan delayTime, string name, T? value, string? callbackName = null)
+    {
+        PublishDelayAsync(delayTime, name, value, callbackName).ConfigureAwait(false);
+    }
+
+    private async Task PublishInternalAsync<T>(string name, T? value, IDictionary<string, string?> headers, TimeSpan? delayTime = null,
+        CancellationToken cancellationToken = default)
+    {
         if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 
         if (!string.IsNullOrEmpty(_capOptions.TopicNamePrefix)) name = $"{_capOptions.TopicNamePrefix}.{name}";
@@ -59,7 +117,18 @@ internal class CapPublisher : ICapPublisher
 
         headers.Add(Headers.MessageName, name);
         headers.Add(Headers.Type, typeof(T).Name);
-        headers.Add(Headers.SentTime, DateTimeOffset.Now.ToString());
+
+        var publishTime = DateTime.Now;
+        if (delayTime != null)
+        {
+            publishTime += delayTime.Value;
+            headers.Add(Headers.DelayTime, delayTime.Value.ToString());
+            headers.Add(Headers.SentTime, publishTime.ToString());
+        }
+        else
+        {
+            headers.Add(Headers.SentTime, publishTime.ToString());
+        }
 
         var message = new Message(headers, value);
 
@@ -74,7 +143,14 @@ internal class CapPublisher : ICapPublisher
 
                 TracingAfter(tracingTimestamp, message);
 
-                await _dispatcher.EnqueueToPublish(mediumMessage).ConfigureAwait(false);
+                if (delayTime != null)
+                {
+                    await _dispatcher.EnqueueToScheduler(mediumMessage, publishTime).ConfigureAwait(false);
+                }
+                else
+                {
+                    await _dispatcher.EnqueueToPublish(mediumMessage).ConfigureAwait(false);
+                }
             }
             else
             {
@@ -96,31 +172,6 @@ internal class CapPublisher : ICapPublisher
 
             throw;
         }
-    }
-
-    public async Task PublishAsync<T>(string name, T? value, string? callbackName = null,
-        CancellationToken cancellationToken = default)
-    {
-        var headers = new Dictionary<string, string?>
-        {
-            { Headers.CallbackName, callbackName }
-        };
-        await PublishAsync(name, value, headers, cancellationToken).ConfigureAwait(false);
-    }
-
-    public void Publish<T>(string name, T? value, string? callbackName = null)
-    {
-        var header = new Dictionary<string, string?>
-        {
-            { Headers.CallbackName, callbackName }
-        };
-
-        PublishAsync(name, value, header).ConfigureAwait(false);
-    }
-
-    public void Publish<T>(string name, T? value, IDictionary<string, string?> headers)
-    {
-        PublishAsync(name, value, headers).ConfigureAwait(false);
     }
 
     #region tracing

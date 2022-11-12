@@ -229,4 +229,9 @@ public class SqlServerDataStorage : IDataStorage
 
         return result;
     }
+
+    public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+    {
+        throw new NotImplementedException();
+    }
 }

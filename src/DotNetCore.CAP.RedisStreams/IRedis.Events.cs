@@ -19,19 +19,19 @@ namespace DotNetCore.CAP.RedisStreams
             connection.ConnectionFailed += Connection_ConnectionFailed;
         }
 
-        private void Connection_ConnectionFailed(object sender, ConnectionFailedEventArgs e)
+        private void Connection_ConnectionFailed(object? sender, ConnectionFailedEventArgs e)
         {
             _logger.LogError(e.Exception,
                 $"Connection failed!, {e.Exception?.Message}, for endpoint:{e.EndPoint}, failure type:{e.FailureType}, connection type:{e.ConnectionType}");
         }
 
-        private void Connection_ConnectionRestored(object sender, ConnectionFailedEventArgs e)
+        private void Connection_ConnectionRestored(object? sender, ConnectionFailedEventArgs e)
         {
             _logger.LogWarning(
                 $"Connection restored back!, {e.Exception?.Message}, for endpoint:{e.EndPoint}, failure type:{e.FailureType}, connection type:{e.ConnectionType}");
         }
 
-        private void Connection_ErrorMessage(object sender, RedisErrorEventArgs e)
+        private void Connection_ErrorMessage(object? sender, RedisErrorEventArgs e)
         {
             if (e.Message.GetRedisErrorType() == RedisErrorTypes.Unknown)
             {

@@ -76,6 +76,26 @@ namespace DotNetCore.CAP.Test
             {
                 throw new NotImplementedException();
             }
+
+            public Task PublishDelayAsync<T>(TimeSpan delayTime, string name, T value, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PublishDelayAsync<T>(TimeSpan delayTime, string name, T value, string callbackName = null, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void PublishDelay<T>(TimeSpan delayTime, string name, T value, IDictionary<string, string> headers)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void PublishDelay<T>(TimeSpan delayTime, string name, T value, string callbackName = null)
+            {
+                throw new NotImplementedException();
+            }
         }
     }
 }

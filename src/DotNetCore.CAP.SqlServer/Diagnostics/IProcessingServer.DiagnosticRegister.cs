@@ -3,6 +3,7 @@
 
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 
 namespace DotNetCore.CAP.SqlServer.Diagnostics;
@@ -20,12 +21,9 @@ public class DiagnosticRegister : IProcessingServer
     {
     }
 
-    public void Pulse()
-    {
-    }
-
-    public void Start(CancellationToken stoppingToken)
+    public Task Start(CancellationToken stoppingToken)
     {
         DiagnosticListener.AllListeners.Subscribe(_diagnosticProcessorObserver);
+        return Task.CompletedTask;
     }
 }

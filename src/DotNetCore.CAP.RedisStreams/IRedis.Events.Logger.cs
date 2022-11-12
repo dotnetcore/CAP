@@ -19,7 +19,7 @@ namespace DotNetCore.CAP.RedisStreams
         public override Encoding Encoding => Encoding.UTF8;
 
 
-        public override void WriteLine(string value)
+        public override void WriteLine(string? value)
         {
             logger.LogInformation(value);
         }

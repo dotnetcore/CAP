@@ -38,7 +38,7 @@ public class InfiniteRetryProcessor : IProcessor
             }
     }
 
-    public override string ToString()
+    public override string? ToString()
     {
         return _inner.ToString();
     }

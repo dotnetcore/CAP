@@ -106,9 +106,9 @@ namespace DotNetCore.CAP.AzureServiceBus
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
-            var commitInput = (AzureServiceBusConsumerCommitInput) sender;
+            var commitInput = (AzureServiceBusConsumerCommitInput) sender!;
             if (_asbOptions.EnableSessions)
             {
                 commitInput.Session?.CompleteAsync(commitInput.LockToken);

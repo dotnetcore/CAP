@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.Internal;
 
@@ -12,9 +13,10 @@ namespace DotNetCore.CAP.Internal;
 /// </summary>
 public interface IProcessingServer : IDisposable
 {
-    void Pulse()
+    Task Pulse()
     {
+        return Task.CompletedTask;
     }
 
-    void Start(CancellationToken stoppingToken);
+    Task Start(CancellationToken stoppingToken);
 }

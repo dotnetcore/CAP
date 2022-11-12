@@ -77,11 +77,11 @@ namespace DotNetCore.CAP.RabbitMQ
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
             if (_channel!.IsOpen)
             {
-                _channel.BasicAck((ulong)sender, false);
+                _channel.BasicAck((ulong)sender!, false);
             }
         }
 

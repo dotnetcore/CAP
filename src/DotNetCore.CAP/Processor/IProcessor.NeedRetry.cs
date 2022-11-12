@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -19,16 +20,19 @@ public class MessageNeedToRetryProcessor : IProcessor
     private readonly ILogger<MessageNeedToRetryProcessor> _logger;
     private readonly IMessageSender _messageSender;
     private readonly ISubscribeDispatcher _subscribeDispatcher;
+    private readonly IDispatcher _dispatcher;
     private readonly TimeSpan _waitingInterval;
 
     public MessageNeedToRetryProcessor(
         IOptions<CapOptions> options,
         ILogger<MessageNeedToRetryProcessor> logger,
         ISubscribeDispatcher subscribeDispatcher,
+        IDispatcher dispatcher,
         IMessageSender messageSender)
     {
         _logger = logger;
         _subscribeDispatcher = subscribeDispatcher;
+        _dispatcher = dispatcher;
         _messageSender = messageSender;
         _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
     }
@@ -39,7 +43,10 @@ public class MessageNeedToRetryProcessor : IProcessor
 
         var storage = context.Provider.GetRequiredService<IDataStorage>();
 
-        await Task.WhenAll(ProcessPublishedAsync(storage, context), ProcessReceivedAsync(storage, context)).ConfigureAwait(false);
+        await Task.WhenAll(
+            ProcessPublishedAsync(storage, context),
+            ProcessReceivedAsync(storage, context),
+            ProcessDelayedAsync(storage, context)).ConfigureAwait(false);
 
         await context.WaitAsync(_waitingInterval).ConfigureAwait(false);
     }
@@ -54,6 +61,20 @@ public class MessageNeedToRetryProcessor : IProcessor
         {
             //the message.Origin.Value maybe JObject
             await _messageSender.SendAsync(message).ConfigureAwait(false);
+
+            await context.WaitAsync(_delay).ConfigureAwait(false);
+        }
+    }
+
+    private async Task ProcessDelayedAsync(IDataStorage connection, ProcessingContext context)
+    {
+        context.ThrowIfStopping();
+
+        var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfDelayed).ConfigureAwait(false);
+
+        foreach (var message in messages)
+        {
+            await _dispatcher.EnqueueToScheduler(message, message.ExpiresAt!.Value).ConfigureAwait(false);
 
             await context.WaitAsync(_delay).ConfigureAwait(false);
         }

@@ -223,5 +223,10 @@ namespace DotNetCore.CAP.PostgreSql
 
             return result;
         }
+
+        public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

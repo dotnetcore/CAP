@@ -134,7 +134,7 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
                 var parameters = method.GetParameters()
                     .Select(parameter => new ParameterDescriptor
                     {
-                        Name = parameter.Name,
+                        Name = parameter.Name!,
                         ParameterType = parameter.ParameterType,
                         IsFromCap = parameter.GetCustomAttributes(typeof(FromCapAttribute)).Any()
                                     || typeof(CancellationToken).IsAssignableFrom(parameter.ParameterType)

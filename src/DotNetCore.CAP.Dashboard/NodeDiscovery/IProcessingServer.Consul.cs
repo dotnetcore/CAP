@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery
@@ -15,14 +16,9 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             _discoveryProvider = discoveryProvider;
         }
 
-        public void Start(CancellationToken stoppingToken)
+        public async Task Start(CancellationToken stoppingToken)
         {
-            _discoveryProvider.RegisterNode(stoppingToken).GetAwaiter().GetResult();
-        }
-
-        public void Pulse()
-        {
-            //ignore
+            await _discoveryProvider.RegisterNode(stoppingToken);
         }
 
         public void Dispose()

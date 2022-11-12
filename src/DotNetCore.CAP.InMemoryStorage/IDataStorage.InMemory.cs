@@ -196,5 +196,10 @@ namespace DotNetCore.CAP.InMemoryStorage
         {
             return new InMemoryMonitoringApi();
         }
+
+        public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

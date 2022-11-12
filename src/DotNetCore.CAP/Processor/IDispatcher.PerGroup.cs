@@ -43,7 +43,7 @@ internal class DispatcherPerGroup : IDispatcher
         _executor = executor;
     }
 
-    public void Start(CancellationToken stoppingToken)
+    public async Task Start(CancellationToken stoppingToken)
     {
         _stoppingToken = stoppingToken;
         _stoppingToken.ThrowIfCancellationRequested();
@@ -59,16 +59,22 @@ internal class DispatcherPerGroup : IDispatcher
                 FullMode = BoundedChannelFullMode.Wait
             });
 
-        Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
+        await Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
             .Select(_ => Task.Factory.StartNew(() => Sending(stoppingToken), stoppingToken,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
 
         _receivedChannels =
             new ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>>(
                 _options.ConsumerThreadCount, _options.ConsumerThreadCount * 2);
+
         GetOrCreateReceiverChannel(_options.DefaultGroupName);
 
         _logger.LogInformation("Starting DispatcherPerGroup");
+    }
+
+    public ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime)
+    {
+        throw new NotImplementedException();
     }
 
     public async ValueTask EnqueueToPublish(MediumMessage message)
@@ -144,20 +150,20 @@ internal class DispatcherPerGroup : IDispatcher
         try
         {
             while (await _publishedChannel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
-            while (_publishedChannel.Reader.TryRead(out var message))
-                try
-                {
-                    var result = await _sender.SendAsync(message).ConfigureAwait(false);
-                    if (!result.Succeeded)
-                        _logger.MessagePublishException(
-                            message.Origin.GetId(),
-                            result.ToString(),
-                            result.Exception);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Id:{message.DbId}");
-                }
+                while (_publishedChannel.Reader.TryRead(out var message))
+                    try
+                    {
+                        var result = await _sender.SendAsync(message).ConfigureAwait(false);
+                        if (!result.Succeeded)
+                            _logger.MessagePublishException(
+                                message.Origin.GetId(),
+                                result.ToString(),
+                                result.Exception);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Id:{message.DbId}");
+                    }
         }
         catch (OperationCanceledException)
         {
@@ -171,23 +177,23 @@ internal class DispatcherPerGroup : IDispatcher
         try
         {
             while (await channel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
-            while (channel.Reader.TryRead(out var message))
-                try
-                {
-                    if (_logger.IsEnabled(LogLevel.Debug))
-                        _logger.LogDebug("Dispatching message for group {ConsumerGroup}", group);
+                while (channel.Reader.TryRead(out var message))
+                    try
+                    {
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug("Dispatching message for group {ConsumerGroup}", group);
 
-                    await _executor.DispatchAsync(message.Item1, message.Item2, cancellationToken).ConfigureAwait(false);
-                }
-                catch (OperationCanceledException)
-                {
-                    //expected
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e,
-                        $"An exception occurred when invoke subscriber. MessageId:{message.Item1.DbId}");
-                }
+                        await _executor.DispatchAsync(message.Item1, message.Item2, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        //expected
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e,
+                            $"An exception occurred when invoke subscriber. MessageId:{message.Item1.DbId}");
+                    }
         }
         catch (OperationCanceledException)
         {

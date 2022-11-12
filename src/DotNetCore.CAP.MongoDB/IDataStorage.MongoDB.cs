@@ -221,4 +221,9 @@ public class MongoDBDataStorage : IDataStorage
     {
         return new MongoDBMonitoringApi(_client, _options);
     }
+
+    public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+    {
+        throw new NotImplementedException();
+    }
 }

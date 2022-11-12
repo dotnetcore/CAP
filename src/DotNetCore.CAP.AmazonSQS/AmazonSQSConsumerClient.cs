@@ -115,11 +115,11 @@ namespace DotNetCore.CAP.AmazonSQS
             }
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
             try
             {
-                _ = _sqsClient!.DeleteMessageAsync(_queueUrl, (string)sender).GetAwaiter().GetResult();
+                _ = _sqsClient!.DeleteMessageAsync(_queueUrl, (string)sender!).GetAwaiter().GetResult();
             }
             catch (InvalidIdFormatException ex)
             {
