@@ -102,7 +102,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 Port = options.Port,
                 Password = options.Password,
                 VirtualHost = options.VirtualHost,
-                ClientProvidedName = Assembly.GetEntryAssembly()?.GetName().Name.ToLower()
+                ClientProvidedName = Assembly.GetEntryAssembly()?.GetName().Name!.ToLower()
             };
 
             if (options.HostName.Contains(","))

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 	<Nullable>enable</Nullable>
 	<Description>CAP instrumentation for OpenTelemetry .NET</Description>
     <PackageTags>$(PackageTags);distributed-tracing;opentelemetry;</PackageTags>
