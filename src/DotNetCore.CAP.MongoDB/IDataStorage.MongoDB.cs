@@ -162,14 +162,14 @@ public class MongoDBDataStorage : IDataStorage
         if (collection == _options.Value.PublishedCollection)
         {
             var publishedCollection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
-            var ret = await publishedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout, cancellationToken)
+            var ret = await publishedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout && (x.StatusName == nameof(StatusName.Succeeded) || x.StatusName == nameof(StatusName.Failed)), cancellationToken)
                 .ConfigureAwait(false);
             return (int)ret.DeletedCount;
         }
         else
         {
             var receivedCollection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
-            var ret = await receivedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout, cancellationToken)
+            var ret = await receivedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout && (x.StatusName == nameof(StatusName.Succeeded) || x.StatusName == nameof(StatusName.Failed)), cancellationToken)
                 .ConfigureAwait(false);
             return (int)ret.DeletedCount;
         }
@@ -224,7 +224,7 @@ public class MongoDBDataStorage : IDataStorage
             .Find(x => x.Version == _capOptions.Value.Version
                        && (
                              (x.StatusName == nameof(StatusName.Delayed) && x.ExpiresAt < DateTime.Now.AddMinutes(2))
-                               || 
+                               ||
                              (x.StatusName == nameof(StatusName.Queued) && x.ExpiresAt < DateTime.Now.AddMinutes(-1))
                           )
                   )

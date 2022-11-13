@@ -147,7 +147,7 @@ public class SqlServerDataStorage : IDataStorage
         var connection = new SqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
         return await connection.ExecuteNonQueryAsync(
-            $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout;", null,
+            $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout AND (StatusName='{StatusName.Succeeded}' OR StatusName='{StatusName.Failed}');", null,
             new SqlParameter("@timeout", timeout), new SqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
     }
 

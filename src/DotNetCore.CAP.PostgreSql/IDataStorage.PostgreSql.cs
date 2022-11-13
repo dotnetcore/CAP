@@ -143,7 +143,7 @@ namespace DotNetCore.CAP.PostgreSql
             var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
             return await connection.ExecuteNonQueryAsync(
-                $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout LIMIT @batchCount);", null,
+                $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout AND (\"StatusName\"='{StatusName.Succeeded}' OR \"StatusName\"='{StatusName.Failed}') LIMIT @batchCount);", null,
                 new NpgsqlParameter("@timeout", timeout), new NpgsqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
         }
 
