@@ -58,7 +58,7 @@ public class MessageNeedToRetryProcessor : IProcessor
         var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry).ConfigureAwait(false);
 
         foreach (var message in messages)
-        {
+        { 
             //the message.Origin.Value maybe JObject
             await _messageSender.SendAsync(message).ConfigureAwait(false);
 
@@ -75,8 +75,6 @@ public class MessageNeedToRetryProcessor : IProcessor
         foreach (var message in messages)
         {
             await _dispatcher.EnqueueToScheduler(message, message.ExpiresAt!.Value).ConfigureAwait(false);
-
-            await context.WaitAsync(_delay).ConfigureAwait(false);
         }
     }
 

@@ -18,16 +18,18 @@ namespace DotNetCore.CAP.Processor;
 
 public class Dispatcher : IDispatcher
 {
-    private readonly CancellationTokenSource _cts = new();
+    private readonly CancellationTokenSource _tasksCTS = new();
+    private readonly CancellationTokenSource _delayCTS = new();
     private readonly ISubscribeDispatcher _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
     private readonly IMessageSender _sender;
     private readonly IDataStorage _storage;
+    private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
 
     private Channel<MediumMessage> _publishedChannel = default!;
-    private Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel = default!;
-    private PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
+    private Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel = default!;    
+    private DateTime _nextSendTime = DateTime.MaxValue;
 
     public Dispatcher(ILogger<Dispatcher> logger,
         IMessageSender sender,
@@ -46,7 +48,8 @@ public class Dispatcher : IDispatcher
     public async Task Start(CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
-        stoppingToken.Register(() => _cts.Cancel());
+        stoppingToken.Register(() => _tasksCTS.Cancel());
+        stoppingToken.Register(() => _delayCTS.Cancel());
 
         var capacity = _options.ProducerThreadCount * 500;
         _publishedChannel = Channel.CreateBounded<MediumMessage>(
@@ -81,19 +84,27 @@ public class Dispatcher : IDispatcher
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                while (_schedulerQueue.TryDequeue(out var message, out var sentTime))
+                try
                 {
-                    var elpsedTime = sentTime - DateTime.Now;
-
-                    if (elpsedTime.TotalMilliseconds > 0)
+                    while (_schedulerQueue.TryPeek(out var message, out _nextSendTime))
                     {
-                        await Task.Delay(elpsedTime);
-                    }
-                    await _sender.SendAsync(message).ConfigureAwait(false);
-                }
-                stoppingToken.WaitHandle.WaitOne(1000);
-            }
+                        var delayTime = _nextSendTime - DateTime.Now;
 
+                        if (delayTime > new TimeSpan(500000)) //50ms
+                        {
+                            await Task.Delay(delayTime, _delayCTS.Token);
+                        }
+                        stoppingToken.ThrowIfCancellationRequested();
+
+                        await _sender.SendAsync(_schedulerQueue.Dequeue()).ConfigureAwait(false);
+                    }
+                    stoppingToken.WaitHandle.WaitOne(100);
+                }
+                catch (OperationCanceledException)
+                {
+                    //Ignore
+                }
+            }
         }, stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
 
         _logger.LogInformation("Starting default Dispatcher");
@@ -110,6 +121,11 @@ public class Dispatcher : IDispatcher
             await _storage.ChangePublishStateAsync(message, StatusName.Queued);
 
             _schedulerQueue.Enqueue(message, publishTime);
+
+            if (publishTime < _nextSendTime)
+            {
+                _delayCTS.Cancel();
+            }
         }
         else
         {
@@ -122,7 +138,7 @@ public class Dispatcher : IDispatcher
         try
         {
             if (!_publishedChannel.Writer.TryWrite(message))
-                while (await _publishedChannel.Writer.WaitToWriteAsync(_cts.Token).ConfigureAwait(false))
+                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCTS.Token).ConfigureAwait(false))
                     if (_publishedChannel.Writer.TryWrite(message))
                         return;
         }
@@ -137,7 +153,7 @@ public class Dispatcher : IDispatcher
         try
         {
             if (!_receivedChannel.Writer.TryWrite((message, descriptor)))
-                while (await _receivedChannel.Writer.WaitToWriteAsync(_cts.Token).ConfigureAwait(false))
+                while (await _receivedChannel.Writer.WaitToWriteAsync(_tasksCTS.Token).ConfigureAwait(false))
                     if (_receivedChannel.Writer.TryWrite((message, descriptor)))
                         return;
         }
@@ -149,8 +165,8 @@ public class Dispatcher : IDispatcher
 
     public void Dispose()
     {
-        if (!_cts.IsCancellationRequested)
-            _cts.Cancel();
+        if (!_tasksCTS.IsCancellationRequested)
+            _tasksCTS.Cancel();
     }
 
     private async ValueTask Sending(CancellationToken cancellationToken)

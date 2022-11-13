@@ -10,7 +10,7 @@ builder.Services.AddCap(c =>
     c.UseInMemoryStorage();
     c.UseAzureServiceBus(asb =>
     {
-        asb.ConnectionString = builder.Configuration.GetConnectionString("AzureServiceBus");
+        asb.ConnectionString = builder.Configuration.GetConnectionString("AzureServiceBus")!;
         asb.CustomHeaders = message => new List<KeyValuePair<string, string>>()
         {
             new(DotNetCore.CAP.Messages.Headers.MessageId,

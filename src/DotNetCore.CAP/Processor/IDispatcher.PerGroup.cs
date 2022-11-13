@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -18,36 +19,41 @@ namespace DotNetCore.CAP.Processor;
 
 internal class DispatcherPerGroup : IDispatcher
 {
-    private readonly CancellationTokenSource _cts = new();
+    private readonly CancellationTokenSource _tasksCTS = new();
+    private readonly CancellationTokenSource _delayCTS = new();
     private readonly ISubscribeDispatcher _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
     private readonly IMessageSender _sender;
+    private readonly IDataStorage _storage;
+    private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
 
     private Channel<MediumMessage> _publishedChannel = default!;
+    private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>> _receivedChannels = default!;
 
-    private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>> _receivedChannels =
-        default!;
-
+    private DateTime _nextSendTime = DateTime.MaxValue;
     private CancellationToken _stoppingToken;
 
-    public DispatcherPerGroup(
-        ILogger<Dispatcher> logger,
+    public DispatcherPerGroup(ILogger<Dispatcher> logger,
         IMessageSender sender,
         IOptions<CapOptions> options,
-        ISubscribeDispatcher executor)
+        ISubscribeDispatcher executor,
+        IDataStorage storage)
     {
         _logger = logger;
         _sender = sender;
         _options = options.Value;
         _executor = executor;
+        _schedulerQueue = new PriorityQueue<MediumMessage, DateTime>();
+        _storage = storage;
     }
 
     public async Task Start(CancellationToken stoppingToken)
     {
         _stoppingToken = stoppingToken;
         _stoppingToken.ThrowIfCancellationRequested();
-        _stoppingToken.Register(() => _cts.Cancel());
+        _stoppingToken.Register(() => _tasksCTS.Cancel());
+        _stoppingToken.Register(() => _delayCTS.Cancel());
 
         var capacity = _options.ProducerThreadCount * 500;
         _publishedChannel = Channel.CreateBounded<MediumMessage>(
@@ -69,12 +75,57 @@ internal class DispatcherPerGroup : IDispatcher
 
         GetOrCreateReceiverChannel(_options.DefaultGroupName);
 
+        await Task.Factory.StartNew(async () =>
+        {
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    while (_schedulerQueue.TryPeek(out var message, out _nextSendTime))
+                    {
+                        var delayTime = _nextSendTime - DateTime.Now;
+
+                        if (delayTime > new TimeSpan(500000)) //50ms
+                        {
+                            await Task.Delay(delayTime, _delayCTS.Token);
+                        }
+                        stoppingToken.ThrowIfCancellationRequested();
+
+                        await _sender.SendAsync(_schedulerQueue.Dequeue()).ConfigureAwait(false);
+                    }
+                    stoppingToken.WaitHandle.WaitOne(100);
+                }
+                catch (OperationCanceledException)
+                {
+                    //Ignore
+                }
+            }
+        }, stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+
         _logger.LogInformation("Starting DispatcherPerGroup");
     }
 
-    public ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime)
+    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime)
     {
-        throw new NotImplementedException();
+        message.ExpiresAt = publishTime;
+
+        var timeSpan = publishTime - DateTime.Now;
+
+        if (timeSpan <= TimeSpan.FromMinutes(1))
+        {
+            await _storage.ChangePublishStateAsync(message, StatusName.Queued);
+
+            _schedulerQueue.Enqueue(message, publishTime);
+
+            if (publishTime < _nextSendTime)
+            {
+                _delayCTS.Cancel();
+            }
+        }
+        else
+        {
+            await _storage.ChangePublishStateAsync(message, StatusName.Delayed);
+        }
     }
 
     public async ValueTask EnqueueToPublish(MediumMessage message)
@@ -82,7 +133,7 @@ internal class DispatcherPerGroup : IDispatcher
         try
         {
             if (!_publishedChannel.Writer.TryWrite(message))
-                while (await _publishedChannel.Writer.WaitToWriteAsync(_cts.Token).ConfigureAwait(false))
+                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCTS.Token).ConfigureAwait(false))
                     if (_publishedChannel.Writer.TryWrite(message))
                         return;
         }
@@ -103,7 +154,7 @@ internal class DispatcherPerGroup : IDispatcher
             var channel = GetOrCreateReceiverChannel(group);
 
             if (!channel.Writer.TryWrite((message, descriptor)))
-                while (await channel.Writer.WaitToWriteAsync(_cts.Token).ConfigureAwait(false))
+                while (await channel.Writer.WaitToWriteAsync(_tasksCTS.Token).ConfigureAwait(false))
                     if (channel.Writer.TryWrite((message, descriptor)))
                         return;
         }
@@ -115,8 +166,8 @@ internal class DispatcherPerGroup : IDispatcher
 
     public void Dispose()
     {
-        if (!_cts.IsCancellationRequested)
-            _cts.Cancel();
+        if (!_tasksCTS.IsCancellationRequested)
+            _tasksCTS.Cancel();
     }
 
     private Channel<(MediumMessage, ConsumerExecutorDescriptor)> GetOrCreateReceiverChannel(string key)

@@ -217,13 +217,31 @@ public class MongoDBDataStorage : IDataStorage
         }).ToList();
     }
 
+    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+    {
+        var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
+        var queryResult = await collection
+            .Find(x => x.Version == _capOptions.Value.Version
+                       && (
+                             (x.StatusName == nameof(StatusName.Delayed) && x.ExpiresAt < DateTime.Now.AddMinutes(2))
+                               || 
+                             (x.StatusName == nameof(StatusName.Queued) && x.ExpiresAt < DateTime.Now.AddMinutes(-1))
+                          )
+                  )
+            .Limit(200)
+            .ToListAsync().ConfigureAwait(false);
+        return queryResult.Select(x => new MediumMessage
+        {
+            DbId = x.Id.ToString(),
+            Origin = _serializer.Deserialize(x.Content)!,
+            Retries = x.Retries,
+            Added = x.Added,
+            ExpiresAt = x.ExpiresAt
+        }).ToList();
+    }
+
     public IMonitoringApi GetMonitoringApi()
     {
         return new MongoDBMonitoringApi(_client, _options);
-    }
-
-    public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
-    {
-        throw new NotImplementedException();
     }
 }
