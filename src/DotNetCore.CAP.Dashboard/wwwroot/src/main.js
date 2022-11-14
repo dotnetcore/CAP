@@ -2,14 +2,19 @@ import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
 import baseURL from './global'
-import { BootstrapVue, IconsPlugin } from 'bootstrap-vue'
+import {
+  BootstrapVue,
+  IconsPlugin
+} from 'bootstrap-vue'
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
-import store from '@/store/store.js'
+import store from '../src/store/store.js'
 import axios from "axios";
 import VueI18n from 'vue-i18n'
+import * as zh from './assets/language/zh-cn'
+import * as en from './assets/language/en-us'
 //
 //
 axios.defaults.baseURL = baseURL;
@@ -39,21 +44,21 @@ Vue.component("vue-json-pretty", VueJsonPretty)
 Vue.use(VueI18n)
 
 const i18n = new VueI18n({
-    locale:(function(){
-        if(localStorage.getItem('lang')){
-            return localStorage.getItem('lang')
-        }
-        return 'en-us'
-    }()),
-    messages:{
-        'en-us':require('./assets/language/en-us'), //英文语言包
-        'zh-cn':require('./assets/language/zh-cn'), //中文繁体包
+  locale: (function () {
+    if (localStorage.getItem('lang')) {
+      return localStorage.getItem('lang')
     }
+    return 'en-us'
+  }()),
+  messages: {
+    'en-us': en.default, //英文语言包
+    'zh-cn': zh.default, //中文包
+  }
 })
 
 new Vue({
   router,
   store,
-    i18n,
+  i18n,
   render: h => h(App)
 }).$mount('#app')

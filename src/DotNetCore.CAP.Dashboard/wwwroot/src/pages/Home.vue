@@ -1,215 +1,153 @@
 <template>
   <b-row>
     <b-col md="12">
-      <h1 class="page-line mb-4">{{$t("Dashboard")}}</h1>
-      <h3 class="mb-4">{{$t("24h History Graph")}}</h3>
-      <v-chart class="chart" :option="option" />
+      <h1 class="page-line mb-4">{{ $t("Dashboard") }}</h1>
+
+      <h3 class="mb-4">{{ $t("24h History Graph") }}</h3>
+      <div id="realtimeGraph"></div>
+
     </b-col>
   </b-row>
 </template>
 
 <script>
-import axios from 'axios';
-import { use, graphic } from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
-import { LineChart } from "echarts/charts";
-import {
-  GridComponent,
-  DataZoomComponent,
-  VisualMapComponent,
-  TimelineComponent,
-  CalendarComponent,
-  TooltipComponent,
-  LegendComponent,
-} from "echarts/components";
-import VChart, { THEME_KEY } from "vue-echarts";
 
-use([
-  CanvasRenderer,
-  LineChart,
-  GridComponent,
-  DataZoomComponent,
-  VisualMapComponent,
-  TimelineComponent,
-  CalendarComponent,
-  TooltipComponent,
-  LegendComponent
-]);
+import uPlot from '../assets/uPlot.esm.js';
 
 export default {
-  name: "Dashboard",
-  components: {
-    VChart
-  },
-  provide: {
-    [THEME_KEY]: "light"
-  },
-  data() {
-    return {
-      renderData: {},
-    }
-  },
-  computed: {
-    option: function () {
-      const { dayHour,
-        publishSuccessed,
-        publishFailed,
-        subscribeSuccessed,
-        subscribeFailed } = this.renderData;
-
-      return {
-        color: ['#80FFA5', '#00DDFF', '#37A2FF', '#FF0087'],
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'cross',
-            label: {
-              backgroundColor: '#6a7985'
-            }
-          }
-        },
-        legend: {
-          data: [
-            this.$t('Publish Succeeded'),
-            this.$t('Publish Failed'),
-            this.$t('Received Succeeded'),
-            this.$t('Received Failed')]
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: [
-          {
-            type: 'category',
-            inverse: true,
-            axisLabel: {
-              interval: 0,
-              rotate: 40
-            },
-            boundaryGap: false,
-            data: dayHour
-          }
-        ],
-        yAxis: [
-          {
-            type: 'value'
-          }
-        ],
-        series: [
-          {
-            name:  this.$t('Publish Succeeded'),
-            type: 'line',
-            stack: 'Number',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(128, 255, 165)'
-              }, {
-                offset: 1,
-                color: 'rgba(1, 191, 236)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: publishSuccessed
-          },
-          {
-            name:  this.$t('Publish Failed'),
-            type: 'line',
-            stack: 'Number',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(0, 221, 255)'
-              }, {
-                offset: 1,
-                color: 'rgba(77, 119, 255)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: publishFailed
-          },
-          {
-            name: this.$t('Received Succeeded'),
-            type: 'line',
-            stack: 'Number',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(55, 162, 255)'
-              }, {
-                offset: 1,
-                color: 'rgba(116, 21, 219)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: subscribeSuccessed
-          },
-          {
-            name: this.$t('Received Failed'),
-            type: 'line',
-            stack: 'Number',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(255, 0, 135)'
-              }, {
-                offset: 1,
-                color: 'rgba(135, 0, 157)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: subscribeFailed
-          }
-        ]
-      }
-    }
-  },
-
   mounted() {
-    axios.get('/metrics').then(res => {
-      this.renderData = res.data;
-      console.log(this.renderData);
+
+
+    function round2(val) {
+      return Math.round(val * 100) / 100;
+    }
+
+    function round3(val) {
+      return Math.round(val * 1000) / 1000;
+    }
+
+    function prepData(packed) {
+      console.time('prep');
+
+      // epoch,idl,recv,send,read,writ,used,free
+
+      const numFields = packed[0];
+
+      packed = packed.slice(numFields + 1);
+
+      // 55,550 data points x 3 series = 166,650
+      let data = [
+        Array(packed.length / numFields),
+        Array(packed.length / numFields),
+        Array(packed.length / numFields),
+        Array(packed.length / numFields),
+      ];
+
+      for (let i = 0, j = 0; i < packed.length; i += numFields, j++) {
+        data[0][j] = packed[i] * 60;
+        data[1][j] = round3(100 - packed[i + 1]);
+        data[2][j] = round2(100 * packed[i + 5] / (packed[i + 5] + packed[i + 6]));
+        data[3][j] = packed[i + 3];
+      }
+
+      console.timeEnd('prep');
+
+      return data;
+    }
+
+    function makeChart(data) {
+      console.time('chart');
+
+      function sliceData(start, end) {
+        let d = [];
+
+        for (let i = 0; i < data.length; i++)
+          d.push(data[i].slice(start, end));
+
+        return d;
+      }
+
+      let interval = 100;
+
+      const opts = {
+        title: "Fixed length / sliding data slices",
+        width: 800,
+        height: 400,
+        cursor: {
+          drag: {
+            setScale: false,
+          }
+        },
+        select: {
+          show: false,
+        },
+        series: [{},
+        {
+          label: "CPU",
+          scale: "%",
+          value: (u, v) => v == null ? "-" : v.toFixed(1) + "%",
+          stroke: "red",
+        },
+        {
+          label: "RAM",
+          scale: "%",
+          value: (u, v) => v == null ? "-" : v.toFixed(1) + "%",
+          stroke: "blue",
+        },
+        {
+          label: "TCP Out",
+          scale: "mb",
+          value: (u, v) => v == null ? "-" : v.toFixed(2) + " MB",
+          stroke: "green",
+        }
+        ],
+        axes: [{},
+        {
+          scale: '%',
+          values: (u, vals, space) => vals.map(v => +v.toFixed(1) + "%"),
+        },
+        {
+          side: 1,
+          scale: 'mb',
+          values: (u, vals, space) => vals.map(v => +v.toFixed(2) + " MB"),
+          grid: {
+            show: false
+          },
+        },
+        ]
+      };
+
+      let start1 = 0;
+      let len1 = 3000;
+
+      let data1 = sliceData(start1, start1 + len1);
+      let uplot1 = new uPlot(opts, data1, document.getElementById("realtimeGraph"));
+
+      setInterval(function () {
+        start1 += 10;
+        let data1 = sliceData(start1, start1 + len1);
+        uplot1.setData(data1);
+      }, interval);
+
+      //  wait.textContent = "Done!";
+      console.timeEnd('chart');
+
+    }
+
+
+    fetch("data.json").then(r => r.json()).then(packed => {
+      //  wait.textContent = "Rendering...";
+      let data = prepData(packed);
+      setTimeout(() => makeChart(data), 0);
     });
+
   }
 };
 </script>
 
-<style scoped>
+<style>
+
+@import "/src/assets/uPlot.min.css";
 .chart {
   height: 500px;
   width: 100%;

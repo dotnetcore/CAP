@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     LanguageName:"简体中文",
     Published: "发布",
     Received: "接收",

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     LanguageName:"English",
     Published: "Published",
     Received: "Received",
