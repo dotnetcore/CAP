@@ -10,7 +10,6 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
-using DotNetCore.CAP.Serialization;
 using DotNetCore.CAP.Transport;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,9 +25,9 @@ namespace DotNetCore.CAP.Dashboard
         private readonly HttpRequest _request;
         private readonly HttpResponse _response;
         private readonly RouteData _routeData;
-
         private IServiceProvider ServiceProvider => _request.HttpContext.RequestServices;
         private IMonitoringApi MonitoringApi => ServiceProvider.GetRequiredService<IDataStorage>().GetMonitoringApi();
+        private CapMetricsEventListener Metrics => ServiceProvider.GetRequiredService<CapMetricsEventListener>();
 
         public RouteActionProvider(HttpRequest request, HttpResponse response, RouteData routeData)
         {
@@ -63,15 +62,26 @@ namespace DotNetCore.CAP.Dashboard
             }
         }
 
-        [HttpGet("/metrics")]
-        public async Task Metrics()
+        [HttpGet("/metrics-realtime")]
+        public async Task MetricsRealtime()
         {
-            const string cacheKey = "dashboard.metrics";
-            if (CapCache.Global.TryGet(cacheKey, out var ret))
-            {
-                await _response.WriteAsJsonAsync(ret);
-                return;
-            }
+            
+            Metrics.LastMetrics.RecordTime ??= DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
+            await _response.WriteAsJsonAsync(Metrics.LastMetrics);
+            Metrics.LastMetrics.RecordTime = null;
+        }
+
+        [HttpGet("/metrics-history")]
+        public async Task MetricsHistory()
+        {
+            const string cacheKey = "dashboard.metrics.history";
+            //if (CapCache.Global.TryGet(cacheKey, out var ret))
+            //{
+            //    var refRet = (dynamic)ret;
+            //    refRet.MetricsHistory = CapMetricsEventListener.GetHistory();
+            //    await _response.WriteAsJsonAsync((object)refRet);
+            //    return;
+            //}
 
             var ps = await MonitoringApi.HourlySucceededJobs(MessageType.Publish);
             var pf = await MonitoringApi.HourlyFailedJobs(MessageType.Publish);
@@ -87,9 +97,10 @@ namespace DotNetCore.CAP.Dashboard
                 PublishFailed = pf.Values,
                 SubscribeSuccessed = ss.Values,
                 SubscribeFailed = sf.Values,
+                MetricsHistory = Metrics.GetHistory()
             };
 
-            CapCache.Global.AddOrUpdate(cacheKey, result, TimeSpan.FromMinutes(10));
+           // CapCache.Global.AddOrUpdate(cacheKey, result, TimeSpan.FromMinutes(10));
 
             await _response.WriteAsJsonAsync(result);
         }

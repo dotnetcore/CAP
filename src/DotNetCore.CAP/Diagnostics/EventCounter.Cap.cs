@@ -6,10 +6,10 @@ using System.Diagnostics.Tracing;
 
 namespace DotNetCore.CAP.Diagnostics
 {
-    [EventSource(Name = "DotNetCore.CAP.EventCounter")]
+    [EventSource(Name = CapDiagnosticListenerNames.MetricListenerName)]
     public class CapEventCounterSource : EventSource
     {
-        public static readonly CapEventCounterSource Log = new CapEventCounterSource();
+        public static readonly CapEventCounterSource Log = new ();
 
         private IncrementingEventCounter? _publishPerSecondCounter;
         private IncrementingEventCounter? _consumePerSecondCounter;
@@ -23,27 +23,27 @@ namespace DotNetCore.CAP.Diagnostics
         {
             if (args.Command == EventCommand.Enable)
             {
-                _publishPerSecondCounter ??= new IncrementingEventCounter("published-per-second", this)
+                _publishPerSecondCounter ??= new IncrementingEventCounter(CapDiagnosticListenerNames.PublishedPerSec, this)
                 {
                     DisplayName = "Publish Rate",
                     DisplayRateTimeScale = TimeSpan.FromSeconds(1)
                 };
 
-                _consumePerSecondCounter ??= new IncrementingEventCounter("consume-per-second", this)
+                _consumePerSecondCounter ??= new IncrementingEventCounter(CapDiagnosticListenerNames.ConsumePerSec, this)
                 {
                     DisplayName = "Consume Rate",
                     DisplayRateTimeScale = TimeSpan.FromSeconds(1)
                 };
 
-                _subscriberInvokePerSecondCounter ??= new IncrementingEventCounter("invoke-subscriber-per-second", this)
+                _subscriberInvokePerSecondCounter ??= new IncrementingEventCounter(CapDiagnosticListenerNames.InvokeSubscriberPerSec, this)
                 {
                     DisplayName = "Invoke Subscriber Rate",
                     DisplayRateTimeScale = TimeSpan.FromSeconds(1)
                 };
 
-                _invokeCounter ??= new EventCounter("invoke-time", this)
+                _invokeCounter ??= new EventCounter(CapDiagnosticListenerNames.InvokeSubscriberElapsedMs, this)
                 {
-                    DisplayName = "Invoke Subscriber Time",
+                    DisplayName = "Invoke Subscriber Elapsed Time",
                     DisplayUnits = "ms"
                 };
             }

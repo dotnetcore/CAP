@@ -10,6 +10,7 @@ public static class CapDiagnosticListenerNames
 {
     private const string CapPrefix = "DotNetCore.CAP.";
 
+    //Tracing
     public const string DiagnosticListenerName = "CapDiagnosticListener";
 
     public const string BeforePublishMessageStore = CapPrefix + "WritePublishMessageStoreBefore";
@@ -27,4 +28,11 @@ public static class CapDiagnosticListenerNames
     public const string BeforeSubscriberInvoke = CapPrefix + "WriteSubscriberInvokeBefore";
     public const string AfterSubscriberInvoke = CapPrefix + "WriteSubscriberInvokeAfter";
     public const string ErrorSubscriberInvoke = CapPrefix + "WriteSubscriberInvokeError";
+
+    //Metrics
+    public const string MetricListenerName = CapPrefix + "EventCounter";
+    public const string PublishedPerSec = "published-per-second";
+    public const string ConsumePerSec = "consume-per-second";
+    public const string InvokeSubscriberPerSec = "invoke-subscriber-per-second";
+    public const string InvokeSubscriberElapsedMs = "invoke-subscriber-elapsed-ms";
 }

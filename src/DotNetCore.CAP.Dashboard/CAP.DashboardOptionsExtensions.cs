@@ -3,6 +3,7 @@
 
 using System;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Dashboard;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
 using Microsoft.AspNetCore.Builder;
@@ -28,6 +29,7 @@ namespace DotNetCore.CAP
             services.AddSingleton(dashboardOptions);
             services.AddSingleton<IHttpRequester, HttpClientHttpRequester>();
             services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
+            services.AddSingleton<CapMetricsEventListener>();
             services.AddSingleton<IRequestMapper, RequestMapper>();
         }
     }
