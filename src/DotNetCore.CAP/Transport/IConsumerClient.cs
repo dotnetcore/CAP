@@ -41,7 +41,7 @@ public interface IConsumerClient : IDisposable
     /// <summary>
     /// Manual submit message offset when the message consumption is complete
     /// </summary>
-    void Commit(object sender);
+    void Commit(object? sender);
 
     /// <summary>
     /// Reject message and resumption

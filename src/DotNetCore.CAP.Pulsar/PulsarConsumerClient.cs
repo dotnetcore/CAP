@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.Pulsar
                 throw new ArgumentNullException(nameof(topics));
             }
 
-            var serviceName = Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
+            var serviceName = Assembly.GetEntryAssembly()?.GetName().Name!.ToLower();
             
             _consumerClient = _client.NewConsumer()
                 .Topics(topics)
@@ -70,9 +70,9 @@ namespace DotNetCore.CAP.Pulsar
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
-            _consumerClient!.AcknowledgeAsync((MessageId)sender);
+            _consumerClient!.AcknowledgeAsync((MessageId)sender!);
         }
 
         public void Reject(object? sender)

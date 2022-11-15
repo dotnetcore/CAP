@@ -54,7 +54,7 @@ public static class MessageExtensions
 
     public static int GetCorrelationSequence(this Message message)
     {
-        if (message.Headers.TryGetValue(Headers.CorrelationSequence, out var value)) return int.Parse(value);
+        if (message.Headers.TryGetValue(Headers.CorrelationSequence, out var value)) return int.Parse(value!);
 
         return 0;
     }

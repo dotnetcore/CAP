@@ -133,9 +133,9 @@ namespace DotNetCore.CAP.Kafka
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
-            _consumerClient!.Commit((ConsumeResult<string, byte[]>)sender);
+            _consumerClient!.Commit((ConsumeResult<string, byte[]>)sender!);
         }
 
         public void Reject(object? sender)

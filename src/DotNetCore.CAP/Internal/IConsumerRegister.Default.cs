@@ -54,7 +54,7 @@ internal class ConsumerRegister : IConsumerRegister
         return _isHealthy;
     }
 
-    public void Start(CancellationToken stoppingToken)
+    public async Task Start(CancellationToken stoppingToken)
     {
         _selector = _serviceProvider.GetRequiredService<MethodMatcherCache>();
         _dispatcher = _serviceProvider.GetRequiredService<IDispatcher>();
@@ -64,7 +64,7 @@ internal class ConsumerRegister : IConsumerRegister
 
         stoppingToken.Register(Dispose);
 
-        Execute();
+        await ExecuteAsync().ConfigureAwait(false);
     }
 
     public void ReStart(bool force = false)
@@ -76,7 +76,7 @@ internal class ConsumerRegister : IConsumerRegister
             _cts = new CancellationTokenSource();
             _isHealthy = true;
 
-            Execute();
+            ExecuteAsync().ConfigureAwait(false);
         }
     }
 
@@ -105,7 +105,7 @@ internal class ConsumerRegister : IConsumerRegister
         _cts.Dispose();
     }
 
-    public void Execute()
+    public async Task ExecuteAsync()
     {
         var groupingMatches = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
@@ -129,35 +129,35 @@ internal class ConsumerRegister : IConsumerRegister
             for (var i = 0; i < _options.ConsumerThreadCount; i++)
             {
                 var topicIds = topics.Select(t => t);
-                Task.Factory.StartNew(() =>
-                {
-                    try
-                    {
-                        using (var client = _consumerClientFactory.Create(matchGroup.Key))
-                        {
-                            _serverAddress = client.BrokerAddress;
+                await Task.Factory.StartNew(() =>
+                 {
+                     try
+                     {
+                         using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                         {
+                             _serverAddress = client.BrokerAddress;
 
-                            RegisterMessageProcessor(client);
+                             RegisterMessageProcessor(client);
 
-                            client.Subscribe(topicIds);
+                             client.Subscribe(topicIds);
 
-                            client.Listening(_pollingDelay, _cts.Token);
-                        }
-                    }
-                    catch (OperationCanceledException)
-                    {
-                        //ignore
-                    }
-                    catch (BrokerConnectionException e)
-                    {
-                        _isHealthy = false;
-                        _logger.LogError(e, e.Message);
-                    }
-                    catch (Exception e)
-                    {
-                        _logger.LogError(e, e.Message);
-                    }
-                }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                             client.Listening(_pollingDelay, _cts.Token);
+                         }
+                     }
+                     catch (OperationCanceledException)
+                     {
+                         //ignore
+                     }
+                     catch (BrokerConnectionException e)
+                     {
+                         _isHealthy = false;
+                         _logger.LogError(e, e.Message);
+                     }
+                     catch (Exception e)
+                     {
+                         _logger.LogError(e, e.Message);
+                     }
+                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
         }
 
@@ -274,7 +274,7 @@ internal class ConsumerRegister : IConsumerRegister
         client.OnLog += WriteLog;
     }
 
-    private void WriteLog(object sender, LogMessageEventArgs logmsg)
+    private void WriteLog(object? sender, LogMessageEventArgs logmsg)
     {
         switch (logmsg.LogType)
         {

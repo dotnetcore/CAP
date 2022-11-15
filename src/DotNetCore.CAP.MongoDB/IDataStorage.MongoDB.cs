@@ -162,14 +162,14 @@ public class MongoDBDataStorage : IDataStorage
         if (collection == _options.Value.PublishedCollection)
         {
             var publishedCollection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
-            var ret = await publishedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout, cancellationToken)
+            var ret = await publishedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout && (x.StatusName == nameof(StatusName.Succeeded) || x.StatusName == nameof(StatusName.Failed)), cancellationToken)
                 .ConfigureAwait(false);
             return (int)ret.DeletedCount;
         }
         else
         {
             var receivedCollection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
-            var ret = await receivedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout, cancellationToken)
+            var ret = await receivedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout && (x.StatusName == nameof(StatusName.Succeeded) || x.StatusName == nameof(StatusName.Failed)), cancellationToken)
                 .ConfigureAwait(false);
             return (int)ret.DeletedCount;
         }
@@ -214,6 +214,29 @@ public class MongoDBDataStorage : IDataStorage
             Origin = _serializer.Deserialize(x.Content)!,
             Retries = x.Retries,
             Added = x.Added
+        }).ToList();
+    }
+
+    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+    {
+        var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
+        var queryResult = await collection
+            .Find(x => x.Version == _capOptions.Value.Version
+                       && (
+                             (x.StatusName == nameof(StatusName.Delayed) && x.ExpiresAt < DateTime.Now.AddMinutes(2))
+                               ||
+                             (x.StatusName == nameof(StatusName.Queued) && x.ExpiresAt < DateTime.Now.AddMinutes(-1))
+                          )
+                  )
+            .Limit(200)
+            .ToListAsync().ConfigureAwait(false);
+        return queryResult.Select(x => new MediumMessage
+        {
+            DbId = x.Id.ToString(),
+            Origin = _serializer.Deserialize(x.Content)!,
+            Retries = x.Retries,
+            Added = x.Added,
+            ExpiresAt = x.ExpiresAt
         }).ToList();
     }
 

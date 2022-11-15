@@ -25,6 +25,8 @@ public interface IDataStorage
 
     Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry();
 
+    Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed();
+
     Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry();
 
     //dashboard api

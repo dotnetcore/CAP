@@ -147,7 +147,7 @@ public class SqlServerDataStorage : IDataStorage
         var connection = new SqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
         return await connection.ExecuteNonQueryAsync(
-            $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout;", null,
+            $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout AND (StatusName='{StatusName.Succeeded}' OR StatusName='{StatusName.Failed}');", null,
             new SqlParameter("@timeout", timeout), new SqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
     }
 
@@ -159,6 +159,40 @@ public class SqlServerDataStorage : IDataStorage
     public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
     {
         return await GetMessagesOfNeedRetryAsync(_recName).ConfigureAwait(false);
+    }
+
+    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+    {
+        var sql =
+            $"SELECT TOP 200 Id,Content,Retries,Added,ExpiresAt FROM `{_pubName}` WHERE Version=@Version " +
+            $"AND ((ExpiresAt< @TwoMinutesLater AND StatusName = '{StatusName.Delayed}') OR (ExpiresAt< @OneMinutesAgo AND StatusName = '{StatusName.Queued}'))";
+
+        object[] sqlParams =
+        {
+            new SqlParameter("@Version", _capOptions.Value.Version),
+            new SqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
+            new SqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1)),
+        };
+
+        var connection = new SqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var result = await connection.ExecuteReaderAsync(sql, async reader =>
+        {
+            var messages = new List<MediumMessage>();
+            while (await reader.ReadAsync().ConfigureAwait(false))
+                messages.Add(new MediumMessage
+                {
+                    DbId = reader.GetInt64(0).ToString(),
+                    Origin = _serializer.Deserialize(reader.GetString(1))!,
+                    Retries = reader.GetInt32(2),
+                    Added = reader.GetDateTime(3),
+                    ExpiresAt = reader.GetDateTime(4)
+                });
+
+            return messages;
+        }, sqlParams).ConfigureAwait(false);
+
+        return result;
     }
 
     public IMonitoringApi GetMonitoringApi()
@@ -229,4 +263,6 @@ public class SqlServerDataStorage : IDataStorage
 
         return result;
     }
+
+   
 }

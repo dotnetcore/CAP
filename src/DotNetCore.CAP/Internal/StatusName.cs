@@ -10,5 +10,8 @@ public enum StatusName
 {
     Failed = -1,
     Scheduled,
-    Succeeded
+    Succeeded,
+
+    Delayed,
+    Queued
 }

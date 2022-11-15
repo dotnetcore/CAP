@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
@@ -41,22 +40,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 props.DeliveryMode = 2;
                 props.Headers = message.Headers.ToDictionary(x => x.Key, x => (object?)x.Value);
 
-                if (message.Headers.ContainsKey("x-delay"))
-                {
-                    var delayExchangeName = _exchange + "_delayed";
-                    channel.ExchangeDeclare(exchange: delayExchangeName, type: "x-delayed-message", durable: true, autoDelete: false,
-                        new Dictionary<string, object>
-                        {
-                            ["x-delayed-type"] = "topic"
-                        });
-                    channel.ExchangeBind(_exchange, delayExchangeName, message.GetName());
-
-                    channel.BasicPublish(delayExchangeName, message.GetName(), props, message.Body);
-                }
-                else
-                {
-                    channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
-                }
+                channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
 
                 // Enable publish confirms
                 if (channel.NextPublishSeqNo > 0)

@@ -34,7 +34,7 @@ public class CapProcessingServer : IProcessingServer
         _cts = new CancellationTokenSource();
     }
 
-    public void Start(CancellationToken stoppingToken)
+    public async Task Start(CancellationToken stoppingToken)
     {
         stoppingToken.Register(() => _cts.Cancel());
 
@@ -46,11 +46,14 @@ public class CapProcessingServer : IProcessingServer
             .Select(InfiniteRetry)
             .Select(p => p.ProcessAsync(_context));
         _compositeTask = Task.WhenAll(processorTasks);
+
+        await _compositeTask;
     }
 
-    public void Pulse()
+    public Task Pulse()
     {
         _logger.LogTrace("Pulsing the processor.");
+        return Task.CompletedTask;
     }
 
     public void Dispose()

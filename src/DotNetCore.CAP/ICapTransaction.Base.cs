@@ -1,9 +1,11 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
 
@@ -43,9 +45,18 @@ public abstract class CapTransactionBase : ICapTransaction
     {
         while (!_bufferList.IsEmpty)
         {
-            _bufferList.TryDequeue(out var message);
-
-            _dispatcher.EnqueueToPublish(message);
+            if (_bufferList.TryDequeue(out var message))
+            {
+                var isDelayMessage = message.Origin.Headers.ContainsKey(Headers.DelayTime);
+                if (isDelayMessage)
+                {
+                    _dispatcher.EnqueueToScheduler(message, DateTime.Parse(message.Origin.Headers[Headers.SentTime]!)).ConfigureAwait(false);
+                }
+                else
+                {
+                    _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
+                }
+            }
         }
     }
 }

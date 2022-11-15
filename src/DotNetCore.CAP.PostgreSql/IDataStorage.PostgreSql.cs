@@ -143,7 +143,7 @@ namespace DotNetCore.CAP.PostgreSql
             var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
             return await connection.ExecuteNonQueryAsync(
-                $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout LIMIT @batchCount);", null,
+                $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout AND (\"StatusName\"='{StatusName.Succeeded}' OR \"StatusName\"='{StatusName.Failed}') LIMIT @batchCount);", null,
                 new NpgsqlParameter("@timeout", timeout), new NpgsqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
         }
 
@@ -152,6 +152,40 @@ namespace DotNetCore.CAP.PostgreSql
 
         public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry() =>
             await GetMessagesOfNeedRetryAsync(_recName).ConfigureAwait(false);
+
+        public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+        {
+            var sql =
+                $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\" FROM `{_pubName}` WHERE \"Version\"=@Version " +
+                $"AND ((\"ExpiresAt\"< @TwoMinutesLater AND \"StatusName\" = '{StatusName.Delayed}') OR (\"ExpiresAt\"< @OneMinutesAgo AND \"StatusName\" = '{StatusName.Queued}')) LIMIT 200;";
+
+            object[] sqlParams =
+            {
+                new NpgsqlParameter("@Version", _capOptions.Value.Version),
+                new NpgsqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
+                new NpgsqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1)),
+            };
+
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            var result = await connection.ExecuteReaderAsync(sql, async reader =>
+            {
+                var messages = new List<MediumMessage>();
+                while (await reader.ReadAsync().ConfigureAwait(false))
+                    messages.Add(new MediumMessage
+                    {
+                        DbId = reader.GetInt64(0).ToString(),
+                        Origin = _serializer.Deserialize(reader.GetString(1))!,
+                        Retries = reader.GetInt32(2),
+                        Added = reader.GetDateTime(3),
+                        ExpiresAt = reader.GetDateTime(4)
+                    });
+
+                return messages;
+            }, sqlParams).ConfigureAwait(false);
+
+            return result;
+        }
 
         public IMonitoringApi GetMonitoringApi()
         {

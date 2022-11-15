@@ -26,7 +26,7 @@ public class CapOptions
         ProducerThreadCount = 1;
         Extensions = new List<ICapOptionsExtension>();
         Version = "v1";
-        DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name.ToLower();
+        DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name!.ToLower();
         CollectorCleaningInterval = 300;
         UseDispatchingPerGroup = false;
     }

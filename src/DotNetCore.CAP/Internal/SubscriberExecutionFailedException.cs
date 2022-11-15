@@ -14,7 +14,7 @@ internal class SubscriberExecutionFailedException : Exception
         _originException = ex;
     }
 
-    public override string StackTrace => _originException.StackTrace;
+    public override string? StackTrace => _originException.StackTrace;
 
-    public override string Source => _originException.Source;
+    public override string? Source => _originException.Source;
 }
