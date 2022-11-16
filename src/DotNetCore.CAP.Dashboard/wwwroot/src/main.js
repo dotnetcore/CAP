@@ -51,8 +51,8 @@ const i18n = new VueI18n({
     return 'en-us'
   }()),
   messages: {
-    'en-us': en.default, //英文语言包
-    'zh-cn': zh.default, //中文包
+    'en-us': en.default,
+    'zh-cn': zh.default,
   }
 })
 

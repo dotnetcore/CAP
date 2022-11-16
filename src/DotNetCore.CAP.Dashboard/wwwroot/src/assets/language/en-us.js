@@ -1,5 +1,5 @@
 export default {
-    LanguageName:"English",
+    LanguageName: "English",
     Published: "Published",
     Received: "Received",
     Subscriber: "Subscriber",
@@ -12,10 +12,10 @@ export default {
     Prev: "Prev",
     Last: "Last",
     "Page Size": "Page Size",
-    "Realtime Metric Graph":"Realtime Metric Graph",
-    PublishedPerSec:"Publish Rate(sec)",
-    ConsumePerSec:"Consume Rate(sec)",
-    InvokeSubscriberPerSec:"Call Subscriber Rate(sec)",
+    "Realtime Metric Graph": "Realtime Metric Graph",
+    PublishedPerSec: "Publish Rate(sec)",
+    ConsumePerSec: "Consume Rate(sec)",
+    InvokeSubscriberPerSec: "Call Subscriber Rate(sec)",
     "24h History Graph": "24h History Graph",
     "Publish Succeeded": "Publish Succeeded",
     "Publish Failed": "Publish Failed",
@@ -23,6 +23,9 @@ export default {
     "Received Failed": "Received Failed",
     "Published Message": "Published Message",
     "Received Message": "Received Message",
+    "Aggregation Count": "Aggregation Count",
+    "SubscriberInvokeMeanTime": "The Y1 axis represents the subscriber invoke mean time (not execute times)",
+    "Elpsed Time (ms)": "Elpsed Time (ms)",
     Succeeded: "Succeeded",
     Failed: "Failed",
     Requeue: "Requeue",
@@ -44,6 +47,6 @@ export default {
     Port: "Port",
     Tags: "Tags",
     Actions: "Actions",
-    ReexecuteSuccess:"Reexecute Successful !",
-    RequeueSuccess:"Requeue Successfull!"
+    ReexecuteSuccess: "Reexecute Successful !",
+    RequeueSuccess: "Requeue Successfull!"
 }

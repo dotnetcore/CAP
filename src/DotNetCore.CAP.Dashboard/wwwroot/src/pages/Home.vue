@@ -5,6 +5,7 @@
 
       <h3 class="mb-4">{{ $t("Realtime Metric Graph") }}</h3>
       <div id="realtimeGraph"></div>
+      <p class="text-secondary">{{ $t("SubscriberInvokeMeanTime") }}</p>
 
       <h3 class="mt-4">{{ $t("24h History Graph") }}</h3>
       <div id="historyGraph"></div>
@@ -18,8 +19,6 @@ import uPlot from '../assets/uPlot.esm.js';
 import axios from 'axios';
 
 export default {
-
-
   async mounted() {
 
     var historyInitData = [];
@@ -30,9 +29,6 @@ export default {
       historyInitData.push(res.data.subscribeSuccessed);
       historyInitData.push(res.data.publishFailed);
       historyInitData.push(res.data.subscribeFailed);
-
-
-      console.log(historyInitData)
     });
 
     var historyOpts = {
@@ -49,19 +45,19 @@ export default {
       series: [
         { value: "{YYYY}/{MM}/{DD} {HH}:00" },
         {
-          label: "Publish Successed",
+          label: this.$t("Publish Succeeded"),
           fill: "rgba(0,255,0,0.3)",
         },
         {
-          label: "Subscribe Successed",
+          label: this.$t("Received Succeeded"),
           fill: "rgba(0,0,255,0.3)",
         },
         {
-          label: "Publish Failed",
+          label: this.$t("Publish Failed"),
           fill: "rgba(255,0,0,0.5)",
         },
         {
-          label: "Subscribe Failed",
+          label: this.$t("Received Failed"),
           fill: "rgba(255,255,0,0.5)",
         },
       ],
@@ -73,13 +69,12 @@ export default {
           ],
         },
         {
-          label: "Aggregation Count",
-          space: 50
+          label: this.$t("Aggregation Count"),
         }
       ]
     };
 
-    let historyUplot = new uPlot(historyOpts, historyInitData, document.getElementById("historyGraph"));
+    new uPlot(historyOpts, historyInitData, document.getElementById("historyGraph"));
 
     const realtimeOpts = {
       width: 1000,
@@ -97,7 +92,7 @@ export default {
           value: "{YYYY}/{MM}/{DD} {HH}:{mm}:{ss}"
         },
         {
-          label: "Publish TPS",
+          label: this.$t("Publish TPS"),
           show: true,
           scale: "s",
           width: 2,
@@ -105,24 +100,24 @@ export default {
           stroke: "rgba(0,255,0,0.3)"
         },
         {
-          label: "Consume TPS",
+          label: this.$t("Consume TPS"),
           show: true,
           scale: "s",
           width: 2,
           value: (u, v) => v == null ? "-" : v.toFixed(1) + "/s",
-          stroke: "rgba(0,0,255,0.3)",
+          stroke: "rgba(255,0,0,0.3)",
         },
         {
-          label: "Subscriber Invoke Time",
+          label: this.$t("Subscriber Invoke Time"),
           scale: "ms",
-          width: 2,
+          width: 1,
           paths: u => null,
           points: {
             space: 0,
-            fill: "green"
+            stroke: "blue"
           },
           value: (u, v) => v == null ? "-" : v.toFixed(0) + "ms",
-          stroke: "green",
+          stroke: "blue"
         }
       ],
       axes: [
@@ -134,8 +129,8 @@ export default {
         },
         {
           scale: "s",
-          label: "Rate (TPS)",
-          space: 40,
+          label: this.$t("Rate (TPS)"),
+          //space: 20,
           ticks: {
             show: true,
             stroke: "#eee",
@@ -145,13 +140,13 @@ export default {
           },
           values: (self, ticks) => ticks.map(rawValue => rawValue + "/s"),
           incrs: [
-            1
+            1, 5, 10, 30, 50, 100
           ]
         }, {
           side: 1,
           scale: "ms",
-          space: 40,
-          label: "Elpsed Time (ms)",
+          //space: 20,
+          label: this.$t("Elpsed Time (ms)"),
           size: 60,
           ticks: {
             show: true,
@@ -160,6 +155,9 @@ export default {
             dash: [5],
             size: 5,
           },
+          incrs: [
+            1, 10, 50, 100, 300, 500, 1000
+          ],
           values: (u, vals, space) => vals.map(v => +v.toFixed(0) + "ms"),
           grid: { show: false },
         }
