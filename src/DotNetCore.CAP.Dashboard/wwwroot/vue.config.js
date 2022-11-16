@@ -6,7 +6,7 @@ module.exports = {
     },
     devServer: {
         proxy: {
-            '/cap/api': {
+            '^/cap/api': {
                 target: 'http://localhost:5000',
                 changeOrigin: true
             }

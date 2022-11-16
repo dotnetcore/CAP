@@ -12,79 +12,70 @@ namespace DotNetCore.CAP.Dashboard
     public class CapMetricsEventListener : EventListener
     {
         public const int HistorySize = 300;
-
-        public Metrics LastMetrics { get; } = new();
-
-        public Queue<Metrics> Queue = new(HistorySize);
+        public Queue<double?> PublishedPerSec { get; } = new(HistorySize);
+        public Queue<double?> ConsumePerSec { get; } = new(HistorySize);
+        public Queue<double?> InvokeSubscriberElapsedMs { get; } = new(HistorySize);
 
         public CapMetricsEventListener()
         {
-            var nowTime = DateTime.Now;
-            for (int i = HistorySize; i > 0; i--)
+            for (int i = 0; i < HistorySize; i++)
             {
-                Queue.Enqueue(new Metrics
-                {
-                    RecordTime = nowTime.AddSeconds(-i).ToString("yyyy/MM/dd HH:mm:ss"),
-                    PublishedPerSec = 0,
-                    ConsumePerSec = 0,
-                    InvokeSubscriberPerSec = 0,
-                    InvokeSubscriberElapsedMs = 0
-                });
-            }
-        }
-
-        public class Metrics
-        {
-            public string RecordTime { get; set; }
-            public double PublishedPerSec { get; set; }
-            public double ConsumePerSec { get; set; }
-            public double InvokeSubscriberPerSec { get; set; }
-            public double InvokeSubscriberElapsedMs { get; set; }
-        }
-
-        public struct Pair
-        {
-            public Pair(string date, double count)
-            {
-                Value = new[]
-                {
-                    date,
-                    count.ToString()
-                };
-                Name = null;
+                PublishedPerSec.Enqueue(0);
+                ConsumePerSec.Enqueue(0);
+                InvokeSubscriberElapsedMs.Enqueue(null);
             }
 
-            public string Name { get; set; }
-            public string[] Value { get; set; }
+            //Task.Factory.StartNew(async () =>
+            //{
+            //    var token = lifetime.ApplicationStopping;
+            //    while (!token.IsCancellationRequested)
+            //    {
+            //        await Task.Delay(1000, token);
+
+            //        lock (Current)
+            //        {
+            //            PublishedPerSec.Dequeue();
+            //            ConsumePerSec.Dequeue();
+            //            InvokeSubscriberElapsedMs.Dequeue();
+
+            //            PublishedPerSec.Enqueue(Current.PublishedPerSec);
+            //            ConsumePerSec.Enqueue(Current.ConsumePerSec);
+            //            InvokeSubscriberElapsedMs.Enqueue(Current.InvokeSubscriberPerSec);
+
+            //            Current.PublishedPerSec = 0;
+            //            Current.ConsumePerSec = 0;
+            //            Current.InvokeSubscriberPerSec = 0;
+            //        }
+            //    }
+            //});
         }
 
-        public class MetricsHistory
+        //public class Metrics
+        //{
+        //    public double? PublishedPerSec { get; set; }
+        //    public double? ConsumePerSec { get; set; }
+        //    public double? InvokeSubscriberPerSec { get; set; }
+        //    public double? InvokeSubscriberElapsedMs { get; set; }
+        //}
+
+        public double?[][] GetRealTimeMetrics()
         {
-            public string[] FiveMinutes { get; set; } = new string[HistorySize];
-            public Pair[] PublishedPerSec { get; set; } = new Pair[HistorySize];
-            public Pair[] ConsumePerSec { get; set; } = new Pair[HistorySize];
-            public Pair[] InvokeSubscriberPerSec { get; set; } = new Pair[HistorySize];
+            var warpArr = new double?[4][];
+            warpArr[0] = new double?[HistorySize];  //x-timestamps
+            //warpArr[1] = new double[HistorySize];  //y1-publish
+            //warpArr[2] = new double[HistorySize];  //y2-consume
+            //warpArr[3] = new double[HistorySize];  //y3-subscriber
 
-            // public KeyValuePair<DateTime, int>[] InvokeSubscriberElapsedMs => new KeyValuePair<DateTime, int>[HistorySize];
-        }
-
-        public MetricsHistory GetHistory()
-        {
-            var arr = new Metrics[HistorySize];
-            Queue.CopyTo(arr, 0);
-
-            var history = new MetricsHistory();
-            for (var i = 0; i < arr.Length; i++)
+            var dateVal = DateTimeOffset.Now.AddSeconds(-300).ToUnixTimeSeconds();
+            for (long i = 0, j = dateVal; j < dateVal + 300; i++, j++)
             {
-                var cur = arr[i];
-
-                history.FiveMinutes[i] = cur.RecordTime;
-                history.PublishedPerSec[i] = new(cur.RecordTime, cur.PublishedPerSec);
-                history.ConsumePerSec[i] = new(cur.RecordTime, cur.ConsumePerSec);
-                history.InvokeSubscriberPerSec[i] = new(cur.RecordTime, cur.InvokeSubscriberPerSec);
-                // history.InvokeSubscriberElapsedMs.Add(cur.RecordTime, cur.InvokeSubscriberElapsedMs);
+                warpArr[0][i] = j;
             }
-            return history;
+            warpArr[1] = PublishedPerSec.ToArray();
+            warpArr[2] = ConsumePerSec.ToArray();
+            warpArr[3] = InvokeSubscriberElapsedMs.ToArray();
+
+            return warpArr;
         }
 
         protected override void OnEventSourceCreated(EventSource source)
@@ -112,38 +103,34 @@ namespace DotNetCore.CAP.Dashboard
 
             var val = payload.Values.ToArray();
 
-            
             if ((string)val[0] == CapDiagnosticListenerNames.PublishedPerSec)
             {
-                LastMetrics.RecordTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-                LastMetrics.PublishedPerSec = (double)val[3];
-
+                    PublishedPerSec.Dequeue();
+                    var v = (double)val[3];
+                    PublishedPerSec.Enqueue(v);
             }
             else if ((string)val[0] == CapDiagnosticListenerNames.ConsumePerSec)
             {
-                LastMetrics.RecordTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-                LastMetrics.ConsumePerSec = (double)val[3];
+                    ConsumePerSec.Dequeue();
+                    var v = (double)val[3];
+                    ConsumePerSec.Enqueue(v);
             }
-            else if ((string)val[0] == CapDiagnosticListenerNames.InvokeSubscriberPerSec)
-            {
-                LastMetrics.RecordTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-                LastMetrics.InvokeSubscriberPerSec = (double)val[3];
-            }
+            //else if ((string)val[0] == CapDiagnosticListenerNames.InvokeSubscriberPerSec)
+            //{
+            //    lock (Current)
+            //    {
+            //        Current.InvokeSubscriberPerSec = (double)val[3];
+            //    }
+            //}
             else if ((string)val[0] == CapDiagnosticListenerNames.InvokeSubscriberElapsedMs)
             {
-                LastMetrics.RecordTime = DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-                LastMetrics.InvokeSubscriberElapsedMs = (double)val[3];
+                    InvokeSubscriberElapsedMs.Dequeue();
+                    var v = (double)val[2];
+                    InvokeSubscriberElapsedMs.Enqueue(v == 0 ? null : v);
             }
             else
             {
                 return;
-            }
-
-            Queue.Enqueue(LastMetrics);
-
-            while (Queue.Count > HistorySize)
-            {
-                Queue.Dequeue();
             }
         }
 

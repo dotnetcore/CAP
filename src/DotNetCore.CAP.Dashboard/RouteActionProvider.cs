@@ -65,42 +65,36 @@ namespace DotNetCore.CAP.Dashboard
         [HttpGet("/metrics-realtime")]
         public async Task MetricsRealtime()
         {
-            
-            Metrics.LastMetrics.RecordTime ??= DateTime.Now.ToString("yyyy/MM/dd HH:mm:ss");
-            await _response.WriteAsJsonAsync(Metrics.LastMetrics);
-            Metrics.LastMetrics.RecordTime = null;
+            await _response.WriteAsJsonAsync(Metrics.GetRealTimeMetrics());
         }
 
         [HttpGet("/metrics-history")]
         public async Task MetricsHistory()
         {
             const string cacheKey = "dashboard.metrics.history";
-            //if (CapCache.Global.TryGet(cacheKey, out var ret))
-            //{
-            //    var refRet = (dynamic)ret;
-            //    refRet.MetricsHistory = CapMetricsEventListener.GetHistory();
-            //    await _response.WriteAsJsonAsync((object)refRet);
-            //    return;
-            //}
+            if (CapCache.Global.TryGet(cacheKey, out var ret))
+            {
+                await _response.WriteAsJsonAsync(ret);
+                return;
+            }
 
             var ps = await MonitoringApi.HourlySucceededJobs(MessageType.Publish);
             var pf = await MonitoringApi.HourlyFailedJobs(MessageType.Publish);
             var ss = await MonitoringApi.HourlySucceededJobs(MessageType.Subscribe);
             var sf = await MonitoringApi.HourlyFailedJobs(MessageType.Subscribe);
 
-            var dayHour = ps.Keys.Select(x => x.ToString("MM-dd HH:00")).ToList();
+            var dayHour = ps.Keys.OrderBy(x => x).Select(x => new DateTimeOffset(x).ToUnixTimeSeconds());
 
             var result = new
             {
-                DayHour = dayHour,
-                PublishSuccessed = ps.Values,
-                PublishFailed = pf.Values,
-                SubscribeSuccessed = ss.Values,
-                SubscribeFailed = sf.Values,
-                MetricsHistory = Metrics.GetHistory()
+                DayHour = dayHour.ToArray(),
+                PublishSuccessed = ps.Values.Reverse(),
+                PublishFailed = pf.Values.Reverse(),
+                SubscribeSuccessed = ss.Values.Reverse(),
+                SubscribeFailed = sf.Values.Reverse()
             };
 
-           // CapCache.Global.AddOrUpdate(cacheKey, result, TimeSpan.FromMinutes(10));
+            CapCache.Global.AddOrUpdate(cacheKey, result, TimeSpan.FromMinutes(10));
 
             await _response.WriteAsJsonAsync(result);
         }
@@ -175,8 +169,6 @@ namespace DotNetCore.CAP.Dashboard
         [HttpPost("/received/reexecute")]
         public async Task ReceivedRequeue()
         {
-            //var form = await _request.ReadFormAsync();
-            //var messageIds =  form["messages[]"]
             var messageIds = await _request.ReadFromJsonAsync<long[]>();
             if (messageIds == null || messageIds.Length == 0)
             {
