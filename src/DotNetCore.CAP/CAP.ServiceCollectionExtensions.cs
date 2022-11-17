@@ -49,6 +49,7 @@ public static class ServiceCollectionExtensions
         //Queue's message processor
         services.TryAddSingleton<MessageNeedToRetryProcessor>();
         services.TryAddSingleton<TransportCheckProcessor>();
+        services.TryAddSingleton<MessageDelayedProcessor>();
         services.TryAddSingleton<CollectorProcessor>();
 
         //Sender
