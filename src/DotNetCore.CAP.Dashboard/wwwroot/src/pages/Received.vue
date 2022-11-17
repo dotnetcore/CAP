@@ -1,47 +1,63 @@
 <template>
   <div>
     <b-row>
-      <b-col md="3">
+      <b-col md="3" class="mt-4">
         <b-list-group>
-          <router-link class="list-group-item text-left list-group-item-secondary list-group-item-action" v-for="menu of subMens" :key="menu.text" active-class="active" :to="menu.name">
+          <router-link class="list-group-item text-left list-group-item-secondary list-group-item-action"
+            v-for="menu of subMens" :key="menu.text" active-class="active" :to="menu.name">
             {{ $t(menu.text) }}
             <b-badge :variant="menu.variant" class="float-right" pill> {{ onMetric[menu.num] }} </b-badge>
           </router-link>
         </b-list-group>
       </b-col>
       <b-col md="9">
-        <h1 class="page-line mb-4">{{$t("Received Message")}}</h1>
-        <b-form inline>
-          <label class="sr-only" for="inline-form-input-name">{{$t("Name")}}</label>
-          <b-form-input v-model="formData.name" id="inline-form-input-name" class="mb-2 mr-sm-2 col-3 mb-sm-0" :placeholder="$t('Name')" />
+        <h1 class="page-line mb-2">{{ $t("Received Message") }}</h1>
+        <b-form class="d-flex">
+          <div class="col-sm-10">
+            <div class="row mb-2">
+              <label class="sr-only" for="inline-form-input-name">{{ $t("Name") }}</label>
+              <b-form-input v-model="formData.name" id="inline-form-input-name" class="form-control col mr-4"
+                :placeholder="$t('Name')" />
 
-          <label class="sr-only" for="inline-form-input-name">{{$t("Group")}}</label>
-          <b-form-input v-model="formData.group" id="inline-form-input-group" class="mb-2 mr-sm-2 col-3 mb-sm-0" :placeholder="$t('Group')" />
-
-          <label class="sr-only" for="inline-form-input-content">{{$t("Content")}}</label>
-          <b-form-input v-model="formData.content" id="inline-form-input-content" class="mb-2 mr-sm-2 col-4 mb-sm-0" :placeholder="$t('Content')" />
-          <b-button variant="dark" @click="onSearch">
+              <label class="sr-only" for="inline-form-input-name">{{ $t("Group") }}</label>
+              <b-form-input v-model="formData.group" id="inline-form-input-group"
+                class="form-control col" :placeholder="$t('Group')" />
+            </div>
+            <div class="row">
+              <label class="sr-only" for="inline-form-input-content">{{ $t("Content") }}</label>
+              <b-form-input v-model="formData.content" id="inline-form-input-content" class="form-control"
+                :placeholder="$t('Content')" />
+            </div>
+          </div>
+          <b-button variant="dark" class="ml-2 align-self-end" @click="onSearch">
             <b-icon icon="search"></b-icon>
-            {{$t("Search")}}
+            {{ $t("Search") }}
           </b-button>
         </b-form>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col md="12">
         <b-btn-toolbar class="mt-4">
           <b-button size="sm" variant="dark" @click="reexecute" :disabled="!selectedItems.length">
             <b-icon icon="arrow-repeat" aria-hidden="true"></b-icon>
-            {{$t("Re-execute")}}
+            {{ $t("Re-execute") }}
           </b-button>
           <div class="pagination">
-            <span style="font-size: 14px"> {{$t("Page Size")}}:</span>
+            <span style="font-size: 14px"> {{ $t("Page Size") }}:</span>
             <b-button-group class="ml-2">
-              <b-button variant="outline-secondary" size="sm" v-for="size in pageOptions" :class="{ active: formData.perPage == size }" @click="pageSizeChange(size)" :key="size">{{ size }}</b-button>
+              <b-button variant="outline-secondary" size="sm" v-for="size in pageOptions"
+                :class="{ active: formData.perPage == size }" @click="pageSizeChange(size)" :key="size">{{ size }}
+              </b-button>
             </b-button-group>
           </div>
         </b-btn-toolbar>
-        <b-table id="datatable" class="mt-3" :busy="isBusy" striped thead-tr-class="text-left" tbody-tr-class="text-left" small :fields="fields" :items="items" select-mode="range">
+        <b-table id="datatable" class="mt-3" :busy="isBusy" striped thead-tr-class="text-left"
+          tbody-tr-class="text-left" small :fields="fields" :items="items" select-mode="range">
           <template #table-busy>
             <div class="text-center text-secondary my-2">
               <b-spinner class="align-middle"></b-spinner>
-              <strong class="ml-2">{{$t("Loading")}}...</strong>
+              <strong class="ml-2">{{ $t("Loading") }}...</strong>
             </div>
           </template>
 
@@ -57,7 +73,7 @@
           <template #cell(id)="data">
             <b-link @click="info(data.item, $event.target)">
               {{ data.item.id }}
-            </b-link>
+            </b-link><br />
             {{ data.item.name }}
           </template>
 
@@ -66,12 +82,10 @@
           </template>
 
         </b-table>
-        <span class="float-left"> {{$t("Total")}}: {{ totals }} </span>
-        <b-pagination
-            :first-text="$t('First')"
-            :prev-text="$t('Prev')"
-            :next-text="$t('Next')"
-            :last-text="$t('Last')" v-model="formData.currentPage" :total-rows="totals" :per-page="formData.perPage" class="capPagination" aria-controls="datatable"></b-pagination>
+        <span class="float-left"> {{ $t("Total") }}: {{ totals }} </span>
+        <b-pagination :first-text="$t('First')" :prev-text="$t('Prev')" :next-text="$t('Next')" :last-text="$t('Last')"
+          v-model="formData.currentPage" :total-rows="totals" :per-page="formData.perPage" class="capPagination"
+          aria-controls="datatable"></b-pagination>
       </b-col>
     </b-row>
     <b-modal size="lg" :id="infoModal.id" :title="'Id: ' + infoModal.title" ok-only>
@@ -129,27 +143,27 @@ export default {
     onMetric() {
       return this.$store.getters.getMetric;
     },
-    fields(){
-      return  [
-      { key: "checkbox", label: "" },
-      { key: "id", label: this.$t("IdName") },
-      { key: "group", label: this.$t("Group") },
-      { key: "retries", label: this.$t("Retries") },
-      {
-        key: "added",
-        label: this.$t("Added"),
-        formatter: (val) => {
-          if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
+    fields() {
+      return [
+        { key: "checkbox", label: "" },
+        { key: "id", label: this.$t("IdName") },
+        { key: "group", label: this.$t("Group") },
+        { key: "retries", label: this.$t("Retries") },
+        {
+          key: "added",
+          label: this.$t("Added"),
+          formatter: (val) => {
+            if (val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
+          },
         },
-      },
-      {
-        key: "expiresAt",
-        label: this.$t("Expires"),
-        formatter: (val) => {
-          if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
+        {
+          key: "expiresAt",
+          label: this.$t("Expires"),
+          formatter: (val) => {
+            if (val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
+          },
         },
-      },
-    ]
+      ]
     }
   },
   mounted() {
@@ -252,6 +266,7 @@ export default {
   justify-content: flex-end;
   align-items: center;
 }
+
 .capPagination::v-deep .page-link {
   color: #6c757d;
   box-shadow: none;

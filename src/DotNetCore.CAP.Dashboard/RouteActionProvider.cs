@@ -37,6 +37,21 @@ namespace DotNetCore.CAP.Dashboard
             _response.StatusCode = StatusCodes.Status200OK;
         }
 
+        [HttpGet("/meta")]
+        public async Task MetaInfo()
+        {
+            var cap = ServiceProvider.GetRequiredService<CapMarkerService>();
+            var broker = ServiceProvider.GetRequiredService<CapMessageQueueMakerService>();
+            var storage = ServiceProvider.GetRequiredService<CapStorageMarkerService>();
+
+            await _response.WriteAsJsonAsync(new
+            {
+                cap,
+                broker,
+                storage
+            });
+        }
+
         [HttpGet("/stats")]
         public async Task Stats()
         {

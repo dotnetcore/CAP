@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using DotNetCore.CAP.Filter;
@@ -18,6 +19,15 @@ namespace DotNetCore.CAP;
 /// </summary>
 public class CapMarkerService
 {
+    public string Name { get; set; }
+
+    public string Version { get; set; }
+
+    public CapMarkerService(string name)
+    {
+        Name = name;
+        Version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion!;
+    }
 }
 
 /// <summary>
@@ -25,6 +35,20 @@ public class CapMarkerService
 /// </summary>
 public class CapStorageMarkerService
 {
+    public string Name { get; set; }
+
+    //public IDictionary<string, string> MetaData { get; private set; }
+
+    public CapStorageMarkerService(string name)
+    {
+        Name = name;
+        //MetaData = new Dictionary<string, string>();
+    }
+
+    //public void AddMetaData(string key, string value)
+    //{
+    //    MetaData.Add(key, value);
+    //}
 }
 
 /// <summary>
@@ -32,6 +56,20 @@ public class CapStorageMarkerService
 /// </summary>
 public class CapMessageQueueMakerService
 {
+    public string Name { get; set; }
+
+    //public IDictionary<string, object> MetaData { get; private set; }
+
+    public CapMessageQueueMakerService(string name)
+    {
+        Name = name;
+        //MetaData = new Dictionary<string, object>();
+    }
+
+    //public void AddMetaData(string key, string value)
+    //{
+    //    MetaData.Add(key, value);
+    //}
 }
 
 /// <summary>

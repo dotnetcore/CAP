@@ -22,7 +22,7 @@ public class MongoDBCapOptionsExtension : ICapOptionsExtension
 
     public void AddServices(IServiceCollection services)
     {
-        services.AddSingleton<CapStorageMarkerService>();
+        services.AddSingleton(new CapStorageMarkerService("MongoDB"));
 
         services.AddSingleton<IDataStorage, MongoDBDataStorage>();
         services.AddSingleton<IStorageInitializer, MongoDBStorageInitializer>();

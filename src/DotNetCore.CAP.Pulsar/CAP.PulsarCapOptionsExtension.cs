@@ -20,7 +20,7 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapMessageQueueMakerService>();
+            services.AddSingleton(new CapMessageQueueMakerService("Apache Pulsar"));
 
             services.Configure(_configure);
 

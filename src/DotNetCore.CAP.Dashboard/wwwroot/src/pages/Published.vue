@@ -2,43 +2,70 @@
   <div>
     <b-row>
       <b-col md="3">
+
         <b-list-group>
-          <router-link class="list-group-item text-left list-group-item-secondary list-group-item-action" v-for="menu of subMens" :key="menu.text" active-class="active" :to="menu.name">
-            {{$t(menu.text) }}
+          <b-tooltip target="tooltip" triggers="hover" variant="warning" custom-class="my-tooltip-class" placement="bottomright">
+            {{ $t("DelayedInfo") }}
+          </b-tooltip>
+          <router-link class="list-group-item text-left list-group-item-secondary list-group-item-action"
+            v-for="(menu, index) of subMens" :key="menu.text" active-class="active" :to="menu.name">
+            {{ $t(menu.text) }}
+
+            <b-icon-info-circle-fill id="tooltip" v-if="index == subMens.length - 1">
+            </b-icon-info-circle-fill>
             <b-badge :variant="menu.variant" class="float-right" pill> {{ onMetric[menu.num] }} </b-badge>
           </router-link>
         </b-list-group>
       </b-col>
-      <b-col md="9">
-        <h1 class="page-line mb-4">{{$t("Published Message")}}</h1>
-        <b-form inline>
-          <label class="sr-only" for="inline-form-input-name">{{$t("Name")}}</label>
-          <b-form-input v-model="formData.name" id="inline-form-input-name" class="mb-2 mr-sm-2 col-3 mb-sm-0" :placeholder="$t('Name')" />
 
-          <label class="sr-only" for="inline-form-input-content">{{$t("Content")}}</label>
-          <b-form-input v-model="formData.content" id="inline-form-input-content" class="mb-2 mr-sm-2 col-7 mb-sm-0" :placeholder="$t('Content')" />
-          <b-button variant="dark" @click="onSearch">
-            <b-icon icon="search"></b-icon>
-            {{$t("Search")}}
-          </b-button>
+      <b-col md="9">
+        <h1 class="page-line mb-3">{{ $t("Published Message") }}</h1>
+
+        <b-form class="d-flex">
+          <div class="col-sm-10">
+            <div class="form-row mb-2">
+              <label for="form-input-name" class="sr-only">{{ $t("Name") }}</label>
+              <b-form-input v-model="formData.name" id="form-input-name" class="form-control"
+                :placeholder="$t('Name')" />
+            </div>
+            <div class="form-row">
+              <label class="sr-only" for="inline-form-input-content">{{ $t("Content") }}</label>
+              <b-form-input v-model="formData.content" id="inline-form-input-content" class="form-control"
+                :placeholder="$t('Content')" />
+            </div>
+          </div>
+          <div class="align-self-end">
+            <b-button variant="dark" @click="onSearch">
+              <b-icon icon="search"></b-icon>
+              {{ $t("Search") }}
+            </b-button>
+          </div>
         </b-form>
+      </b-col>
+    </b-row>
+
+    <b-row>
+      <b-col md="12">
         <b-btn-toolbar class="mt-4">
           <b-button size="sm" variant="dark" @click="requeue" :disabled="!selectedItems.length">
             <b-icon icon="arrow-repeat" aria-hidden="true"></b-icon>
-            {{$t("Requeue")}}
+            {{ requeueTitle }}
           </b-button>
           <div class="pagination">
-            <span style="font-size: 14px">{{$t("Page Size")}}:</span>
+            <span style="font-size: 14px">{{ $t("Page Size") }}:</span>
             <b-button-group class="ml-2">
-              <b-button variant="outline-secondary" size="sm" v-for="size in pageOptions" :class="{ active: formData.perPage == size }" @click="pageSizeChange(size)" :key="size">{{ size }}</b-button>
+              <b-button variant="outline-secondary" size="sm" v-for="size in pageOptions"
+                :class="{ active: formData.perPage == size }" @click="pageSizeChange(size)" :key="size">{{ size }}
+              </b-button>
             </b-button-group>
           </div>
         </b-btn-toolbar>
-        <b-table id="datatable" :busy="isBusy" class="mt-3" striped thead-tr-class="text-left" tbody-tr-class="text-left" small :fields="fields" :items="items" select-mode="range">
+        <b-table id="datatable" :busy="isBusy" class="mt-3" striped thead-tr-class="text-left"
+          tbody-tr-class="text-left" small :fields="fields" :items="items" select-mode="range">
           <template #table-busy>
             <div class="text-center text-secondary my-2">
               <b-spinner class="align-middle"></b-spinner>
-              <strong class="ml-2">{{$t("Loading")}}...</strong>
+              <strong class="ml-2">{{ $t("Loading") }}...</strong>
             </div>
           </template>
 
@@ -55,17 +82,15 @@
             <b-link @click="info(data.item, $event.target)">
               {{ data.item.id }}
             </b-link>
+            <br />
             {{ data.item.name }}
           </template>
- 
+
         </b-table>
-        <span class="float-left"> {{$t("Total")}}: {{ totals }} </span>
-        <b-pagination
-            :first-text="$t('First')"
-            :prev-text="$t('Prev')"
-            :next-text="$t('Next')"
-            :last-text="$t('Last')"
-            v-model="formData.currentPage" :total-rows="totals" :per-page="formData.perPage" class="capPagination" aria-controls="datatable"></b-pagination>
+        <span class="float-left"> {{ $t("Total") }}: {{ totals }} </span>
+        <b-pagination :first-text="$t('First')" :prev-text="$t('Prev')" :next-text="$t('Next')" :last-text="$t('Last')"
+          v-model="formData.currentPage" :total-rows="totals" :per-page="formData.perPage" class="capPagination"
+          aria-controls="datatable"></b-pagination>
       </b-col>
     </b-row>
     <b-modal size="lg" :id="infoModal.id" :title="'Id: ' + infoModal.title" ok-only>
@@ -102,6 +127,13 @@ export default {
           name: "/published/failed",
           num: 'publishedFailed',
         },
+
+        {
+          variant: "warning",
+          text: "Delayed",
+          name: "/published/delayed",
+          num: 'publishedDelayed',
+        },
       ],
       pageOptions: [10, 20, 50, 100, 500],
       selectedItems: [],
@@ -116,35 +148,37 @@ export default {
         title: "",
         content: "{}",
       },
+      expiresTitle: this.$t("Expires"),
+      requeueTitle: this.$t("Requeue")
     };
   },
   computed: {
     onMetric() {
       return this.$store.getters.getMetric;
     },
-    fields(){
+    fields() {
       return [{ key: "checkbox", label: "" },
-        { key: "id", label: this.$t("IdName") },
-        { key: "retries", label: this.$t("Retries") },
-        {
-          key: "added",
-          label: this.$t("Added"),
-          formatter: (val) => {
-            if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
-          },
+      { key: "id", label: this.$t("IdName") },
+      { key: "retries", label: this.$t("Retries") },
+      {
+        key: "added",
+        label: this.$t("Added"),
+        formatter: (val) => {
+          if (val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
         },
-
-        {
-          key: "expiresAt",
-          label: this.$t("Expires"),
-          formatter: (val) => {
-            if(val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
-          },
-        }];
+      },
+      {
+        key: "expiresAt",
+        label: this.expiresTitle,
+        formatter: (val) => {
+          if (val != null) return new Date(val).format("yyyy-MM-dd hh:mm:ss");
+        },
+      }];
     }
   },
   mounted() {
     this.fetchData();
+    window.abc = this;
   },
   watch: {
     status: function () {
@@ -162,6 +196,13 @@ export default {
       }).then(res => {
         this.items = res.data.items;
         this.totals = res.data.totals;
+        if (this.status == "delayed") {
+          this.expiresTitle = this.$t("DelayedPublishTime");
+          this.requeueTitle = this.$t("PublishNow")
+        } else {
+          this.expiresTitle = this.$t("Expires");
+          this.requeueTitle = this.$t("Requeue")
+        }
       }).finally(() => {
         this.isBusy = false;
       });
@@ -243,6 +284,7 @@ export default {
   justify-content: flex-end;
   align-items: center;
 }
+
 .capPagination::v-deep .page-link {
   color: #6c757d;
   box-shadow: none;

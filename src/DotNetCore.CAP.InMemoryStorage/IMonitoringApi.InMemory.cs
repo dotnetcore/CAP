@@ -32,7 +32,8 @@ namespace DotNetCore.CAP.InMemoryStorage
                 PublishedSucceeded = InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded),
                 ReceivedSucceeded = InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded),
                 PublishedFailed = InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Failed),
-                ReceivedFailed = InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Failed)
+                ReceivedFailed = InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Failed),
+                PublishedDelayed = InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Delayed)
             };
             return Task.FromResult(stats);
         }

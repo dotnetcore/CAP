@@ -10,6 +10,9 @@ public class StatisticsDto
     public int Subscribers { get; set; }
 
     public int PublishedSucceeded { get; set; }
+
+    public int PublishedDelayed { get; set; }
+
     public int ReceivedSucceeded { get; set; }
 
     public int PublishedFailed { get; set; }

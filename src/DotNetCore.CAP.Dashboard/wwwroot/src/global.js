@@ -1,6 +1,6 @@
 let baseURL = "";
 
-switch (process.env.NODE_ENV) {
+switch (import.meta.env.MODE) {
     case 'development':
         baseURL = "/cap/api";
         break

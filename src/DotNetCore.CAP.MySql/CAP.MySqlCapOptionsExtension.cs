@@ -22,7 +22,7 @@ internal class MySqlCapOptionsExtension : ICapOptionsExtension
 
     public void AddServices(IServiceCollection services)
     {
-        services.AddSingleton<CapStorageMarkerService>();
+        services.AddSingleton(new CapStorageMarkerService("MySql"));
         services.AddSingleton<IDataStorage, MySqlDataStorage>();
 
         services.TryAddSingleton<IStorageInitializer, MySqlStorageInitializer>();

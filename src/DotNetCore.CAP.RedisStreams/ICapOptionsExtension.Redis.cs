@@ -25,7 +25,7 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapMessageQueueMakerService>();
+            services.AddSingleton(new CapMessageQueueMakerService("RedisStreams"));
             services.AddSingleton<IRedisStreamManager, RedisStreamManager>();
             services.AddSingleton<IConsumerClientFactory, RedisConsumerClientFactory>();
             services.AddSingleton<ITransport, RedisTransport>();

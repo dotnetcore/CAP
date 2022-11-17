@@ -42,7 +42,10 @@ SELECT
 ) AS PublishedFailed,
 (
     SELECT COUNT(Id) FROM {_recName} WHERE StatusName = N'Failed'
-) AS ReceivedFailed;";
+) AS ReceivedFailed,
+(
+    SELECT COUNT(Id) FROM {_pubName} WHERE StatusName = N'Delayed'
+) AS PublishedDelayed;";
 
         var connection = new SqlConnection(_options.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
@@ -56,6 +59,7 @@ SELECT
                 statisticsDto.ReceivedSucceeded = reader.GetInt32(1);
                 statisticsDto.PublishedFailed = reader.GetInt32(2);
                 statisticsDto.ReceivedFailed = reader.GetInt32(3);
+                statisticsDto.PublishedDelayed = reader.GetInt32(4);
             }
 
             return Task.FromResult(statisticsDto);

@@ -9,24 +9,22 @@ The dashboard project uses vue 2 to build, and the UI uses bootstrap 4.
 > cd src\DotNetCore.CAP.Dashboard\wwwroot
 
 ```sh
-npm install -g @vue/cli @vue/cli-service-global
-
 npm install
 ```
 
 ### Update backend api
 
-Update the `baseURL` in `global.js` of development to specify the backend service api.
+Update the `target` in `vite.config.js` of development to specify the backend service api.
 
 ```
-switch (process.env.NODE_ENV) {
-    case 'development':
-        baseURL = 'http://localhost:5000';  // backend api
-        break
-    default:
-        baseURL = window.serverUrl;
-        break
-}
+  server: {
+    proxy: {
+      '^/cap/api': {
+        target: 'http://localhost:5000',  //backend
+        changeOrigin: true
+      }
+    }
+  }
 ```
 
 ### Run
@@ -34,7 +32,7 @@ switch (process.env.NODE_ENV) {
 The backend api needs to allow cross-domain access.
 
 ```
-npm run serve
+npm run dev
 ```
 
 ## Publish

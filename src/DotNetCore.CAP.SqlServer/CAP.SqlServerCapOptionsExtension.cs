@@ -24,7 +24,7 @@ internal class SqlServerCapOptionsExtension : ICapOptionsExtension
 
     public void AddServices(IServiceCollection services)
     {
-        services.AddSingleton<CapStorageMarkerService>();
+        services.AddSingleton(new CapStorageMarkerService("SqlServer"));
 
         services.AddSingleton<DiagnosticProcessorObserver>();
         services.AddSingleton<IDataStorage, SqlServerDataStorage>();

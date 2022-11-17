@@ -28,7 +28,7 @@ public static class ServiceCollectionExtensions
         if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
         services.AddSingleton(_ => services);
-        services.TryAddSingleton<CapMarkerService>();
+        services.TryAddSingleton(new CapMarkerService("CAP"));
 
         services.TryAddSingleton<ICapPublisher, CapPublisher>();
 

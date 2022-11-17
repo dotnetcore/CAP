@@ -71,8 +71,12 @@ public class MongoDBMonitoringApi : IMonitoringApi
             ReceivedSucceeded =
                 (int)await receivedCollection.CountDocumentsAsync(x => x.StatusName == nameof(StatusName.Succeeded))
                     .ConfigureAwait(false),
-            ReceivedFailed = (int)await receivedCollection
-                .CountDocumentsAsync(x => x.StatusName == nameof(StatusName.Failed)).ConfigureAwait(false)
+            ReceivedFailed =
+                (int)await receivedCollection.CountDocumentsAsync(x => x.StatusName == nameof(StatusName.Failed))
+                    .ConfigureAwait(false),
+            PublishedDelayed =
+                (int)await publishedCollection.CountDocumentsAsync(x => x.StatusName == nameof(StatusName.Delayed))
+                    .ConfigureAwait(false)
         };
         return statistics;
     }
@@ -135,23 +139,23 @@ public class MongoDBMonitoringApi : IMonitoringApi
             .Limit(queryDto.PageSize)
             .ToListAsync().ConfigureAwait(false);
         var items = queryItems.Select(x => new MessageDto
-            {
-                Id = x.Id.ToString(),
-                Version = x.Version.ToString(),
-                Group = x.Group,
-                Name = x.Name,
-                Content = x.Content,
-                Added = x.Added.ToLocalTime(),
-                ExpiresAt = x.ExpiresAt?.ToLocalTime(),
-                Retries = x.Retries,
-                StatusName = x.StatusName
-            })
+        {
+            Id = x.Id.ToString(),
+            Version = x.Version.ToString(),
+            Group = x.Group,
+            Name = x.Name,
+            Content = x.Content,
+            Added = x.Added.ToLocalTime(),
+            ExpiresAt = x.ExpiresAt?.ToLocalTime(),
+            Retries = x.Retries,
+            StatusName = x.StatusName
+        })
             .ToList();
 
         var count = await collection.CountDocumentsAsync(filter).ConfigureAwait(false);
 
         return new PagedQueryResult<MessageDto>
-            { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
+        { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
     }
 
     private async Task<PagedQueryResult<MessageDto>> FindPublishedMessages(MessageQueryDto queryDto)
@@ -191,7 +195,7 @@ public class MongoDBMonitoringApi : IMonitoringApi
         var count = await collection.CountDocumentsAsync(filter).ConfigureAwait(false);
 
         return new PagedQueryResult<MessageDto>
-            { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
+        { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
     }
 
     private ValueTask<int> GetNumberOfMessage(string collectionName, string statusName)

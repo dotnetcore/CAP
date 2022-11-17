@@ -1,16 +1,20 @@
 <template>
-  <b-row>
-    <b-col md="12">
-      <h1 class="page-line mb-4">{{ $t("Dashboard") }}</h1>
-
-      <h3 class="mb-4">{{ $t("Realtime Metric Graph") }}</h3>
-      <div id="realtimeGraph"></div>
-      <p class="text-secondary">{{ $t("SubscriberInvokeMeanTime") }}</p>
-
-      <h3 class="mt-4">{{ $t("24h History Graph") }}</h3>
-      <div id="historyGraph"></div>
-    </b-col>
-  </b-row>
+  <b-container>
+    <h1 class="page-line mb-4">{{ $t("Dashboard") }}</h1>
+    <b-row>
+      <b-col>
+        <h3 class="mb-4">{{ $t("Realtime Metric Graph") }}</h3>
+        <div id="realtimeGraph"></div>
+        <p class="text-secondary">{{ $t("SubscriberInvokeMeanTime") }}</p>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <h3 class="mt-4">{{ $t("24h History Graph") }}</h3>
+        <div id="historyGraph"></div>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
@@ -32,7 +36,7 @@ export default {
     });
 
     var historyOpts = {
-      width: 1000,
+      width: 960,
       height: 400,
       cursor: {
         drag: {
@@ -77,7 +81,7 @@ export default {
     new uPlot(historyOpts, historyInitData, document.getElementById("historyGraph"));
 
     const realtimeOpts = {
-      width: 1000,
+      width: 960,
       height: 400,
       cursor: {
         drag: {
