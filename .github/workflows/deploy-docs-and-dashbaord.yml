@@ -47,6 +47,7 @@ jobs:
     - name: Commit & Push dist changes 🚀
       uses: actions-js/push@master
       with:
+        branch: master
         github_token: ${{ secrets.GITHUB_TOKEN }}
 
   build-docs-and-deploy:
