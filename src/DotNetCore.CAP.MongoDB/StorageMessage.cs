@@ -3,45 +3,44 @@
 
 using System;
 
-namespace DotNetCore.CAP.MongoDB
+namespace DotNetCore.CAP.MongoDB;
+
+internal class ReceivedMessage
 {
-    internal class ReceivedMessage
-    {
-        public long Id { get; set; }
+    public long Id { get; set; }
 
-        public string Version { get; set; } = default!;
+    public string Version { get; set; } = default!;
 
-        public string Group { get; set; } = default!;
+    public string Group { get; set; } = default!;
 
-        public string Name { get; set; } = default!;
+    public string Name { get; set; } = default!;
 
-        public string Content { get; set; } = default!;
+    public string Content { get; set; } = default!;
 
-        public DateTime Added { get; set; }
+    public DateTime Added { get; set; }
 
-        public DateTime? ExpiresAt { get; set; }
+    public DateTime? ExpiresAt { get; set; }
 
-        public int Retries { get; set; }
+    public int Retries { get; set; }
 
-        public string StatusName { get; set; } = default!;
-    }
+    public string StatusName { get; set; } = default!;
+}
 
-    internal class PublishedMessage
-    {
-        public long Id { get; set; }
+internal class PublishedMessage
+{
+    public long Id { get; set; }
 
-        public string Version { get; set; } = default!;
+    public string Version { get; set; } = default!;
 
-        public string Name { get; set; } = default!;
+    public string Name { get; set; } = default!;
 
-        public string Content { get; set; } = default!;
+    public string Content { get; set; } = default!;
 
-        public DateTime Added { get; set; }
+    public DateTime Added { get; set; }
 
-        public DateTime? ExpiresAt { get; set; }
+    public DateTime? ExpiresAt { get; set; }
 
-        public int Retries { get; set; }
+    public int Retries { get; set; }
 
-        public string StatusName { get; set; } = default!;
-    }
+    public string StatusName { get; set; } = default!;
 }

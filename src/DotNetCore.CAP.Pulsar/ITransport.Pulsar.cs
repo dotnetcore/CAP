@@ -32,7 +32,7 @@ namespace DotNetCore.CAP.Pulsar
             {
                 var headerDic = new Dictionary<string, string?>(message.Headers);
                 headerDic.TryGetValue(PulsarHeaders.PulsarKey, out var key);
-                var pulsarMessage = producer.NewMessage(message.Body!, key, headerDic);
+                var pulsarMessage = producer.NewMessage(message.Body.ToArray()!, key, headerDic);
                 var result = await producer.SendAsync(pulsarMessage);
 
                 if (result.Type != null)

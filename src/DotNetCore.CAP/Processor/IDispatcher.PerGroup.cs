@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -14,40 +15,49 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Processor
+namespace DotNetCore.CAP.Processor;
+
+internal class DispatcherPerGroup : IDispatcher
 {
-    internal class DispatcherPerGroup : IDispatcher
+    private readonly CancellationTokenSource _tasksCTS = new();
+    private readonly CancellationTokenSource _delayCTS = new();
+    private readonly ISubscribeDispatcher _executor;
+    private readonly ILogger<Dispatcher> _logger;
+    private readonly CapOptions _options;
+    private readonly IMessageSender _sender;
+    private readonly IDataStorage _storage;
+    private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
+
+    private Channel<MediumMessage> _publishedChannel = default!;
+    private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>> _receivedChannels = default!;
+
+    private DateTime _nextSendTime = DateTime.MaxValue;
+    private CancellationToken _stoppingToken;
+
+    public DispatcherPerGroup(ILogger<Dispatcher> logger,
+        IMessageSender sender,
+        IOptions<CapOptions> options,
+        ISubscribeDispatcher executor,
+        IDataStorage storage)
     {
-        private readonly IMessageSender _sender;
-        private readonly CapOptions _options;
-        private readonly ISubscribeDispatcher _executor;
-        private readonly ILogger<Dispatcher> _logger;
-        private readonly CancellationTokenSource _cts = new ();
+        _logger = logger;
+        _sender = sender;
+        _options = options.Value;
+        _executor = executor;
+        _schedulerQueue = new PriorityQueue<MediumMessage, DateTime>();
+        _storage = storage;
+    }
 
-        private Channel<MediumMessage> _publishedChannel = default!;
-        private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>> _receivedChannels = default!;
-        private CancellationToken _stoppingToken;
+    public async Task Start(CancellationToken stoppingToken)
+    {
+        _stoppingToken = stoppingToken;
+        _stoppingToken.ThrowIfCancellationRequested();
+        _stoppingToken.Register(() => _tasksCTS.Cancel());
+        _stoppingToken.Register(() => _delayCTS.Cancel());
 
-        public DispatcherPerGroup(
-            ILogger<Dispatcher> logger,
-            IMessageSender sender,
-            IOptions<CapOptions> options,
-            ISubscribeDispatcher executor)
-        {
-            _logger = logger;
-            _sender = sender;
-            _options = options.Value;
-            _executor = executor;
-        }
-
-        public void Start(CancellationToken stoppingToken)
-        {
-            _stoppingToken = stoppingToken;
-            _stoppingToken.ThrowIfCancellationRequested();
-            _stoppingToken.Register(() => _cts.Cancel());
-
-            var capacity = _options.ProducerThreadCount * 500;
-            _publishedChannel = Channel.CreateBounded<MediumMessage>(new BoundedChannelOptions(capacity > 5000 ? 5000 : capacity)
+        var capacity = _options.ProducerThreadCount * 500;
+        _publishedChannel = Channel.CreateBounded<MediumMessage>(
+            new BoundedChannelOptions(capacity > 5000 ? 5000 : capacity)
             {
                 AllowSynchronousContinuations = true,
                 SingleReader = _options.ProducerThreadCount == 1,
@@ -55,74 +65,122 @@ namespace DotNetCore.CAP.Processor
                 FullMode = BoundedChannelFullMode.Wait
             });
 
-            Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
-                .Select(_ => Task.Factory.StartNew(() => Sending(stoppingToken), stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
+        await Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
+            .Select(_ => Task.Factory.StartNew(() => Sending(stoppingToken), stoppingToken,
+                TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
 
-            _receivedChannels = new ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>>(_options.ConsumerThreadCount, _options.ConsumerThreadCount * 2);
-            GetOrCreateReceiverChannel(_options.DefaultGroupName);
+        _receivedChannels =
+            new ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>>(
+                _options.ConsumerThreadCount, _options.ConsumerThreadCount * 2);
 
-            _logger.LogInformation("Starting DispatcherPerGroup");
-        }
+        GetOrCreateReceiverChannel(_options.DefaultGroupName);
 
-        public void EnqueueToPublish(MediumMessage message)
+        await Task.Factory.StartNew(async () =>
         {
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                if (!_publishedChannel.Writer.TryWrite(message))
+                try
                 {
-                    while (_publishedChannel.Writer.WaitToWriteAsync(_cts.Token).AsTask().ConfigureAwait(false).GetAwaiter().GetResult())
+                    while (_schedulerQueue.TryPeek(out var message, out _nextSendTime))
                     {
-                        if (_publishedChannel.Writer.TryWrite(message))
+                        var delayTime = _nextSendTime - DateTime.Now;
+
+                        if (delayTime > new TimeSpan(500000)) //50ms
                         {
-                            return;
+                            await Task.Delay(delayTime, _delayCTS.Token);
                         }
+                        stoppingToken.ThrowIfCancellationRequested();
+
+                        await _sender.SendAsync(_schedulerQueue.Dequeue()).ConfigureAwait(false);
                     }
+                    stoppingToken.WaitHandle.WaitOne(100);
+                }
+                catch (OperationCanceledException)
+                {
+                    //Ignore
                 }
             }
-            catch (OperationCanceledException)
+        }, stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+
+        _logger.LogInformation("Starting DispatcherPerGroup");
+    }
+
+    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime)
+    {
+        message.ExpiresAt = publishTime;
+
+        var timeSpan = publishTime - DateTime.Now;
+
+        if (timeSpan <= TimeSpan.FromMinutes(1))
+        {
+            await _storage.ChangePublishStateAsync(message, StatusName.Queued);
+
+            _schedulerQueue.Enqueue(message, publishTime);
+
+            if (publishTime < _nextSendTime)
             {
-                //Ignore
+                _delayCTS.Cancel();
             }
         }
-
-        public void EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
+        else
         {
-            try
-            {
-                var group = descriptor.Attribute.Group ?? _options.DefaultGroupName;
-
-                if (_logger.IsEnabled(LogLevel.Debug))
-                {
-                    _logger.LogDebug("Enqueue message for group {ConsumerGroup}", group);
-                }
-
-                var channel = GetOrCreateReceiverChannel(group);
-
-                if (!channel.Writer.TryWrite((message, descriptor)))
-                {
-                    while (channel.Writer.WaitToWriteAsync(_cts.Token).AsTask().ConfigureAwait(false).GetAwaiter().GetResult())
-                    {
-                        if (channel.Writer.TryWrite((message, descriptor)))
-                        {
-                            return;
-                        }
-                    }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                //Ignore
-            }
+            await _storage.ChangePublishStateAsync(message, StatusName.Delayed);
         }
+    }
 
-        private Channel<(MediumMessage, ConsumerExecutorDescriptor)> GetOrCreateReceiverChannel(string key)
+    public async ValueTask EnqueueToPublish(MediumMessage message)
+    {
+        try
         {
-            return _receivedChannels.GetOrAdd(key, group =>
-            {
-                _logger.LogInformation("Creating receiver channel for group {ConsumerGroup} with thread count {ConsumerThreadCount}", group, _options.ConsumerThreadCount);
+            if (!_publishedChannel.Writer.TryWrite(message))
+                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCTS.Token).ConfigureAwait(false))
+                    if (_publishedChannel.Writer.TryWrite(message))
+                        return;
+        }
+        catch (OperationCanceledException)
+        {
+            //Ignore
+        }
+    }
 
-                var capacity = _options.ConsumerThreadCount * 300;
-                var channel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor)>(new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
+    public async ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
+    {
+        try
+        {
+            var group = descriptor.Attribute.Group ?? _options.DefaultGroupName;
+
+            if (_logger.IsEnabled(LogLevel.Debug)) _logger.LogDebug("Enqueue message for group {ConsumerGroup}", group);
+
+            var channel = GetOrCreateReceiverChannel(group);
+
+            if (!channel.Writer.TryWrite((message, descriptor)))
+                while (await channel.Writer.WaitToWriteAsync(_tasksCTS.Token).ConfigureAwait(false))
+                    if (channel.Writer.TryWrite((message, descriptor)))
+                        return;
+        }
+        catch (OperationCanceledException)
+        {
+            //Ignore
+        }
+    }
+
+    public void Dispose()
+    {
+        if (!_tasksCTS.IsCancellationRequested)
+            _tasksCTS.Cancel();
+    }
+
+    private Channel<(MediumMessage, ConsumerExecutorDescriptor)> GetOrCreateReceiverChannel(string key)
+    {
+        return _receivedChannels.GetOrAdd(key, group =>
+        {
+            _logger.LogInformation(
+                "Creating receiver channel for group {ConsumerGroup} with thread count {ConsumerThreadCount}", group,
+                _options.ConsumerThreadCount);
+
+            var capacity = _options.ConsumerThreadCount * 300;
+            var channel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor)>(
+                new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
                 {
                     AllowSynchronousContinuations = true,
                     SingleReader = _options.ConsumerThreadCount == 1,
@@ -130,83 +188,67 @@ namespace DotNetCore.CAP.Processor
                     FullMode = BoundedChannelFullMode.Wait
                 });
 
-                Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
-                    .Select(_ => Task.Factory.StartNew(() => Processing(group, channel, _stoppingToken), _stoppingToken, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
+            Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
+                .Select(_ => Task.Factory.StartNew(() => Processing(group, channel, _stoppingToken), _stoppingToken,
+                    TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
 
-                return channel;
-            });
-        }
+            return channel;
+        });
+    }
 
-        private async Task Sending(CancellationToken cancellationToken)
+    private async Task Sending(CancellationToken cancellationToken)
+    {
+        try
         {
-            try
-            {
-                while (await _publishedChannel.Reader.WaitToReadAsync(cancellationToken))
-                {
-                    while (_publishedChannel.Reader.TryRead(out var message))
+            while (await _publishedChannel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
+                while (_publishedChannel.Reader.TryRead(out var message))
+                    try
                     {
-                        try
-                        {
-                            var result = await _sender.SendAsync(message);
-                            if (!result.Succeeded)
-                            {
-                                _logger.MessagePublishException(
-                                    message.Origin.GetId(),
-                                    result.ToString(),
-                                    result.Exception);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Id:{message.DbId}");
-                        }
+                        var result = await _sender.SendAsync(message).ConfigureAwait(false);
+                        if (!result.Succeeded)
+                            _logger.MessagePublishException(
+                                message.Origin.GetId(),
+                                result.ToString(),
+                                result.Exception);
                     }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // expected
-            }
-        }
-
-        private async Task Processing(string group, Channel<(MediumMessage, ConsumerExecutorDescriptor)> channel, CancellationToken cancellationToken)
-        {
-            try
-            {
-                while (await channel.Reader.WaitToReadAsync(cancellationToken))
-                {
-                    while (channel.Reader.TryRead(out var message))
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            if (_logger.IsEnabled(LogLevel.Debug))
-                            {
-                                _logger.LogDebug("Dispatching message for group {ConsumerGroup}", group);
-                            }
-
-                            await _executor.DispatchAsync(message.Item1, message.Item2, cancellationToken);
-                        }
-                        catch (OperationCanceledException)
-                        {
-                            //expected
-                        }
-                        catch (Exception e)
-                        {
-                            _logger.LogError(e, $"An exception occurred when invoke subscriber. MessageId:{message.Item1.DbId}");
-                        }
+                        _logger.LogError(ex, $"An exception occurred when sending a message to the MQ. Id:{message.DbId}");
                     }
-                }
-            }
-            catch (OperationCanceledException)
-            {
-                // expected
-            }
         }
-
-        public void Dispose()
+        catch (OperationCanceledException)
         {
-            if (!_cts.IsCancellationRequested)
-                _cts.Cancel();
+            // expected
+        }
+    }
+
+    private async Task Processing(string group, Channel<(MediumMessage, ConsumerExecutorDescriptor)> channel,
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            while (await channel.Reader.WaitToReadAsync(cancellationToken).ConfigureAwait(false))
+                while (channel.Reader.TryRead(out var message))
+                    try
+                    {
+                        if (_logger.IsEnabled(LogLevel.Debug))
+                            _logger.LogDebug("Dispatching message for group {ConsumerGroup}", group);
+
+                        await _executor.DispatchAsync(message.Item1, message.Item2, cancellationToken).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        //expected
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e,
+                            $"An exception occurred when invoke subscriber. MessageId:{message.Item1.DbId}");
+                    }
+        }
+        catch (OperationCanceledException)
+        {
+            // expected
         }
     }
 }

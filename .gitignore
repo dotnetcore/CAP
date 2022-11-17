@@ -1,4 +1,4 @@
-﻿node_modules
+node_modules
 [Oo]bj/
 [Bb]in/
 TestResults/
@@ -12,6 +12,8 @@ PublishProfiles/
 *.cache
 *.docstates
 _ReSharper.*
+*.[Rr]e[Ss]harper
+*.DotSettings.user
 nuget.exe
 *k10.csproj
 *.psess
@@ -31,3 +33,4 @@ Properties
 /pack.bat
 .vscode/*
 site/
+*.lock

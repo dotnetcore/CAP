@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
@@ -8,6 +9,7 @@ using MySqlConnector;
 
 namespace Sample.RabbitMQ.MySql.Controllers
 {
+
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
@@ -21,7 +23,15 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
+            await _capBus.PublishAsync("sample.rabbitmq.test", DateTime.Now);
+
+            return Ok();
+        }
+
+        [Route("~/delay/{delaySeconds:int}")]
+        public async Task<IActionResult> Delay(int delaySeconds)
+        {
+            await _capBus.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "sample.rabbitmq.test", $"publish time:{DateTime.Now}, delay seconds:{delaySeconds}");
 
             return Ok();
         }
@@ -33,13 +43,9 @@ namespace Sample.RabbitMQ.MySql.Controllers
             {
                 using (var transaction = connection.BeginTransaction(_capBus, true))
                 {
-                    //your business code
                     connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
 
-                    //for (int i = 0; i < 5; i++)
-                    //{
                     _capBus.Publish("sample.rabbitmq.mysql", DateTime.Now);
-                    //}
                 }
             }
 
@@ -47,7 +53,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         }
 
         [Route("~/ef/transaction")]
-        public IActionResult EntityFrameworkWithTransaction([FromServices]AppDbContext dbContext)
+        public IActionResult EntityFrameworkWithTransaction([FromServices] AppDbContext dbContext)
         {
             using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
             {
@@ -66,17 +72,10 @@ namespace Sample.RabbitMQ.MySql.Controllers
         }
 
         [NonAction]
-        [CapSubscribe("sample.rabbitmq.mysql")]
-        public void Subscriber(DateTime p)
+        [CapSubscribe("sample.rabbitmq.test")]
+        public void Subscriber(string content)
         {
-            Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
-        }
-
-        [NonAction]
-        [CapSubscribe("sample.rabbitmq.mysql", Group = "group.test2")]
-        public void Subscriber2(DateTime p, [FromCap]CapHeader header)
-        {
-            Console.WriteLine($@"{DateTime.Now} Subscriber invoked, Info: {p}");
+            Console.WriteLine($"Consume time: {DateTime.Now} \r\n   --> " +content);
         }
     }
 }

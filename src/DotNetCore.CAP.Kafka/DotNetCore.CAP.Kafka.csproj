@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);Kafka</PackageTags>
   </PropertyGroup>
@@ -12,7 +12,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Confluent.Kafka" Version="1.8.2" />
+    <PackageReference Include="Confluent.Kafka" Version="1.9.3" />
   </ItemGroup>
 
   <ItemGroup>

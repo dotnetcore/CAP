@@ -8,39 +8,36 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+public class SqlServerOptions : EFOptions
 {
-    public class SqlServerOptions : EFOptions
+    /// <summary>
+    /// Gets or sets the database's connection string that will be used to store database entities.
+    /// </summary>
+    public string ConnectionString { get; set; } = default!;
+}
+
+internal class ConfigureSqlServerOptions : IConfigureOptions<SqlServerOptions>
+{
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public ConfigureSqlServerOptions(IServiceScopeFactory serviceScopeFactory)
     {
-        /// <summary>
-        /// Gets or sets the database's connection string that will be used to store database entities.
-        /// </summary>
-        public string ConnectionString { get; set; } = default!;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
-
-    internal class ConfigureSqlServerOptions : IConfigureOptions<SqlServerOptions>
+    public void Configure(SqlServerOptions options)
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        if (options.DbContextType == null) return;
 
-        public ConfigureSqlServerOptions(IServiceScopeFactory serviceScopeFactory)
-        {
-            _serviceScopeFactory = serviceScopeFactory;
-        }
+        if (Helper.IsUsingType<ICapPublisher>(options.DbContextType))
+            throw new InvalidOperationException(
+                "We detected that you are using ICapPublisher in DbContext, please change the configuration to use the storage extension directly to avoid circular references! eg:  x.UseSqlServer()");
 
-        public void Configure(SqlServerOptions options)
-        {
-            if (options.DbContextType == null) return;
-
-            if (Helper.IsUsingType<ICapPublisher>(options.DbContextType))
-            {
-                throw new InvalidOperationException("We detected that you are using ICapPublisher in DbContext, please change the configuration to use the storage extension directly to avoid circular references! eg:  x.UseSqlServer()");
-            }
-
-            using var scope = _serviceScopeFactory.CreateScope();
-            var provider = scope.ServiceProvider;
-            using var dbContext = (DbContext)provider.GetRequiredService(options.DbContextType);
-            options.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
-        }
+        using var scope = _serviceScopeFactory.CreateScope();
+        var provider = scope.ServiceProvider;
+        using var dbContext = (DbContext)provider.GetRequiredService(options.DbContextType);
+        options.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
     }
 }

@@ -1,215 +1,194 @@
 <template>
-  <b-row>
-    <b-col md="12">
-      <h1 class="page-line mb-4">{{$t("Dashboard")}}</h1>
-      <h3 class="mb-4">{{$t("24h History Graph")}}</h3>
-      <v-chart class="chart" :option="option" />
-    </b-col>
-  </b-row>
+  <b-container>
+    <h1 class="page-line mb-4">{{ $t("Dashboard") }}</h1>
+    <b-row>
+      <b-col>
+        <h3 class="mb-4">{{ $t("Realtime Metric Graph") }}</h3>
+        <div id="realtimeGraph"></div>
+        <p class="text-secondary">{{ $t("SubscriberInvokeMeanTime") }}</p>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col>
+        <h3 class="mt-4">{{ $t("24h History Graph") }}</h3>
+        <div id="historyGraph"></div>
+      </b-col>
+    </b-row>
+  </b-container>
 </template>
 
 <script>
-import axios from 'axios';
-import { use, graphic } from "echarts/core";
-import { CanvasRenderer } from "echarts/renderers";
-import { LineChart } from "echarts/charts";
-import {
-  GridComponent,
-  DataZoomComponent,
-  VisualMapComponent,
-  TimelineComponent,
-  CalendarComponent,
-  TooltipComponent,
-  LegendComponent,
-} from "echarts/components";
-import VChart, { THEME_KEY } from "vue-echarts";
 
-use([
-  CanvasRenderer,
-  LineChart,
-  GridComponent,
-  DataZoomComponent,
-  VisualMapComponent,
-  TimelineComponent,
-  CalendarComponent,
-  TooltipComponent,
-  LegendComponent
-]);
+import uPlot from '../assets/uPlot.esm.js';
+import axios from 'axios';
 
 export default {
-  name: "Dashboard",
-  components: {
-    VChart
-  },
-  provide: {
-    [THEME_KEY]: "light"
-  },
-  data() {
-    return {
-      renderData: {},
-    }
-  },
-  computed: {
-    option: function () {
-      const { dayHour,
-        publishSuccessed,
-        publishFailed,
-        subscribeSuccessed,
-        subscribeFailed } = this.renderData;
+  async mounted() {
 
-      return {
-        color: ['#80FFA5', '#00DDFF', '#37A2FF', '#FF0087'],
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'cross',
-            label: {
-              backgroundColor: '#6a7985'
-            }
-          }
-        },
-        legend: {
-          data: [
-            this.$t('Publish Succeeded'),
-            this.$t('Publish Failed'),
-            this.$t('Received Succeeded'),
-            this.$t('Received Failed')]
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: [
-          {
-            type: 'category',
-            inverse: true,
-            axisLabel: {
-              interval: 0,
-              rotate: 40
-            },
-            boundaryGap: false,
-            data: dayHour
-          }
-        ],
-        yAxis: [
-          {
-            type: 'value'
-          }
-        ],
-        series: [
-          {
-            name:  this.$t('Publish Succeeded'),
-            type: 'line',
-            stack: 'Number',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(128, 255, 165)'
-              }, {
-                offset: 1,
-                color: 'rgba(1, 191, 236)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: publishSuccessed
-          },
-          {
-            name:  this.$t('Publish Failed'),
-            type: 'line',
-            stack: 'Number',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(0, 221, 255)'
-              }, {
-                offset: 1,
-                color: 'rgba(77, 119, 255)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: publishFailed
-          },
-          {
-            name: this.$t('Received Succeeded'),
-            type: 'line',
-            stack: 'Number',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(55, 162, 255)'
-              }, {
-                offset: 1,
-                color: 'rgba(116, 21, 219)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: subscribeSuccessed
-          },
-          {
-            name: this.$t('Received Failed'),
-            type: 'line',
-            stack: 'Number',
-            smooth: true,
-            lineStyle: {
-              width: 0
-            },
-            showSymbol: false,
-            areaStyle: {
-              opacity: 0.8,
-              color: new graphic.LinearGradient(0, 0, 0, 1, [{
-                offset: 0,
-                color: 'rgba(255, 0, 135)'
-              }, {
-                offset: 1,
-                color: 'rgba(135, 0, 157)'
-              }])
-            },
-            emphasis: {
-              focus: 'series'
-            },
-            data: subscribeFailed
-          }
-        ]
-      }
-    }
-  },
+    var historyInitData = [];
 
-  mounted() {
-    axios.get('/metrics').then(res => {
-      this.renderData = res.data;
-      console.log(this.renderData);
+    await axios.get('/metrics-history').then(res => {
+      historyInitData.push(res.data.dayHour);
+      historyInitData.push(res.data.publishSuccessed);
+      historyInitData.push(res.data.subscribeSuccessed);
+      historyInitData.push(res.data.publishFailed);
+      historyInitData.push(res.data.subscribeFailed);
     });
+
+    var historyOpts = {
+      width: 960,
+      height: 400,
+      cursor: {
+        drag: {
+          setScale: false,
+        }
+      },
+      select: {
+        show: false,
+      },
+      series: [
+        { value: "{YYYY}/{MM}/{DD} {HH}:00" },
+        {
+          label: this.$t("Publish Succeeded"),
+          fill: "rgba(0,255,0,0.3)",
+        },
+        {
+          label: this.$t("Received Succeeded"),
+          fill: "rgba(0,0,255,0.3)",
+        },
+        {
+          label: this.$t("Publish Failed"),
+          fill: "rgba(255,0,0,0.5)",
+        },
+        {
+          label: this.$t("Received Failed"),
+          fill: "rgba(255,255,0,0.5)",
+        },
+      ],
+      axes: [
+        {
+          space: 30,
+          values: [
+            [60, "{HH}:00", "\n{YYYY}/{M}/{D}", null, "\n{M}/{D}", null, null, null, 1],
+          ],
+        },
+        {
+          label: this.$t("Aggregation Count"),
+        }
+      ]
+    };
+
+    new uPlot(historyOpts, historyInitData, document.getElementById("historyGraph"));
+
+    const realtimeOpts = {
+      width: 960,
+      height: 400,
+      cursor: {
+        drag: {
+          setScale: false,
+        }
+      },
+      select: {
+        show: false,
+      },
+      series: [
+        {
+          value: "{YYYY}/{MM}/{DD} {HH}:{mm}:{ss}"
+        },
+        {
+          label: this.$t("Publish TPS"),
+          show: true,
+          scale: "s",
+          width: 2,
+          value: (u, v) => v == null ? "-" : v.toFixed(1) + "/s",
+          stroke: "rgba(0,255,0,0.3)"
+        },
+        {
+          label: this.$t("Consume TPS"),
+          show: true,
+          scale: "s",
+          width: 2,
+          value: (u, v) => v == null ? "-" : v.toFixed(1) + "/s",
+          stroke: "rgba(255,0,0,0.3)",
+        },
+        {
+          label: this.$t("Subscriber Invoke Time"),
+          scale: "ms",
+          width: 1,
+          paths: u => null,
+          points: {
+            space: 0,
+            stroke: "blue"
+          },
+          value: (u, v) => v == null ? "-" : v.toFixed(0) + "ms",
+          stroke: "blue"
+        }
+      ],
+      axes: [
+        {
+          space: 30,
+          values: [
+            [1, "{mm}:{ss}", "\n{YY}/{M}/{D}/ {HH}:{mm}", null, "\n{M}/{D} {HH}:{mm}", null, "\n{HH}:{mm}", null, 1],
+          ]
+        },
+        {
+          scale: "s",
+          label: this.$t("Rate (TPS)"),
+          //space: 20,
+          ticks: {
+            show: true,
+            stroke: "#eee",
+            width: 10,
+            dash: [5],
+            size: 5,
+          },
+          values: (self, ticks) => ticks.map(rawValue => rawValue + "/s"),
+          incrs: [
+            1, 5, 10, 30, 50, 100
+          ]
+        }, {
+          side: 1,
+          scale: "ms",
+          //space: 20,
+          label: this.$t("Elpsed Time (ms)"),
+          size: 60,
+          ticks: {
+            show: true,
+            stroke: "#eee",
+            width: 10,
+            dash: [5],
+            size: 5,
+          },
+          incrs: [
+            1, 10, 50, 100, 300, 500, 1000
+          ],
+          values: (u, vals, space) => vals.map(v => +v.toFixed(0) + "ms"),
+          grid: { show: false },
+        }
+      ]
+    };
+
+    var metricInitData = [];
+    async function reamtime() {
+      await axios.get('/metrics-realtime').then(res => {
+        metricInitData = res.data;
+      });
+    }
+    await reamtime();
+    let realtimeUplot = new uPlot(realtimeOpts, metricInitData, document.getElementById("realtimeGraph"));
+
+    setInterval(async function () {
+      await reamtime();
+      realtimeUplot.setData(metricInitData);
+    }, 1000);
+
   }
-};
+}; 
 </script>
 
-<style scoped>
+<style>
+@import "/src/assets/uPlot.min.css";
+
 .chart {
   height: 500px;
   width: 100%;

@@ -4,15 +4,14 @@
 using DotNetCore.CAP.Internal;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP.Filter
-{
-    public class ExecutingContext : FilterContext
-    {
-        public ExecutingContext(ConsumerContext context, object?[] arguments) : base(context)
-        {
-            Arguments = arguments;
-        }
+namespace DotNetCore.CAP.Filter;
 
-        public object?[] Arguments { get; set; }
+public class ExecutingContext : FilterContext
+{
+    public ExecutingContext(ConsumerContext context, object?[] arguments) : base(context)
+    {
+        Arguments = arguments;
     }
+
+    public object?[] Arguments { get; set; }
 }

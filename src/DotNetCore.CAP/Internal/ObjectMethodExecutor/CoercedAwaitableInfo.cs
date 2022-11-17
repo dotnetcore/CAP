@@ -22,7 +22,8 @@ internal readonly struct CoercedAwaitableInfo
         CoercerResultType = null;
     }
 
-    public CoercedAwaitableInfo(Expression coercerExpression, Type coercerResultType, AwaitableInfo coercedAwaitableInfo)
+    public CoercedAwaitableInfo(Expression coercerExpression, Type coercerResultType,
+        AwaitableInfo coercedAwaitableInfo)
     {
         CoercerExpression = coercerExpression;
         CoercerResultType = coercerResultType;
@@ -42,15 +43,13 @@ internal readonly struct CoercedAwaitableInfo
         if (ObjectMethodExecutorFSharpSupport.TryBuildCoercerFromFSharpAsyncToAwaitable(type,
                 out var coercerExpression,
                 out var coercerResultType))
-        {
             if (AwaitableInfo.IsTypeAwaitable(coercerResultType, out var coercedAwaitableInfo))
             {
                 info = new CoercedAwaitableInfo(coercerExpression, coercerResultType, coercedAwaitableInfo);
                 return true;
             }
-        }
 
-        info = default(CoercedAwaitableInfo);
+        info = default;
         return false;
     }
 }

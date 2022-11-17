@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
 	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);NATS</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="NATS.Client" Version="0.14.1" />
+    <PackageReference Include="NATS.Client" Version="1.0.1" />
   </ItemGroup>
 
   <ItemGroup>

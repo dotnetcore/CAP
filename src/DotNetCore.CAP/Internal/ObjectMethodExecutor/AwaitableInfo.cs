@@ -49,7 +49,7 @@ internal readonly struct AwaitableInfo
             && m.ReturnType != null);
         if (getAwaiterMethod == null)
         {
-            awaitableInfo = default(AwaitableInfo);
+            awaitableInfo = default;
             return false;
         }
 
@@ -62,7 +62,7 @@ internal readonly struct AwaitableInfo
             && p.GetMethod != null);
         if (isCompletedProperty == null)
         {
-            awaitableInfo = default(AwaitableInfo);
+            awaitableInfo = default;
             return false;
         }
 
@@ -71,7 +71,7 @@ internal readonly struct AwaitableInfo
         var implementsINotifyCompletion = awaiterInterfaces.Any(t => t == typeof(INotifyCompletion));
         if (!implementsINotifyCompletion)
         {
-            awaitableInfo = default(AwaitableInfo);
+            awaitableInfo = default;
             return false;
         }
 
@@ -86,18 +86,14 @@ internal readonly struct AwaitableInfo
         var implementsICriticalNotifyCompletion = awaiterInterfaces.Any(t => t == typeof(ICriticalNotifyCompletion));
         MethodInfo unsafeOnCompletedMethod;
         if (implementsICriticalNotifyCompletion)
-        {
             // ICriticalNotifyCompletion supplies a method matching "void UnsafeOnCompleted(Action action)"
             unsafeOnCompletedMethod = typeof(ICriticalNotifyCompletion).GetRuntimeMethods().Single(m =>
                 m.Name.Equals("UnsafeOnCompleted", StringComparison.OrdinalIgnoreCase)
                 && m.ReturnType == typeof(void)
                 && m.GetParameters().Length == 1
                 && m.GetParameters()[0].ParameterType == typeof(Action));
-        }
         else
-        {
             unsafeOnCompletedMethod = null;
-        }
 
         // Awaiter must have method matching "void GetResult" or "T GetResult()"
         var getResultMethod = awaiterType.GetRuntimeMethods().FirstOrDefault(m =>
@@ -105,7 +101,7 @@ internal readonly struct AwaitableInfo
             && m.GetParameters().Length == 0);
         if (getResultMethod == null)
         {
-            awaitableInfo = default(AwaitableInfo);
+            awaitableInfo = default;
             return false;
         }
 

@@ -47,7 +47,7 @@ namespace DotNetCore.CAP.InMemoryStorage
             return Task.CompletedTask;
         }
 
-        public MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null)
+        public Task<MediumMessage> StoreMessageAsync(string name, Message content, object? dbTransaction = null)
         {
             var message = new MediumMessage
             {
@@ -70,10 +70,10 @@ namespace DotNetCore.CAP.InMemoryStorage
                 StatusName = StatusName.Scheduled
             };
 
-            return message;
+            return Task.FromResult(message);
         }
 
-        public void StoreReceivedExceptionMessage(string name, string group, string content)
+        public Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
         {
             var id = SnowflakeId.Default().NextId().ToString();
 
@@ -89,9 +89,11 @@ namespace DotNetCore.CAP.InMemoryStorage
                 ExpiresAt = DateTime.Now.AddSeconds(_capOptions.Value.FailedMessageExpiredAfter),
                 StatusName = StatusName.Failed
             };
+
+            return Task.CompletedTask;
         }
 
-        public MediumMessage StoreReceivedMessage(string name, string @group, Message message)
+        public Task<MediumMessage> StoreReceivedMessageAsync(string name, string @group, Message message)
         {
             var mdMessage = new MediumMessage
             {
@@ -115,7 +117,7 @@ namespace DotNetCore.CAP.InMemoryStorage
                 StatusName = StatusName.Scheduled
             };
 
-            return mdMessage;
+            return Task.FromResult(mdMessage);
         }
 
         public Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default)
@@ -165,10 +167,10 @@ namespace DotNetCore.CAP.InMemoryStorage
                 .Take(200)
                 .Select(x => (MediumMessage)x).ToList();
 
-            foreach (var message in result)
-            {
-                message.Origin = _serializer.Deserialize(message.Content)!;
-            }
+            //foreach (var message in result)
+            //{
+            //    message.Origin = _serializer.DeserializeAsync(message.Content)!;
+            //}
 
             return Task.FromResult(result);
         }
@@ -182,10 +184,10 @@ namespace DotNetCore.CAP.InMemoryStorage
                 .Take(200)
                 .Select(x => (MediumMessage)x).ToList();
 
-            foreach (var message in result)
-            {
-                message.Origin = _serializer.Deserialize(message.Content)!;
-            }
+            //foreach (var message in result)
+            //{
+            //    message.Origin = _serializer.Deserialize(message.Content)!;
+            //}
 
             return Task.FromResult(result);
         }
@@ -193,6 +195,11 @@ namespace DotNetCore.CAP.InMemoryStorage
         public IMonitoringApi GetMonitoringApi()
         {
             return new InMemoryMonitoringApi();
+        }
+
+        public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+        {
+            throw new NotImplementedException();
         }
     }
 }

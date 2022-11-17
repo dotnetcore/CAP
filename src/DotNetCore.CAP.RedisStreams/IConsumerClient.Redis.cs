@@ -62,9 +62,9 @@ namespace DotNetCore.CAP.RedisStreams
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
-            var (stream, group, id) = ((string stream, string group, string id))sender;
+            var (stream, group, id) = ((string stream, string group, string id))sender!;
 
             _redis.Ack(stream, group, id).GetAwaiter().GetResult();
         }

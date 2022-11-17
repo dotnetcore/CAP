@@ -3,7 +3,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data;
+using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
@@ -41,12 +41,12 @@ namespace DotNetCore.CAP.PostgreSql
         }
 
         public async Task ChangePublishStateAsync(MediumMessage message, StatusName state) =>
-            await ChangeMessageStateAsync(_pubName, message, state);
+            await ChangeMessageStateAsync(_pubName, message, state).ConfigureAwait(false);
 
         public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state) =>
-            await ChangeMessageStateAsync(_recName, message, state);
+            await ChangeMessageStateAsync(_recName, message, state).ConfigureAwait(false);
 
-        public MediumMessage StoreMessage(string name, Message content, object? dbTransaction = null)
+        public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object? dbTransaction = null)
         {
             var sql =
                 $"INSERT INTO {_pubName} (\"Id\",\"Version\",\"Name\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
@@ -75,23 +75,24 @@ namespace DotNetCore.CAP.PostgreSql
 
             if (dbTransaction == null)
             {
-                using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-                connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+                var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+                await using var _ = connection.ConfigureAwait(false);
+                await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
             }
             else
             {
-                var dbTrans = dbTransaction as IDbTransaction;
+                var dbTrans = dbTransaction as DbTransaction;
                 if (dbTrans == null && dbTransaction is IDbContextTransaction dbContextTrans)
                     dbTrans = dbContextTrans.GetDbTransaction();
 
                 var conn = dbTrans?.Connection!;
-                conn.ExecuteNonQuery(sql, dbTrans, sqlParams);
+                await conn.ExecuteNonQueryAsync(sql, dbTrans, sqlParams).ConfigureAwait(false);
             }
 
             return message;
         }
 
-        public void StoreReceivedExceptionMessage(string name, string group, string content)
+        public async Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
         {
             object[] sqlParams =
             {
@@ -105,10 +106,10 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@StatusName", nameof(StatusName.Failed))
             };
 
-            StoreReceivedMessage(sqlParams);
+            await StoreReceivedMessage(sqlParams).ConfigureAwait(false);
         }
 
-        public MediumMessage StoreReceivedMessage(string name, string group, Message message)
+        public async Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message message)
         {
             var mdMessage = new MediumMessage
             {
@@ -131,24 +132,60 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@StatusName", nameof(StatusName.Scheduled))
             };
 
-            StoreReceivedMessage(sqlParams);
+            await StoreReceivedMessage(sqlParams).ConfigureAwait(false);
+
             return mdMessage;
         }
 
         public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
             CancellationToken token = default)
         {
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            return connection.ExecuteNonQuery(
-                $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout LIMIT @batchCount);", null,
-                new NpgsqlParameter("@timeout", timeout), new NpgsqlParameter("@batchCount", batchCount));
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            return await connection.ExecuteNonQueryAsync(
+                $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout AND (\"StatusName\"='{StatusName.Succeeded}' OR \"StatusName\"='{StatusName.Failed}') LIMIT @batchCount);", null,
+                new NpgsqlParameter("@timeout", timeout), new NpgsqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
         }
 
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry() =>
-            await GetMessagesOfNeedRetryAsync(_pubName);
+            await GetMessagesOfNeedRetryAsync(_pubName).ConfigureAwait(false);
 
         public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry() =>
-            await GetMessagesOfNeedRetryAsync(_recName);
+            await GetMessagesOfNeedRetryAsync(_recName).ConfigureAwait(false);
+
+        public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+        {
+            var sql =
+                $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\" FROM `{_pubName}` WHERE \"Version\"=@Version " +
+                $"AND ((\"ExpiresAt\"< @TwoMinutesLater AND \"StatusName\" = '{StatusName.Delayed}') OR (\"ExpiresAt\"< @OneMinutesAgo AND \"StatusName\" = '{StatusName.Queued}')) LIMIT 200;";
+
+            object[] sqlParams =
+            {
+                new NpgsqlParameter("@Version", _capOptions.Value.Version),
+                new NpgsqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
+                new NpgsqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1)),
+            };
+
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            var result = await connection.ExecuteReaderAsync(sql, async reader =>
+            {
+                var messages = new List<MediumMessage>();
+                while (await reader.ReadAsync().ConfigureAwait(false))
+                    messages.Add(new MediumMessage
+                    {
+                        DbId = reader.GetInt64(0).ToString(),
+                        Origin = _serializer.Deserialize(reader.GetString(1))!,
+                        Retries = reader.GetInt32(2),
+                        Added = reader.GetDateTime(3),
+                        ExpiresAt = reader.GetDateTime(4)
+                    });
+
+                return messages;
+            }, sqlParams).ConfigureAwait(false);
+
+            return result;
+        }
 
         public IMonitoringApi GetMonitoringApi()
         {
@@ -169,18 +206,20 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@StatusName", state.ToString("G"))
             };
 
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
         }
 
-        private void StoreReceivedMessage(object[] sqlParams)
+        private async Task StoreReceivedMessage(object[] sqlParams)
         {
             var sql =
                 $"INSERT INTO {_recName}(\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
                 $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING \"Id\";";
 
-            using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            connection.ExecuteNonQuery(sql, sqlParams: sqlParams);
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
         }
 
         private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
@@ -197,11 +236,12 @@ namespace DotNetCore.CAP.PostgreSql
                 new NpgsqlParameter("@Added", fourMinAgo)
             };
 
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            var result = connection.ExecuteReader(sql, reader =>
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            var result = await connection.ExecuteReaderAsync(sql, async reader =>
             {
                 var messages = new List<MediumMessage>();
-                while (reader.Read())
+                while (await reader.ReadAsync().ConfigureAwait(false))
                 {
                     messages.Add(new MediumMessage
                     {
@@ -213,7 +253,7 @@ namespace DotNetCore.CAP.PostgreSql
                 }
 
                 return messages;
-            }, sqlParams);
+            }, sqlParams).ConfigureAwait(false);
 
             return result;
         }

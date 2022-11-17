@@ -13,26 +13,24 @@ namespace Microsoft.Extensions.Internal;
 
 internal class ObjectMethodExecutor
 {
-    private readonly object?[]? _parameterDefaultValues;
-    private readonly MethodExecutorAsync? _executorAsync;
-    private readonly MethodExecutor? _executor;
-
     private static readonly ConstructorInfo _objectMethodExecutorAwaitableConstructor =
-        typeof(ObjectMethodExecutorAwaitable).GetConstructor(new[] {
-                typeof(object),                 // customAwaitable
-                typeof(Func<object, object>),   // getAwaiterMethod
-                typeof(Func<object, bool>),     // isCompletedMethod
-                typeof(Func<object, object>),   // getResultMethod
-                typeof(Action<object, Action>), // onCompletedMethod
-                typeof(Action<object, Action>)  // unsafeOnCompletedMethod
+        typeof(ObjectMethodExecutorAwaitable).GetConstructor(new[]
+        {
+            typeof(object), // customAwaitable
+            typeof(Func<object, object>), // getAwaiterMethod
+            typeof(Func<object, bool>), // isCompletedMethod
+            typeof(Func<object, object>), // getResultMethod
+            typeof(Action<object, Action>), // onCompletedMethod
+            typeof(Action<object, Action>) // unsafeOnCompletedMethod
         })!;
+
+    private readonly MethodExecutor? _executor;
+    private readonly MethodExecutorAsync? _executorAsync;
+    private readonly object?[]? _parameterDefaultValues;
 
     private ObjectMethodExecutor(MethodInfo methodInfo, TypeInfo targetTypeInfo, object?[]? parameterDefaultValues)
     {
-        if (methodInfo == null)
-        {
-            throw new ArgumentNullException(nameof(methodInfo));
-        }
+        if (methodInfo == null) throw new ArgumentNullException(nameof(methodInfo));
 
         MethodInfo = methodInfo;
         MethodParameters = methodInfo.GetParameters();
@@ -49,19 +47,10 @@ internal class ObjectMethodExecutor
         // and await it without the extra heap allocations involved in the _executorAsync code path.
         _executor = GetExecutor(methodInfo, targetTypeInfo);
 
-        if (IsMethodAsync)
-        {
-            _executorAsync = GetExecutorAsync(methodInfo, targetTypeInfo, coercedAwaitableInfo);
-        }
+        if (IsMethodAsync) _executorAsync = GetExecutorAsync(methodInfo, targetTypeInfo, coercedAwaitableInfo);
 
         _parameterDefaultValues = parameterDefaultValues;
     }
-
-    private delegate ObjectMethodExecutorAwaitable MethodExecutorAsync(object target, object?[]? parameters);
-
-    private delegate object? MethodExecutor(object target, object?[]? parameters);
-
-    private delegate void VoidMethodExecutor(object target, object?[]? parameters);
 
     public MethodInfo MethodInfo { get; }
 
@@ -81,18 +70,16 @@ internal class ObjectMethodExecutor
         return new ObjectMethodExecutor(methodInfo, targetTypeInfo, null);
     }
 
-    public static ObjectMethodExecutor Create(MethodInfo methodInfo, TypeInfo targetTypeInfo, object?[] parameterDefaultValues)
+    public static ObjectMethodExecutor Create(MethodInfo methodInfo, TypeInfo targetTypeInfo,
+        object?[] parameterDefaultValues)
     {
-        if (parameterDefaultValues == null)
-        {
-            throw new ArgumentNullException(nameof(parameterDefaultValues));
-        }
+        if (parameterDefaultValues == null) throw new ArgumentNullException(nameof(parameterDefaultValues));
 
         return new ObjectMethodExecutor(methodInfo, targetTypeInfo, parameterDefaultValues);
     }
 
     /// <summary>
-    /// Executes the configured method on <paramref name="target"/>. This can be used whether or not
+    /// Executes the configured method on <paramref name="target" />. This can be used whether or not
     /// the configured method is asynchronous.
     /// </summary>
     /// <remarks>
@@ -113,7 +100,7 @@ internal class ObjectMethodExecutor
     }
 
     /// <summary>
-    /// Executes the configured method on <paramref name="target"/>. This can only be used if the configured
+    /// Executes the configured method on <paramref name="target" />. This can only be used if the configured
     /// method is asynchronous.
     /// </summary>
     /// <remarks>
@@ -121,13 +108,12 @@ internal class ObjectMethodExecutor
     /// which supplies an awaitable-of-object. This always works, but can incur several extra heap allocations
     /// as compared with using Execute and then using "await" on the result value typecasted to the known
     /// awaitable type. The possible extra heap allocations are for:
-    ///
     /// 1. The custom awaitable (though usually there's a heap allocation for this anyway, since normally
-    ///    it's a reference type, and you normally create a new instance per call).
+    /// it's a reference type, and you normally create a new instance per call).
     /// 2. The custom awaiter (whether or not it's a value type, since if it's not, you need a new instance
-    ///    of it, and if it is, it will have to be boxed so the calling code can reference it as an object).
+    /// of it, and if it is, it will have to be boxed so the calling code can reference it as an object).
     /// 3. The async result value, if it's a value type (it has to be boxed as an object, since the calling
-    ///    code doesn't know what type it's going to be).
+    /// code doesn't know what type it's going to be).
     /// </remarks>
     /// <param name="target">The object whose method is to be executed.</param>
     /// <param name="parameters">Parameters to pass to the method.</param>
@@ -141,14 +127,10 @@ internal class ObjectMethodExecutor
     public object? GetDefaultValueForParameter(int index)
     {
         if (_parameterDefaultValues == null)
-        {
-            throw new InvalidOperationException($"Cannot call {nameof(GetDefaultValueForParameter)}, because no parameter default values were supplied.");
-        }
+            throw new InvalidOperationException(
+                $"Cannot call {nameof(GetDefaultValueForParameter)}, because no parameter default values were supplied.");
 
-        if (index < 0 || index > MethodParameters.Length - 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(index));
-        }
+        if (index < 0 || index > MethodParameters.Length - 1) throw new ArgumentOutOfRangeException(nameof(index));
 
         return _parameterDefaultValues[index];
     }
@@ -162,7 +144,7 @@ internal class ObjectMethodExecutor
         // Build parameter list
         var paramInfos = methodInfo.GetParameters();
         var parameters = new List<Expression>(paramInfos.Length);
-        for (int i = 0; i < paramInfos.Length; i++)
+        for (var i = 0; i < paramInfos.Length; i++)
         {
             var paramInfo = paramInfos[i];
             var valueObj = Expression.ArrayIndex(parametersParameter, Expression.Constant(i));
@@ -195,7 +177,7 @@ internal class ObjectMethodExecutor
 
     private static MethodExecutor WrapVoidMethod(VoidMethodExecutor executor)
     {
-        return delegate (object target, object?[]? parameters)
+        return delegate(object target, object?[]? parameters)
         {
             executor(target, parameters);
             return null;
@@ -214,7 +196,7 @@ internal class ObjectMethodExecutor
         // Build parameter list
         var paramInfos = methodInfo.GetParameters();
         var parameters = new List<Expression>(paramInfos.Length);
-        for (int i = 0; i < paramInfos.Length; i++)
+        for (var i = 0; i < paramInfos.Length; i++)
         {
             var paramInfo = paramInfos[i];
             var valueObj = Expression.ArrayIndex(parametersParameter, Expression.Constant(i));
@@ -258,7 +240,6 @@ internal class ObjectMethodExecutor
         var getResultParam = Expression.Parameter(typeof(object), "awaiter");
         Func<object, object> getResultFunc;
         if (awaitableInfo.ResultType == typeof(void))
-        {
             // var getResultFunc = (object awaiter) =>
             // {
             //     ((CustomAwaiterType)awaiter).GetResult(); // We need to invoke this to surface any exceptions
@@ -272,9 +253,7 @@ internal class ObjectMethodExecutor
                     Expression.Constant(null)
                 ),
                 getResultParam).Compile();
-        }
         else
-        {
             // var getResultFunc = (object awaiter) =>
             //     (object)((CustomAwaiterType)awaiter).GetResult();
             getResultFunc = Expression.Lambda<Func<object, object>>(
@@ -284,7 +263,6 @@ internal class ObjectMethodExecutor
                         awaitableInfo.AwaiterGetResultMethod),
                     typeof(object)),
                 getResultParam).Compile();
-        }
 
         // var onCompletedFunc = (object awaiter, Action continuation) => {
         //     ((CustomAwaiterType)awaiter).OnCompleted(continuation);
@@ -338,7 +316,14 @@ internal class ObjectMethodExecutor
             Expression.Constant(onCompletedFunc),
             Expression.Constant(unsafeOnCompletedFunc, typeof(Action<object, Action>)));
 
-        var lambda = Expression.Lambda<MethodExecutorAsync>(returnValueExpression, targetParameter, parametersParameter);
+        var lambda =
+            Expression.Lambda<MethodExecutorAsync>(returnValueExpression, targetParameter, parametersParameter);
         return lambda.Compile();
     }
+
+    private delegate ObjectMethodExecutorAwaitable MethodExecutorAsync(object target, object?[]? parameters);
+
+    private delegate object? MethodExecutor(object target, object?[]? parameters);
+
+    private delegate void VoidMethodExecutor(object target, object?[]? parameters);
 }

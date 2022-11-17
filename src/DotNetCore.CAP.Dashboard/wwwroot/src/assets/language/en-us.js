@@ -1,5 +1,5 @@
-module.exports = {
-    LanguageName:"English",
+export default {
+    LanguageName: "English",
     Published: "Published",
     Received: "Received",
     Subscriber: "Subscriber",
@@ -12,6 +12,10 @@ module.exports = {
     Prev: "Prev",
     Last: "Last",
     "Page Size": "Page Size",
+    "Realtime Metric Graph": "Realtime Metric Graph",
+    PublishedPerSec: "Publish Rate(sec)",
+    ConsumePerSec: "Consume Rate(sec)",
+    InvokeSubscriberPerSec: "Call Subscriber Rate(sec)",
     "24h History Graph": "24h History Graph",
     "Publish Succeeded": "Publish Succeeded",
     "Publish Failed": "Publish Failed",
@@ -19,9 +23,15 @@ module.exports = {
     "Received Failed": "Received Failed",
     "Published Message": "Published Message",
     "Received Message": "Received Message",
+    "Aggregation Count": "Aggregation Count",
+    "SubscriberInvokeMeanTime": "The Y1 axis represents the subscriber invoke mean time (not execute times)",
+    "Elpsed Time (ms)": "Elpsed Time (ms)",
+    "DelayedPublishTime": "Delayed Publish Time",
     Succeeded: "Succeeded",
     Failed: "Failed",
     Requeue: "Requeue",
+    PublishNow: "Immediately Publish",
+    DelayedInfo: "Only show delay time more than 1 minute messages here, the status of shorter than 1 minute messages name is 'Queued', you can check it in the database",
     Name: "Name",
     Content: "Content",
     Search: "Search",
@@ -40,6 +50,6 @@ module.exports = {
     Port: "Port",
     Tags: "Tags",
     Actions: "Actions",
-    ReexecuteSuccess:"Reexecute Successful !",
-    RequeueSuccess:"Requeue Successfull!"
+    ReexecuteSuccess: "Reexecute Successful !",
+    RequeueSuccess: "Requeue Successfull!"
 }

@@ -25,7 +25,7 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapMessageQueueMakerService>();
+            services.AddSingleton(new CapMessageQueueMakerService("RedisStreams"));
             services.AddSingleton<IRedisStreamManager, RedisStreamManager>();
             services.AddSingleton<IConsumerClientFactory, RedisConsumerClientFactory>();
             services.AddSingleton<ITransport, RedisTransport>();
@@ -38,7 +38,7 @@ namespace DotNetCore.CAP
 
     internal class CapRedisOptionsPostConfigure : IPostConfigureOptions<CapRedisOptions>
     {
-        public void PostConfigure(string name, CapRedisOptions options)
+        public void PostConfigure(string? name, CapRedisOptions options)
         {
             options.Configuration ??= new ConfigurationOptions();
 

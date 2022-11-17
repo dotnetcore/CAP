@@ -92,7 +92,7 @@ namespace DotNetCore.CAP.NATS
                     .WithConfiguration(ConsumerConfiguration.Builder().WithDeliverPolicy(DeliverPolicy.New).Build())
                     .Build();
 
-                js.PushSubscribeAsync(subject, Helper.Normalized(_groupId), Subscription_MessageHandler, false, pso);
+                js.PushSubscribeAsync(subject, Helper.Normalized(_groupId), SubscriptionMessageHandler, false, pso);
             }
         }
 
@@ -106,7 +106,7 @@ namespace DotNetCore.CAP.NATS
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private void Subscription_MessageHandler(object sender, MsgHandlerEventArgs e)
+        private void SubscriptionMessageHandler(object? sender, MsgHandlerEventArgs e)
         {
             var headers = new Dictionary<string, string?>();
 
@@ -120,7 +120,7 @@ namespace DotNetCore.CAP.NATS
             OnMessageReceived?.Invoke(e.Message, new TransportMessage(headers, e.Message.Data));
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
             if (sender is Msg msg)
             {
@@ -169,7 +169,7 @@ namespace DotNetCore.CAP.NATS
             }
         }
 
-        private void ConnectedEventHandler(object sender, ConnEventArgs e)
+        private void ConnectedEventHandler(object? sender, ConnEventArgs e)
         {
             var logArgs = new LogMessageEventArgs
             {
@@ -179,7 +179,7 @@ namespace DotNetCore.CAP.NATS
             OnLog?.Invoke(null, logArgs);
         }
 
-        private void AsyncErrorEventHandler(object sender, ErrEventArgs e)
+        private void AsyncErrorEventHandler(object? sender, ErrEventArgs e)
         {
             var logArgs = new LogMessageEventArgs
             {

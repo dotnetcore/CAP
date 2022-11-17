@@ -103,7 +103,7 @@ namespace DotNetCore.CAP.OpenTelemetry
                             activity.SetTag("messaging.destination_kind", "topic");
                             activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint!.Replace("-1", "5672"));
                             activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
-                            activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body?.Length);
+                            activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
 
                             activity.AddEvent(new ActivityEvent("Message publishing start...",
                                 DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
@@ -164,7 +164,7 @@ namespace DotNetCore.CAP.OpenTelemetry
                             activity.SetTag("messaging.destination_kind", "topic");
                             activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint!.Replace("-1", "5672"));
                             activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
-                            activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body?.Length);
+                            activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
 
                             activity.AddEvent(new ActivityEvent("CAP message persistence start...",
                                 DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));

@@ -66,6 +66,11 @@ namespace DotNetCore.CAP
         public string ExchangeName { get; set; } = DefaultExchangeName;
 
         /// <summary>
+        /// Enabling Publisher Confirms on a Channel
+        /// </summary>
+        public bool PublishConfirms { get; set; }
+
+        /// <summary>
         /// The port to connect on.
         /// </summary>
         public int Port { get; set; } = -1;

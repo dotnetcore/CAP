@@ -4,10 +4,9 @@
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 
-namespace DotNetCore.CAP.Internal
+namespace DotNetCore.CAP.Internal;
+
+public interface IMessageSender
 {
-    public interface IMessageSender
-    {
-        Task<OperateResult> SendAsync(MediumMessage message);
-    }
+    Task<OperateResult> SendAsync(MediumMessage message);
 }

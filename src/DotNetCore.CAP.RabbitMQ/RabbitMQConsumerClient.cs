@@ -77,11 +77,11 @@ namespace DotNetCore.CAP.RabbitMQ
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
             if (_channel!.IsOpen)
             {
-                _channel.BasicAck((ulong)sender, false);
+                _channel.BasicAck((ulong)sender!, false);
             }
         }
 
@@ -129,7 +129,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
         #region events
 
-        private void OnConsumerConsumerCancelled(object sender, ConsumerEventArgs e)
+        private void OnConsumerConsumerCancelled(object? sender, ConsumerEventArgs e)
         {
             var args = new LogMessageEventArgs
             {
@@ -139,7 +139,7 @@ namespace DotNetCore.CAP.RabbitMQ
             OnLog?.Invoke(sender, args);
         }
 
-        private void OnConsumerUnregistered(object sender, ConsumerEventArgs e)
+        private void OnConsumerUnregistered(object? sender, ConsumerEventArgs e)
         {
             var args = new LogMessageEventArgs
             {
@@ -149,7 +149,7 @@ namespace DotNetCore.CAP.RabbitMQ
             OnLog?.Invoke(sender, args);
         }
 
-        private void OnConsumerRegistered(object sender, ConsumerEventArgs e)
+        private void OnConsumerRegistered(object? sender, ConsumerEventArgs e)
         {
             var args = new LogMessageEventArgs
             {
@@ -159,7 +159,7 @@ namespace DotNetCore.CAP.RabbitMQ
             OnLog?.Invoke(sender, args);
         }
 
-        private void OnConsumerReceived(object sender, BasicDeliverEventArgs e)
+        private void OnConsumerReceived(object? sender, BasicDeliverEventArgs e)
         {
             var headers = new Dictionary<string, string?>();
 
@@ -194,7 +194,7 @@ namespace DotNetCore.CAP.RabbitMQ
             OnMessageReceived?.Invoke(e.DeliveryTag, message);
         }
 
-        private void OnConsumerShutdown(object sender, ShutdownEventArgs e)
+        private void OnConsumerShutdown(object? sender, ShutdownEventArgs e)
         {
             var args = new LogMessageEventArgs
             {

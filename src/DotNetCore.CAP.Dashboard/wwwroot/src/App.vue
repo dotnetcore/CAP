@@ -4,28 +4,35 @@
     <b-container class="mt-4">
       <router-view />
     </b-container>
+    <Footer />
   </div>
 </template>
 
 <script>
-import Navigation from "@/components/Navigation";
+import Navigation from "@/components/Navigation.vue";
+import Footer from "@/components/Footer.vue";
 import axios from "axios";
 
 export default {
   name: "App",
   components: {
-    Navigation
+    Navigation,
+    Footer
   },
   data() {
     return { timer: '' }
   },
   methods: {
     getData() {
+      if (window.pollingInterval == "%(pollingInterval)") {
+        window.pollingInterval = 2000;
+      }
+
       axios.get('/stats').then(response => {
         this.$store.dispatch("pollingMertic", response.data);
         setTimeout(() => {
           this.getData()
-        }, window.pollingInterval)
+        }, window.pollingInterval);
       });
     }
   },

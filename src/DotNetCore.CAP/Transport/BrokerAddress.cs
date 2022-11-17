@@ -1,38 +1,37 @@
 ﻿using System.Linq;
 
-namespace DotNetCore.CAP.Transport
+namespace DotNetCore.CAP.Transport;
+
+public struct BrokerAddress
 {
-    public struct BrokerAddress
+    public BrokerAddress(string address)
     {
-        public BrokerAddress(string address)
+        if (address.Contains("$"))
         {
-            if (address.Contains("$"))
-            {
-                var parts = address.Split('$');
+            var parts = address.Split('$');
 
-                Name = parts[0];
-                Endpoint = string.Join(string.Empty, parts.Skip(1));
-            }
-            else
-            {
-                Name = string.Empty;
-                Endpoint = address;
-            }
+            Name = parts[0];
+            Endpoint = string.Join(string.Empty, parts.Skip(1));
         }
-
-        public BrokerAddress(string name, string? endpoint)
+        else
         {
-            Name = name;
-            Endpoint = endpoint;
+            Name = string.Empty;
+            Endpoint = address;
         }
+    }
 
-        public string Name { get; set; }
+    public BrokerAddress(string name, string? endpoint)
+    {
+        Name = name;
+        Endpoint = endpoint;
+    }
 
-        public string? Endpoint { get; set; }
+    public string Name { get; set; }
 
-        public override string ToString()
-        {
-            return Name + "$" + Endpoint;
-        }
+    public string? Endpoint { get; set; }
+
+    public override string ToString()
+    {
+        return Name + "$" + Endpoint;
     }
 }

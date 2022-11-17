@@ -11,83 +11,79 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Processor
+namespace DotNetCore.CAP.Processor;
+
+public class MessageNeedToRetryProcessor : IProcessor
 {
-    public class MessageNeedToRetryProcessor : IProcessor
+    private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
+    private readonly ILogger<MessageNeedToRetryProcessor> _logger;
+    private readonly IMessageSender _messageSender;
+    private readonly ISubscribeDispatcher _subscribeDispatcher;
+    private readonly TimeSpan _waitingInterval;
+
+    public MessageNeedToRetryProcessor(
+        IOptions<CapOptions> options,
+        ILogger<MessageNeedToRetryProcessor> logger,
+        ISubscribeDispatcher subscribeDispatcher,
+        IMessageSender messageSender)
     {
-        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
-        private readonly ILogger<MessageNeedToRetryProcessor> _logger;
-        private readonly IMessageSender _messageSender;
-        private readonly ISubscribeDispatcher _subscribeDispatcher;
-        private readonly TimeSpan _waitingInterval;
+        _logger = logger;
+        _subscribeDispatcher = subscribeDispatcher;
+        _messageSender = messageSender;
+        _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
+    }
 
-        public MessageNeedToRetryProcessor(
-            IOptions<CapOptions> options,
-            ILogger<MessageNeedToRetryProcessor> logger,
-            ISubscribeDispatcher subscribeDispatcher,
-            IMessageSender messageSender)
+    public virtual async Task ProcessAsync(ProcessingContext context)
+    {
+        if (context == null) throw new ArgumentNullException(nameof(context));
+
+        var storage = context.Provider.GetRequiredService<IDataStorage>();
+
+        await Task.WhenAll(ProcessPublishedAsync(storage, context), ProcessReceivedAsync(storage, context)).ConfigureAwait(false);
+
+        await context.WaitAsync(_waitingInterval).ConfigureAwait(false);
+    }
+
+    private async Task ProcessPublishedAsync(IDataStorage connection, ProcessingContext context)
+    {
+        context.ThrowIfStopping();
+
+        var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry).ConfigureAwait(false);
+
+        foreach (var message in messages)
         {
-            _logger = logger;
-            _subscribeDispatcher = subscribeDispatcher;
-            _messageSender = messageSender;
-            _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
+            //the message.Origin.Value maybe JObject
+            await _messageSender.SendAsync(message).ConfigureAwait(false);
+
+            await context.WaitAsync(_delay).ConfigureAwait(false);
         }
+    }
 
-        public virtual async Task ProcessAsync(ProcessingContext context)
+    private async Task ProcessReceivedAsync(IDataStorage connection, ProcessingContext context)
+    {
+        context.ThrowIfStopping();
+
+        var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry).ConfigureAwait(false);
+
+        foreach (var message in messages)
         {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
+            await _subscribeDispatcher.DispatchAsync(message, context.CancellationToken).ConfigureAwait(false);
 
-            var storage = context.Provider.GetRequiredService<IDataStorage>();
-
-            await Task.WhenAll(ProcessPublishedAsync(storage, context), ProcessReceivedAsync(storage, context));
-
-            await context.WaitAsync(_waitingInterval);
+            await context.WaitAsync(_delay).ConfigureAwait(false);
         }
+    }
 
-        private async Task ProcessPublishedAsync(IDataStorage connection, ProcessingContext context)
+    private async Task<IEnumerable<T>> GetSafelyAsync<T>(Func<Task<IEnumerable<T>>> getMessagesAsync)
+    {
+        try
         {
-            context.ThrowIfStopping();
-
-            var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry);
-
-            foreach (var message in messages)
-            {
-                //the message.Origin.Value maybe JObject
-                await _messageSender.SendAsync(message);
-
-                await context.WaitAsync(_delay);
-            }
+            return await getMessagesAsync().ConfigureAwait(false);
         }
-
-        private async Task ProcessReceivedAsync(IDataStorage connection, ProcessingContext context)
+        catch (Exception ex)
         {
-            context.ThrowIfStopping();
+            _logger.LogWarning(1, ex, "Get messages from storage failed. Retrying...");
 
-            var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry);
-
-            foreach (var message in messages)
-            {
-                await _subscribeDispatcher.DispatchAsync(message, context.CancellationToken);
-
-                await context.WaitAsync(_delay);
-            }
-        }
-
-        private async Task<IEnumerable<T>> GetSafelyAsync<T>(Func<Task<IEnumerable<T>>> getMessagesAsync)
-        {
-            try
-            {
-                return await getMessagesAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(1, ex, "Get messages from storage failed. Retrying...");
-
-                return Enumerable.Empty<T>();
-            }
+            return Enumerable.Empty<T>();
         }
     }
 }

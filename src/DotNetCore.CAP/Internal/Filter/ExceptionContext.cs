@@ -5,20 +5,19 @@ using System;
 using DotNetCore.CAP.Internal;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP.Filter
+namespace DotNetCore.CAP.Filter;
+
+public class ExceptionContext : FilterContext
 {
-    public class ExceptionContext : FilterContext
+    public ExceptionContext(ConsumerContext context, Exception e)
+        : base(context)
     {
-        public ExceptionContext(ConsumerContext context, Exception e)
-            : base(context)
-        {
-            Exception = e;
-        }
-
-        public Exception Exception { get; set; }
-
-        public bool ExceptionHandled { get; set; }
-
-        public object? Result { get; set; }
+        Exception = e;
     }
+
+    public Exception Exception { get; set; }
+
+    public bool ExceptionHandled { get; set; }
+
+    public object? Result { get; set; }
 }

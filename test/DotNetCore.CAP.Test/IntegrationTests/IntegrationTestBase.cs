@@ -18,6 +18,8 @@ namespace DotNetCore.CAP.Test.IntegrationTests
         {
             var services = new ServiceCollection();
             services.AddTestSetup(testOutput);
+            services.AddSingleton(new CapMessageQueueMakerService("Broker"));
+            services.AddSingleton(new CapStorageMarkerService("Storage"));
             services.AddSingleton(sp => new TestMessageCollector(HandledMessages));
             ConfigureServices(services);
 

@@ -1,8 +1,8 @@
 let baseURL = "";
 
-switch (process.env.NODE_ENV) {
+switch (import.meta.env.MODE) {
     case 'development':
-        baseURL = 'http://localhost:5001';
+        baseURL = "/cap/api";
         break
     default:
         baseURL = window.serverUrl;

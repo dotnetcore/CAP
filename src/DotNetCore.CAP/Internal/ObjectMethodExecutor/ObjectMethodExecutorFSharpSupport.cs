@@ -14,7 +14,7 @@ namespace Microsoft.Extensions.Internal;
 
 /// <summary>
 /// Helper for detecting whether a given type is FSharpAsync`1, and if so, supplying
-/// an <see cref="Expression"/> for mapping instances of that type to a C# awaitable.
+/// an <see cref="Expression" /> for mapping instances of that type to a C# awaitable.
 /// </summary>
 /// <remarks>
 /// The main design goal here is to avoid taking a compile-time dependency on
@@ -23,7 +23,7 @@ namespace Microsoft.Extensions.Internal;
 /// </remarks>
 internal static class ObjectMethodExecutorFSharpSupport
 {
-    private static readonly object _fsharpValuesCacheLock = new object();
+    private static readonly object _fsharpValuesCacheLock = new();
     private static Assembly _fsharpCoreAssembly;
     private static MethodInfo _fsharpAsyncStartAsTaskGenericMethod;
     private static PropertyInfo _fsharpOptionOfTaskCreationOptionsNoneProperty;
@@ -75,24 +75,17 @@ internal static class ObjectMethodExecutorFSharpSupport
     {
         var typeFullName = possibleFSharpAsyncGenericType?.FullName;
         if (!string.Equals(typeFullName, "Microsoft.FSharp.Control.FSharpAsync`1", StringComparison.Ordinal))
-        {
             return false;
-        }
 
         lock (_fsharpValuesCacheLock)
         {
             if (_fsharpCoreAssembly != null)
-            {
                 // Since we've already found the real FSharpAsync.Core assembly, we just have
                 // to check that the supplied FSharpAsync`1 type is the one from that assembly.
                 return possibleFSharpAsyncGenericType.Assembly == _fsharpCoreAssembly;
-            }
-            else
-            {
-                // We'll keep trying to find the FSharp types/values each time any type called
-                // FSharpAsync`1 is supplied.
-                return TryPopulateFSharpValueCaches(possibleFSharpAsyncGenericType);
-            }
+            // We'll keep trying to find the FSharp types/values each time any type called
+            // FSharpAsync`1 is supplied.
+            return TryPopulateFSharpValueCaches(possibleFSharpAsyncGenericType);
         }
     }
 
@@ -102,10 +95,7 @@ internal static class ObjectMethodExecutorFSharpSupport
         var fsharpOptionType = assembly.GetType("Microsoft.FSharp.Core.FSharpOption`1");
         var fsharpAsyncType = assembly.GetType("Microsoft.FSharp.Control.FSharpAsync");
 
-        if (fsharpOptionType == null || fsharpAsyncType == null)
-        {
-            return false;
-        }
+        if (fsharpOptionType == null || fsharpAsyncType == null) return false;
 
         // Get a reference to FSharpOption<TaskCreationOptions>.None
         var fsharpOptionOfTaskCreationOptionsType = fsharpOptionType
@@ -144,7 +134,7 @@ internal static class ObjectMethodExecutorFSharpSupport
     private static bool TypesHaveSameIdentity(Type type1, Type type2)
     {
         return type1.Assembly == type2.Assembly
-            && string.Equals(type1.Namespace, type2.Namespace, StringComparison.Ordinal)
-            && string.Equals(type1.Name, type2.Name, StringComparison.Ordinal);
+               && string.Equals(type1.Namespace, type2.Namespace, StringComparison.Ordinal)
+               && string.Equals(type1.Name, type2.Name, StringComparison.Ordinal);
     }
 }

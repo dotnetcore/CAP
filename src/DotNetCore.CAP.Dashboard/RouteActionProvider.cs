@@ -10,7 +10,6 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
-using DotNetCore.CAP.Serialization;
 using DotNetCore.CAP.Transport;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -26,9 +25,9 @@ namespace DotNetCore.CAP.Dashboard
         private readonly HttpRequest _request;
         private readonly HttpResponse _response;
         private readonly RouteData _routeData;
-
         private IServiceProvider ServiceProvider => _request.HttpContext.RequestServices;
         private IMonitoringApi MonitoringApi => ServiceProvider.GetRequiredService<IDataStorage>().GetMonitoringApi();
+        private CapMetricsEventListener Metrics => ServiceProvider.GetRequiredService<CapMetricsEventListener>();
 
         public RouteActionProvider(HttpRequest request, HttpResponse response, RouteData routeData)
         {
@@ -38,10 +37,25 @@ namespace DotNetCore.CAP.Dashboard
             _response.StatusCode = StatusCodes.Status200OK;
         }
 
+        [HttpGet("/meta")]
+        public async Task MetaInfo()
+        {
+            var cap = ServiceProvider.GetRequiredService<CapMarkerService>();
+            var broker = ServiceProvider.GetRequiredService<CapMessageQueueMakerService>();
+            var storage = ServiceProvider.GetRequiredService<CapStorageMarkerService>();
+
+            await _response.WriteAsJsonAsync(new
+            {
+                cap,
+                broker,
+                storage
+            });
+        }
+
         [HttpGet("/stats")]
         public async Task Stats()
         {
-            var result = MonitoringApi.GetStatistics();
+            var result = await MonitoringApi.GetStatisticsAsync();
             SetServersCount(result);
             await _response.WriteAsJsonAsync(result);
 
@@ -63,30 +77,36 @@ namespace DotNetCore.CAP.Dashboard
             }
         }
 
-        [HttpGet("/metrics")]
-        public async Task Metrics()
+        [HttpGet("/metrics-realtime")]
+        public async Task MetricsRealtime()
         {
-            const string cacheKey = "dashboard.metrics";
+            await _response.WriteAsJsonAsync(Metrics.GetRealTimeMetrics());
+        }
+
+        [HttpGet("/metrics-history")]
+        public async Task MetricsHistory()
+        {
+            const string cacheKey = "dashboard.metrics.history";
             if (CapCache.Global.TryGet(cacheKey, out var ret))
             {
                 await _response.WriteAsJsonAsync(ret);
                 return;
             }
 
-            var ps = MonitoringApi.HourlySucceededJobs(MessageType.Publish);
-            var pf = MonitoringApi.HourlyFailedJobs(MessageType.Publish);
-            var ss = MonitoringApi.HourlySucceededJobs(MessageType.Subscribe);
-            var sf = MonitoringApi.HourlyFailedJobs(MessageType.Subscribe);
+            var ps = await MonitoringApi.HourlySucceededJobs(MessageType.Publish);
+            var pf = await MonitoringApi.HourlyFailedJobs(MessageType.Publish);
+            var ss = await MonitoringApi.HourlySucceededJobs(MessageType.Subscribe);
+            var sf = await MonitoringApi.HourlyFailedJobs(MessageType.Subscribe);
 
-            var dayHour = ps.Keys.Select(x => x.ToString("MM-dd HH:00")).ToList(); 
+            var dayHour = ps.Keys.OrderBy(x => x).Select(x => new DateTimeOffset(x).ToUnixTimeSeconds());
 
             var result = new
             {
-                DayHour = dayHour,
-                PublishSuccessed = ps.Values,
-                PublishFailed = pf.Values,
-                SubscribeSuccessed = ss.Values,
-                SubscribeFailed = sf.Values,
+                DayHour = dayHour.ToArray(),
+                PublishSuccessed = ps.Values.Reverse(),
+                PublishFailed = pf.Values.Reverse(),
+                SubscribeSuccessed = ss.Values.Reverse(),
+                SubscribeFailed = sf.Values.Reverse()
             };
 
             CapCache.Global.AddOrUpdate(cacheKey, result, TimeSpan.FromMinutes(10));
@@ -154,8 +174,8 @@ namespace DotNetCore.CAP.Dashboard
             foreach (var messageId in messageIds)
             {
                 var message = await MonitoringApi.GetPublishedMessageAsync(messageId);
-                message.Origin = ServiceProvider.GetRequiredService<ISerializer>().Deserialize(message.Content);
-                ServiceProvider.GetRequiredService<IDispatcher>().EnqueueToPublish(message);
+                if (message != null)
+                    await ServiceProvider.GetRequiredService<IDispatcher>().EnqueueToPublish(message);
             }
 
             _response.StatusCode = StatusCodes.Status204NoContent;
@@ -164,8 +184,6 @@ namespace DotNetCore.CAP.Dashboard
         [HttpPost("/received/reexecute")]
         public async Task ReceivedRequeue()
         {
-            //var form = await _request.ReadFormAsync();
-            //var messageIds =  form["messages[]"]
             var messageIds = await _request.ReadFromJsonAsync<long[]>();
             if (messageIds == null || messageIds.Length == 0)
             {
@@ -176,8 +194,8 @@ namespace DotNetCore.CAP.Dashboard
             foreach (var messageId in messageIds)
             {
                 var message = await MonitoringApi.GetReceivedMessageAsync(messageId);
-                message.Origin = ServiceProvider.GetRequiredService<ISerializer>().Deserialize(message.Content);
-                await ServiceProvider.GetRequiredService<ISubscribeDispatcher>().DispatchAsync(message);
+                if (message != null)
+                    await ServiceProvider.GetRequiredService<ISubscribeDispatcher>().DispatchAsync(message);
             }
 
             _response.StatusCode = StatusCodes.Status204NoContent;
@@ -203,7 +221,7 @@ namespace DotNetCore.CAP.Dashboard
                 PageSize = pageSize
             };
 
-            var result = MonitoringApi.Messages(queryDto);
+            var result = await MonitoringApi.GetMessagesAsync(queryDto);
 
             await _response.WriteAsJsonAsync(result);
         }
@@ -230,7 +248,7 @@ namespace DotNetCore.CAP.Dashboard
                 PageSize = pageSize
             };
 
-            var result = MonitoringApi.Messages(queryDto);
+            var result = await MonitoringApi.GetMessagesAsync(queryDto);
 
             await _response.WriteAsJsonAsync(result);
         }

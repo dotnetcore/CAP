@@ -3,13 +3,12 @@
 
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Internal
+namespace DotNetCore.CAP.Internal;
+
+/// <summary>
+/// Represents bootstrapping logic. For example, adding initial state to the storage or querying certain entities.
+/// </summary>
+public interface IBootstrapper
 {
-    /// <summary>
-    /// Represents bootstrapping logic. For example, adding initial state to the storage or querying certain entities.
-    /// </summary>
-    public interface IBootstrapper
-    {
-        Task BootstrapAsync();
-    }
+    Task BootstrapAsync();
 }

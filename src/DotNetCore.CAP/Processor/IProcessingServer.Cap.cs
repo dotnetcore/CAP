@@ -10,98 +10,94 @@ using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP.Processor
+namespace DotNetCore.CAP.Processor;
+
+public class CapProcessingServer : IProcessingServer
 {
-    public class CapProcessingServer : IProcessingServer
+    private readonly CancellationTokenSource _cts;
+    private readonly ILogger _logger;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly IServiceProvider _provider;
+
+    private Task? _compositeTask;
+    private ProcessingContext _context = default!;
+    private bool _disposed;
+
+    public CapProcessingServer(
+        ILogger<CapProcessingServer> logger,
+        ILoggerFactory loggerFactory,
+        IServiceProvider provider)
     {
-        private readonly CancellationTokenSource _cts;
-        private readonly ILogger _logger;
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly IServiceProvider _provider;
+        _logger = logger;
+        _loggerFactory = loggerFactory;
+        _provider = provider;
+        _cts = new CancellationTokenSource();
+    }
 
-        private Task? _compositeTask;
-        private ProcessingContext _context = default!;
-        private bool _disposed;
+    public async Task Start(CancellationToken stoppingToken)
+    {
+        stoppingToken.Register(() => _cts.Cancel());
 
-        public CapProcessingServer(
-            ILogger<CapProcessingServer> logger,
-            ILoggerFactory loggerFactory,
-            IServiceProvider provider)
+        _logger.ServerStarting();
+
+        _context = new ProcessingContext(_provider, _cts.Token);
+
+        var processorTasks = GetProcessors()
+            .Select(InfiniteRetry)
+            .Select(p => p.ProcessAsync(_context));
+        _compositeTask = Task.WhenAll(processorTasks);
+
+        await _compositeTask;
+    }
+
+    public Task Pulse()
+    {
+        _logger.LogTrace("Pulsing the processor.");
+        return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+
+        try
         {
-            _logger = logger;
-            _loggerFactory = loggerFactory;
-            _provider = provider;
-            _cts = new CancellationTokenSource();
-        }
+            _disposed = true;
 
-        public void Start(CancellationToken stoppingToken)
+            _logger.ServerShuttingDown();
+            _cts.Cancel();
+
+            _compositeTask?.Wait((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
+        }
+        catch (AggregateException ex)
         {
-            stoppingToken.Register(() => _cts.Cancel());
-
-            _logger.ServerStarting();
-
-            _context = new ProcessingContext(_provider, _cts.Token);
-
-            var processorTasks = GetProcessors()
-                .Select(InfiniteRetry)
-                .Select(p => p.ProcessAsync(_context));
-            _compositeTask = Task.WhenAll(processorTasks);
+            var innerEx = ex.InnerExceptions[0];
+            if (!(innerEx is OperationCanceledException)) _logger.ExpectedOperationCanceledException(innerEx);
         }
-
-        public void Pulse()
+        catch (Exception ex)
         {
-            _logger.LogTrace("Pulsing the processor.");
+            _logger.LogWarning(ex, "An exception was occurred when disposing.");
         }
-
-        public void Dispose()
+        finally
         {
-            if (_disposed)
-            {
-                return;
-            }
-
-            try
-            {
-                _disposed = true;
-
-                _logger.ServerShuttingDown();
-                _cts.Cancel();
-
-                _compositeTask?.Wait((int)TimeSpan.FromSeconds(10).TotalMilliseconds);
-            }
-            catch (AggregateException ex)
-            {
-                var innerEx = ex.InnerExceptions[0];
-                if (!(innerEx is OperationCanceledException))
-                {
-                    _logger.ExpectedOperationCanceledException(innerEx);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "An exception was occurred when disposing.");
-            }
-            finally
-            {
-                _logger.LogInformation("### CAP shutdown!");
-            }
+            _logger.LogInformation("### CAP shutdown!");
         }
+    }
 
-        private IProcessor InfiniteRetry(IProcessor inner)
+    private IProcessor InfiniteRetry(IProcessor inner)
+    {
+        return new InfiniteRetryProcessor(inner, _loggerFactory);
+    }
+
+    private IProcessor[] GetProcessors()
+    {
+        var returnedProcessors = new List<IProcessor>
         {
-            return new InfiniteRetryProcessor(inner, _loggerFactory);
-        }
+            _provider.GetRequiredService<TransportCheckProcessor>(),
+            _provider.GetRequiredService<MessageNeedToRetryProcessor>(),
+            _provider.GetRequiredService<CollectorProcessor>()
+        };
 
-        private IProcessor[] GetProcessors()
-        {
-            var returnedProcessors = new List<IProcessor>
-            {
-                _provider.GetRequiredService<TransportCheckProcessor>(),
-                _provider.GetRequiredService<MessageNeedToRetryProcessor>(),
-                _provider.GetRequiredService<CollectorProcessor>()
-            };
-
-            return returnedProcessors.ToArray();
-        }
+        return returnedProcessors.ToArray();
     }
 }

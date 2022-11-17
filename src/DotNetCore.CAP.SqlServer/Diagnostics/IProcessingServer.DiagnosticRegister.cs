@@ -3,32 +3,27 @@
 
 using System.Diagnostics;
 using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 
-namespace DotNetCore.CAP.SqlServer.Diagnostics
+namespace DotNetCore.CAP.SqlServer.Diagnostics;
+
+public class DiagnosticRegister : IProcessingServer
 {
-    public class DiagnosticRegister : IProcessingServer
+    private readonly DiagnosticProcessorObserver _diagnosticProcessorObserver;
+
+    public DiagnosticRegister(DiagnosticProcessorObserver diagnosticProcessorObserver)
     {
-        private readonly DiagnosticProcessorObserver _diagnosticProcessorObserver;
+        _diagnosticProcessorObserver = diagnosticProcessorObserver;
+    }
 
-        public DiagnosticRegister(DiagnosticProcessorObserver diagnosticProcessorObserver)
-        {
-            _diagnosticProcessorObserver = diagnosticProcessorObserver;
-        }
+    public void Dispose()
+    {
+    }
 
-        public void Dispose()
-        {
-
-        }
-
-        public void Pulse()
-        {
-            
-        }
-
-        public void Start(CancellationToken stoppingToken)
-        {
-            DiagnosticListener.AllListeners.Subscribe(_diagnosticProcessorObserver);
-        }
+    public Task Start(CancellationToken stoppingToken)
+    {
+        DiagnosticListener.AllListeners.Subscribe(_diagnosticProcessorObserver);
+        return Task.CompletedTask;
     }
 }
