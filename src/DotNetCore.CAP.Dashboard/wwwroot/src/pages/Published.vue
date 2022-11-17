@@ -4,13 +4,13 @@
       <b-col md="3">
 
         <b-list-group>
-          <b-tooltip target="tooltip" triggers="hover" variant="warning" custom-class="my-tooltip-class" placement="bottomright">
+          <b-tooltip target="tooltip" triggers="hover" variant="warning" custom-class="my-tooltip-class"
+            placement="bottomright">
             {{ $t("DelayedInfo") }}
           </b-tooltip>
           <router-link class="list-group-item text-left list-group-item-secondary list-group-item-action"
             v-for="(menu, index) of subMens" :key="menu.text" active-class="active" :to="menu.name">
             {{ $t(menu.text) }}
-
             <b-icon-info-circle-fill id="tooltip" v-if="index == subMens.length - 1">
             </b-icon-info-circle-fill>
             <b-badge :variant="menu.variant" class="float-right" pill> {{ onMetric[menu.num] }} </b-badge>
@@ -19,7 +19,7 @@
       </b-col>
 
       <b-col md="9">
-        <h1 class="page-line mb-3">{{ $t("Published Message") }}</h1>
+        <h2 class="page-line mb-3">{{ $t("Published Message") }}</h2>
 
         <b-form class="d-flex">
           <div class="col-sm-10">
@@ -36,7 +36,7 @@
           </div>
           <div class="align-self-end">
             <b-button variant="dark" @click="onSearch">
-              <b-icon icon="search"></b-icon>
+              <b-icon-search></b-icon-search>
               {{ $t("Search") }}
             </b-button>
           </div>
@@ -48,7 +48,7 @@
       <b-col md="12">
         <b-btn-toolbar class="mt-4">
           <b-button size="sm" variant="dark" @click="requeue" :disabled="!selectedItems.length">
-            <b-icon icon="arrow-repeat" aria-hidden="true"></b-icon>
+            <b-icon-arrow-repeat aria-hidden="true"></b-icon-arrow-repeat>
             {{ requeueTitle }}
           </b-button>
           <div class="pagination">
@@ -93,7 +93,7 @@
           aria-controls="datatable"></b-pagination>
       </b-col>
     </b-row>
-    <b-modal size="lg" :id="infoModal.id" :title="'Id: ' + infoModal.title" ok-only>
+    <b-modal size="lg" :id="infoModal.id" :title="'Id: ' + infoModal.title" ok-only ok-variant="secondary">
       <vue-json-pretty showSelectController :key="infoModal.id" :data="infoModal.content" />
     </b-modal>
   </div>
@@ -101,6 +101,11 @@
 <script>
 import axios from "axios";
 import JSONBIG from "json-bigint";
+import {
+  BIconInfoCircleFill,
+  BIconArrowRepeat,
+  BIconSearch
+} from 'bootstrap-vue';
 
 const formDataTpl = {
   currentPage: 1,
@@ -109,6 +114,11 @@ const formDataTpl = {
   content: "",
 };
 export default {
+  components: {
+    BIconInfoCircleFill,
+    BIconArrowRepeat,
+    BIconSearch
+  },
   props: {
     status: {}
   },

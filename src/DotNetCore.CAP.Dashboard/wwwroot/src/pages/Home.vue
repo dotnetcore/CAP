@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <h1 class="page-line mb-4">{{ $t("Dashboard") }}</h1>
+    <h2 class="page-line mb-4">{{ $t("Dashboard") }}</h2>
     <b-row>
       <b-col>
         <h3 class="mb-4">{{ $t("Realtime Metric Graph") }}</h3>
@@ -24,61 +24,6 @@ import axios from 'axios';
 
 export default {
   async mounted() {
-
-    var historyInitData = [];
-
-    await axios.get('/metrics-history').then(res => {
-      historyInitData.push(res.data.dayHour);
-      historyInitData.push(res.data.publishSuccessed);
-      historyInitData.push(res.data.subscribeSuccessed);
-      historyInitData.push(res.data.publishFailed);
-      historyInitData.push(res.data.subscribeFailed);
-    });
-
-    var historyOpts = {
-      width: 960,
-      height: 400,
-      cursor: {
-        drag: {
-          setScale: false,
-        }
-      },
-      select: {
-        show: false,
-      },
-      series: [
-        { value: "{YYYY}/{MM}/{DD} {HH}:00" },
-        {
-          label: this.$t("Publish Succeeded"),
-          fill: "rgba(0,255,0,0.3)",
-        },
-        {
-          label: this.$t("Received Succeeded"),
-          fill: "rgba(0,0,255,0.3)",
-        },
-        {
-          label: this.$t("Publish Failed"),
-          fill: "rgba(255,0,0,0.5)",
-        },
-        {
-          label: this.$t("Received Failed"),
-          fill: "rgba(255,255,0,0.5)",
-        },
-      ],
-      axes: [
-        {
-          space: 30,
-          values: [
-            [60, "{HH}:00", "\n{YYYY}/{M}/{D}", null, "\n{M}/{D}", null, null, null, 1],
-          ],
-        },
-        {
-          label: this.$t("Aggregation Count"),
-        }
-      ]
-    };
-
-    new uPlot(historyOpts, historyInitData, document.getElementById("historyGraph"));
 
     const realtimeOpts = {
       width: 960,
@@ -181,6 +126,64 @@ export default {
       await reamtime();
       realtimeUplot.setData(metricInitData);
     }, 1000);
+
+    // ----------------------------------- History ------------------------------------------------
+    var historyInitData = [];
+
+    await axios.get('/metrics-history').then(res => {
+      historyInitData.push(res.data.dayHour);
+      historyInitData.push(res.data.publishSuccessed);
+      historyInitData.push(res.data.subscribeSuccessed);
+      historyInitData.push(res.data.publishFailed);
+      historyInitData.push(res.data.subscribeFailed);
+    });
+
+    var historyOpts = {
+      width: 960,
+      height: 400,
+      cursor: {
+        drag: {
+          setScale: false,
+        }
+      },
+      select: {
+        show: false,
+      },
+      series: [
+        { value: "{YYYY}/{MM}/{DD} {HH}:00" },
+        {
+          label: this.$t("Publish Succeeded"),
+          fill: "rgba(0,255,0,0.3)",
+        },
+        {
+          label: this.$t("Received Succeeded"),
+          fill: "rgba(0,0,255,0.3)",
+        },
+        {
+          label: this.$t("Publish Failed"),
+          fill: "rgba(255,0,0,0.5)",
+        },
+        {
+          label: this.$t("Received Failed"),
+          fill: "rgba(255,255,0,0.5)",
+        },
+      ],
+      axes: [
+        {
+          space: 30,
+          values: [
+            [60, "{HH}:00", "\n{YYYY}/{M}/{D}", null, "\n{M}/{D}", null, null, null, 1],
+          ],
+        },
+        {
+          label: this.$t("Aggregation Count"),
+        }
+      ]
+    };
+
+    new uPlot(historyOpts, historyInitData, document.getElementById("historyGraph"));
+
+
 
   }
 }; 

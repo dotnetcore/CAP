@@ -1,11 +1,7 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import baseURL from './global'
-import {
-  BootstrapVue,
-  IconsPlugin
-} from 'bootstrap-vue'
+import BootstrapVue from 'bootstrap-vue'
 import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import 'bootstrap/dist/css/bootstrap.css'
@@ -16,7 +12,17 @@ import VueI18n from 'vue-i18n'
 import * as zh from './assets/language/zh-cn'
 import * as en from './assets/language/en-us'
 //
-//
+
+let baseURL = "";
+switch (import.meta.env.MODE) {
+  case 'development':
+      baseURL = "/cap/api";
+      break
+  default:
+      baseURL = window.serverUrl;
+      break
+}
+
 axios.defaults.baseURL = baseURL;
 axios.defaults.withCredentials = true
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -39,7 +45,6 @@ Vue.config.productionTip = false
 
 // Make BootstrapVue available throughout your project
 Vue.use(BootstrapVue)
-Vue.use(IconsPlugin)
 Vue.component("vue-json-pretty", VueJsonPretty)
 Vue.use(VueI18n)
 

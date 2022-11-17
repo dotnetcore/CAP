@@ -11,7 +11,7 @@
         </b-list-group>
       </b-col>
       <b-col md="9">
-        <h1 class="page-line mb-2">{{ $t("Received Message") }}</h1>
+        <h2 class="page-line mb-2">{{ $t("Received Message") }}</h2>
         <b-form class="d-flex">
           <div class="col-sm-10">
             <div class="row mb-2">
@@ -20,8 +20,8 @@
                 :placeholder="$t('Name')" />
 
               <label class="sr-only" for="inline-form-input-name">{{ $t("Group") }}</label>
-              <b-form-input v-model="formData.group" id="inline-form-input-group"
-                class="form-control col" :placeholder="$t('Group')" />
+              <b-form-input v-model="formData.group" id="inline-form-input-group" class="form-control col"
+                :placeholder="$t('Group')" />
             </div>
             <div class="row">
               <label class="sr-only" for="inline-form-input-content">{{ $t("Content") }}</label>
@@ -30,7 +30,7 @@
             </div>
           </div>
           <b-button variant="dark" class="ml-2 align-self-end" @click="onSearch">
-            <b-icon icon="search"></b-icon>
+            <b-icon-search></b-icon-search>
             {{ $t("Search") }}
           </b-button>
         </b-form>
@@ -40,7 +40,7 @@
       <b-col md="12">
         <b-btn-toolbar class="mt-4">
           <b-button size="sm" variant="dark" @click="reexecute" :disabled="!selectedItems.length">
-            <b-icon icon="arrow-repeat" aria-hidden="true"></b-icon>
+            <b-icon-arrow-repeat aria-hidden="true"></b-icon-arrow-repeat>
             {{ $t("Re-execute") }}
           </b-button>
           <div class="pagination">
@@ -88,7 +88,7 @@
           aria-controls="datatable"></b-pagination>
       </b-col>
     </b-row>
-    <b-modal size="lg" :id="infoModal.id" :title="'Id: ' + infoModal.title" ok-only>
+    <b-modal size="lg" :id="infoModal.id" :title="'Id: ' + infoModal.title" ok-only ok-variant="secondary">
       <vue-json-pretty showSelectController :key="infoModal.id" :data="infoModal.content" />
     </b-modal>
   </div>
@@ -96,6 +96,10 @@
 <script>
 import axios from "axios";
 import JSONBIG from "json-bigint";
+import {
+  BIconArrowRepeat,
+  BIconSearch
+} from 'bootstrap-vue';
 
 const formDataTpl = {
   currentPage: 1,
@@ -105,6 +109,10 @@ const formDataTpl = {
   content: "",
 };
 export default {
+  components: {
+    BIconArrowRepeat,
+    BIconSearch
+  },
   props: {
     status: {},
   },

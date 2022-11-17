@@ -1,6 +1,6 @@
 <template>
   <b-row>
-    <h1 page-line mb-4>{{$t("Subscriber")}}</h1>
+    <h2 page-line mb-4>{{$t("Subscriber")}}</h2>
 
     <b-table-simple caption-top responsive>
       <caption>{{$t("SubscriberDescription")}}</caption>

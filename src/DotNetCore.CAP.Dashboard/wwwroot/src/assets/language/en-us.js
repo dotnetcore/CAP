@@ -1,7 +1,8 @@
 export default {
     LanguageName: "English",
     Published: "Published",
-    Received: "Received",
+    Delayed: "Delayed",
+    Received: "Received",    
     Subscriber: "Subscriber",
     Nodes: "Nodes",
     Dashboard: "Dashboard",
@@ -24,6 +25,10 @@ export default {
     "Published Message": "Published Message",
     "Received Message": "Received Message",
     "Aggregation Count": "Aggregation Count",
+    "Publish TPS": "Publish TPS",
+    "Consume TPS": "Consume TPS",
+    "Subscriber Invoke Time": "Subscriber Invoke Time",
+    "Rate (TPS)": "Rate (TPS)",
     "SubscriberInvokeMeanTime": "The Y1 axis represents the subscriber invoke mean time (not execute times)",
     "Elpsed Time (ms)": "Elpsed Time (ms)",
     "DelayedPublishTime": "Delayed Publish Time",
@@ -37,7 +42,7 @@ export default {
     Search: "Search",
     "Re-execute": "Re-execute",
     Group: "Group",
-    IdName: "IdName",
+    IdName: "Id/Name",
     Added: "Added",
     Retries: "Retries",
     Expires: "Expires",
@@ -51,5 +56,5 @@ export default {
     Tags: "Tags",
     Actions: "Actions",
     ReexecuteSuccess: "Reexecute Successful !",
-    RequeueSuccess: "Requeue Successfull!"
+    RequeueSuccess: "Requeue Successfull !"
 }

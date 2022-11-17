@@ -1,18 +1,18 @@
 <template>
   <div>
-    <h1 class="text-left mb-4">{{$t("Nodes")}}</h1>
+    <h2 class="text-left mb-4">{{ $t("Nodes") }}</h2>
     <b-table :fields="fields" :items="items" :busy="isBusy" show-empty empty-text="Unconfigure node discovery !">
       <template #table-busy>
         <div class="text-center text-secondary my-2">
           <b-spinner class="align-middle"></b-spinner>
-          <strong class="ml-2">{{$t("Loading")}}...</strong>
+          <strong class="ml-2">{{ $t("Loading") }}...</strong>
         </div>
       </template>
 
       <template #empty="scope">
-        <h4 class="alert alert-primary" role="alert">
+        <h5 class="alert alert-primary" role="alert">
           <b-icon-info-circle-fill /> {{ scope.emptyText }}
-        </h4>
+        </h5>
       </template>
 
       <template #cell(actions)="data">
@@ -25,15 +25,20 @@
 </template>
 <script>
 import axios from 'axios';
+import { BIconInfoCircleFill } from 'bootstrap-vue';
+
 export default {
+  components: {
+    BIconInfoCircleFill
+  },
   data() {
     return {
       isBusy: false,
       items: []
     }
   },
-  computed:{
-    fields(){
+  computed: {
+    fields() {
       return [
         { key: "id", label: this.$t("Id") },
         { key: "name", label: this.$t("Node Name") },
