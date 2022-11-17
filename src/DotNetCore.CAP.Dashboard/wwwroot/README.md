@@ -1,6 +1,6 @@
 # Dashboard
 
-The dashboard project uses vue 2 to build, and the UI uses bootstrap 4.
+The dashboard project uses vue 2 to build with vite, and the UI uses bootstrap 4.
 
 ## Local Development
 
@@ -37,7 +37,7 @@ npm run dev
 
 ## Publish
 
-The release will be generated into the `dist` folder, and the contents of this folder will be embedded in the dotnet csproj assembly.
+The release will be generated into the `dist` folder, and the contents of this folder will be embedded in the dashboard csproj assembly.
 
 ```
 npm run build
