@@ -43,7 +43,6 @@ axios.interceptors.request.use(
 
 Vue.config.productionTip = false
 
-// Make BootstrapVue available throughout your project
 Vue.use(BootstrapVue)
 Vue.component("vue-json-pretty", VueJsonPretty)
 Vue.use(VueI18n)
