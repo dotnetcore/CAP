@@ -11,7 +11,7 @@ jobs:
       dashboard: ${{ steps.filter.outputs.dashboard }}
     steps:
     - name: Checkout 🛎️
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         persist-credentials: false 
     - name: Check for changes 🎯
@@ -33,13 +33,13 @@ jobs:
         working-directory: src/DotNetCore.CAP.Dashboard/wwwroot  
     steps:
     - name: Checkout 🛎️
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         persist-credentials: false 
     - name: Use Node.js 🥽
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v3
       with:
-        node-version: '14.x'
+        node-version: 16
     - name: Install dependencies 🧵
       run: npm install
     - name: Build to dist 🧨
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout 🛎️
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         persist-credentials: false 
     - name: Deploy docs 🚀
