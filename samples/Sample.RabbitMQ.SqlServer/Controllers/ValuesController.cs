@@ -5,6 +5,7 @@ using DotNetCore.CAP;
 using DotNetCore.CAP.Messages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Sample.RabbitMQ.SqlServer.Messages;
 
 namespace Sample.RabbitMQ.SqlServer.Controllers
 {
@@ -65,6 +66,23 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
                 });
             }
             return Ok();
+        }
+
+        [Route("~/type/publish")]
+        public async Task<IActionResult> TypePublish()
+        {
+            await using (var connection = new SqlConnection(AppDbContext.ConnectionString))
+            {
+                using var transaction = connection.BeginTransaction(_capBus);
+                // This is where you would do other work that is going to persist data to your database
+
+                var message = TestMessage.Create($"This is message text created at {DateTime.Now:O}.");
+
+                await _capBus.PublishAsync(typeof(TestMessage).FullName, message);
+                transaction.Commit();
+            }
+
+            return Content("ok");
         }
 
         [NonAction]

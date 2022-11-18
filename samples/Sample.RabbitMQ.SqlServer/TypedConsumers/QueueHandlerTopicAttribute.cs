@@ -1,6 +1,6 @@
 using System;
 
-namespace Sample.RabbitMQ.SqlServer.DispatcherPerGroup.TypedConsumers
+namespace Sample.RabbitMQ.SqlServer.TypedConsumers
 {
     [AttributeUsage(AttributeTargets.Class)]
     public class QueueHandlerTopicAttribute : Attribute

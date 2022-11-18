@@ -23,7 +23,7 @@ namespace DotNetCore.CAP
 {
     public static class CapBuilderExtension
     {
-        public static IApplicationBuilder UseCapDashboard(this IApplicationBuilder app)
+        internal static IApplicationBuilder UseCapDashboard(this IApplicationBuilder app)
         {
             if (app == null)
             {

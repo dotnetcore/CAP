@@ -1,9 +1,9 @@
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Sample.RabbitMQ.SqlServer.DispatcherPerGroup.TypedConsumers
+namespace Sample.RabbitMQ.SqlServer.TypedConsumers
 {
     internal static class QueueHandlersExtensions
     {

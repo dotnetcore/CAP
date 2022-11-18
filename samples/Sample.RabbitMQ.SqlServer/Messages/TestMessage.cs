@@ -1,4 +1,4 @@
-namespace Sample.RabbitMQ.SqlServer.DispatcherPerGroup.Messages
+namespace Sample.RabbitMQ.SqlServer.Messages
 {
     public class TestMessage
     {
