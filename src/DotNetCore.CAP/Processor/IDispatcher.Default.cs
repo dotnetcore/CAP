@@ -18,8 +18,8 @@ namespace DotNetCore.CAP.Processor;
 
 public class Dispatcher : IDispatcher
 {
-    private readonly CancellationTokenSource _tasksCTS = new();
-    private readonly CancellationTokenSource _delayCTS = new();
+    private readonly CancellationTokenSource _tasksCts = new();
+    private readonly CancellationTokenSource _delayCts = new();
     private readonly ISubscribeDispatcher _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
@@ -48,8 +48,8 @@ public class Dispatcher : IDispatcher
     public async Task Start(CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
-        stoppingToken.Register(() => _tasksCTS.Cancel());
-        stoppingToken.Register(() => _delayCTS.Cancel());
+        stoppingToken.Register(() => _tasksCts.Cancel());
+        stoppingToken.Register(() => _delayCts.Cancel());
 
         var capacity = _options.ProducerThreadCount * 500;
         _publishedChannel = Channel.CreateBounded<MediumMessage>(
@@ -86,17 +86,17 @@ public class Dispatcher : IDispatcher
             {
                 try
                 {
-                    while (_schedulerQueue.TryPeek(out var message, out _nextSendTime))
+                    while (_schedulerQueue.TryPeek(out _, out _nextSendTime))
                     {
                         var delayTime = _nextSendTime - DateTime.Now;
 
                         if (delayTime > new TimeSpan(500000)) //50ms
                         {
-                            await Task.Delay(delayTime, _delayCTS.Token);
+                            await Task.Delay(delayTime, _delayCts.Token);
                         }
                         stoppingToken.ThrowIfCancellationRequested();
 
-                        await _sender.SendAsync(_schedulerQueue.Dequeue()).ConfigureAwait(false);
+                        await EnqueueToPublish(_schedulerQueue.Dequeue()).ConfigureAwait(false);
                     }
                     stoppingToken.WaitHandle.WaitOne(100);
                 }
@@ -124,7 +124,7 @@ public class Dispatcher : IDispatcher
 
             if (publishTime < _nextSendTime)
             {
-                _delayCTS.Cancel();
+                _delayCts.Cancel();
             }
         }
         else
@@ -138,7 +138,7 @@ public class Dispatcher : IDispatcher
         try
         {
             if (!_publishedChannel.Writer.TryWrite(message))
-                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCTS.Token).ConfigureAwait(false))
+                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCts.Token).ConfigureAwait(false))
                     if (_publishedChannel.Writer.TryWrite(message))
                         return;
         }
@@ -153,7 +153,7 @@ public class Dispatcher : IDispatcher
         try
         {
             if (!_receivedChannel.Writer.TryWrite((message, descriptor)))
-                while (await _receivedChannel.Writer.WaitToWriteAsync(_tasksCTS.Token).ConfigureAwait(false))
+                while (await _receivedChannel.Writer.WaitToWriteAsync(_tasksCts.Token).ConfigureAwait(false))
                     if (_receivedChannel.Writer.TryWrite((message, descriptor)))
                         return;
         }
@@ -165,8 +165,8 @@ public class Dispatcher : IDispatcher
 
     public void Dispose()
     {
-        if (!_tasksCTS.IsCancellationRequested)
-            _tasksCTS.Cancel();
+        if (!_tasksCts.IsCancellationRequested)
+            _tasksCts.Cancel();
     }
 
     private async ValueTask Sending(CancellationToken cancellationToken)
@@ -179,7 +179,7 @@ public class Dispatcher : IDispatcher
                     {
                         var result = await _sender.SendAsync(message).ConfigureAwait(false);
                         if (!result.Succeeded)
-                            _logger.MessagePublishException(message.Origin?.GetId(), result.ToString(), result.Exception);
+                            _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
                     }
                     catch (Exception ex)
                     {
