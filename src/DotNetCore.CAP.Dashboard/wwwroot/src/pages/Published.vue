@@ -60,7 +60,7 @@
             </b-button-group>
           </div>
         </b-btn-toolbar>
-        <b-table id="datatable" :busy="isBusy" class="mt-3" striped thead-tr-class="text-left"
+        <b-table id="datatable" :busy="isBusy" class="mt-3" striped thead-tr-class="text-left"  details-td-class="align-middle"
           tbody-tr-class="text-left" small :fields="fields" :items="items" select-mode="range">
           <template #table-busy>
             <div class="text-center text-secondary my-2">
@@ -310,5 +310,8 @@ export default {
 .capPagination::v-deep .active .page-link {
   color: white;
   background-color: black;
+}
+.my-align-middle{
+  vertical-align: middle;
 }
 </style>

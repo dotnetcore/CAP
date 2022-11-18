@@ -33,6 +33,7 @@ namespace DotNetCore.CAP
             var provider = app.ApplicationServices;
 
             var options = provider.GetService<DashboardOptions>();
+
             if (options != null)
             {
                 if (provider.GetService<DiscoveryOptions>() != null)
@@ -42,16 +43,22 @@ namespace DotNetCore.CAP
 
                 app.UseMiddleware<UiMiddleware>();
 
+                var metrics = provider.GetRequiredService<CapMetricsEventListener>();
                 app.Map(options.PathMatch + "/api", false, x =>
                 {
-
                     IAuthorizationService authService = null;
-                    if (!String.IsNullOrEmpty(options.AuthorizationPolicy))
+                    if (!string.IsNullOrEmpty(options.AuthorizationPolicy))
                     {
                         authService = app.ApplicationServices.GetService<IAuthorizationService>();
                     }
 
                     var builder = new RouteBuilder(x);
+
+                    //Put realtime metrics api output because want to use not scoped service
+                    builder.MapGet("/metrics-realtime", async httpContext =>
+                    {
+                        await httpContext.Response.WriteAsJsonAsync(metrics.GetRealTimeMetrics());
+                    });
 
                     var methods = typeof(RouteActionProvider).GetMethods(BindingFlags.Instance | BindingFlags.Public);
 
