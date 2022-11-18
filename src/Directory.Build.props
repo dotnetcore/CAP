@@ -9,7 +9,7 @@
     <RepositoryUrl>https://github.com/dotnetcore/CAP</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
-	<PackageIcon>https://raw.githubusercontent.com/dotnetcore/CAP/master/docs/content/img/logo.png</PackageIcon>
+	<PackageIcon>logo.png</PackageIcon>
     <PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>CAP;EventBus;MicroService</PackageTags>
@@ -25,6 +25,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+	<None Include="..\..\docs\content\img\logo.png" Pack="true" Visible="false"  PackagePath="" />
 	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
   </ItemGroup>
 
