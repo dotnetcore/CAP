@@ -27,8 +27,7 @@ namespace DotNetCore.CAP.Dashboard
         private readonly RouteData _routeData;
         private IServiceProvider ServiceProvider => _request.HttpContext.RequestServices;
         private IMonitoringApi MonitoringApi => ServiceProvider.GetRequiredService<IDataStorage>().GetMonitoringApi();
-        private CapMetricsEventListener Metrics => ServiceProvider.GetRequiredService<CapMetricsEventListener>();
-
+        
         public RouteActionProvider(HttpRequest request, HttpResponse response, RouteData routeData)
         {
             _request = request;
@@ -75,12 +74,6 @@ namespace DotNetCore.CAP.Dashboard
                     }
                 }
             }
-        }
-
-        [HttpGet("/metrics-realtime")]
-        public async Task MetricsRealtime()
-        {
-            await _response.WriteAsJsonAsync(Metrics.GetRealTimeMetrics());
         }
 
         [HttpGet("/metrics-history")]

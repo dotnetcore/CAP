@@ -9,71 +9,42 @@ using DotNetCore.CAP.Diagnostics;
 
 namespace DotNetCore.CAP.Dashboard
 {
-    public class CapMetricsEventListener : EventListener
+    internal class CapMetricsEventListener : EventListener
     {
         public const int HistorySize = 300;
-        public Queue<double?> PublishedPerSec { get; } = new(HistorySize);
-        public Queue<double?> ConsumePerSec { get; } = new(HistorySize);
-        public Queue<double?> InvokeSubscriberElapsedMs { get; } = new(HistorySize);
+
+        public CircularBuffer<int?> PublishedPerSec { get; } = new(HistorySize);
+        //public Queue<double?> ConsumePerSec { get; } = new(HistorySize);
+        public CircularBuffer<int?> InvokeSubscriberPerSec { get; } = new(HistorySize);
+        public CircularBuffer<int?> InvokeSubscriberElapsedMs { get; } = new(HistorySize);
 
         public CapMetricsEventListener()
         {
             for (int i = 0; i < HistorySize; i++)
             {
-                PublishedPerSec.Enqueue(0);
-                ConsumePerSec.Enqueue(0);
-                InvokeSubscriberElapsedMs.Enqueue(null);
+                PublishedPerSec.Add(0);
+                InvokeSubscriberPerSec.Add(0);
+                InvokeSubscriberElapsedMs.Add(null);
             }
-
-            //Task.Factory.StartNew(async () =>
-            //{
-            //    var token = lifetime.ApplicationStopping;
-            //    while (!token.IsCancellationRequested)
-            //    {
-            //        await Task.Delay(1000, token);
-
-            //        lock (Current)
-            //        {
-            //            PublishedPerSec.Dequeue();
-            //            ConsumePerSec.Dequeue();
-            //            InvokeSubscriberElapsedMs.Dequeue();
-
-            //            PublishedPerSec.Enqueue(Current.PublishedPerSec);
-            //            ConsumePerSec.Enqueue(Current.ConsumePerSec);
-            //            InvokeSubscriberElapsedMs.Enqueue(Current.InvokeSubscriberPerSec);
-
-            //            Current.PublishedPerSec = 0;
-            //            Current.ConsumePerSec = 0;
-            //            Current.InvokeSubscriberPerSec = 0;
-            //        }
-            //    }
-            //});
         }
 
-        //public class Metrics
-        //{
-        //    public double? PublishedPerSec { get; set; }
-        //    public double? ConsumePerSec { get; set; }
-        //    public double? InvokeSubscriberPerSec { get; set; }
-        //    public double? InvokeSubscriberElapsedMs { get; set; }
-        //}
-
-        public double?[][] GetRealTimeMetrics()
+        public CircularBuffer<int?>[] GetRealTimeMetrics()
         {
-            var warpArr = new double?[4][];
-            warpArr[0] = new double?[HistorySize];  //x-timestamps
-            //warpArr[1] = new double[HistorySize];  //y1-publish
-            //warpArr[2] = new double[HistorySize];  //y2-consume
-            //warpArr[3] = new double[HistorySize];  //y3-subscriber
+            var warpArr = new CircularBuffer<int?>[4];
 
-            var dateVal = DateTimeOffset.Now.AddSeconds(-300).ToUnixTimeSeconds();
-            for (long i = 0, j = dateVal; j < dateVal + 300; i++, j++)
+            var startTime = (int)DateTimeOffset.Now.AddSeconds(-300).ToUnixTimeSeconds();
+            var endTime = startTime + 300;
+
+            var timeSerials = new CircularBuffer<int?>(HistorySize);
+            for (var j = startTime; j < endTime; j++)
             {
-                warpArr[0][i] = j;
+                timeSerials.Add(j);
             }
-            warpArr[1] = PublishedPerSec.ToArray();
-            warpArr[2] = ConsumePerSec.ToArray();
-            warpArr[3] = InvokeSubscriberElapsedMs.ToArray();
+
+            warpArr[0] = timeSerials;
+            warpArr[1] = PublishedPerSec;
+            warpArr[2] = InvokeSubscriberPerSec;
+            warpArr[3] = InvokeSubscriberElapsedMs;
 
             return warpArr;
         }
@@ -105,32 +76,22 @@ namespace DotNetCore.CAP.Dashboard
 
             if ((string)val[0] == CapDiagnosticListenerNames.PublishedPerSec)
             {
-                    PublishedPerSec.Dequeue();
-                    var v = (double)val[3];
-                    PublishedPerSec.Enqueue(v);
+                PublishedPerSec.Add(Convert.ToInt32(val[3]));
             }
-            else if ((string)val[0] == CapDiagnosticListenerNames.ConsumePerSec)
-            {
-                    ConsumePerSec.Dequeue();
-                    var v = (double)val[3];
-                    ConsumePerSec.Enqueue(v);
-            }
-            //else if ((string)val[0] == CapDiagnosticListenerNames.InvokeSubscriberPerSec)
+            //else if ((string)val[0] == CapDiagnosticListenerNames.ConsumePerSec)
             //{
-            //    lock (Current)
-            //    {
-            //        Current.InvokeSubscriberPerSec = (double)val[3];
-            //    }
+            //        ConsumePerSec.Dequeue();
+            //        var v = (double)val[3];
+            //        ConsumePerSec.Enqueue(v);
             //}
+            else if ((string)val[0] == CapDiagnosticListenerNames.InvokeSubscriberPerSec)
+            {
+                InvokeSubscriberPerSec.Add(Convert.ToInt32(val[3]));
+            }
             else if ((string)val[0] == CapDiagnosticListenerNames.InvokeSubscriberElapsedMs)
             {
-                    InvokeSubscriberElapsedMs.Dequeue();
-                    var v = (double)val[2];
-                    InvokeSubscriberElapsedMs.Enqueue(v == 0 ? null : v);
-            }
-            else
-            {
-                return;
+                var v = Convert.ToInt32(val[2]);
+                InvokeSubscriberElapsedMs.Add(v == 0 ? null : v);
             }
         }
 

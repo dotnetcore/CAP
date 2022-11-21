@@ -3,7 +3,6 @@ using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
-using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 

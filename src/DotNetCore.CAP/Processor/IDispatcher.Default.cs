@@ -85,7 +85,7 @@ public class Dispatcher : IDispatcher
             {
                 try
                 {
-                    while (_schedulerQueue.TryPeek(out var message, out _nextSendTime))
+                    while (_schedulerQueue.TryPeek(out _, out _nextSendTime))
                     {
                         var delayTime = _nextSendTime - DateTime.Now;
 

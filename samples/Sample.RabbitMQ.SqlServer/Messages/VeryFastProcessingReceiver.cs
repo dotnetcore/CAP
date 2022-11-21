@@ -1,9 +1,9 @@
 using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using Sample.RabbitMQ.SqlServer.DispatcherPerGroup.TypedConsumers;
+using Sample.RabbitMQ.SqlServer.TypedConsumers;
 
-namespace Sample.RabbitMQ.SqlServer.DispatcherPerGroup.Messages
+namespace Sample.RabbitMQ.SqlServer.Messages
 {
     [QueueHandlerTopic("fasttopic")]
     public class VeryFastProcessingReceiver : QueueHandler

@@ -206,8 +206,6 @@ internal class CapPublisher : ICapPublisher
 
     private void TracingAfter(long? tracingTimestamp, Message message)
     {
-        CapEventCounterSource.Log.WritePublishMetrics();
-
         if (tracingTimestamp != null &&
             s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterPublishMessageStore))
         {

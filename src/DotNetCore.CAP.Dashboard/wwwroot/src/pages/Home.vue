@@ -23,6 +23,11 @@ import uPlot from '../assets/uPlot.esm.js';
 import axios from 'axios';
 
 export default {
+  data() {
+    return {
+      timer: Number
+    }
+  },
   async mounted() {
 
     const realtimeOpts = {
@@ -122,7 +127,7 @@ export default {
     await reamtime();
     let realtimeUplot = new uPlot(realtimeOpts, metricInitData, document.getElementById("realtimeGraph"));
 
-    setInterval(async function () {
+    this.timer = setInterval(async function () {
       await reamtime();
       realtimeUplot.setData(metricInitData);
     }, 1000);
@@ -182,9 +187,9 @@ export default {
     };
 
     new uPlot(historyOpts, historyInitData, document.getElementById("historyGraph"));
-
-
-
+  },
+  destroyed() {
+    window.clearInterval(this.timer);
   }
 }; 
 </script>

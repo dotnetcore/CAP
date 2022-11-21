@@ -1,13 +1,13 @@
-using DotNetCore.CAP;
-using DotNetCore.CAP.Internal;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using DotNetCore.CAP;
+using DotNetCore.CAP.Internal;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
-namespace Sample.RabbitMQ.SqlServer.DispatcherPerGroup.TypedConsumers
+namespace Sample.RabbitMQ.SqlServer.TypedConsumers
 {
     internal class TypedConsumerServiceSelector : ConsumerServiceSelector
     {

@@ -133,6 +133,8 @@ internal class MessageSender : IMessageSender
 
     private long? TracingBefore(TransportMessage message, BrokerAddress broker)
     {
+        CapEventCounterSource.Log.WritePublishMetrics();
+
         if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforePublish))
         {
             var eventData = new CapEventDataPubSend
