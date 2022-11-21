@@ -1,5 +1,5 @@
 ﻿using System;
-using DotNetCore.CAP.Internal;
+using DotNetCore.CAP;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
