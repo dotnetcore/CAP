@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Data;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
+using DotNetCore.CAP.Internal;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 
@@ -18,6 +18,20 @@ namespace Sample.RabbitMQ.MySql.Controllers
         public ValuesController(ICapPublisher capPublisher)
         {
             _capBus = capPublisher;
+        }
+
+        [Route("~/control/start")]
+        public async Task<IActionResult> Start([FromServices]IBootstrapper bootstrapper)
+        {
+            await bootstrapper.BootstrapAsync();
+            return Ok();
+        }
+
+        [Route("~/control/stop")]
+        public async Task<IActionResult> Stop([FromServices] IBootstrapper bootstrapper)
+        {
+            await bootstrapper.DisposeAsync();
+            return Ok();
         }
 
         [Route("~/without/transaction")]

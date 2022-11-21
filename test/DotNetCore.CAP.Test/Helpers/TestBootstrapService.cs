@@ -1,6 +1,5 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.Hosting;
 
 namespace DotNetCore.CAP.Test.Helpers

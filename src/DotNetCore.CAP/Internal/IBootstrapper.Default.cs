@@ -17,11 +17,14 @@ namespace DotNetCore.CAP.Internal;
 /// </summary>
 internal class Bootstrapper : BackgroundService, IBootstrapper
 {
-    private readonly CancellationTokenSource _cts = new();
     private readonly ILogger<Bootstrapper> _logger;
     private readonly IServiceProvider _serviceProvider;
+
+    private CancellationTokenSource? _cts;
     private bool _disposed;
     private IEnumerable<IProcessingServer> _processors = default!;
+
+    public bool IsStarted => !_cts?.IsCancellationRequested ?? false;
 
     public Bootstrapper(IServiceProvider serviceProvider, ILogger<Bootstrapper> logger)
     {
@@ -29,9 +32,18 @@ internal class Bootstrapper : BackgroundService, IBootstrapper
         _logger = logger;
     }
 
-    public async Task BootstrapAsync()
+    public async Task BootstrapAsync(CancellationToken cancellationToken = default)
     {
+        if (_cts != null)
+        {
+            _logger.LogInformation("### CAP background task is already started!");
+
+            return;
+        } 
+
         _logger.LogDebug("### CAP background task is starting.");
+
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
         CheckRequirement();
 
@@ -65,18 +77,19 @@ internal class Bootstrapper : BackgroundService, IBootstrapper
 
         await BootstrapCoreAsync().ConfigureAwait(false);
 
+        _disposed = false;
         _logger.LogInformation("### CAP started!");
     }
 
-    protected virtual Task BootstrapCoreAsync()
+    protected virtual async Task BootstrapCoreAsync()
     {
         foreach (var item in _processors)
         {
-            _cts.Token.ThrowIfCancellationRequested();
-
             try
             {
-                item.Start(_cts.Token);
+                _cts!.Token.ThrowIfCancellationRequested();
+
+                await item.Start(_cts!.Token);
             }
             catch (OperationCanceledException)
             {
@@ -87,26 +100,26 @@ internal class Bootstrapper : BackgroundService, IBootstrapper
                 _logger.ProcessorsStartedError(ex);
             }
         }
-
-        return Task.CompletedTask;
     }
 
     public override void Dispose()
     {
         if (_disposed) return;
-        _cts.Cancel();
-        _cts.Dispose();
+
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
         _disposed = true;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        await BootstrapAsync().ConfigureAwait(false);
+        await BootstrapAsync(stoppingToken).ConfigureAwait(false);
     }
 
     public override async Task StopAsync(CancellationToken cancellationToken)
     {
-        _cts.Cancel();
+        _cts?.Cancel();
 
         await base.StopAsync(cancellationToken).ConfigureAwait(false);
     }
@@ -137,5 +150,12 @@ internal class Bootstrapper : BackgroundService, IBootstrapper
                 "========   eg: services.AddCap( options => { options.UseSqlServer(...) }); ========" +
                 Environment.NewLine +
                 "===================================================================================");
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        Dispose();
+
+        return ValueTask.CompletedTask;
     }
 }

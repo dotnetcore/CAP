@@ -54,17 +54,22 @@ internal class ConsumerRegister : IConsumerRegister
         return _isHealthy;
     }
 
-    public async Task Start(CancellationToken stoppingToken)
+    public Task Start(CancellationToken stoppingToken)
     {
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
+        _cts.Token.Register(Dispose);
+
         _selector = _serviceProvider.GetRequiredService<MethodMatcherCache>();
         _dispatcher = _serviceProvider.GetRequiredService<IDispatcher>();
         _serializer = _serviceProvider.GetRequiredService<ISerializer>();
         _storage = _serviceProvider.GetRequiredService<IDataStorage>();
         _consumerClientFactory = _serviceProvider.GetRequiredService<IConsumerClientFactory>();
 
-        stoppingToken.Register(Dispose);
+        Execute();
 
-        await ExecuteAsync().ConfigureAwait(false);
+        _disposed = false;
+
+        return Task.CompletedTask;
     }
 
     public void ReStart(bool force = false)
@@ -76,7 +81,7 @@ internal class ConsumerRegister : IConsumerRegister
             _cts = new CancellationTokenSource();
             _isHealthy = true;
 
-            ExecuteAsync().ConfigureAwait(false);
+            Execute();
         }
     }
 
@@ -105,7 +110,7 @@ internal class ConsumerRegister : IConsumerRegister
         _cts.Dispose();
     }
 
-    public async Task ExecuteAsync()
+    public void Execute()
     {
         var groupingMatches = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
@@ -129,35 +134,35 @@ internal class ConsumerRegister : IConsumerRegister
             for (var i = 0; i < _options.ConsumerThreadCount; i++)
             {
                 var topicIds = topics.Select(t => t);
-                await Task.Factory.StartNew(() =>
-                 {
-                     try
-                     {
-                         using (var client = _consumerClientFactory.Create(matchGroup.Key))
-                         {
-                             _serverAddress = client.BrokerAddress;
+                _ = Task.Factory.StartNew(() =>
+                  {
+                      try
+                      {
+                          using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                          {
+                              _serverAddress = client.BrokerAddress;
 
-                             RegisterMessageProcessor(client);
+                              RegisterMessageProcessor(client);
 
-                             client.Subscribe(topicIds);
+                              client.Subscribe(topicIds);
 
-                             client.Listening(_pollingDelay, _cts.Token);
-                         }
-                     }
-                     catch (OperationCanceledException)
-                     {
-                         //ignore
-                     }
-                     catch (BrokerConnectionException e)
-                     {
-                         _isHealthy = false;
-                         _logger.LogError(e, e.Message);
-                     }
-                     catch (Exception e)
-                     {
-                         _logger.LogError(e, e.Message);
-                     }
-                 }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+                              client.Listening(_pollingDelay, _cts.Token);
+                          }
+                      }
+                      catch (OperationCanceledException)
+                      {
+                          //ignore
+                      }
+                      catch (BrokerConnectionException e)
+                      {
+                          _isHealthy = false;
+                          _logger.LogError(e, e.Message);
+                      }
+                      catch (Exception e)
+                      {
+                          _logger.LogError(e, e.Message);
+                      }
+                  }, _cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             }
         }
 

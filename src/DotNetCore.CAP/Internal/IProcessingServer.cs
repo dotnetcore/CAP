@@ -13,10 +13,5 @@ namespace DotNetCore.CAP.Internal;
 /// </summary>
 public interface IProcessingServer : IDisposable
 {
-    Task Pulse()
-    {
-        return Task.CompletedTask;
-    }
-
     Task Start(CancellationToken stoppingToken);
 }

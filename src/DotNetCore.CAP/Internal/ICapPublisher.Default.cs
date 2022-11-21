@@ -24,15 +24,19 @@ internal class CapPublisher : ICapPublisher
     private readonly CapOptions _capOptions;
     private readonly IDispatcher _dispatcher;
     private readonly IDataStorage _storage;
+    private readonly IBootstrapper _bootstrapper;
 
     public CapPublisher(IServiceProvider service)
     {
         ServiceProvider = service;
+        _bootstrapper = service.GetRequiredService<IBootstrapper>();
         _dispatcher = service.GetRequiredService<IDispatcher>();
         _storage = service.GetRequiredService<IDataStorage>();
         _capOptions = service.GetRequiredService<IOptions<CapOptions>>().Value;
         Transaction = new AsyncLocal<ICapTransaction>();
     }
+
+    internal bool CanPublish { get; private set; }
 
     public IServiceProvider ServiceProvider { get; }
 
@@ -78,12 +82,12 @@ internal class CapPublisher : ICapPublisher
 
     public void Publish<T>(string name, T? value, string? callbackName = null)
     {
-        PublishAsync(name, value, callbackName).ConfigureAwait(false);
+        PublishAsync(name, value, callbackName).RunSynchronously();
     }
 
     public void Publish<T>(string name, T? value, IDictionary<string, string?> headers)
     {
-        PublishAsync(name, value, headers).ConfigureAwait(false);
+        PublishAsync(name, value, headers).RunSynchronously();
     }
 
     public void PublishDelay<T>(TimeSpan delayTime, string name, T? value, IDictionary<string, string?> headers)
@@ -99,6 +103,11 @@ internal class CapPublisher : ICapPublisher
     private async Task PublishInternalAsync<T>(string name, T? value, IDictionary<string, string?> headers, TimeSpan? delayTime = null,
         CancellationToken cancellationToken = default)
     {
+        if (!_bootstrapper.IsStarted)
+        {
+            throw new InvalidOperationException("CAP has not been started!");
+        }
+
         if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 
         if (!string.IsNullOrEmpty(_capOptions.TopicNamePrefix)) name = $"{_capOptions.TopicNamePrefix}.{name}";
