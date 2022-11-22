@@ -20,7 +20,7 @@ public class Dispatcher : IDispatcher
 {
     private CancellationTokenSource? _tasksCts;
     private readonly CancellationTokenSource _delayCts = new();
-    private readonly ISubscribeDispatcher _executor;
+    private readonly ISubscribeExector _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
     private readonly IMessageSender _sender;
@@ -28,13 +28,13 @@ public class Dispatcher : IDispatcher
     private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
 
     private Channel<MediumMessage> _publishedChannel = default!;
-    private Channel<(MediumMessage, ConsumerExecutorDescriptor)> _receivedChannel = default!;
+    private Channel<(MediumMessage, ConsumerExecutorDescriptor?)> _receivedChannel = default!;
     private DateTime _nextSendTime = DateTime.MaxValue;
 
     public Dispatcher(ILogger<Dispatcher> logger,
         IMessageSender sender,
         IOptions<CapOptions> options,
-        ISubscribeDispatcher executor,
+        ISubscribeExector executor,
         IDataStorage storage)
     {
         _logger = logger;
@@ -62,7 +62,7 @@ public class Dispatcher : IDispatcher
             });
 
         capacity = _options.ConsumerThreadCount * 300;
-        _receivedChannel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor)>(
+        _receivedChannel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor?)>(
             new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
             {
                 AllowSynchronousContinuations = true,
@@ -164,7 +164,7 @@ public class Dispatcher : IDispatcher
         }
     }
 
-    public async ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
+    public async ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor? descriptor = null)
     {
         try
         {
@@ -216,8 +216,7 @@ public class Dispatcher : IDispatcher
                 while (_receivedChannel.Reader.TryRead(out var message))
                     try
                     {
-                        await _executor.DispatchAsync(message.Item1, message.Item2, _tasksCts.Token)
-                            .ConfigureAwait(false);
+                        await _executor.DispatchAsync(message.Item1, message.Item2, _tasksCts.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {

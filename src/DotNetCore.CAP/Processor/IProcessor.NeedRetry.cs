@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,21 +15,14 @@ namespace DotNetCore.CAP.Processor;
 
 public class MessageNeedToRetryProcessor : IProcessor
 {
-    private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
     private readonly ILogger<MessageNeedToRetryProcessor> _logger;
-    private readonly IMessageSender _messageSender;
-    private readonly ISubscribeDispatcher _subscribeDispatcher;
+    private readonly IDispatcher _dispatcher;
     private readonly TimeSpan _waitingInterval;
 
-    public MessageNeedToRetryProcessor(
-        IOptions<CapOptions> options,
-        ILogger<MessageNeedToRetryProcessor> logger,
-        ISubscribeDispatcher subscribeDispatcher,
-        IMessageSender messageSender)
+    public MessageNeedToRetryProcessor(IOptions<CapOptions> options, ILogger<MessageNeedToRetryProcessor> logger, IDispatcher dispatcher)
     {
         _logger = logger;
-        _subscribeDispatcher = subscribeDispatcher;
-        _messageSender = messageSender;
+        _dispatcher = dispatcher;
         _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
     }
 
@@ -39,7 +32,9 @@ public class MessageNeedToRetryProcessor : IProcessor
 
         var storage = context.Provider.GetRequiredService<IDataStorage>();
 
-        await Task.WhenAll(ProcessPublishedAsync(storage, context), ProcessReceivedAsync(storage, context)).ConfigureAwait(false);
+        _ = Task.Run(() => ProcessPublishedAsync(storage, context));
+
+        _ = Task.Run(() => ProcessReceivedAsync(storage, context));
 
         await context.WaitAsync(_waitingInterval).ConfigureAwait(false);
     }
@@ -52,10 +47,9 @@ public class MessageNeedToRetryProcessor : IProcessor
 
         foreach (var message in messages)
         {
-            //the message.Origin.Value maybe JObject
-            await _messageSender.SendAsync(message).ConfigureAwait(false);
+            context.ThrowIfStopping();
 
-            await context.WaitAsync(_delay).ConfigureAwait(false);
+            await _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
         }
     }
 
@@ -67,9 +61,9 @@ public class MessageNeedToRetryProcessor : IProcessor
 
         foreach (var message in messages)
         {
-            await _subscribeDispatcher.DispatchAsync(message, context.CancellationToken).ConfigureAwait(false);
+            context.ThrowIfStopping();
 
-            await context.WaitAsync(_delay).ConfigureAwait(false);
+            await _dispatcher.EnqueueToExecute(message).ConfigureAwait(false);
         }
     }
 

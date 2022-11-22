@@ -12,7 +12,7 @@ public interface IDispatcher : IProcessingServer
 {
     ValueTask EnqueueToPublish(MediumMessage message);
 
-    ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor);
+    ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor? descriptor = null);
 
     ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime);
 }

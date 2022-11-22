@@ -21,7 +21,7 @@ internal class DispatcherPerGroup : IDispatcher
 {
     private CancellationTokenSource? _tasksCts;
     private readonly CancellationTokenSource _delayCts = new();
-    private readonly ISubscribeDispatcher _executor;
+    private readonly ISubscribeExector _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
     private readonly IMessageSender _sender;
@@ -29,14 +29,14 @@ internal class DispatcherPerGroup : IDispatcher
     private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
 
     private Channel<MediumMessage> _publishedChannel = default!;
-    private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>> _receivedChannels = default!;
+    private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor?)>> _receivedChannels = default!;
 
     private DateTime _nextSendTime = DateTime.MaxValue;
 
     public DispatcherPerGroup(ILogger<Dispatcher> logger,
         IMessageSender sender,
         IOptions<CapOptions> options,
-        ISubscribeDispatcher executor,
+        ISubscribeExector executor,
         IDataStorage storage)
     {
         _logger = logger;
@@ -68,7 +68,7 @@ internal class DispatcherPerGroup : IDispatcher
                 TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
 
         _receivedChannels =
-            new ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor)>>(
+            new ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor?)>>(
                 _options.ConsumerThreadCount, _options.ConsumerThreadCount * 2);
 
         GetOrCreateReceiverChannel(_options.DefaultGroupName);
@@ -158,13 +158,11 @@ internal class DispatcherPerGroup : IDispatcher
         }
     }
 
-    public async ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor descriptor)
+    public async ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor? descriptor)
     {
         try
         {
-            var group = descriptor.Attribute.Group;
-
-            if (_logger.IsEnabled(LogLevel.Debug)) _logger.LogDebug("Enqueue message for group {ConsumerGroup}", group);
+            var group = message.Origin.GetGroup()!;
 
             var channel = GetOrCreateReceiverChannel(group);
 
@@ -184,7 +182,7 @@ internal class DispatcherPerGroup : IDispatcher
         _tasksCts?.Dispose();
     }
 
-    private Channel<(MediumMessage, ConsumerExecutorDescriptor)> GetOrCreateReceiverChannel(string key)
+    private Channel<(MediumMessage, ConsumerExecutorDescriptor?)> GetOrCreateReceiverChannel(string key)
     {
         return _receivedChannels.GetOrAdd(key, group =>
         {
@@ -193,7 +191,7 @@ internal class DispatcherPerGroup : IDispatcher
                 _options.ConsumerThreadCount);
 
             var capacity = _options.ConsumerThreadCount * 300;
-            var channel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor)>(
+            var channel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor?)>(
                 new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
                 {
                     AllowSynchronousContinuations = true,
@@ -236,7 +234,7 @@ internal class DispatcherPerGroup : IDispatcher
         }
     }
 
-    private async Task Processing(string group, Channel<(MediumMessage, ConsumerExecutorDescriptor)> channel)
+    private async Task Processing(string group, Channel<(MediumMessage, ConsumerExecutorDescriptor?)> channel)
     {
         try
         {

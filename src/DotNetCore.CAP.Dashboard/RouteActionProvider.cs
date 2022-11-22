@@ -27,7 +27,7 @@ namespace DotNetCore.CAP.Dashboard
         private readonly RouteData _routeData;
         private IServiceProvider ServiceProvider => _request.HttpContext.RequestServices;
         private IMonitoringApi MonitoringApi => ServiceProvider.GetRequiredService<IDataStorage>().GetMonitoringApi();
-        
+
         public RouteActionProvider(HttpRequest request, HttpResponse response, RouteData routeData)
         {
             _request = request;
@@ -188,7 +188,7 @@ namespace DotNetCore.CAP.Dashboard
             {
                 var message = await MonitoringApi.GetReceivedMessageAsync(messageId);
                 if (message != null)
-                    await ServiceProvider.GetRequiredService<ISubscribeDispatcher>().DispatchAsync(message);
+                    await ServiceProvider.GetRequiredService<IDispatcher>().EnqueueToExecute(message);
             }
 
             _response.StatusCode = StatusCodes.Status204NoContent;

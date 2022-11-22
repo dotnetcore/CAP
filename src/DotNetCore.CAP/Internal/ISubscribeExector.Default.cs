@@ -17,7 +17,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Internal;
 
-internal class SubscribeDispatcher : ISubscribeDispatcher
+internal class SubscribeExecutor : ISubscribeExector
 {
     // diagnostics listener
     // ReSharper disable once InconsistentNaming
@@ -30,8 +30,8 @@ internal class SubscribeDispatcher : ISubscribeDispatcher
     private readonly CapOptions _options;
     private readonly IServiceProvider _provider;
 
-    public SubscribeDispatcher(
-        ILogger<SubscribeDispatcher> logger,
+    public SubscribeExecutor(
+        ILogger<SubscribeExecutor> logger,
         IOptions<CapOptions> options,
         IServiceProvider provider)
     {
@@ -46,27 +46,24 @@ internal class SubscribeDispatcher : ISubscribeDispatcher
 
     private ISubscribeInvoker Invoker { get; }
 
-    public async Task<OperateResult> DispatchAsync(MediumMessage message, CancellationToken cancellationToken)
+    public async Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor? descriptor = null, CancellationToken cancellationToken = default)
     {
-        var selector = _provider.GetRequiredService<MethodMatcherCache>();
-        if (!selector.TryGetTopicExecutor(message.Origin.GetName(), message.Origin.GetGroup()!, out var executor))
+        if (descriptor == null)
         {
-            var error =
-                $"Message (Name:{message.Origin.GetName()},Group:{message.Origin.GetGroup()}) can not be found subscriber." +
-                $"{Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
-            _logger.LogError(error);
+            var selector = _provider.GetRequiredService<MethodMatcherCache>();
+            if (!selector.TryGetTopicExecutor(message.Origin.GetName(), message.Origin.GetGroup()!, out descriptor))
+            {
+                var error =
+                    $"Message (Name:{message.Origin.GetName()},Group:{message.Origin.GetGroup()}) can not be found subscriber." +
+                    $"{Environment.NewLine} see: https://github.com/dotnetcore/CAP/issues/63";
+                _logger.LogError(error);
 
-            TracingError(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), message.Origin, null, new Exception(error));
+                TracingError(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), message.Origin, null, new Exception(error));
 
-            return OperateResult.Failed(new SubscriberNotFoundException(error));
+                return OperateResult.Failed(new SubscriberNotFoundException(error));
+            }
         }
 
-        return await DispatchAsync(message, executor, cancellationToken).ConfigureAwait(false);
-    }
-
-    public async Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor,
-        CancellationToken cancellationToken)
-    {
         bool retry;
         OperateResult result;
 
