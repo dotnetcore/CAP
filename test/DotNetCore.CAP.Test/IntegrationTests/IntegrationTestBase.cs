@@ -21,6 +21,7 @@ namespace DotNetCore.CAP.Test.IntegrationTests
             services.AddSingleton(new CapMessageQueueMakerService("Broker"));
             services.AddSingleton(new CapStorageMarkerService("Storage"));
             services.AddSingleton(sp => new TestMessageCollector(HandledMessages));
+
             ConfigureServices(services);
 
             Container = services.BuildTestContainer(CancellationToken);

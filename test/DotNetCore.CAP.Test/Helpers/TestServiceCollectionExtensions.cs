@@ -19,13 +19,12 @@ namespace DotNetCore.CAP.Test.Helpers
                 x.UseFakeTransport();
                 x.UseInMemoryStorage();
             });
-            services.AddHostedService<TestBootstrapService>();
         }
 
         public static ServiceProvider BuildTestContainer(this IServiceCollection services, CancellationToken cancellationToken)
         {
             var container = services.BuildServiceProvider();
-            container.StartHostedServices(cancellationToken);
+            container.GetRequiredService<IBootstrapper>().BootstrapAsync(cancellationToken).Wait();
             return container;
         }
     }

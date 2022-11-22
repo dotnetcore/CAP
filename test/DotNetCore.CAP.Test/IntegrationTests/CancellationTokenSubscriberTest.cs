@@ -1,7 +1,6 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Test.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -24,9 +23,9 @@ namespace DotNetCore.CAP.Test.IntegrationTests
             await HandledMessages.WaitOneMessage(CancellationToken);
 
             // Explicitly stop Bootstrapper to prove the cancellation token works.
-            var bootstrapper = Container.GetRequiredService<Bootstrapper>();
+            var bootstrapper = Container.GetRequiredService<IBootstrapper>();
        
-            await bootstrapper.StopAsync(CancellationToken.None);
+            await bootstrapper.DisposeAsync();
 
             var (message, token) = HandledMessages
                 .OfType<(string Message, CancellationToken Token)>()

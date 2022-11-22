@@ -36,8 +36,6 @@ internal class CapPublisher : ICapPublisher
         Transaction = new AsyncLocal<ICapTransaction>();
     }
 
-    internal bool CanPublish { get; private set; }
-
     public IServiceProvider ServiceProvider { get; }
 
     public AsyncLocal<ICapTransaction> Transaction { get; }
