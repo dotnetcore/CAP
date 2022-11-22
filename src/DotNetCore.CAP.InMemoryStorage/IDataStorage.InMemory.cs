@@ -31,6 +31,15 @@ namespace DotNetCore.CAP.InMemoryStorage
 
         public static ConcurrentDictionary<string, MemoryMessage> ReceivedMessages { get; } = new();
 
+        public Task ChangePublishStateToDelayedAsync(string[] ids)
+        {
+            foreach (var id in ids)
+            {
+                PublishedMessages[id].StatusName = StatusName.Delayed;
+            }
+            return Task.CompletedTask;
+        }
+
         public Task ChangePublishStateAsync(MediumMessage message, StatusName state)
         {
             PublishedMessages[message.DbId].StatusName = state;

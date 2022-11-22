@@ -37,6 +37,15 @@ public class MongoDBDataStorage : IDataStorage
         _serializer = serializer;
     }
 
+    public async Task ChangePublishStateToDelayedAsync(string[] ids)
+    {
+        var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
+        var updateDef = Builders<PublishedMessage>.Update.Set(x => x.StatusName, nameof(StatusName.Delayed));
+        var filter = Builders<PublishedMessage>.Filter.In(x => x.Id, ids.Select(long.Parse));
+
+        await collection.UpdateManyAsync(filter, updateDef);
+    }
+
     public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)
     {
         var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);

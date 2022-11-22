@@ -39,7 +39,7 @@ internal class Bootstrapper : BackgroundService, IBootstrapper
             _logger.LogInformation("### CAP background task is already started!");
 
             return;
-        } 
+        }
 
         _logger.LogDebug("### CAP background task is starting.");
 
@@ -47,10 +47,10 @@ internal class Bootstrapper : BackgroundService, IBootstrapper
 
         CheckRequirement();
 
+        _processors = _serviceProvider.GetServices<IProcessingServer>();
+
         try
         {
-            _processors = _serviceProvider.GetServices<IProcessingServer>();
-
             await _serviceProvider.GetRequiredService<IStorageInitializer>().InitializeAsync(_cts.Token).ConfigureAwait(false);
         }
         catch (Exception e)

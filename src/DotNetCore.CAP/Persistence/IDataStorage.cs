@@ -10,6 +10,8 @@ namespace DotNetCore.CAP.Persistence;
 
 public interface IDataStorage
 {
+    Task ChangePublishStateToDelayedAsync(string[] ids);
+
     Task ChangePublishStateAsync(MediumMessage message, StatusName state);
 
     Task ChangeReceiveStateAsync(MediumMessage message, StatusName state);

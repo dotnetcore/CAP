@@ -40,6 +40,14 @@ public class SqlServerDataStorage : IDataStorage
         _recName = initializer.GetReceivedTableName();
     }
 
+    public async Task ChangePublishStateToDelayedAsync(string[] ids)
+    {
+        var sql = $"UPDATE {_pubName} SET [StatusName]='{StatusName.Delayed}' WHERE [Id] IN ({string.Join(',', ids)});";
+        var connection = new SqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+    }
+
     public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)
     {
         await ChangeMessageStateAsync(_pubName, message, state).ConfigureAwait(false);
@@ -164,7 +172,7 @@ public class SqlServerDataStorage : IDataStorage
     public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
     {
         var sql =
-            $"SELECT TOP 200 Id,Content,Retries,Added,ExpiresAt FROM `{_pubName}` WHERE Version=@Version " +
+            $"SELECT TOP 200 Id,Content,Retries,Added,ExpiresAt FROM {_pubName} WHERE Version=@Version " +
             $"AND ((ExpiresAt< @TwoMinutesLater AND StatusName = '{StatusName.Delayed}') OR (ExpiresAt< @OneMinutesAgo AND StatusName = '{StatusName.Queued}'))";
 
         object[] sqlParams =

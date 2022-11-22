@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
@@ -38,6 +39,14 @@ public class MySqlDataStorage : IDataStorage
         _serializer = serializer;
         _pubName = initializer.GetPublishedTableName();
         _recName = initializer.GetReceivedTableName();
+    }
+
+    public async Task ChangePublishStateToDelayedAsync(string[] ids)
+    {
+        var sql = $"UPDATE `{_pubName}` SET `StatusName`='{StatusName.Delayed}' WHERE `Id` IN ({string.Join(',', ids)});";
+        var connection = new MySqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
     }
 
     public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)

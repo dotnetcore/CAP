@@ -40,6 +40,14 @@ namespace DotNetCore.CAP.PostgreSql
             _recName = initializer.GetReceivedTableName();
         }
 
+        public async Task ChangePublishStateToDelayedAsync(string[] ids)
+        {
+            var sql = $"UPDATE {_pubName} SET \"StatusName\"='{StatusName.Delayed}' WHERE \"Id\" IN ({string.Join(',', ids)});";
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        }
+
         public async Task ChangePublishStateAsync(MediumMessage message, StatusName state) =>
             await ChangeMessageStateAsync(_pubName, message, state).ConfigureAwait(false);
 
@@ -156,7 +164,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
         {
             var sql =
-                $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\" FROM `{_pubName}` WHERE \"Version\"=@Version " +
+                $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\" FROM {_pubName} WHERE \"Version\"=@Version " +
                 $"AND ((\"ExpiresAt\"< @TwoMinutesLater AND \"StatusName\" = '{StatusName.Delayed}') OR (\"ExpiresAt\"< @OneMinutesAgo AND \"StatusName\" = '{StatusName.Queued}')) LIMIT 200;";
 
             object[] sqlParams =

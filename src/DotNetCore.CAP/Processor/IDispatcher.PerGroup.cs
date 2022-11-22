@@ -19,8 +19,8 @@ namespace DotNetCore.CAP.Processor;
 
 internal class DispatcherPerGroup : IDispatcher
 {
-    private CancellationTokenSource? _tasksCTS;
-    private readonly CancellationTokenSource _delayCTS = new();
+    private CancellationTokenSource? _tasksCts;
+    private readonly CancellationTokenSource _delayCts = new();
     private readonly ISubscribeDispatcher _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
@@ -50,8 +50,8 @@ internal class DispatcherPerGroup : IDispatcher
     public async Task Start(CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
-        _tasksCTS = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, CancellationToken.None);
-        _tasksCTS.Token.Register(() => _delayCTS.Cancel());
+        _tasksCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, CancellationToken.None);
+        _tasksCts.Token.Register(() => _delayCts.Cancel());
 
         var capacity = _options.ProducerThreadCount * 500;
         _publishedChannel = Channel.CreateBounded<MediumMessage>(
@@ -64,7 +64,7 @@ internal class DispatcherPerGroup : IDispatcher
             });
 
         await Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
-            .Select(_ => Task.Factory.StartNew(() => Sending(), _tasksCTS.Token,
+            .Select(_ => Task.Factory.StartNew(Sending, _tasksCts.Token,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
 
         _receivedChannels =
@@ -73,32 +73,49 @@ internal class DispatcherPerGroup : IDispatcher
 
         GetOrCreateReceiverChannel(_options.DefaultGroupName);
 
-        await Task.Factory.StartNew(async () =>
+        _ = Task.Factory.StartNew(async () =>
         {
-            while (!_tasksCTS.Token.IsCancellationRequested)
+            //When canceling, place the message status of unsent in the queue to delayed
+            _tasksCts.Token.Register(() =>
             {
                 try
                 {
-                    while (_schedulerQueue.TryPeek(out var message, out _nextSendTime))
+                    if (_schedulerQueue.Count == 0) return;
+
+                    var messageIds = _schedulerQueue.UnorderedItems.Select(x => x.Element.DbId).ToArray();
+                    _storage.ChangePublishStateToDelayedAsync(messageIds).GetAwaiter().GetResult();
+                    _logger.LogDebug("Update storage to delayed success of delayed message in memory queue!");
+                }
+                catch (Exception e)
+                {
+                    _logger.LogWarning(e, "Update storage fails of delayed message in memory queue!");
+                }
+            });
+
+            while (!_tasksCts.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    while (_schedulerQueue.TryPeek(out _, out _nextSendTime))
                     {
                         var delayTime = _nextSendTime - DateTime.Now;
 
                         if (delayTime > new TimeSpan(500000)) //50ms
                         {
-                            await Task.Delay(delayTime, _delayCTS.Token);
+                            await Task.Delay(delayTime, _delayCts.Token);
                         }
-                        _tasksCTS.Token.ThrowIfCancellationRequested();
+                        _tasksCts.Token.ThrowIfCancellationRequested();
 
                         await _sender.SendAsync(_schedulerQueue.Dequeue()).ConfigureAwait(false);
                     }
-                    _tasksCTS.Token.WaitHandle.WaitOne(100);
+                    _tasksCts.Token.WaitHandle.WaitOne(100);
                 }
                 catch (OperationCanceledException)
                 {
                     //Ignore
                 }
             }
-        }, _tasksCTS.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+        }, _tasksCts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
 
         _logger.LogInformation("Starting DispatcherPerGroup");
     }
@@ -117,7 +134,7 @@ internal class DispatcherPerGroup : IDispatcher
 
             if (publishTime < _nextSendTime)
             {
-                _delayCTS.Cancel();
+                _delayCts.Cancel();
             }
         }
         else
@@ -131,7 +148,7 @@ internal class DispatcherPerGroup : IDispatcher
         try
         {
             if (!_publishedChannel.Writer.TryWrite(message))
-                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCTS!.Token).ConfigureAwait(false))
+                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
                     if (_publishedChannel.Writer.TryWrite(message))
                         return;
         }
@@ -145,14 +162,14 @@ internal class DispatcherPerGroup : IDispatcher
     {
         try
         {
-            var group = descriptor.Attribute.Group ?? _options.DefaultGroupName;
+            var group = descriptor.Attribute.Group;
 
             if (_logger.IsEnabled(LogLevel.Debug)) _logger.LogDebug("Enqueue message for group {ConsumerGroup}", group);
 
             var channel = GetOrCreateReceiverChannel(group);
 
             if (!channel.Writer.TryWrite((message, descriptor)))
-                while (await channel.Writer.WaitToWriteAsync(_tasksCTS!.Token).ConfigureAwait(false))
+                while (await channel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
                     if (channel.Writer.TryWrite((message, descriptor)))
                         return;
         }
@@ -164,9 +181,7 @@ internal class DispatcherPerGroup : IDispatcher
 
     public void Dispose()
     {
-        _tasksCTS?.Cancel();
-        _tasksCTS?.Dispose();
-        _tasksCTS = null;
+        _tasksCts?.Dispose();
     }
 
     private Channel<(MediumMessage, ConsumerExecutorDescriptor)> GetOrCreateReceiverChannel(string key)
@@ -188,7 +203,7 @@ internal class DispatcherPerGroup : IDispatcher
                 });
 
             Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
-                .Select(_ => Task.Factory.StartNew(() => Processing(group, channel), _tasksCTS!.Token,
+                .Select(_ => Task.Factory.StartNew(() => Processing(group, channel), _tasksCts!.Token,
                     TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
 
             return channel;
@@ -199,7 +214,7 @@ internal class DispatcherPerGroup : IDispatcher
     {
         try
         {
-            while (await _publishedChannel.Reader.WaitToReadAsync(_tasksCTS!.Token).ConfigureAwait(false))
+            while (await _publishedChannel.Reader.WaitToReadAsync(_tasksCts!.Token).ConfigureAwait(false))
                 while (_publishedChannel.Reader.TryRead(out var message))
                     try
                     {
@@ -225,14 +240,14 @@ internal class DispatcherPerGroup : IDispatcher
     {
         try
         {
-            while (await channel.Reader.WaitToReadAsync(_tasksCTS!.Token).ConfigureAwait(false))
+            while (await channel.Reader.WaitToReadAsync(_tasksCts!.Token).ConfigureAwait(false))
                 while (channel.Reader.TryRead(out var message))
                     try
                     {
                         if (_logger.IsEnabled(LogLevel.Debug))
                             _logger.LogDebug("Dispatching message for group {ConsumerGroup}", group);
 
-                        await _executor.DispatchAsync(message.Item1, message.Item2, _tasksCTS.Token).ConfigureAwait(false);
+                        await _executor.DispatchAsync(message.Item1, message.Item2, _tasksCts.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -23,6 +24,15 @@ namespace Sample.RabbitMQ.MongoDB.Controllers
         public IActionResult WithoutTransaction()
         {
             _capBus.PublishAsync("sample.rabbitmq.mongodb", DateTime.Now);
+
+            return Ok();
+        }
+
+
+        [Route("~/delay/{delaySeconds:int}")]
+        public async Task<IActionResult> Delay(int delaySeconds)
+        {
+            await _capBus.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "sample.rabbitmq.mongodb", DateTime.Now);
 
             return Ok();
         }

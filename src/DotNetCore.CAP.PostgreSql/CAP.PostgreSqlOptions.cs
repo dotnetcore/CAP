@@ -39,7 +39,12 @@ namespace DotNetCore.CAP
             using var scope = _serviceScopeFactory.CreateScope();
             var provider = scope.ServiceProvider;
             using var dbContext = (DbContext) provider.GetRequiredService(options.DbContextType);
-            options.ConnectionString = dbContext.Database.GetDbConnection().ConnectionString;
+            var connectionString = dbContext.Database.GetConnectionString();
+            if (string.IsNullOrEmpty(connectionString))
+            {
+                throw new ArgumentNullException(connectionString);
+            }
+            options.ConnectionString = connectionString; 
         }
     }
 }

@@ -89,6 +89,7 @@ public class CapProcessingServer : IProcessingServer
         {
             _provider.GetRequiredService<TransportCheckProcessor>(),
             _provider.GetRequiredService<MessageNeedToRetryProcessor>(),
+            _provider.GetRequiredService<MessageDelayedProcessor>(),
             _provider.GetRequiredService<CollectorProcessor>()
         };
 
