@@ -41,5 +41,7 @@ Thanks to the community for supporting CAP, the following is the implementation 
 
 * ZeroMQ ([@maikebing](https://github.com/maikebing))： https://github.com/maikebing/CAP.Extensions
 
+* MQTT ([@john jiang](https://github.com/jinzaz)): https://github.com/jinzaz/jinzaz.CAP.MQTT
+
 
 
