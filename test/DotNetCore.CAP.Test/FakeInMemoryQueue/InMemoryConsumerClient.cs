@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
@@ -23,9 +24,9 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
             _subscriptionName = subscriptionName;
         }
 
-        public event EventHandler<TransportMessage> OnMessageReceived;
+        public Func<TransportMessage, object, Task> OnMessageCallback { get; set; }
 
-        public event EventHandler<LogMessageEventArgs> OnLog;
+        public Action<LogMessageEventArgs> OnLogCallback { get; set; }
 
         public BrokerAddress BrokerAddress => new BrokerAddress("InMemory", string.Empty);
 
@@ -70,7 +71,7 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
         {
             var headers = e.Headers;
             headers.TryAdd(Messages.Headers.Group, _subscriptionName);
-            OnMessageReceived?.Invoke(null, e);
+            OnMessageCallback(e, null).GetAwaiter().GetResult();
         }
         #endregion private methods
     }

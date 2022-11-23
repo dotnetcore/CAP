@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
@@ -29,9 +30,9 @@ namespace DotNetCore.CAP.NATS
             _natsOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public event EventHandler<TransportMessage>? OnMessageReceived;
+        public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
-        public event EventHandler<LogMessageEventArgs>? OnLog;
+        public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
         public BrokerAddress BrokerAddress => new ("NATS", _natsOptions.Servers);
 
@@ -117,7 +118,7 @@ namespace DotNetCore.CAP.NATS
 
             headers.Add(Headers.Group, _groupId);
 
-            OnMessageReceived?.Invoke(e.Message, new TransportMessage(headers, e.Message.Data));
+            OnMessageCallback!(new TransportMessage(headers, e.Message.Data), e.Message);
         }
 
         public void Commit(object? sender)
@@ -176,7 +177,7 @@ namespace DotNetCore.CAP.NATS
                 LogType = MqLogType.ConnectError,
                 Reason = e.Error?.ToString()
             };
-            OnLog?.Invoke(null, logArgs);
+            OnLogCallback!(logArgs);
         }
 
         private void AsyncErrorEventHandler(object? sender, ErrEventArgs e)
@@ -186,7 +187,7 @@ namespace DotNetCore.CAP.NATS
                 LogType = MqLogType.AsyncErrorEvent,
                 Reason = e.Error
             };
-            OnLog?.Invoke(null, logArgs);
+            OnLogCallback!(logArgs);
         }
     }
 }

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
@@ -27,11 +28,11 @@ namespace DotNetCore.CAP.Pulsar
             _pulsarOptions = options.Value;
         }
 
-        public event EventHandler<TransportMessage>? OnMessageReceived;
+        public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
-        public event EventHandler<LogMessageEventArgs>? OnLog;
+        public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-        public BrokerAddress BrokerAddress => new ("Pulsar", _pulsarOptions.ServiceUrl);
+        public BrokerAddress BrokerAddress => new("Pulsar", _pulsarOptions.ServiceUrl);
 
         public void Subscribe(IEnumerable<string> topics)
         {
@@ -41,7 +42,7 @@ namespace DotNetCore.CAP.Pulsar
             }
 
             var serviceName = Assembly.GetEntryAssembly()?.GetName().Name!.ToLower();
-            
+
             _consumerClient = _client.NewConsumer()
                 .Topics(topics)
                 .SubscriptionName(_groupId)
@@ -54,20 +55,30 @@ namespace DotNetCore.CAP.Pulsar
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var consumerResult = _consumerClient!.ReceiveAsync(cancellationToken).Result;
-
-                var headers = new Dictionary<string, string?>(consumerResult.Properties.Count);
-                foreach (var header in consumerResult.Properties)
+                try
                 {
-                    headers.Add(header.Key, header.Value);
+                    var consumerResult = _consumerClient!.ReceiveAsync(cancellationToken).GetAwaiter().GetResult();
+
+                    var headers = new Dictionary<string, string?>(consumerResult.Properties.Count);
+                    foreach (var header in consumerResult.Properties)
+                    {
+                        headers.Add(header.Key, header.Value);
+                    }
+                    headers.Add(Headers.Group, _groupId);
+
+                    var message = new TransportMessage(headers, consumerResult.Data);
+
+                    OnMessageCallback!(message, consumerResult.MessageId).GetAwaiter().GetResult();
                 }
-                headers.Add(Headers.Group, _groupId);
-
-                var message = new TransportMessage(headers, consumerResult.Data);
-
-                OnMessageReceived?.Invoke(consumerResult.MessageId, message);
+                catch (Exception e)
+                {
+                    OnLogCallback!(new LogMessageEventArgs()
+                    {
+                        LogType = MqLogType.ConsumeError,
+                        Reason = e.Message
+                    });
+                }
             }
-            // ReSharper disable once FunctionNeverReturns
         }
 
         public void Commit(object? sender)
@@ -77,7 +88,7 @@ namespace DotNetCore.CAP.Pulsar
 
         public void Reject(object? sender)
         {
-            if(sender is MessageId id)
+            if (sender is MessageId id)
             {
                 _consumerClient!.NegativeAcknowledge(id);
             }
@@ -88,6 +99,6 @@ namespace DotNetCore.CAP.Pulsar
             _consumerClient?.DisposeAsync();
         }
 
-       
-    } 
+
+    }
 }

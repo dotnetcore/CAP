@@ -145,7 +145,7 @@ internal class ConsumerRegister : IConsumerRegister
                               RegisterMessageProcessor(client);
 
                               client.Subscribe(topicIds);
-
+                               
                               client.Listening(_pollingDelay, _cts.Token);
                           }
                       }
@@ -171,8 +171,7 @@ internal class ConsumerRegister : IConsumerRegister
 
     private void RegisterMessageProcessor(IConsumerClient client)
     {
-        // Cannot set subscription to asynchronous
-        client.OnMessageReceived += (sender, transportMessage) =>
+        client.OnMessageCallback = async (transportMessage,sender) =>
         {
             long? tracingTimestamp = null;
             try
@@ -201,7 +200,7 @@ internal class ConsumerRegister : IConsumerRegister
                     }
 
                     var type = executor!.Parameters.FirstOrDefault(x => x.IsFromCap == false)?.ParameterType;
-                    message = _serializer.DeserializeAsync(transportMessage, type).GetAwaiter().GetResult();
+                    message = await _serializer.DeserializeAsync(transportMessage, type);
                     message.RemoveException();
                 }
                 catch (Exception e)
@@ -230,7 +229,7 @@ internal class ConsumerRegister : IConsumerRegister
                 {
                     var content = _serializer.Serialize(message);
 
-                    _storage.StoreReceivedExceptionMessageAsync(name, group, content);
+                    await _storage.StoreReceivedExceptionMessageAsync(name, group, content); 
 
                     client.Commit(sender);
 
@@ -254,15 +253,14 @@ internal class ConsumerRegister : IConsumerRegister
                 }
                 else
                 {
-                    var mediumMessage = _storage.StoreReceivedMessageAsync(name, group, message).GetAwaiter()
-                        .GetResult();
+                    var mediumMessage = await _storage.StoreReceivedMessageAsync(name, group, message);
                     mediumMessage.Origin = message;
 
                     client.Commit(sender);
 
                     TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
 
-                    _dispatcher.EnqueueToExecute(mediumMessage, executor!);
+                    await _dispatcher.EnqueueToExecute(mediumMessage, executor!);
                 }
             }
             catch (Exception e)
@@ -276,10 +274,10 @@ internal class ConsumerRegister : IConsumerRegister
             }
         };
 
-        client.OnLog += WriteLog;
+        client.OnLogCallback = WriteLog;
     }
 
-    private void WriteLog(object? sender, LogMessageEventArgs logmsg)
+    private void WriteLog(LogMessageEventArgs logmsg)
     {
         switch (logmsg.LogType)
         {

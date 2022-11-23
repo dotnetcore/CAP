@@ -34,9 +34,9 @@ namespace DotNetCore.CAP.RedisStreams
             _logger = logger;
         }
 
-        public event EventHandler<TransportMessage>? OnMessageReceived;
+        public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
-        public event EventHandler<LogMessageEventArgs>? OnLog;
+        public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
         public BrokerAddress BrokerAddress => new("redis", _options.Value.Endpoint);
 
@@ -109,7 +109,7 @@ namespace DotNetCore.CAP.RedisStreams
                         try
                         {
                             var message = RedisMessage.Create(entry, _groupId);
-                            OnMessageReceived?.Invoke((stream.Key.ToString(), _groupId, entry.Id.ToString()), message);
+                            await OnMessageCallback!(message, (stream.Key.ToString(), _groupId, entry.Id.ToString()));
                         }
                         catch (Exception ex)
                         {
@@ -119,7 +119,7 @@ namespace DotNetCore.CAP.RedisStreams
                                 LogType = MqLogType.ConsumeError,
                                 Reason = ex.ToString()
                             };
-                            OnLog?.Invoke(entry, logArgs);
+                            OnLogCallback!(logArgs);
                         }
                         finally
                         {

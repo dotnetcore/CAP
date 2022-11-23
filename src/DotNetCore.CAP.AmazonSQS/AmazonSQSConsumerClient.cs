@@ -37,9 +37,9 @@ namespace DotNetCore.CAP.AmazonSQS
             _amazonSQSOptions = options.Value;
         }
 
-        public event EventHandler<TransportMessage>? OnMessageReceived;
+        public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
-        public event EventHandler<LogMessageEventArgs>? OnLog;
+        public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
         public BrokerAddress BrokerAddress => new BrokerAddress("AmazonSQS", _queueUrl);
 
@@ -105,7 +105,7 @@ namespace DotNetCore.CAP.AmazonSQS
 
                     message.Headers.Add(Headers.Group, _groupId);
 
-                    OnMessageReceived?.Invoke(response.Messages[0].ReceiptHandle, message);
+                    OnMessageCallback!(message, response.Messages[0].ReceiptHandle);
                 }
                 else
                 {
@@ -219,7 +219,7 @@ namespace DotNetCore.CAP.AmazonSQS
                 Reason = exceptionMessage
             };
 
-            OnLog?.Invoke(null, logArgs);
+            OnLogCallback!(logArgs);
         }
 
         private void MessageNotInflightLog(string exceptionMessage)
@@ -230,7 +230,7 @@ namespace DotNetCore.CAP.AmazonSQS
                 Reason = exceptionMessage
             };
 
-            OnLog?.Invoke(null, logArgs);
+            OnLogCallback!(logArgs);
         }
 
         private async Task GenerateSqsAccessPolicyAsync(IEnumerable<string> topicArns)
