@@ -245,7 +245,7 @@ internal class DispatcherPerGroup : IDispatcher
                         if (_logger.IsEnabled(LogLevel.Debug))
                             _logger.LogDebug("Dispatching message for group {ConsumerGroup}", group);
 
-                        await _executor.DispatchAsync(message.Item1, message.Item2, _tasksCts.Token).ConfigureAwait(false);
+                        await _executor.ExecuteAsync(message.Item1, message.Item2, _tasksCts.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
