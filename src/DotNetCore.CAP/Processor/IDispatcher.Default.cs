@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
@@ -20,12 +21,13 @@ public class Dispatcher : IDispatcher
 {
     private CancellationTokenSource? _tasksCts;
     private readonly CancellationTokenSource _delayCts = new();
-    private readonly ISubscribeExector _executor;
+    private readonly ISubscribeExecutor _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
     private readonly IMessageSender _sender;
     private readonly IDataStorage _storage;
     private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
+    private readonly bool _enablePrefetch;
 
     private Channel<MediumMessage> _publishedChannel = default!;
     private Channel<(MediumMessage, ConsumerExecutorDescriptor?)> _receivedChannel = default!;
@@ -34,7 +36,7 @@ public class Dispatcher : IDispatcher
     public Dispatcher(ILogger<Dispatcher> logger,
         IMessageSender sender,
         IOptions<CapOptions> options,
-        ISubscribeExector executor,
+        ISubscribeExecutor executor,
         IDataStorage storage)
     {
         _logger = logger;
@@ -43,6 +45,7 @@ public class Dispatcher : IDispatcher
         _executor = executor;
         _schedulerQueue = new PriorityQueue<MediumMessage, DateTime>();
         _storage = storage;
+        _enablePrefetch = options.Value.EnableConsumerPrefetch;
     }
 
     public async Task Start(CancellationToken stoppingToken)
@@ -61,23 +64,26 @@ public class Dispatcher : IDispatcher
                 FullMode = BoundedChannelFullMode.Wait
             });
 
-        capacity = _options.ConsumerThreadCount * 300;
-        _receivedChannel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor?)>(
-            new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
-            {
-                AllowSynchronousContinuations = true,
-                SingleReader = _options.ConsumerThreadCount == 1,
-                SingleWriter = true,
-                FullMode = BoundedChannelFullMode.Wait
-            });
-
         await Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
             .Select(_ => Task.Factory.StartNew(Sending, _tasksCts.Token,
                 TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray()).ConfigureAwait(false);
 
-        await Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
-            .Select(_ => Task.Factory.StartNew(Processing, _tasksCts.Token,
-                TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray()).ConfigureAwait(false);
+        if (_enablePrefetch)
+        {
+            capacity = _options.ConsumerThreadCount * 300;
+            _receivedChannel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor?)>(
+                new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
+                {
+                    AllowSynchronousContinuations = true,
+                    SingleReader = _options.ConsumerThreadCount == 1,
+                    SingleWriter = true,
+                    FullMode = BoundedChannelFullMode.Wait
+                });
+
+            await Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
+                .Select(_ => Task.Factory.StartNew(Processing, _tasksCts.Token,
+                    TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray()).ConfigureAwait(false);
+        }
 
         _ = Task.Factory.StartNew(async () =>
         {
@@ -168,14 +174,27 @@ public class Dispatcher : IDispatcher
     {
         try
         {
-            if (!_receivedChannel.Writer.TryWrite((message, descriptor)))
-                while (await _receivedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
-                    if (_receivedChannel.Writer.TryWrite((message, descriptor)))
-                        return;
+            if (_enablePrefetch)
+            {
+                if (!_receivedChannel.Writer.TryWrite((message, descriptor)))
+                {
+                    while (await _receivedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
+                        if (_receivedChannel.Writer.TryWrite((message, descriptor)))
+                            return;
+                }
+            }
+            else
+            {
+                await _executor.ExecuteAsync(message, descriptor, _tasksCts!.Token).ConfigureAwait(false);
+            }
         }
         catch (OperationCanceledException)
         {
             //Ignore
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, $"An exception occurred when invoke subscriber. MessageId:{message.DbId}");
         }
     }
 
@@ -216,7 +235,7 @@ public class Dispatcher : IDispatcher
                 while (_receivedChannel.Reader.TryRead(out var message))
                     try
                     {
-                        await _executor.DispatchAsync(message.Item1, message.Item2, _tasksCts.Token).ConfigureAwait(false);
+                        await _executor.ExecuteAsync(message.Item1, message.Item2, _tasksCts.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {

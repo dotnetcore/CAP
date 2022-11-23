@@ -21,7 +21,7 @@ internal class DispatcherPerGroup : IDispatcher
 {
     private CancellationTokenSource? _tasksCts;
     private readonly CancellationTokenSource _delayCts = new();
-    private readonly ISubscribeExector _executor;
+    private readonly ISubscribeExecutor _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
     private readonly IMessageSender _sender;
@@ -36,7 +36,7 @@ internal class DispatcherPerGroup : IDispatcher
     public DispatcherPerGroup(ILogger<Dispatcher> logger,
         IMessageSender sender,
         IOptions<CapOptions> options,
-        ISubscribeExector executor,
+        ISubscribeExecutor executor,
         IDataStorage storage)
     {
         _logger = logger;
