@@ -237,7 +237,6 @@ public class MongoDBDataStorage : IDataStorage
                              (x.StatusName == nameof(StatusName.Queued) && x.ExpiresAt < DateTime.Now.AddMinutes(-1))
                           )
                   )
-            .Limit(200)
             .ToListAsync().ConfigureAwait(false);
         return queryResult.Select(x => new MediumMessage
         {

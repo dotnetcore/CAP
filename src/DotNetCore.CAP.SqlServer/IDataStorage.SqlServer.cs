@@ -172,7 +172,7 @@ public class SqlServerDataStorage : IDataStorage
     public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
     {
         var sql =
-            $"SELECT TOP 200 Id,Content,Retries,Added,ExpiresAt FROM {_pubName} WHERE Version=@Version " +
+            $"SELECT Id,Content,Retries,Added,ExpiresAt FROM {_pubName} WHERE Version=@Version " +
             $"AND ((ExpiresAt< @TwoMinutesLater AND StatusName = '{StatusName.Delayed}') OR (ExpiresAt< @OneMinutesAgo AND StatusName = '{StatusName.Queued}'))";
 
         object[] sqlParams =
