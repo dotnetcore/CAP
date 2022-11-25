@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Data.Common;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
@@ -15,5 +14,5 @@ public interface IDispatcher : IProcessingServer
 
     ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor? descriptor = null);
 
-    ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, DbTransaction? transaction = null);
+    ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null);
 }

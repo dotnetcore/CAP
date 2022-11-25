@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -121,7 +120,7 @@ internal class DispatcherPerGroup : IDispatcher
         _logger.LogInformation("Starting DispatcherPerGroup");
     }
 
-    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, DbTransaction? transaction = null)
+    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null)
     {
         message.ExpiresAt = publishTime;
 

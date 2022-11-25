@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
@@ -13,11 +12,11 @@ public interface IDataStorage
 {
     Task ChangePublishStateToDelayedAsync(string[] ids);
 
-    Task ChangePublishStateAsync(MediumMessage message, StatusName state, DbTransaction? dbTransaction = null);
+    Task ChangePublishStateAsync(MediumMessage message, StatusName state, object? transaction = null);
 
     Task ChangeReceiveStateAsync(MediumMessage message, StatusName state);
 
-    Task<MediumMessage> StoreMessageAsync(string name, Message content, object? dbTransaction = null);
+    Task<MediumMessage> StoreMessageAsync(string name, Message content, object? transaction = null);
 
     Task StoreReceivedExceptionMessageAsync(string name, string group, string content);
 
@@ -27,7 +26,7 @@ public interface IDataStorage
 
     Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry();
 
-    Task ScheduleMessagesOfDelayedAsync(Func<DbTransaction, IEnumerable<MediumMessage>, Task> scheduleTask, CancellationToken token = default);
+    Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask, CancellationToken token = default);
 
     Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry();
 

@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using MongoDB.Bson;
 
 namespace DotNetCore.CAP.MongoDB;
 
@@ -43,4 +44,7 @@ internal class PublishedMessage
     public int Retries { get; set; }
 
     public string StatusName { get; set; } = default!;
+
+    // ReSharper disable once InconsistentNaming
+    public ObjectId _lockToken { get; set; }
 }

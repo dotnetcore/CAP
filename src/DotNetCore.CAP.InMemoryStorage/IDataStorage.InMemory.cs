@@ -40,7 +40,7 @@ namespace DotNetCore.CAP.InMemoryStorage
             return Task.CompletedTask;
         }
 
-        public Task ChangePublishStateAsync(MediumMessage message, StatusName state)
+        public Task ChangePublishStateAsync(MediumMessage message, StatusName state, object? dbTransaction = null)
         {
             PublishedMessages[message.DbId].StatusName = state;
             PublishedMessages[message.DbId].ExpiresAt = message.ExpiresAt;
@@ -184,16 +184,6 @@ namespace DotNetCore.CAP.InMemoryStorage
             return Task.FromResult(result);
         }
 
-        public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
-        {
-            var result = PublishedMessages.Values.Where(x =>
-                     (x.StatusName == StatusName.Delayed && x.ExpiresAt < DateTime.Now.AddMinutes(2))
-                     || (x.StatusName == StatusName.Queued && x.ExpiresAt < DateTime.Now.AddMinutes(-1)))
-                 .Select(x => (MediumMessage)x);
-
-            return Task.FromResult(result);
-        }
-
         public Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
         {
             IEnumerable<MediumMessage> result = ReceivedMessages.Values
@@ -204,6 +194,16 @@ namespace DotNetCore.CAP.InMemoryStorage
                 .Select(x => (MediumMessage)x).ToList();
 
             return Task.FromResult(result);
+        }
+
+        public Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask, CancellationToken token = default)
+        {
+            var result = PublishedMessages.Values.Where(x =>
+                    (x.StatusName == StatusName.Delayed && x.ExpiresAt < DateTime.Now.AddMinutes(2))
+                    || (x.StatusName == StatusName.Queued && x.ExpiresAt < DateTime.Now.AddMinutes(-1)))
+                .Select(x => (MediumMessage)x);
+
+            return scheduleTask(null!, result);
         }
 
         public IMonitoringApi GetMonitoringApi()

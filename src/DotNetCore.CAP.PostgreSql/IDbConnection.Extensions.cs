@@ -37,7 +37,7 @@ namespace DotNetCore.CAP.PostgreSql
         }
 
         public static async Task<T> ExecuteReaderAsync<T>(this DbConnection connection, string sql,
-            Func<DbDataReader, Task<T>>? readerFunc, params object[] sqlParams)
+            Func<DbDataReader, Task<T>>? readerFunc, DbTransaction? transaction = null, params object[] sqlParams)
         {
             if (connection.State == ConnectionState.Closed)
             {
@@ -51,6 +51,11 @@ namespace DotNetCore.CAP.PostgreSql
             foreach (var param in sqlParams)
             {
                 command.Parameters.Add(param);
+            }
+
+            if (transaction != null)
+            {
+                command.Transaction = transaction;
             }
 
             var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);

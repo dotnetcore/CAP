@@ -26,6 +26,7 @@ public class MySqlDataStorage : IDataStorage
     private readonly string _pubName;
     private readonly string _recName;
     private readonly ISerializer _serializer;
+    private readonly bool _supportSkipLocked;
 
     public MySqlDataStorage(
         IOptions<MySqlOptions> options,
@@ -39,6 +40,7 @@ public class MySqlDataStorage : IDataStorage
         _serializer = serializer;
         _pubName = initializer.GetPublishedTableName();
         _recName = initializer.GetReceivedTableName();
+        _supportSkipLocked = ((MySqlStorageInitializer)initializer).IsSupportSkipLocked();
     }
 
     public async Task ChangePublishStateToDelayedAsync(string[] ids)
@@ -49,9 +51,9 @@ public class MySqlDataStorage : IDataStorage
         await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
     }
 
-    public async Task ChangePublishStateAsync(MediumMessage message, StatusName state, DbTransaction? dbTransaction = null)
+    public async Task ChangePublishStateAsync(MediumMessage message, StatusName state, object? transaction = null)
     {
-        await ChangeMessageStateAsync(_pubName, message, state, dbTransaction).ConfigureAwait(false);
+        await ChangeMessageStateAsync(_pubName, message, state, transaction).ConfigureAwait(false);
     }
 
     public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state)
@@ -59,7 +61,7 @@ public class MySqlDataStorage : IDataStorage
         await ChangeMessageStateAsync(_recName, message, state).ConfigureAwait(false);
     }
 
-    public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object? dbTransaction = null)
+    public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object? transaction = null)
     {
         var sql =
             $"INSERT INTO `{_pubName}`(`Id`,`Version`,`Name`,`Content`,`Retries`,`Added`,`ExpiresAt`,`StatusName`)" +
@@ -86,7 +88,7 @@ public class MySqlDataStorage : IDataStorage
             new MySqlParameter("@StatusName", nameof(StatusName.Scheduled))
         };
 
-        if (dbTransaction == null)
+        if (transaction == null)
         {
             var connection = new MySqlConnection(_options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
@@ -94,8 +96,8 @@ public class MySqlDataStorage : IDataStorage
         }
         else
         {
-            var dbTrans = dbTransaction as DbTransaction;
-            if (dbTrans == null && dbTransaction is IDbContextTransaction dbContextTrans)
+            var dbTrans = transaction as DbTransaction;
+            if (dbTrans == null && transaction is IDbContextTransaction dbContextTrans)
                 dbTrans = dbContextTrans.GetDbTransaction();
 
             var conn = dbTrans!.Connection!;
@@ -170,12 +172,14 @@ public class MySqlDataStorage : IDataStorage
         return await GetMessagesOfNeedRetryAsync(_recName).ConfigureAwait(false);
     }
 
-    public async Task ScheduleMessagesOfDelayedAsync(Func<DbTransaction, IEnumerable<MediumMessage>, Task> scheduleTask,
+    public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
         CancellationToken token = default)
     {
+        var lockSql = _supportSkipLocked ? "FOR UPDATE SKIP LOCKED" : "FOR UPDATE";
+
         var sql =
             $"SELECT `Id`,`Content`,`Retries`,`Added`,`ExpiresAt` FROM `{_pubName}` WHERE `Version`=@Version " +
-            $"AND ((`ExpiresAt`< @TwoMinutesLater AND `StatusName` = '{StatusName.Delayed}') OR (`ExpiresAt`< @OneMinutesAgo AND `StatusName` = '{StatusName.Queued}')) FOR UPDATE;";
+            $"AND ((`ExpiresAt`< @TwoMinutesLater AND `StatusName` = '{StatusName.Delayed}') OR (`ExpiresAt`< @OneMinutesAgo AND `StatusName` = '{StatusName.Queued}')) {lockSql};";
 
         object[] sqlParams =
         {
@@ -185,6 +189,7 @@ public class MySqlDataStorage : IDataStorage
         };
 
         await using var connection = new MySqlConnection(_options.Value.ConnectionString);
+
         await connection.OpenAsync(token);
         await using var transaction = await connection.BeginTransactionAsync(IsolationLevel.ReadCommitted, token);
         var messageList = await connection.ExecuteReaderAsync(sql, async reader =>
@@ -197,7 +202,7 @@ public class MySqlDataStorage : IDataStorage
                     DbId = reader.GetInt64(0).ToString(),
                     Origin = _serializer.Deserialize(reader.GetString(1))!,
                     Retries = reader.GetInt32(2),
-                    Added = reader.GetDateTime(3),  
+                    Added = reader.GetDateTime(3),
                     ExpiresAt = reader.GetDateTime(4)
                 });
             }
@@ -214,7 +219,7 @@ public class MySqlDataStorage : IDataStorage
         return new MySqlMonitoringApi(_options, _initializer, _serializer);
     }
 
-    private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state, DbTransaction? dbTransaction = null)
+    private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state, object? transaction = null)
     {
         var sql =
             $"UPDATE `{tableName}` SET `Content`=@Content,`Retries`=@Retries,`ExpiresAt`=@ExpiresAt,`StatusName`=@StatusName WHERE `Id`=@Id;";
@@ -228,7 +233,7 @@ public class MySqlDataStorage : IDataStorage
             new MySqlParameter("@StatusName", state.ToString("G"))
         };
 
-        if (dbTransaction != null)
+        if (transaction is DbTransaction dbTransaction)
         {
             var connection = (MySqlConnection)dbTransaction.Connection!;
             await connection.ExecuteNonQueryAsync(sql, dbTransaction, sqlParams).ConfigureAwait(false);

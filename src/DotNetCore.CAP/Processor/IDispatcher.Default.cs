@@ -3,7 +3,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -26,12 +25,12 @@ public class Dispatcher : IDispatcher
     private readonly CapOptions _options;
     private readonly IMessageSender _sender;
     private readonly IDataStorage _storage;
-    private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
+    private readonly PriorityQueue<MediumMessage, long> _schedulerQueue;
     private readonly bool _enablePrefetch;
 
     private Channel<MediumMessage> _publishedChannel = default!;
     private Channel<(MediumMessage, ConsumerExecutorDescriptor?)> _receivedChannel = default!;
-    private DateTime _nextSendTime = DateTime.MaxValue;
+    private long _nextSendTime = DateTime.MaxValue.Ticks;
 
     public Dispatcher(ILogger<Dispatcher> logger,
         IMessageSender sender,
@@ -43,7 +42,7 @@ public class Dispatcher : IDispatcher
         _sender = sender;
         _options = options.Value;
         _executor = executor;
-        _schedulerQueue = new PriorityQueue<MediumMessage, DateTime>();
+        _schedulerQueue = new PriorityQueue<MediumMessage, long>();
         _storage = storage;
         _enablePrefetch = options.Value.EnableConsumerPrefetch;
     }
@@ -110,11 +109,11 @@ public class Dispatcher : IDispatcher
                 {
                     while (_schedulerQueue.TryPeek(out _, out _nextSendTime))
                     {
-                        var delayTime = _nextSendTime - DateTime.Now;
+                        var delayTime = _nextSendTime - DateTime.Now.Ticks;
 
-                        if (delayTime > new TimeSpan(500000)) //50ms
+                        if (delayTime > 500000) //50ms
                         {
-                            await Task.Delay(delayTime, _delayCts.Token);
+                            await Task.Delay(new TimeSpan(delayTime), _delayCts.Token);
                         }
                         _tasksCts.Token.ThrowIfCancellationRequested();
 
@@ -132,19 +131,19 @@ public class Dispatcher : IDispatcher
         _logger.LogInformation("Starting default Dispatcher");
     }
 
-    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, DbTransaction? transaction = null)
+    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null)
     {
         message.ExpiresAt = publishTime;
 
         var timeSpan = publishTime - DateTime.Now;
 
-        if (timeSpan <= TimeSpan.FromMinutes(1))
+        if (timeSpan <= TimeSpan.FromMinutes(1)) //1min
         {
             await _storage.ChangePublishStateAsync(message, StatusName.Queued, transaction);
 
-            _schedulerQueue.Enqueue(message, publishTime);
+            _schedulerQueue.Enqueue(message, publishTime.Ticks);
 
-            if (publishTime < _nextSendTime)
+            if (publishTime.Ticks < _nextSendTime)
             {
                 _delayCts.Cancel();
             }

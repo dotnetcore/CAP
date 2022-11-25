@@ -15,6 +15,8 @@ public class MySqlStorageInitializer : IStorageInitializer
     private readonly ILogger _logger;
     private readonly IOptions<MySqlOptions> _options;
 
+    private ServerVersion? _serverVersion;
+
     public MySqlStorageInitializer(
         ILogger<MySqlStorageInitializer> logger,
         IOptions<MySqlOptions> options)
@@ -33,6 +35,21 @@ public class MySqlStorageInitializer : IStorageInitializer
         return $"{_options.Value.TableNamePrefix}.received";
     }
 
+    public virtual bool IsSupportSkipLocked()
+    {
+        if (_serverVersion == null) return false;
+
+        switch (_serverVersion.Type)
+        {
+            case ServerVersion.ServerType.MySql when _serverVersion.Version.Major >= 8:
+            case ServerVersion.ServerType.MariaDb when _serverVersion.Version.Major > 10:
+            case ServerVersion.ServerType.MariaDb when _serverVersion.Version.Major == 10 && _serverVersion.Version.Minor >= 6:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public async Task InitializeAsync(CancellationToken cancellationToken)
     {
         if (cancellationToken.IsCancellationRequested) return;
@@ -41,6 +58,8 @@ public class MySqlStorageInitializer : IStorageInitializer
         var connection = new MySqlConnection(_options.Value.ConnectionString);
         await using (connection.ConfigureAwait(false))
         {
+            await connection.OpenAsync(cancellationToken);
+            _serverVersion = ServerVersion.Parse(connection.ServerVersion);
             await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
         }
 

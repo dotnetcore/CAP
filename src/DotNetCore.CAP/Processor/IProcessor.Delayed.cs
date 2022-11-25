@@ -40,7 +40,7 @@ public class MessageDelayedProcessor : IProcessor
     {
         try
         {
-            async Task ScheduleTask(DbTransaction transaction, IEnumerable<MediumMessage> messages)
+            async Task ScheduleTask(object transaction, IEnumerable<MediumMessage> messages)
             {
                 foreach (var message in messages)
                 {
