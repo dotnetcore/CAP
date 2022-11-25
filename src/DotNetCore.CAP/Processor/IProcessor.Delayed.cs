@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Data.Common;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
@@ -39,14 +40,15 @@ public class MessageDelayedProcessor : IProcessor
     {
         try
         {
-            var messages = await connection.GetPublishedMessagesOfDelayed().ConfigureAwait(false);
-
-            foreach (var message in messages)
+            async Task ScheduleTask(DbTransaction transaction, IEnumerable<MediumMessage> messages)
             {
-                context.ThrowIfStopping();
-
-                await _dispatcher.EnqueueToScheduler(message, message.ExpiresAt!.Value).ConfigureAwait(false);
+                foreach (var message in messages)
+                {
+                    await _dispatcher.EnqueueToScheduler(message, message.ExpiresAt!.Value, transaction).ConfigureAwait(false);
+                }
             }
+
+            await connection.ScheduleMessagesOfDelayedAsync(ScheduleTask, context.CancellationToken).ConfigureAwait(false);
         }
         catch (DbException ex)
         {

@@ -139,10 +139,10 @@ SELECT
             }
 
             return messages;
-        }, sqlParams).ConfigureAwait(false);
+        }, sqlParams: sqlParams).ConfigureAwait(false);
 
         return new PagedQueryResult<MessageDto>
-            { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
+        { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
     }
 
     public ValueTask<int> PublishedFailedCount()
@@ -234,7 +234,7 @@ WHERE `Key` >= @minKey
                 while (await reader.ReadAsync()) dictionary.Add(reader.GetString(0), reader.GetInt32(1));
 
                 return dictionary;
-            }, sqlParams).ConfigureAwait(false);
+            }, sqlParams: sqlParams).ConfigureAwait(false);
         }
 
         foreach (var key in keyMaps.Keys)

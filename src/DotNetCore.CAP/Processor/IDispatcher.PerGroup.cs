@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
@@ -120,7 +121,7 @@ internal class DispatcherPerGroup : IDispatcher
         _logger.LogInformation("Starting DispatcherPerGroup");
     }
 
-    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime)
+    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, DbTransaction? transaction = null)
     {
         message.ExpiresAt = publishTime;
 
@@ -128,7 +129,7 @@ internal class DispatcherPerGroup : IDispatcher
 
         if (timeSpan <= TimeSpan.FromMinutes(1))
         {
-            await _storage.ChangePublishStateAsync(message, StatusName.Queued);
+            await _storage.ChangePublishStateAsync(message, StatusName.Queued, transaction);
 
             _schedulerQueue.Enqueue(message, publishTime);
 
@@ -139,7 +140,7 @@ internal class DispatcherPerGroup : IDispatcher
         }
         else
         {
-            await _storage.ChangePublishStateAsync(message, StatusName.Delayed);
+            await _storage.ChangePublishStateAsync(message, StatusName.Delayed, transaction);
         }
     }
 

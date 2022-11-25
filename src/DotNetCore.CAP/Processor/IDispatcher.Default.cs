@@ -3,11 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Threading;
 using System.Threading.Channels;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Diagnostics;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
@@ -132,7 +132,7 @@ public class Dispatcher : IDispatcher
         _logger.LogInformation("Starting default Dispatcher");
     }
 
-    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime)
+    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, DbTransaction? transaction = null)
     {
         message.ExpiresAt = publishTime;
 
@@ -140,7 +140,7 @@ public class Dispatcher : IDispatcher
 
         if (timeSpan <= TimeSpan.FromMinutes(1))
         {
-            await _storage.ChangePublishStateAsync(message, StatusName.Queued);
+            await _storage.ChangePublishStateAsync(message, StatusName.Queued, transaction);
 
             _schedulerQueue.Enqueue(message, publishTime);
 
@@ -151,7 +151,7 @@ public class Dispatcher : IDispatcher
         }
         else
         {
-            await _storage.ChangePublishStateAsync(message, StatusName.Delayed);
+            await _storage.ChangePublishStateAsync(message, StatusName.Delayed, transaction);
         }
     }
 
