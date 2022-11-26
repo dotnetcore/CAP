@@ -17,7 +17,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Internal;
 
-internal class SubscribeExecutor : ISubscribeExector
+internal class SubscribeExecutor : ISubscribeExecutor
 {
     // diagnostics listener
     // ReSharper disable once InconsistentNaming
@@ -46,7 +46,7 @@ internal class SubscribeExecutor : ISubscribeExector
 
     private ISubscribeInvoker Invoker { get; }
 
-    public async Task<OperateResult> DispatchAsync(MediumMessage message, ConsumerExecutorDescriptor? descriptor = null, CancellationToken cancellationToken = default)
+    public async Task<OperateResult> ExecuteAsync(MediumMessage message, ConsumerExecutorDescriptor? descriptor = null, CancellationToken cancellationToken = default)
     {
         if (descriptor == null)
         {
@@ -217,7 +217,7 @@ internal class SubscribeExecutor : ISubscribeExector
         }
         catch (Exception e)
         {
-            _logger.LogWarning("Couldn't get host name!", e);
+            _logger.LogWarning(e, "Couldn't get host name!");
             return null;
         }
     }

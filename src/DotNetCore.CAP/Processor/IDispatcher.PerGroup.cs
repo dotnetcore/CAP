@@ -21,7 +21,7 @@ internal class DispatcherPerGroup : IDispatcher
 {
     private CancellationTokenSource? _tasksCts;
     private readonly CancellationTokenSource _delayCts = new();
-    private readonly ISubscribeExector _executor;
+    private readonly ISubscribeExecutor _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
     private readonly IMessageSender _sender;
@@ -36,7 +36,7 @@ internal class DispatcherPerGroup : IDispatcher
     public DispatcherPerGroup(ILogger<Dispatcher> logger,
         IMessageSender sender,
         IOptions<CapOptions> options,
-        ISubscribeExector executor,
+        ISubscribeExecutor executor,
         IDataStorage storage)
     {
         _logger = logger;
@@ -120,7 +120,7 @@ internal class DispatcherPerGroup : IDispatcher
         _logger.LogInformation("Starting DispatcherPerGroup");
     }
 
-    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime)
+    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null)
     {
         message.ExpiresAt = publishTime;
 
@@ -128,7 +128,7 @@ internal class DispatcherPerGroup : IDispatcher
 
         if (timeSpan <= TimeSpan.FromMinutes(1))
         {
-            await _storage.ChangePublishStateAsync(message, StatusName.Queued);
+            await _storage.ChangePublishStateAsync(message, StatusName.Queued, transaction);
 
             _schedulerQueue.Enqueue(message, publishTime);
 
@@ -139,7 +139,7 @@ internal class DispatcherPerGroup : IDispatcher
         }
         else
         {
-            await _storage.ChangePublishStateAsync(message, StatusName.Delayed);
+            await _storage.ChangePublishStateAsync(message, StatusName.Delayed, transaction);
         }
     }
 
@@ -245,7 +245,7 @@ internal class DispatcherPerGroup : IDispatcher
                         if (_logger.IsEnabled(LogLevel.Debug))
                             _logger.LogDebug("Dispatching message for group {ConsumerGroup}", group);
 
-                        await _executor.DispatchAsync(message.Item1, message.Item2, _tasksCts.Token).ConfigureAwait(false);
+                        await _executor.ExecuteAsync(message.Item1, message.Item2, _tasksCts.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {

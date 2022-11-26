@@ -58,7 +58,7 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<ISerializer, JsonUtf8Serializer>();
 
         // Warning: IPublishMessageSender need to inject at extension project. 
-        services.TryAddSingleton<ISubscribeExector, SubscribeExecutor>();
+        services.TryAddSingleton<ISubscribeExecutor, SubscribeExecutor>();
 
         //Options and extension service
         var options = new CapOptions();

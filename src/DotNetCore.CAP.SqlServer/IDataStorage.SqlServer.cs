@@ -48,9 +48,9 @@ public class SqlServerDataStorage : IDataStorage
         await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
     }
 
-    public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)
+    public async Task ChangePublishStateAsync(MediumMessage message, StatusName state, object? transaction = null)
     {
-        await ChangeMessageStateAsync(_pubName, message, state).ConfigureAwait(false);
+        await ChangeMessageStateAsync(_pubName, message, state, transaction).ConfigureAwait(false);
     }
 
     public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state)
@@ -58,7 +58,7 @@ public class SqlServerDataStorage : IDataStorage
         await ChangeMessageStateAsync(_recName, message, state).ConfigureAwait(false);
     }
 
-    public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object? dbTransaction = null)
+    public async Task<MediumMessage> StoreMessageAsync(string name, Message content, object? transaction = null)
     {
         var sql =
             $"INSERT INTO {_pubName} ([Id],[Version],[Name],[Content],[Retries],[Added],[ExpiresAt],[StatusName])" +
@@ -85,7 +85,7 @@ public class SqlServerDataStorage : IDataStorage
             new SqlParameter("@StatusName", nameof(StatusName.Scheduled))
         };
 
-        if (dbTransaction == null)
+        if (transaction == null)
         {
             var connection = new SqlConnection(_options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
@@ -93,8 +93,8 @@ public class SqlServerDataStorage : IDataStorage
         }
         else
         {
-            var dbTrans = dbTransaction as DbTransaction;
-            if (dbTrans == null && dbTransaction is IDbContextTransaction dbContextTrans)
+            var dbTrans = transaction as DbTransaction;
+            if (dbTrans == null && transaction is IDbContextTransaction dbContextTrans)
                 dbTrans = dbContextTrans.GetDbTransaction();
 
             var conn = dbTrans?.Connection;
@@ -169,10 +169,10 @@ public class SqlServerDataStorage : IDataStorage
         return await GetMessagesOfNeedRetryAsync(_recName).ConfigureAwait(false);
     }
 
-    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+    public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask, CancellationToken token = default)
     {
         var sql =
-            $"SELECT TOP 200 Id,Content,Retries,Added,ExpiresAt FROM {_pubName} WHERE Version=@Version " +
+            $"SELECT Id,Content,Retries,Added,ExpiresAt FROM {_pubName} WITH (UPDLOCK,READPAST) WHERE Version=@Version " +
             $"AND ((ExpiresAt< @TwoMinutesLater AND StatusName = '{StatusName.Delayed}') OR (ExpiresAt< @OneMinutesAgo AND StatusName = '{StatusName.Queued}'))";
 
         object[] sqlParams =
@@ -182,12 +182,14 @@ public class SqlServerDataStorage : IDataStorage
             new SqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1)),
         };
 
-        var connection = new SqlConnection(_options.Value.ConnectionString);
-        await using var _ = connection.ConfigureAwait(false);
-        var result = await connection.ExecuteReaderAsync(sql, async reader =>
+        await using var connection = new SqlConnection(_options.Value.ConnectionString);
+        await connection.OpenAsync(token);
+        await using var transaction = await connection.BeginTransactionAsync(token);
+        var messageList = await connection.ExecuteReaderAsync(sql, async reader =>
         {
             var messages = new List<MediumMessage>();
-            while (await reader.ReadAsync().ConfigureAwait(false))
+            while (await reader.ReadAsync(token).ConfigureAwait(false))
+            {
                 messages.Add(new MediumMessage
                 {
                     DbId = reader.GetInt64(0).ToString(),
@@ -196,11 +198,13 @@ public class SqlServerDataStorage : IDataStorage
                     Added = reader.GetDateTime(3),
                     ExpiresAt = reader.GetDateTime(4)
                 });
-
+            }
             return messages;
-        }, sqlParams).ConfigureAwait(false);
+        }, transaction, sqlParams).ConfigureAwait(false);
 
-        return result;
+        await scheduleTask(transaction, messageList);
+
+        await transaction.CommitAsync(token);
     }
 
     public IMonitoringApi GetMonitoringApi()
@@ -208,7 +212,7 @@ public class SqlServerDataStorage : IDataStorage
         return new SqlServerMonitoringApi(_options, _initializer);
     }
 
-    private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state)
+    private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state, object? transaction = null)
     {
         var sql =
             $"UPDATE {tableName} SET Content=@Content, Retries=@Retries,ExpiresAt=@ExpiresAt,StatusName=@StatusName WHERE Id=@Id";
@@ -222,9 +226,17 @@ public class SqlServerDataStorage : IDataStorage
             new SqlParameter("@StatusName", state.ToString("G"))
         };
 
-        var connection = new SqlConnection(_options.Value.ConnectionString);
-        await using var _ = connection.ConfigureAwait(false);
-        await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
+        if (transaction is DbTransaction dbTransaction)
+        {
+            var connection = (SqlConnection)dbTransaction.Connection!;
+            await connection.ExecuteNonQueryAsync(sql, dbTransaction, sqlParams).ConfigureAwait(false);
+        }
+        else
+        {
+            var connection = new SqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
+        }
     }
 
     private async Task StoreReceivedMessage(object[] sqlParams)
@@ -267,10 +279,10 @@ public class SqlServerDataStorage : IDataStorage
                 });
 
             return messages;
-        }, sqlParams).ConfigureAwait(false);
+        }, sqlParams: sqlParams).ConfigureAwait(false);
 
         return result;
     }
 
-   
+
 }

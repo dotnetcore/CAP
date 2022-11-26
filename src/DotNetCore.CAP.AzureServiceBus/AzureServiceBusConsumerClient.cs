@@ -36,9 +36,9 @@ namespace DotNetCore.CAP.AzureServiceBus
             _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public event EventHandler<TransportMessage>? OnMessageReceived;
+        public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
-        public event EventHandler<LogMessageEventArgs>? OnLog;
+        public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
         public BrokerAddress BrokerAddress => new ("AzureServiceBus", _asbOptions.ConnectionString);
 
@@ -210,22 +210,18 @@ namespace DotNetCore.CAP.AzureServiceBus
             return new TransportMessage(headers, message.Body);
         }
         
-        private Task OnConsumerReceivedWithSession(IMessageSession session, Message message, CancellationToken token)
+        private async Task OnConsumerReceivedWithSession(IMessageSession session, Message message, CancellationToken token)
         {
             var context = ConvertMessage(message);
 
-            OnMessageReceived?.Invoke(new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken, session), context);
-            
-            return Task.CompletedTask;
+            await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken, session));
         }
 
-        private Task OnConsumerReceived(Message message, CancellationToken token)
+        private async Task OnConsumerReceived(Message message, CancellationToken token)
         {
             var context = ConvertMessage(message);
 
-            OnMessageReceived?.Invoke(new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken), context);
-
-            return Task.CompletedTask;
+            await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken));
         }
 
         private Task OnExceptionReceived(ExceptionReceivedEventArgs args)
@@ -243,7 +239,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                 Reason = exceptionMessage
             };
 
-            OnLog?.Invoke(null, logArgs);
+            OnLogCallback!(logArgs);
 
             return Task.CompletedTask;
         }

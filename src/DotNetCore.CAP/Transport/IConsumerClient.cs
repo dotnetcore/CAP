@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 
 namespace DotNetCore.CAP.Transport;
@@ -48,7 +49,7 @@ public interface IConsumerClient : IDisposable
     /// </summary>
     void Reject(object? sender);
 
-    event EventHandler<TransportMessage> OnMessageReceived;
+    public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
-    event EventHandler<LogMessageEventArgs> OnLog;
+    public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 }

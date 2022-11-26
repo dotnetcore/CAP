@@ -102,6 +102,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 Port = options.Port,
                 Password = options.Password,
                 VirtualHost = options.VirtualHost,
+                DispatchConsumersAsync = true,
                 ClientProvidedName = Assembly.GetEntryAssembly()?.GetName().Name!.ToLower()
             };
 
@@ -133,7 +134,7 @@ namespace DotNetCore.CAP.RabbitMQ
                 model.ExchangeDeclare(Exchange, RabbitMQOptions.ExchangeType, true);
                 if (_isPublishConfirms)
                 {
-                    model.ConfirmSelect(); 
+                    model.ConfirmSelect();
                 }
             }
             catch (Exception e)

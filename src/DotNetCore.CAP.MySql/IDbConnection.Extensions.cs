@@ -17,6 +17,7 @@ internal static class DbConnectionExtensions
         if (connection.State == ConnectionState.Closed) await connection.OpenAsync().ConfigureAwait(false);
 
         var command = connection.CreateCommand();
+        
         await using var _ = command.ConfigureAwait(false);
         command.CommandType = CommandType.Text;
         command.CommandText = sql;
@@ -28,7 +29,7 @@ internal static class DbConnectionExtensions
     }
 
     public static async Task<T> ExecuteReaderAsync<T>(this DbConnection connection, string sql,
-        Func<DbDataReader, Task<T>>? readerFunc, params object[] sqlParams)
+        Func<DbDataReader, Task<T>>? readerFunc, DbTransaction? transaction = null, params object[] sqlParams)
     {
         if (connection.State == ConnectionState.Closed) await connection.OpenAsync().ConfigureAwait(false);
 
@@ -38,7 +39,9 @@ internal static class DbConnectionExtensions
         command.CommandText = sql;
         foreach (var param in sqlParams) command.Parameters.Add(param);
 
-        var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
+        if (transaction != null) command.Transaction = transaction;
+
+        await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
 
         T result = default!;
         if (readerFunc != null) result = await readerFunc(reader).ConfigureAwait(false);

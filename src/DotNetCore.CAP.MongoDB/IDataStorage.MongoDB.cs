@@ -12,6 +12,7 @@ using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB;
@@ -43,10 +44,10 @@ public class MongoDBDataStorage : IDataStorage
         var updateDef = Builders<PublishedMessage>.Update.Set(x => x.StatusName, nameof(StatusName.Delayed));
         var filter = Builders<PublishedMessage>.Filter.In(x => x.Id, ids.Select(long.Parse));
 
-        await collection.UpdateManyAsync(filter, updateDef);
+        await collection.UpdateManyAsync(filter, updateDef).ConfigureAwait(false);
     }
 
-    public async Task ChangePublishStateAsync(MediumMessage message, StatusName state)
+    public async Task ChangePublishStateAsync(MediumMessage message, StatusName state, object? transaction = null)
     {
         var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
 
@@ -56,7 +57,15 @@ public class MongoDBDataStorage : IDataStorage
             .Set(x => x.ExpiresAt, message.ExpiresAt)
             .Set(x => x.StatusName, state.ToString("G"));
 
-        await collection.UpdateOneAsync(x => x.Id == long.Parse(message.DbId), updateDef).ConfigureAwait(false);
+        if (transaction != null)
+        {
+            var session = transaction as IClientSessionHandle;
+            await collection.UpdateOneAsync(session, x => x.Id == long.Parse(message.DbId), updateDef).ConfigureAwait(false);
+        }
+        else
+        {
+            await collection.UpdateOneAsync(x => x.Id == long.Parse(message.DbId), updateDef).ConfigureAwait(false);
+        }
     }
 
     public async Task ChangeReceiveStateAsync(MediumMessage message, StatusName state)
@@ -165,8 +174,7 @@ public class MongoDBDataStorage : IDataStorage
         return mdMessage;
     }
 
-    public async Task<int> DeleteExpiresAsync(string collection, DateTime timeout, int batchCount = 1000,
-        CancellationToken cancellationToken = default)
+    public async Task<int> DeleteExpiresAsync(string collection, DateTime timeout, int batchCount = 1000, CancellationToken cancellationToken = default)
     {
         if (collection == _options.Value.PublishedCollection)
         {
@@ -226,27 +234,62 @@ public class MongoDBDataStorage : IDataStorage
         }).ToList();
     }
 
-    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfDelayed()
+    public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask, CancellationToken token = default)
     {
         var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
-        var queryResult = await collection
-            .Find(x => x.Version == _capOptions.Value.Version
-                       && (
-                             (x.StatusName == nameof(StatusName.Delayed) && x.ExpiresAt < DateTime.Now.AddMinutes(2))
-                               ||
-                             (x.StatusName == nameof(StatusName.Queued) && x.ExpiresAt < DateTime.Now.AddMinutes(-1))
-                          )
-                  )
-            .Limit(200)
-            .ToListAsync().ConfigureAwait(false);
-        return queryResult.Select(x => new MediumMessage
+
+        var update = Builders<PublishedMessage>.Update.Set(x=>x._lockToken, ObjectId.GenerateNewId());
+
+        var filter = Builders<PublishedMessage>.Filter.Where(x => x.Version == _capOptions.Value.Version
+                                                     && ((x.StatusName == nameof(StatusName.Delayed) && x.ExpiresAt < DateTime.Now.AddMinutes(2))
+                                                         ||
+                                                         (x.StatusName == nameof(StatusName.Queued) && x.ExpiresAt < DateTime.Now.AddMinutes(-1)))
+                                                     );
+
+        using var timeoutTs = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+        using var linkedTs = CancellationTokenSource.CreateLinkedTokenSource(timeoutTs.Token, token);
+
+        using var session = await _client.StartSessionAsync(cancellationToken: token).ConfigureAwait(false);
+        var transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
+        session.StartTransaction(transactionOptions);
+
+        while (!timeoutTs.IsCancellationRequested)
         {
-            DbId = x.Id.ToString(),
-            Origin = _serializer.Deserialize(x.Content)!,
-            Retries = x.Retries,
-            Added = x.Added,
-            ExpiresAt = x.ExpiresAt
-        }).ToList();
+            try
+            {
+                try
+                {
+                    await collection.UpdateManyAsync(session, filter, update, cancellationToken: linkedTs.Token).ConfigureAwait(false);
+
+                    var queryResult = await collection.Find(session, filter).ToListAsync(linkedTs.Token).ConfigureAwait(false);
+
+                    var result = queryResult.Select(x => new MediumMessage
+                    {
+                        DbId = x.Id.ToString(),
+                        Origin = _serializer.Deserialize(x.Content)!,
+                        Retries = x.Retries,
+                        Added = x.Added,
+                        ExpiresAt = x.ExpiresAt
+                    }).ToList();
+
+                    await scheduleTask(session, result).ConfigureAwait(false);
+
+                    await session.CommitTransactionAsync(token).ConfigureAwait(false);
+
+                    break;
+                }
+                catch (MongoCommandException e) when (e.HasErrorLabel("TransientTransactionError") && e.CodeName == "WriteConflict")
+                {
+                    await session.AbortTransactionAsync(linkedTs.Token).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromMilliseconds(Random.Shared.Next(5, 20)), linkedTs.Token).ConfigureAwait(false);
+                    session.StartTransaction(transactionOptions);
+                }
+            }
+            catch (Exception ex) when (ex is OperationCanceledException && timeoutTs.IsCancellationRequested)
+            {
+                break;
+            }
+        }
     }
 
     public IMonitoringApi GetMonitoringApi()

@@ -80,12 +80,12 @@ internal class CapPublisher : ICapPublisher
 
     public void Publish<T>(string name, T? value, string? callbackName = null)
     {
-        PublishAsync(name, value, callbackName).RunSynchronously();
+        PublishAsync(name, value, callbackName).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     public void Publish<T>(string name, T? value, IDictionary<string, string?> headers)
     {
-        PublishAsync(name, value, headers).RunSynchronously();
+        PublishAsync(name, value, headers).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     public void PublishDelay<T>(TimeSpan delayTime, string name, T? value, IDictionary<string, string?> headers)

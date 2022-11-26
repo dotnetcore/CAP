@@ -91,7 +91,7 @@ SELECT
             var connection = new NpgsqlConnection(_options.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
 
-            var count =  await connection.ExecuteScalarAsync<int>($"select count(1) from {tableName} where 1=1 {where}",
+            var count = await connection.ExecuteScalarAsync<int>($"select count(1) from {tableName} where 1=1 {where}",
                 new NpgsqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
                 new NpgsqlParameter("@Group", queryDto.Group ?? string.Empty),
                 new NpgsqlParameter("@Name", queryDto.Name ?? string.Empty),
@@ -129,7 +129,7 @@ SELECT
                 }
 
                 return messages;
-            }, sqlParams).ConfigureAwait(false);
+            }, sqlParams: sqlParams).ConfigureAwait(false);
 
             return new PagedQueryResult<MessageDto> { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
         }
@@ -218,7 +218,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
             var connection = new NpgsqlConnection(_options.ConnectionString);
             await using (connection.ConfigureAwait(false))
             {
-                valuesMap =await connection.ExecuteReaderAsync(sqlQuery, async reader =>
+                valuesMap = await connection.ExecuteReaderAsync(sqlQuery, async reader =>
                 {
                     var dictionary = new Dictionary<string, int>();
 
@@ -228,7 +228,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
                     }
 
                     return dictionary;
-                }, sqlParams).ConfigureAwait(false);
+                }, sqlParams: sqlParams).ConfigureAwait(false);
             }
 
             foreach (var key in keyMaps.Keys)
@@ -253,7 +253,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
 
             var connection = new NpgsqlConnection(_options.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
-            var mediumMessage = await connection.ExecuteReaderAsync(sql,  async reader =>
+            var mediumMessage = await connection.ExecuteReaderAsync(sql, async reader =>
             {
                 MediumMessage? message = null;
 

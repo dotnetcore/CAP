@@ -23,6 +23,7 @@ public class CapOptions
         FailedRetryInterval = 60;
         FailedRetryCount = 50;
         ConsumerThreadCount = 1;
+        EnableConsumerPrefetch = false;
         ProducerThreadCount = 1;
         Extensions = new List<ICapOptionsExtension>();
         Version = "v1";
@@ -90,8 +91,16 @@ public class CapOptions
     public int ConsumerThreadCount { get; set; }
 
     /// <summary>
+    /// If true, the message will be pre fetch to memory queue for execute.
+    /// <para>Not available when <see cref="UseDispatchingPerGroup"/> true.</para>
+    /// Default is false
+    /// </summary>
+    public bool EnableConsumerPrefetch { get; set; }
+
+    /// <summary>
     /// If true then each message group will have own independent dispatching pipeline. Each pipeline use as many threads as
     /// <see cref="ConsumerThreadCount" /> value is.
+    /// <para>If true, the <see cref="EnableConsumerPrefetch"/> is not available.</para>
     /// Default is false.
     /// </summary>
     public bool UseDispatchingPerGroup { get; set; }

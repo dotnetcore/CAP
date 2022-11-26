@@ -9,7 +9,7 @@ namespace DotNetCore.CAP.Diagnostics
     [EventSource(Name = CapDiagnosticListenerNames.MetricListenerName)]
     public class CapEventCounterSource : EventSource
     {
-        public static readonly CapEventCounterSource Log = new ();
+        public static readonly CapEventCounterSource Log = new();
 
         private IncrementingEventCounter? _publishPerSecondCounter;
         private IncrementingEventCounter? _consumePerSecondCounter;
@@ -64,9 +64,9 @@ namespace DotNetCore.CAP.Diagnostics
             _subscriberInvokePerSecondCounter?.Increment();
         }
 
-        public void WriteInvokeTimeMetrics(double elapsedMS)
+        public void WriteInvokeTimeMetrics(double elapsedMs)
         {
-            _invokeCounter?.WriteMetric(elapsedMS);
+            _invokeCounter?.WriteMetric(elapsedMs);
         }
 
         protected override void Dispose(bool disposing)
