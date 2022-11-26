@@ -47,9 +47,10 @@ Port | Port | int | -1
 ExchangeName | Default exchange name | string | cap.default.topic
 QueueArguments  | Extra queue `x-arguments` | QueueArgumentsOptions  |  N/A
 ConnectionFactoryOptions  |  RabbitMQClient native connection options | ConnectionFactory | N/A
-CustomHeaders  | Custom subscribe headers |  Func<BasicDeliverEventArgs, List<KeyValuePair<string, string>>> |  N/A
+CustomHeaders  | Custom subscribe headers |  See the blow |  N/A
+PublishConfirms | Enable [publish confirms](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
 
-#### ConnectionFactory Options
+#### ConnectionFactory Option
 
 If you need **more** native `ConnectionFactory` configuration options, you can set it by 'ConnectionFactoryOptions' option:
 
@@ -68,7 +69,7 @@ services.AddCap(x =>
 
 ```
 
-#### CustomHeaders Options
+#### CustomHeaders Option
 
 When the message sent from the RabbitMQ management console or a heterogeneous system, because of the CAP needs to define additional headers, so an exception will occur at this time. By providing this parameter to set the custom headersn to make the subscriber works.
 

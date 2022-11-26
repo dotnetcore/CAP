@@ -45,6 +45,22 @@ public class PublishController : Controller
 }
 ```
 
+### Publish delay message
+
+```c#
+public class PublishController : Controller
+{
+    [Route("~/send/delay")]
+    public IActionResult SendDelayMessage([FromServices]ICapPublisher capBus)
+    {
+        capBus.PublishDelay(TimeSpan.FromSeconds(100),"test.show.time", DateTime.Now);
+
+        return Ok();
+    }
+}
+```
+
+
 ### Publish with extra header
 
 ```c#

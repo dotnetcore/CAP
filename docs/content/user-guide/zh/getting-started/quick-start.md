@@ -45,21 +45,20 @@ public class PublishController : Controller
 }
 ```
 
-## 处理消息
+### 发送延迟消息
 
-```C#
-public class ConsumerController : Controller
+```c#
+public class PublishController : Controller
 {
-    [NonAction]
-    [CapSubscribe("test.show.time")]
-    public void ReceiveMessage(DateTime time)
+    [Route("~/send/delay")]
+    public IActionResult SendDelayMessage([FromServices]ICapPublisher capBus)
     {
-        Console.WriteLine("message time is:" + time);
+        capBus.PublishDelay(TimeSpan.FromSeconds(100),"test.show.time", DateTime.Now);
+
+        return Ok();
     }
 }
 ```
-
-## 带有头信息的消息
 
 ### 发送包含头信息的消息
 
@@ -74,6 +73,21 @@ capBus.Publish("test.show.time", DateTime.Now, header);
 
 ```
 
+## 处理消息
+
+```C#
+public class ConsumerController : Controller
+{
+    [NonAction]
+    [CapSubscribe("test.show.time")]
+    public void ReceiveMessage(DateTime time)
+    {
+        Console.WriteLine("message time is:" + time);
+    }
+}
+```
+
+
 ### 处理包含头信息的消息
 
 ```c#
@@ -86,7 +100,6 @@ public void ReceiveMessage(DateTime time, [FromCap]CapHeader header)
 }
 
 ```
-
 
 ## 摘要
 
