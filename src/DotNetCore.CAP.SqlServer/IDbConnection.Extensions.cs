@@ -40,7 +40,7 @@ internal static class DbConnectionExtensions
 
         if (transaction != null) command.Transaction = transaction;
 
-        var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
+        await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
 
         T result = default!;
         if (readerFunc != null) result = await readerFunc(reader).ConfigureAwait(false);
