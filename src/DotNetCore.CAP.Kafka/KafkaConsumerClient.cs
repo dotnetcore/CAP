@@ -88,13 +88,14 @@ namespace DotNetCore.CAP.Kafka
         {
             Connect();
 
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 ConsumeResult<string, byte[]> consumerResult;
 
                 try
                 {
-                    consumerResult = _consumerClient!.Consume(cancellationToken);
+                    consumerResult = _consumerClient!.Consume(timeout);
+                    if (consumerResult == null) continue;
                 }
                 catch (ConsumeException e) when (_kafkaOptions.RetriableErrorCodes.Contains(e.Error.Code))
                 {
