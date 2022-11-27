@@ -18,6 +18,13 @@ namespace Sample.Kafka.PostgreSql.Controllers
             _capBus = producer;
         }
 
+        [Route("~/control/start")]
+        public async Task<IActionResult> Start([FromServices] IBootstrapper bootstrapper)
+        {
+            await bootstrapper.BootstrapAsync();
+            return Ok();
+        }
+
         [Route("~/control/stop")]
         public async Task<IActionResult> Stop([FromServices] IBootstrapper bootstrapper)
         {
