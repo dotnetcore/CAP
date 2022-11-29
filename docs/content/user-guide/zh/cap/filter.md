@@ -13,29 +13,29 @@
 ```C#
 public class MyCapFilter: SubscribeFilter
 {
-    public override void OnSubscribeExecuting(ExecutingContext context)
+    public override Task OnSubscribeExecutingAsync(ExecutingContext context)
     {
         // 订阅方法执行前
     }
 
-    public override void OnSubscribeExecuted(ExecutedContext context)
+    public override Task OnSubscribeExecutedAsync(ExecutedContext context)
     {
         // 订阅方法执行后
     }
 
-    public override void OnSubscribeException(ExceptionContext context)
+    public override Task OnSubscribeExceptionAsync(ExceptionContext context)
     {
         // 订阅方法执行异常
     }
 }
 ```
 
-在一些场景中，如果想终止订阅者方法执行，可以在 `OnSubscribeExecuting` 中抛出异常，并且在 `OnSubscribeException` 中选择忽略该异常。
+在一些场景中，如果想终止订阅者方法执行，可以在 `OnSubscribeExecutingAsync` 中抛出异常，并且在 `OnSubscribeExceptionAsync` 中选择忽略该异常。
 
 通过在 `ExceptionContext` 中设置 `context.ExceptionHandled = true` 来忽略异常。
 
 ```C#
-public override void OnSubscribeException(ExceptionContext context)
+public override Task OnSubscribeExceptionAsync(ExceptionContext context)
 {
     context.ExceptionHandled = true;
 }

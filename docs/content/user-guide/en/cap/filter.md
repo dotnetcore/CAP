@@ -11,30 +11,30 @@ Create a new filter class and inherit the `SubscribeFilter` abstract class.
 ```C#
 public class MyCapFilter: SubscribeFilter
 {
-    public override void OnSubscribeExecuting(ExecutingContext context)
+    public override Task OnSubscribeExecutingAsync(ExecutingContext context)
     {
         // before subscribe method exectuing
     }
 
-    public override void OnSubscribeExecuted(ExecutedContext context)
+    public override Task OnSubscribeExecutedAsync(ExecutedContext context)
     {
         // after subscribe method executed
     }
 
-    public override void OnSubscribeException(ExceptionContext context)
+    public override Task OnSubscribeExceptionAsync(ExceptionContext context)
     {
         // subscribe method execution exception
     }
 }
 ```
 
-In some scenarios, if you want to terminate the subscriber method execution, you can throw an exception in `OnSubscribeExecuting`, and choose to ignore the exception in `OnSubscribeException`.
+In some scenarios, if you want to terminate the subscriber method execution, you can throw an exception in `OnSubscribeExecutingAsync`, and choose to ignore the exception in `OnSubscribeExceptionAsync`.
 
 To ignore exceptions, you can setting `context.ExceptionHandled = true` in `ExceptionContext`
 
 
 ```C#
-public override void OnSubscribeException(ExceptionContext context)
+public override Task OnSubscribeExceptionAsync(ExceptionContext context)
 {
     context.ExceptionHandled = true;
 }

@@ -121,6 +121,7 @@ internal class ConsumerRegister : IConsumerRegister
             {
                 using (var client = _consumerClientFactory.Create(matchGroup.Key))
                 {
+                    client.OnLogCallback = WriteLog;
                     topics = client.FetchTopics(matchGroup.Value.Select(x => x.TopicName));
                 }
             }
@@ -171,6 +172,7 @@ internal class ConsumerRegister : IConsumerRegister
 
     private void RegisterMessageProcessor(IConsumerClient client)
     {
+        client.OnLogCallback = WriteLog;
         client.OnMessageCallback = async (transportMessage,sender) =>
         {
             long? tracingTimestamp = null;
@@ -272,9 +274,7 @@ internal class ConsumerRegister : IConsumerRegister
 
                 TracingError(tracingTimestamp, transportMessage, client.BrokerAddress, e);
             }
-        };
-
-        client.OnLogCallback = WriteLog;
+        };       
     }
 
     private void WriteLog(LogMessageEventArgs logmsg)
