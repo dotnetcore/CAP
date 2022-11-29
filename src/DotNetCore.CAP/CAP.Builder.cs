@@ -26,7 +26,15 @@ public class CapMarkerService
     public CapMarkerService(string name)
     {
         Name = name;
-        Version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion!;
+
+        try
+        {
+            Version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion!;
+        }
+        catch
+        {
+            Version = "N/A";
+        }
     }
 }
 
