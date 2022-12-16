@@ -51,7 +51,8 @@ namespace DotNetCore.CAP.Dashboard
             _builder.MapPost(prefixMatch + "/received/reexecute", ReceivedRequeue);
 
             _builder.MapGet(prefixMatch + "/published/{status}", PublishedList);
-            _builder.MapGet(prefixMatch + "/received/{status}", Subscribers);
+            _builder.MapGet(prefixMatch + "/received/{status}", ReceivedList);
+            _builder.MapGet(prefixMatch + "/subscriber", Subscribers);
             _builder.MapGet(prefixMatch + "/nodes", Nodes);
         }
 
