@@ -6,13 +6,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
+using Azure.Messaging.ServiceBus;
+using Azure.Messaging.ServiceBus.Administration;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
-using Microsoft.Azure.ServiceBus;
-using Microsoft.Azure.ServiceBus.Management;
+using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Message = Microsoft.Azure.ServiceBus.Message;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
@@ -23,14 +24,17 @@ namespace DotNetCore.CAP.AzureServiceBus
         private readonly ILogger _logger;
         private readonly string _subscriptionName;
         private readonly AzureServiceBusOptions _asbOptions;
+        ServiceBusAdministrationClient _administrationClient;
+        ServiceBusClient _servicebusClient;
 
-        private SubscriptionClient? _consumerClient;
+        private ServiceBusProcessor? _serviceBusProcessor;
 
         public AzureServiceBusConsumerClient(
             ILogger logger,
             string subscriptionName,
             IOptions<AzureServiceBusOptions> options)
         {
+            
             _logger = logger;
             _subscriptionName = subscriptionName;
             _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
@@ -51,24 +55,23 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             ConnectAsync().GetAwaiter().GetResult();
 
-            var allRuleNames = _consumerClient!.GetRulesAsync().GetAwaiter().GetResult().Select(x => x.Name);
+
+            var allRuleNames = _administrationClient.GetRulesAsync(_asbOptions.TopicPath, _subscriptionName).ToEnumerable().Select(o=>o.Name).ToArray();
 
             foreach (var newRule in topics.Except(allRuleNames))
             {
-                CheckValidSubscriptionName(newRule);
-
-                _consumerClient.AddRuleAsync(new RuleDescription
-                {
-                    Filter = new CorrelationFilter { Label = newRule },
-                    Name = newRule
-                }).GetAwaiter().GetResult();
-
+               var filter = new CorrelationRuleFilter() { };
+                
+                _administrationClient.CreateRuleAsync(_asbOptions.TopicPath, _subscriptionName,
+                                        new CreateRuleOptions() { Name = newRule, Filter = new CorrelationRuleFilter() {
+                                             Subject = newRule
+                                        } });
                 _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
             }
 
             foreach (var oldRule in allRuleNames.Except(topics))
             {
-                _consumerClient.RemoveRuleAsync(oldRule).GetAwaiter().GetResult();
+                _administrationClient.DeleteRuleAsync(_asbOptions.TopicPath, _subscriptionName, oldRule).GetAwaiter().GetResult();
 
                 _logger.LogInformation($"Azure Service Bus remove rule: {oldRule}");
             }
@@ -78,45 +81,51 @@ namespace DotNetCore.CAP.AzureServiceBus
         {
             ConnectAsync().GetAwaiter().GetResult();
 
-            if (_asbOptions.EnableSessions)
-            {
-                _consumerClient!.RegisterSessionHandler(OnConsumerReceivedWithSession,
-                    new SessionHandlerOptions(OnExceptionReceived)
-                    {
-                        AutoComplete = false,
-                        MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
-                    });
-            }
-            else
-            {
-                _consumerClient!.RegisterMessageHandler(OnConsumerReceived,
-                    new MessageHandlerOptions(OnExceptionReceived)
-                    {
-                        AutoComplete = false,
-                        MaxConcurrentCalls = 10,
-                        MaxAutoRenewDuration = TimeSpan.FromSeconds(30)
-                    });
-            }
+            _serviceBusProcessor.ProcessMessageAsync += _serviceBusProcessor_ProcessMessageAsync;
+            _serviceBusProcessor.ProcessErrorAsync += _serviceBusProcessor_ProcessErrorAsync;
 
-            while (true)
+            _serviceBusProcessor.StartProcessingAsync().GetAwaiter().GetResult();
+
+        }
+
+        private Task _serviceBusProcessor_ProcessErrorAsync(ProcessErrorEventArgs args)
+        {
+            
+            var exceptionMessage =
+                $"- Identifier: {args.Identifier}" + Environment.NewLine +
+                $"- Entity Path: {args.EntityPath}" + Environment.NewLine +
+                $"- Executing ErrorSource: {args.ErrorSource}" + Environment.NewLine +
+                $"- Exception: {args.Exception}";
+
+            var logArgs = new LogMessageEventArgs
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                cancellationToken.WaitHandle.WaitOne(timeout);
-            }
-            // ReSharper disable once FunctionNeverReturns
+                LogType = MqLogType.ExceptionReceived,
+                Reason = exceptionMessage
+            };
+
+            OnLogCallback!(logArgs);
+
+            return Task.CompletedTask;
+        }
+
+        private async Task _serviceBusProcessor_ProcessMessageAsync(ProcessMessageEventArgs arg)
+        {
+            var context = ConvertMessage(arg.Message);
+            
+            await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(arg.Message.LockToken));
         }
 
         public void Commit(object? sender)
         {
-            var commitInput = (AzureServiceBusConsumerCommitInput) sender!;
-            if (_asbOptions.EnableSessions)
-            {
-                commitInput.Session?.CompleteAsync(commitInput.LockToken);
-            }
-            else
-            {
-                _consumerClient!.CompleteAsync(commitInput.LockToken);
-            }
+            //var commitInput = (AzureServiceBusConsumerCommitInput) sender!;
+            //if (_asbOptions.EnableSessions)
+            //{
+            //    commitInput.Session?.CompleteAsync(commitInput.LockToken);
+            //}
+            //else
+            //{
+            //    _serviceBusProcessor!.CompleteAsync(commitInput.LockToken);
+            //}
         }
 
         public void Reject(object? sender)
@@ -126,12 +135,16 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public void Dispose()
         {
-            _consumerClient?.CloseAsync().Wait(1500);
+            if (!_serviceBusProcessor.IsProcessing)
+            {
+                _serviceBusProcessor.DisposeAsync().GetAwaiter().GetResult();
+            }
+            //_serviceBusProcessor?.CloseAsync().Wait(1500);
         }
 
         public async Task ConnectAsync()
         {
-            if (_consumerClient != null)
+            if (_serviceBusProcessor != null)
             {
                 return;
             }
@@ -140,39 +153,44 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             try
             {
-                if (_consumerClient == null)
+                if (_serviceBusProcessor == null)
                 {
-                    ManagementClient mClient;
-                    if (_asbOptions.ManagementTokenProvider != null)
+                    if (_asbOptions.TokenCredential != null)
                     {
-                        mClient = new ManagementClient(new ServiceBusConnectionStringBuilder(
-                            _asbOptions.ConnectionString), _asbOptions.ManagementTokenProvider);
+                        _administrationClient = new ServiceBusAdministrationClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
+                        _servicebusClient = new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
                     }
                     else
                     {
-                        mClient = new ManagementClient(_asbOptions.ConnectionString);
+                        _administrationClient = new ServiceBusAdministrationClient(_asbOptions.ConnectionString);
+                        _servicebusClient = new ServiceBusClient(_asbOptions.ConnectionString);
                     }
 
-                    if (!await mClient.TopicExistsAsync(_asbOptions.TopicPath))
+                    if (!await _administrationClient.TopicExistsAsync(_asbOptions.TopicPath))
                     {
-                        await mClient.CreateTopicAsync(_asbOptions.TopicPath);
+                        await _administrationClient.CreateTopicAsync(_asbOptions.TopicPath);
                         _logger.LogInformation($"Azure Service Bus created topic: {_asbOptions.TopicPath}");
                     }
 
-                    if (!await mClient.SubscriptionExistsAsync(_asbOptions.TopicPath, _subscriptionName))
+                    if (!await _administrationClient.SubscriptionExistsAsync(_asbOptions.TopicPath, _subscriptionName))
                     {
                         var subscriptionDescription =
-                            new SubscriptionDescription(_asbOptions.TopicPath, _subscriptionName)
+                            new CreateSubscriptionOptions(_asbOptions.TopicPath, _subscriptionName)
                             {
                                 RequiresSession = _asbOptions.EnableSessions
                             };
 
-                        await mClient.CreateSubscriptionAsync(subscriptionDescription);
+                        await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
                         _logger.LogInformation($"Azure Service Bus topic {_asbOptions.TopicPath} created subscription: {_subscriptionName}");
                     }
 
-                    _consumerClient = new SubscriptionClient(_asbOptions.ConnectionString, _asbOptions.TopicPath, _subscriptionName,
-                        ReceiveMode.PeekLock, RetryPolicy.Default);
+
+                    _serviceBusProcessor = _servicebusClient.CreateProcessor(_asbOptions.TopicPath, _subscriptionName,_asbOptions.EnableSessions?
+                                           new ServiceBusProcessorOptions {
+                                                AutoCompleteMessages =_asbOptions.AutoCompleteMessages,
+                                                MaxConcurrentCalls=_asbOptions.MaxConcurrentCalls,
+                                                MaxAutoLockRenewalDuration = TimeSpan.FromSeconds(30),
+                                           }:null);
                 }
             }
             finally
@@ -183,9 +201,9 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         #region private methods
 
-        private TransportMessage ConvertMessage(Message message)
+        private TransportMessage ConvertMessage(ServiceBusReceivedMessage message)
         {
-            var headers = message.UserProperties
+            var headers = message.ApplicationProperties
                 .ToDictionary(x => x.Key, y => y.Value?.ToString());
             
             headers.Add(Headers.Group, _subscriptionName);
@@ -206,44 +224,10 @@ namespace DotNetCore.CAP.AzureServiceBus
                     }
                 }
             }
-
+            
             return new TransportMessage(headers, message.Body);
         }
-        
-        private async Task OnConsumerReceivedWithSession(IMessageSession session, Message message, CancellationToken token)
-        {
-            var context = ConvertMessage(message);
-
-            await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken, session));
-        }
-
-        private async Task OnConsumerReceived(Message message, CancellationToken token)
-        {
-            var context = ConvertMessage(message);
-
-            await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(message.SystemProperties.LockToken));
-        }
-
-        private Task OnExceptionReceived(ExceptionReceivedEventArgs args)
-        {
-            var context = args.ExceptionReceivedContext;
-            var exceptionMessage =
-                $"- Endpoint: {context.Endpoint}" + Environment.NewLine +
-                $"- Entity Path: {context.EntityPath}" + Environment.NewLine +
-                $"- Executing Action: {context.Action}" + Environment.NewLine +
-                $"- Exception: {args.Exception}";
-
-            var logArgs = new LogMessageEventArgs
-            {
-                LogType = MqLogType.ExceptionReceived,
-                Reason = exceptionMessage
-            };
-
-            OnLogCallback!(logArgs);
-
-            return Task.CompletedTask;
-        }
-
+       
         private static void CheckValidSubscriptionName(string subscriptionName)
         {
             const string pathDelimiter = @"/";
