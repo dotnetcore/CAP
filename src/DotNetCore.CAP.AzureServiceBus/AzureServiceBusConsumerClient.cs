@@ -112,20 +112,17 @@ namespace DotNetCore.CAP.AzureServiceBus
         {
             var context = ConvertMessage(arg.Message);
             
-            await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(arg.Message.LockToken));
+            await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(arg));
         }
 
         public void Commit(object? sender)
         {
-            //var commitInput = (AzureServiceBusConsumerCommitInput) sender!;
-            //if (_asbOptions.EnableSessions)
-            //{
-            //    commitInput.Session?.CompleteAsync(commitInput.LockToken);
-            //}
-            //else
-            //{
-            //    _serviceBusProcessor!.CompleteAsync(commitInput.LockToken);
-            //}
+            var commitInput = (AzureServiceBusConsumerCommitInput)sender!;
+            if (_serviceBusProcessor?.AutoCompleteMessages ?? false)
+            {
+                commitInput.ProcessMessageArgs.CompleteMessageAsync(commitInput.ProcessMessageArgs.Message).GetAwaiter().GetResult();
+            }
+           
         }
 
         public void Reject(object? sender)
