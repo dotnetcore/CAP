@@ -59,9 +59,7 @@ namespace DotNetCore.CAP.AzureServiceBus
             var allRuleNames = _administrationClient.GetRulesAsync(_asbOptions.TopicPath, _subscriptionName).ToEnumerable().Select(o=>o.Name).ToArray();
 
             foreach (var newRule in topics.Except(allRuleNames))
-            {
-               var filter = new CorrelationRuleFilter() { };
-                
+            {   
                 _administrationClient.CreateRuleAsync(_asbOptions.TopicPath, _subscriptionName,
                                         new CreateRuleOptions() { Name = newRule, Filter = new CorrelationRuleFilter() {
                                              Subject = newRule
