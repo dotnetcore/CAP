@@ -25,7 +25,7 @@ namespace DotNetCore.CAP
         public string ConnectionString { get; set; } = default!;
 
         /// <summary>
-        /// Namespace of Servicebus
+        /// Namespace of Servicebus , Needs to be set when using with TokenCredential Property
         /// </summary>
         public string Namespace { get; set; } = default!;
 
@@ -40,8 +40,15 @@ namespace DotNetCore.CAP
         /// </summary>
         public string TopicPath { get; set; } = DefaultTopicPath;
 
+        /// <summary>
+        /// Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing.
+        /// If the message handler triggers an exception, the message will not be automatically completed.
+        /// </summary>
         public bool AutoCompleteMessages { get; set; }
 
+        /// <summary>
+        /// Gets the maximum number of concurrent calls to the ProcessMessageAsync message handler the processor should initiate.
+        /// </summary>
         public int MaxConcurrentCalls { get; set; }
 
         /// <summary>
