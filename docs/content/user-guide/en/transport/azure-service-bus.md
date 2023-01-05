@@ -7,7 +7,7 @@ Azure services can be used in CAP as a message transporter.
 ## Configuration
 
 !!! warning "Requirement"
-For the Service Bus pricing layer, CAP requires "standard" or "advanced" to support Topic functionality.
+    For the Service Bus pricing layer, CAP requires "standard" or "advanced" to support Topic functionality.
 
 To use Azure Service Bus as a message transport, you need to install the following package from NuGet:
 
@@ -40,13 +40,13 @@ public void ConfigureServices(IServiceCollection services)
 The AzureServiceBus configuration options provided directly by the CAP:
 
 | NAME                    | DESCRIPTION                                                                                                                                 | TYPE                                               | DEFAULT |
-| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- | :------ | ----- |
+| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- | :------ |
 | ConnectionString        | Endpoint address                                                                                                                            | string                                             |
 | EnableSessions          | Enable [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions)                                | bool                                               | false   |
 | TopicPath               | Topic entity path                                                                                                                           | string                                             | cap     |
 | ManagementTokenProvider | Token provider                                                                                                                              | ITokenProvider                                     | null    |
-| AutoCompleteMessages    | Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing | bool                                               | false   | false |
-| CustomHeaders           | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                                                      | Func<Message, List<KeyValuePair<string, string>>>? | null    |
+| AutoCompleteMessages    | Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing | bool                                               | false   |
+| CustomHeaders           | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                                                      | `Func<Message, List<KeyValuePair<string, string>>>?` | null    |
 | Namespace               | Namespace of Servicebus , Needs to be set when using with TokenCredential Property                                                          | string                                             | null    |
 
 #### Sessions
