@@ -4,10 +4,11 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Messaging.ServiceBus;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
-using Microsoft.Azure.ServiceBus;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -20,7 +21,9 @@ namespace DotNetCore.CAP.AzureServiceBus
         private readonly ILogger _logger;
         private readonly IOptions<AzureServiceBusOptions> _asbOptions;
 
-        private ITopicClient? _topicClient;
+        ServiceBusClient _client;
+
+        ServiceBusSender _sender;
 
         public AzureServiceBusTransport(
             ILogger<AzureServiceBusTransport> logger,
@@ -37,12 +40,11 @@ namespace DotNetCore.CAP.AzureServiceBus
             try
             {
                 Connect();
-
-                var message = new Microsoft.Azure.ServiceBus.Message
+                
+                var message = new ServiceBusMessage(transportMessage.Body.ToArray())
                 {
                     MessageId = transportMessage.GetId(),
-                    Body = transportMessage.Body.ToArray(),
-                    Label = transportMessage.GetName(),
+                    Subject = transportMessage.GetName(),
                     CorrelationId = transportMessage.GetCorrelationId()
                 };
 
@@ -56,15 +58,16 @@ namespace DotNetCore.CAP.AzureServiceBus
                     transportMessage.Headers.TryGetValue(AzureServiceBusHeaders.ScheduledEnqueueTimeUtc, out var scheduledEnqueueTimeUtcString)
                     && DateTimeOffset.TryParse(scheduledEnqueueTimeUtcString, out var scheduledEnqueueTimeUtc))
                 {
-                    message.ScheduledEnqueueTimeUtc = scheduledEnqueueTimeUtc.UtcDateTime;
+                    message.ScheduledEnqueueTime = scheduledEnqueueTimeUtc.UtcDateTime;
                 }
 
                 foreach (var header in transportMessage.Headers)
                 {
-                    message.UserProperties.Add(header.Key, header.Value);
+                    message.ApplicationProperties.Add(header.Key, header.Value);
                 }
 
-                await _topicClient!.SendAsync(message);
+                
+                await _sender.SendMessageAsync(message);
 
                 _logger.LogDebug($"Azure Service Bus message [{transportMessage.GetName()}] has been published.");
 
@@ -80,7 +83,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private void Connect()
         {
-            if (_topicClient != null)
+            if (_client != null)
             {
                 return;
             }
@@ -89,7 +92,10 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             try
             {
-                _topicClient ??= new TopicClient(BrokerAddress.Endpoint, _asbOptions.Value.TopicPath, RetryPolicy.NoRetry);
+                _client ??= _asbOptions.Value.TokenCredential is null ? new ServiceBusClient(_asbOptions.Value.ConnectionString) :
+                                                                         new ServiceBusClient(_asbOptions.Value.Namespace,_asbOptions.Value.TokenCredential);
+
+                _sender ??= _client.CreateSender(_asbOptions.Value.TopicPath);
             }
             finally
             {

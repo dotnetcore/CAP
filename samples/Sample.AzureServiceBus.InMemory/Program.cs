@@ -15,7 +15,7 @@ builder.Services.AddCap(c =>
         {
             new(DotNetCore.CAP.Messages.Headers.MessageId,
                 SnowflakeId.Default().NextId().ToString()),
-            new(DotNetCore.CAP.Messages.Headers.MessageName, message.Label)
+            new(DotNetCore.CAP.Messages.Headers.MessageName, message.Subject)
         };
     });
 
