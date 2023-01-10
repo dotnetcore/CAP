@@ -81,7 +81,7 @@ public void ConfigureServices(IServiceCollection services)
         x.UseMongoDB("Your ConnectionStrings");  //MongoDB 4.0+ cluster
 
         // CAP support RabbitMQ,Kafka,AzureService as the MQ, choose to add configuration you needed：
-        x.UseRabbitMQ("ConnectionString");
+        x.UseRabbitMQ("HostName");
         x.UseKafka("ConnectionString");
         x.UseAzureServiceBus("ConnectionString");
         x.UseAmazonSQS();
