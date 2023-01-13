@@ -9,6 +9,7 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
@@ -19,12 +20,14 @@ namespace DotNetCore.CAP.PostgreSql
         private readonly PostgreSqlOptions _options;
         private readonly string _pubName;
         private readonly string _recName;
+        private readonly ISerializer _serializer;
 
-        public PostgreSqlMonitoringApi(IOptions<PostgreSqlOptions> options, IStorageInitializer initializer)
+        public PostgreSqlMonitoringApi(IOptions<PostgreSqlOptions> options, IStorageInitializer initializer, ISerializer serializer)
         {
             _options = options.Value ?? throw new ArgumentNullException(nameof(options));
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
+            _serializer = serializer;
         }
 
         public async Task<MediumMessage?> GetPublishedMessageAsync(long id) => await GetMessageAsync(_pubName, id).ConfigureAwait(false);
@@ -262,6 +265,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
                     message = new MediumMessage
                     {
                         DbId = reader.GetInt64(0).ToString(),
+                        Origin = _serializer.Deserialize(reader.GetString(1))!,
                         Content = reader.GetString(1),
                         Added = reader.GetDateTime(2),
                         ExpiresAt = reader.GetDateTime(3),
