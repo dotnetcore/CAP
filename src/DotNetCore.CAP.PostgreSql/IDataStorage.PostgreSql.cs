@@ -201,7 +201,7 @@ namespace DotNetCore.CAP.PostgreSql
 
         public IMonitoringApi GetMonitoringApi()
         {
-            return new PostgreSqlMonitoringApi(_options, _initializer);
+            return new PostgreSqlMonitoringApi(_options, _initializer, _serializer);
         }
 
         private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state, object? transaction = null)
@@ -228,7 +228,7 @@ namespace DotNetCore.CAP.PostgreSql
                 await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
                 await using var _ = connection.ConfigureAwait(false);
                 await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
-            } 
+            }
         }
 
         private async Task StoreReceivedMessage(object[] sqlParams)
@@ -273,7 +273,7 @@ namespace DotNetCore.CAP.PostgreSql
                 }
 
                 return messages;
-            },sqlParams: sqlParams).ConfigureAwait(false);
+            }, sqlParams: sqlParams).ConfigureAwait(false);
 
             return result;
         }

@@ -19,7 +19,7 @@ namespace DotNetCore.CAP.RedisStreams
             return new[]
             {
                 new NameValueEntry(Headers, ToJson(message.Headers)),
-                new NameValueEntry(Body, ToJson(message.Body))
+                new NameValueEntry(Body, ToJson(message.Body.ToArray()))
             };
         }
 
