@@ -60,5 +60,12 @@ namespace DotNetCore.CAP
         /// Use this function to write additional headers from the original ASB Message or any Custom Header, i.e. to allow compatibility with heterogeneous systems, into <see cref="CapHeader"/>
         /// </summary>
         public Func<ServiceBusReceivedMessage, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
+
+        /// <summary>
+        /// Custom SQL Filters for topic subscribtion , more about SQL Filters and its rules 
+        /// Key: Rule Name , Value: SQL Expression 
+        /// https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-sql-filter
+        /// </summary>
+        public List<KeyValuePair<string,string>> SQLFilters { get; set; }
     }
 }

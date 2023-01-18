@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Core;
@@ -46,6 +47,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public BrokerAddress BrokerAddress => new ("AzureServiceBus", _asbOptions.ConnectionString);
 
+        
         public void Subscribe(IEnumerable<string> topics)
         {
             if (topics == null)
@@ -55,15 +57,37 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             ConnectAsync().GetAwaiter().GetResult();
 
+            topics = topics.Concat(_asbOptions?.SQLFilters.Select(o => o.Key) ?? Enumerable.Empty<string>());
+            var allRules = _administrationClient.GetRulesAsync(_asbOptions.TopicPath, _subscriptionName).ToEnumerable();
+            var allRuleNames = allRules.Select(o => o.Name);
 
-            var allRuleNames = _administrationClient.GetRulesAsync(_asbOptions.TopicPath, _subscriptionName).ToEnumerable().Select(o=>o.Name).ToArray();
-
+            
             foreach (var newRule in topics.Except(allRuleNames))
-            {   
+            {
+                bool isSqlRule = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value is not null;
+
+                RuleFilter currentRuleToAdd = default;
+
+                if (isSqlRule)
+                {
+                    var sqlExpresssion = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value;
+                    currentRuleToAdd = new SqlRuleFilter(sqlExpresssion);
+                }
+                else
+                {
+                    currentRuleToAdd = new CorrelationRuleFilter()
+                    {
+                        Subject = newRule
+                    };
+                }
+
                 _administrationClient.CreateRuleAsync(_asbOptions.TopicPath, _subscriptionName,
-                                        new CreateRuleOptions() { Name = newRule, Filter = new CorrelationRuleFilter() {
-                                             Subject = newRule
-                                        } });
+                                        new CreateRuleOptions()
+                                        {
+                                            Name = newRule,
+                                            Filter = currentRuleToAdd
+                                        });
+
                 _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
             }
 
@@ -73,6 +97,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
                 _logger.LogInformation($"Azure Service Bus remove rule: {oldRule}");
             }
+
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
