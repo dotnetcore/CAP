@@ -39,22 +39,23 @@ public void ConfigureServices(IServiceCollection services)
 
 The AzureServiceBus configuration options provided directly by the CAP:
 
-| NAME                    | DESCRIPTION                                                                                                                                 | TYPE                                               | DEFAULT |
-| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- | :------ | ----- |
-| ConnectionString        | Endpoint address                                                                                                                            | string                                             |
-| EnableSessions          | Enable [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions)                                | bool                                               | false   |
-| TopicPath               | Topic entity path                                                                                                                           | string                                             | cap     |
-| ManagementTokenProvider | Token provider                                                                                                                              | ITokenProvider                                     | null    |
-| AutoCompleteMessages    | Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing | bool                                               | false   | false |
-| CustomHeaders           | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                                                      | Func<Message, List<KeyValuePair<string, string>>>? | null    |
-| Namespace               | Namespace of Servicebus , Needs to be set when using with TokenCredential Property                                                          | string                                             | null    |
+| NAME                    | DESCRIPTION                                                                                                                                 | TYPE                                                 | DEFAULT |
+| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- | :------ |
+| ConnectionString        | Endpoint address                                                                                                                            | string                                               |
+| EnableSessions          | Enable [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions)                                | bool                                                 | false   |
+| TopicPath               | Topic entity path                                                                                                                           | string                                               | cap     |
+| ManagementTokenProvider | Token provider                                                                                                                              | ITokenProvider                                       | null    |
+| AutoCompleteMessages    | Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing | bool                                                 | false   |
+| CustomHeaders           | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                                                      | `Func<Message, List<KeyValuePair<string, string>>>?` | null    |
+| Namespace               | Namespace of Servicebus , Needs to be set when using with TokenCredential Property                                                          | string                                               | null    |
+| SQLFilters              | Custom SQL Filters by name and expression on Topic Subscribtion                                                                             | List<KeyValuePair<string, string>>                   | null    |
 
 #### Sessions
 
 When sessions are enabled (see `EnableSessions` option above), every message sent will have a session id. To control the session id, include
 an extra header with name `AzureServiceBusHeaders.SessionId` when publishing events:
 
-```csharp
+```C#
 ICapPublisher capBus = ...;
 string yourEventName = ...;
 YourEventType yourEvent = ...;
@@ -71,17 +72,17 @@ If no session id header is present, the message id will be used as the session i
 
 Sometimes you might want to listen to a message that was published by an external system. In this case, you need to add a set of two mandatory headers for CAP compatibility as shown below.
 
-```csharp
-    c.UseAzureServiceBus(asb =>
+```C#
+c.UseAzureServiceBus(asb =>
+{
+    asb.ConnectionString = ...
+    asb.CustomHeaders = message => new List<KeyValuePair<string, string>>()
     {
-        asb.ConnectionString = ...
-        asb.CustomHeaders = message => new List<KeyValuePair<string, string>>()
-        {
-            new(DotNetCore.CAP.Messages.Headers.MessageId,
-                SnowflakeId.Default().NextId().ToString()),
-            new(DotNetCore.CAP.Messages.Headers.MessageName, message.Label)
-        };
-    });
+        new(DotNetCore.CAP.Messages.Headers.MessageId,
+            SnowflakeId.Default().NextId().ToString()),
+        new(DotNetCore.CAP.Messages.Headers.MessageName, message.Label)
+    };
+});
 ```
 
 > Important: If a header with the same name (key) already exists in the message, the Custom Header won't be added.
