@@ -90,6 +90,7 @@ c.UseAzureServiceBus(asb =>
 You can set SQL filters on subscribtion level to get desired messages and not to have custom logic on business side.
 More about Azure Service Bus SQL FILTERS - [Link](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-sql-filter)
 
+SQLFilters is List Of KeyValuePair<string, string> , Key is filter name and Value SQL Expression.
 ```C#
 c.UseAzureServiceBus(asb =>
 {
