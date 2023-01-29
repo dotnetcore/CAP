@@ -8,6 +8,7 @@ using Azure.Messaging.ServiceBus;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
+
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -20,8 +21,9 @@ namespace DotNetCore.CAP.AzureServiceBus
         private readonly ILogger _logger;
         private readonly IOptions<AzureServiceBusOptions> _asbOptions;
 
-        private ServiceBusClient? _client;
-        private ServiceBusSender? _sender;
+        ServiceBusClient _client;
+
+        ServiceBusSender _sender;
 
         public AzureServiceBusTransport(
             ILogger<AzureServiceBusTransport> logger,
@@ -64,7 +66,8 @@ namespace DotNetCore.CAP.AzureServiceBus
                     message.ApplicationProperties.Add(header.Key, header.Value);
                 }
 
-                await _sender!.SendMessageAsync(message);
+                
+                await _sender.SendMessageAsync(message);
 
                 _logger.LogDebug($"Azure Service Bus message [{transportMessage.GetName()}] has been published.");
 
