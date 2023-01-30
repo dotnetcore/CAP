@@ -97,7 +97,9 @@ public void ConfigureServices(IServiceCollection services)
 
 ### 发布
 
-在 Controller 中注入 `ICapPublisher` 然后使用 `ICapPublisher` 进行消息发送
+在 Controller 中注入 `ICapPublisher` 然后使用 `ICapPublisher` 进行消息发送。
+
+> 版本 7.0+ 支持发送延迟消息。
 
 ```c#
 
@@ -115,6 +117,9 @@ public class PublishController : Controller
     public IActionResult WithoutTransaction()
     {
         _capBus.Publish("xxx.services.show.time", DateTime.Now);
+
+        // Publish delay message
+        _capBus.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "xxx.services.show.time", DateTime.Now);
 	
         return Ok();
     }

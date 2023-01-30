@@ -4,15 +4,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Core;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
-using Microsoft.Azure.Amqp.Framing;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -25,9 +22,9 @@ namespace DotNetCore.CAP.AzureServiceBus
         private readonly ILogger _logger;
         private readonly string _subscriptionName;
         private readonly AzureServiceBusOptions _asbOptions;
-        ServiceBusAdministrationClient _administrationClient;
-        ServiceBusClient _servicebusClient;
 
+        private ServiceBusAdministrationClient? _administrationClient;
+        private ServiceBusClient? _serviceBusClient;
         private ServiceBusProcessor? _serviceBusProcessor;
 
         public AzureServiceBusConsumerClient(
@@ -57,21 +54,21 @@ namespace DotNetCore.CAP.AzureServiceBus
 
             ConnectAsync().GetAwaiter().GetResult();
 
-            topics = topics.Concat(_asbOptions?.SQLFilters.Select(o => o.Key) ?? Enumerable.Empty<string>());
-            var allRules = _administrationClient.GetRulesAsync(_asbOptions.TopicPath, _subscriptionName).ToEnumerable();
+            topics = topics.Concat(_asbOptions!.SQLFilters?.Select(o => o.Key) ?? Enumerable.Empty<string>());
+            var allRules = _administrationClient!.GetRulesAsync(_asbOptions!.TopicPath, _subscriptionName).ToEnumerable();
             var allRuleNames = allRules.Select(o => o.Name);
 
             
             foreach (var newRule in topics.Except(allRuleNames))
             {
-                bool isSqlRule = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value is not null;
+                var isSqlRule = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value is not null;
 
-                RuleFilter currentRuleToAdd = default;
+                RuleFilter? currentRuleToAdd = default;
 
                 if (isSqlRule)
                 {
-                    var sqlExpresssion = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value;
-                    currentRuleToAdd = new SqlRuleFilter(sqlExpresssion);
+                    var sqlExpression = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value;
+                    currentRuleToAdd = new SqlRuleFilter(sqlExpression);
                 }
                 else
                 {
@@ -104,11 +101,10 @@ namespace DotNetCore.CAP.AzureServiceBus
         {
             ConnectAsync().GetAwaiter().GetResult();
 
-            _serviceBusProcessor.ProcessMessageAsync += _serviceBusProcessor_ProcessMessageAsync;
+            _serviceBusProcessor!.ProcessMessageAsync += _serviceBusProcessor_ProcessMessageAsync;
             _serviceBusProcessor.ProcessErrorAsync += _serviceBusProcessor_ProcessErrorAsync;
 
-            _serviceBusProcessor.StartProcessingAsync().GetAwaiter().GetResult();
-
+            _serviceBusProcessor.StartProcessingAsync(cancellationToken).GetAwaiter().GetResult();
         }
 
         private Task _serviceBusProcessor_ProcessErrorAsync(ProcessErrorEventArgs args)
@@ -145,7 +141,6 @@ namespace DotNetCore.CAP.AzureServiceBus
             {
                 commitInput.ProcessMessageArgs.CompleteMessageAsync(commitInput.ProcessMessageArgs.Message).GetAwaiter().GetResult();
             }
-           
         }
 
         public void Reject(object? sender)
@@ -155,11 +150,10 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public void Dispose()
         {
-            if (!_serviceBusProcessor.IsProcessing)
+            if (!_serviceBusProcessor!.IsProcessing)
             {
                 _serviceBusProcessor.DisposeAsync().GetAwaiter().GetResult();
             }
-            //_serviceBusProcessor?.CloseAsync().Wait(1500);
         }
 
         public async Task ConnectAsync()
@@ -169,7 +163,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                 return;
             }
 
-            _connectionLock.Wait();
+            await _connectionLock.WaitAsync();
 
             try
             {
@@ -178,12 +172,12 @@ namespace DotNetCore.CAP.AzureServiceBus
                     if (_asbOptions.TokenCredential != null)
                     {
                         _administrationClient = new ServiceBusAdministrationClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
-                        _servicebusClient = new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
+                        _serviceBusClient = new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
                     }
                     else
                     {
                         _administrationClient = new ServiceBusAdministrationClient(_asbOptions.ConnectionString);
-                        _servicebusClient = new ServiceBusClient(_asbOptions.ConnectionString);
+                        _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString);
                     }
 
                     if (!await _administrationClient.TopicExistsAsync(_asbOptions.TopicPath))
@@ -205,7 +199,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                     }
 
 
-                    _serviceBusProcessor = _servicebusClient.CreateProcessor(_asbOptions.TopicPath, _subscriptionName,_asbOptions.EnableSessions?
+                    _serviceBusProcessor = _serviceBusClient.CreateProcessor(_asbOptions.TopicPath, _subscriptionName,_asbOptions.EnableSessions?
                                            new ServiceBusProcessorOptions {
                                                 AutoCompleteMessages =_asbOptions.AutoCompleteMessages,
                                                 MaxConcurrentCalls=_asbOptions.MaxConcurrentCalls,
