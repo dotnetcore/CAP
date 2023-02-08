@@ -68,7 +68,7 @@ namespace DotNetCore.CAP.RabbitMQ
             consumer.ConsumerCancelled += OnConsumerConsumerCancelled;
 
             if (_rabbitMQOptions.BasicQosOptions != null)
-                _channel?.BasicQos(_rabbitMQOptions.BasicQosOptions.PrefetchSize, _rabbitMQOptions.BasicQosOptions.PrefetchCount, _rabbitMQOptions.BasicQosOptions.Global);
+                _channel?.BasicQos(0, _rabbitMQOptions.BasicQosOptions.PrefetchCount, _rabbitMQOptions.BasicQosOptions.Global);
 
             _channel.BasicConsume(_queueName, false, consumer);
 

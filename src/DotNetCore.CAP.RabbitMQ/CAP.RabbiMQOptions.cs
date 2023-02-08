@@ -118,35 +118,17 @@ namespace DotNetCore.CAP
         }
                 
         public class BasicQos
-        {
+        {       
             /// <summary>
-            /// New intance of BasicQos sets the use of basic qos setup on the channel.
-            /// </summary>
-            /// <param name="prefetchCount">Sets the PrefetchSize.</param>
+            /// New instance of BasicQos sets the use of basic qos setup on the basic channel.
+            /// </summary>            
+            /// <param name="prefetchCount">Sets the PrefetchCount.</param>
             /// <param name="global">Sets Global flag (default false).</param>
             public BasicQos(ushort prefetchCount, bool global = false)
             {
                 PrefetchCount = prefetchCount;
-            }
-
-            /// <summary>
-            /// New intance of BasicQos sets the use of basic qos setup on the channel.
-            /// </summary>
-            /// <param name="prefetchSize">Sets the PrefetchSize.</param>
-            /// <param name="prefetchCount">Sets the PrefetchCount.</param>
-            /// <param name="global">Sets Global flag (default false).</param>
-            public BasicQos(uint prefetchSize, ushort prefetchCount, bool global = false)
-            {
-                PrefetchSize = prefetchSize;
-                PrefetchCount = prefetchCount;
                 Global = global;
-            }            
-
-            /// <summary>
-            /// Gets the PrefetchSize, a value of 0 is treated as infinite, allowing any number of unacknowledged message to be prefetched on server. 
-            /// The default value is 0.
-            /// </summary>
-            public uint PrefetchSize { get; private set; } = 0;
+            }   
 
             /// <summary>
             /// Gets the PrefetchCount, a value of 0 is treated as infinite, allowing any number of unacknowledged message being pushed to consumer.
