@@ -1,3 +1,7 @@
+---
+hide:
+  - feedback
+---
 
 # Contact Us
 
