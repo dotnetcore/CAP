@@ -64,6 +64,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                     message.ApplicationProperties.Add(header.Key, header.Value);
                 }
 
+                
                 await _sender!.SendMessageAsync(message);
 
                 _logger.LogDebug($"Azure Service Bus message [{transportMessage.GetName()}] has been published.");

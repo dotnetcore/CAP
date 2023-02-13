@@ -69,7 +69,7 @@ dotnet-counters monitor --process-id=25496 --counters=DotNetCore.CAP.EventCounte
 
 ### 在 Dashboard 中查看度量
 
-你可以配置 `x.UserDashboard()` 来开启仪表盘以图表的形式查看 Metrics 指标。 如下图：
+你可以配置 `x.UseDashboard()` 来开启仪表盘以图表的形式查看 Metrics 指标。 如下图：
 
 ![img](/img/dashboard-metrics.gif)
 

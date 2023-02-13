@@ -25,7 +25,7 @@ namespace DotNetCore.CAP
         public string ConnectionString { get; set; } = default!;
 
         /// <summary>
-        /// Namespace of Servicebus , Needs to be set when using with TokenCredential Property
+        /// Namespace of service bus , Needs to be set when using with TokenCredential Property
         /// </summary>
         public string Namespace { get; set; } = default!;
 
@@ -60,5 +60,12 @@ namespace DotNetCore.CAP
         /// Use this function to write additional headers from the original ASB Message or any Custom Header, i.e. to allow compatibility with heterogeneous systems, into <see cref="CapHeader"/>
         /// </summary>
         public Func<ServiceBusReceivedMessage, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
+
+        /// <summary>
+        /// Custom SQL Filters for topic subscription , more about SQL Filters and its rules 
+        /// Key: Rule Name , Value: SQL Expression 
+        /// https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-sql-filter
+        /// </summary>
+        public List<KeyValuePair<string,string>>? SQLFilters { get; set; }
     }
 }

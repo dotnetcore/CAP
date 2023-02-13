@@ -7,7 +7,7 @@ Azure services can be used in CAP as a message transporter.
 ## Configuration
 
 !!! warning "Requirement"
-    For the Service Bus pricing layer, CAP requires "standard" or "advanced" to support Topic functionality.
+For the Service Bus pricing layer, CAP requires "standard" or "advanced" to support Topic functionality.
 
 To use Azure Service Bus as a message transport, you need to install the following package from NuGet:
 
@@ -48,6 +48,7 @@ The AzureServiceBus configuration options provided directly by the CAP:
 | AutoCompleteMessages    | Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing | bool                                                 | false   |
 | CustomHeaders           | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                                                      | `Func<Message, List<KeyValuePair<string, string>>>?` | null    |
 | Namespace               | Namespace of Servicebus , Needs to be set when using with TokenCredential Property                                                          | string                                               | null    |
+| SQLFilters              | Custom SQL Filters by name and expression on Topic Subscribtion                                                                             | List<KeyValuePair<string, string>>                   | null    |
 
 #### Sessions
 
@@ -84,4 +85,20 @@ c.UseAzureServiceBus(asb =>
 });
 ```
 
-> Important: If a header with the same name (key) already exists in the message, the Custom Header won't be added.
+#### SQL Filters
+
+You can set SQL filters on subscribtion level to get desired messages and not to have custom logic on business side.
+More about Azure Service Bus SQL FILTERS - [Link](https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-sql-filter)
+
+SQLFilters is List Of KeyValuePair<string, string> , Key is filter name and Value SQL Expression.
+```C#
+c.UseAzureServiceBus(asb =>
+{
+    asb.ConnectionString = ...
+    asb.SQLFilters = new List<KeyValuePair<string, string>> {
+            
+            new KeyValuePair<string,string>("IOTFilter","FromIOTHub='true'"),//The message will be handled if ApplicationProperties contains IOTFilter and value is true
+            new KeyValuePair<string,string>("SequenceFilter","sys.enqueuedSequenceNumber >= 300")
+        };
+});
+```

@@ -9,6 +9,7 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Options;
 
@@ -19,12 +20,14 @@ internal class SqlServerMonitoringApi : IMonitoringApi
     private readonly SqlServerOptions _options;
     private readonly string _pubName;
     private readonly string _recName;
+    private readonly ISerializer _serializer;
 
-    public SqlServerMonitoringApi(IOptions<SqlServerOptions> options, IStorageInitializer initializer)
+    public SqlServerMonitoringApi(IOptions<SqlServerOptions> options, IStorageInitializer initializer, ISerializer serializer)
     {
         _options = options.Value ?? throw new ArgumentNullException(nameof(options));
         _pubName = initializer.GetPublishedTableName();
         _recName = initializer.GetReceivedTableName();
+        _serializer = serializer;
     }
 
     public async Task<StatisticsDto> GetStatisticsAsync()
@@ -283,6 +286,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
                 message = new MediumMessage
                 {
                     DbId = reader.GetInt64(0).ToString(),
+                    Origin = _serializer.Deserialize(reader.GetString(1))!,
                     Content = reader.GetString(1),
                     Added = reader.GetDateTime(2),
                     ExpiresAt = reader.GetDateTime(3),

@@ -19,11 +19,17 @@ CAP is modular in design and highly scalable. You have many options to choose fr
 
 [Video: Youtube Tutorial](https://youtu.be/K1e4e0eddNE)
 
+[Video: Youtube Tutorial - @CodeOpinion](https://www.youtube.com/watch?v=dnhPzILvgeo) 
+
 [Video: Tencent Tutorial](https://www.cnblogs.com/savorboard/p/7243609.html)
 
 ## Related articles
 
 [Article: Introduction and how to use](http://www.cnblogs.com/savorboard/p/cap.html)
+
+[Article: New features in version 7.0](https://www.cnblogs.com/savorboard/p/cap-7-0.html)
+
+[Article: New features in version 6.0](https://www.cnblogs.com/savorboard/p/cap-6-0.html)
 
 [Article: New features in version 5.0](https://www.cnblogs.com/savorboard/p/cap-5-0.html)
 

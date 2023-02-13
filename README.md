@@ -81,7 +81,7 @@ public void ConfigureServices(IServiceCollection services)
         x.UseMongoDB("Your ConnectionStrings");  //MongoDB 4.0+ cluster
 
         // CAP support RabbitMQ,Kafka,AzureService as the MQ, choose to add configuration you needed：
-        x.UseRabbitMQ("ConnectionString");
+        x.UseRabbitMQ("HostName");
         x.UseKafka("ConnectionString");
         x.UseAzureServiceBus("ConnectionString");
         x.UseAmazonSQS();
@@ -92,7 +92,9 @@ public void ConfigureServices(IServiceCollection services)
 
 ### Publish
 
-Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send messages
+Inject `ICapPublisher` in your Controller, then use the `ICapPublisher` to send messages.
+
+> The version 7.0+ supports publish delay messages.
 
 ```c#
 public class PublishController : Controller
@@ -114,6 +116,9 @@ public class PublishController : Controller
                 //your business logic code
 
                 _capBus.Publish("xxx.services.show.time", DateTime.Now);
+
+                // Publish delay message
+                _capBus.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "xxx.services.show.time", DateTime.Now);
             }
         }
 

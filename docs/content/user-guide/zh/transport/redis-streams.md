@@ -40,7 +40,7 @@ Configuration | redis连接配置 (StackExchange.Redis) | ConfigurationOptions |
 StreamEntriesCount | 读取时从 stream 返回的条目数  | uint | 10
 ConnectionPoolSize  | 连接池数  | uint | 10
 
-#### Redis ConfigurationOptions
+#### Redis Configuration Options
 
 如果需要**更多**原生Redis相关配置选项，您可以在 `Configuration` 选项中进行设置 :
 
@@ -56,3 +56,7 @@ services.AddCap(capOptions =>
 ```
 
 `Configuration` 是 StackExchange.Redis ConfigurationOptions ，您可以通过此[链接](https://stackexchange.github.io/StackExchange.Redis/Configuration)找到更多详细信息。
+
+### 流清理注意事项
+
+由于redis streams 没有自动删除所有已经被所有组确认的消息的特性[issue](https://github.com/redis/redis/issues/5774)，所以你需要考虑是否使用脚本来执行定期删除。

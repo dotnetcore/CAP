@@ -15,7 +15,11 @@ builder.Services.AddCap(c =>
         {
             new(DotNetCore.CAP.Messages.Headers.MessageId,
                 SnowflakeId.Default().NextId().ToString()),
-            new(DotNetCore.CAP.Messages.Headers.MessageName, message.Subject)
+            new(DotNetCore.CAP.Messages.Headers.MessageName, message.Subject),
+            new("IsFromSampleProject", "'true'")
+        };
+        asb.SQLFilters = new List<KeyValuePair<string, string>>() {
+            new("IsFromSampleProjectFilter","IsFromSampleProject = 'true'")
         };
     });
 

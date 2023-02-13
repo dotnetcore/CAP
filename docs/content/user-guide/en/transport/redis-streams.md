@@ -41,7 +41,7 @@ Configuration | redis connection configuration (StackExchange.Redis) | Configura
 StreamEntriesCount | number of entries returned from a stream while reading | uint | 10
 ConnectionPoolSize  | number of connections pool | uint | 10
 
-#### Redis ConfigurationOptions
+#### Redis Configuration Options
 
 If you need **more** native Redis related configuration options, you can set them in the `Configuration` option:
 
@@ -57,3 +57,7 @@ services.AddCap(capOptions =>
 ```
 
 `Configuration` is a StackExchange.Redis ConfigurationOptions , you can find more details through this [link](https://stackexchange.github.io/StackExchange.Redis/Configuration)
+
+### Streams Cleanup Notes
+
+Since redis streams does not have the feature of deletes all messages that already acknowledged by all groups [issue](https://github.com/redis/redis/issues/5774) , so you need to consider if using a script to perform the deletion regularly.

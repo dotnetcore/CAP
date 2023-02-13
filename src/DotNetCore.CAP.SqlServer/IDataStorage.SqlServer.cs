@@ -209,7 +209,7 @@ public class SqlServerDataStorage : IDataStorage
 
     public IMonitoringApi GetMonitoringApi()
     {
-        return new SqlServerMonitoringApi(_options, _initializer);
+        return new SqlServerMonitoringApi(_options, _initializer, _serializer);
     }
 
     private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state, object? transaction = null)

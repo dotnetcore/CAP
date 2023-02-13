@@ -75,7 +75,7 @@ process-id： The ID of the CAP process to collect counter data from.
 
 ### Monitor with dashboard
 
-You can configure `x.UserDashboard()` to open the dashboard to view Metrics graph charts.
+You can configure `x.UseDashboard()` to open the dashboard to view Metrics graph charts.
 
 ![img](/img/dashboard-metrics.gif)
 
