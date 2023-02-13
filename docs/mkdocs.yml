@@ -10,7 +10,7 @@ edit_uri: "edit/master/docs/content"
 docs_dir: "content"
 
 # Copyright
-copyright: Copyright &copy; 2021 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
+copyright: Copyright &copy; 2023 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
 
 #theme: material
 theme:
@@ -45,6 +45,23 @@ extra:
       link: "https://twitter.com/ncc_community"
     - icon: "fontawesome/brands/weibo"
       link: "https://weibo.com/dotnetcore"
+  analytics:
+    provider: google
+    property: !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: >- 
+            Thanks for your feedback! Help us improve this page by
+            using our <a href="..." target="_blank" rel="noopener">feedback form</a>.
 
 # Extensions
 markdown_extensions:
@@ -161,8 +178,3 @@ nav:
       - Contact Us: about/contact-us.md
       - Release Notes: about/release-notes.md
       - License: about/license.md
-
-# Google Analytics
-google_analytics:
-  - !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
-  - auto
