@@ -123,6 +123,11 @@ public class CapOptions
     public JsonSerializerOptions JsonSerializerOptions { get; } = new();
 
     /// <summary>
+    /// if true,cap will use only one instance to retry failure messages
+    /// </summary>
+    public bool IsUseStorageLock { get; set; }
+
+    /// <summary>
     /// Registers an extension that will be executed when building services.
     /// </summary>
     /// <param name="extension"></param>

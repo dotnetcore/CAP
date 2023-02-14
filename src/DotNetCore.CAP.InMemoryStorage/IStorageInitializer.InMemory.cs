@@ -19,6 +19,11 @@ namespace DotNetCore.CAP.InMemoryStorage
             return nameof(InMemoryStorage.ReceivedMessages);
         }
 
+        public string GetLockTableName()
+        {
+            return string.Empty;
+        }
+
         public Task InitializeAsync(CancellationToken cancellationToken)
         {
              return Task.CompletedTask;

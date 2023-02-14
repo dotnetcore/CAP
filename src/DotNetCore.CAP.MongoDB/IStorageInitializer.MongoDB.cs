@@ -1,7 +1,9 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
@@ -16,12 +18,14 @@ public class MongoDBStorageInitializer : IStorageInitializer
     private readonly IMongoClient _client;
     private readonly ILogger _logger;
     private readonly IOptions<MongoDBOptions> _options;
+    private readonly IOptions<CapOptions> _capOptions;
 
     public MongoDBStorageInitializer(
         ILogger<MongoDBStorageInitializer> logger,
         IMongoClient client,
-        IOptions<MongoDBOptions> options)
+        IOptions<MongoDBOptions> options,IOptions<CapOptions> capOptions)
     {
+        _capOptions = capOptions;
         _options = options;
         _logger = logger;
         _client = client;
@@ -35,6 +39,11 @@ public class MongoDBStorageInitializer : IStorageInitializer
     public string GetReceivedTableName()
     {
         return _options.Value.ReceivedCollection;
+    }
+
+    public string GetLockTableName()
+    {
+        return _options.Value.LockCollection;
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -55,10 +64,27 @@ public class MongoDBStorageInitializer : IStorageInitializer
             await database.CreateCollectionAsync(options.PublishedCollection, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
+        if (_capOptions.Value.IsUseStorageLock&&names.All(n => n != options.LockCollection))
+            await database.CreateCollectionAsync(options.LockCollection, cancellationToken: cancellationToken)
+                .ConfigureAwait(false);
+        
         await Task.WhenAll(
             TryCreateIndexesAsync<ReceivedMessage>(options.ReceivedCollection),
             TryCreateIndexesAsync<PublishedMessage>(options.PublishedCollection)).ConfigureAwait(false);
-
+        
+        if (_capOptions.Value.IsUseStorageLock)
+        {
+            await database.GetCollection<Lock>(options.LockCollection)
+                .UpdateOneAsync(it=>it.Key=="publish_retry",
+                    Builders<Lock>.Update.Set(model=>model.Key,"publish_retry").SetOnInsert(model=>model.LastLockTime,DateTime.MinValue), 
+                    new UpdateOptions() { IsUpsert = true },cancellationToken);
+            
+            await database.GetCollection<Lock>(options.LockCollection)
+                .UpdateOneAsync(it=>it.Key=="received_retry",
+                    Builders<Lock>.Update.Set(model=>model.Key,"received_retry").SetOnInsert(model=>model.LastLockTime,DateTime.MinValue), 
+                    new UpdateOptions() { IsUpsert = true },cancellationToken);
+        }
+       
         _logger.LogDebug("Ensuring all create database tables script are applied.");
 
 

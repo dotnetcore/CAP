@@ -25,6 +25,7 @@ namespace DotNetCore.CAP.PostgreSql
         private readonly ISerializer _serializer;
         private readonly string _pubName;
         private readonly string _recName;
+        private readonly string _retryName;
 
         public PostgreSqlDataStorage(
             IOptions<PostgreSqlOptions> options,
@@ -38,6 +39,35 @@ namespace DotNetCore.CAP.PostgreSql
             _serializer = serializer;
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
+            _retryName = initializer.GetLockTableName();
+        }
+
+        public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl,string instance, CancellationToken token = default)
+        {
+            string sql =
+                $"UPDATE {_retryName} SET \"Instance\"='{instance}',\"LastLockTime\"='{DateTime.Now}' WHERE \"Key\"='{key}' AND \"LastLockTime\" < '{DateTime.Now.Subtract(ttl)}';"; 
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            var opResult=await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+            return opResult > 0;
+        }
+
+        public async Task ReleaseLockAsync(string key,string instance, CancellationToken token = default)
+        {
+            string sql =
+                $"UPDATE {_retryName} SET \"Instance\"='',\"LastLockTime\"='{DateTime.MinValue}' WHERE \"Key\"='{key}' AND \"Instance\"='{instance}';";
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        }
+
+        public async Task RenewLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
+        {
+            var sql = $"UPDATE {_retryName} SET \"LastLockTime\"=\"LastLockTime\"+interval '{ttl.TotalSeconds}' second WHERE \"Key\"='{key}'" +
+                      $" AND \"Instance\"='{instance}';";
+            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var _ = connection.ConfigureAwait(false);
+            await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
         }
 
         public async Task ChangePublishStateToDelayedAsync(string[] ids)

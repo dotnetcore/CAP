@@ -1,6 +1,7 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
@@ -14,11 +15,13 @@ public class SqlServerStorageInitializer : IStorageInitializer
 {
     private readonly ILogger _logger;
     private readonly IOptions<SqlServerOptions> _options;
+    private readonly IOptions<CapOptions> _capOptions;
 
     public SqlServerStorageInitializer(
         ILogger<SqlServerStorageInitializer> logger,
-        IOptions<SqlServerOptions> options)
+        IOptions<SqlServerOptions> options,IOptions<CapOptions> capOptions)
     {
+	    _capOptions = capOptions;
         _options = options;
         _logger = logger;
     }
@@ -31,6 +34,11 @@ public class SqlServerStorageInitializer : IStorageInitializer
     public virtual string GetReceivedTableName()
     {
         return $"{_options.Value.Schema}.Received";
+    }
+
+    public string GetLockTableName()
+    {
+	    return $"{_options.Value.Schema}.Lock";
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -89,7 +97,26 @@ CREATE TABLE {GetPublishedTableName()}(
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-END;";
+END;
+";
+        if (_capOptions.Value.IsUseStorageLock)
+	        batchSql += $@"
+IF OBJECT_ID(N'{GetLockTableName()}',N'U') IS NULL
+BEGIN
+CREATE TABLE {GetLockTableName()}(
+	[Key] [nvarchar](128) NOT NULL,
+    [Instance] [nvarchar](256) NOT NULL,
+	[LastLockTime] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_{GetLockTableName()}] PRIMARY KEY CLUSTERED
+(
+	[Key] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = ON, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] 
+END;
+
+INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('publish_retry','','{DateTime.MinValue}');
+INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('received_retry','','{DateTime.MinValue}');
+";
         return batchSql;
     }
 }
