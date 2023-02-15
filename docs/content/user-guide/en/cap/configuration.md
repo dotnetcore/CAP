@@ -85,6 +85,15 @@ During the message sending process if consumption method fails, CAP will try to 
     By default if failure occurs on send or consume, retry will start after **4 minutes** in order to avoid possible problems caused by setting message state delays.    
     Failures in the process of sending and consuming messages will be retried 3 times immediately, and will be retried polling after 3 times, at which point the FailedRetryInterval configuration will take effect.
 
+!!! WARNING "Multi-instance concurrent retries"
+    We introduced database-based distributed locks in version 7.1.0 to solve the problem of retrying concurrent fetches from the database under multiple instances, you need to explicitly configure `IsUseStorageLock` to true.
+
+#### IsUseStorageLock
+
+> Default: false
+
+If set to true, we will use a database-based distributed lock to solve the problem of concurrent fetches data by retry processes with multiple instances. This will generate the cap.lock table in the database.
+
 #### CollectorCleaningInterval
 
 > Default: 300 sec
