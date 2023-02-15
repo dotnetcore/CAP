@@ -31,6 +31,21 @@ namespace DotNetCore.CAP.InMemoryStorage
 
         public static ConcurrentDictionary<string, MemoryMessage> ReceivedMessages { get; } = new();
 
+        public Task<bool> AcquireLockAsync(string key, TimeSpan ttl,string instance, CancellationToken token = default)
+        {
+            return Task.FromResult(true);
+        }
+
+        public Task ReleaseLockAsync(string key,string instance, CancellationToken token = default)
+        {
+            return Task.CompletedTask;
+        }
+
+        public Task RenewLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
+        {
+            return Task.CompletedTask;
+        }
+
         public Task ChangePublishStateToDelayedAsync(string[] ids)
         {
             foreach (var id in ids)

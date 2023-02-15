@@ -3,6 +3,8 @@
 
 using System;
 using MongoDB.Bson;
+using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson.Serialization.IdGenerators;
 
 namespace DotNetCore.CAP.MongoDB;
 
@@ -47,4 +49,12 @@ internal class PublishedMessage
 
     // ReSharper disable once InconsistentNaming
     public ObjectId _lockToken { get; set; }
+}
+
+public class Lock
+{
+    [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
+    public string Key { get; set; } 
+    public string Instance { get; set; }
+    public DateTime LastLockTime  { get; set; }
 }

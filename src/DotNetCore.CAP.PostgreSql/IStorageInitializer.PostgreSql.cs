@@ -1,6 +1,7 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
@@ -14,11 +15,13 @@ namespace DotNetCore.CAP.PostgreSql
     {
         private readonly ILogger _logger;
         private readonly IOptions<PostgreSqlOptions> _options;
+        private readonly IOptions<CapOptions> _capOptions;
 
         public PostgreSqlStorageInitializer(
             ILogger<PostgreSqlStorageInitializer> logger,
-            IOptions<PostgreSqlOptions> options)
+            IOptions<PostgreSqlOptions> options, IOptions<CapOptions> capOptions)
         {
+            _capOptions = capOptions;
             _options = options;
             _logger = logger;
         }
@@ -31,6 +34,11 @@ namespace DotNetCore.CAP.PostgreSql
         public virtual string GetReceivedTableName()
         {
             return $"\"{_options.Value.Schema}\".\"received\"";
+        }
+
+        public string GetLockTableName()
+        {
+            return $"\"{_options.Value.Schema}\".\"lock\"";
         }
 
         public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -71,7 +79,19 @@ CREATE TABLE IF NOT EXISTS {GetPublishedTableName()}(
 	""Added"" TIMESTAMP NOT NULL,
     ""ExpiresAt"" TIMESTAMP NULL,
 	""StatusName"" VARCHAR(50) NOT NULL
-);";
+);
+";
+            if (_capOptions.Value.IsUseStorageLock)
+                batchSql += $@"
+CREATE TABLE IF NOT EXISTS {GetLockTableName()}(
+	""Key"" VARCHAR(128) PRIMARY KEY NOT NULL,
+    ""Instance"" VARCHAR(256),
+	""LastLockTime"" TIMESTAMP NOT NULL
+);
+
+INSERT INTO  {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('publish_retry','','{DateTime.MinValue}') ON CONFLICT DO NOTHING ;
+INSERT INTO {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('received_retry','','{DateTime.MinValue}')  ON CONFLICT DO NOTHING;";
+            
             return batchSql;
         }
     }
