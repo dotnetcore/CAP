@@ -50,6 +50,7 @@ QueueArguments  | 队列额外参数 x-arguments | QueueArgumentsOptions  |  N/A
 ConnectionFactoryOptions  |  RabbitMQClient原生参数 | ConnectionFactory | N/A
 CustomHeaders  | 订阅者自定义头信息 |  见下文 |  N/A
 PublishConfirms | 是否启用[发布确认](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
+BasicQosOptions | 指定消费的[Qos](https://www.rabbitmq.com/consumer-prefetch.html) | BasicQos | N/A
 
 #### ConnectionFactory Option
 

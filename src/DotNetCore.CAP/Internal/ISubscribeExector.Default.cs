@@ -41,7 +41,7 @@ internal class SubscribeExecutor : ISubscribeExecutor
 
         _dataStorage = _provider.GetRequiredService<IDataStorage>();
         Invoker = _provider.GetRequiredService<ISubscribeInvoker>();
-        _hostName = GenerateHostnameInstanceId();
+        _hostName = Helper.GetInstanceHostname();
     }
 
     private ISubscribeInvoker Invoker { get; }
@@ -204,21 +204,6 @@ internal class SubscribeExecutor : ISubscribeExecutor
             TracingError(tracingTimestamp, message.Origin, descriptor.MethodInfo, e);
 
             throw e;
-        }
-    }
-
-    private string? GenerateHostnameInstanceId()
-    {
-        try
-        {
-            var hostName = Dns.GetHostName();
-            if (hostName.Length <= 50) return hostName;
-            return hostName.Substring(0, 50);
-        }
-        catch (Exception e)
-        {
-            _logger.LogWarning(e, "Couldn't get host name!");
-            return null;
         }
     }
 

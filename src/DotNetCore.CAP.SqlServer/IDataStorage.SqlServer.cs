@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
@@ -27,7 +26,7 @@ public class SqlServerDataStorage : IDataStorage
     private readonly string _recName;
     private readonly ISerializer _serializer;
     private readonly string _retryName;
-    
+
     public SqlServerDataStorage(
         IOptions<CapOptions> capOptions,
         IOptions<SqlServerOptions> options,
@@ -43,17 +42,17 @@ public class SqlServerDataStorage : IDataStorage
         _retryName = initializer.GetLockTableName();
     }
 
-    public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl,string instance, CancellationToken token = default)
+    public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
     {
         string sql =
             $"UPDATE {_retryName} SET [Instance]='{instance}',[LastLockTime]='{DateTime.Now}' WHERE [Key]='{key}' AND [LastLockTime] < '{DateTime.Now.Subtract(ttl)}';";
         var connection = new SqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
-        var opResult=await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        var opResult = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
         return opResult > 0;
     }
 
-    public async Task ReleaseLockAsync(string key,string instance, CancellationToken cancellationToken=default)
+    public async Task ReleaseLockAsync(string key, string instance, CancellationToken cancellationToken = default)
     {
         string sql =
             $"UPDATE {_retryName} SET [Instance]='',[LastLockTime]='{DateTime.MinValue}' WHERE [Key]='{key}' AND [Instance]='{instance}';";

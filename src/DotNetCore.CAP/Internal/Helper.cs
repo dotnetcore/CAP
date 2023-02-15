@@ -4,6 +4,7 @@
 using System;
 using System.ComponentModel;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Text.RegularExpressions;
 
@@ -38,6 +39,20 @@ public static class Helper
             return ("^" + wildcard.Replace(".", "\\.") + "$").Replace("#", "[0-9a-zA-Z\\.]+");
 
         return wildcard;
+    }
+
+    public static string? GetInstanceHostname()
+    {
+        try
+        {
+            var hostName = Dns.GetHostName();
+            if (hostName.Length <= 50) return hostName;
+            return hostName.Substring(0, 50);
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 
     public static string Normalized(string name)

@@ -86,27 +86,36 @@ services.AddCap(config =>
     在默认情况下，重试将在发送和消费消息失败的 **4分钟后** 开始，这是为了避免设置消息状态延迟导致可能出现的问题。  
     发送和消费消息的过程中失败会立即重试 3 次，在 3 次以后将进入重试轮询，此时 FailedRetryInterval 配置才会生效。
 
+!!! WARNING "多实例并发重试"
+    我们在7.1.0版本中引入了基于数据库的分布式锁以应对在多个实例下对数据库重试的并发数据获取问题，你需要显式配置 `IsUseStorageLock` 为 true。
+
+#### IsUseStorageLock
+
+> 默认值: false
+
+如果设置为true，我们将使用基于数据库的分布式锁以应对重试进程在多个实例下对数据库数据的并发获取问题。这将会在数据库生成 cap.lock 表。
+
 #### ConsumerThreadCount 
 
-默认值：1
+> 默认值：1
 
 消费者线程并行处理消息的线程数，当这个值大于1时，将不能保证消息执行的顺序。
 
 #### CollectorCleaningInterval
 
-默认值：300 秒
+> 默认值：300 秒
 
 收集器删除已经过期消息的时间间隔。
 
 #### FailedRetryCount
 
-默认值：50
+> 默认值：50
 
 重试的最大次数。当达到此设置值时，将不会再继续重试，通过改变此参数来设置重试的最大次数。
 
 #### FailedThresholdCallback
 
-默认值：NULL
+> 默认值：NULL
 
 类型：`Action<FailedInfo>`
 
@@ -114,13 +123,13 @@ services.AddCap(config =>
 
 #### SucceedMessageExpiredAfter
 
-默认值：24*3600 秒（1天后）
+> 默认值：24*3600 秒（1天后）
 
 成功消息的过期时间（秒）。 当消息发送或者消费成功时候，在时间达到 `SucceedMessageExpiredAfter` 秒时候将会从 Persistent 中删除，你可以通过指定此值来设置过期的时间。
 
 #### FailedMessageExpiredAfter
 
-默认值：15*24*3600 秒（15天后）
+> 默认值：15*24*3600 秒（15天后）
 
 失败消息的过期时间（秒）。 当消息发送或者消费失败时候，在时间达到 `FailedMessageExpiredAfter` 秒时候将会从 Persistent 中删除，你可以通过指定此值来设置过期的时间。
 

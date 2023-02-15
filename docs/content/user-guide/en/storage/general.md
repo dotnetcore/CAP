@@ -63,7 +63,15 @@ Added | Added Time | DateTime
 ExpiresAt | Expire time | DateTime
 Retries | Retry times | int
 StatusName | Status Name | string
- 
+
+Table structure of **Lock** (Optional):
+
+NAME | DESCRIPTION | TYPE
+:---|:---|:---
+Key | Lock Id | string
+Instance | Acquired instance of lock | string
+LastLockTime | Last acquired lock time | DateTime
+
 ### Wapper Object
 
 When CAP sends a message, it will store original message object in a second package in the `Content` field. 

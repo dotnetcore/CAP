@@ -36,7 +36,7 @@ namespace DotNetCore.CAP.PostgreSql
             return $"\"{_options.Value.Schema}\".\"received\"";
         }
 
-        public string GetLockTableName()
+        public virtual string GetLockTableName()
         {
             return $"\"{_options.Value.Schema}\".\"lock\"";
         }
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS {GetLockTableName()}(
 
 INSERT INTO  {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('publish_retry','','{DateTime.MinValue}') ON CONFLICT DO NOTHING ;
 INSERT INTO {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('received_retry','','{DateTime.MinValue}')  ON CONFLICT DO NOTHING;";
-            
+
             return batchSql;
         }
     }

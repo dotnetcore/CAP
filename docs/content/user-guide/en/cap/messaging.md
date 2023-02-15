@@ -109,7 +109,7 @@ Retrying plays an important role in the overall CAP architecture design, CAP ret
 
 ### Send retry
 
-During the message sending process, when the broker crashes or the connection fails or an abnormality occurs, CAP will retry the sending. Retry 3 times for the first time, retry every minute after 4 minutes, and +1 retry. When the total number of retries reaches 50,CAP will stop retrying.
+During the message sending process, when the broker crashes or the connection fails or an abnormality occurs, CAP will retry the sending. Retry 3 times for the first time, retry every minute after 4 minutes, and +1 retry. When the total number of retries reaches 50, CAP will stop retrying.
 
 You can adjust the total number of retries by setting [FailedRetryCount](../configuration#failedretrycount) in CapOptions.
 
@@ -118,6 +118,8 @@ It will stop when the maximum number of times is reached. You can see the reason
 ### Consumption retry
 
 The consumer method is executed when the Consumer receives the message and will retry when an exception occurs. This retry strategy is the same as the send retry.
+
+We introduced database-based distributed locks in version 7.1.0 to deal with the problem of concurrent data acquisition of database retries under multiple instances, you need to explicitly configure `IsUseStorageLock` option to true.
 
 ## Data Cleanup
 

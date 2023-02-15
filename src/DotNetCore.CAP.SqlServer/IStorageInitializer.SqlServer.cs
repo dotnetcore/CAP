@@ -19,9 +19,9 @@ public class SqlServerStorageInitializer : IStorageInitializer
 
     public SqlServerStorageInitializer(
         ILogger<SqlServerStorageInitializer> logger,
-        IOptions<SqlServerOptions> options,IOptions<CapOptions> capOptions)
+        IOptions<SqlServerOptions> options, IOptions<CapOptions> capOptions)
     {
-	    _capOptions = capOptions;
+        _capOptions = capOptions;
         _options = options;
         _logger = logger;
     }
@@ -36,9 +36,9 @@ public class SqlServerStorageInitializer : IStorageInitializer
         return $"{_options.Value.Schema}.Received";
     }
 
-    public string GetLockTableName()
+    public virtual string GetLockTableName()
     {
-	    return $"{_options.Value.Schema}.Lock";
+        return $"{_options.Value.Schema}.Lock";
     }
 
     public async Task InitializeAsync(CancellationToken cancellationToken)
@@ -100,7 +100,7 @@ CREATE TABLE {GetPublishedTableName()}(
 END;
 ";
         if (_capOptions.Value.IsUseStorageLock)
-	        batchSql += $@"
+            batchSql += $@"
 IF OBJECT_ID(N'{GetLockTableName()}',N'U') IS NULL
 BEGIN
 CREATE TABLE {GetLockTableName()}(

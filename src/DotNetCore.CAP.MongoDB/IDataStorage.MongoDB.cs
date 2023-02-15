@@ -38,43 +38,44 @@ public class MongoDBDataStorage : IDataStorage
         _serializer = serializer;
     }
 
-    public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl,string instance, CancellationToken token = default)
+    public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
     {
         var collection = _database.GetCollection<Lock>(_options.Value.LockCollection);
-        using var session = await _client.StartSessionAsync(cancellationToken:token).ConfigureAwait(false);
+        using var session = await _client.StartSessionAsync(cancellationToken: token).ConfigureAwait(false);
         var transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
         session.StartTransaction(transactionOptions);
         try
         {
-            var opResult = await collection.UpdateOneAsync(session,model=> model.Key == key&&model.LastLockTime<DateTime.Now.Subtract(ttl),
-                Builders<Lock>.Update.Set(model => model.Instance, instance).Set(model=>model.LastLockTime,DateTime.Now),null,token);
-            var isAcquired=opResult.IsModifiedCountAvailable && opResult.ModifiedCount > 0;
+            var opResult = await collection.UpdateOneAsync(session, model => model.Key == key && model.LastLockTime < DateTime.Now.Subtract(ttl),
+                Builders<Lock>.Update.Set(model => model.Instance, instance).Set(model => model.LastLockTime, DateTime.Now), null, token);
+            var isAcquired = opResult.IsModifiedCountAvailable && opResult.ModifiedCount > 0;
             await session.CommitTransactionAsync(token).ConfigureAwait(false);
             return isAcquired;
-        }catch(Exception)
+        }
+        catch (Exception)
         {
             await session.AbortTransactionAsync(token).ConfigureAwait(false);
             return false;
         }
     }
 
-    public async Task ReleaseLockAsync(string key,string instance, CancellationToken token = default)
+    public async Task ReleaseLockAsync(string key, string instance, CancellationToken token = default)
     {
         var collection = _database.GetCollection<Lock>(_options.Value.LockCollection);
         await collection.UpdateOneAsync(
-            model=> model.Key == key&&model.Instance==instance,
+            model => model.Key == key && model.Instance == instance,
             Builders<Lock>.Update.Set(model => model.Instance, "")
-                .Set(model=>model.LastLockTime,DateTime.MinValue),null,token).ConfigureAwait(false);
+                .Set(model => model.LastLockTime, DateTime.MinValue), null, token).ConfigureAwait(false);
     }
 
     public async Task RenewLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
     {
         var collection = _database.GetCollection<Lock>(_options.Value.LockCollection);
-        var filter = Builders<Lock>.Filter.Where(it=>it.Key==key&&it.Instance==instance); 
+        var filter = Builders<Lock>.Filter.Where(it => it.Key == key && it.Instance == instance);
         var pipeline = new EmptyPipelineDefinition<Lock>()
             .AppendStage<Lock, Lock, Lock>($"{{$set:{{LastLockTime:{{$add:[ \"$LastLockTime\",  {ttl.TotalMilliseconds} ]}}}}}}");
         var update = Builders<Lock>.Update.Pipeline(pipeline);
-        await collection.UpdateOneAsync(filter, update,cancellationToken:token).ConfigureAwait(false);
+        await collection.UpdateOneAsync(filter, update, cancellationToken: token).ConfigureAwait(false);
     }
 
     public async Task ChangePublishStateToDelayedAsync(string[] ids)
@@ -250,7 +251,7 @@ public class MongoDBDataStorage : IDataStorage
             Retries = x.Retries,
             Added = x.Added
         }).ToList();
-       
+
     }
 
     public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
@@ -278,7 +279,7 @@ public class MongoDBDataStorage : IDataStorage
     {
         var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
 
-        var update = Builders<PublishedMessage>.Update.Set(x=>x._lockToken, ObjectId.GenerateNewId());
+        var update = Builders<PublishedMessage>.Update.Set(x => x._lockToken, ObjectId.GenerateNewId());
 
         var filter = Builders<PublishedMessage>.Filter.Where(x => x.Version == _capOptions.Value.Version
                                                      && ((x.StatusName == nameof(StatusName.Delayed) && x.ExpiresAt < DateTime.Now.AddMinutes(2))

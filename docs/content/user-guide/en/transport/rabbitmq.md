@@ -49,6 +49,7 @@ QueueArguments  | Extra queue `x-arguments` | QueueArgumentsOptions  |  N/A
 ConnectionFactoryOptions  |  RabbitMQClient native connection options | ConnectionFactory | N/A
 CustomHeaders  | Custom subscribe headers |  See the blow |  N/A
 PublishConfirms | Enable [publish confirms](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
+BasicQosOptions | Specify [Qos](https://www.rabbitmq.com/consumer-prefetch.html) of message prefetch | BasicQos | N/A
 
 #### ConnectionFactory Option
 

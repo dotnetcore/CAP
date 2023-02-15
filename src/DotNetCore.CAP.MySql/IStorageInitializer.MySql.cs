@@ -22,7 +22,8 @@ public class MySqlStorageInitializer : IStorageInitializer
 
     public MySqlStorageInitializer(
         ILogger<MySqlStorageInitializer> logger,
-        IOptions<MySqlOptions> options, IOptions<CapOptions> capOptions)
+        IOptions<MySqlOptions> options, 
+        IOptions<CapOptions> capOptions)
     {
         _options = options;
         _logger = logger;
@@ -39,7 +40,7 @@ public class MySqlStorageInitializer : IStorageInitializer
         return $"{_options.Value.TableNamePrefix}.received";
     }
 
-    public string GetLockTableName()
+    public virtual string GetLockTableName()
     {
         return $"{_options.Value.TableNamePrefix}.lock";
     }

@@ -45,13 +45,13 @@ public class MySqlDataStorage : IDataStorage
         _supportSkipLocked = ((MySqlStorageInitializer)initializer).IsSupportSkipLocked();
     }
 
-    public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl,string instance, CancellationToken token = default)
+    public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
     {
         string sql =
             $"UPDATE `{_retryName}` SET `Instance`='{instance}',`LastLockTime`='{DateTime.Now}' WHERE `Key`='{key}' AND `LastLockTime` < '{DateTime.Now.Subtract(ttl)}';";
         var connection = new MySqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
-        var opResult=await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        var opResult = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
         return opResult > 0;
     }
 

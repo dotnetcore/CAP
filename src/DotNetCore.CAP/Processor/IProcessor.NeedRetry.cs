@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
@@ -26,7 +25,8 @@ public class MessageNeedToRetryProcessor : IProcessor
     private readonly string _instance;
     private Task? _failedRetryConsumeTask;
 
-    public MessageNeedToRetryProcessor(IOptions<CapOptions> options, ILogger<MessageNeedToRetryProcessor> logger, IDispatcher dispatcher,IDataStorage dataStorage)
+    public MessageNeedToRetryProcessor(IOptions<CapOptions> options, ILogger<MessageNeedToRetryProcessor> logger,
+        IDispatcher dispatcher, IDataStorage dataStorage)
     {
         _options = options;
         _logger = logger;
@@ -34,27 +34,27 @@ public class MessageNeedToRetryProcessor : IProcessor
         _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
         _dataStorage = dataStorage;
         _ttl = _waitingInterval.Add(TimeSpan.FromSeconds(10));
-        _instance = $"{Assembly.GetEntryAssembly()?.GetName().Name!.ToLower()}-{SnowflakeId.Default().NextId()}";
+
+        _instance = string.Concat(Helper.GetInstanceHostname(), "_", Util.GenerateWorkerId(1023));
     }
 
     public virtual async Task ProcessAsync(ProcessingContext context)
     {
         if (context == null) throw new ArgumentNullException(nameof(context));
-        
+
         var storage = context.Provider.GetRequiredService<IDataStorage>();
 
         _ = Task.Run(() => ProcessPublishedAsync(storage, context));
-        
-        if (_options.Value.IsUseStorageLock&&_failedRetryConsumeTask!=null && !_failedRetryConsumeTask.IsCompleted)
+
+        if (_options.Value.IsUseStorageLock && _failedRetryConsumeTask is { IsCompleted: false })
         {
-            await _dataStorage.RenewLockAsync("received_retry",_ttl,_instance,context.CancellationToken);            
+            await _dataStorage.RenewLockAsync("received_retry", _ttl, _instance, context.CancellationToken);
             return;
         }
-        
+
         _failedRetryConsumeTask = Task.Run(() => ProcessReceivedAsync(storage, context));
         
-        if (_options.Value.IsUseStorageLock)
-            _failedRetryConsumeTask.ContinueWith(_ => { _failedRetryConsumeTask = null; });
+        _ = _failedRetryConsumeTask.ContinueWith(_ => { _failedRetryConsumeTask = null; });
 
         await context.WaitAsync(_waitingInterval).ConfigureAwait(false);
     }
@@ -62,10 +62,10 @@ public class MessageNeedToRetryProcessor : IProcessor
     private async Task ProcessPublishedAsync(IDataStorage connection, ProcessingContext context)
     {
         context.ThrowIfStopping();
-        
-        if (_options.Value.IsUseStorageLock&&!await connection.AcquireLockAsync("publish_retry", _ttl, _instance, context.CancellationToken))
+
+        if (_options.Value.IsUseStorageLock && !await connection.AcquireLockAsync("publish_retry", _ttl, _instance, context.CancellationToken))
             return;
-        
+
         var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry).ConfigureAwait(false);
 
         foreach (var message in messages)
@@ -74,16 +74,16 @@ public class MessageNeedToRetryProcessor : IProcessor
 
             await _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
         }
-        
-        if(_options.Value.IsUseStorageLock)
+
+        if (_options.Value.IsUseStorageLock)
             await connection.ReleaseLockAsync("publish_retry", _instance, context.CancellationToken);
     }
 
     private async Task ProcessReceivedAsync(IDataStorage connection, ProcessingContext context)
     {
         context.ThrowIfStopping();
-        
-        if (_options.Value.IsUseStorageLock&&!await connection.AcquireLockAsync("received_retry", _ttl, _instance, context.CancellationToken))
+
+        if (_options.Value.IsUseStorageLock && !await connection.AcquireLockAsync("received_retry", _ttl, _instance, context.CancellationToken))
             return;
 
         var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry).ConfigureAwait(false);
@@ -94,7 +94,7 @@ public class MessageNeedToRetryProcessor : IProcessor
 
             await _dispatcher.EnqueueToExecute(message).ConfigureAwait(false);
         }
-        
+
         if (_options.Value.IsUseStorageLock)
             await connection.ReleaseLockAsync("received_retry", _instance, context.CancellationToken);
     }

@@ -61,6 +61,14 @@ ExpiresAt | Expire time | DateTime
 Retries | Retry times | int
 StatusName | Status Name | string
 
+**Lock** 表结构（可选）：
+
+NAME | DESCRIPTION | TYPE
+:---|:---|:---
+Key | Lock Id | string
+Instance | Acquired instance of lock | string
+LastLockTime | Last acquired lock time | DateTime
+
 ### 包装器对象
 
 CAP 在进行消息发送到时候，会对原始消息对象进行一个二次包装存储到 `Content` 字段中，以下为包装 Content 的 Message 对象数据结构：
