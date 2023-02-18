@@ -109,7 +109,7 @@ CREATE TABLE IF NOT EXISTS `{GetPublishedTableName()}` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 ";
-        if (_capOptions.Value.IsUseStorageLock)
+        if (_capOptions.Value.UseStorageLock)
             batchSql += $@"
 CREATE TABLE IF NOT EXISTS `{GetLockTableName()}` (
   `Key` varchar(128) NOT NULL,

@@ -49,7 +49,7 @@ public static class Helper
             if (hostName.Length <= 50) return hostName;
             return hostName.Substring(0, 50);
         }
-        catch (Exception e)
+        catch
         {
             return null;
         }

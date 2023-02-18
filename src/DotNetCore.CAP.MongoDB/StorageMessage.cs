@@ -54,7 +54,9 @@ internal class PublishedMessage
 public class Lock
 {
     [BsonId(IdGenerator = typeof(StringObjectIdGenerator))]
-    public string Key { get; set; } 
-    public string Instance { get; set; }
-    public DateTime LastLockTime  { get; set; }
+    public string Key { get; set; } = default!;
+
+    public string Instance { get; set; } = default!;
+
+    public DateTime LastLockTime { get; set; }
 }
