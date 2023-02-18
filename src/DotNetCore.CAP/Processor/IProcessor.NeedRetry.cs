@@ -46,7 +46,7 @@ public class MessageNeedToRetryProcessor : IProcessor
 
         _ = Task.Run(() => ProcessPublishedAsync(storage, context));
 
-        if (_options.Value.IsUseStorageLock && _failedRetryConsumeTask is { IsCompleted: false })
+        if (_options.Value.UseStorageLock && _failedRetryConsumeTask is { IsCompleted: false })
         {
             await _dataStorage.RenewLockAsync("received_retry", _ttl, _instance, context.CancellationToken);
             return;
@@ -63,7 +63,7 @@ public class MessageNeedToRetryProcessor : IProcessor
     {
         context.ThrowIfStopping();
 
-        if (_options.Value.IsUseStorageLock && !await connection.AcquireLockAsync("publish_retry", _ttl, _instance, context.CancellationToken))
+        if (_options.Value.UseStorageLock && !await connection.AcquireLockAsync("publish_retry", _ttl, _instance, context.CancellationToken))
             return;
 
         var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry).ConfigureAwait(false);
@@ -75,7 +75,7 @@ public class MessageNeedToRetryProcessor : IProcessor
             await _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
         }
 
-        if (_options.Value.IsUseStorageLock)
+        if (_options.Value.UseStorageLock)
             await connection.ReleaseLockAsync("publish_retry", _instance, context.CancellationToken);
     }
 
@@ -83,7 +83,7 @@ public class MessageNeedToRetryProcessor : IProcessor
     {
         context.ThrowIfStopping();
 
-        if (_options.Value.IsUseStorageLock && !await connection.AcquireLockAsync("received_retry", _ttl, _instance, context.CancellationToken))
+        if (_options.Value.UseStorageLock && !await connection.AcquireLockAsync("received_retry", _ttl, _instance, context.CancellationToken))
             return;
 
         var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry).ConfigureAwait(false);
@@ -95,7 +95,7 @@ public class MessageNeedToRetryProcessor : IProcessor
             await _dispatcher.EnqueueToExecute(message).ConfigureAwait(false);
         }
 
-        if (_options.Value.IsUseStorageLock)
+        if (_options.Value.UseStorageLock)
             await connection.ReleaseLockAsync("received_retry", _instance, context.CancellationToken);
     }
 

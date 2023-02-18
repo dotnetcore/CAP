@@ -119,7 +119,7 @@ It will stop when the maximum number of times is reached. You can see the reason
 
 The consumer method is executed when the Consumer receives the message and will retry when an exception occurs. This retry strategy is the same as the send retry.
 
-We introduced database-based distributed locks in version 7.1.0 to deal with the problem of concurrent data acquisition of database retries under multiple instances, you need to explicitly configure `IsUseStorageLock` option to true.
+We introduced database-based distributed locks in version 7.1.0 to deal with the problem of concurrent data acquisition of database retries under multiple instances, you need to explicitly configure `UseStorageLock` option to true.
 
 ## Data Cleanup
 

@@ -86,9 +86,9 @@ During the message sending process if consumption method fails, CAP will try to 
     Failures in the process of sending and consuming messages will be retried 3 times immediately, and will be retried polling after 3 times, at which point the FailedRetryInterval configuration will take effect.
 
 !!! WARNING "Multi-instance concurrent retries"
-    We introduced database-based distributed locks in version 7.1.0 to solve the problem of retrying concurrent fetches from the database under multiple instances, you need to explicitly configure `IsUseStorageLock` to true.
+    We introduced database-based distributed locks in version 7.1.0 to solve the problem of retrying concurrent fetches from the database under multiple instances, you need to explicitly configure `UseStorageLock` to true.
 
-#### IsUseStorageLock
+#### UseStorageLock
 
 > Default: false
 

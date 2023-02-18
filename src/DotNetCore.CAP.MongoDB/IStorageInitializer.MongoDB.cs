@@ -64,7 +64,7 @@ public class MongoDBStorageInitializer : IStorageInitializer
             await database.CreateCollectionAsync(options.PublishedCollection, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-        if (_capOptions.Value.IsUseStorageLock&&names.All(n => n != options.LockCollection))
+        if (_capOptions.Value.UseStorageLock&&names.All(n => n != options.LockCollection))
             await database.CreateCollectionAsync(options.LockCollection, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         
@@ -72,7 +72,7 @@ public class MongoDBStorageInitializer : IStorageInitializer
             TryCreateIndexesAsync<ReceivedMessage>(options.ReceivedCollection),
             TryCreateIndexesAsync<PublishedMessage>(options.PublishedCollection)).ConfigureAwait(false);
         
-        if (_capOptions.Value.IsUseStorageLock)
+        if (_capOptions.Value.UseStorageLock)
         {
             await database.GetCollection<Lock>(options.LockCollection)
                 .UpdateOneAsync(it=>it.Key=="publish_retry",

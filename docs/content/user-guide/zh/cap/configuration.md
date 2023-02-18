@@ -87,9 +87,9 @@ services.AddCap(config =>
     发送和消费消息的过程中失败会立即重试 3 次，在 3 次以后将进入重试轮询，此时 FailedRetryInterval 配置才会生效。
 
 !!! WARNING "多实例并发重试"
-    我们在7.1.0版本中引入了基于数据库的分布式锁以应对在多个实例下对数据库重试的并发数据获取问题，你需要显式配置 `IsUseStorageLock` 为 true。
+    我们在7.1.0版本中引入了基于数据库的分布式锁以应对在多个实例下对数据库重试的并发数据获取问题，你需要显式配置 `UseStorageLock` 为 true。
 
-#### IsUseStorageLock
+#### UseStorageLock
 
 > 默认值: false
 

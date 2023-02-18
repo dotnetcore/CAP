@@ -29,10 +29,13 @@ public class MongoDBOptions
     /// Default value: "published"
     /// </summary>
     public string PublishedCollection { get; set; } = "cap.published";
-    
+
+    /// <summary>
+    /// MongoDB lock collection name.
+    /// Default value: lock
+    /// </summary>
     public string LockCollection { get; set; } = "cap.lock";
-    
-   
+
 
     internal string Version { get; set; } = default!;
 }

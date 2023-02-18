@@ -125,7 +125,7 @@ public class CapOptions
     /// <summary>
     /// if true,cap will use only one instance to retry failure messages
     /// </summary>
-    public bool IsUseStorageLock { get; set; }
+    public bool UseStorageLock { get; set; }
 
     /// <summary>
     /// Registers an extension that will be executed when building services.

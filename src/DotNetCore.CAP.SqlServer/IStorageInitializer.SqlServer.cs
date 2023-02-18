@@ -99,7 +99,7 @@ CREATE TABLE {GetPublishedTableName()}(
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
 END;
 ";
-        if (_capOptions.Value.IsUseStorageLock)
+        if (_capOptions.Value.UseStorageLock)
             batchSql += $@"
 IF OBJECT_ID(N'{GetLockTableName()}',N'U') IS NULL
 BEGIN

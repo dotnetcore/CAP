@@ -10,12 +10,12 @@ namespace DotNetCore.CAP.Persistence;
 
 public interface IDataStorage
 {
-    Task<bool> AcquireLockAsync(string key,TimeSpan ttl,string instance,CancellationToken token=default);
-    
-    Task ReleaseLockAsync(string key,string instance,CancellationToken token=default);
-    
+    Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default);
+
+    Task ReleaseLockAsync(string key, string instance, CancellationToken token = default);
+
     Task RenewLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default);
-    
+
     Task ChangePublishStateToDelayedAsync(string[] ids);
 
     Task ChangePublishStateAsync(MediumMessage message, StatusName state, object? transaction = null);

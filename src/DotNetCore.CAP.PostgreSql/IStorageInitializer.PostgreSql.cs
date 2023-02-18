@@ -81,7 +81,7 @@ CREATE TABLE IF NOT EXISTS {GetPublishedTableName()}(
 	""StatusName"" VARCHAR(50) NOT NULL
 );
 ";
-            if (_capOptions.Value.IsUseStorageLock)
+            if (_capOptions.Value.UseStorageLock)
                 batchSql += $@"
 CREATE TABLE IF NOT EXISTS {GetLockTableName()}(
 	""Key"" VARCHAR(128) PRIMARY KEY NOT NULL,
