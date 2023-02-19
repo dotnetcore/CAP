@@ -89,8 +89,8 @@ CREATE TABLE IF NOT EXISTS {GetLockTableName()}(
 	""LastLockTime"" TIMESTAMP NOT NULL
 );
 
-INSERT INTO  {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('publish_retry','','{DateTime.MinValue}') ON CONFLICT DO NOTHING ;
-INSERT INTO {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('received_retry','','{DateTime.MinValue}')  ON CONFLICT DO NOTHING;";
+INSERT INTO  {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('{$"publish_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}') ON CONFLICT DO NOTHING ;
+INSERT INTO {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('{$"received_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}')  ON CONFLICT DO NOTHING;";
 
             return batchSql;
         }

@@ -118,8 +118,8 @@ CREATE TABLE IF NOT EXISTS `{GetLockTableName()}` (
   PRIMARY KEY (`Key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT IGNORE INTO `{GetLockTableName()}` (`Key`,`Instance`,`LastLockTime`) VALUES('publish_retry','','{DateTime.MinValue}');
-INSERT IGNORE INTO `{GetLockTableName()}` (`Key`,`Instance`,`LastLockTime`) VALUES('received_retry','','{DateTime.MinValue}');";
+INSERT IGNORE INTO `{GetLockTableName()}` (`Key`,`Instance`,`LastLockTime`) VALUES('{$"publish_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');
+INSERT IGNORE INTO `{GetLockTableName()}` (`Key`,`Instance`,`LastLockTime`) VALUES('{$"received_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');";
 
         return batchSql;
     }

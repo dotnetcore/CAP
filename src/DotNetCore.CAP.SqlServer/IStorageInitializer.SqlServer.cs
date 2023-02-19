@@ -114,8 +114,8 @@ CREATE TABLE {GetLockTableName()}(
 ) ON [PRIMARY] 
 END;
 
-INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('publish_retry','','{DateTime.MinValue}');
-INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('received_retry','','{DateTime.MinValue}');
+INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('{$"publish_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');
+INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('{$"received_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');
 ";
         return batchSql;
     }
