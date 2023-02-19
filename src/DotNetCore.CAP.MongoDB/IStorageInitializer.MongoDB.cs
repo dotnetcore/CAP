@@ -75,13 +75,13 @@ public class MongoDBStorageInitializer : IStorageInitializer
         if (_capOptions.Value.UseStorageLock)
         {
             await database.GetCollection<Lock>(options.LockCollection)
-                .UpdateOneAsync(it=>it.Key=="publish_retry",
-                    Builders<Lock>.Update.Set(model=>model.Key,"publish_retry").SetOnInsert(model=>model.LastLockTime,DateTime.MinValue), 
+                .UpdateOneAsync(it=>it.Key==$"publish_retry_{_capOptions.Value.Version}",
+                    Builders<Lock>.Update.Set(model=>model.Key,$"publish_retry_{_capOptions.Value.Version}").SetOnInsert(model=>model.LastLockTime,DateTime.MinValue), 
                     new UpdateOptions() { IsUpsert = true },cancellationToken);
             
             await database.GetCollection<Lock>(options.LockCollection)
-                .UpdateOneAsync(it=>it.Key=="received_retry",
-                    Builders<Lock>.Update.Set(model=>model.Key,"received_retry").SetOnInsert(model=>model.LastLockTime,DateTime.MinValue), 
+                .UpdateOneAsync(it=>it.Key==$"received_retry_{_capOptions.Value.Version}",
+                    Builders<Lock>.Update.Set(model=>model.Key,$"received_retry_{_capOptions.Value.Version}").SetOnInsert(model=>model.LastLockTime,DateTime.MinValue), 
                     new UpdateOptions() { IsUpsert = true },cancellationToken);
         }
        
