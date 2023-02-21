@@ -8,6 +8,7 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -18,13 +19,17 @@ namespace DotNetCore.CAP.MongoDB
     {
         private readonly IMongoDatabase _database;
         private readonly MongoDBOptions _options;
+        private readonly ISerializer _serializer;
+        
 
-        public MongoDBMonitoringApi(IMongoClient client, IOptions<MongoDBOptions> options)
+        public MongoDBMonitoringApi(IMongoClient client, IOptions<MongoDBOptions> options, ISerializer serializer)
         {
+         
             var mongoClient = client ?? throw new ArgumentNullException(nameof(client));
             _options = options.Value ?? throw new ArgumentNullException(nameof(options));
 
             _database = mongoClient.GetDatabase(_options.DatabaseName);
+            _serializer = serializer;
         }
 
         public async Task<MediumMessage> GetPublishedMessageAsync(long id)
@@ -35,6 +40,7 @@ namespace DotNetCore.CAP.MongoDB
             {
                 Added = message.Added,
                 Content = message.Content,
+                Origin = _serializer.Deserialize(message.Content),
                 DbId = message.Id.ToString(),
                 ExpiresAt = message.ExpiresAt,
                 Retries = message.Retries
@@ -49,6 +55,7 @@ namespace DotNetCore.CAP.MongoDB
             {
                 Added = message.Added,
                 Content = message.Content,
+                Origin = _serializer.Deserialize(message.Content),
                 DbId = message.Id.ToString(),
                 ExpiresAt = message.ExpiresAt,
                 Retries = message.Retries

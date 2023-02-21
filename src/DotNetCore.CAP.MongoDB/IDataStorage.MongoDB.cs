@@ -217,7 +217,7 @@ namespace DotNetCore.CAP.MongoDB
 
         public IMonitoringApi GetMonitoringApi()
         {
-            return new MongoDBMonitoringApi(_client, _options);
+            return new MongoDBMonitoringApi(_client, _options,_serializer);
         }
     }
 }
