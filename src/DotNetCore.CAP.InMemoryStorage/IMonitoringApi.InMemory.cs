@@ -15,39 +15,40 @@ namespace DotNetCore.CAP.InMemoryStorage
 {
     internal class InMemoryMonitoringApi : IMonitoringApi
     {
-        public Task<MediumMessage> GetPublishedMessageAsync(long id)
+        public Task<MediumMessage?> GetPublishedMessageAsync(long id)
         {
-            return Task.FromResult((MediumMessage)InMemoryStorage.PublishedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
+            return Task.FromResult<MediumMessage?>(InMemoryStorage.PublishedMessages.Values.FirstOrDefault(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
         }
 
-        public Task<MediumMessage> GetReceivedMessageAsync(long id)
+        public Task<MediumMessage?> GetReceivedMessageAsync(long id)
         {
-            return Task.FromResult((MediumMessage)InMemoryStorage.ReceivedMessages.Values.First(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
+            return Task.FromResult<MediumMessage?>(InMemoryStorage.ReceivedMessages.Values.FirstOrDefault(x => x.DbId == id.ToString(CultureInfo.InvariantCulture)));
         }
 
-        public StatisticsDto GetStatistics()
+        public Task<StatisticsDto> GetStatisticsAsync()
         {
             var stats = new StatisticsDto
             {
                 PublishedSucceeded = InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded),
                 ReceivedSucceeded = InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded),
                 PublishedFailed = InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Failed),
-                ReceivedFailed = InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Failed)
+                ReceivedFailed = InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Failed),
+                PublishedDelayed = InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Delayed)
             };
-            return stats;
+            return Task.FromResult(stats);
         }
 
-        public IDictionary<DateTime, int> HourlyFailedJobs(MessageType type)
+        public Task<IDictionary<DateTime, int>> HourlyFailedJobs(MessageType type)
         {
             return GetHourlyTimelineStats(type, nameof(StatusName.Failed));
         }
 
-        public IDictionary<DateTime, int> HourlySucceededJobs(MessageType type)
+        public Task<IDictionary<DateTime, int>> HourlySucceededJobs(MessageType type)
         {
             return GetHourlyTimelineStats(type, nameof(StatusName.Succeeded));
         }
 
-        public IList<MessageDto> Messages(MessageQueryDto queryDto)
+        public Task<PagedQueryResult<MessageDto>> GetMessagesAsync(MessageQueryDto queryDto)
         {
             if (queryDto.MessageType == MessageType.Publish)
             {
@@ -71,17 +72,25 @@ namespace DotNetCore.CAP.InMemoryStorage
                 var offset = queryDto.CurrentPage * queryDto.PageSize;
                 var size = queryDto.PageSize;
 
-                return expression.Skip(offset).Take(size).Select(x => new MessageDto()
+                var allItems = expression.Select(x => new MessageDto()
                 {
                     Added = x.Added,
                     Version = "N/A",
                     Content = x.Content,
                     ExpiresAt = x.ExpiresAt,
-                    Id = long.Parse(x.DbId),
+                    Id = x.DbId,
                     Name = x.Name,
                     Retries = x.Retries,
                     StatusName = x.StatusName.ToString()
-                }).ToList();
+                });
+
+                return Task.FromResult( new PagedQueryResult<MessageDto>()
+                {
+                    Items = allItems.Skip(offset).Take(size).ToList(),
+                    PageIndex = queryDto.CurrentPage,
+                    PageSize = queryDto.PageSize,
+                    Totals = allItems.Count()
+                });
             }
             else
             {
@@ -110,42 +119,50 @@ namespace DotNetCore.CAP.InMemoryStorage
                 var offset = queryDto.CurrentPage * queryDto.PageSize;
                 var size = queryDto.PageSize;
 
-                return expression.Skip(offset).Take(size).Select(x => new MessageDto()
+                var allItems = expression.Select(x => new MessageDto()
                 {
                     Added = x.Added,
                     Group = x.Group,
                     Version = "N/A",
                     Content = x.Content,
                     ExpiresAt = x.ExpiresAt,
-                    Id = long.Parse(x.DbId),
+                    Id = x.DbId,
                     Name = x.Name,
                     Retries = x.Retries,
                     StatusName = x.StatusName.ToString()
-                }).ToList();
+                });
+
+                return Task.FromResult(new PagedQueryResult<MessageDto>()
+                {
+                    Items = allItems.Skip(offset).Take(size).ToList(),
+                    PageIndex = queryDto.CurrentPage,
+                    PageSize = queryDto.PageSize,
+                    Totals = allItems.Count()
+                });
             }
         }
 
-        public int PublishedFailedCount()
+        public ValueTask<int> PublishedFailedCount()
         {
-            return InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Failed);
+            return new ValueTask<int>(InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Failed));
         }
 
-        public int PublishedSucceededCount()
+        public ValueTask<int> PublishedSucceededCount()
         {
-            return InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded);
+            return new ValueTask<int>(InMemoryStorage.PublishedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded));
         }
 
-        public int ReceivedFailedCount()
+        public ValueTask<int> ReceivedFailedCount()
         {
-            return InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Failed);
+            return new ValueTask<int>(InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Failed));
         }
 
-        public int ReceivedSucceededCount()
+        public ValueTask<int> ReceivedSucceededCount()
         {
-            return InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded);
+            return new ValueTask<int>(InMemoryStorage.ReceivedMessages.Values.Count(x => x.StatusName == StatusName.Succeeded));
         }
 
-        private Dictionary<DateTime, int> GetHourlyTimelineStats(MessageType type, string statusName)
+        private Task<IDictionary<DateTime, int>> GetHourlyTimelineStats(MessageType type, string statusName)
         {
             var endDate = DateTime.Now;
             var dates = new List<DateTime>();
@@ -182,13 +199,13 @@ namespace DotNetCore.CAP.InMemoryStorage
                 }
             }
 
-            var result = new Dictionary<DateTime, int>();
+            IDictionary<DateTime, int> result = new Dictionary<DateTime, int>();
             for (var i = 0; i < keyMaps.Count; i++)
             {
                 var value = valuesMap[keyMaps.ElementAt(i).Key];
                 result.Add(keyMaps.ElementAt(i).Value, value);
             }
-            return result;
+            return Task.FromResult(result);
         }
     }
 }

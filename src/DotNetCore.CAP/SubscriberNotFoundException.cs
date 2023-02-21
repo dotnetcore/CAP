@@ -3,12 +3,11 @@
 
 using System;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+public class SubscriberNotFoundException : Exception
 {
-    public class SubscriberNotFoundException : Exception
+    public SubscriberNotFoundException(string message) : base(message)
     {
-        public SubscriberNotFoundException(string message) : base(message)
-        {
-        }
     }
 }

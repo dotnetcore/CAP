@@ -1,4 +1,168 @@
+---
+hide:
+  - feedback
+---
+
 # Release Notes
+
+## Version 7.0.0 (2022-11-27)
+
+**Breaking Changes:**
+
+* `SubscribeFilter` method to asynchronous.
+* `IConsumerClient` interface `OnMessage` and `OnLog` is from event to delegate.
+
+**Features:**
+
+* Performance improvement
+* Add support publish delay message. (#1237)
+* Dashbord support viewing and immediately publish for delayed messages.
+* Add support for metrics diagnostics. (#1230)
+* Dashboard support real-time metric graph viewing.
+* Add support manual start/stop CAP process. (#1238)
+* Add EnableConsumerPrefetch option of consumer. (#1240)
+* Add PublishConfirms options for RabbitMQ.
+
+**Others:**
+
+* Change framework target from netstandard to net6.
+* Upgrade NuGet to the latest version.
+
+**Bug Fixed:**
+
+* RabbitMQ cluster connection failed without using default ports. (#1232)
+
+## Version 6.2.1 (2022-10-15)
+
+**Bug Fixed:**
+
+* Fixed EnvironmentVariableTarget.Machine only supported on windows. (#1220) Thanks @cuibty
+* Fixed RedisStream TryGetOrCreateStreamGroupAsync to create ConsumerGroup when not found. (#1212) Thanks @mlatoszek
+
+## Version 6.2.0 (2022-09-19)
+
+**Features:**
+
+* Add Chinese support for dashboard localization.  (#1157)  Thanks @tetris1128
+* Make DbTransaction property virtual for extend of CapTransactionBase. (#1179)  @yang-xiaodong 
+* Add logs for duplicate subscriber in same group. (#1186)  @yang-xiaodong 
+* Record the Instance Id in the executed received messages. (#1187)  @yang-xiaodong 
+
+**Bug Fixed:**
+
+* SnowflakeId excludes virtual and loopback and non-working NICs. (#1163)  Thanks @xiatiandegaga
+* Fixed the health check could not get the status correctly when RabbitMQ lost connection and quickly recovered. (#1193) Thanks @rpenha
+* Fixed dashboard gateway proxy request missing QueryString (#1168) Thanks @wwwu
+* Fixed the disconnect detection of RabbitMQ connection abnormality. (#1178)
+* Fixed Mongo queries not returning results when a element convention name is registered. (#1193) Thanks @rpenha
+* Fixed subscriber lookup in scoped lifecycle of factory mode. (#1204) Thanks @sampsonye
+  
+## Version 6.1.0 (2022-06-10)
+
+**Features:**
+
+* Optimize snowflake algorithm. (#1065)  Thanks @Allen-dududu
+* Add authorization policy option feature to CAP dashboard. (#1113)  Thanks @albertopm19
+* Added support of ScheduledEnqueueTimeUtc for AzureServiceBus transport. (#1137)  Thanks @webinex
+* Add option to configure failed messages expiration term. (#1142) Thanks @dima-zhemkov
+
+**Bug Fixed:**
+
+* Fixed sequence validation error when both enable Challenge and Auth of dashboard authentication. (#1097)
+* Used concurrentdictionary since PublishedMessages and ReceivedMessages are public and accessed from various places. (#1104) Thanks @wakiter
+* Fixed the health check could not get the status correctly when RabbitMQ lost connection and quickly recovered. (#1140)
+* Fixed date file format bug when retrying query from database. (#1143)
+* Change reading/creating streams and consumer groups to handle non idempotent operations. (#1150) Thanks @MahmoudSamir101
+
+## Version 6.0.1 (2022-02-15)
+
+**Bug Fixed:**
+
+* Fixed kafka consume excepiton for GroupLoadInProress errcode (#1085)
+* Fixed deserialization exception when message body is empty byte array. (#1087)
+* Fixed dashboard authentication challenge bug. (#1077)
+  
+## Version 6.0.0 (2022-01-06)
+
+**Features:**
+
+* Fully support .NET 6.
+* Add support for OpenTelemetry. (#885)
+* Improve support for NATS JetStream wildcard topic. (#1047)
+* Add support customer header options for Azure Service Bus. (#1063) Thanks [@Mateus Viegas](https://github.com/mviegas)
+
+## Version 5.2.0 (2021-11-12)
+
+**Features:**
+
+* Add support for NATS JetStream. (#983)
+* Add support for Apache Pulsar. (#610)
+* Add possibility to process messages for each consumer group indepedently. (#1027)
+
+**Bug Fixed:**
+
+* Fixed message content of bigint type cannot be displayed correctly in dashboard. (#1028)
+* Fixed unobserved tasks of async method calls in Amazon SQS. (#1033)
+* Fixed RabbitMQ federation plugin message header object values cause exceptions. (#1036)
+
+## Version 5.1.2 (2021-07-26)
+
+**Bug Fixed:**
+
+* Fixed consumer register cancellation token source null referencee bug. (#952)
+* Fixed redis streams transport cluster keys cross-hashslot bug. (#944)
+
+
+## Version 5.1.1 (2021-07-09)
+
+**Features:**
+
+* Improve flow control for message cache of in memory. (#935)
+* Add cancellation token support to subscribers. (#912)
+* Add pathbase options for dashbaord. (#901)
+* Add custom authorization scheme support for dashbaord. (#906)
+
+**Bug Fixed:**
+
+* Fixed mysql connect timeout expired bug. (#931)
+* Fixed consul health check path invalid bug. (#921)
+* Fixed mongo dashbaord query bug. (#909)
+
+## Version 5.1.0 (2021-06-07)
+
+**Features:**
+
+* Add configure options for json serialization. (#879)
+* Add Redis Streams transport support. (#817)
+* New dashboard build with vue. (#880)
+* Add subscribe filter support. (#894)
+
+**Bug Fixed:**
+
+* Fixed use CapEFDbTransaction to get dbtransaction extension method bug. (#868)
+* Fixed pending message has not been deleted from buffer list in SQL Server. (#889)
+* Fixed dispatcher processing when storage message exception bug. (#900)
+
+
+## Version 5.0.3 (2021-05-14)
+
+**Bug Fixed:**
+
+* Fix the bug of getting db transaction through the IDbContextTransaction for SQLServer. (#867)
+* Fix RabbitMQ Connection close forced. (#861)
+
+## Version 5.0.2 (2021-04-28)
+
+**Features:**
+
+* Add support for Azure Service Bus sessions. (#829)
+* Add custom message headers support for RabbitMQ consumer. (#818)
+
+**Bug Fixed:**
+
+* Downgrading Microsoft.Data.SqlClient to 2.0.1. (#839)
+* DiagnosticObserver does not use null connection. (#845)
+* Fix null reference in AmazonSQSTransport. (#846)
 
 ## Version 5.0.1 (2021-04-07)
 

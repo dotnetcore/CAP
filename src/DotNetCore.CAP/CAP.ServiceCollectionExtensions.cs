@@ -10,72 +10,74 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+/// <summary>
+/// Contains extension methods to <see cref="IServiceCollection" /> for configuring consistence services.
+/// </summary>
+public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Contains extension methods to <see cref="IServiceCollection" /> for configuring consistence services.
+    /// Adds and configures the consistence services for the consistency.
     /// </summary>
-    public static class ServiceCollectionExtensions
+    /// <param name="services">The services available in the application.</param>
+    /// <param name="setupAction">An action to configure the <see cref="CapOptions" />.</param>
+    /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
+    public static CapBuilder AddCap(this IServiceCollection services, Action<CapOptions> setupAction)
     {
-        internal static IServiceCollection ServiceCollection;
+        if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
 
-        /// <summary>
-        /// Adds and configures the consistence services for the consistency.
-        /// </summary>
-        /// <param name="services">The services available in the application.</param>
-        /// <param name="setupAction">An action to configure the <see cref="CapOptions" />.</param>
-        /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
-        public static CapBuilder AddCap(this IServiceCollection services, Action<CapOptions> setupAction)
-        {
-            if (setupAction == null)
-            {
-                throw new ArgumentNullException(nameof(setupAction));
-            }
+        services.AddSingleton(_ => services);
+        services.TryAddSingleton(new CapMarkerService("CAP"));
 
-            ServiceCollection = services;
+        services.TryAddSingleton<ICapPublisher, CapPublisher>();
 
-            services.TryAddSingleton<CapMarkerService>();
+        services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
+        services.TryAddSingleton<ISubscribeInvoker, SubscribeInvoker>();
+        services.TryAddSingleton<MethodMatcherCache>();
 
-            services.TryAddSingleton<ICapPublisher, CapPublisher>();
+        services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();
 
-            services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
-            services.TryAddSingleton<ISubscribeInvoker, SubscribeInvoker>();
-            services.TryAddSingleton<MethodMatcherCache>();
+        //Processors
+        services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<IProcessingServer, IDispatcher>(sp => sp.GetRequiredService<IDispatcher>()));
+        services.TryAddEnumerable(
+            ServiceDescriptor.Singleton<IProcessingServer, IConsumerRegister>(sp =>
+                sp.GetRequiredService<IConsumerRegister>()));
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
 
-            services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();
+        //Queue's message processor
+        services.TryAddSingleton<MessageNeedToRetryProcessor>();
+        services.TryAddSingleton<TransportCheckProcessor>();
+        services.TryAddSingleton<MessageDelayedProcessor>();
+        services.TryAddSingleton<CollectorProcessor>();
 
-            //Processors
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, ConsumerRegister>());
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
+        //Sender
+        services.TryAddSingleton<IMessageSender, MessageSender>();
 
-            //Queue's message processor
-            services.TryAddSingleton<MessageNeedToRetryProcessor>();
-            services.TryAddSingleton<TransportCheckProcessor>();
-            services.TryAddSingleton<CollectorProcessor>();
+        services.TryAddSingleton<ISerializer, JsonUtf8Serializer>();
 
-            //Sender and Executors   
-            services.TryAddSingleton<IMessageSender, MessageSender>();
+        // Warning: IPublishMessageSender need to inject at extension project. 
+        services.TryAddSingleton<ISubscribeExecutor, SubscribeExecutor>();
+
+        //Options and extension service
+        var options = new CapOptions();
+        setupAction(options);
+
+        //Executors
+        if (options.UseDispatchingPerGroup)
+            services.TryAddSingleton<IDispatcher, DispatcherPerGroup>();
+        else
             services.TryAddSingleton<IDispatcher, Dispatcher>();
 
-            services.TryAddSingleton<ISerializer, JsonUtf8Serializer>();
+        foreach (var serviceExtension in options.Extensions) serviceExtension.AddServices(services);
+        services.Configure(setupAction);
 
-            // Warning: IPublishMessageSender need to inject at extension project. 
-            services.TryAddSingleton<ISubscribeDispatcher, SubscribeDispatcher>();
+        //Startup and Hosted 
+        services.AddSingleton<Bootstrapper>();
+        services.AddHostedService(sp => sp.GetRequiredService<Bootstrapper>());
+        services.AddSingleton<IBootstrapper>(sp => sp.GetRequiredService<Bootstrapper>());
 
-            //Options and extension service
-            var options = new CapOptions();
-            setupAction(options);
-            foreach (var serviceExtension in options.Extensions)
-            {
-                serviceExtension.AddServices(services);
-            }
-            services.Configure(setupAction);
-
-            //Startup and Hosted 
-            services.AddSingleton<IBootstrapper, Bootstrapper>();
-            services.AddHostedService<Bootstrapper>();
-
-            return new CapBuilder(services);
-        }
+        return new CapBuilder(services);
     }
 }

@@ -4,12 +4,11 @@
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 
-namespace DotNetCore.CAP.Transport
-{
-    public interface ITransport
-    {
-        BrokerAddress BrokerAddress { get; }
+namespace DotNetCore.CAP.Transport;
 
-        Task<OperateResult> SendAsync(TransportMessage message);
-    }
+public interface ITransport
+{
+    BrokerAddress BrokerAddress { get; }
+
+    Task<OperateResult> SendAsync(TransportMessage message);
 }

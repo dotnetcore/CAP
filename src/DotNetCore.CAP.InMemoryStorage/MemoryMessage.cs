@@ -8,10 +8,10 @@ namespace DotNetCore.CAP.InMemoryStorage
 {
     internal class MemoryMessage : MediumMessage
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = default!;
 
         public StatusName StatusName { get; set; }
 
-        public string Group { get; set; }
+        public string Group { get; set; } = default!;
     }
 }

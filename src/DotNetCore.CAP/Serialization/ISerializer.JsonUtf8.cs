@@ -2,71 +2,62 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Buffers;
 using System.Text.Json;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
+using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Serialization
+namespace DotNetCore.CAP.Serialization;
+
+public class JsonUtf8Serializer : ISerializer
 {
-    public class JsonUtf8Serializer : ISerializer
+    private readonly JsonSerializerOptions _jsonSerializerOptions;
+
+    public JsonUtf8Serializer(IOptions<CapOptions> capOptions)
     {
-        public Task<TransportMessage> SerializeAsync(Message message)
-        {
-            if (message == null)
-            {
-                throw new ArgumentNullException(nameof(message));
-            }
+        _jsonSerializerOptions = capOptions.Value.JsonSerializerOptions;
+    }
 
-            if (message.Value == null)
-            {
-                return Task.FromResult(new TransportMessage(message.Headers, null));
-            }
+    public ValueTask<TransportMessage> SerializeAsync(Message message)
+    {
+        if (message == null) throw new ArgumentNullException(nameof(message));
 
-            var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(message.Value);
-            return Task.FromResult(new TransportMessage(message.Headers, jsonBytes));
-        }
+        if (message.Value == null) return new ValueTask<TransportMessage>(new TransportMessage(message.Headers, null));
 
-        public Task<Message> DeserializeAsync(TransportMessage transportMessage, Type valueType)
-        {
-            if (valueType == null || transportMessage.Body == null)
-            {
-                return Task.FromResult(new Message(transportMessage.Headers, null));
-            }
+        var jsonBytes = JsonSerializer.SerializeToUtf8Bytes(message.Value, _jsonSerializerOptions);
 
-            var obj = JsonSerializer.Deserialize(transportMessage.Body, valueType);
+        return new ValueTask<TransportMessage>(new TransportMessage(message.Headers, jsonBytes));
+    }
 
-            return Task.FromResult(new Message(transportMessage.Headers, obj));
-        }
+    public ValueTask<Message> DeserializeAsync(TransportMessage transportMessage, Type? valueType)
+    {
+        if (valueType == null || transportMessage.Body.Length == 0)
+            return new ValueTask<Message>(new Message(transportMessage.Headers, null));
 
-        public string Serialize(Message message)
-        {
-            return JsonSerializer.Serialize(message);
-        }
+        var obj = JsonSerializer.Deserialize(transportMessage.Body.Span, valueType, _jsonSerializerOptions);
 
-        public Message Deserialize(string json)
-        {
-            return JsonSerializer.Deserialize<Message>(json);
-        }
+        return new ValueTask<Message>(new Message(transportMessage.Headers, obj));
+    }
 
-        public object Deserialize(object value, Type valueType)
-        {
-            if (value is JsonElement jToken)
-            {
-                var bufferWriter = new ArrayBufferWriter<byte>();
-                using (var writer = new Utf8JsonWriter(bufferWriter))
-                {
-                    jToken.WriteTo(writer);
-                }
-                return JsonSerializer.Deserialize(bufferWriter.WrittenSpan, valueType);
-            }
-            throw new NotSupportedException("Type is not of type JToken");
-        }
+    public string Serialize(Message message)
+    {
+        return JsonSerializer.Serialize(message, _jsonSerializerOptions);
+    }
 
-        public bool IsJsonType(object jsonObject)
-        {
-            return jsonObject is JsonElement;
-        }
-         
+    public Message? Deserialize(string json)
+    {
+        return JsonSerializer.Deserialize<Message>(json, _jsonSerializerOptions);
+    }
+
+    public object? Deserialize(object value, Type valueType)
+    {
+        if (value is JsonElement jsonElement) return jsonElement.Deserialize(valueType, _jsonSerializerOptions);
+
+        throw new NotSupportedException("Type is not of type JsonElement");
+    }
+
+    public bool IsJsonType(object jsonObject)
+    {
+        return jsonObject is JsonElement;
     }
 }

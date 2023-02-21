@@ -3,16 +3,15 @@
 
 using System;
 
-namespace DotNetCore.CAP.Internal
-{
-    public class PublisherSentFailedException : Exception
-    {
-        public PublisherSentFailedException(string message) : base(message)
-        {
-        }
+namespace DotNetCore.CAP.Internal;
 
-        public PublisherSentFailedException(string message, Exception ex) : base(message, ex)
-        {
-        }
+public class PublisherSentFailedException : Exception
+{
+    public PublisherSentFailedException(string message) : base(message)
+    {
+    }
+
+    public PublisherSentFailedException(string message, Exception? ex) : base(message, ex)
+    {
     }
 }

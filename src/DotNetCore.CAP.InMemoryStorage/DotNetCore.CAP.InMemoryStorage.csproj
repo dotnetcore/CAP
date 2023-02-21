@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>DotNetCore.CAP.InMemoryStorage</AssemblyName>
+    <TargetFramework>net6.0</TargetFramework>
+	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);InMemory</PackageTags>
   </PropertyGroup>
 

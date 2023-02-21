@@ -38,17 +38,21 @@ public void ConfigureServices(IServiceCollection services)
 
 CAP 直接对外提供的 RabbitMQ 配置参数如下：
 
-NAME | DESCRIPTION | TYPE | DEFAULT
+配置项 | 描述 | 类型 | 默认值
 :---|:---|---|:---
-HostName | 宿主地址 | string | localhost
+HostName | 宿主地址，如果要配置集群可以使用逗号分隔，例如 `192.168.1.111,192.168.1.112` | string | localhost
 UserName | 用户名 | string | guest
 Password | 密码 | string | guest
 VirtualHost | 虚拟主机 | string | /
 Port | 端口号 | int | -1
-TopicExchangeName | CAP默认Exchange名称 | string | cap.default.topic
-QueueMessageExpires | 队列中消息自动删除时间 | int | (10天) 毫秒
+ExchangeName | CAP默认Exchange名称 | string | cap.default.topic
+QueueArguments  | 队列额外参数 x-arguments | QueueArgumentsOptions  |  N/A
+ConnectionFactoryOptions  |  RabbitMQClient原生参数 | ConnectionFactory | N/A
+CustomHeaders  | 订阅者自定义头信息 |  见下文 |  N/A
+PublishConfirms | 是否启用[发布确认](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
+BasicQosOptions | 指定消费的[Qos](https://www.rabbitmq.com/consumer-prefetch.html) | BasicQos | N/A
 
-#### ConnectionFactory Options
+#### ConnectionFactory Option
 
 如果你需要 **更多** 原生 `ConnectionFactory` 相关的配置项，可以通过 `ConnectionFactoryOptions` 配置项进行设定：
 
@@ -66,6 +70,26 @@ services.AddCap(x =>
 });
 
 ```
+
+#### CustomHeaders Option
+
+当需要从异构系统或者直接接收从RabbitMQ 控制台发送的消息时，由于 CAP 需要定义额外的头信息才能正常订阅，所以此时会出现异常。通过提供此参数来进行自定义头信息的设置来使订阅者正常工作。
+
+你可以在这里找到有关 [头信息](../cap/messaging#异构系统集成) 的说明。
+
+用法如下：
+
+```cs
+x.UseRabbitMQ(aa =>
+{
+    aa.CustomHeaders = e => new List<KeyValuePair<string, string>>
+    {
+        new KeyValuePair<string, string>(Headers.MessageId, SnowflakeId.Default().NextId().ToString()),
+        new KeyValuePair<string, string>(Headers.MessageName, e.RoutingKey),
+    };
+});
+```
+
 
 #### 如何连接 RabbitMQ 集群？
 

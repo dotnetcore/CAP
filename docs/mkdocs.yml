@@ -4,31 +4,30 @@ site_url: http://cap.dotnetcore.xyz
 site_description: A distributed transaction solution in micro-service base on eventually consistency, also an eventbus with Outbox pattern.
 site_author: CAP Team
 
-repo_name: 'GitHub'
-repo_url: 'https://github.com/dotnetcore/CAP'
-edit_uri: 'edit/master/docs/content'
-docs_dir: 'content'
+repo_name: "GitHub"
+repo_url: "https://github.com/dotnetcore/CAP"
+edit_uri: "edit/master/docs/content"
+docs_dir: "content"
 
 # Copyright
-copyright: Copyright &copy; 2020 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
-
+copyright: Copyright &copy; 2023 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
 
 #theme: material
 theme:
-  name: 'material'
+  name: "material"
   palette:
-    primary: 'deep purple'
-    accent: 'indigo'  
+    primary: "deep purple"
+    accent: "indigo"
   language: en
   include_sidebar: true
-  logo: 'img/logo.svg'
-  favicon: 'img/favicon.ico'
+  logo: "img/logo.svg"
+  favicon: "img/favicon.ico"
   features:
     - navigation.tabs
     - navigation.instant
   i18n:
-    prev: 'Previous'
-    next: 'Next'
+    prev: "Previous"
+    next: "Next"
 
 #Customization
 extra:
@@ -40,12 +39,28 @@ extra:
       link: /user-guide/zh/getting-started/quick-start
       lang: zh
   social:
-    - icon: 'fontawesome/brands/github'
-      link: 'https://github.com/dotnetcore/CAP'
-    - icon: 'fontawesome/brands/twitter'
-      link: 'https://twitter.com/ncc_community'
-    - icon: 'fontawesome/brands/weibo'
-      link: 'https://weibo.com/dotnetcore'
+    - icon: "fontawesome/brands/github"
+      link: "https://github.com/dotnetcore/CAP"
+    - icon: "fontawesome/brands/twitter"
+      link: "https://twitter.com/ncc_community"
+    - icon: "fontawesome/brands/weibo"
+      link: "https://weibo.com/dotnetcore"
+  analytics:
+    provider: google
+    property: !!python/object/apply:os.getenv ["GOOGLE_ANALYTICS_KEY"]
+    feedback:
+      title: Was this page helpful?
+      ratings:
+        - icon: material/emoticon-happy-outline
+          name: This page was helpful
+          data: 1
+          note: >-
+            Thanks for your feedback!
+        - icon: material/emoticon-sad-outline
+          name: This page could be improved
+          data: 0
+          note: >- 
+            Thanks for your feedback!
 
 # Extensions
 markdown_extensions:
@@ -80,24 +95,28 @@ markdown_extensions:
   - pymdownx.tilde
 
 nav:
-    - Home: index.md
-    - Documentation:
+  - Home: index.md
+  - Documentation:
       - Getting Started:
           - Quick Start: user-guide/en/getting-started/quick-start.md
           - Introduction: user-guide/en/getting-started/introduction.md
-          - Contributing: user-guide/en/getting-started/contributing.md    
+          - Contributing: user-guide/en/getting-started/contributing.md
       - CAP:
           - Configuration: user-guide/en/cap/configuration.md
           - Messaging: user-guide/en/cap/messaging.md
+          - Filter: user-guide/en/cap/filter.md
           - Serialization: user-guide/en/cap/serialization.md
           - Transactions: user-guide/en/cap/transactions.md
           - Idempotence: user-guide/en/cap/idempotence.md
       - Transport:
           - General: user-guide/en/transport/general.md
-          - RabbitMQ: user-guide/en/transport/rabbitmq.md
-          - Apache Kafka®: user-guide/en/transport/kafka.md
-          - Azure Service Bus: user-guide/en/transport/azure-service-bus.md
           - Amazon SQS: user-guide/en/transport/aws-sqs.md
+          - Apache Kafka®: user-guide/en/transport/kafka.md
+          - Apache Pulsar: user-guide/en/transport/pulsar.md
+          - Azure Service Bus: user-guide/en/transport/azure-service-bus.md
+          - NATS: user-guide/en/transport/nats.md
+          - RabbitMQ: user-guide/en/transport/rabbitmq.md
+          - Redis Streams: user-guide/en/transport/redis-streams.md
           - In-Memory Queue: user-guide/en/transport/in-memory-queue.md
       - Storage:
           - General: user-guide/en/storage/general.md
@@ -110,27 +129,32 @@ nav:
           - Consul: user-guide/en/monitoring/consul.md
           - Dashboard: user-guide/en/monitoring/dashboard.md
           - Diagnostics: user-guide/en/monitoring/diagnostics.md
+          - OpenTelemetry: user-guide/en/monitoring/opentelemetry.md
       - Samples:
           - Github: user-guide/en/samples/github.md
           - eShopOnContainers: user-guide/en/samples/eshoponcontainers.md
           - FAQ: user-guide/en/samples/faq.md
-    - 文档（中文）:
+  - 文档（中文）:
       - 入门:
           - 快速开始: user-guide/zh/getting-started/quick-start.md
           - 介绍: user-guide/zh/getting-started/introduction.md
-          - 贡献: user-guide/zh/getting-started/contributing.md    
+          - 贡献: user-guide/zh/getting-started/contributing.md
       - CAP:
           - 配置: user-guide/zh/cap/configuration.md
           - 消息: user-guide/zh/cap/messaging.md
+          - 过滤器: user-guide/zh/cap/filter.md
           - 序列化: user-guide/zh/cap/serialization.md
           - 事务: user-guide/zh/cap/transactions.md
-          - 幂等性: user-guide/zh/cap/idempotence.md          
+          - 幂等性: user-guide/zh/cap/idempotence.md
       - 传输:
           - 简介: user-guide/zh/transport/general.md
-          - RabbitMQ: user-guide/zh/transport/rabbitmq.md
-          - Apache Kafka®: user-guide/zh/transport/kafka.md
-          - Azure Service Bus: user-guide/zh/transport/azure-service-bus.md
           - Amazon SQS: user-guide/zh/transport/aws-sqs.md
+          - Apache Kafka®: user-guide/zh/transport/kafka.md
+          - Apache Pulsar: user-guide/zh/transport/pulsar.md
+          - Azure Service Bus: user-guide/zh/transport/azure-service-bus.md
+          - NATS: user-guide/zh/transport/nats.md
+          - RabbitMQ: user-guide/zh/transport/rabbitmq.md
+          - Redis Streams: user-guide/zh/transport/redis-streams.md
           - In-Memory Queue: user-guide/zh/transport/in-memory-queue.md
       - 存储:
           - 简介: user-guide/zh/storage/general.md
@@ -142,14 +166,14 @@ nav:
       - 监控:
           - Consul: user-guide/zh/monitoring/consul.md
           - Dashboard: user-guide/zh/monitoring/dashboard.md
-          - 性能追踪: user-guide/zh/monitoring/diagnostics.md
-          - 健康检查: user-guide/zh/monitoring/health-checks.md
+          - Diagnostics: user-guide/zh/monitoring/diagnostics.md
+          - OpenTelemetry: user-guide/zh/monitoring/opentelemetry.md
       - 示例:
           - Castle DynamicProxy: user-guide/zh/samples/castle.dynamicproxy.md
           - Github: user-guide/zh/samples/github.md
           - eShopOnContainers: user-guide/zh/samples/eshoponcontainers.md
           - FAQ: user-guide/zh/samples/faq.md
-    - About:
+  - About:
       - Contact Us: about/contact-us.md
       - Release Notes: about/release-notes.md
       - License: about/license.md

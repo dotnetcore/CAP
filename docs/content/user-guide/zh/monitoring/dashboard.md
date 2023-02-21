@@ -26,6 +26,12 @@ services.AddCap(x =>
 
 ### Dashboard 配置项
 
+* PathBase
+
+默认值：N/A
+
+当位于代理后时，通过配置此参数可以指定代理请求前缀。
+
 * PathMatch
 
 默认值：'/cap'
@@ -38,39 +44,67 @@ services.AddCap(x =>
 
 此配置项用来配置Dashboard 前端 获取状态接口(/stats)的轮询时间
 
-* Authorization
+* UseAuth 
 
-此配置项用来配置访问 Dashboard 时的授权过滤器，默认过滤器允许局域网访问，当你的应用想提供外网访问时候，可以通过设置此配置来自定义认证规则。详细参看下一节
+默认值：false
+
+指定是否开启授权
+
+* DefaultAuthenticationScheme 
+
+授权默认使用的 Scheme 
+
+* UseChallengeOnAuth
+
+默认值：false
+
+授权是否启用 Challenge
+
+* DefaultChallengeScheme 
+
+Challenge 默认使用的 Scheme
+
 
 ### 自定义认证
+ 
+自 5.1.0 开始，CAP Dashboard 授权默认使用 ASP.NET Core 的方式，不再提供自定义授权过滤器。
 
-通过实现 `IDashboardAuthorizationFilter` 接口可以自定义Dashboard认证。
+在 Dashabord 认证时，会从 HttpContext.User?.Identity?.IsAuthenticated 中取值，如果取不到则认证失败，并调用 Challenge Scheme(如进行配置)。
 
-以下是一个示例代码，通过从url请求参数中读取 accesskey 判断是否允许访问。
+你可以在 Sample.Dashboard.Auth 这个示例项目中查看使用细节。
 
 ```C#
-public class TestAuthorizationFilter : IDashboardAuthorizationFilter
-{
-    public bool Authorize(DashboardContext context)
+services
+    .AddAuthorization()
+    .AddAuthentication(options =>
     {
-        if(context.Request.GetQuery("accesskey")=="xxxxxx"){
-            return true;
-        }
-        return false;
-    }
-}
+        options.DefaultScheme =  CookieAuthenticationDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+    })
+    .AddCookie()
+    .AddOpenIdConnect(options =>
+    {
+        options.Authority = "https://demo.identityserver.io/";
+        options.ClientId = "interactive.confidential";
+        options.ClientSecret = "secret";
+        options.ResponseType = "code";
+        options.UsePkce = true;
+
+        options.Scope.Clear();
+        options.Scope.Add("openid");
+        options.Scope.Add("profile");
+    })
 ```
 
-然后在修改注册 Dashboard 时候配置此过滤对象。
+配置
 
 ```C#
-services.AddCap(x =>
+services.AddCap(cap =>
 {
-    //...
-
-    // Register Dashboard
-    x.UseDashboard(opt => {
-        opt.Authorization = new[] {new TestAuthorizationFilter()};
+    cap.UseDashboard(d =>
+    {
+        d.UseChallengeOnAuth = true;
+        d.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
     });
-});
+}
 ```

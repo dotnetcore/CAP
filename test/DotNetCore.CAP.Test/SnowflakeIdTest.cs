@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using Xunit;
@@ -10,11 +11,11 @@ namespace DotNetCore.CAP.Test
         [Fact]
         public void NextIdTest()
         {
-            var result = SnowflakeId.Default().NextId();
+            var instance = SnowflakeId.Default();
+            var result = instance.NextId();
+            var result2 = instance.NextId();
 
-            Assert.IsType<long>(result);
-            Assert.True(result > 0);
-            Assert.True(result.ToString().Length == long.MaxValue.ToString().Length);
+            Assert.True(result2 - result == 1);
         }
 
         [Fact]
@@ -31,5 +32,16 @@ namespace DotNetCore.CAP.Test
             Assert.True(array.Distinct().Count() == 1000);
         }
 
+        [Fact]
+        public void TestNegativeWorkerId()
+        {
+            Assert.Throws<ArgumentException>(() => new SnowflakeId(-1));
+        }
+
+        [Fact]
+        public void TestTooLargeWorkerId()
+        {
+            Assert.Throws<ArgumentException>(() => new SnowflakeId(1024));
+        }
     }
 }

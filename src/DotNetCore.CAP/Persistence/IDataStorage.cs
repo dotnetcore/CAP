@@ -6,28 +6,36 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 
-namespace DotNetCore.CAP.Persistence
+namespace DotNetCore.CAP.Persistence;
+
+public interface IDataStorage
 {
-    public interface IDataStorage
-    {
-        Task ChangePublishStateAsync(MediumMessage message, StatusName state);
+    Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default);
 
-        Task ChangeReceiveStateAsync(MediumMessage message, StatusName state);
+    Task ReleaseLockAsync(string key, string instance, CancellationToken token = default);
 
-        MediumMessage StoreMessage(string name, Message content, object dbTransaction = null);
+    Task RenewLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default);
 
-        void StoreReceivedExceptionMessage(string name, string group, string content);
+    Task ChangePublishStateToDelayedAsync(string[] ids);
 
-        MediumMessage StoreReceivedMessage(string name, string group, Message content);
+    Task ChangePublishStateAsync(MediumMessage message, StatusName state, object? transaction = null);
 
-        Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
-            CancellationToken token = default);
+    Task ChangeReceiveStateAsync(MediumMessage message, StatusName state);
 
-        Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry();
+    Task<MediumMessage> StoreMessageAsync(string name, Message content, object? transaction = null);
 
-        Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry();
+    Task StoreReceivedExceptionMessageAsync(string name, string group, string content);
 
-        //dashboard api
-        IMonitoringApi GetMonitoringApi();
-    }
+    Task<MediumMessage> StoreReceivedMessageAsync(string name, string group, Message content);
+
+    Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default);
+
+    Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry();
+
+    Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask, CancellationToken token = default);
+
+    Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry();
+
+    //dashboard api
+    IMonitoringApi GetMonitoringApi();
 }

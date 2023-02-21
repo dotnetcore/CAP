@@ -6,87 +6,156 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP.Internal
+namespace DotNetCore.CAP.Internal;
+
+/// <summary>
+/// Default implement of <see cref="T:DotNetCore.CAP.Internal.IBootstrapper" />.
+/// </summary>
+internal class Bootstrapper : BackgroundService, IBootstrapper
 {
-    /// <summary>
-    /// Default implement of <see cref="T:DotNetCore.CAP.Internal.IBootstrapper" />.
-    /// </summary>
-    internal class Bootstrapper : BackgroundService, IBootstrapper
+    private readonly ILogger<Bootstrapper> _logger;
+    private readonly IServiceProvider _serviceProvider;
+
+    private CancellationTokenSource? _cts;
+    private bool _disposed;
+    private IEnumerable<IProcessingServer> _processors = default!;
+
+    public bool IsStarted => !_cts?.IsCancellationRequested ?? false;
+
+    public Bootstrapper(IServiceProvider serviceProvider, ILogger<Bootstrapper> logger)
     {
-        private readonly ILogger<Bootstrapper> _logger;
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+    }
 
-        public Bootstrapper(
-            ILogger<Bootstrapper> logger,
-            IStorageInitializer storage,
-            IEnumerable<IProcessingServer> processors)
+    public async Task BootstrapAsync(CancellationToken cancellationToken = default)
+    {
+        if (_cts != null)
         {
-            _logger = logger;
-            Storage = storage;
-            Processors = processors;
+            _logger.LogInformation("### CAP background task is already started!");
+
+            return;
         }
 
-        private IStorageInitializer Storage { get; }
+        _logger.LogDebug("### CAP background task is starting.");
 
-        private IEnumerable<IProcessingServer> Processors { get; }
+        _cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 
-        public async Task BootstrapAsync(CancellationToken stoppingToken)
+        CheckRequirement();
+
+        _processors = _serviceProvider.GetServices<IProcessingServer>();
+
+        try
         {
-            _logger.LogDebug("### CAP background task is starting.");
-
-            try
-            {
-                await Storage.InitializeAsync(stoppingToken);
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Initializing the storage structure failed!");
-            }
-
-            stoppingToken.Register(() =>
-            {
-                _logger.LogDebug("### CAP background task is stopping.");
-
-                foreach (var item in Processors)
-                {
-                    try
-                    {
-                        item.Dispose();
-                    }
-                    catch (OperationCanceledException ex)
-                    {
-                        _logger.ExpectedOperationCanceledException(ex);
-                    }
-                }
-            });
-
-            await BootstrapCoreAsync();
-
-            _logger.LogInformation("### CAP started!");
+            await _serviceProvider.GetRequiredService<IStorageInitializer>().InitializeAsync(_cts.Token).ConfigureAwait(false);
+        }
+        catch (Exception e)
+        {
+            if (e is InvalidOperationException) throw;
+            _logger.LogError(e, "Initializing the storage structure failed!");
         }
 
-        protected virtual Task BootstrapCoreAsync()
+        _cts.Token.Register(() =>
         {
-            foreach (var item in Processors)
-            {
+            _logger.LogDebug("### CAP background task is stopping.");
+
+
+            foreach (var item in _processors)
                 try
                 {
-                    item.Start();
+                    item.Dispose();
                 }
-                catch (Exception ex)
+                catch (OperationCanceledException ex)
                 {
-                    _logger.ProcessorsStartedError(ex);
+                    _logger.ExpectedOperationCanceledException(ex);
                 }
-            }
+        });
 
-            return Task.CompletedTask;
-        }
+        await BootstrapCoreAsync().ConfigureAwait(false);
 
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+        _disposed = false;
+        _logger.LogInformation("### CAP started!");
+    }
+
+    protected virtual async Task BootstrapCoreAsync()
+    {
+        foreach (var item in _processors)
         {
-            await BootstrapAsync(stoppingToken);
+            try
+            {
+                _cts!.Token.ThrowIfCancellationRequested();
+
+                await item.Start(_cts!.Token);
+            }
+            catch (OperationCanceledException)
+            {
+                // ignore
+            }
+            catch (Exception ex)
+            {
+                _logger.ProcessorsStartedError(ex);
+            }
         }
+    }
+
+    public override void Dispose()
+    {
+        if (_disposed) return;
+
+        _cts?.Cancel();
+        _cts?.Dispose();
+        _cts = null;
+        _disposed = true;
+    }
+
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        await BootstrapAsync(stoppingToken).ConfigureAwait(false);
+    }
+
+    public override async Task StopAsync(CancellationToken cancellationToken)
+    {
+        _cts?.Cancel();
+
+        await base.StopAsync(cancellationToken).ConfigureAwait(false);
+    }
+
+    private void CheckRequirement()
+    {
+        var marker = _serviceProvider.GetService<CapMarkerService>();
+        if (marker == null)
+            throw new InvalidOperationException(
+                "AddCap() must be added on the service collection.   eg: services.AddCap(...)");
+
+        var messageQueueMarker = _serviceProvider.GetService<CapMessageQueueMakerService>();
+        if (messageQueueMarker == null)
+            throw new InvalidOperationException(
+                "You must be config transport provider for CAP!" + Environment.NewLine +
+                "==================================================================================" +
+                Environment.NewLine +
+                "========   eg: services.AddCap( options => { options.UseRabbitMQ(...) }); ========" +
+                Environment.NewLine +
+                "==================================================================================");
+
+        var databaseMarker = _serviceProvider.GetService<CapStorageMarkerService>();
+        if (databaseMarker == null)
+            throw new InvalidOperationException(
+                "You must be config storage provider for CAP!" + Environment.NewLine +
+                "===================================================================================" +
+                Environment.NewLine +
+                "========   eg: services.AddCap( options => { options.UseSqlServer(...) }); ========" +
+                Environment.NewLine +
+                "===================================================================================");
+    }
+
+    public ValueTask DisposeAsync()
+    {
+        Dispose();
+
+        return ValueTask.CompletedTask;
     }
 }

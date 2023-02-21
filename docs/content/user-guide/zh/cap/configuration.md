@@ -19,8 +19,8 @@ services.AddCap(config=> {
 ```C#
 services.AddCap(config => 
 {
-     config.UseInMemoryQueue();
-     config.UseInmemoryStorage();
+     config.UseInMemoryMessageQueue();
+     config.UseInMemoryStorage();
 });
 ```
 
@@ -30,15 +30,31 @@ services.AddCap(config =>
 
 在 `AddCap` 中 `CapOptions` 对象是用来存储配置相关信息，默认情况下它们都具有一些默认值，有些时候你可能需要自定义。
 
-#### DefaultGroup
+#### DefaultGroupName
 
 默认值：cap.queue.{程序集名称}
 
 默认的消费者组的名字，在不同的 Transports 中对应不同的名字，可以通过自定义此值来自定义不同 Transports 中的名字，以便于查看。
 
-> 在 RabbitMQ 中映射到 [Queue Names](https://www.rabbitmq.com/queues.html#names)。  
-> 在 Apache Kafka 中映射到 [Consumer Group Id](http://kafka.apache.org/documentation/#group.id)。  
-> 在 Azure Service Bus 中映射到 Subscription Name。  
+!!! info "Mapping"
+    在 RabbitMQ 中映射到 [Queue Names](https://www.rabbitmq.com/queues.html#names)。  
+    在 Apache Kafka 中映射到 [Consumer Group Id](http://kafka.apache.org/documentation/#group.id)。  
+    在 Azure Service Bus 中映射到 Subscription Name。  
+    在 NATS 中映射到 [Queue Group Name](https://docs.nats.io/nats-concepts/queue).
+    在 Redis Streams 中映射到 [Consumer Group](https://redis.io/topics/streams-intro#creating-a-consumer-group).
+
+
+#### GroupNamePrefix
+
+默认值：Null
+
+为订阅 Group 统一添加前缀。 https://github.com/dotnetcore/CAP/pull/780
+
+#### TopicNamePrefix
+
+默认值： Null
+
+为 Topic 统一添加前缀。 https://github.com/dotnetcore/CAP/pull/780
 
 #### Version
 
@@ -70,33 +86,68 @@ services.AddCap(config =>
     在默认情况下，重试将在发送和消费消息失败的 **4分钟后** 开始，这是为了避免设置消息状态延迟导致可能出现的问题。  
     发送和消费消息的过程中失败会立即重试 3 次，在 3 次以后将进入重试轮询，此时 FailedRetryInterval 配置才会生效。
 
+!!! WARNING "多实例并发重试"
+    我们在7.1.0版本中引入了基于数据库的分布式锁以应对在多个实例下对数据库重试的并发数据获取问题，你需要显式配置 `UseStorageLock` 为 true。
+
+#### UseStorageLock
+
+> 默认值: false
+
+如果设置为true，我们将使用基于数据库的分布式锁以应对重试进程在多个实例下对数据库数据的并发获取问题。这将会在数据库生成 cap.lock 表。
+
 #### ConsumerThreadCount 
 
-默认值：1
+> 默认值：1
 
 消费者线程并行处理消息的线程数，当这个值大于1时，将不能保证消息执行的顺序。
 
+#### CollectorCleaningInterval
+
+> 默认值：300 秒
+
+收集器删除已经过期消息的时间间隔。
+
 #### FailedRetryCount
 
-默认值：50
+> 默认值：50
 
 重试的最大次数。当达到此设置值时，将不会再继续重试，通过改变此参数来设置重试的最大次数。
 
 #### FailedThresholdCallback
 
-默认值：NULL
+> 默认值：NULL
 
-类型：`Action<MessageType, string, string>`
-
->
-T1 : Message Type  
-T2 : Message Name  
-T3 : Message Content
+类型：`Action<FailedInfo>`
 
 重试阈值的失败回调。当重试达到 FailedRetryCount 设置的值的时候，将调用此 Action 回调，你可以通过指定此回调来接收失败达到最大的通知，以做出人工介入。例如发送邮件或者短信。
 
 #### SucceedMessageExpiredAfter
 
-默认值：24*3600 秒（1天后）
+> 默认值：24*3600 秒（1天后）
 
 成功消息的过期时间（秒）。 当消息发送或者消费成功时候，在时间达到 `SucceedMessageExpiredAfter` 秒时候将会从 Persistent 中删除，你可以通过指定此值来设置过期的时间。
+
+#### FailedMessageExpiredAfter
+
+> 默认值：15*24*3600 秒（15天后）
+
+失败消息的过期时间（秒）。 当消息发送或者消费失败时候，在时间达到 `FailedMessageExpiredAfter` 秒时候将会从 Persistent 中删除，你可以通过指定此值来设置过期的时间。
+
+#### UseDispatchingPerGroup
+
+> 默认值: false
+
+默认情况下，CAP会将所有消费者组的消息都先放置到内存同一个Channel中，然后线性处理。
+如果设置为 true，则每个消费者组都会根据 `ConsumerThreadCount` 设置的值创建单独的线程进行处理。
+
+!!! WARNING "如果此设置项目为 true，则 EnableConsumerPrefetch 设置项无效"
+
+#### EnableConsumerPrefetch
+
+> 默认值: false， 在 7.0 版本之前默认行为 true
+
+默认情况下，CAP只会从消息队列读取一条，然后执行订阅方法，执行完成后才会读取下一条来执行.
+如果设置为 true, 消费端会预取一部分消息到内存队列，然后再分发给调度器执行。
+
+!!! note "注意事项"
+    设置为 true 可能会产生一些问题，当订阅方法执行过慢耗时太久时，会导致重试线程拾取到还未执行的的消息。重试线程默认拾取4分钟前的消息，也就是说如果消费端积压了超过4分钟的消息就会被重新拾取到再次执行

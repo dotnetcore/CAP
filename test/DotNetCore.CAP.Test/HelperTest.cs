@@ -8,19 +8,6 @@ namespace DotNetCore.CAP.Test
     public class HelperTest
     {
         [Fact]
-        public void ToTimestampTest()
-        {
-            //Arrange
-            var time = DateTime.Parse("2018-01-01 00:00:00");
-
-            //Act
-            var result = Helper.ToTimestamp(time);
-
-            //Assert
-            Assert.Equal(1514764800, result);
-        }
-
-        [Fact]
         public void IsControllerTest()
         {
             //Arrange
@@ -31,6 +18,19 @@ namespace DotNetCore.CAP.Test
 
             //Assert
             Assert.True(result);
+        }
+
+        [Fact]
+        public void IsControllerAbstractTest()
+        {
+            //Arrange
+            var typeInfo = typeof(AbstractController).GetTypeInfo();
+
+            //Act
+            var result = Helper.IsController(typeInfo);
+
+            //Assert
+            Assert.False(result);
         }
 
         [Theory]
@@ -75,5 +75,10 @@ namespace DotNetCore.CAP.Test
     public class HomeController
     {
         
+    }
+
+    public abstract class AbstractController
+    {
+
     }
 }

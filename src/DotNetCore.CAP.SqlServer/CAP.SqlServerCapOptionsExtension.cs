@@ -11,28 +11,27 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+internal class SqlServerCapOptionsExtension : ICapOptionsExtension
 {
-    internal class SqlServerCapOptionsExtension : ICapOptionsExtension
+    private readonly Action<SqlServerOptions> _configure;
+
+    public SqlServerCapOptionsExtension(Action<SqlServerOptions> configure)
     {
-        private readonly Action<SqlServerOptions> _configure;
+        _configure = configure;
+    }
 
-        public SqlServerCapOptionsExtension(Action<SqlServerOptions> configure)
-        {
-            _configure = configure;
-        }
+    public void AddServices(IServiceCollection services)
+    {
+        services.AddSingleton(new CapStorageMarkerService("SqlServer"));
 
-        public void AddServices(IServiceCollection services)
-        {
-            services.AddSingleton<CapStorageMarkerService>();
+        services.AddSingleton<DiagnosticProcessorObserver>();
+        services.AddSingleton<IDataStorage, SqlServerDataStorage>();
+        services.AddSingleton<IStorageInitializer, SqlServerStorageInitializer>();
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, DiagnosticRegister>());
 
-            services.AddSingleton<DiagnosticProcessorObserver>();
-            services.AddSingleton<IDataStorage, SqlServerDataStorage>();
-            services.AddSingleton<IStorageInitializer, SqlServerStorageInitializer>();
-            services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, DiagnosticRegister>());
-
-            services.Configure(_configure);
-            services.AddSingleton<IConfigureOptions<SqlServerOptions>, ConfigureSqlServerOptions>();
-        }
+        services.Configure(_configure);
+        services.AddSingleton<IConfigureOptions<SqlServerOptions>, ConfigureSqlServerOptions>();
     }
 }

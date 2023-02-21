@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29025.244
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31919.166
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9B2AE124-6636-4DE9-83A3-70360DABD0C4}"
 EndProject
@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		.travis.yml = .travis.yml
 		appveyor.yml = appveyor.yml
+		.github\workflows\deploy-docs-and-dashbaord.yml = .github\workflows\deploy-docs-and-dashbaord.yml
 		.github\ISSUE_TEMPLATE = .github\ISSUE_TEMPLATE
 		LICENSE.txt = LICENSE.txt
 		README.md = README.md
@@ -69,9 +70,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AmazonSQS.InMemory",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.NATS", "src\DotNetCore.CAP.NATS\DotNetCore.CAP.NATS.csproj", "{8B2FD3EA-E72B-4A82-B182-B87EC0C15D07}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sample.RabbitMQ.Postgres.DashboardAuth", "samples\Sample.RabbitMQ.Postgres.DashboardAuth\Sample.RabbitMQ.Postgres.DashboardAuth.csproj", "{54F6C206-2A23-4971-AE5A-FC47EB772452}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Samples.Redis.SqlServer", "samples\Samples.Redis.SqlServer\Samples.Redis.SqlServer.csproj", "{375AF85D-8C81-47C6-BE5B-D0874D4971EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyConsumerSelector", "samples\MyConsumerSelector\MyConsumerSelector.csproj", "{1AE86784-0B64-4A73-8D81-D913C6E33D7D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.RedisStreams", "src\DotNetCore.CAP.RedisStreams\DotNetCore.CAP.RedisStreams.csproj", "{54458B54-49CC-454C-82B2-4AED681D9D07}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Dashboard.Auth", "samples\Sample.Dashboard.Auth\Sample.Dashboard.Auth.csproj", "{6E059983-DE89-4D53-88F5-D9083BCE257F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.MultiModuleSubscriberTests", "test\DotNetCore.CAP.MultiModuleSubscriberTests\DotNetCore.CAP.MultiModuleSubscriberTests.csproj", "{23684403-7DA8-489A-8A1E-8056D7683E18}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.Pulsar", "src\DotNetCore.CAP.Pulsar\DotNetCore.CAP.Pulsar.csproj", "{AB7A10CB-2C7E-49CE-AA21-893772FF6546}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Pulsar.InMemory", "samples\Sample.Pulsar.InMemory\Sample.Pulsar.InMemory.csproj", "{B1D95CCD-0123-41D4-8CCB-9F834ED8D5C5}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.OpenTelemetry", "src\DotNetCore.CAP.OpenTelemetry\DotNetCore.CAP.OpenTelemetry.csproj", "{83DDB126-A00B-4064-86E7-568322CA67EC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.AzureServiceBus.InMemory", "samples\Sample.AzureServiceBus.InMemory\Sample.AzureServiceBus.InMemory.csproj", "{0C734FB2-7D75-4FF3-B564-1E50E6280B14}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -163,14 +176,38 @@ Global
 		{8B2FD3EA-E72B-4A82-B182-B87EC0C15D07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8B2FD3EA-E72B-4A82-B182-B87EC0C15D07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8B2FD3EA-E72B-4A82-B182-B87EC0C15D07}.Release|Any CPU.Build.0 = Release|Any CPU
-		{54F6C206-2A23-4971-AE5A-FC47EB772452}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{54F6C206-2A23-4971-AE5A-FC47EB772452}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{54F6C206-2A23-4971-AE5A-FC47EB772452}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{54F6C206-2A23-4971-AE5A-FC47EB772452}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1AE86784-0B64-4A73-8D81-D913C6E33D7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1AE86784-0B64-4A73-8D81-D913C6E33D7D}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1AE86784-0B64-4A73-8D81-D913C6E33D7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1AE86784-0B64-4A73-8D81-D913C6E33D7D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{375AF85D-8C81-47C6-BE5B-D0874D4971EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{375AF85D-8C81-47C6-BE5B-D0874D4971EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{375AF85D-8C81-47C6-BE5B-D0874D4971EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{375AF85D-8C81-47C6-BE5B-D0874D4971EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{54458B54-49CC-454C-82B2-4AED681D9D07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{54458B54-49CC-454C-82B2-4AED681D9D07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{54458B54-49CC-454C-82B2-4AED681D9D07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{54458B54-49CC-454C-82B2-4AED681D9D07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6E059983-DE89-4D53-88F5-D9083BCE257F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6E059983-DE89-4D53-88F5-D9083BCE257F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6E059983-DE89-4D53-88F5-D9083BCE257F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6E059983-DE89-4D53-88F5-D9083BCE257F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23684403-7DA8-489A-8A1E-8056D7683E18}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23684403-7DA8-489A-8A1E-8056D7683E18}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23684403-7DA8-489A-8A1E-8056D7683E18}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23684403-7DA8-489A-8A1E-8056D7683E18}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AB7A10CB-2C7E-49CE-AA21-893772FF6546}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AB7A10CB-2C7E-49CE-AA21-893772FF6546}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AB7A10CB-2C7E-49CE-AA21-893772FF6546}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AB7A10CB-2C7E-49CE-AA21-893772FF6546}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B1D95CCD-0123-41D4-8CCB-9F834ED8D5C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B1D95CCD-0123-41D4-8CCB-9F834ED8D5C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B1D95CCD-0123-41D4-8CCB-9F834ED8D5C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B1D95CCD-0123-41D4-8CCB-9F834ED8D5C5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83DDB126-A00B-4064-86E7-568322CA67EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83DDB126-A00B-4064-86E7-568322CA67EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83DDB126-A00B-4064-86E7-568322CA67EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83DDB126-A00B-4064-86E7-568322CA67EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0C734FB2-7D75-4FF3-B564-1E50E6280B14}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -197,8 +234,14 @@ Global
 		{43475E00-51B7-443D-BC2D-FC21F9D8A0B4} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
 		{B187DD15-092D-4B72-9807-50856607D237} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 		{8B2FD3EA-E72B-4A82-B182-B87EC0C15D07} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
-		{54F6C206-2A23-4971-AE5A-FC47EB772452} = {3A6B6931-A123-477A-9469-8B468B5385AF}
-		{1AE86784-0B64-4A73-8D81-D913C6E33D7D} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{375AF85D-8C81-47C6-BE5B-D0874D4971EA} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{54458B54-49CC-454C-82B2-4AED681D9D07} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{6E059983-DE89-4D53-88F5-D9083BCE257F} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{23684403-7DA8-489A-8A1E-8056D7683E18} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
+		{AB7A10CB-2C7E-49CE-AA21-893772FF6546} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{B1D95CCD-0123-41D4-8CCB-9F834ED8D5C5} = {3A6B6931-A123-477A-9469-8B468B5385AF}
+		{83DDB126-A00B-4064-86E7-568322CA67EC} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{0C734FB2-7D75-4FF3-B564-1E50E6280B14} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E70565D-94CF-40B4-BFE1-AC18D5F736AB}

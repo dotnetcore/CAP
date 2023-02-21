@@ -1,6 +1,7 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
@@ -8,48 +9,54 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.SqlServer
+namespace DotNetCore.CAP.SqlServer;
+
+public class SqlServerStorageInitializer : IStorageInitializer
 {
-    public class SqlServerStorageInitializer : IStorageInitializer
+    private readonly ILogger _logger;
+    private readonly IOptions<SqlServerOptions> _options;
+    private readonly IOptions<CapOptions> _capOptions;
+
+    public SqlServerStorageInitializer(
+        ILogger<SqlServerStorageInitializer> logger,
+        IOptions<SqlServerOptions> options, IOptions<CapOptions> capOptions)
     {
-        private readonly ILogger _logger;
-        private readonly IOptions<SqlServerOptions> _options;
+        _capOptions = capOptions;
+        _options = options;
+        _logger = logger;
+    }
 
-        public SqlServerStorageInitializer(
-            ILogger<SqlServerStorageInitializer> logger,
-            IOptions<SqlServerOptions> options)
-        {
-            _options = options;
-            _logger = logger;
-        }
+    public virtual string GetPublishedTableName()
+    {
+        return $"{_options.Value.Schema}.Published";
+    }
 
-        public virtual string GetPublishedTableName()
-        {
-            return $"{_options.Value.Schema}.Published";
-        }
+    public virtual string GetReceivedTableName()
+    {
+        return $"{_options.Value.Schema}.Received";
+    }
 
-        public virtual string GetReceivedTableName()
-        {
-            return $"{_options.Value.Schema}.Received";
-        }
+    public virtual string GetLockTableName()
+    {
+        return $"{_options.Value.Schema}.Lock";
+    }
 
-        public async Task InitializeAsync(CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested) return;
+    public async Task InitializeAsync(CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested) return;
 
-            var sql = CreateDbTablesScript(_options.Value.Schema);
-            using (var connection = new SqlConnection(_options.Value.ConnectionString))
-                connection.ExecuteNonQuery(sql);
+        var sql = CreateDbTablesScript(_options.Value.Schema);
+        var connection = new SqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
 
-            await Task.CompletedTask;
+        _logger.LogDebug("Ensuring all create database tables script are applied.");
+    }
 
-            _logger.LogDebug("Ensuring all create database tables script are applied.");
-        }
-
-        protected virtual string CreateDbTablesScript(string schema)
-        {
-            var batchSql =
-                $@"
+    protected virtual string CreateDbTablesScript(string schema)
+    {
+        var batchSql =
+            $@"
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = '{schema}')
 BEGIN
 	EXEC('CREATE SCHEMA [{schema}]')
@@ -90,8 +97,26 @@ CREATE TABLE {GetPublishedTableName()}(
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
-END;";
-            return batchSql;
-        }
+END;
+";
+        if (_capOptions.Value.UseStorageLock)
+            batchSql += $@"
+IF OBJECT_ID(N'{GetLockTableName()}',N'U') IS NULL
+BEGIN
+CREATE TABLE {GetLockTableName()}(
+	[Key] [nvarchar](128) NOT NULL,
+    [Instance] [nvarchar](256) NOT NULL,
+	[LastLockTime] [datetime2](7) NOT NULL,
+ CONSTRAINT [PK_{GetLockTableName()}] PRIMARY KEY CLUSTERED
+(
+	[Key] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = ON, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY] 
+END;
+
+INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('{$"publish_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');
+INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('{$"received_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');
+";
+        return batchSql;
     }
 }

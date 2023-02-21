@@ -8,33 +8,32 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
-namespace DotNetCore.CAP.MongoDB
+namespace DotNetCore.CAP.MongoDB;
+
+// ReSharper disable once InconsistentNaming
+public class MongoDBCapOptionsExtension : ICapOptionsExtension
 {
-    // ReSharper disable once InconsistentNaming
-    public class MongoDBCapOptionsExtension : ICapOptionsExtension
+    private readonly Action<MongoDBOptions> _configure;
+
+    public MongoDBCapOptionsExtension(Action<MongoDBOptions> configure)
     {
-        private readonly Action<MongoDBOptions> _configure;
+        _configure = configure;
+    }
 
-        public MongoDBCapOptionsExtension(Action<MongoDBOptions> configure)
+    public void AddServices(IServiceCollection services)
+    {
+        services.AddSingleton(new CapStorageMarkerService("MongoDB"));
+
+        services.AddSingleton<IDataStorage, MongoDBDataStorage>();
+        services.AddSingleton<IStorageInitializer, MongoDBStorageInitializer>();
+
+        services.Configure(_configure);
+
+        //Try to add IMongoClient if does not exists
+        services.TryAddSingleton<IMongoClient>(x =>
         {
-            _configure = configure;
-        }
-
-        public void AddServices(IServiceCollection services)
-        {
-            services.AddSingleton<CapStorageMarkerService>();
-
-            services.AddSingleton<IDataStorage, MongoDBDataStorage>();
-            services.AddSingleton<IStorageInitializer, MongoDBStorageInitializer>(); 
-
-            services.Configure(_configure);
-
-            //Try to add IMongoClient if does not exists
-            services.TryAddSingleton<IMongoClient>(x =>
-            {
-                var options = x.GetService<IOptions<MongoDBOptions>>().Value;
-                return new MongoClient(options.DatabaseConnection);
-            });
-        }
+            var options = x.GetRequiredService<IOptions<MongoDBOptions>>().Value;
+            return new MongoClient(options.DatabaseConnection);
+        });
     }
 }

@@ -33,7 +33,7 @@ namespace DotNetCore.CAP.MySql.Test
             };
             var message = new Message(header, null);
 
-            var mdMessage = _storage.StoreMessage("test.name", message);
+            var mdMessage = _storage.StoreMessageAsync("test.name", message);
             Assert.NotNull(mdMessage);
         }
 
@@ -47,14 +47,14 @@ namespace DotNetCore.CAP.MySql.Test
             };
             var message = new Message(header, null);
 
-            var mdMessage = _storage.StoreReceivedMessage("test.name", "test.group", message);
+            var mdMessage = _storage.StoreReceivedMessageAsync("test.name", "test.group", message);
             Assert.NotNull(mdMessage);
         }
 
         [Fact]
-        public void StoreReceivedExceptionMessageTest()
+        public async Task StoreReceivedExceptionMessageTest()
         {
-            _storage.StoreReceivedExceptionMessage("test.name", "test.group", "");
+            await _storage.StoreReceivedExceptionMessageAsync("test.name", "test.group", "");
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace DotNetCore.CAP.MySql.Test
             };
             var message = new Message(header, null);
 
-            var mdMessage = _storage.StoreMessage("test.name", message);
+            var mdMessage = await _storage.StoreMessageAsync("test.name", message);
 
             await _storage.ChangePublishStateAsync(mdMessage, StatusName.Succeeded);
         }
@@ -82,7 +82,7 @@ namespace DotNetCore.CAP.MySql.Test
             };
             var message = new Message(header, null);
 
-            var mdMessage = _storage.StoreMessage("test.name", message);
+            var mdMessage = await _storage.StoreMessageAsync("test.name", message);
 
             await _storage.ChangeReceiveStateAsync(mdMessage, StatusName.Succeeded);
         }

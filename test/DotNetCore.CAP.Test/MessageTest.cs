@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,8 +16,9 @@ namespace DotNetCore.CAP.Test
         public MessageTest()
         {
             var services = new ServiceCollection();
-            ServiceCollectionExtensions.ServiceCollection = services;
 
+            services.AddOptions();
+            services.AddSingleton<IServiceCollection>(_ => services);
             services.AddSingleton<ISerializer, JsonUtf8Serializer>();
             _provider = services.BuildServiceProvider();
         }

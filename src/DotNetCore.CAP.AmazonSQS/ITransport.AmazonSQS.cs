@@ -22,8 +22,8 @@ namespace DotNetCore.CAP.AmazonSQS
         private readonly ILogger _logger;
         private readonly IOptions<AmazonSQSOptions> _sqsOptions;
         private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-        private IAmazonSimpleNotificationService _snsClient;
-        private IDictionary<string, string> _topicArnMaps;
+        private IAmazonSimpleNotificationService? _snsClient;
+        private IDictionary<string, string>? _topicArnMaps;
 
         public AmazonSQSTransport(ILogger<AmazonSQSTransport> logger, IOptions<AmazonSQSOptions> sqsOptions)
         {
@@ -31,20 +31,20 @@ namespace DotNetCore.CAP.AmazonSQS
             _sqsOptions = sqsOptions;
         }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("RabbitMQ", string.Empty);
+        public BrokerAddress BrokerAddress => new BrokerAddress("AmazonSQS", string.Empty);
 
         public async Task<OperateResult> SendAsync(TransportMessage message)
         {
             try
             {
-                await TryAddTopicArns();
+                await FetchExistingTopicArns();
 
-                if (_topicArnMaps.TryGetValue(message.GetName().NormalizeForAws(), out var arn))
+                if (TryGetOrCreateTopicArn(message.GetName().NormalizeForAws(), out var arn))
                 {
-                    string bodyJson = null;
-                    if (message.Body != null)
+                    string? bodyJson = null;
+                    if (message.Body.Length > 0)
                     {
-                        bodyJson = Encoding.UTF8.GetString(message.Body);
+                        bodyJson = Encoding.UTF8.GetString(message.Body.Span);
                     }
 
                     var attributes = message.Headers.Where(x => x.Value != null).ToDictionary(x => x.Key,
@@ -53,24 +53,28 @@ namespace DotNetCore.CAP.AmazonSQS
                             StringValue = x.Value,
                             DataType = "String"
                         });
-                    
+
                     var request = new PublishRequest(arn, bodyJson)
                     {
                         MessageAttributes = attributes
                     };
 
-                    await _snsClient.PublishAsync(request);
+                    await _snsClient!.PublishAsync(request);
 
                     _logger.LogDebug($"SNS topic message [{message.GetName().NormalizeForAws()}] has been published.");
                     return OperateResult.Success;
                 }
 
-                _logger.LogWarning($"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]");
-                return OperateResult.Failed(new OperateError
-                {
-                    Code = "SNS",
-                    Description = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]"
-                });
+                var errorMessage = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]";
+                _logger.LogWarning(errorMessage);
+
+                return OperateResult.Failed(
+                    new PublisherSentFailedException(errorMessage),
+                    new OperateError
+                    {
+                        Code = "SNS",
+                        Description = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]"
+                    });
             }
             catch (Exception ex)
             {
@@ -85,26 +89,35 @@ namespace DotNetCore.CAP.AmazonSQS
             }
         }
 
-        public async Task<bool> TryAddTopicArns()
+        private async Task FetchExistingTopicArns()
         {
             if (_topicArnMaps != null)
             {
-                return true;
+                return;
             }
 
             await _semaphore.WaitAsync();
 
             try
             {
-                _snsClient = _sqsOptions.Value.Credentials != null
-                    ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, _sqsOptions.Value.Region)
-                    : new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Region);
+                if (string.IsNullOrWhiteSpace(_sqsOptions.Value.SNSServiceUrl))
+                {
+                    _snsClient = _sqsOptions.Value.Credentials != null
+                        ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, _sqsOptions.Value.Region)
+                        : new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Region);
+                }
+                else
+                {
+                    _snsClient = _sqsOptions.Value.Credentials != null
+                        ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl })
+                        : new AmazonSimpleNotificationServiceClient(new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl });
+                }
 
                 if (_topicArnMaps == null)
                 {
                     _topicArnMaps = new Dictionary<string, string>();
-                    
-                    string nextToken = null;
+
+                    string? nextToken = null;
                     do
                     {
                         var topics = nextToken == null
@@ -118,8 +131,6 @@ namespace DotNetCore.CAP.AmazonSQS
                         nextToken = topics.NextToken;
                     }
                     while (!string.IsNullOrEmpty(nextToken));
-
-                    return true;
                 }
             }
             catch (Exception e)
@@ -130,8 +141,27 @@ namespace DotNetCore.CAP.AmazonSQS
             {
                 _semaphore.Release();
             }
+        }
 
-            return false;
+        private bool TryGetOrCreateTopicArn(string topicName, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? topicArn)
+        {
+            topicArn = null;
+            if (_topicArnMaps!.TryGetValue(topicName, out topicArn))
+            {
+                return true;
+            }
+
+            var response = _snsClient!.CreateTopicAsync(topicName).GetAwaiter().GetResult();
+
+            if (string.IsNullOrEmpty(response.TopicArn))
+            {
+                return false;
+            }
+
+            topicArn = response.TopicArn;
+
+            _topicArnMaps.Add(topicName, topicArn);
+            return true;
         }
     }
 }

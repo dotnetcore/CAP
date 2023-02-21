@@ -1,18 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>DotNetCore.CAP.RabbitMQ</AssemblyName>
+    <TargetFramework>net6.0</TargetFramework>
+	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);RabbitMQ</PackageTags>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\netstandard2.1\DotNetCore.CAP.RabbitMQ.xml</DocumentationFile>
-    <NoWarn>1701;1702;1705;CS1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RabbitMQ.Client" Version="6.2.1" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.4.0" />
   </ItemGroup>
 
   <ItemGroup>

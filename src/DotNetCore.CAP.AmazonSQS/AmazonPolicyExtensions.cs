@@ -102,10 +102,10 @@ namespace DotNetCore.CAP.AmazonSQS
         ///             "AWS": "*"
         ///         },
         ///         "Action": "sqs:SendMessage",
-        ///         "Resource": "arn:aws:sqs:us-east-1:MyQueue",
+        ///         "Resource": "arn:aws:sqs:us-east-1:MyQueue-v1",
         ///         "Condition": {
         ///             "ArnLike": {
-        ///                 "aws:SourceArn": "arn:aws:sns:us-east-1:FirstTopic"
+        ///                 "aws:SourceArn": "arn:aws:sns:us-east-1:MyQueue-FirstTopic"
         ///             }
         ///         }
         ///     },
@@ -115,13 +115,26 @@ namespace DotNetCore.CAP.AmazonSQS
         ///             "AWS": "*"
         ///         },
         ///         "Action": "sqs:SendMessage",
-        ///         "Resource": "arn:aws:sqs:us-east-1:MyQueue",
+        ///         "Resource": "arn:aws:sqs:us-east-1:MyQueue-v1",
         ///         "Condition": {
         ///             "ArnLike": {
-        ///                 "aws:SourceArn": "arn:aws:sns:us-east-1:SecondTopic"
+        ///                 "aws:SourceArn": "arn:aws:sns:us-east-1:MyQueue-SecondTopic"
         ///             }
         ///         }
-        ///     }]
+        ///     },
+        ///     {
+        ///         "Effect": "Allow",
+        ///         "Principal": {
+        ///             "AWS": "*"
+        ///         },
+        ///         "Action": "sqs:SendMessage",
+        ///         "Resource": "arn:aws:sqs:us-east-1:MyQueue-v1",
+        ///         "Condition": {
+        ///             "ArnLike": {
+        ///                 "aws:SourceArn": "arn:aws:sns:us-east-1:MyQueue2-FirstTopic"
+        ///             }
+        ///         }
+        ///     },]
         /// }
         /// </code>
         ///     into compacted single statement:
@@ -135,13 +148,13 @@ namespace DotNetCore.CAP.AmazonSQS
         ///             "AWS": "*"
         ///         },
         ///         "Action": "sqs:SendMessage",
-        ///         "Resource": "arn:aws:sqs:us-east-1:MyQueue",
+        ///         "Resource": "arn:aws:sqs:us-east-1:MyQueue-v1",
         ///         "Condition": {
         ///             "ArnLike": {
         ///                 "aws:SourceArn": [
-        ///                 "arn:aws:sns:us-east-1:FirstTopic",
-        ///                 "arn:aws:sns:us-east-1:SecondTopic"
-        ///                     ]
+        ///                     "arn:aws:sns:us-east-1:MyQueue-*",
+        ///                     "arn:aws:sns:us-east-1:MyQueue2-FirstTopic"
+        ///                 ]
         ///             }
         ///         }
         ///     }]
@@ -161,7 +174,12 @@ namespace DotNetCore.CAP.AmazonSQS
                 .Where(s => s.Principals.All(r => string.Equals(r.Id, "*", StringComparison.OrdinalIgnoreCase)))
                 .ToList();
 
-            if (statementsToCompact.Count < 2)
+            var groupName = GetGroupName(sqsQueueArn);
+            if (groupName != null)
+            {
+                groupName = $":{groupName}-";
+            }
+            if (statementsToCompact.Count < 2 && groupName == null)
             {
                 return;
             }
@@ -172,11 +190,66 @@ namespace DotNetCore.CAP.AmazonSQS
                 policy.Statements.Remove(statement);
                 foreach (var topicArn in statement.Conditions.SelectMany(c => c.Values))
                 {
-                    topicArns.Add(topicArn);
+                    topicArns.Add(
+                        groupName != null && topicArn.Contains(groupName, StringComparison.InvariantCultureIgnoreCase)
+                            ? $"{GetArnGroupPrefix(topicArn)}-*"
+                            : topicArn);
                 }
             }
 
-            policy.AddSqsPermissions(topicArns, sqsQueueArn);
+            policy.AddSqsPermissions(topicArns.OrderBy(a => a), sqsQueueArn);
+        }
+
+        /// <summary>
+        /// Extract group prefix from ARN
+        /// For example for ARN:
+        ///     arn:aws:sns:us-east-1:MyQueue-FirstTopic
+        /// group prefix will be extracted:
+        ///     arn:aws:sns:us-east-1:MyQueue
+        /// </summary>
+        /// <param name="arn">Source ARN</param>
+        /// <returns>Group prefix or null if group not present</returns>
+        private static string? GetArnGroupPrefix(string arn)
+        {
+            const char separator = '-';
+            if (string.IsNullOrEmpty(arn) || !arn.Contains(separator))
+            {
+                return null;
+            }
+
+            var groupPaths = arn.Split(separator);
+            if (groupPaths.Length < 2)
+            {
+                return null;
+            }
+
+            return string.Join(separator, groupPaths.Take(groupPaths.Length - 1));
+        }
+        
+        /// <summary>
+        /// Extract group name from ARN
+        /// For example for ARN:
+        ///     arn:aws:sns:us-east-1:MyQueue-FirstTopic
+        /// group name will be extracted:
+        ///     MyQueue
+        /// </summary>
+        /// <param name="arn">Source ARN</param>
+        /// <returns>Group name or null if group not present</returns>
+        private static string? GetGroupName(string arn)
+        {
+            const char separator = ':';
+            if (string.IsNullOrEmpty(arn) || !arn.Contains(separator))
+            {
+                return null;
+            }
+
+            var name = arn.Split(separator).LastOrDefault();
+            if(string.IsNullOrEmpty(name))
+            {
+                return null;
+            }
+
+            return GetArnGroupPrefix(name);
         }
     }
 }

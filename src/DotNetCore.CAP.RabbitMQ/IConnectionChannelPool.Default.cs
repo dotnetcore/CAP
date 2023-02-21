@@ -15,11 +15,13 @@ namespace DotNetCore.CAP.RabbitMQ
     public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     {
         private const int DefaultPoolSize = 15;
+
         private readonly Func<IConnection> _connectionActivator;
         private readonly ILogger<ConnectionChannelPool> _logger;
         private readonly ConcurrentQueue<IModel> _pool;
-        private IConnection _connection;
-        private static readonly object SLock = new object();
+        private readonly bool _isPublishConfirms;
+        private IConnection? _connection;
+        private static readonly object SLock = new();
 
         private int _count;
         private int _maxSize;
@@ -37,6 +39,7 @@ namespace DotNetCore.CAP.RabbitMQ
             var options = optionsAccessor.Value;
 
             _connectionActivator = CreateConnection(options);
+            _isPublishConfirms = options.PublishConfirms;
 
             HostAddress = $"{options.HostName}:{options.Port}";
             Exchange = "v1" == capOptions.Version ? options.ExchangeName : $"{options.ExchangeName}.{capOptions.Version}";
@@ -67,24 +70,28 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public IConnection GetConnection()
         {
-            if (_connection != null && _connection.IsOpen)
+            lock (SLock)
             {
+                if (_connection != null && _connection.IsOpen)
+                {
+                    return _connection;
+                }
+
+                _connection?.Dispose();
+                _connection = _connectionActivator();
                 return _connection;
             }
-
-            _connection = _connectionActivator();
-            _connection.ConnectionShutdown += RabbitMQ_ConnectionShutdown;
-            return _connection;
         }
 
         public void Dispose()
         {
             _maxSize = 0;
 
-            while (_pool.TryDequeue(out var context))
+            while (_pool.TryDequeue(out var channel))
             {
-                context.Dispose();
+                channel.Dispose();
             }
+            _connection?.Dispose();
         }
 
         private static Func<IConnection> CreateConnection(RabbitMQOptions options)
@@ -95,25 +102,19 @@ namespace DotNetCore.CAP.RabbitMQ
                 Port = options.Port,
                 Password = options.Password,
                 VirtualHost = options.VirtualHost,
-                ClientProvidedName = Assembly.GetEntryAssembly()?.GetName().Name.ToLower()
+                DispatchConsumersAsync = true,
+                ClientProvidedName = Assembly.GetEntryAssembly()?.GetName().Name!.ToLower()
             };
 
             if (options.HostName.Contains(","))
             {
                 options.ConnectionFactoryOptions?.Invoke(factory);
- 
-                return () => factory.CreateConnection(
-                    options.HostName.Split(new[] { "," }, StringSplitOptions.RemoveEmptyEntries));
-            }
 
+                return () => factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(options.HostName));
+            }
             factory.HostName = options.HostName;
             options.ConnectionFactoryOptions?.Invoke(factory);
             return () => factory.CreateConnection();
-        }
-
-        private void RabbitMQ_ConnectionShutdown(object sender, ShutdownEventArgs e)
-        {
-            _logger.LogWarning($"RabbitMQ client connection closed! --> {e.ReplyText}");
         }
 
         public virtual IModel Rent()
@@ -130,6 +131,11 @@ namespace DotNetCore.CAP.RabbitMQ
             try
             {
                 model = GetConnection().CreateModel();
+                model.ExchangeDeclare(Exchange, RabbitMQOptions.ExchangeType, true);
+                if (_isPublishConfirms)
+                {
+                    model.ConfirmSelect();
+                }
             }
             catch (Exception e)
             {
@@ -141,14 +147,16 @@ namespace DotNetCore.CAP.RabbitMQ
             return model;
         }
 
-        public virtual bool Return(IModel connection)
+        public virtual bool Return(IModel channel)
         {
-            if (Interlocked.Increment(ref _count) <= _maxSize && connection.IsOpen)
+            if (Interlocked.Increment(ref _count) <= _maxSize && channel.IsOpen)
             {
-                _pool.Enqueue(connection);
+                _pool.Enqueue(channel);
 
                 return true;
             }
+
+            channel.Dispose();
 
             Interlocked.Decrement(ref _count);
 

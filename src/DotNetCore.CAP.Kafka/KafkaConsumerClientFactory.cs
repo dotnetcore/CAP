@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
-    internal sealed class KafkaConsumerClientFactory : IConsumerClientFactory
+    public class KafkaConsumerClientFactory : IConsumerClientFactory
     {
         private readonly IOptions<KafkaOptions> _kafkaOptions;
 
@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.Kafka
             _kafkaOptions = kafkaOptions;
         }
 
-        public IConsumerClient Create(string groupId)
+        public virtual IConsumerClient Create(string groupId)
         {
             try
             {

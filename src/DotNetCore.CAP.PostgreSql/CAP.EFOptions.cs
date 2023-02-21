@@ -16,11 +16,11 @@ namespace DotNetCore.CAP
         /// </summary>
         public string Schema { get; set; } = DefaultSchema;
 
-        internal Type DbContextType { get; set; }
+        internal Type? DbContextType { get; set; }
 
         /// <summary>
         /// Data version
         /// </summary>
-        internal string Version { get; set; }
+        internal string Version { get; set; } = default!;
     }
 }

@@ -8,33 +8,32 @@ using System.Diagnostics;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
 
-namespace DotNetCore.CAP.SqlServer.Diagnostics
+namespace DotNetCore.CAP.SqlServer.Diagnostics;
+
+public class DiagnosticProcessorObserver : IObserver<DiagnosticListener>
 {
-    public class DiagnosticProcessorObserver : IObserver<DiagnosticListener>
+    public const string DiagnosticListenerName = "SqlClientDiagnosticListener";
+    private readonly IDispatcher _dispatcher;
+
+    public DiagnosticProcessorObserver(IDispatcher dispatcher)
     {
-        public const string DiagnosticListenerName = "SqlClientDiagnosticListener";
-        private readonly IDispatcher _dispatcher;
+        _dispatcher = dispatcher;
+        BufferList = new ConcurrentDictionary<Guid, List<MediumMessage>>();
+    }
 
-        public DiagnosticProcessorObserver(IDispatcher dispatcher)
-        {
-            _dispatcher = dispatcher;
-            BufferList = new ConcurrentDictionary<Guid, List<MediumMessage>>();
-        }
+    public ConcurrentDictionary<Guid, List<MediumMessage>> BufferList { get; }
 
-        public ConcurrentDictionary<Guid, List<MediumMessage>> BufferList { get; }
+    public void OnCompleted()
+    {
+    }
 
-        public void OnCompleted()
-        {
-        }
+    public void OnError(Exception error)
+    {
+    }
 
-        public void OnError(Exception error)
-        {
-        }
-
-        public void OnNext(DiagnosticListener listener)
-        {
-            if (listener.Name == DiagnosticListenerName)
-                listener.Subscribe(new DiagnosticObserver(_dispatcher, BufferList));
-        }
+    public void OnNext(DiagnosticListener listener)
+    {
+        if (listener.Name == DiagnosticListenerName)
+            listener.Subscribe(new DiagnosticObserver(_dispatcher, BufferList));
     }
 }

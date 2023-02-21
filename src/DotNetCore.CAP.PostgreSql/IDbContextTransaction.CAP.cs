@@ -2,21 +2,23 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.EntityFrameworkCore.Storage
 {
-    internal class CapEFDbTransaction : IDbContextTransaction
+    internal class CapEFDbTransaction : IDbContextTransaction, IInfrastructure<DbTransaction>
     {
         private readonly ICapTransaction _transaction;
 
         public CapEFDbTransaction(ICapTransaction transaction)
         {
             _transaction = transaction;
-            var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction;
+            var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction!;
             TransactionId = dbContextTransaction.TransactionId;
         }
 
@@ -50,6 +52,15 @@ namespace Microsoft.EntityFrameworkCore.Storage
         public ValueTask DisposeAsync()
         {
             return new ValueTask(Task.Run(() => _transaction.Dispose()));
+        }
+
+        public DbTransaction Instance
+        {
+            get
+            {
+                var dbContextTransaction = (IDbContextTransaction) _transaction.DbTransaction!;
+                return dbContextTransaction.GetDbTransaction();
+            }
         }
     }
 }

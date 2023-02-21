@@ -78,13 +78,13 @@ public void ConfigureServices(IServiceCollection services)
 
 #### AmazonSQS Options
 
-CAP 直接对外提供的 AmazonSQSOptions 配置参数如下：
+The SQS configuration parameters provided directly by the CAP:
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-Region | AWS 所处的区域 | Amazon.RegionEndpoint | 
-Credentials | AWS AK SK信息 | Amazon.Runtime.AWSCredentials | 
+Region | AWS Region | Amazon.RegionEndpoint | 
+Credentials | AWS AK SK Information | Amazon.Runtime.AWSCredentials | 
 
-如果你的项目运行在 AWS EC2 中，则不需要设置 Credentials，直接对 EC2 应用 IAM 策略即可。
+If your project runs in AWS EC2, you don't need to set Credentials, you can directly apply IAM policy for EC2.
 
-Credentials 需要具有新增和订阅 SNS Topic，SQS Queue 等权限。
+Credentials requires the SNS,SQS IAM policy.

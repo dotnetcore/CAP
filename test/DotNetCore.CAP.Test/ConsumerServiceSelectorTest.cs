@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,14 +15,15 @@ namespace DotNetCore.CAP.Test
 
         public ConsumerServiceSelectorTest()
         {
-            var services = new ServiceCollection(); 
-            ServiceCollectionExtensions.ServiceCollection = services;
+            var services = new ServiceCollection();
             services.AddOptions();
             services.PostConfigure<CapOptions>(x=>{});
+            services.AddSingleton<IServiceCollection>(_ => services);
             services.AddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
             services.AddScoped<IFooTest, CandidatesFooTest>();			
             services.AddScoped<IBarTest, CandidatesBarTest>();
 			services.AddScoped<IAbstractTest, CandidatesAbstractTest>();
+			services.AddScoped<ICancellationTest, CancellationTokenTest>();
             services.AddLogging();
             _provider = services.BuildServiceProvider();
         }
@@ -29,8 +33,8 @@ namespace DotNetCore.CAP.Test
         {
             var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
             var candidates = selector.SelectCandidates();
-
-            Assert.Equal(10, candidates.Count);
+            
+            Assert.Equal(13, candidates.Count);
         }
 
         [Theory]
@@ -130,6 +134,22 @@ namespace DotNetCore.CAP.Test
             var bestCandidates = selector.SelectBestCandidate(topic, candidates);
             Assert.Null(bestCandidates);
         }
+
+        [Theory]
+        [InlineData("CancellationToken.NoAdditionalParameters", 1, 1)]
+        [InlineData("CancellationToken.OneAdditionalParameter", 2, 2)]
+        [InlineData("CancellationToken.CommonArrangement", 3, 2)]
+        public void CanFindTopicSuccessfully(string topic, int parameterCount, int fromCapCount)
+        {
+            var selector = _provider.GetRequiredService<IConsumerServiceSelector>();
+            var candidates = selector.SelectCandidates();
+
+            var bestCandidate = selector.SelectBestCandidate(topic, candidates);
+            Assert.NotEqual(0, candidates.Count);
+            Assert.NotNull(bestCandidate);
+            Assert.Equal(bestCandidate.Parameters.Count, parameterCount);
+            Assert.Equal(fromCapCount, bestCandidate.Parameters.Count(x => x.IsFromCap));
+        }
     }
 
     public class CandidatesTopic : TopicAttribute
@@ -148,6 +168,10 @@ namespace DotNetCore.CAP.Test
     }
 
     public interface IAbstractTest
+    {
+    }
+
+    public interface ICancellationTest
     {
     }
 
@@ -244,4 +268,29 @@ namespace DotNetCore.CAP.Test
 	public class CandidatesAbstractTest : CandidatesAbstractBaseTest
 	{
 	}
+    
+    [CandidatesTopic("Candidates")]
+    public class CancellationTokenTest : ICancellationTest, ICapSubscribe
+    {
+        [CandidatesTopic("CancellationToken.NoAdditionalParameters")]
+        public Task NoAdditionalParameters(CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"{nameof(NoAdditionalParameters)} method has been executed.");
+            return Task.CompletedTask;
+        }
+
+        [CandidatesTopic("CancellationToken.OneAdditionalParameter")]
+        public Task OneAdditionalParameter([FromCap] CapHeader headers, CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"{nameof(OneAdditionalParameter)} method has been executed.");
+            return Task.CompletedTask;
+        }
+
+        [CandidatesTopic("CancellationToken.CommonArrangement")]
+        public Task CommonArrangement(DateTime date, [FromCap] IDictionary<string, string> headers, CancellationToken cancellationToken)
+        {
+            Console.WriteLine($"{nameof(CommonArrangement)} method has been executed.");
+            return Task.CompletedTask;
+        }
+    }
 }

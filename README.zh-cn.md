@@ -39,16 +39,19 @@ CAP 采用的是和当前数据库集成的本地消息表的方案来解决在�
 PM> Install-Package DotNetCore.CAP
 ```
 
-CAP 支持 Kafka、RabbitMQ、AzureServiceBus、AmazonSQS 等消息队列，你可以按需选择下面的包进行安装：
+CAP 支持主流的消息队列作为传输器，你可以按需选择下面的包进行安装：
 
 ```
 PM> Install-Package DotNetCore.CAP.Kafka
 PM> Install-Package DotNetCore.CAP.RabbitMQ
 PM> Install-Package DotNetCore.CAP.AzureServiceBus
 PM> Install-Package DotNetCore.CAP.AmazonSQS
+PM> Install-Package DotNetCore.CAP.NATS
+PM> Install-Package DotNetCore.CAP.RedisStreams
+PM> Install-Package DotNetCore.CAP.Pulsar
 ```
 
-CAP 提供了 Sql Server, MySql, PostgreSQL，MongoDB 的扩展作为数据库存储：
+CAP 提供了主流数据库作为存储，你可以按需选择下面的包进行安装：
 
 ```
 // 按需选择安装你正在使用的数据库
@@ -94,7 +97,9 @@ public void ConfigureServices(IServiceCollection services)
 
 ### 发布
 
-在 Controller 中注入 `ICapPublisher` 然后使用 `ICapPublisher` 进行消息发送
+在 Controller 中注入 `ICapPublisher` 然后使用 `ICapPublisher` 进行消息发送。
+
+> 版本 7.0+ 支持发送延迟消息。
 
 ```c#
 
@@ -112,6 +117,9 @@ public class PublishController : Controller
     public IActionResult WithoutTransaction()
     {
         _capBus.Publish("xxx.services.show.time", DateTime.Now);
+
+        // Publish delay message
+        _capBus.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "xxx.services.show.time", DateTime.Now);
 	
         return Ok();
     }
@@ -195,13 +203,27 @@ namespace xxx.Service
 ```c#
 public void ConfigureServices(IServiceCollection services)
 {
-    //注意: 注入的服务需要在 `services.AddCap()` 之前
     services.AddTransient<ISubscriberService,SubscriberService>();
 	
     services.AddCap(x=>{});
 }
 ```
 
+#### 使用多部分订阅名
+
+要在类级别对订阅的Topic进行分组，您可以将在方法上的订阅设置为部分订阅。 消息队列上的订阅将是类上定义的topic加上方法上定义的topic的拼合。 
+在下面的示例中，当收到关于 `customers.create` 的消息时，将调用 `Create(..)` 函数
+
+```c#
+[CapSubscribe("customers")]
+public class CustomersSubscriberService : ICapSubscribe
+{
+    [CapSubscribe("create", isPartial: true)]
+    public void Create(Customer customer)
+    {
+    }
+}
+```
 
 #### 订阅者组
 
@@ -225,7 +247,8 @@ public void ShowTime2(DateTime datetime)
 }
 
 ```
-`ShowTime1` 和 `ShowTime2` 处于不同的组，他们将会被同时调用。
+
+`ShowTime1` 和 `ShowTime2` 处于不同的组，他们在默认情况下被线性的接连调用，你可以通过设置`UseDispatchingPerGroup`为true来使两者互不影响的同时调用。
 
 PS，你可以通过下面的方式来指定默认的消费者组名称：
 

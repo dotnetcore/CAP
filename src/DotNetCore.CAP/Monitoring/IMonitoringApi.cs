@@ -7,28 +7,27 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 
-namespace DotNetCore.CAP.Monitoring
+namespace DotNetCore.CAP.Monitoring;
+
+public interface IMonitoringApi
 {
-    public interface IMonitoringApi
-    {
-        Task<MediumMessage> GetPublishedMessageAsync(long id);
+    Task<MediumMessage?> GetPublishedMessageAsync(long id);
 
-        Task<MediumMessage> GetReceivedMessageAsync(long id);
+    Task<MediumMessage?> GetReceivedMessageAsync(long id);
 
-        StatisticsDto GetStatistics();
+    Task<StatisticsDto> GetStatisticsAsync();
 
-        IList<MessageDto> Messages(MessageQueryDto queryDto);
+    Task<PagedQueryResult<MessageDto>> GetMessagesAsync(MessageQueryDto queryDto);
 
-        int PublishedFailedCount();
+    ValueTask<int> PublishedFailedCount();
 
-        int PublishedSucceededCount();
+    ValueTask<int> PublishedSucceededCount();
 
-        int ReceivedFailedCount();
+    ValueTask<int> ReceivedFailedCount();
 
-        int ReceivedSucceededCount();
+    ValueTask<int> ReceivedSucceededCount();
 
-        IDictionary<DateTime, int> HourlySucceededJobs(MessageType type);
+    Task<IDictionary<DateTime, int>> HourlySucceededJobs(MessageType type);
 
-        IDictionary<DateTime, int> HourlyFailedJobs(MessageType type);
-    }
+    Task<IDictionary<DateTime, int>> HourlyFailedJobs(MessageType type);
 }

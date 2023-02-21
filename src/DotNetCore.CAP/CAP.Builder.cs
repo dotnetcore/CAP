@@ -2,72 +2,134 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Diagnostics;
+using System.Linq;
+using System.Reflection;
+using DotNetCore.CAP.Filter;
+using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
-namespace DotNetCore.CAP
+// ReSharper disable UnusedMember.Global
+
+namespace DotNetCore.CAP;
+
+/// <summary>
+/// Used to verify cap service was called on a ServiceCollection
+/// </summary>
+public class CapMarkerService
 {
-    /// <summary>
-    /// Used to verify cap service was called on a ServiceCollection
-    /// </summary>
-    public class CapMarkerService
+    public string Name { get; set; }
+
+    public string Version { get; set; }
+
+    public CapMarkerService(string name)
     {
+        Name = name;
+
+        try
+        {
+            Version = FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).ProductVersion!;
+        }
+        catch
+        {
+            Version = "N/A";
+        }
+    }
+}
+
+/// <summary>
+/// Used to verify cap storage extension was added on a ServiceCollection
+/// </summary>
+public class CapStorageMarkerService
+{
+    public string Name { get; set; }
+
+    //public IDictionary<string, string> MetaData { get; private set; }
+
+    public CapStorageMarkerService(string name)
+    {
+        Name = name;
+        //MetaData = new Dictionary<string, string>();
+    }
+
+    //public void AddMetaData(string key, string value)
+    //{
+    //    MetaData.Add(key, value);
+    //}
+}
+
+/// <summary>
+/// Used to verify cap message queue extension was added on a ServiceCollection
+/// </summary>
+public class CapMessageQueueMakerService
+{
+    public string Name { get; set; }
+
+    //public IDictionary<string, object> MetaData { get; private set; }
+
+    public CapMessageQueueMakerService(string name)
+    {
+        Name = name;
+        //MetaData = new Dictionary<string, object>();
+    }
+
+    //public void AddMetaData(string key, string value)
+    //{
+    //    MetaData.Add(key, value);
+    //}
+}
+
+/// <summary>
+/// Allows fine grained configuration of CAP services.
+/// </summary>
+public sealed class CapBuilder
+{
+    public CapBuilder(IServiceCollection services)
+    {
+        Services = services;
     }
 
     /// <summary>
-    /// Used to verify cap storage extension was added on a ServiceCollection
+    /// Gets the <see cref="IServiceCollection" /> where MVC services are configured.
     /// </summary>
-    public class CapStorageMarkerService
+    public IServiceCollection Services { get; }
+
+    /// <summary>
+    /// Registers subscribers filter.
+    /// </summary>
+    /// <typeparam name="T">Type of filter</typeparam>
+    public CapBuilder AddSubscribeFilter<T>() where T : class, ISubscribeFilter
     {
+        Services.TryAddScoped<ISubscribeFilter, T>();
+        return this;
     }
 
     /// <summary>
-    /// Used to verify cap message queue extension was added on a ServiceCollection
+    /// Registers subscribers from the specified assemblies.
     /// </summary>
-    public class CapMessageQueueMakerService
+    /// <param name="assemblies">Assemblies to scan subscriber</param>
+    public CapBuilder AddSubscriberAssembly(params Assembly[] assemblies)
     {
+        if (assemblies == null) throw new ArgumentNullException(nameof(assemblies));
+
+        Services.Replace(new ServiceDescriptor(typeof(IConsumerServiceSelector),
+            x => new AssemblyConsumerServiceSelector(x, assemblies),
+            ServiceLifetime.Singleton));
+
+        return this;
     }
 
     /// <summary>
-    /// Allows fine grained configuration of CAP services.
+    /// Registers subscribers from the specified types.
     /// </summary>
-    public sealed class CapBuilder
+    /// <param name="handlerAssemblyMarkerTypes"></param>
+    public CapBuilder AddSubscriberAssembly(params Type[] handlerAssemblyMarkerTypes)
     {
-        public CapBuilder(IServiceCollection services)
-        {
-            Services = services;
-        }
+        if (handlerAssemblyMarkerTypes == null) throw new ArgumentNullException(nameof(handlerAssemblyMarkerTypes));
 
-        /// <summary>
-        /// Gets the <see cref="IServiceCollection" /> where MVC services are configured.
-        /// </summary>
-        public IServiceCollection Services { get; }
+        AddSubscriberAssembly(handlerAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly).ToArray());
 
-        /// <summary>
-        /// Add an <see cref="ICapPublisher" />.
-        /// </summary>
-        /// <typeparam name="T">The type of the service.</typeparam>
-        public CapBuilder AddProducerService<T>()
-            where T : class, ICapPublisher
-        {
-            return AddScoped(typeof(ICapPublisher), typeof(T));
-        }
-
-        /// <summary>
-        /// Adds a scoped service of the type specified in serviceType with an implementation
-        /// </summary>
-        private CapBuilder AddScoped(Type serviceType, Type concreteType)
-        {
-            Services.AddScoped(serviceType, concreteType);
-            return this;
-        }
-
-        /// <summary>
-        /// Adds a singleton service of the type specified in serviceType with an implementation
-        /// </summary>
-        private CapBuilder AddSingleton(Type serviceType, Type concreteType)
-        {
-            Services.AddSingleton(serviceType, concreteType);
-            return this;
-        }
+        return this;
     }
 }

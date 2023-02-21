@@ -1,16 +1,20 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-namespace DotNetCore.CAP.Monitoring
+namespace DotNetCore.CAP.Monitoring;
+
+public class StatisticsDto
 {
-    public class StatisticsDto
-    {
-        public int Servers { get; set; }
+    public int Servers { get; set; }
 
-        public int PublishedSucceeded { get; set; }
-        public int ReceivedSucceeded { get; set; }
+    public int Subscribers { get; set; }
 
-        public int PublishedFailed { get; set; }
-        public int ReceivedFailed { get; set; }
-    }
+    public int PublishedSucceeded { get; set; }
+
+    public int PublishedDelayed { get; set; }
+
+    public int ReceivedSucceeded { get; set; }
+
+    public int PublishedFailed { get; set; }
+    public int ReceivedFailed { get; set; }
 }

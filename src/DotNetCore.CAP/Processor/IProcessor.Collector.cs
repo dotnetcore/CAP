@@ -4,57 +4,55 @@
 using System;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Processor
+namespace DotNetCore.CAP.Processor;
+
+public class CollectorProcessor : IProcessor
 {
-    public class CollectorProcessor : IProcessor
+    private const int ItemBatch = 1000;
+    private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
+    private readonly ILogger _logger;
+    private readonly IServiceProvider _serviceProvider;
+
+    private readonly string[] _tableNames;
+    private readonly TimeSpan _waitingInterval;
+
+    public CollectorProcessor(ILogger<CollectorProcessor> logger, IOptions<CapOptions> options,
+        IServiceProvider serviceProvider)
     {
-        private readonly ILogger _logger;
-        private readonly IStorageInitializer _initializer;
-        private readonly IDataStorage _storage;
+        _logger = logger;
+        _serviceProvider = serviceProvider;
+        _waitingInterval = TimeSpan.FromSeconds(options.Value.CollectorCleaningInterval);
 
-        private const int ItemBatch = 1000;
-        private readonly TimeSpan _waitingInterval = TimeSpan.FromMinutes(5);
-        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
+        var initializer = _serviceProvider.GetRequiredService<IStorageInitializer>();
 
-        public CollectorProcessor(
-            ILogger<CollectorProcessor> logger,
-            IStorageInitializer initializer,
-            IDataStorage storage)
+        _tableNames = new[] { initializer.GetPublishedTableName(), initializer.GetReceivedTableName() };
+    }
+
+    public virtual async Task ProcessAsync(ProcessingContext context)
+    {
+        foreach (var table in _tableNames)
         {
-            _logger = logger;
-            _initializer = initializer;
-            _storage = storage;
-        } 
+            _logger.LogDebug($"Collecting expired data from table: {table}");
 
-        public async Task ProcessAsync(ProcessingContext context)
-        {
-            var tables = new[]
+            int deletedCount;
+            var time = DateTime.Now;
+            do
             {
-                _initializer.GetPublishedTableName(),
-                _initializer.GetReceivedTableName()
-            };
+                deletedCount = await _serviceProvider.GetRequiredService<IDataStorage>()
+                    .DeleteExpiresAsync(table, time, ItemBatch, context.CancellationToken).ConfigureAwait(false);
 
-            foreach (var table in tables)
-            {
-                _logger.LogDebug($"Collecting expired data from table: {table}");
-
-                int deletedCount;
-                var time = DateTime.Now;
-                do
+                if (deletedCount != 0)
                 {
-                    deletedCount = await _storage.DeleteExpiresAsync(table, time, ItemBatch, context.CancellationToken);
-
-                    if (deletedCount != 0)
-                    {
-                        await context.WaitAsync(_delay);
-                        context.ThrowIfStopping();
-                    }
-                } while (deletedCount != 0);
-            }
-
-            await context.WaitAsync(_waitingInterval);
+                    await context.WaitAsync(_delay).ConfigureAwait(false);
+                    context.ThrowIfStopping();
+                }
+            } while (deletedCount != 0);
         }
+
+        await context.WaitAsync(_waitingInterval).ConfigureAwait(false);
     }
 }

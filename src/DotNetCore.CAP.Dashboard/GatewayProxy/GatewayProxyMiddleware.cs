@@ -74,7 +74,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
                         {
                             DownstreamRequest = await _requestMapper.Map(request);
 
-                            SetDownStreamRequestUri(node, request.Path.Value);
+                            SetDownStreamRequestUri(node, request.Path.Value, request.QueryString.Value);
 
                             var response = await _requester.GetResponse(DownstreamRequest);
 
@@ -126,14 +126,14 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 
         private bool TryGetRemoteNode(string requestNodeId, out Node node)
         {
-            var nodes = _discoveryProvider.GetNodes().GetAwaiter().GetResult();
+            var nodes = _discoveryProvider.GetNodes();
             node = nodes.FirstOrDefault(x => x.Id == requestNodeId);
             return node != null;
         }
 
-        private void SetDownStreamRequestUri(Node node, string requestPath)
+        private void SetDownStreamRequestUri(Node node, string requestPath, string queryString)
         {
-            var uriBuilder = new UriBuilder("http://", node.Address, node.Port, requestPath);
+            var uriBuilder = new UriBuilder("http://", node.Address, node.Port, requestPath, queryString);
             DownstreamRequest.RequestUri = uriBuilder.Uri;
         }
 

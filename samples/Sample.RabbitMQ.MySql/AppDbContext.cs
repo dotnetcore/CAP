@@ -13,17 +13,8 @@ namespace Sample.RabbitMQ.MySql
             return $"Name:{Name}, Id:{Id}";
         }
     }
-    public class Person2
-    {
-        public int Id { get; set; }
 
-        public string Name { get; set; }
 
-        public override string ToString()
-        {
-            return $"Name:{Name}, Id:{Id}";
-        }
-    }
     public class AppDbContext : DbContext
     {
         public const string ConnectionString = "";
@@ -32,7 +23,7 @@ namespace Sample.RabbitMQ.MySql
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseMySql(ConnectionString, ServerVersion.FromString("mysql"));
+            optionsBuilder.UseMySql(ConnectionString, ServerVersion.AutoDetect(ConnectionString));
         }
     }
 }

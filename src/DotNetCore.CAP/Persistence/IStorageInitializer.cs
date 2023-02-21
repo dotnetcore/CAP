@@ -1,14 +1,15 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Persistence
+namespace DotNetCore.CAP.Persistence;
+
+public interface IStorageInitializer
 {
-    public interface IStorageInitializer
-    {
-        Task InitializeAsync(CancellationToken cancellationToken);
+    Task InitializeAsync(CancellationToken cancellationToken);
 
-        string GetPublishedTableName();
+    string GetPublishedTableName();
 
-        string GetReceivedTableName();
-    }
+    string GetReceivedTableName();
+
+    string GetLockTableName();
 }

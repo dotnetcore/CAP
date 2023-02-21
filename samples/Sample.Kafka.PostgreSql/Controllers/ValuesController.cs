@@ -18,6 +18,30 @@ namespace Sample.Kafka.PostgreSql.Controllers
             _capBus = producer;
         }
 
+        [Route("~/control/start")]
+        public async Task<IActionResult> Start([FromServices] IBootstrapper bootstrapper)
+        {
+            await bootstrapper.BootstrapAsync();
+            return Ok();
+        }
+
+        [Route("~/control/stop")]
+        public async Task<IActionResult> Stop([FromServices] IBootstrapper bootstrapper)
+        {
+            await bootstrapper.DisposeAsync();
+            return Ok();
+        }
+         
+
+        [Route("~/delay/{delaySeconds:int}")]
+        public async Task<IActionResult> Delay(int delaySeconds)
+        {
+            await _capBus.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "sample.kafka.postgrsql", DateTime.Now);
+
+            return Ok();
+        }
+
+
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {

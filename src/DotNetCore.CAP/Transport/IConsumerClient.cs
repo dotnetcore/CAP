@@ -5,52 +5,51 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
-using JetBrains.Annotations;
 
-namespace DotNetCore.CAP.Transport
+namespace DotNetCore.CAP.Transport;
+
+/// <inheritdoc />
+/// <summary>
+/// Message queue consumer client
+/// </summary>
+public interface IConsumerClient : IDisposable
 {
-    /// <inheritdoc />
+    BrokerAddress BrokerAddress { get; }
+
     /// <summary>
-    /// Message queue consumer client
+    /// Create (if necessary) and get topic identifiers
     /// </summary>
-    public interface IConsumerClient : IDisposable
+    /// <param name="topicNames">Names of the requested topics</param>
+    /// <returns>Topic identifiers</returns>
+    ICollection<string> FetchTopics(IEnumerable<string> topicNames)
     {
-        BrokerAddress BrokerAddress { get; }
-
-        /// <summary>
-        /// Create (if necessary) and get topic identifiers
-        /// </summary>
-        /// <param name="topicNames">Names of the requested topics</param>
-        /// <returns>Topic identifiers</returns>
-        ICollection<string> FetchTopics(IEnumerable<string> topicNames)
-        {
-            return topicNames.ToList();
-        }
-
-        /// <summary>
-        /// Subscribe to a set of topics to the message queue
-        /// </summary>
-        /// <param name="topics"></param>
-        void Subscribe(IEnumerable<string> topics);
-
-        /// <summary>
-        /// Start listening
-        /// </summary>
-        void Listening(TimeSpan timeout, CancellationToken cancellationToken);
-
-        /// <summary>
-        /// Manual submit message offset when the message consumption is complete
-        /// </summary>
-        void Commit([NotNull] object sender);
-
-        /// <summary>
-        /// Reject message and resumption
-        /// </summary>
-        void Reject([CanBeNull] object sender);
-
-        event EventHandler<TransportMessage> OnMessageReceived;
-
-        event EventHandler<LogMessageEventArgs> OnLog;
+        return topicNames.ToList();
     }
+
+    /// <summary>
+    /// Subscribe to a set of topics to the message queue
+    /// </summary>
+    /// <param name="topics"></param>
+    void Subscribe(IEnumerable<string> topics);
+
+    /// <summary>
+    /// Start listening
+    /// </summary>
+    void Listening(TimeSpan timeout, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Manual submit message offset when the message consumption is complete
+    /// </summary>
+    void Commit(object? sender);
+
+    /// <summary>
+    /// Reject message and resumption
+    /// </summary>
+    void Reject(object? sender);
+
+    public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
+
+    public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 }

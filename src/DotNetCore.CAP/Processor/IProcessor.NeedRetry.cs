@@ -7,87 +7,109 @@ using System.Linq;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Processor
+namespace DotNetCore.CAP.Processor;
+
+public class MessageNeedToRetryProcessor : IProcessor
 {
-    public class MessageNeedToRetryProcessor : IProcessor
+    private readonly ILogger<MessageNeedToRetryProcessor> _logger;
+    private readonly IDispatcher _dispatcher;
+    private readonly TimeSpan _waitingInterval;
+    private readonly IOptions<CapOptions> _options;
+    private readonly IDataStorage _dataStorage;
+    private readonly TimeSpan _ttl;
+    private readonly string _instance;
+    private Task? _failedRetryConsumeTask;
+
+    public MessageNeedToRetryProcessor(IOptions<CapOptions> options, ILogger<MessageNeedToRetryProcessor> logger,
+        IDispatcher dispatcher, IDataStorage dataStorage)
     {
-        private readonly TimeSpan _delay = TimeSpan.FromSeconds(1);
-        private readonly ILogger<MessageNeedToRetryProcessor> _logger;
-        private readonly IMessageSender _messageSender;
-        private readonly ISubscribeDispatcher _subscribeDispatcher;
-        private readonly TimeSpan _waitingInterval;
+        _options = options;
+        _logger = logger;
+        _dispatcher = dispatcher;
+        _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
+        _dataStorage = dataStorage;
+        _ttl = _waitingInterval.Add(TimeSpan.FromSeconds(10));
 
-        public MessageNeedToRetryProcessor(
-            IOptions<CapOptions> options,
-            ILogger<MessageNeedToRetryProcessor> logger,
-            ISubscribeDispatcher subscribeDispatcher,
-            IMessageSender messageSender)
+        _instance = string.Concat(Helper.GetInstanceHostname(), "_", Util.GenerateWorkerId(1023));
+    }
+
+    public virtual async Task ProcessAsync(ProcessingContext context)
+    {
+        if (context == null) throw new ArgumentNullException(nameof(context));
+
+        var storage = context.Provider.GetRequiredService<IDataStorage>();
+
+        _ = Task.Run(() => ProcessPublishedAsync(storage, context));
+
+        if (_options.Value.UseStorageLock && _failedRetryConsumeTask is { IsCompleted: false })
         {
-            _logger = logger;
-            _subscribeDispatcher = subscribeDispatcher;
-            _messageSender = messageSender;
-            _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
+            await _dataStorage.RenewLockAsync($"received_retry_{_options.Value.Version}", _ttl, _instance, context.CancellationToken);
+            return;
         }
 
-        public async Task ProcessAsync(ProcessingContext context)
-        {
-            if (context == null)
-            {
-                throw new ArgumentNullException(nameof(context));
-            }
+        _failedRetryConsumeTask = Task.Run(() => ProcessReceivedAsync(storage, context));
+        
+        _ = _failedRetryConsumeTask.ContinueWith(_ => { _failedRetryConsumeTask = null; });
 
-            var storage = context.Provider.GetRequiredService<IDataStorage>();
+        await context.WaitAsync(_waitingInterval).ConfigureAwait(false);
+    }
 
-            await Task.WhenAll(ProcessPublishedAsync(storage, context), ProcessReceivedAsync(storage, context));
+    private async Task ProcessPublishedAsync(IDataStorage connection, ProcessingContext context)
+    {
+        context.ThrowIfStopping();
 
-            await context.WaitAsync(_waitingInterval);
-        }
+        if (_options.Value.UseStorageLock && !await connection.AcquireLockAsync($"publish_retry_{_options.Value.Version}", _ttl, _instance, context.CancellationToken))
+            return;
 
-        private async Task ProcessPublishedAsync(IDataStorage connection, ProcessingContext context)
+        var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry).ConfigureAwait(false);
+
+        foreach (var message in messages)
         {
             context.ThrowIfStopping();
 
-            var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry);
-
-            foreach (var message in messages)
-            {
-                //the message.Origin.Value maybe JObject
-                await _messageSender.SendAsync(message);
-
-                await context.WaitAsync(_delay);
-            }
+            await _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
         }
 
-        private async Task ProcessReceivedAsync(IDataStorage connection, ProcessingContext context)
+        if (_options.Value.UseStorageLock)
+            await connection.ReleaseLockAsync($"publish_retry_{_options.Value.Version}", _instance, context.CancellationToken);
+    }
+
+    private async Task ProcessReceivedAsync(IDataStorage connection, ProcessingContext context)
+    {
+        context.ThrowIfStopping();
+
+        if (_options.Value.UseStorageLock && !await connection.AcquireLockAsync($"received_retry_{_options.Value.Version}", _ttl, _instance, context.CancellationToken))
+            return;
+
+        var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry).ConfigureAwait(false);
+
+        foreach (var message in messages)
         {
             context.ThrowIfStopping();
 
-            var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry);
-
-            foreach (var message in messages)
-            {
-                await _subscribeDispatcher.DispatchAsync(message);
-
-                await context.WaitAsync(_delay);
-            }
+            await _dispatcher.EnqueueToExecute(message).ConfigureAwait(false);
         }
 
-        private async Task<IEnumerable<T>> GetSafelyAsync<T>(Func<Task<IEnumerable<T>>> getMessagesAsync)
-        {
-            try
-            {
-                return await getMessagesAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(1, ex, "Get messages of type '{messageType}' failed. Retrying...", typeof(T).Name);
+        if (_options.Value.UseStorageLock)
+            await connection.ReleaseLockAsync($"received_retry_{_options.Value.Version}", _instance, context.CancellationToken);
+    }
 
-                return Enumerable.Empty<T>();
-            }
+    private async Task<IEnumerable<T>> GetSafelyAsync<T>(Func<Task<IEnumerable<T>>> getMessagesAsync)
+    {
+        try
+        {
+            return await getMessagesAsync().ConfigureAwait(false);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(1, ex, "Get messages from storage failed. Retrying...");
+
+            return Enumerable.Empty<T>();
         }
     }
 }

@@ -3,35 +3,36 @@
 
 using System;
 
-namespace DotNetCore.CAP.Transport
+namespace DotNetCore.CAP.Transport;
+
+public enum MqLogType
 {
-    public enum MqLogType
-    {
-        //RabbitMQ
-        ConsumerCancelled,
-        ConsumerRegistered,
-        ConsumerUnregistered,
-        ConsumerShutdown,
+    //RabbitMQ
+    ConsumerCancelled,
+    ConsumerRegistered,
+    ConsumerUnregistered,
+    ConsumerShutdown,
 
-        //Kafka
-        ConsumeError,
-        ServerConnError,
+    //Kafka
+    ConsumeError,
+    ConsumeRetries,
+    ServerConnError,
 
-        //AzureServiceBus
-        ExceptionReceived,
+    //AzureServiceBus
+    ExceptionReceived,
 
-        //NATS
-        AsyncErrorEvent,
+    //NATS
+    AsyncErrorEvent,
+    ConnectError,
 
-        //Amazon SQS
-        InvalidIdFormat,
-        MessageNotInflight
-    }
+    //Amazon SQS
+    InvalidIdFormat,
+    MessageNotInflight
+}
 
-    public class LogMessageEventArgs : EventArgs
-    {
-        public string Reason { get; set; }
+public class LogMessageEventArgs : EventArgs
+{
+    public string? Reason { get; set; }
 
-        public MqLogType LogType { get; set; }
-    }
+    public MqLogType LogType { get; set; }
 }

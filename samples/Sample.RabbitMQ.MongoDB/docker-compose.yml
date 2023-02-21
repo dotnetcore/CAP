@@ -1,0 +1,41 @@
+version: "3.9"
+services:
+  
+  mongodb:
+    hostname: cap-mongodb
+    container_name: cap-mongodb
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_DATABASE: test
+      MONGO_REPLICA_SET_NAME: rs0
+    volumes:
+      - ./mongo-initdb.d:/docker-entrypoint-initdb.d
+    expose:
+      - 27017
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: test $$(echo "rs.initiate().ok || rs.slaveOk().ok || rs.status().ok" | mongo --quiet) -eq 1
+      interval: 10s
+      start_period: 30s
+    entrypoint: [ "/usr/bin/mongod", "--bind_ip_all", "--replSet", "rs0" ]
+    networks:
+      - cap-net
+  
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: cap-rabbitmq
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+      - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+      - cap-net
+
+networks:
+  cap-net:
+    name: cap-net
+    driver: bridge
+  

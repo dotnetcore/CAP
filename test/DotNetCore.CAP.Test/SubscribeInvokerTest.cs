@@ -37,7 +37,11 @@ namespace DotNetCore.CAP.Test
                 Parameters = new List<ParameterDescriptor>()
             };
 
-            var header = new Dictionary<string, string>();
+            var header = new Dictionary<string, string>()
+            {
+                [Headers.MessageId] = SnowflakeId.Default().NextId().ToString(),
+                [Headers.MessageName] = "fake.output.integer"
+            };
             var message = new Message(header, null);
             var context = new ConsumerContext(descriptor, message);
 

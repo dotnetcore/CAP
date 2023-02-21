@@ -4,20 +4,23 @@
 using System;
 using System.ComponentModel;
 using System.Data;
+using System.Data.Common;
+using System.Threading.Tasks;
 
 namespace DotNetCore.CAP.PostgreSql
 {
     internal static class DbConnectionExtensions
     {
-        public static int ExecuteNonQuery(this IDbConnection connection, string sql, IDbTransaction transaction = null,
-            params object[] sqlParams)
+        public static async Task<int> ExecuteNonQueryAsync(this DbConnection connection, string sql,
+            DbTransaction? transaction = null, params object[] sqlParams)
         {
             if (connection.State == ConnectionState.Closed)
             {
-                connection.Open();
+                await connection.OpenAsync().ConfigureAwait(false);
             }
 
-            using var command = connection.CreateCommand();
+            var command = connection.CreateCommand();
+            await using var _ = command.ConfigureAwait(false);
             command.CommandType = CommandType.Text;
             command.CommandText = sql;
             foreach (var param in sqlParams)
@@ -30,18 +33,19 @@ namespace DotNetCore.CAP.PostgreSql
                 command.Transaction = transaction;
             }
 
-            return command.ExecuteNonQuery();
+            return await command.ExecuteNonQueryAsync().ConfigureAwait(false);
         }
 
-        public static T ExecuteReader<T>(this IDbConnection connection, string sql, Func<IDataReader, T> readerFunc,
-            params object[] sqlParams)
+        public static async Task<T> ExecuteReaderAsync<T>(this DbConnection connection, string sql,
+            Func<DbDataReader, Task<T>>? readerFunc, DbTransaction? transaction = null, params object[] sqlParams)
         {
             if (connection.State == ConnectionState.Closed)
             {
-                connection.Open();
+                await connection.OpenAsync().ConfigureAwait(false);
             }
 
-            using var command = connection.CreateCommand();
+            var command = connection.CreateCommand();
+            await using var _ = command.ConfigureAwait(false);
             command.CommandType = CommandType.Text;
             command.CommandText = sql;
             foreach (var param in sqlParams)
@@ -49,25 +53,31 @@ namespace DotNetCore.CAP.PostgreSql
                 command.Parameters.Add(param);
             }
 
-            var reader = command.ExecuteReader();
+            if (transaction != null)
+            {
+                command.Transaction = transaction;
+            }
 
-            T result = default;
+            await using var reader = await command.ExecuteReaderAsync().ConfigureAwait(false);
+
+            T result = default!;
             if (readerFunc != null)
             {
-                result = readerFunc(reader);
+                result = await readerFunc(reader).ConfigureAwait(false);
             }
 
             return result;
         }
 
-        public static T ExecuteScalar<T>(this IDbConnection connection, string sql, params object[] sqlParams)
+        public static async Task<T> ExecuteScalarAsync<T>(this DbConnection connection, string sql, params object[] sqlParams)
         {
             if (connection.State == ConnectionState.Closed)
             {
-                connection.Open();
+                await connection.OpenAsync().ConfigureAwait(false);
             }
 
-            using var command = connection.CreateCommand();
+            var command = connection.CreateCommand();
+            await using var _ = command.ConfigureAwait(false);
             command.CommandType = CommandType.Text;
             command.CommandText = sql;
             foreach (var param in sqlParams)
@@ -75,16 +85,16 @@ namespace DotNetCore.CAP.PostgreSql
                 command.Parameters.Add(param);
             }
 
-            var objValue = command.ExecuteScalar();
+            var objValue = await command.ExecuteScalarAsync().ConfigureAwait(false);
 
-            T result = default;
+            T result = default!;
             if (objValue != null)
             {
                 var returnType = typeof(T);
                 var converter = TypeDescriptor.GetConverter(returnType);
                 if (converter.CanConvertFrom(objValue.GetType()))
                 {
-                    result = (T)converter.ConvertFrom(objValue);
+                    result = (T)converter.ConvertFrom(objValue)!;
                 }
                 else
                 {

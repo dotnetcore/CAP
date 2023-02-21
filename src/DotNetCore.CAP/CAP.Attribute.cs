@@ -7,33 +7,29 @@ using System.Collections.ObjectModel;
 using DotNetCore.CAP.Internal;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+public class CapSubscribeAttribute : TopicAttribute
 {
-    public class CapSubscribeAttribute : TopicAttribute
+    public CapSubscribeAttribute(string name, bool isPartial = false)
+        : base(name, isPartial)
     {
-        public CapSubscribeAttribute(string name, bool isPartial = false)
-            : base(name, isPartial)
-        {
-
-        }
-
-        public override string ToString()
-        {
-            return Name;
-        }
     }
 
-    [AttributeUsage(AttributeTargets.Parameter)]
-    public class FromCapAttribute : Attribute
+    public override string ToString()
     {
-       
+        return Name;
     }
+}
 
-    public class CapHeader : ReadOnlyDictionary<string, string>
+[AttributeUsage(AttributeTargets.Parameter)]
+public class FromCapAttribute : Attribute
+{
+}
+
+public class CapHeader : ReadOnlyDictionary<string, string?>
+{
+    public CapHeader(IDictionary<string, string?> dictionary) : base(dictionary)
     {
-        public CapHeader(IDictionary<string, string> dictionary) : base(dictionary)
-        {
-
-        }
     }
 }

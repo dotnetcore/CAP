@@ -1,5 +1,5 @@
 version: '{build}'
-os: Visual Studio 2019
+os: Visual Studio 2022
 environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
@@ -7,7 +7,7 @@ environment:
 services:
   - mysql
 before_build:
-  - ps: dotnet tool install --global FlubuCore.GlobalTool --version 6.1.0
+  - ps: dotnet tool install --global FlubuCore.GlobalTool --version 6.3.2
 build_script:
   - ps: flubu
 test: off
@@ -18,6 +18,6 @@ deploy:
   on:
     appveyor_repo_tag: true
   api_key:
-    secure: Q/7aMFCMA363iQv1r2fgW2PyvAFL3H409s9Pq8SgmYAbTH+c6ZQcYC9evHpipuNR 
+    secure: sqSgfuOl/CQhAn9TL+PzKRkxAZ9Eoql1ghXU4K0LBOXUdtjAMHgXz4itALPYtwn6
   skip_symbols: false
   artifact: /artifacts\/.+\.s?nupkg/

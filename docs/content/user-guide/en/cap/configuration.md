@@ -13,7 +13,7 @@ services.AddCap(config=>
 
 If you don't want to use Microsoft's IoC container, you can take a look at ASP.NET Core documentation [here](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.2#default-service-container-replacement) to learn how to replace the default container implementation.
 
-## what is minimum configuration required for CAP
+## What is minimum configuration required for CAP
 
 you have to configure at least a transport and a storage. If you want to get started quickly you can use the following configuration:
 
@@ -31,7 +31,7 @@ For specific transport and storage configuration, you can take a look at the con
 
 The `CapOptions` is used to store configuration information. By default they have default values, sometimes you may need to customize them.
 
-#### DefaultGroup
+#### DefaultGroupName
 
 > Default: cap.queue.{assembly name}
 
@@ -41,6 +41,20 @@ The default consumer group name, corresponds to different names in different Tra
     Map to [Queue Names](https://www.rabbitmq.com/queues.html#names) in RabbitMQ.  
     Map to [Consumer Group Id](http://kafka.apache.org/documentation/#group.id) in Apache Kafka.  
     Map to Subscription Name in Azure Service Bus.  
+    Map to [Queue Group Name](https://docs.nats.io/nats-concepts/queue) in NATS.
+    Map to [Consumer Group](https://redis.io/topics/streams-intro#creating-a-consumer-group) in Redis Streams.
+
+#### GroupNamePrefix
+
+> Default: Null
+
+Add unified prefixes for consumer group.  https://github.com/dotnetcore/CAP/pull/780
+
+#### TopicNamePrefix
+
+> Default: Null
+
+Add unified prefixes for topic/queue name.  https://github.com/dotnetcore/CAP/pull/780
 
 #### Versioning
 
@@ -71,11 +85,26 @@ During the message sending process if consumption method fails, CAP will try to 
     By default if failure occurs on send or consume, retry will start after **4 minutes** in order to avoid possible problems caused by setting message state delays.    
     Failures in the process of sending and consuming messages will be retried 3 times immediately, and will be retried polling after 3 times, at which point the FailedRetryInterval configuration will take effect.
 
+!!! WARNING "Multi-instance concurrent retries"
+    We introduced database-based distributed locks in version 7.1.0 to solve the problem of retrying concurrent fetches from the database under multiple instances, you need to explicitly configure `UseStorageLock` to true.
+
+#### UseStorageLock
+
+> Default: false
+
+If set to true, we will use a database-based distributed lock to solve the problem of concurrent fetches data by retry processes with multiple instances. This will generate the cap.lock table in the database.
+
+#### CollectorCleaningInterval
+
+> Default: 300 sec
+
+The interval of the collector processor deletes expired messages.
+
 #### ConsumerThreadCount 
 
-> Default : 1
+> Default: 1
 
-Number of consumer threads, when this value is greater than 1, the order of message execution cannot be guaranteed
+Number of consumer threads, when this value is greater than 1, the order of message execution cannot be guaranteed.
 
 #### FailedRetryCount
 
@@ -87,17 +116,36 @@ Maximum number of retries. When this value is reached, retry will stop and the m
 
 > Default: NULL
 
-Type: `Action<MessageType, string, string>`
+Type: `Action<FailedInfo>`
 
->
-T1 : Message Type  
-T2 : Message Name  
-T3 : Message Content
-
-Failure threshold callback. This action is called when the retry reaches the value set by `FailedRetryCount`, you can receive notification by specifying this parameter to make a manual intervention. For example, send an email or notification.
+Failure threshold callback. This action is called when the retry reaches the value set by `FailedRetryCount`, you can receive notification by specifying this parameter to make a manual intervention. For example, send an email or notification. 
 
 #### SucceedMessageExpiredAfter
 
 > Default: 24*3600 sec (1 days)
 
 The expiration time (in seconds) of the success message. When the message is sent or consumed successfully, it will be removed from database storage when the time reaches `SucceedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.
+
+#### FailedMessageExpiredAfter
+
+> Default: 15*24*3600 sec(15 days)
+
+The expiration time (in seconds) of the failed message. When the message is sent or consumed failed, it will be removed from database storage when the time reaches `FailedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.
+
+#### UseDispatchingPerGroup
+
+> Default: false
+
+If `true` then all consumers within the same group pushes received messages to own dispatching pipeline channel. Each channel has set thread count to `ConsumerThreadCount` value.
+
+!!! WARNING "If option set true, the EnableConsumerPrefetch option is disabled"
+
+#### EnableConsumerPrefetch
+
+> Default: false， Before version 7.0 the default behavior is true
+
+By default, CAP will only read one message from the message queue, then execute the subscription method. After the execution is done, it will read the next message for execution.
+If set to true, the consumer will prefetch some messages to the memory queue, and then distribute them to the scheduler for execution.
+
+!!! note "Precautions"
+    Setting it to true may cause some problems. When the subscription method executes too slowly and takes too long, it will cause the retry thread to pick up messages that have not yet been executed. The retry thread picks up messages from 4 minutes ago by default, that is to say, if the message backlog of more than 4 minutes on the consumer side will be picked up again and executed again

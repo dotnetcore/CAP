@@ -23,6 +23,16 @@ Since Kafka is born with message persistence using files, Kafka will ensure that
 
 ## Storage
 
+### Supported storages
+
+CAP supports the following types of transaction-enabled databases for storage:
+
+* [SQL Server](sqlserver.md)
+* [MySQL](mysql.md)
+* [PostgreSql](postgresql.md)
+* [MongoDB](mongodb.md)
+* [In-Memory Storage](in-memory-storage.md)
+
 After CAP is started, two tables are generated in used storage, by default the name is `Cap.Published` and `Cap.Received`.
 
 ### Storage Data Structure
@@ -53,7 +63,15 @@ Added | Added Time | DateTime
 ExpiresAt | Expire time | DateTime
 Retries | Retry times | int
 StatusName | Status Name | string
- 
+
+Table structure of **Lock** (Optional):
+
+NAME | DESCRIPTION | TYPE
+:---|:---|:---
+Key | Lock Id | string
+Instance | Acquired instance of lock | string
+LastLockTime | Last acquired lock time | DateTime
+
 ### Wapper Object
 
 When CAP sends a message, it will store original message object in a second package in the `Content` field. 

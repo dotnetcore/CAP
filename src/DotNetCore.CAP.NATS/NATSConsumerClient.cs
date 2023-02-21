@@ -3,13 +3,15 @@
 
 using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
+using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 using NATS.Client;
+using NATS.Client.JetStream;
 
 namespace DotNetCore.CAP.NATS
 {
@@ -19,22 +21,58 @@ namespace DotNetCore.CAP.NATS
 
         private readonly string _groupId;
         private readonly NATSOptions _natsOptions;
-        private readonly IList<IAsyncSubscription> _asyncSubscriptions;
 
-        private IConnection _consumerClient;
+        private IConnection? _consumerClient;
 
         public NATSConsumerClient(string groupId, IOptions<NATSOptions> options)
         {
             _groupId = groupId;
-            _asyncSubscriptions = new List<IAsyncSubscription>();
             _natsOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public event EventHandler<TransportMessage> OnMessageReceived;
+        public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
-        public event EventHandler<LogMessageEventArgs> OnLog;
+        public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("NATS", _natsOptions.Servers);
+        public BrokerAddress BrokerAddress => new ("NATS", _natsOptions.Servers);
+
+        public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+        {
+            Connect();
+
+            var jsm = _consumerClient!.CreateJetStreamManagementContext();
+
+            var streamGroup = topicNames.GroupBy(x => _natsOptions.NormalizeStreamName(x));
+
+            foreach (var subjectStream in streamGroup)
+            {
+                try
+                {
+                    jsm.GetStreamInfo(subjectStream.Key); // this throws if the stream does not exist
+                }
+                catch (NATSJetStreamException)
+                {
+                    var builder = StreamConfiguration.Builder()
+                        .WithName(subjectStream.Key)
+                        .WithNoAck(false)
+                        .WithStorageType(StorageType.Memory)
+                        .WithSubjects(subjectStream.ToList());
+
+                    _natsOptions.StreamOptions?.Invoke(builder);
+
+                    try
+                    {
+                        jsm.AddStream(builder.Build());
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
+                }
+            }
+
+            return topicNames.ToList();
+        }
 
         public void Subscribe(IEnumerable<string> topics)
         {
@@ -45,22 +83,22 @@ namespace DotNetCore.CAP.NATS
 
             Connect();
 
-            foreach (var topic in topics)
+            var js = _consumerClient!.CreateJetStreamContext();
+
+            foreach (var subject in topics)
             {
-                _asyncSubscriptions.Add(_consumerClient.SubscribeAsync(topic, _groupId));
+                var streamName = _natsOptions.NormalizeStreamName(subject);
+                var pso = PushSubscribeOptions.Builder()
+                    .WithStream(streamName)
+                    .WithConfiguration(ConsumerConfiguration.Builder().WithDeliverPolicy(DeliverPolicy.New).Build())
+                    .Build();
+
+                js.PushSubscribeAsync(subject, Helper.Normalized(_groupId), SubscriptionMessageHandler, false, pso);
             }
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            Connect();
-
-            foreach (var subscription in _asyncSubscriptions)
-            {
-                subscription.MessageHandler += Subscription_MessageHandler;
-                subscription.Start();
-            }
-
             while (true)
             {
                 cancellationToken.ThrowIfCancellationRequested();
@@ -69,32 +107,33 @@ namespace DotNetCore.CAP.NATS
             // ReSharper disable once FunctionNeverReturns
         }
 
-        private void Subscription_MessageHandler(object sender, MsgHandlerEventArgs e)
+        private void SubscriptionMessageHandler(object? sender, MsgHandlerEventArgs e)
         {
-            using var mStream = new MemoryStream();
-            var binFormatter = new BinaryFormatter();
+            var headers = new Dictionary<string, string?>();
 
-            mStream.Write(e.Message.Data, 0, e.Message.Data.Length);
-            mStream.Position = 0;
+            foreach (string h in e.Message.Header.Keys)
+            {
+                headers.Add(h, e.Message.Header[h]);
+            }
 
-            var message = (TransportMessage)binFormatter.Deserialize(mStream);
-            message.Headers.Add(Headers.Group, _groupId);
-            OnMessageReceived?.Invoke(e.Message.Reply, message);
+            headers.Add(Headers.Group, _groupId);
+
+            OnMessageCallback!(new TransportMessage(headers, e.Message.Data), e.Message);
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
-            if (sender is string reply)
+            if (sender is Msg msg)
             {
-                _consumerClient.Publish(reply, new byte[] { 1 });
+                msg.Ack();
             }
         }
 
-        public void Reject(object sender)
+        public void Reject(object? sender)
         {
-            if (sender is string reply)
+            if (sender is Msg msg)
             {
-                _consumerClient.Publish(reply, new byte[] { 0 });
+                msg.Nak();
             }
         }
 
@@ -117,10 +156,11 @@ namespace DotNetCore.CAP.NATS
                 if (_consumerClient == null)
                 {
                     var opts = _natsOptions.Options ?? ConnectionFactory.GetDefaultOptions();
-                    opts.Url = _natsOptions.Servers ?? opts.Url;
+                    opts.Url ??= _natsOptions.Servers;
                     opts.ClosedEventHandler = ConnectedEventHandler;
                     opts.DisconnectedEventHandler = ConnectedEventHandler;
                     opts.AsyncErrorEventHandler = AsyncErrorEventHandler;
+                    opts.Timeout = 5000;
                     _consumerClient = new ConnectionFactory().CreateConnection(opts);
                 }
             }
@@ -130,24 +170,24 @@ namespace DotNetCore.CAP.NATS
             }
         }
 
-        private void ConnectedEventHandler(object sender, ConnEventArgs e)
+        private void ConnectedEventHandler(object? sender, ConnEventArgs e)
         {
             var logArgs = new LogMessageEventArgs
             {
-                LogType = MqLogType.ServerConnError,
-                Reason = $"An error occurred during connect NATS --> {e.Error}"
+                LogType = MqLogType.ConnectError,
+                Reason = e.Error?.ToString()
             };
-            OnLog?.Invoke(null, logArgs);
+            OnLogCallback!(logArgs);
         }
 
-        private void AsyncErrorEventHandler(object sender, ErrEventArgs e)
+        private void AsyncErrorEventHandler(object? sender, ErrEventArgs e)
         {
             var logArgs = new LogMessageEventArgs
             {
                 LogType = MqLogType.AsyncErrorEvent,
-                Reason = $"An error occurred out of band --> {e.Error}"
+                Reason = e.Error
             };
-            OnLog?.Invoke(null, logArgs);
+            OnLogCallback!(logArgs);
         }
     }
 }

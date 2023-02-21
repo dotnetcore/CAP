@@ -1,24 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>DotNetCore.CAP.PostgreSql</AssemblyName>
-    <PackageTags>$(PackageTags);PostgreSQL</PackageTags>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-    <DocumentationFile>bin\$(Configuration)\netstandard2.1\DotNetCore.CAP.PostgreSql.xml</DocumentationFile>
-    <NoWarn>1701;1702;1705;CS1591</NoWarn>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="5.0.4" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="5.0.4" />
-    <PackageReference Include="Npgsql" Version="5.0.3" /> 
-  </ItemGroup>
+	<PropertyGroup>
+		<TargetFramework>net6.0</TargetFramework>
+		<PackageTags>$(PackageTags);PostgreSQL</PackageTags>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
-  </ItemGroup>
- 
+	<ItemGroup>
+		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0" />
+		<PackageReference Include="Npgsql" Version="6.0.7" />
+		<ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+	</ItemGroup>
+
 </Project>

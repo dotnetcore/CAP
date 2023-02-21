@@ -1,5 +1,5 @@
 ﻿using System;
-using DotNetCore.CAP.Internal;
+using DotNetCore.CAP;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -29,7 +29,7 @@ namespace Sample.ConsoleApp
 
             var sp = container.BuildServiceProvider();
 
-            sp.GetService<IBootstrapper>().BootstrapAsync(default);
+            sp.GetService<IBootstrapper>().BootstrapAsync();
 
             Console.ReadLine();
         }

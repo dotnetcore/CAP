@@ -1,16 +1,17 @@
-using Microsoft.Azure.ServiceBus;
+
+
+using Azure.Messaging.ServiceBus;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
     public class AzureServiceBusConsumerCommitInput
     {
-        public AzureServiceBusConsumerCommitInput(string lockToken, IMessageSession session = null)
+        public AzureServiceBusConsumerCommitInput(ProcessMessageEventArgs processMessageEventArgs)
         {
-            LockToken = lockToken;
-            Session = session;
+            ProcessMessageArgs = processMessageEventArgs;
         }
-        
-        public IMessageSession Session { get; set; }
-        public string LockToken { get; set; }
+
+        public ProcessMessageEventArgs ProcessMessageArgs { get; set; }
+
     }
 }

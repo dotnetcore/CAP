@@ -3,81 +3,82 @@
 
 using System;
 using System.Collections.Generic;
-using JetBrains.Annotations;
 
-namespace DotNetCore.CAP.Messages
+namespace DotNetCore.CAP.Messages;
+
+public class Message
 {
-    public class Message
+    /// <summary>
+    /// System.Text.Json requires that class explicitly has a parameter less constructor
+    /// and public properties have a setter.
+    /// </summary>
+    public Message()
     {
-        /// <summary>
-        /// System.Text.Json requires that class explicitly has a parameterless constructor
-        /// and public properties have a setter.
-        /// </summary>
-        public Message() { }
-
-        public Message(IDictionary<string, string> headers, [CanBeNull] object value)
-        {
-            Headers = headers ?? throw new ArgumentNullException(nameof(headers));
-            Value = value;
-        }
-
-        public IDictionary<string, string> Headers { get; set; }
-
-        [CanBeNull]
-        public object Value { get; set; }
+        Headers = new Dictionary<string, string?>();
     }
 
-    public static class MessageExtensions
+    public Message(IDictionary<string, string?> headers, object? value)
     {
-        public static string GetId(this Message message)
-        {
-            message.Headers.TryGetValue(Headers.MessageId, out var value);
-            return value;
-        }
+        Headers = headers ?? throw new ArgumentNullException(nameof(headers));
+        Value = value;
+    }
 
-        public static string GetName(this Message message)
-        {
-            message.Headers.TryGetValue(Headers.MessageName, out var value);
-            return value;
-        }
+    public IDictionary<string, string?> Headers { get; set; }
 
-        public static string GetCallbackName(this Message message)
-        {
-            message.Headers.TryGetValue(Headers.CallbackName, out var value);
-            return value;
-        }
+    public object? Value { get; set; }
+}
 
-        public static string GetGroup(this Message message)
-        {
-            message.Headers.TryGetValue(Headers.Group, out var value);
-            return value;
-        }
+public static class MessageExtensions
+{
+    public static string GetId(this Message message)
+    {
+        return message.Headers[Headers.MessageId]!;
+    }
 
-        public static int GetCorrelationSequence(this Message message)
-        {
-            if (message.Headers.TryGetValue(Headers.CorrelationSequence, out var value))
-            {
-                return int.Parse(value);
-            }
+    public static string GetName(this Message message)
+    {
+        return message.Headers[Headers.MessageName]!;
+    }
 
-            return 0;
-        }
+    public static string? GetCallbackName(this Message message)
+    {
+        message.Headers.TryGetValue(Headers.CallbackName, out var value);
+        return value;
+    }
 
-        public static bool HasException(this Message message)
-        {
-            return message.Headers.ContainsKey(Headers.Exception);
-        }
+    public static string? GetGroup(this Message message)
+    {
+        message.Headers.TryGetValue(Headers.Group, out var value);
+        return value;
+    }
 
-        public static void AddOrUpdateException(this Message message, Exception ex)
-        {
-            var msg = $"{ex.GetType().Name}-->{ex.Message}";
+    public static int GetCorrelationSequence(this Message message)
+    {
+        if (message.Headers.TryGetValue(Headers.CorrelationSequence, out var value)) return int.Parse(value!);
 
-            message.Headers[Headers.Exception] = msg;
-        }
+        return 0;
+    }
 
-        public static void RemoveException(this Message message)
-        {
-            message.Headers.Remove(Headers.Exception);
-        }
+    public static string? GetExecutionInstanceId(this Message message)
+    {
+        message.Headers.TryGetValue(Headers.ExecutionInstanceId, out var value);
+        return value;
+    }
+
+    public static bool HasException(this Message message)
+    {
+        return message.Headers.ContainsKey(Headers.Exception);
+    }
+
+    public static void AddOrUpdateException(this Message message, Exception ex)
+    {
+        var msg = $"{ex.GetType().Name}-->{ex.Message}";
+
+        message.Headers[Headers.Exception] = msg;
+    }
+
+    public static void RemoveException(this Message message)
+    {
+        message.Headers.Remove(Headers.Exception);
     }
 }

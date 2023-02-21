@@ -1,19 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.1</TargetFramework>
-    <AssemblyName>DotNetCore.CAP.Kafka</AssemblyName>
+    <TargetFramework>net6.0</TargetFramework>
+	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);Kafka</PackageTags>
   </PropertyGroup>
 
   <PropertyGroup>
     <WarningsAsErrors>NU1605;NU1701</WarningsAsErrors>
     <NoWarn>NU1701;CS1591</NoWarn>
-    <DocumentationFile>bin\$(Configuration)\netstandard2.1\DotNetCore.CAP.Kafka.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Confluent.Kafka" Version="1.6.2" />
+    <PackageReference Include="Confluent.Kafka" Version="1.9.3" />
   </ItemGroup>
 
   <ItemGroup>

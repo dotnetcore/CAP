@@ -40,19 +40,6 @@ namespace DotNetCore.CAP.Test
         }
 
         [Fact]
-        public void CanOverridePublishService()
-        {
-            var services = new ServiceCollection();
-            services.AddCap(x => { }).AddProducerService<MyProducerService>();
-
-            var thingy = services.BuildServiceProvider()
-                .GetRequiredService<ICapPublisher>() as MyProducerService;
-
-            Assert.NotNull(thingy);
-        }
-      
-
-        [Fact]
         public void CanResolveCapOptions()
         {
             var services = new ServiceCollection();
@@ -86,6 +73,26 @@ namespace DotNetCore.CAP.Test
             }
 
             public void Publish<T>(string name, T contentObj, IDictionary<string, string> headers)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PublishDelayAsync<T>(TimeSpan delayTime, string name, T value, IDictionary<string, string> headers, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public Task PublishDelayAsync<T>(TimeSpan delayTime, string name, T value, string callbackName = null, CancellationToken cancellationToken = default)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void PublishDelay<T>(TimeSpan delayTime, string name, T value, IDictionary<string, string> headers)
+            {
+                throw new NotImplementedException();
+            }
+
+            public void PublishDelay<T>(TimeSpan delayTime, string name, T value, string callbackName = null)
             {
                 throw new NotImplementedException();
             }

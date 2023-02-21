@@ -20,8 +20,8 @@ namespace DotNetCore.CAP
 
         public void AddServices(IServiceCollection services)
         {
-            services.AddSingleton<CapMessageQueueMakerService>();
-             
+            services.AddSingleton(new CapMessageQueueMakerService("RabbitMQ"));
+
             services.Configure(_configure);
             services.AddSingleton<ITransport, RabbitMQTransport>();
             services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();

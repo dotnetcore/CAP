@@ -6,21 +6,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
 {
-    internal sealed class KafkaConsumerClient : IConsumerClient
+    public class KafkaConsumerClient : IConsumerClient
     {
-        private static readonly SemaphoreSlim ConnectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+        private static readonly SemaphoreSlim ConnectionLock = new(initialCount: 1, maxCount: 1);
 
         private readonly string _groupId;
         private readonly KafkaOptions _kafkaOptions;
-        private IConsumer<string, byte[]> _consumerClient;
+        private IConsumer<string, byte[]>? _consumerClient;
 
         public KafkaConsumerClient(string groupId, IOptions<KafkaOptions> options)
         {
@@ -28,11 +30,11 @@ namespace DotNetCore.CAP.Kafka
             _kafkaOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
-        public event EventHandler<TransportMessage> OnMessageReceived;
+        public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
-        public event EventHandler<LogMessageEventArgs> OnLog;
+        public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("Kafka", _kafkaOptions.Servers);
+        public BrokerAddress BrokerAddress => new("Kafka", _kafkaOptions.Servers);
 
         public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
         {
@@ -41,13 +43,15 @@ namespace DotNetCore.CAP.Kafka
                 throw new ArgumentNullException(nameof(topicNames));
             }
 
+            var regexTopicNames = topicNames.Select(Helper.WildcardToRegex).ToList();
+
             try
             {
                 var config = new AdminClientConfig(_kafkaOptions.MainConfig) { BootstrapServers = _kafkaOptions.Servers };
 
                 using var adminClient = new AdminClientBuilder(config).Build();
 
-                adminClient.CreateTopicsAsync(topicNames.Select(x => new TopicSpecification
+                adminClient.CreateTopicsAsync(regexTopicNames.Select(x => new TopicSpecification
                 {
                     Name = x
                 })).GetAwaiter().GetResult();
@@ -62,10 +66,10 @@ namespace DotNetCore.CAP.Kafka
                     LogType = MqLogType.ConsumeError,
                     Reason = $"An error was encountered when automatically creating topic! -->" + ex.Message
                 };
-                OnLog?.Invoke(null, logArgs);
+                OnLogCallback!(logArgs);
             }
 
-            return topicNames.ToList();
+            return regexTopicNames;
         }
 
         public void Subscribe(IEnumerable<string> topics)
@@ -77,20 +81,37 @@ namespace DotNetCore.CAP.Kafka
 
             Connect();
 
-            _consumerClient.Subscribe(topics);
+            _consumerClient!.Subscribe(topics);
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
             Connect();
 
-            while (true)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                var consumerResult = _consumerClient.Consume(cancellationToken);
+                ConsumeResult<string, byte[]> consumerResult;
+
+                try
+                {
+                    consumerResult = _consumerClient!.Consume(timeout);
+                    if (consumerResult == null) continue;
+                }
+                catch (ConsumeException e) when (_kafkaOptions.RetriableErrorCodes.Contains(e.Error.Code))
+                {
+                    var logArgs = new LogMessageEventArgs
+                    {
+                        LogType = MqLogType.ConsumeRetries,
+                        Reason = e.Error.ToString()
+                    };
+                    OnLogCallback!(logArgs);
+
+                    continue;
+                }
 
                 if (consumerResult.IsPartitionEOF || consumerResult.Message.Value == null) continue;
 
-                var headers = new Dictionary<string, string>(consumerResult.Message.Headers.Count);
+                var headers = new Dictionary<string, string?>(consumerResult.Message.Headers.Count);
                 foreach (var header in consumerResult.Message.Headers)
                 {
                     var val = header.GetValueBytes();
@@ -103,25 +124,25 @@ namespace DotNetCore.CAP.Kafka
                     var customHeaders = _kafkaOptions.CustomHeaders(consumerResult);
                     foreach (var customHeader in customHeaders)
                     {
-                        headers.Add(customHeader.Key, customHeader.Value);
+                        headers[customHeader.Key] = customHeader.Value;
                     }
                 }
 
                 var message = new TransportMessage(headers, consumerResult.Message.Value);
 
-                OnMessageReceived?.Invoke(consumerResult, message);
+                OnMessageCallback!(message, consumerResult).GetAwaiter().GetResult();
             }
             // ReSharper disable once FunctionNeverReturns
         }
 
-        public void Commit(object sender)
+        public void Commit(object? sender)
         {
-            _consumerClient.Commit((ConsumeResult<string, byte[]>)sender);
+            _consumerClient!.Commit((ConsumeResult<string, byte[]>)sender!);
         }
 
-        public void Reject(object sender)
+        public void Reject(object? sender)
         {
-            _consumerClient.Assign(_consumerClient.Assignment);
+            _consumerClient!.Assign(_consumerClient.Assignment);
         }
 
         public void Dispose()
@@ -150,15 +171,20 @@ namespace DotNetCore.CAP.Kafka
                     config.EnableAutoCommit ??= false;
                     config.LogConnectionClose ??= false;
 
-                    _consumerClient = new ConsumerBuilder<string, byte[]>(config)
-                        .SetErrorHandler(ConsumerClient_OnConsumeError)
-                        .Build();
+                    _consumerClient = BuildConsumer(config);
                 }
             }
             finally
             {
                 ConnectionLock.Release();
             }
+        }
+
+        protected virtual IConsumer<string, byte[]> BuildConsumer(ConsumerConfig config)
+        {
+            return new ConsumerBuilder<string, byte[]>(config)
+                .SetErrorHandler(ConsumerClient_OnConsumeError)
+                .Build();
         }
 
         private void ConsumerClient_OnConsumeError(IConsumer<string, byte[]> consumer, Error e)
@@ -168,7 +194,7 @@ namespace DotNetCore.CAP.Kafka
                 LogType = MqLogType.ServerConnError,
                 Reason = $"An error occurred during connect kafka --> {e.Reason}"
             };
-            OnLog?.Invoke(null, logArgs);
+            OnLogCallback!(logArgs);
         }
     }
 }

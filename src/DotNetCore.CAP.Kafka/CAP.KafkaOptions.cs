@@ -24,6 +24,10 @@ namespace DotNetCore.CAP
         public KafkaOptions()
         {
             MainConfig = new Dictionary<string, string>();
+            RetriableErrorCodes = new List<ErrorCode>
+            {
+                ErrorCode.GroupLoadInProgress
+            };
         }
 
         /// <summary>
@@ -37,11 +41,16 @@ namespace DotNetCore.CAP
         /// Initial list of brokers as a CSV list of broker host or host:port.
         /// </para>
         /// </summary>
-        public string Servers { get; set; }
+        public string Servers { get; set; } = default!;
 
         /// <summary>
         /// If you need to get offset and partition and so on.., you can use this function to write additional header into <see cref="CapHeader"/>
         /// </summary>
-        public Func<ConsumeResult<string, byte[]>, List<KeyValuePair<string, string>>> CustomHeaders { get; set; }
+        public Func<ConsumeResult<string, byte[]>, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
+
+        /// <summary>
+        /// New retriable error code (refer to https://docs.confluent.io/platform/current/clients/librdkafka/html/rdkafkacpp_8h.html#a4c6b7af48c215724c323c60ea4080dbf)
+        /// </summary>
+        public IList<ErrorCode> RetriableErrorCodes { get; set; }
     }
 }

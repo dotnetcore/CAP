@@ -23,25 +23,27 @@ _capBus.Publish("place.order.qty.deducted",
 // publisher using `callbackName` to subscribe consumer result
 
 [CapSubscribe("place.order.mark.status")]
-public void MarkOrderStatus(JToken param)
+public void MarkOrderStatus(JsonElement param)
 {
-    var orderId = param.Value<int>("OrderId");
-    var isSuccess = param.Value<bool>("IsSuccess");
+    var orderId = param.GetProperty("OrderId").GetInt32();
+    var isSuccess = param.GetProperty("IsSuccess").GetBoolean();
     
-    if(isSuccess)
-       //mark order status to succeeded
-    else
-       //mark order status to failed
+    if(isSuccess){
+        // mark order status to succeeded
+    }
+    else{
+       // mark order status to failed
+    }
 }
 
 // =============  Consumer ===================
 
 [CapSubscribe("place.order.qty.deducted")]
-public object DeductProductQty(JToken param)
+public object DeductProductQty(JsonElement param)
 {
-    var orderId = param.Value<int>("OrderId");
-    var productId = param.Value<int>("ProductId");
-    var qty = param.Value<int>("Qty");
+    var orderId = param.GetProperty("OrderId").GetInt32();
+    var productId = param.GetProperty("ProductId").GetInt32();
+    var qty = param.GetProperty("Qty").GetInt32();
 
     //business logic 
 
@@ -71,7 +73,7 @@ cap-msg-type | string | The type of message, `typeof(T).FullName`(not required)
 cap-senttime | string | sending time (not required)
 
 ### Custom headers
-To consume messages sent without CAP headers, both Kafka and RabbitMQ consumers can inject a minimal set of headers using custom headers as shown below:
+To consume messages sent without CAP headers, both AzureServiceBus, Kafka and RabbitMQ consumers can inject a minimal set of headers using the `CustomHeaders` property as shown below (RabbitMQ example):
 ```C#
 container.AddCap(x =>
 {
@@ -87,7 +89,7 @@ container.AddCap(x =>
 });
 ```
 
-After adding `cap-msg-id` and `cap-msg-name`, CAP consumers receive messages sent directly from the RabbitMQ management tool.
+After adding `cap-msg-id` and `cap-msg-name`, CAP consumers receive messages sent directly from any external system, like the RabbitMQ management tool when using RabbitMQ as a transport.
 
 ## Scheduling
 
@@ -107,9 +109,9 @@ Retrying plays an important role in the overall CAP architecture design, CAP ret
 
 ### Send retry
 
-During the message sending process, when the broker crashes or the connection fails or an abnormality occurs, CAP will retry the sending. Retry 3 times for the first time, retry every minute after 4 minutes, and +1 retry. When the total number of retries reaches 50,CAP will stop retrying.
+During the message sending process, when the broker crashes or the connection fails or an abnormality occurs, CAP will retry the sending. Retry 3 times for the first time, retry every minute after 4 minutes, and +1 retry. When the total number of retries reaches 50, CAP will stop retrying.
 
-You can adjust the total number of retries by setting `FailedRetryCount` in CapOptions.
+You can adjust the total number of retries by setting [FailedRetryCount](../configuration#failedretrycount) in CapOptions.
 
 It will stop when the maximum number of times is reached. You can see the reason for the failure in Dashboard and choose whether to manually retry.
 
@@ -117,12 +119,16 @@ It will stop when the maximum number of times is reached. You can see the reason
 
 The consumer method is executed when the Consumer receives the message and will retry when an exception occurs. This retry strategy is the same as the send retry.
 
+We introduced database-based distributed locks in version 7.1.0 to deal with the problem of concurrent data acquisition of database retries under multiple instances, you need to explicitly configure `UseStorageLock` option to true.
+
 ## Data Cleanup
 
 There is an `ExpiresAt` field in the database message table indicating the expiration time of the message. When the message is sent successfully, status will be changed to `Successed`, and `ExpiresAt` will be set to **1 day** later. 
 
-Consuming failure will change the message status to `Failed` and `ExpiresAt` will be set to **15 days** later.
+Consuming failure will change the message status to `Failed` and `ExpiresAt` will be set to **15 days** later (You can use [FailedMessageExpiredAfter](../configuration#failedmessageexpiredafter) configuration items to custom).
 
-By default, the data of the message in the table is deleted **every hour** to avoid performance degradation caused by too much data. The cleanup strategy `ExpiresAt` is performed when field is not empty and is less than the current time. 
+By default, the data of the message in the table is deleted every **5 minutes** to avoid performance degradation caused by too much data. The cleanup strategy `ExpiresAt` is performed when field is not empty and is less than the current time. 
 
 That is to say, the message with the status Failed (by default they have been retried 50 times), if you do not have manual intervention for 15 days, it will **also be** cleaned up.
+
+You can use [CollectorCleaningInterval](../configuration#collectorcleaninginterval) configuration items to custom the interval time.

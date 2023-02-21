@@ -4,14 +4,14 @@
 
   <PropertyGroup Label="Package">
     <Product>CAP</Product>
-    <LangVersion>8</LangVersion>
-    <Authors>ncc;savorboard</Authors>
+	<Nullable>enable</Nullable>
+    <Authors>NCC;Savorboard</Authors>
     <RepositoryUrl>https://github.com/dotnetcore/CAP</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryRoot>$(MSBuildThisFileDirectory)</RepositoryRoot>
-    <PackageIconUrl>https://raw.githubusercontent.com/dotnetcore/CAP/master/docs/content/img/logo.png</PackageIconUrl>
+	<PackageIcon>logo.png</PackageIcon>
     <PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/dotnetcore/CAP/blob/master/LICENSE.txt</PackageLicenseUrl>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageTags>CAP;EventBus;MicroService</PackageTags>
     <Description>Distributed transaction solution in micro-service base on eventually consistency, also an eventbus with Outbox pattern.</Description>
   </PropertyGroup>
@@ -25,8 +25,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All"/>
-    <PackageReference Include="JetBrains.Annotations" Version="2020.3.0" PrivateAssets="All" />
+	<None Include="..\..\docs\content\img\logo.png" Pack="true" Visible="false"  PackagePath="" />
+	<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
   </ItemGroup>
 
 </Project>

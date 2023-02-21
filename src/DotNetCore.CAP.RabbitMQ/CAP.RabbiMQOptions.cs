@@ -5,6 +5,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Channels;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -66,6 +67,11 @@ namespace DotNetCore.CAP
         public string ExchangeName { get; set; } = DefaultExchangeName;
 
         /// <summary>
+        /// Enabling Publisher Confirms on a Channel
+        /// </summary>
+        public bool PublishConfirms { get; set; }
+
+        /// <summary>
         /// The port to connect on.
         /// </summary>
         public int Port { get; set; } = -1;
@@ -74,29 +80,68 @@ namespace DotNetCore.CAP
         /// Optional queue arguments, also known as "x-arguments" because of their field name in the AMQP 0-9-1 protocol,
         /// is a map (dictionary) of arbitrary key/value pairs that can be provided by clients when a queue is declared.
         /// </summary>
-        public QueueArgumentsOptions QueueArguments { get; set; } = new QueueArgumentsOptions();
+        public QueueArgumentsOptions QueueArguments { get; set; } = new();
 
         /// <summary>
         /// If you need to get additional native delivery args, you can use this function to write into <see cref="CapHeader"/>.
         /// </summary>
-        public Func<BasicDeliverEventArgs, List<KeyValuePair<string, string>>> CustomHeaders { get; set; }
+        public Func<BasicDeliverEventArgs, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
 
         /// <summary>
         /// RabbitMQ native connection factory options
         /// </summary>
-        public Action<ConnectionFactory> ConnectionFactoryOptions { get; set; }
+        public Action<ConnectionFactory>? ConnectionFactoryOptions { get; set; }
+
+        /// <summary> 
+        /// Specify quality of service.
+        /// <br/><br/>
+        /// This settings requests a specific quality of service.The QoS can be specified for the current channel or for all channels on the connection.<br/>
+        /// The particular properties and semantics of a qos method always depend on the content class semantics.<br/>
+        /// Though the qos method could in principle apply to both peers, it is currently meaningful only for the server.<br/>
+        /// <br/>
+        /// <see href="https://www.rabbitmq.com/consumer-prefetch.html">More info at: https://www.rabbitmq.com/consumer-prefetch.html</see>
+        /// </summary>
+        public BasicQos? BasicQosOptions { get; set; } = null;
 
         public class QueueArgumentsOptions
         {
             /// <summary>
             /// Gets or sets queue mode by supplying the 'x-queue-mode' declaration argument with a string specifying the desired mode.
             /// </summary>
-            public string QueueMode { get; set; }
+            public string QueueMode { get; set; } = default!;
 
             /// <summary>
             /// Gets or sets queue message automatic deletion time (in milliseconds) "x-message-ttl", Default 864000000 ms (10 days).
             /// </summary>
+            // ReSharper disable once InconsistentNaming
             public int MessageTTL { get; set; } = 864000000;
+        }
+                
+        public class BasicQos
+        {       
+            /// <summary>
+            /// New instance of BasicQos sets the use of basic qos setup on the basic channel.
+            /// </summary>            
+            /// <param name="prefetchCount">Sets the PrefetchCount.</param>
+            /// <param name="global">Sets Global flag (default false).</param>
+            public BasicQos(ushort prefetchCount, bool global = false)
+            {
+                PrefetchCount = prefetchCount;
+                Global = global;
+            }   
+
+            /// <summary>
+            /// Gets the PrefetchCount, a value of 0 is treated as infinite, allowing any number of unacknowledged message being pushed to consumer.
+            /// The default value is 0.
+            /// </summary>
+            public ushort PrefetchCount { get; private set; } = 0;
+
+            /// <summary>
+            /// Gets the global flag across all consumers in RabbitMq.
+            /// false (default) - applied separately to each new consumer on the channel
+            /// true - shared across all consumers on the channel
+            /// </summary>
+            public bool Global { get; private set; } = false;
         }
     }
 }
