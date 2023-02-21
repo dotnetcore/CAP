@@ -9,6 +9,7 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 
@@ -16,14 +17,16 @@ namespace DotNetCore.CAP.MongoDB;
 
 public class MongoDBMonitoringApi : IMonitoringApi
 {
+    private readonly ISerializer _serializer;
     private readonly IMongoDatabase _database;
     private readonly MongoDBOptions _options;
 
-    public MongoDBMonitoringApi(IMongoClient client, IOptions<MongoDBOptions> options)
+    public MongoDBMonitoringApi(IMongoClient client, IOptions<MongoDBOptions> options, ISerializer serializer)
     {
+        
         var mongoClient = client ?? throw new ArgumentNullException(nameof(client));
         _options = options.Value ?? throw new ArgumentNullException(nameof(options));
-
+        _serializer = serializer?? throw new ArgumentNullException(nameof(serializer));
         _database = mongoClient.GetDatabase(_options.DatabaseName);
     }
 
@@ -34,6 +37,7 @@ public class MongoDBMonitoringApi : IMonitoringApi
         return new MediumMessage
         {
             Added = message.Added,
+            Origin = _serializer.Deserialize(message.Content)!,
             Content = message.Content,
             DbId = message.Id.ToString(),
             ExpiresAt = message.ExpiresAt,
@@ -48,6 +52,7 @@ public class MongoDBMonitoringApi : IMonitoringApi
         return new MediumMessage
         {
             Added = message.Added,
+            Origin = _serializer.Deserialize(message.Content)!,
             Content = message.Content,
             DbId = message.Id.ToString(),
             ExpiresAt = message.ExpiresAt,
