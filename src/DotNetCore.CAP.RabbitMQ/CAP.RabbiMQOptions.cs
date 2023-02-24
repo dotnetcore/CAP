@@ -115,6 +115,11 @@ namespace DotNetCore.CAP
             /// </summary>
             // ReSharper disable once InconsistentNaming
             public int MessageTTL { get; set; } = 864000000;
+
+            /// <summary>
+            /// Gets or sets queue type by supplying the 'x-queue-type' declaration argument with a string specifying the desired type.
+            /// </summary>
+            public string QueueType { get; set; } = default!;
         }
                 
         public class BasicQos

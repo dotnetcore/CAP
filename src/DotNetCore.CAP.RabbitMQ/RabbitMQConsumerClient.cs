@@ -126,6 +126,11 @@ namespace DotNetCore.CAP.RabbitMQ
                         arguments.Add("x-queue-mode", _rabbitMQOptions.QueueArguments.QueueMode);
                     }
 
+                    if (!string.IsNullOrEmpty(_rabbitMQOptions.QueueArguments.QueueType))
+                    {
+                        arguments.Add("x-queue-type", _rabbitMQOptions.QueueArguments.QueueType);
+                    }
+
                     _channel.QueueDeclare(_queueName, durable: true, exclusive: false, autoDelete: false, arguments: arguments);
                 }
             }
