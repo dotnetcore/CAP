@@ -10,8 +10,8 @@ public class ServiceBusProducerDescriptorBuilder<T>
         return this;
     }
 
-    public ServiceBusProducerDescriptorDescriptor<T> Build()
+    public ServiceBusProducerDescriptor<T> Build()
     {
-        return new ServiceBusProducerDescriptorDescriptor<T>(TopicPath);
+        return new ServiceBusProducerDescriptor<T>(TopicPath);
     }
 }

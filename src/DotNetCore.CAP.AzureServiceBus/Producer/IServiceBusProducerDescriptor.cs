@@ -8,15 +8,15 @@ public interface IServiceBusProducerDescriptor
     string MessageTypeName { get; }
 }
 
-public class ServiceBusProducerDescriptorDescriptor : IServiceBusProducerDescriptor
+public class ServiceBusProducerDescriptor : IServiceBusProducerDescriptor
 {
-    public ServiceBusProducerDescriptorDescriptor(Type type, string topicPath)
+    public ServiceBusProducerDescriptor(Type type, string topicPath)
     {
         MessageTypeName = type.Name;
         TopicPath = topicPath;
     }
 
-    public ServiceBusProducerDescriptorDescriptor(string typeName, string topicPath)
+    public ServiceBusProducerDescriptor(string typeName, string topicPath)
     {
         MessageTypeName = typeName;
         TopicPath = topicPath;
@@ -27,9 +27,9 @@ public class ServiceBusProducerDescriptorDescriptor : IServiceBusProducerDescrip
     public string MessageTypeName { get; }
 }
 
-public class ServiceBusProducerDescriptorDescriptor<T> : ServiceBusProducerDescriptorDescriptor
+public class ServiceBusProducerDescriptor<T> : ServiceBusProducerDescriptor
 {
-    public ServiceBusProducerDescriptorDescriptor(string topicPath) : base(typeof(T), topicPath)
+    public ServiceBusProducerDescriptor(string topicPath) : base(typeof(T), topicPath)
     {
     }
 }

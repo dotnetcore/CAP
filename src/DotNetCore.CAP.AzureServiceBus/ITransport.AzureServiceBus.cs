@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                    .CustomProducers
                    .SingleOrDefault(p => p.MessageTypeName == transportMessage.GetName())
                ??
-               new ServiceBusProducerDescriptorDescriptor(
+               new ServiceBusProducerDescriptor(
                    typeName: transportMessage.GetName(),
                    topicPath: _asbOptions.Value.TopicPath);
         
