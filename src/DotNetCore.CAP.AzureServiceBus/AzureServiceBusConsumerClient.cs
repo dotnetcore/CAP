@@ -182,7 +182,8 @@ namespace DotNetCore.CAP.AzureServiceBus
 
                     var topicPaths = 
                         _asbOptions.CustomProducers.Select(producer => producer.TopicPath)
-                            .Append(_asbOptions.TopicPath);
+                            .Append(_asbOptions.TopicPath)
+                            .Distinct();
 
                     foreach (var topicPath in topicPaths)
                     {
