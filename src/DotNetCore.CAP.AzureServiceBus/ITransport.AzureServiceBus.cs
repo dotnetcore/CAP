@@ -37,7 +37,8 @@ namespace DotNetCore.CAP.AzureServiceBus
         public BrokerAddress BrokerAddress => new BrokerAddress("AzureServiceBus", _asbOptions.Value.ConnectionString);
 
         /// <summary>
-        /// Gets a custom Producer
+        /// Creates a producer descriptor for the given message. If there's no custom producer configuration for the
+        /// message type, one will be created using defaults configured in the AzureServiceBusOptions (e.g. TopicPath).
         /// </summary>
         /// <param name="transportMessage"></param>
         /// <returns></returns>
