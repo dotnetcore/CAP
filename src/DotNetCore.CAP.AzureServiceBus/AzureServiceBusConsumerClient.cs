@@ -180,24 +180,30 @@ namespace DotNetCore.CAP.AzureServiceBus
                         _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString);
                     }
 
-                    if (!await _administrationClient.TopicExistsAsync(_asbOptions.TopicPath))
+                    var topicPaths = 
+                        _asbOptions.CustomProducers.Select(producer => producer.TopicPath)
+                            .Append(_asbOptions.TopicPath);
+
+                    foreach (var topicPath in topicPaths)
                     {
-                        await _administrationClient.CreateTopicAsync(_asbOptions.TopicPath);
-                        _logger.LogInformation($"Azure Service Bus created topic: {_asbOptions.TopicPath}");
+                        if (!await _administrationClient.TopicExistsAsync(topicPath))
+                        {
+                            await _administrationClient.CreateTopicAsync(topicPath);
+                            _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
+                        }
+
+                        if (!await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
+                        {
+                            var subscriptionDescription =
+                                new CreateSubscriptionOptions(topicPath, _subscriptionName)
+                                {
+                                    RequiresSession = _asbOptions.EnableSessions
+                                };
+
+                            await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
+                            _logger.LogInformation($"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
+                        }
                     }
-
-                    if (!await _administrationClient.SubscriptionExistsAsync(_asbOptions.TopicPath, _subscriptionName))
-                    {
-                        var subscriptionDescription =
-                            new CreateSubscriptionOptions(_asbOptions.TopicPath, _subscriptionName)
-                            {
-                                RequiresSession = _asbOptions.EnableSessions
-                            };
-
-                        await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
-                        _logger.LogInformation($"Azure Service Bus topic {_asbOptions.TopicPath} created subscription: {_subscriptionName}");
-                    }
-
 
                     _serviceBusProcessor = _serviceBusClient.CreateProcessor(_asbOptions.TopicPath, _subscriptionName,_asbOptions.EnableSessions?
                                            new ServiceBusProcessorOptions {
