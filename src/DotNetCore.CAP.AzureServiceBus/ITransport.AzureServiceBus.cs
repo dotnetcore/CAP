@@ -2,8 +2,11 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using DotNetCore.CAP.AzureServiceBus.Producer;
 using Azure.Messaging.ServiceBus;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
@@ -13,7 +16,7 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
-    internal class AzureServiceBusTransport : ITransport
+    internal class AzureServiceBusTransport : ITransport, IServiceBusProducerDescriptorFactory
     {
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
@@ -21,8 +24,8 @@ namespace DotNetCore.CAP.AzureServiceBus
         private readonly IOptions<AzureServiceBusOptions> _asbOptions;
 
         private ServiceBusClient? _client;
-        private ServiceBusSender? _sender;
-
+        private readonly ConcurrentDictionary<string, ServiceBusSender?> _senders = new();
+        
         public AzureServiceBusTransport(
             ILogger<AzureServiceBusTransport> logger,
             IOptions<AzureServiceBusOptions> asbOptions)
@@ -33,11 +36,27 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public BrokerAddress BrokerAddress => new BrokerAddress("AzureServiceBus", _asbOptions.Value.ConnectionString);
 
+        /// <summary>
+        /// Creates a producer descriptor for the given message. If there's no custom producer configuration for the
+        /// message type, one will be created using defaults configured in the AzureServiceBusOptions (e.g. TopicPath).
+        /// </summary>
+        /// <param name="transportMessage"></param>
+        /// <returns></returns>
+        public IServiceBusProducerDescriptor CreateProducerForMessage(TransportMessage transportMessage)
+            => _asbOptions.Value
+                   .CustomProducers
+                   .SingleOrDefault(p => p.MessageTypeName == transportMessage.GetName())
+               ??
+               new ServiceBusProducerDescriptor(
+                   typeName: transportMessage.GetName(),
+                   topicPath: _asbOptions.Value.TopicPath);
+        
         public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {
             try
             {
-                Connect();
+                var producer = CreateProducerForMessage(transportMessage);
+                var sender = GetSenderForProducer(producer);
                 
                 var message = new ServiceBusMessage(transportMessage.Body.ToArray())
                 {
@@ -65,7 +84,7 @@ namespace DotNetCore.CAP.AzureServiceBus
                 }
 
                 
-                await _sender!.SendMessageAsync(message);
+                await sender.SendMessageAsync(message);
 
                 _logger.LogDebug($"Azure Service Bus message [{transportMessage.GetName()}] has been published.");
 
@@ -79,11 +98,20 @@ namespace DotNetCore.CAP.AzureServiceBus
             }
         }
 
-        private void Connect()
+
+        /// <summary>
+        /// Gets the Topic Client for the specified producer. If it does not exist, a new one is created and added to the Topic Client dictionary.
+        /// </summary>
+        /// <param name="producerDescriptor"></param>
+        /// <returns><see cref="ServiceBusSender"/></returns>
+        private ServiceBusSender GetSenderForProducer(IServiceBusProducerDescriptor producerDescriptor)
         {
-            if (_client != null)
+            if (_senders.TryGetValue(producerDescriptor.TopicPath, out var sender) && sender != null)
             {
-                return;
+                _logger.LogTrace("Topic {TopicPath} connection already present as a Publish destination.",
+                    producerDescriptor.TopicPath);
+
+                return sender;
             }
 
             _connectionLock.Wait();
@@ -93,7 +121,13 @@ namespace DotNetCore.CAP.AzureServiceBus
                 _client ??= _asbOptions.Value.TokenCredential is null ? new ServiceBusClient(_asbOptions.Value.ConnectionString) :
                                                                          new ServiceBusClient(_asbOptions.Value.Namespace,_asbOptions.Value.TokenCredential);
 
-                _sender ??= _client.CreateSender(_asbOptions.Value.TopicPath);
+                var newSender = _client.CreateSender(producerDescriptor.TopicPath);
+                _senders.AddOrUpdate(
+                    key: producerDescriptor.TopicPath,
+                    addValue: newSender,
+                    updateValueFactory: (_, _) => newSender);
+
+                return newSender;
             }
             finally
             {

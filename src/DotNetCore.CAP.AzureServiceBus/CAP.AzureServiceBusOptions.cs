@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using Azure.Messaging.ServiceBus;
 using DotNetCore.CAP.AzureServiceBus;
+using DotNetCore.CAP.AzureServiceBus.Producer;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -67,5 +68,17 @@ namespace DotNetCore.CAP
         /// https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-sql-filter
         /// </summary>
         public List<KeyValuePair<string,string>>? SQLFilters { get; set; }
+        
+        public AzureServiceBusOptions ConfigureCustomProducer<T>(Action<ServiceBusProducerDescriptorBuilder<T>> configuration)
+        {
+            var builder = new ServiceBusProducerDescriptorBuilder<T>();
+            configuration(builder);
+            CustomProducers.Add(builder.Build());
+
+            return this;
+        }
+
+        internal ICollection<IServiceBusProducerDescriptor> CustomProducers { get; set; } =
+            new List<IServiceBusProducerDescriptor>();
     }
 }
