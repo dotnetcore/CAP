@@ -28,7 +28,7 @@ namespace DotNetCore.CAP.RabbitMQ
                client.Connect();
                return client;
             }
-            catch (System.Exception e)
+            catch (Exception e)
             {
                 throw new BrokerConnectionException(e);
             }
