@@ -2,7 +2,7 @@ namespace DotNetCore.CAP.AzureServiceBus.Producer;
 
 public class ServiceBusProducerDescriptorBuilder<T>
 {
-    private string TopicPath { get; set; }
+    private string TopicPath { get; set; } = null!;
 
     public ServiceBusProducerDescriptorBuilder<T> WithTopic(string topicPath)
     {
