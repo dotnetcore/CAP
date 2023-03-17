@@ -169,15 +169,17 @@ namespace DotNetCore.CAP.AzureServiceBus
             {
                 if (_serviceBusProcessor == null)
                 {
+                    var serviceBusClientOptions = new ServiceBusClientOptions();
+                    serviceBusClientOptions.TransportType = _asbOptions.TransportType;
                     if (_asbOptions.TokenCredential != null)
                     {
                         _administrationClient = new ServiceBusAdministrationClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
-                        _serviceBusClient = new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
+                        _serviceBusClient = new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential, serviceBusClientOptions);
                     }
                     else
                     {
                         _administrationClient = new ServiceBusAdministrationClient(_asbOptions.ConnectionString);
-                        _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString);
+                        _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString, serviceBusClientOptions);
                     }
 
                     var topicPaths = 

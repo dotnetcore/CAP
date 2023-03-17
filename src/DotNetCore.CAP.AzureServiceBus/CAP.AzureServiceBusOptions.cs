@@ -68,7 +68,13 @@ namespace DotNetCore.CAP
         /// https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-sql-filter
         /// </summary>
         public List<KeyValuePair<string,string>>? SQLFilters { get; set; }
-        
+
+        /// <summary>
+        ///   The type of protocol and transport that will be used for communicating with the Service Bus
+        ///   service.
+        /// </summary>
+        public ServiceBusTransportType TransportType { get; set; } = ServiceBusTransportType.AmqpTcp;
+
         public AzureServiceBusOptions ConfigureCustomProducer<T>(Action<ServiceBusProducerDescriptorBuilder<T>> configuration)
         {
             var builder = new ServiceBusProducerDescriptorBuilder<T>();
