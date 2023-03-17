@@ -5,12 +5,11 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Dashboard.NodeDiscovery
-{
-    public interface INodeDiscoveryProvider
-    {
-        IList<Node> GetNodes(CancellationToken cancellationToken = default);
+namespace DotNetCore.CAP.Dashboard.NodeDiscovery;
 
-        Task RegisterNode(CancellationToken cancellationToken = default);
-    }
+public interface INodeDiscoveryProvider
+{
+    IList<Node> GetNodes(CancellationToken cancellationToken = default);
+
+    Task RegisterNode(CancellationToken cancellationToken = default);
 }

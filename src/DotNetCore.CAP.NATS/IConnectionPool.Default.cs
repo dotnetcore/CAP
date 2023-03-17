@@ -8,78 +8,77 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NATS.Client;
 
-namespace DotNetCore.CAP.NATS
+namespace DotNetCore.CAP.NATS;
+
+public class ConnectionPool : IConnectionPool, IDisposable
 {
-    public class ConnectionPool : IConnectionPool, IDisposable
+    private readonly NATSOptions _options;
+    private readonly ConcurrentQueue<IConnection> _connectionPool;
+    private readonly ConnectionFactory _connectionFactory;
+    private int _pCount;
+    private int _maxSize;
+
+    public ConnectionPool(ILogger<ConnectionPool> logger, IOptions<NATSOptions> options)
     {
-        private readonly NATSOptions _options;
-        private readonly ConcurrentQueue<IConnection> _connectionPool;
-        private readonly ConnectionFactory _connectionFactory;
-        private int _pCount;
-        private int _maxSize;
+        _options = options.Value;
+        _connectionPool = new ConcurrentQueue<IConnection>();
+        _connectionFactory = new ConnectionFactory();
+        _maxSize = _options.ConnectionPoolSize;
 
-        public ConnectionPool(ILogger<ConnectionPool> logger, IOptions<NATSOptions> options)
+        logger.LogDebug("NATS configuration: {0}", options.Value.Options);
+    }
+
+    public string ServersAddress => _options.Servers;
+
+    public IConnection RentConnection()
+    {
+        if (_connectionPool.TryDequeue(out var connection))
         {
-            _options = options.Value;
-            _connectionPool = new ConcurrentQueue<IConnection>();
-            _connectionFactory = new ConnectionFactory();
-            _maxSize = _options.ConnectionPoolSize;
-
-            logger.LogDebug("NATS configuration: {0}", options.Value.Options);
-        }
-
-        public string ServersAddress => _options.Servers;
-
-        public IConnection RentConnection()
-        {
-            if (_connectionPool.TryDequeue(out var connection))
-            {
-                Interlocked.Decrement(ref _pCount);
-
-                return connection;
-            }
-
-            if (_options.Options != null)
-            {
-                if (_options.Servers != null)
-                {
-                    _options.Options.Url = _options.Servers;
-                }
-                connection = _connectionFactory.CreateConnection(_options.Options);
-            }
-            else
-            {
-                connection = _connectionFactory.CreateConnection(_options.Servers);
-            }
+            Interlocked.Decrement(ref _pCount);
 
             return connection;
         }
 
-        public bool Return(IConnection connection)
+        if (_options.Options != null)
         {
-            if (Interlocked.Increment(ref _pCount) <= _maxSize)
+            if (_options.Servers != null)
             {
-                _connectionPool.Enqueue(connection);
-
-                return true;
+                _options.Options.Url = _options.Servers;
             }
-
-            connection.Dispose();
-
-            Interlocked.Decrement(ref _pCount);
-
-            return false;
+            connection = _connectionFactory.CreateConnection(_options.Options);
+        }
+        else
+        {
+            connection = _connectionFactory.CreateConnection(_options.Servers);
         }
 
-        public void Dispose()
+        return connection;
+    }
+
+    public bool Return(IConnection connection)
+    {
+        if (Interlocked.Increment(ref _pCount) <= _maxSize)
         {
-            _maxSize = 0;
+            _connectionPool.Enqueue(connection);
 
-            while (_connectionPool.TryDequeue(out var context))
-            {
-                context.Dispose();
+            return true;
+        }
 
-            }
+        connection.Dispose();
+
+        Interlocked.Decrement(ref _pCount);
+
+        return false;
+    }
+
+    public void Dispose()
+    {
+        _maxSize = 0;
+
+        while (_connectionPool.TryDequeue(out var context))
+        {
+            context.Dispose();
+
         }
     }
 }

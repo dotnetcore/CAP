@@ -3,14 +3,13 @@
 
 using NATS.Client;
 
-namespace DotNetCore.CAP.NATS
+namespace DotNetCore.CAP.NATS;
+
+public interface IConnectionPool
 {
-    public interface IConnectionPool
-    {
-        string ServersAddress { get; }
+    string ServersAddress { get; }
 
-        IConnection RentConnection();
+    IConnection RentConnection();
 
-        bool Return(IConnection connection);
-    }
+    bool Return(IConnection connection);
 }

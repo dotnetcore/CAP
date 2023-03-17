@@ -4,14 +4,13 @@
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
 
-namespace DotNetCore.CAP.InMemoryStorage
+namespace DotNetCore.CAP.InMemoryStorage;
+
+internal class MemoryMessage : MediumMessage
 {
-    internal class MemoryMessage : MediumMessage
-    {
-        public string Name { get; set; } = default!;
+    public string Name { get; set; } = default!;
 
-        public StatusName StatusName { get; set; }
+    public StatusName StatusName { get; set; }
 
-        public string Group { get; set; } = default!;
-    }
+    public string Group { get; set; } = default!;
 }

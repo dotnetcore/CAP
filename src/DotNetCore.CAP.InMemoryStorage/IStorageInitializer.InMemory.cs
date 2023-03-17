@@ -5,28 +5,27 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 
-namespace DotNetCore.CAP.InMemoryStorage
+namespace DotNetCore.CAP.InMemoryStorage;
+
+internal class InMemoryStorageInitializer : IStorageInitializer
 {
-    internal class InMemoryStorageInitializer : IStorageInitializer
+    public string GetPublishedTableName()
     {
-        public string GetPublishedTableName()
-        {
-            return nameof(InMemoryStorage.PublishedMessages);
-        }
+        return nameof(InMemoryStorage.PublishedMessages);
+    }
 
-        public string GetReceivedTableName()
-        {
-            return nameof(InMemoryStorage.ReceivedMessages);
-        }
+    public string GetReceivedTableName()
+    {
+        return nameof(InMemoryStorage.ReceivedMessages);
+    }
 
-        public string GetLockTableName()
-        {
-            return string.Empty;
-        }
+    public string GetLockTableName()
+    {
+        return string.Empty;
+    }
 
-        public Task InitializeAsync(CancellationToken cancellationToken)
-        {
-             return Task.CompletedTask;
-        }
+    public Task InitializeAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }

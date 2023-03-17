@@ -1,24 +1,23 @@
 ﻿using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace DotNetCore.CAP.Test.Helpers
+namespace DotNetCore.CAP.Test.Helpers;
+
+public class TestLoggingProvider : ILoggerProvider
 {
-    public class TestLoggingProvider : ILoggerProvider
+    private readonly ITestOutputHelper _outputHelper;
+
+    public TestLoggingProvider(ITestOutputHelper outputHelper)
     {
-        private readonly ITestOutputHelper _outputHelper;
+        _outputHelper = outputHelper;
+    }
 
-        public TestLoggingProvider(ITestOutputHelper outputHelper)
-        {
-            _outputHelper = outputHelper;
-        }
+    public void Dispose()
+    {
+    }
 
-        public void Dispose()
-        {
-        }
-
-        public ILogger CreateLogger(string categoryName)
-        {
-            return new TestLogger(_outputHelper, categoryName);
-        }
+    public ILogger CreateLogger(string categoryName)
+    {
+        return new TestLogger(_outputHelper, categoryName);
     }
 }

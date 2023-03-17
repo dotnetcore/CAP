@@ -7,84 +7,83 @@ using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
 using Xunit;
 
-namespace DotNetCore.CAP.MySql.Test
+namespace DotNetCore.CAP.MySql.Test;
+
+[Collection("MySql")]
+public class MySqlStorageConnectionTest : DatabaseTestHost
 {
-    [Collection("MySql")]
-    public class MySqlStorageConnectionTest : DatabaseTestHost
+    private readonly MySqlDataStorage _storage;
+
+    public MySqlStorageConnectionTest()
     {
-        private readonly MySqlDataStorage _storage;
+        var serializer = GetService<ISerializer>();
+        var options = GetService<IOptions<MySqlOptions>>();
+        var capOptions = GetService<IOptions<CapOptions>>();
+        var initializer = GetService<IStorageInitializer>();
+        _storage = new MySqlDataStorage(options, capOptions, initializer, serializer);
+    }
 
-        public MySqlStorageConnectionTest()
+    [Fact]
+    public void StorageMessageTest()
+    {
+        var msgId = SnowflakeId.Default().NextId().ToString();
+        var header = new Dictionary<string, string>()
         {
-            var serializer = GetService<ISerializer>();
-            var options = GetService<IOptions<MySqlOptions>>();
-            var capOptions = GetService<IOptions<CapOptions>>();
-            var initializer = GetService<IStorageInitializer>();
-            _storage = new MySqlDataStorage(options, capOptions, initializer, serializer);
-        }
+            [Headers.MessageId] = msgId
+        };
+        var message = new Message(header, null);
 
-        [Fact]
-        public void StorageMessageTest()
+        var mdMessage = _storage.StoreMessageAsync("test.name", message);
+        Assert.NotNull(mdMessage);
+    }
+
+    [Fact]
+    public void StoreReceivedMessageTest()
+    {
+        var msgId = SnowflakeId.Default().NextId().ToString();
+        var header = new Dictionary<string, string>()
         {
-            var msgId = SnowflakeId.Default().NextId().ToString();
-            var header = new Dictionary<string, string>()
-            {
-                [Headers.MessageId] = msgId
-            };
-            var message = new Message(header, null);
+            [Headers.MessageId] = msgId
+        };
+        var message = new Message(header, null);
 
-            var mdMessage = _storage.StoreMessageAsync("test.name", message);
-            Assert.NotNull(mdMessage);
-        }
+        var mdMessage = _storage.StoreReceivedMessageAsync("test.name", "test.group", message);
+        Assert.NotNull(mdMessage);
+    }
 
-        [Fact]
-        public void StoreReceivedMessageTest()
+    [Fact]
+    public async Task StoreReceivedExceptionMessageTest()
+    {
+        await _storage.StoreReceivedExceptionMessageAsync("test.name", "test.group", "");
+    }
+
+    [Fact]
+    public async Task ChangePublishStateTest()
+    {
+        var msgId = SnowflakeId.Default().NextId().ToString();
+        var header = new Dictionary<string, string>()
         {
-            var msgId = SnowflakeId.Default().NextId().ToString();
-            var header = new Dictionary<string, string>()
-            {
-                [Headers.MessageId] = msgId
-            };
-            var message = new Message(header, null);
+            [Headers.MessageId] = msgId
+        };
+        var message = new Message(header, null);
 
-            var mdMessage = _storage.StoreReceivedMessageAsync("test.name", "test.group", message);
-            Assert.NotNull(mdMessage);
-        }
+        var mdMessage = await _storage.StoreMessageAsync("test.name", message);
 
-        [Fact]
-        public async Task StoreReceivedExceptionMessageTest()
+        await _storage.ChangePublishStateAsync(mdMessage, StatusName.Succeeded);
+    }
+
+    [Fact]
+    public async Task ChangeReceiveStateTest()
+    {
+        var msgId = SnowflakeId.Default().NextId().ToString();
+        var header = new Dictionary<string, string>()
         {
-            await _storage.StoreReceivedExceptionMessageAsync("test.name", "test.group", "");
-        }
+            [Headers.MessageId] = msgId
+        };
+        var message = new Message(header, null);
 
-        [Fact]
-        public async Task ChangePublishStateTest()
-        {
-            var msgId = SnowflakeId.Default().NextId().ToString();
-            var header = new Dictionary<string, string>()
-            {
-                [Headers.MessageId] = msgId
-            };
-            var message = new Message(header, null);
+        var mdMessage = await _storage.StoreMessageAsync("test.name", message);
 
-            var mdMessage = await _storage.StoreMessageAsync("test.name", message);
-
-            await _storage.ChangePublishStateAsync(mdMessage, StatusName.Succeeded);
-        }
-
-        [Fact]
-        public async Task ChangeReceiveStateTest()
-        {
-            var msgId = SnowflakeId.Default().NextId().ToString();
-            var header = new Dictionary<string, string>()
-            {
-                [Headers.MessageId] = msgId
-            };
-            var message = new Message(header, null);
-
-            var mdMessage = await _storage.StoreMessageAsync("test.name", message);
-
-            await _storage.ChangeReceiveStateAsync(mdMessage, StatusName.Succeeded);
-        }
+        await _storage.ChangeReceiveStateAsync(mdMessage, StatusName.Succeeded);
     }
 }

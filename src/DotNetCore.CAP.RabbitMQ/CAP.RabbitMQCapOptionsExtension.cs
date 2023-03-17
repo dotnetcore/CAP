@@ -7,25 +7,24 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+internal sealed class RabbitMQCapOptionsExtension : ICapOptionsExtension
 {
-    internal sealed class RabbitMQCapOptionsExtension : ICapOptionsExtension
+    private readonly Action<RabbitMQOptions> _configure;
+
+    public RabbitMQCapOptionsExtension(Action<RabbitMQOptions> configure)
     {
-        private readonly Action<RabbitMQOptions> _configure;
+        _configure = configure;
+    }
 
-        public RabbitMQCapOptionsExtension(Action<RabbitMQOptions> configure)
-        {
-            _configure = configure;
-        }
+    public void AddServices(IServiceCollection services)
+    {
+        services.AddSingleton(new CapMessageQueueMakerService("RabbitMQ"));
 
-        public void AddServices(IServiceCollection services)
-        {
-            services.AddSingleton(new CapMessageQueueMakerService("RabbitMQ"));
-
-            services.Configure(_configure);
-            services.AddSingleton<ITransport, RabbitMQTransport>();
-            services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
-            services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
-        }
+        services.Configure(_configure);
+        services.AddSingleton<ITransport, RabbitMQTransport>();
+        services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
+        services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
     }
 }

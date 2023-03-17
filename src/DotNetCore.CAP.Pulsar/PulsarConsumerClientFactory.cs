@@ -6,36 +6,35 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Pulsar.Client.Api;
 
-namespace DotNetCore.CAP.Pulsar
+namespace DotNetCore.CAP.Pulsar;
+
+internal sealed class PulsarConsumerClientFactory : IConsumerClientFactory
 {
-    internal sealed class PulsarConsumerClientFactory : IConsumerClientFactory
+    private readonly IConnectionFactory _connection;
+    private readonly IOptions<PulsarOptions> _pulsarOptions;
+
+    public PulsarConsumerClientFactory(IConnectionFactory connection, ILoggerFactory loggerFactory, IOptions<PulsarOptions> pulsarOptions)
     {
-        private readonly IConnectionFactory _connection;
-        private readonly IOptions<PulsarOptions> _pulsarOptions;
+        _connection = connection;
+        _pulsarOptions = pulsarOptions;
 
-        public PulsarConsumerClientFactory(IConnectionFactory connection, ILoggerFactory loggerFactory, IOptions<PulsarOptions> pulsarOptions)
+        if (_pulsarOptions.Value.EnableClientLog)
         {
-            _connection = connection;
-            _pulsarOptions = pulsarOptions;
-
-            if (_pulsarOptions.Value.EnableClientLog)
-            {
-                PulsarClient.Logger = loggerFactory.CreateLogger<PulsarClient>();
-            }
+            PulsarClient.Logger = loggerFactory.CreateLogger<PulsarClient>();
         }
+    }
 
-        public IConsumerClient Create(string groupId)
+    public IConsumerClient Create(string groupId)
+    {
+        try
         {
-            try
-            {
-                var client = _connection.RentClient();
-                var consumerClient = new PulsarConsumerClient(client, groupId, _pulsarOptions);
-                return consumerClient;
-            }
-            catch (System.Exception e)
-            {
-                throw new BrokerConnectionException(e);
-            }
+            var client = _connection.RentClient();
+            var consumerClient = new PulsarConsumerClient(client, groupId, _pulsarOptions);
+            return consumerClient;
+        }
+        catch (System.Exception e)
+        {
+            throw new BrokerConnectionException(e);
         }
     }
 }

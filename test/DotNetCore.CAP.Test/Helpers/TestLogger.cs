@@ -2,47 +2,46 @@
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace DotNetCore.CAP.Test.Helpers
+namespace DotNetCore.CAP.Test.Helpers;
+
+public class TestLogger : ILogger
 {
-    public class TestLogger : ILogger
+    private readonly ITestOutputHelper _outputHelper;
+
+    public TestLogger(ITestOutputHelper outputHelper, string categoryName)
     {
-        private readonly ITestOutputHelper _outputHelper;
+        _outputHelper = outputHelper;
+        CategoryName = categoryName;
+    }
 
-        public TestLogger(ITestOutputHelper outputHelper, string categoryName)
+    public string CategoryName { get; }
+
+    public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+    {
+        _outputHelper.WriteLine($"[{logLevel}] {formatter.Invoke(state, exception)}");
+    }
+
+    public bool IsEnabled(LogLevel logLevel)
+    {
+        return true;
+    }
+
+    public IDisposable BeginScope<TState>(TState state)
+    {
+        return new DisposableAction(state);
+    }
+
+    private class DisposableAction : IDisposable
+    {
+        private readonly object _state;
+
+        public DisposableAction(object state)
         {
-            _outputHelper = outputHelper;
-            CategoryName = categoryName;
+            _state = state;
         }
 
-        public string CategoryName { get; }
-
-        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
+        public void Dispose()
         {
-            _outputHelper.WriteLine($"[{logLevel}] {formatter.Invoke(state, exception)}");
-        }
-
-        public bool IsEnabled(LogLevel logLevel)
-        {
-            return true;
-        }
-
-        public IDisposable BeginScope<TState>(TState state)
-        {
-            return new DisposableAction(state);
-        }
-
-        private class DisposableAction : IDisposable
-        {
-            private readonly object _state;
-
-            public DisposableAction(object state)
-            {
-                _state = state;
-            }
-
-            public void Dispose()
-            {
-            }
         }
     }
 }

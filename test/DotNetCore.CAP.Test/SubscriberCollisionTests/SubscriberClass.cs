@@ -1,9 +1,8 @@
-﻿namespace DotNetCore.CAP.Test.SubscriberCollisionTests
+﻿namespace DotNetCore.CAP.Test.SubscriberCollisionTests;
+
+public class SubscriberClass
 {
-    public class SubscriberClass
+    public void TestSubscriber()
     {
-        public void TestSubscriber()
-        {
-        }
     }
 }

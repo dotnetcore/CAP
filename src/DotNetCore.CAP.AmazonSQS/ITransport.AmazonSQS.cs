@@ -15,153 +15,152 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.AmazonSQS
+namespace DotNetCore.CAP.AmazonSQS;
+
+internal sealed class AmazonSQSTransport : ITransport
 {
-    internal sealed class AmazonSQSTransport : ITransport
+    private readonly ILogger _logger;
+    private readonly IOptions<AmazonSQSOptions> _sqsOptions;
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private IAmazonSimpleNotificationService? _snsClient;
+    private IDictionary<string, string>? _topicArnMaps;
+
+    public AmazonSQSTransport(ILogger<AmazonSQSTransport> logger, IOptions<AmazonSQSOptions> sqsOptions)
     {
-        private readonly ILogger _logger;
-        private readonly IOptions<AmazonSQSOptions> _sqsOptions;
-        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
-        private IAmazonSimpleNotificationService? _snsClient;
-        private IDictionary<string, string>? _topicArnMaps;
+        _logger = logger;
+        _sqsOptions = sqsOptions;
+    }
 
-        public AmazonSQSTransport(ILogger<AmazonSQSTransport> logger, IOptions<AmazonSQSOptions> sqsOptions)
+    public BrokerAddress BrokerAddress => new BrokerAddress("AmazonSQS", string.Empty);
+
+    public async Task<OperateResult> SendAsync(TransportMessage message)
+    {
+        try
         {
-            _logger = logger;
-            _sqsOptions = sqsOptions;
-        }
+            await FetchExistingTopicArns();
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("AmazonSQS", string.Empty);
-
-        public async Task<OperateResult> SendAsync(TransportMessage message)
-        {
-            try
+            if (TryGetOrCreateTopicArn(message.GetName().NormalizeForAws(), out var arn))
             {
-                await FetchExistingTopicArns();
-
-                if (TryGetOrCreateTopicArn(message.GetName().NormalizeForAws(), out var arn))
+                string? bodyJson = null;
+                if (message.Body.Length > 0)
                 {
-                    string? bodyJson = null;
-                    if (message.Body.Length > 0)
-                    {
-                        bodyJson = Encoding.UTF8.GetString(message.Body.Span);
-                    }
-
-                    var attributes = message.Headers.Where(x => x.Value != null).ToDictionary(x => x.Key,
-                        x => new MessageAttributeValue
-                        {
-                            StringValue = x.Value,
-                            DataType = "String"
-                        });
-
-                    var request = new PublishRequest(arn, bodyJson)
-                    {
-                        MessageAttributes = attributes
-                    };
-
-                    await _snsClient!.PublishAsync(request);
-
-                    _logger.LogDebug($"SNS topic message [{message.GetName().NormalizeForAws()}] has been published.");
-                    return OperateResult.Success;
+                    bodyJson = Encoding.UTF8.GetString(message.Body.Span);
                 }
 
-                var errorMessage = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]";
-                _logger.LogWarning(errorMessage);
-
-                return OperateResult.Failed(
-                    new PublisherSentFailedException(errorMessage),
-                    new OperateError
+                var attributes = message.Headers.Where(x => x.Value != null).ToDictionary(x => x.Key,
+                    x => new MessageAttributeValue
                     {
-                        Code = "SNS",
-                        Description = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]"
+                        StringValue = x.Value,
+                        DataType = "String"
                     });
-            }
-            catch (Exception ex)
-            {
-                var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
-                var errors = new OperateError
+
+                var request = new PublishRequest(arn, bodyJson)
                 {
-                    Code = ex.HResult.ToString(),
-                    Description = ex.Message
+                    MessageAttributes = attributes
                 };
 
-                return OperateResult.Failed(wrapperEx, errors);
+                await _snsClient!.PublishAsync(request);
+
+                _logger.LogDebug($"SNS topic message [{message.GetName().NormalizeForAws()}] has been published.");
+                return OperateResult.Success;
             }
+
+            var errorMessage = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]";
+            _logger.LogWarning(errorMessage);
+
+            return OperateResult.Failed(
+                new PublisherSentFailedException(errorMessage),
+                new OperateError
+                {
+                    Code = "SNS",
+                    Description = $"Can't be found SNS topics for [{message.GetName().NormalizeForAws()}]"
+                });
+        }
+        catch (Exception ex)
+        {
+            var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
+            var errors = new OperateError
+            {
+                Code = ex.HResult.ToString(),
+                Description = ex.Message
+            };
+
+            return OperateResult.Failed(wrapperEx, errors);
+        }
+    }
+
+    private async Task FetchExistingTopicArns()
+    {
+        if (_topicArnMaps != null)
+        {
+            return;
         }
 
-        private async Task FetchExistingTopicArns()
+        await _semaphore.WaitAsync();
+
+        try
         {
-            if (_topicArnMaps != null)
+            if (string.IsNullOrWhiteSpace(_sqsOptions.Value.SNSServiceUrl))
             {
-                return;
+                _snsClient = _sqsOptions.Value.Credentials != null
+                    ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, _sqsOptions.Value.Region)
+                    : new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Region);
+            }
+            else
+            {
+                _snsClient = _sqsOptions.Value.Credentials != null
+                    ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl })
+                    : new AmazonSimpleNotificationServiceClient(new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl });
             }
 
-            await _semaphore.WaitAsync();
-
-            try
+            if (_topicArnMaps == null)
             {
-                if (string.IsNullOrWhiteSpace(_sqsOptions.Value.SNSServiceUrl))
-                {
-                    _snsClient = _sqsOptions.Value.Credentials != null
-                        ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, _sqsOptions.Value.Region)
-                        : new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Region);
-                }
-                else
-                {
-                    _snsClient = _sqsOptions.Value.Credentials != null
-                        ? new AmazonSimpleNotificationServiceClient(_sqsOptions.Value.Credentials, new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl })
-                        : new AmazonSimpleNotificationServiceClient(new AmazonSimpleNotificationServiceConfig() { ServiceURL = _sqsOptions.Value.SNSServiceUrl });
-                }
+                _topicArnMaps = new Dictionary<string, string>();
 
-                if (_topicArnMaps == null)
+                string? nextToken = null;
+                do
                 {
-                    _topicArnMaps = new Dictionary<string, string>();
-
-                    string? nextToken = null;
-                    do
+                    var topics = nextToken == null
+                        ? await _snsClient.ListTopicsAsync()
+                        : await _snsClient.ListTopicsAsync(nextToken);
+                    topics.Topics.ForEach(x =>
                     {
-                        var topics = nextToken == null
-                            ? await _snsClient.ListTopicsAsync()
-                            : await _snsClient.ListTopicsAsync(nextToken);
-                        topics.Topics.ForEach(x =>
-                        {
-                            var name = x.TopicArn.Split(':').Last();
-                            _topicArnMaps.Add(name, x.TopicArn);
-                        });
-                        nextToken = topics.NextToken;
-                    }
-                    while (!string.IsNullOrEmpty(nextToken));
+                        var name = x.TopicArn.Split(':').Last();
+                        _topicArnMaps.Add(name, x.TopicArn);
+                    });
+                    nextToken = topics.NextToken;
                 }
-            }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Init topics from aws sns error!");
-            }
-            finally
-            {
-                _semaphore.Release();
+                while (!string.IsNullOrEmpty(nextToken));
             }
         }
-
-        private bool TryGetOrCreateTopicArn(string topicName, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? topicArn)
+        catch (Exception e)
         {
-            topicArn = null;
-            if (_topicArnMaps!.TryGetValue(topicName, out topicArn))
-            {
-                return true;
-            }
+            _logger.LogError(e, "Init topics from aws sns error!");
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
+    }
 
-            var response = _snsClient!.CreateTopicAsync(topicName).GetAwaiter().GetResult();
-
-            if (string.IsNullOrEmpty(response.TopicArn))
-            {
-                return false;
-            }
-
-            topicArn = response.TopicArn;
-
-            _topicArnMaps.Add(topicName, topicArn);
+    private bool TryGetOrCreateTopicArn(string topicName, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out string? topicArn)
+    {
+        topicArn = null;
+        if (_topicArnMaps!.TryGetValue(topicName, out topicArn))
+        {
             return true;
         }
+
+        var response = _snsClient!.CreateTopicAsync(topicName).GetAwaiter().GetResult();
+
+        if (string.IsNullOrEmpty(response.TopicArn))
+        {
+            return false;
+        }
+
+        topicArn = response.TopicArn;
+
+        _topicArnMaps.Add(topicName, topicArn);
+        return true;
     }
 }

@@ -5,36 +5,35 @@ using System;
 using DotNetCore.CAP;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class CapOptionsExtensions
 {
-    public static class CapOptionsExtensions
+    /// <summary>
+    /// Configuration to use kafka in CAP.
+    /// </summary>
+    /// <param name="options">CAP configuration options</param>
+    /// <param name="bootstrapServers">Kafka bootstrap server urls.</param>
+    public static CapOptions UseKafka(this CapOptions options, string bootstrapServers)
     {
-        /// <summary>
-        /// Configuration to use kafka in CAP.
-        /// </summary>
-        /// <param name="options">CAP configuration options</param>
-        /// <param name="bootstrapServers">Kafka bootstrap server urls.</param>
-        public static CapOptions UseKafka(this CapOptions options, string bootstrapServers)
+        return options.UseKafka(opt => { opt.Servers = bootstrapServers; });
+    }
+
+    /// <summary>
+    /// Configuration to use kafka in CAP.
+    /// </summary>
+    /// <param name="options">CAP configuration options</param>
+    /// <param name="configure">Provides programmatic configuration for the kafka .</param>
+    /// <returns></returns>
+    public static CapOptions UseKafka(this CapOptions options, Action<KafkaOptions> configure)
+    {
+        if (configure == null)
         {
-            return options.UseKafka(opt => { opt.Servers = bootstrapServers; });
+            throw new ArgumentNullException(nameof(configure));
         }
 
-        /// <summary>
-        /// Configuration to use kafka in CAP.
-        /// </summary>
-        /// <param name="options">CAP configuration options</param>
-        /// <param name="configure">Provides programmatic configuration for the kafka .</param>
-        /// <returns></returns>
-        public static CapOptions UseKafka(this CapOptions options, Action<KafkaOptions> configure)
-        {
-            if (configure == null)
-            {
-                throw new ArgumentNullException(nameof(configure));
-            }
+        options.RegisterExtension(new KafkaCapOptionsExtension(configure));
 
-            options.RegisterExtension(new KafkaCapOptionsExtension(configure));
-
-            return options;
-        }
+        return options;
     }
 }

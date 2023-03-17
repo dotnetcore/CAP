@@ -5,45 +5,44 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace Sample.Dashboard.Auth.Controllers
+namespace Sample.Dashboard.Auth.Controllers;
+
+[Authorize]
+[Route("api/[controller]")]
+public class ValuesController : Controller
 {
-    [Authorize]
-    [Route("api/[controller]")]
-    public class ValuesController : Controller
+    private readonly ICapPublisher _capBus;
+    private readonly ILogger<ValuesController> _logger;
+    private const string MyTopic = "sample.dashboard.auth";
+
+    public ValuesController(ICapPublisher capPublisher, ILogger<ValuesController> logger)
     {
-        private readonly ICapPublisher _capBus;
-        private readonly ILogger<ValuesController> _logger;
-        private const string MyTopic = "sample.dashboard.auth";
+        _capBus = capPublisher;
+        _logger = logger;
+    }
 
-        public ValuesController(ICapPublisher capPublisher, ILogger<ValuesController> logger)
+    [Route("publish")]
+    public async Task<IActionResult> Publish()
+    {
+        await _capBus.PublishAsync(MyTopic, new Person()
         {
-            _capBus = capPublisher;
-            _logger = logger;
-        }
+            Id = new Random().Next(1, 100),
+            Name = "Bar"
+        });
 
-        [Route("publish")]
-        public async Task<IActionResult> Publish()
-        {
-            await _capBus.PublishAsync(MyTopic, new Person()
-            {
-                Id = new Random().Next(1, 100),
-                Name = "Bar"
-            });
+        return Ok();
+    }
 
-            return Ok();
-        }
+    [NonAction]
+    [CapSubscribe(MyTopic)]
+    public void Subscribe(Person p, [FromCap] CapHeader header)
+    {
+        _logger.LogInformation("Subscribe Invoked: " + MyTopic + p);
+    }
 
-        [NonAction]
-        [CapSubscribe(MyTopic)]
-        public void Subscribe(Person p, [FromCap] CapHeader header)
-        {
-            _logger.LogInformation("Subscribe Invoked: " + MyTopic + p);
-        }
-
-        public class Person
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-        }
+    public class Person
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
     }
 }

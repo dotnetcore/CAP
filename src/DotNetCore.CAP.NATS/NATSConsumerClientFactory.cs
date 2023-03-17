@@ -4,29 +4,28 @@
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.NATS
+namespace DotNetCore.CAP.NATS;
+
+internal sealed class NATSConsumerClientFactory : IConsumerClientFactory
 {
-    internal sealed class NATSConsumerClientFactory : IConsumerClientFactory
+    private readonly IOptions<NATSOptions> _natsOptions;
+
+    public NATSConsumerClientFactory(IOptions<NATSOptions> natsOptions)
     {
-        private readonly IOptions<NATSOptions> _natsOptions;
+        _natsOptions = natsOptions;
+    }
 
-        public NATSConsumerClientFactory(IOptions<NATSOptions> natsOptions)
+    public IConsumerClient Create(string groupId)
+    {
+        try
         {
-            _natsOptions = natsOptions;
+            var client = new NATSConsumerClient(groupId, _natsOptions);
+            client.Connect();
+            return client;
         }
-
-        public IConsumerClient Create(string groupId)
+        catch (System.Exception e)
         {
-            try
-            {
-                var client = new NATSConsumerClient(groupId, _natsOptions);
-                client.Connect();
-                return client;
-            }
-            catch (System.Exception e)
-            {
-                throw new BrokerConnectionException(e);
-            }
+            throw new BrokerConnectionException(e);
         }
     }
 }

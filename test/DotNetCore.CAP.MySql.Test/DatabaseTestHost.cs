@@ -2,65 +2,64 @@ using System.Threading;
 using Dapper;
 using DotNetCore.CAP.Persistence;
 
-namespace DotNetCore.CAP.MySql.Test
+namespace DotNetCore.CAP.MySql.Test;
+
+public abstract class DatabaseTestHost : TestHost
 {
-    public abstract class DatabaseTestHost : TestHost
+    private static bool _sqlObjectInstalled;
+    public static object _lock = new object();
+
+    protected override void PostBuildServices()
     {
-        private static bool _sqlObjectInstalled;
-        public static object _lock = new object();
-
-        protected override void PostBuildServices()
+        base.PostBuildServices();
+        lock (_lock)
         {
-            base.PostBuildServices();
-            lock (_lock)
+            if (!_sqlObjectInstalled)
             {
-                if (!_sqlObjectInstalled)
-                {
-                    InitializeDatabase();
-                }
+                InitializeDatabase();
             }
         }
+    }
 
-        public override void Dispose()
+    public override void Dispose()
+    {
+        DeleteAllData();
+        base.Dispose();
+    }
+
+    private void InitializeDatabase()
+    {
+        using (CreateScope())
         {
-            DeleteAllData();
-            base.Dispose();
+            var storage = GetService<IStorageInitializer>();
+            var token = new CancellationTokenSource().Token;
+            CreateDatabase();
+            storage.InitializeAsync(token).GetAwaiter().GetResult();
+            _sqlObjectInstalled = true;
         }
+    }
 
-        private void InitializeDatabase()
+    private void CreateDatabase()
+    {
+        var masterConn = ConnectionUtil.GetMasterConnectionString();
+        var databaseName = ConnectionUtil.GetDatabaseName();
+        using (var connection = ConnectionUtil.CreateConnection(masterConn))
         {
-            using (CreateScope())
-            {
-                var storage = GetService<IStorageInitializer>();
-                var token = new CancellationTokenSource().Token;
-                CreateDatabase();
-                storage.InitializeAsync(token).GetAwaiter().GetResult();
-                _sqlObjectInstalled = true;
-            }
-        }
-
-        private void CreateDatabase()
-        {
-            var masterConn = ConnectionUtil.GetMasterConnectionString();
-            var databaseName = ConnectionUtil.GetDatabaseName();
-            using (var connection = ConnectionUtil.CreateConnection(masterConn))
-            {
-                connection.Execute($@"
+            connection.Execute($@"
 DROP DATABASE IF EXISTS `{databaseName}`;
 CREATE DATABASE `{databaseName}`;");
-            }
         }
+    }
 
-        private void DeleteAllData()
+    private void DeleteAllData()
+    {
+        var conn = ConnectionUtil.GetConnectionString();
+
+        using (var connection = ConnectionUtil.CreateConnection(conn))
         {
-            var conn = ConnectionUtil.GetConnectionString();
-
-            using (var connection = ConnectionUtil.CreateConnection(conn))
-            {
-                connection.Execute($@"
+            connection.Execute($@"
 TRUNCATE TABLE `cap.published`;
 TRUNCATE TABLE `cap.received`;");
-            }
         }
     }
 }

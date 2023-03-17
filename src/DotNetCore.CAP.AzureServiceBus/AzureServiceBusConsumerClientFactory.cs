@@ -5,34 +5,33 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.AzureServiceBus
+namespace DotNetCore.CAP.AzureServiceBus;
+
+internal sealed class AzureServiceBusConsumerClientFactory : IConsumerClientFactory
 {
-    internal sealed class AzureServiceBusConsumerClientFactory : IConsumerClientFactory
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly IOptions<AzureServiceBusOptions> _asbOptions;
+
+    public AzureServiceBusConsumerClientFactory(
+        ILoggerFactory loggerFactory,
+        IOptions<AzureServiceBusOptions> asbOptions)
     {
-        private readonly ILoggerFactory _loggerFactory;
-        private readonly IOptions<AzureServiceBusOptions> _asbOptions;
+        _loggerFactory = loggerFactory;
+        _asbOptions = asbOptions;
+    }
 
-        public AzureServiceBusConsumerClientFactory(
-            ILoggerFactory loggerFactory,
-            IOptions<AzureServiceBusOptions> asbOptions)
+    public IConsumerClient Create(string groupId)
+    {
+        try
         {
-            _loggerFactory = loggerFactory;
-            _asbOptions = asbOptions;
+            var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
+            var client = new AzureServiceBusConsumerClient(logger, groupId, _asbOptions);
+            client.ConnectAsync().GetAwaiter().GetResult();
+            return client;
         }
-
-        public IConsumerClient Create(string groupId)
+        catch (System.Exception e)
         {
-            try
-            {
-                var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
-                var client = new AzureServiceBusConsumerClient(logger, groupId, _asbOptions);
-                client.ConnectAsync().GetAwaiter().GetResult();
-                return client;
-            }
-            catch (System.Exception e)
-            {
-                throw new BrokerConnectionException(e);
-            }
+            throw new BrokerConnectionException(e);
         }
     }
 }

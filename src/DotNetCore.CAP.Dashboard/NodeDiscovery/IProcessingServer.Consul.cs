@@ -5,24 +5,23 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 
-namespace DotNetCore.CAP.Dashboard.NodeDiscovery
+namespace DotNetCore.CAP.Dashboard.NodeDiscovery;
+
+internal class ConsulProcessingNodeServer : IProcessingServer
 {
-    internal class ConsulProcessingNodeServer : IProcessingServer
+    private readonly INodeDiscoveryProvider _discoveryProvider;
+
+    public ConsulProcessingNodeServer(INodeDiscoveryProvider discoveryProvider)
     {
-        private readonly INodeDiscoveryProvider _discoveryProvider;
+        _discoveryProvider = discoveryProvider;
+    }
 
-        public ConsulProcessingNodeServer(INodeDiscoveryProvider discoveryProvider)
-        {
-            _discoveryProvider = discoveryProvider;
-        }
+    public async Task Start(CancellationToken stoppingToken)
+    {
+        await _discoveryProvider.RegisterNode(stoppingToken);
+    }
 
-        public async Task Start(CancellationToken stoppingToken)
-        {
-            await _discoveryProvider.RegisterNode(stoppingToken);
-        }
-
-        public void Dispose()
-        {
-        }
+    public void Dispose()
+    {
     }
 }

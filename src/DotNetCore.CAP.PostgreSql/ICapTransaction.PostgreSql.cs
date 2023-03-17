@@ -14,186 +14,185 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+public class PostgreSqlCapTransaction : CapTransactionBase
 {
-    public class PostgreSqlCapTransaction : CapTransactionBase
+    public PostgreSqlCapTransaction(IDispatcher dispatcher) : base(dispatcher)
     {
-        public PostgreSqlCapTransaction(IDispatcher dispatcher) : base(dispatcher)
+    }
+
+    public override void Commit()
+    {
+        Debug.Assert(DbTransaction != null);
+
+        switch (DbTransaction)
         {
+            case IDbTransaction dbTransaction:
+                dbTransaction.Commit();
+                break;
+            case IDbContextTransaction dbContextTransaction:
+                dbContextTransaction.Commit();
+                break;
         }
 
-        public override void Commit()
+        Flush();
+    }
+
+    public override async Task CommitAsync(CancellationToken cancellationToken = default)
+    {
+        Debug.Assert(DbTransaction != null);
+
+        switch (DbTransaction)
         {
-            Debug.Assert(DbTransaction != null);
-
-            switch (DbTransaction)
-            {
-                case IDbTransaction dbTransaction:
-                    dbTransaction.Commit();
-                    break;
-                case IDbContextTransaction dbContextTransaction:
-                    dbContextTransaction.Commit();
-                    break;
-            }
-
-            Flush();
+            case DbTransaction dbTransaction:
+                await dbTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+                break;
+            case IDbContextTransaction dbContextTransaction:
+                await dbContextTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
+                break;
         }
 
-        public override async Task CommitAsync(CancellationToken cancellationToken = default)
+        Flush();
+    }
+
+    public override void Rollback()
+    {
+        Debug.Assert(DbTransaction != null);
+
+        switch (DbTransaction)
         {
-            Debug.Assert(DbTransaction != null);
-
-            switch (DbTransaction)
-            {
-                case DbTransaction dbTransaction:
-                    await dbTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-                    break;
-                case IDbContextTransaction dbContextTransaction:
-                    await dbContextTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
-                    break;
-            }
-
-            Flush();
-        }
-
-        public override void Rollback()
-        {
-            Debug.Assert(DbTransaction != null);
-
-            switch (DbTransaction)
-            {
-                case IDbTransaction dbTransaction:
-                    dbTransaction.Rollback();
-                    break;
-                case IDbContextTransaction dbContextTransaction:
-                    dbContextTransaction.Rollback();
-                    break;
-            }
-        }
-
-        public override async Task RollbackAsync(CancellationToken cancellationToken = default)
-        {
-            Debug.Assert(DbTransaction != null);
-
-            switch (DbTransaction)
-            {
-                case DbTransaction dbTransaction:
-                    await dbTransaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
-                    break;
-                case IDbContextTransaction dbContextTransaction:
-                    await dbContextTransaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
-                    break;
-            }
-        }
-
-        public override void Dispose()
-        {
-            (DbTransaction as IDisposable)?.Dispose();
-            DbTransaction = null;
+            case IDbTransaction dbTransaction:
+                dbTransaction.Rollback();
+                break;
+            case IDbContextTransaction dbContextTransaction:
+                dbContextTransaction.Rollback();
+                break;
         }
     }
 
-    public static class CapTransactionExtensions
+    public override async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
-        public static ICapTransaction Begin(this ICapTransaction transaction,
-            IDbTransaction dbTransaction, bool autoCommit = false)
+        Debug.Assert(DbTransaction != null);
+
+        switch (DbTransaction)
         {
-            transaction.DbTransaction = dbTransaction;
-            transaction.AutoCommit = autoCommit;
-
-            return transaction;
+            case DbTransaction dbTransaction:
+                await dbTransaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                break;
+            case IDbContextTransaction dbContextTransaction:
+                await dbContextTransaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
+                break;
         }
+    }
 
-        public static ICapTransaction Begin(this ICapTransaction transaction,
-            IDbContextTransaction dbTransaction, bool autoCommit = false)
-        {
-            transaction.DbTransaction = dbTransaction;
-            transaction.AutoCommit = autoCommit;
+    public override void Dispose()
+    {
+        (DbTransaction as IDisposable)?.Dispose();
+        DbTransaction = null;
+    }
+}
 
-            return transaction;
-        }
+public static class CapTransactionExtensions
+{
+    public static ICapTransaction Begin(this ICapTransaction transaction,
+        IDbTransaction dbTransaction, bool autoCommit = false)
+    {
+        transaction.DbTransaction = dbTransaction;
+        transaction.AutoCommit = autoCommit;
 
-        /// <summary>
-        /// Start the CAP transaction
-        /// </summary>
-        /// <param name="dbConnection">The <see cref="IDbConnection" />.</param>
-        /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
-        /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-        /// <returns>The <see cref="ICapTransaction" /> object.</returns>
-        public static ICapTransaction BeginTransaction(this IDbConnection dbConnection,
-            ICapPublisher publisher, bool autoCommit = false)
-        {
-            if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
+        return transaction;
+    }
 
-            var dbTransaction = dbConnection.BeginTransaction();
-            publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
-            return publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
-        }
+    public static ICapTransaction Begin(this ICapTransaction transaction,
+        IDbContextTransaction dbTransaction, bool autoCommit = false)
+    {
+        transaction.DbTransaction = dbTransaction;
+        transaction.AutoCommit = autoCommit;
 
-        /// <summary>
-        /// Start the CAP transaction
-        /// </summary>
-        /// <param name="database">The <see cref="DatabaseFacade" />.</param>
-        /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
-        /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-        /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
-        public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
-            ICapPublisher publisher, bool autoCommit = false)
-        {
-            var trans = database.BeginTransaction();
-            publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
-            var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
-            return new CapEFDbTransaction(capTrans);
-        }
+        return transaction;
+    }
 
-        /// <summary>
-        /// Start the CAP transaction
-        /// </summary>
-        /// <param name="database">The <see cref="DatabaseFacade" />.</param>
-        /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
-        /// <param name="isolationLevel">The <see cref="IsolationLevel" /> to use</param>
-        /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-        /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
-        public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
-            IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
-        {
-            var trans = database.BeginTransaction(isolationLevel);
-            publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
-            var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
-            return new CapEFDbTransaction(capTrans);
-        }
+    /// <summary>
+    /// Start the CAP transaction
+    /// </summary>
+    /// <param name="dbConnection">The <see cref="IDbConnection" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+    /// <returns>The <see cref="ICapTransaction" /> object.</returns>
+    public static ICapTransaction BeginTransaction(this IDbConnection dbConnection,
+        ICapPublisher publisher, bool autoCommit = false)
+    {
+        if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
+
+        var dbTransaction = dbConnection.BeginTransaction();
+        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
+        return publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
+    }
+
+    /// <summary>
+    /// Start the CAP transaction
+    /// </summary>
+    /// <param name="database">The <see cref="DatabaseFacade" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+    /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
+    public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
+        ICapPublisher publisher, bool autoCommit = false)
+    {
+        var trans = database.BeginTransaction();
+        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
+        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+        return new CapEFDbTransaction(capTrans);
+    }
+
+    /// <summary>
+    /// Start the CAP transaction
+    /// </summary>
+    /// <param name="database">The <see cref="DatabaseFacade" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    /// <param name="isolationLevel">The <see cref="IsolationLevel" /> to use</param>
+    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+    /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
+    public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
+        IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
+    {
+        var trans = database.BeginTransaction(isolationLevel);
+        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
+        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+        return new CapEFDbTransaction(capTrans);
+    }
         
-        /// <summary>
-        /// Start the CAP transaction async
-        /// </summary>
-        /// <param name="database">The <see cref="DatabaseFacade" />.</param>
-        /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
-        /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-        /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
-        public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
-            ICapPublisher publisher, bool autoCommit = false)
-        {
-            var trans = await database.BeginTransactionAsync();
-            publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
-            var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
-            return new CapEFDbTransaction(capTrans);
-        }
+    /// <summary>
+    /// Start the CAP transaction async
+    /// </summary>
+    /// <param name="database">The <see cref="DatabaseFacade" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+    /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
+    public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
+        ICapPublisher publisher, bool autoCommit = false)
+    {
+        var trans = await database.BeginTransactionAsync();
+        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
+        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+        return new CapEFDbTransaction(capTrans);
+    }
         
-        /// <summary>
-        /// Start the CAP transaction async
-        /// </summary>
-        /// <param name="database">The <see cref="DatabaseFacade" />.</param>
-        /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
-        /// <param name="isolationLevel">The <see cref="IsolationLevel" /> to use</param>
-        /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-        /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
-        public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
-            IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
-        {
-            var trans = await database.BeginTransactionAsync(isolationLevel);
-            publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
-            var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
-            return new CapEFDbTransaction(capTrans);
-        }
+    /// <summary>
+    /// Start the CAP transaction async
+    /// </summary>
+    /// <param name="database">The <see cref="DatabaseFacade" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    /// <param name="isolationLevel">The <see cref="IsolationLevel" /> to use</param>
+    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+    /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
+    public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
+        IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
+    {
+        var trans = await database.BeginTransactionAsync(isolationLevel);
+        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
+        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+        return new CapEFDbTransaction(capTrans);
     }
 }

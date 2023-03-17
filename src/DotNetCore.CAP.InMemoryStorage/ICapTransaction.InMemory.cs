@@ -7,36 +7,35 @@ using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Transport;
 
-namespace DotNetCore.CAP.InMemoryStorage
+namespace DotNetCore.CAP.InMemoryStorage;
+
+internal class InMemoryCapTransaction : CapTransactionBase
 {
-    internal class InMemoryCapTransaction : CapTransactionBase
+    public InMemoryCapTransaction(IDispatcher dispatcher) : base(dispatcher)
     {
-        public InMemoryCapTransaction(IDispatcher dispatcher) : base(dispatcher)
-        {
-        }
+    }
 
-        public override void Commit()
-        { 
-            Flush();
-        }
+    public override void Commit()
+    { 
+        Flush();
+    }
 
-        public override Task CommitAsync(CancellationToken cancellationToken = default)
-        {
-            return Task.CompletedTask;
-        }
+    public override Task CommitAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
 
-        public override void Rollback()
-        {
-            //Ignore
-        }
+    public override void Rollback()
+    {
+        //Ignore
+    }
 
-        public override Task RollbackAsync(CancellationToken cancellationToken = default)
-        {
-            return Task.CompletedTask;
-        }
+    public override Task RollbackAsync(CancellationToken cancellationToken = default)
+    {
+        return Task.CompletedTask;
+    }
 
-        public override void Dispose()
-        {
-        }
+    public override void Dispose()
+    {
     }
 }

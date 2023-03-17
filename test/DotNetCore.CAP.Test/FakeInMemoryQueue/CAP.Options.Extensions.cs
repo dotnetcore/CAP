@@ -1,11 +1,10 @@
-﻿namespace DotNetCore.CAP.Test.FakeInMemoryQueue
+﻿namespace DotNetCore.CAP.Test.FakeInMemoryQueue;
+
+public static class CapOptionsExtensions
 {
-    public static class CapOptionsExtensions
+    public static CapOptions UseFakeTransport(this CapOptions options)
     {
-        public static CapOptions UseFakeTransport(this CapOptions options)
-        {
-            options.RegisterExtension(new FakeQueueOptionsExtension());
-            return options;
-        }
+        options.RegisterExtension(new FakeQueueOptionsExtension());
+        return options;
     }
 }

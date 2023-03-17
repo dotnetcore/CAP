@@ -3,13 +3,12 @@
 
 using System.Net.Http;
 
-namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
+namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+
+public interface IHttpClientBuilder
 {
-    public interface IHttpClientBuilder
-    {
-        /// <summary>
-        /// Creates the <see cref="HttpClient" />
-        /// </summary>
-        IHttpClient Create();
-    }
+    /// <summary>
+    /// Creates the <see cref="HttpClient" />
+    /// </summary>
+    IHttpClient Create();
 }

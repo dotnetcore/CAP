@@ -2,29 +2,28 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Sample.AmazonSQS.InMemory
+namespace Sample.AmazonSQS.InMemory;
+
+public class Startup
 {
-    public class Startup
+    public void ConfigureServices(IServiceCollection services)
     {
-        public void ConfigureServices(IServiceCollection services)
+        services.AddCap(x =>
         {
-            services.AddCap(x =>
-            {
-                x.UseInMemoryStorage();
-                x.UseAmazonSQS(RegionEndpoint.CNNorthWest1);
-                x.UseDashboard();
-            });
+            x.UseInMemoryStorage();
+            x.UseAmazonSQS(RegionEndpoint.CNNorthWest1);
+            x.UseDashboard();
+        });
 
-            services.AddControllers();
-        }
+        services.AddControllers();
+    }
 
-        public void Configure(IApplicationBuilder app)
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseRouting();
+        app.UseEndpoints(endpoints =>
         {
-            app.UseRouting();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-        }
+            endpoints.MapControllers();
+        });
     }
 }

@@ -1,14 +1,13 @@
 ﻿using System;
 using DotNetCore.CAP;
 
-namespace Sample.ConsoleApp
+namespace Sample.ConsoleApp;
+
+public class EventSubscriber : ICapSubscribe
 {
-    public class EventSubscriber : ICapSubscribe
+    [CapSubscribe("sample.console.showtime")]
+    public void ShowTime(DateTime date)
     {
-        [CapSubscribe("sample.console.showtime")]
-        public void ShowTime(DateTime date)
-        {
-            Console.WriteLine(date);
-        }
+        Console.WriteLine(date);
     }
 }

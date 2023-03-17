@@ -2,25 +2,24 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 
-namespace DotNetCore.CAP.Test.Helpers
+namespace DotNetCore.CAP.Test.Helpers;
+
+public class TestBootstrapService : IHostedService
 {
-    public class TestBootstrapService : IHostedService
+    private readonly IBootstrapper _bootstrapper;
+
+    public TestBootstrapService(IBootstrapper bootstrapper)
     {
-        private readonly IBootstrapper _bootstrapper;
+        _bootstrapper = bootstrapper;
+    }
 
-        public TestBootstrapService(IBootstrapper bootstrapper)
-        {
-            _bootstrapper = bootstrapper;
-        }
+    public async Task StartAsync(CancellationToken cancellationToken)
+    {
+        await _bootstrapper.BootstrapAsync();
+    }
 
-        public async Task StartAsync(CancellationToken cancellationToken)
-        {
-            await _bootstrapper.BootstrapAsync();
-        }
-
-        public Task StopAsync(CancellationToken cancellationToken)
-        {
-            return Task.CompletedTask;
-        }
+    public Task StopAsync(CancellationToken cancellationToken)
+    {
+        return Task.CompletedTask;
     }
 }

@@ -7,26 +7,25 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+internal sealed class KafkaCapOptionsExtension : ICapOptionsExtension
 {
-    internal sealed class KafkaCapOptionsExtension : ICapOptionsExtension
+    private readonly Action<KafkaOptions> _configure;
+
+    public KafkaCapOptionsExtension(Action<KafkaOptions> configure)
     {
-        private readonly Action<KafkaOptions> _configure;
+        _configure = configure;
+    }
 
-        public KafkaCapOptionsExtension(Action<KafkaOptions> configure)
-        {
-            _configure = configure;
-        }
+    public void AddServices(IServiceCollection services)
+    {
+        services.AddSingleton(new CapMessageQueueMakerService("Kafka"));
 
-        public void AddServices(IServiceCollection services)
-        {
-            services.AddSingleton(new CapMessageQueueMakerService("Kafka"));
+        services.Configure(_configure);
 
-            services.Configure(_configure);
-
-            services.AddSingleton<ITransport, KafkaTransport>();
-            services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
-            services.AddSingleton<IConnectionPool, ConnectionPool>();
-        }
+        services.AddSingleton<ITransport, KafkaTransport>();
+        services.AddSingleton<IConsumerClientFactory, KafkaConsumerClientFactory>();
+        services.AddSingleton<IConnectionPool, ConnectionPool>();
     }
 }

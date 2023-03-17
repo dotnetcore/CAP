@@ -10,61 +10,60 @@ using Microsoft.Extensions.Logging;
 using NATS.Client;
 using NATS.Client.JetStream;
 
-namespace DotNetCore.CAP.NATS
+namespace DotNetCore.CAP.NATS;
+
+internal class NATSTransport : ITransport
 {
-    internal class NATSTransport : ITransport
+    private readonly IConnectionPool _connectionPool;
+    private readonly ILogger _logger;
+    private readonly JetStreamOptions _jetStreamOptions;
+
+    public NATSTransport(ILogger<NATSTransport> logger, IConnectionPool connectionPool)
     {
-        private readonly IConnectionPool _connectionPool;
-        private readonly ILogger _logger;
-        private readonly JetStreamOptions _jetStreamOptions;
+        _logger = logger;
+        _connectionPool = connectionPool;
 
-        public NATSTransport(ILogger<NATSTransport> logger, IConnectionPool connectionPool)
+        _jetStreamOptions = JetStreamOptions.Builder().WithPublishNoAck(false).WithRequestTimeout(3000).Build();
+    }
+
+    public BrokerAddress BrokerAddress => new BrokerAddress("NATS", _connectionPool.ServersAddress);
+
+    public async Task<OperateResult> SendAsync(TransportMessage message)
+    {
+        var connection = _connectionPool.RentConnection();
+
+        try
         {
-            _logger = logger;
-            _connectionPool = connectionPool;
-
-            _jetStreamOptions = JetStreamOptions.Builder().WithPublishNoAck(false).WithRequestTimeout(3000).Build();
-        }
-
-        public BrokerAddress BrokerAddress => new BrokerAddress("NATS", _connectionPool.ServersAddress);
-
-        public async Task<OperateResult> SendAsync(TransportMessage message)
-        {
-            var connection = _connectionPool.RentConnection();
-
-            try
+            var msg = new Msg(message.GetName(), message.Body.ToArray());
+            foreach (var header in message.Headers)
             {
-                var msg = new Msg(message.GetName(), message.Body.ToArray());
-                foreach (var header in message.Headers)
-                {
-                    msg.Header[header.Key] = header.Value;
-                }
+                msg.Header[header.Key] = header.Value;
+            }
 
-                var js = connection.CreateJetStreamContext(_jetStreamOptions);
+            var js = connection.CreateJetStreamContext(_jetStreamOptions);
 
-                var builder = PublishOptions.Builder().WithMessageId(message.GetId());
+            var builder = PublishOptions.Builder().WithMessageId(message.GetId());
 
-                var resp = await js.PublishAsync(msg, builder.Build());
+            var resp = await js.PublishAsync(msg, builder.Build());
 
-                if (resp.Seq > 0)
-                {
-                    _logger.LogDebug($"NATS stream message [{message.GetName()}] has been published.");
+            if (resp.Seq > 0)
+            {
+                _logger.LogDebug($"NATS stream message [{message.GetName()}] has been published.");
 
-                    return OperateResult.Success;
-                }
+                return OperateResult.Success;
+            }
                 
-                throw new PublisherSentFailedException("NATS message send failed, no consumer reply!");
-            }
-            catch (Exception ex)
-            {
-                var warpEx = new PublisherSentFailedException(ex.Message, ex);
+            throw new PublisherSentFailedException("NATS message send failed, no consumer reply!");
+        }
+        catch (Exception ex)
+        {
+            var warpEx = new PublisherSentFailedException(ex.Message, ex);
 
-                return OperateResult.Failed(warpEx);
-            }
-            finally
-            {
-                _connectionPool.Return(connection);
-            }
+            return OperateResult.Failed(warpEx);
+        }
+        finally
+        {
+            _connectionPool.Return(connection);
         }
     }
 }

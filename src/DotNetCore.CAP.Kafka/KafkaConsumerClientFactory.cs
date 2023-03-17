@@ -4,27 +4,26 @@
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Kafka;
+
+public class KafkaConsumerClientFactory : IConsumerClientFactory
 {
-    public class KafkaConsumerClientFactory : IConsumerClientFactory
+    private readonly IOptions<KafkaOptions> _kafkaOptions;
+
+    public KafkaConsumerClientFactory(IOptions<KafkaOptions> kafkaOptions)
     {
-        private readonly IOptions<KafkaOptions> _kafkaOptions;
+        _kafkaOptions = kafkaOptions;
+    }
 
-        public KafkaConsumerClientFactory(IOptions<KafkaOptions> kafkaOptions)
+    public virtual IConsumerClient Create(string groupId)
+    {
+        try
         {
-            _kafkaOptions = kafkaOptions;
+            return new KafkaConsumerClient(groupId, _kafkaOptions);
         }
-
-        public virtual IConsumerClient Create(string groupId)
+        catch (System.Exception e)
         {
-            try
-            {
-                return new KafkaConsumerClient(groupId, _kafkaOptions);
-            }
-            catch (System.Exception e)
-            {
-                throw new BrokerConnectionException(e);
-            }
+            throw new BrokerConnectionException(e);
         }
     }
 }

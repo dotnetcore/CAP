@@ -1,4 +1,3 @@
-namespace Sample.RabbitMQ.SqlServer.TypedConsumers
-{
-    public abstract class QueueHandler { }
-}
+namespace Sample.RabbitMQ.SqlServer.TypedConsumers;
+
+public abstract class QueueHandler { }

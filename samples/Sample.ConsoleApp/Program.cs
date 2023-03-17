@@ -3,35 +3,34 @@ using DotNetCore.CAP;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace Sample.ConsoleApp
+namespace Sample.ConsoleApp;
+
+public class Program
 {
-    public class Program
+    public static void Main(string[] args)
     {
-        public static void Main(string[] args)
+        var container = new ServiceCollection();
+
+        container.AddLogging(x => x.AddConsole());
+        container.AddCap(x =>
         {
-            var container = new ServiceCollection();
+            //console app does not support dashboard
 
-            container.AddLogging(x => x.AddConsole());
-            container.AddCap(x =>
+            x.UseMySql("<ConnectionString>");
+            x.UseRabbitMQ(z =>
             {
-                //console app does not support dashboard
-
-                x.UseMySql("<ConnectionString>");
-                x.UseRabbitMQ(z =>
-                {
-                    z.HostName = "192.168.3.57";
-                    z.UserName = "user";
-                    z.Password = "wJ0p5gSs17";
-                });
+                z.HostName = "192.168.3.57";
+                z.UserName = "user";
+                z.Password = "wJ0p5gSs17";
             });
+        });
 
-            container.AddSingleton<EventSubscriber>();
+        container.AddSingleton<EventSubscriber>();
 
-            var sp = container.BuildServiceProvider();
+        var sp = container.BuildServiceProvider();
 
-            sp.GetService<IBootstrapper>().BootstrapAsync();
+        sp.GetService<IBootstrapper>().BootstrapAsync();
 
-            Console.ReadLine();
-        }
+        Console.ReadLine();
     }
 }

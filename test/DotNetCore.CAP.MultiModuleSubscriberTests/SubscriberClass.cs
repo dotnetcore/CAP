@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace DotNetCore.CAP.MultiModuleSubscriberTests
+namespace DotNetCore.CAP.MultiModuleSubscriberTests;
+
+public class SubscriberClass
 {
-    public class SubscriberClass
+    public void TestSubscriber()
     {
-        public void TestSubscriber()
-        {
-        }
     }
 }
