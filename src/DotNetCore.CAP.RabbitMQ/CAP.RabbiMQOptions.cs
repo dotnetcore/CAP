@@ -139,14 +139,14 @@ namespace DotNetCore.CAP
             /// Gets the PrefetchCount, a value of 0 is treated as infinite, allowing any number of unacknowledged message being pushed to consumer.
             /// The default value is 0.
             /// </summary>
-            public ushort PrefetchCount { get; private set; } = 0;
+            public ushort PrefetchCount { get; private set; }
 
             /// <summary>
             /// Gets the global flag across all consumers in RabbitMq.
             /// false (default) - applied separately to each new consumer on the channel
             /// true - shared across all consumers on the channel
             /// </summary>
-            public bool Global { get; private set; } = false;
+            public bool Global { get; private set; }
         }
     }
 }
