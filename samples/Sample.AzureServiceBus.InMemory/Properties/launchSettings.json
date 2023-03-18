@@ -3,10 +3,10 @@
   "profiles": {
     "Sample.AzureServiceBus.InMemory": {
       "commandName": "Project",
-      "dotnetRunMessages": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
-      }
+      },
+      "dotnetRunMessages": true
     }
   }
 }

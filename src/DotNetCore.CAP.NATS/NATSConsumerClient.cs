@@ -172,12 +172,15 @@ namespace DotNetCore.CAP.NATS
 
         private void ConnectedEventHandler(object? sender, ConnEventArgs e)
         {
-            var logArgs = new LogMessageEventArgs
+            if (e.Error is not null) //有异常再输出日志
             {
-                LogType = MqLogType.ConnectError,
-                Reason = e.Error?.ToString()
-            };
-            OnLogCallback!(logArgs);
+                var logArgs = new LogMessageEventArgs
+                {
+                    LogType = MqLogType.ConnectError,
+                    Reason = e.Error?.ToString()
+                };
+                OnLogCallback!(logArgs);
+            }
         }
 
         private void AsyncErrorEventHandler(object? sender, ErrEventArgs e)
