@@ -84,7 +84,7 @@ services
     .AddCookie()
     .AddOpenIdConnect(options =>
     {
-        options.Authority = "https://demo.identityserver.io/";
+        options.Authority = "https://demo.duendesoftware.com/";
         options.ClientId = "interactive.confidential";
         options.ClientSecret = "secret";
         options.ResponseType = "code";
