@@ -1,11 +1,8 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-// ReSharper disable once CheckNamespace
-
 using System;
 using System.Collections.Generic;
-using System.Threading.Channels;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
