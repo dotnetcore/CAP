@@ -70,7 +70,13 @@ public class MySqlStorageInitializer : IStorageInitializer
         {
             await connection.OpenAsync(cancellationToken);
             _serverVersion = ServerVersion.Parse(connection.ServerVersion);
-            await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+            object[] sqlParams =
+            {
+                new MySqlParameter("@PubKey", $"publish_retry_{_capOptions.Value.Version}"),
+                new MySqlParameter("@RecKey", $"received_retry_{_capOptions.Value.Version}"),
+                new MySqlParameter("@LastLockTime", DateTime.MinValue),
+            };
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
         }
 
         _logger.LogDebug("Ensuring all create database tables script are applied.");
@@ -118,8 +124,8 @@ CREATE TABLE IF NOT EXISTS `{GetLockTableName()}` (
   PRIMARY KEY (`Key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-INSERT IGNORE INTO `{GetLockTableName()}` (`Key`,`Instance`,`LastLockTime`) VALUES('{$"publish_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');
-INSERT IGNORE INTO `{GetLockTableName()}` (`Key`,`Instance`,`LastLockTime`) VALUES('{$"received_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');";
+INSERT IGNORE INTO `{GetLockTableName()}` (`Key`,`Instance`,`LastLockTime`) VALUES(@PubKey,'',@LastLockTime);
+INSERT IGNORE INTO `{GetLockTableName()}` (`Key`,`Instance`,`LastLockTime`) VALUES(@RecKey,'',@LastLockTime);";
 
         return batchSql;
     }

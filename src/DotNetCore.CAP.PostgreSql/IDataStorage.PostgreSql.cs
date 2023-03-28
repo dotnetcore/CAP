@@ -45,29 +45,46 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
         {
             string sql =
-                $"UPDATE {_lockName} SET \"Instance\"='{instance}',\"LastLockTime\"='{DateTime.Now}' WHERE \"Key\"='{key}' AND \"LastLockTime\" < '{DateTime.Now.Subtract(ttl)}';";
+                $"UPDATE {_lockName} SET \"Instance\"=@Instance,\"LastLockTime\"=@LastLockTime WHERE \"Key\"='@Key AND \"LastLockTime\" < @TTL;";
             var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
-            var opResult = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+            object[] sqlParams =
+            {
+                new NpgsqlParameter("@Instance", instance),
+                new NpgsqlParameter("@LastLockTime", DateTime.Now),
+                new NpgsqlParameter("@Key", key),
+                new NpgsqlParameter("@TTL",DateTime.Now.Subtract(ttl))
+            };
+            var opResult = await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
             return opResult > 0;
         }
 
         public async Task ReleaseLockAsync(string key, string instance, CancellationToken token = default)
         {
             string sql =
-                $"UPDATE {_lockName} SET \"Instance\"='',\"LastLockTime\"='{DateTime.MinValue}' WHERE \"Key\"='{key}' AND \"Instance\"='{instance}';";
+                $"UPDATE {_lockName} SET \"Instance\"='',\"LastLockTime\"=@LastLockTime WHERE \"Key\"=@Key AND \"Instance\"=@Instance;";
             var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
-            await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+            object[] sqlParams =
+            {
+                new NpgsqlParameter("@Instance", instance),
+                new NpgsqlParameter("@LastLockTime", DateTime.MinValue),
+                new NpgsqlParameter("@Key", key)
+            };
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
         }
 
         public async Task RenewLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
         {
-            var sql = $"UPDATE {_lockName} SET \"LastLockTime\"=\"LastLockTime\"+interval '{ttl.TotalSeconds}' second WHERE \"Key\"='{key}'" +
-                      $" AND \"Instance\"='{instance}';";
+            var sql = $"UPDATE {_lockName} SET \"LastLockTime\"=\"LastLockTime\"+interval '{ttl.TotalSeconds}' second WHERE \"Key\"=@Key AND \"Instance\"=@Instance;";
             var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
-            await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+            object[] sqlParams =
+            {
+                new NpgsqlParameter("@Instance", instance),
+                new NpgsqlParameter("@Key", key)
+            };
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
         }
 
         public async Task ChangePublishStateToDelayedAsync(string[] ids)

@@ -48,7 +48,13 @@ namespace DotNetCore.CAP.PostgreSql
             var sql = CreateDbTablesScript(_options.Value.Schema);
             var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
-            await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+            object[] sqlParams =
+            {
+                new NpgsqlParameter("@PubKey", $"publish_retry_{_capOptions.Value.Version}"),
+                new NpgsqlParameter("@RecKey", $"received_retry_{_capOptions.Value.Version}"),
+                new NpgsqlParameter("@LastLockTime", DateTime.MinValue),
+            };
+            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
 
             _logger.LogDebug("Ensuring all create database tables script are applied.");
         }
@@ -89,8 +95,8 @@ CREATE TABLE IF NOT EXISTS {GetLockTableName()}(
 	""LastLockTime"" TIMESTAMP NOT NULL
 );
 
-INSERT INTO  {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('{$"publish_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}') ON CONFLICT DO NOTHING ;
-INSERT INTO {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES('{$"received_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}')  ON CONFLICT DO NOTHING;";
+INSERT INTO {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES(@PubKey,'',@LastLockTime) ON CONFLICT DO NOTHING;
+INSERT INTO {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES(@RecKey,'',@LastLockTime) ON CONFLICT DO NOTHING;";
 
             return batchSql;
         }

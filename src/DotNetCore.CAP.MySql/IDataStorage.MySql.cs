@@ -48,28 +48,46 @@ public class MySqlDataStorage : IDataStorage
     public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
     {
         string sql =
-            $"UPDATE `{_lockName}` SET `Instance`='{instance}',`LastLockTime`='{DateTime.Now}' WHERE `Key`='{key}' AND `LastLockTime` < '{DateTime.Now.Subtract(ttl)}';";
+            $"UPDATE `{_lockName}` SET `Instance`=@Instance,`LastLockTime`=@LastLockTime WHERE `Key`=@Key AND `LastLockTime` < @TTL;";
         var connection = new MySqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
-        var opResult = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        object[] sqlParams =
+        {
+            new MySqlParameter("@Instance", instance),
+            new MySqlParameter("@LastLockTime", DateTime.Now),
+            new MySqlParameter("@Key", key),
+            new MySqlParameter("@TTL",DateTime.Now.Subtract(ttl))
+        };
+        var opResult = await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
         return opResult > 0;
     }
 
     public async Task ReleaseLockAsync(string key, string instance, CancellationToken token = default)
     {
         string sql =
-            $"UPDATE `{_lockName}` SET `Instance`='',`LastLockTime`='{DateTime.MinValue}' WHERE `Key`='{key}' AND `Instance`='{instance}';";
+            $"UPDATE `{_lockName}` SET `Instance`='',`LastLockTime`=@LastLockTime WHERE `Key`=@Key AND `Instance`=@Instance;";
         var connection = new MySqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
-        await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        object[] sqlParams =
+        {
+            new MySqlParameter("@Instance", instance),
+            new MySqlParameter("@LastLockTime", DateTime.MinValue),
+            new MySqlParameter("@Key", key)
+        };
+        await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
     }
 
     public async Task RenewLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
     {
-        var sql = $"UPDATE `{_lockName}` SET `LastLockTime`= date_add(`LastLockTime`, interval {ttl.TotalSeconds} second) WHERE `Key`='{key}' AND `Instance`='{instance}';";
+        var sql = $"UPDATE `{_lockName}` SET `LastLockTime`= date_add(`LastLockTime`, interval {ttl.TotalSeconds} second) WHERE `Key`=@Key AND `Instance`=@Instance;";
         var connection = new MySqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
-        await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        object[] sqlParams =
+        {
+            new MySqlParameter("@Instance", instance),
+            new MySqlParameter("@Key", key)
+        };
+        await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
     }
 
     public async Task ChangePublishStateToDelayedAsync(string[] ids)
