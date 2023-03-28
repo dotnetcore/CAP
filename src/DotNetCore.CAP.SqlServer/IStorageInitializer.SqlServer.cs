@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
@@ -52,7 +53,7 @@ public class SqlServerStorageInitializer : IStorageInitializer
         {
             new SqlParameter("@PubKey", $"publish_retry_{_capOptions.Value.Version}"),
             new SqlParameter("@RecKey", $"received_retry_{_capOptions.Value.Version}"),
-            new SqlParameter("@LastLockTime", DateTime.MinValue),
+            new SqlParameter("@LastLockTime", DateTime.MinValue){ SqlDbType = SqlDbType.DateTime2 },
         };
         await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
 

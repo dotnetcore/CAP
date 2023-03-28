@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,7 +69,7 @@ public class SqlServerDataStorage : IDataStorage
         object[] sqlParams =
         {
             new SqlParameter("@Instance", instance),
-            new SqlParameter("@LastLockTime", DateTime.MinValue),
+            new SqlParameter("@LastLockTime", DateTime.MinValue){ SqlDbType = SqlDbType.DateTime2 },
             new SqlParameter("@Key", key)
         };
         await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
