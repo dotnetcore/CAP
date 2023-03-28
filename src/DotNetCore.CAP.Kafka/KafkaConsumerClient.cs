@@ -53,7 +53,9 @@ namespace DotNetCore.CAP.Kafka
 
                 adminClient.CreateTopicsAsync(regexTopicNames.Select(x => new TopicSpecification
                 {
-                    Name = x
+                    Name = x,
+                    NumPartitions = _kafkaOptions.TopicOptions.NumPartitions,
+                    ReplicationFactor = _kafkaOptions.TopicOptions.ReplicationFactor
                 })).GetAwaiter().GetResult();
             }
             catch (CreateTopicsException ex) when (ex.Message.Contains("already exists"))

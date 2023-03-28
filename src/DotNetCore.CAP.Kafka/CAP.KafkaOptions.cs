@@ -52,5 +52,20 @@ namespace DotNetCore.CAP
         /// New retriable error code (refer to https://docs.confluent.io/platform/current/clients/librdkafka/html/rdkafkacpp_8h.html#a4c6b7af48c215724c323c60ea4080dbf)
         /// </summary>
         public IList<ErrorCode> RetriableErrorCodes { get; set; }
+
+        public KafkaTopicOptions TopicOptions { get; set; } = new();
+    }
+
+    public class KafkaTopicOptions
+    {
+        /// <summary>
+        ///  The number of partitions for the new topic
+        /// </summary>
+        public short NumPartitions { get; set; } = -1;
+
+        /// <summary>
+        /// The replication factor for the new topic
+        /// </summary>
+        public short ReplicationFactor { get; set; } = -1;
     }
 }
