@@ -48,7 +48,13 @@ public class SqlServerStorageInitializer : IStorageInitializer
         var sql = CreateDbTablesScript(_options.Value.Schema);
         var connection = new SqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
-        await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        object[] sqlParams =
+        {
+            new SqlParameter("@PubKey", $"publish_retry_{_capOptions.Value.Version}"),
+            new SqlParameter("@RecKey", $"received_retry_{_capOptions.Value.Version}"),
+            new SqlParameter("@LastLockTime", DateTime.MinValue),
+        };
+        await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
 
         _logger.LogDebug("Ensuring all create database tables script are applied.");
     }
@@ -114,8 +120,8 @@ CREATE TABLE {GetLockTableName()}(
 ) ON [PRIMARY] 
 END;
 
-INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('{$"publish_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');
-INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES('{$"received_retry_{_capOptions.Value.Version}"}','','{DateTime.MinValue}');
+INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES(@PubKey,'',@LastLockTime);
+INSERT INTO {GetLockTableName()} ([Key],[Instance],[LastLockTime]) VALUES(@RecKey,'',@LastLockTime);
 ";
         return batchSql;
     }
