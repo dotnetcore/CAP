@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UserSecretsId>aspnet-Sample.Dashboard.Jwt-6f791f0f-707a-4e40-b28d-5b0262404cfd</UserSecretsId>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Invio.Extensions.Authentication.JwtBearer" Version="2.0.1" />
+        <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.15" />
+        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.27.0" />
+        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.27.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard\DotNetCore.CAP.Dashboard.csproj" />
+        <ProjectReference Include="..\..\src\DotNetCore.CAP.MySql\DotNetCore.CAP.MySql.csproj" />
+        <ProjectReference Include="..\..\src\DotNetCore.CAP.RabbitMQ\DotNetCore.CAP.RabbitMQ.csproj" />
+        <ProjectReference Include="..\..\src\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+    </ItemGroup>
+
+</Project>
