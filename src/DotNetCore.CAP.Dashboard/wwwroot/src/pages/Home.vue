@@ -29,6 +29,13 @@ export default {
     }
   },
   async mounted() {
+    const params = new Proxy(new URLSearchParams(window.location.search), {
+      get: (searchParams, prop) => searchParams.get(prop),
+    });
+    let accessToken = params.access_token;
+    if (accessToken) {
+      localStorage.setItem('token', accessToken)
+    }
 
     const realtimeOpts = {
       width: 960,
