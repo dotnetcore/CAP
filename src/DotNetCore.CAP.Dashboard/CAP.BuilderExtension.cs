@@ -50,39 +50,41 @@ namespace DotNetCore.CAP
                     FileProvider = new EmbeddedFileProvider(options.GetType().Assembly, EmbeddedFileNamespace)
                 });
 
-                var endPointRouteBuilder = (IEndpointRouteBuilder)app.Properties["__EndpointRouteBuilder"]!;
-
-                endPointRouteBuilder.MapGet(options.PathMatch, httpContext =>
+                app.UseRouting();
+                app.UseEndpoints(endpoints =>
                 {
-                    var path = httpContext.Request.Path.Value;
-                    var redirectUrl = string.IsNullOrEmpty(path) || path.EndsWith("/") ? "index.html" : $"{path.Split('/').Last()}/index.html";
-                    httpContext.Response.StatusCode = 301;
-                    httpContext.Response.Headers["Location"] = redirectUrl;
-                    return Task.CompletedTask;
-                });
-
-                endPointRouteBuilder.MapGet(options.PathMatch + "/index.html", async httpContext =>
-                {
-                    if (!await Authentication(httpContext, options))
+                    endpoints.MapGet(options.PathMatch, httpContext =>
                     {
-                        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                        return;
-                    }
+                        var path = httpContext.Request.Path.Value;
+                        var redirectUrl = string.IsNullOrEmpty(path) || path.EndsWith("/") ? "index.html" : $"{path.Split('/').Last()}/index.html";
+                        httpContext.Response.StatusCode = 301;
+                        httpContext.Response.Headers["Location"] = redirectUrl;
+                        return Task.CompletedTask;
+                    });
 
-                    httpContext.Response.StatusCode = 200;
-                    httpContext.Response.ContentType = "text/html;charset=utf-8";
+                    endpoints.MapGet(options.PathMatch + "/index.html", async httpContext =>
+                    {
+                        if (!await Authentication(httpContext, options))
+                        {
+                            httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                            return;
+                        }
 
-                    await using var stream = options.GetType().Assembly.GetManifestResourceStream(EmbeddedFileNamespace + ".index.html");
-                    if (stream == null) throw new InvalidOperationException();
+                        httpContext.Response.StatusCode = 200;
+                        httpContext.Response.ContentType = "text/html;charset=utf-8";
 
-                    using var sr = new StreamReader(stream);
-                    var htmlBuilder = new StringBuilder(await sr.ReadToEndAsync());
-                    htmlBuilder.Replace("%(servicePrefix)", options.PathBase + options.PathMatch + "/api");
-                    htmlBuilder.Replace("%(pollingInterval)", options.StatsPollingInterval.ToString());
-                    await httpContext.Response.WriteAsync(htmlBuilder.ToString(), Encoding.UTF8);
+                        await using var stream = options.GetType().Assembly.GetManifestResourceStream(EmbeddedFileNamespace + ".index.html");
+                        if (stream == null) throw new InvalidOperationException();
+
+                        using var sr = new StreamReader(stream);
+                        var htmlBuilder = new StringBuilder(await sr.ReadToEndAsync());
+                        htmlBuilder.Replace("%(servicePrefix)", options.PathBase + options.PathMatch + "/api");
+                        htmlBuilder.Replace("%(pollingInterval)", options.StatsPollingInterval.ToString());
+                        await httpContext.Response.WriteAsync(htmlBuilder.ToString(), Encoding.UTF8);
+                    });
+
+                    new RouteActionProvider(endpoints, options).MapDashboardRoutes();
                 });
-
-                new RouteActionProvider(endPointRouteBuilder, options).MapDashboardRoutes();
             }
 
             return app;
