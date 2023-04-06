@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP.Dashboard.GatewayProxy;
+using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
 using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -23,6 +25,10 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             _options?.Invoke(discoveryOptions);
             services.AddSingleton(discoveryOptions);
 
+            services.AddSingleton<IHttpRequester, HttpClientHttpRequester>();
+            services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
+            services.AddSingleton<IRequestMapper, RequestMapper>();
+            services.AddSingleton<GatewayProxyAgent>();
             services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
             services.AddSingleton<INodeDiscoveryProvider, ConsulNodeDiscoveryProvider>();
         }

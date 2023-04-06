@@ -4,8 +4,6 @@
 using System;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard;
-using DotNetCore.CAP.Dashboard.GatewayProxy;
-using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,10 +25,7 @@ namespace DotNetCore.CAP
             _options?.Invoke(dashboardOptions);
             services.AddTransient<IStartupFilter, CapStartupFilter>();
             services.AddSingleton(dashboardOptions);
-            services.AddSingleton<IHttpRequester, HttpClientHttpRequester>();
-            services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
             services.AddSingleton<CapMetricsEventListener>();
-            services.AddSingleton<IRequestMapper, RequestMapper>();
         }
     }
 
@@ -56,7 +51,7 @@ namespace Microsoft.Extensions.DependencyInjection
         {
             return capOptions.UseDashboard(opt => { });
         }
-        
+
         public static CapOptions UseDashboard(this CapOptions capOptions, Action<DashboardOptions> options)
         {
             if (options == null)

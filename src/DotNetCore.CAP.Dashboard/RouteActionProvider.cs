@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
@@ -25,7 +26,7 @@ namespace DotNetCore.CAP.Dashboard
         private readonly IEndpointRouteBuilder _builder;
         private readonly IServiceProvider _serviceProvider;
         private readonly DashboardOptions _options;
-
+        private readonly GatewayProxyAgent _agent;
         private IMonitoringApi MonitoringApi => _serviceProvider.GetRequiredService<IDataStorage>().GetMonitoringApi();
 
         public RouteActionProvider(IEndpointRouteBuilder builder, DashboardOptions options)
@@ -33,6 +34,7 @@ namespace DotNetCore.CAP.Dashboard
             _builder = builder;
             _options = options;
             _serviceProvider = builder.ServiceProvider;
+            _agent = _serviceProvider.GetService<GatewayProxyAgent>(); // may be null
         }
 
         public void MapDashboardRoutes()
@@ -58,13 +60,16 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task Metrics(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
+
             var metrics = _serviceProvider.GetRequiredService<CapMetricsEventListener>();
             await httpContext.Response.WriteAsJsonAsync(metrics.GetRealTimeMetrics());
         }
 
         public async Task MetaInfo(HttpContext httpContext)
         {
-            if(!await Auth(httpContext)) return;
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
+            if (!await Auth(httpContext)) return;
 
             var cap = _serviceProvider.GetRequiredService<CapMarkerService>();
             var broker = _serviceProvider.GetRequiredService<CapMessageQueueMakerService>();
@@ -80,6 +85,8 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task Stats(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
+
             var result = await MonitoringApi.GetStatisticsAsync();
             SetServersCount(result);
             await httpContext.Response.WriteAsJsonAsync(result);
@@ -104,6 +111,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task MetricsHistory(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
 
             const string cacheKey = "dashboard.metrics.history";
@@ -142,6 +150,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task PublishedMessageDetails(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
 
             if (long.TryParse(httpContext.GetRouteData().Values["id"]?.ToString() ?? string.Empty, out long id))
@@ -162,6 +171,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task ReceivedMessageDetails(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
 
             if (long.TryParse(httpContext.GetRouteData().Values["id"]?.ToString() ?? string.Empty, out long id))
@@ -182,6 +192,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task PublishedRequeue(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
 
             //var form = await httpContext.Request.ReadFormAsync();
@@ -205,6 +216,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task ReceivedRequeue(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
 
             var messageIds = await httpContext.Request.ReadFromJsonAsync<long[]>();
@@ -226,6 +238,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task PublishedList(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
 
             var routeValue = httpContext.GetRouteData().Values;
@@ -252,6 +265,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task ReceivedList(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
 
             var routeValue = httpContext.GetRouteData().Values;
@@ -280,6 +294,7 @@ namespace DotNetCore.CAP.Dashboard
 
         public async Task Subscribers(HttpContext httpContext)
         {
+            if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
 
             var cache = _serviceProvider.GetRequiredService<MethodMatcherCache>();

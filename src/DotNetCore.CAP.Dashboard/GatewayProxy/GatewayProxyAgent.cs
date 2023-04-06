@@ -16,57 +16,62 @@ using Microsoft.Extensions.Primitives;
 
 namespace DotNetCore.CAP.Dashboard.GatewayProxy
 {
-    public class GatewayProxyMiddleware
+    public class GatewayProxyAgent
     {
         public const string NodeCookieName = "cap.node";
         private readonly ILogger _logger;
 
-        private readonly RequestDelegate _next;
         private readonly IHttpRequester _requester;
         private readonly IRequestMapper _requestMapper;
 
-        private INodeDiscoveryProvider _discoveryProvider;
+        private readonly DiscoveryOptions _discoveryOptions;
+        private readonly INodeDiscoveryProvider _discoveryProvider;
 
-        public GatewayProxyMiddleware(RequestDelegate next,
+        public GatewayProxyAgent(
             ILoggerFactory loggerFactory,
             IRequestMapper requestMapper,
-            IHttpRequester requester)
+            IHttpRequester requester,
+            DiscoveryOptions discoveryOptions,
+            INodeDiscoveryProvider discoveryProvider)
         {
-            _next = next;
-            _logger = loggerFactory.CreateLogger<GatewayProxyMiddleware>();
+            _logger = loggerFactory.CreateLogger<GatewayProxyAgent>();
             _requestMapper = requestMapper;
             _requester = requester;
+            _discoveryProvider = discoveryProvider;
+            _discoveryOptions = discoveryOptions;
         }
 
         protected HttpRequestMessage DownstreamRequest { get; set; }
 
-        public async Task Invoke(HttpContext context,
-            DiscoveryOptions discoveryOptions,
-            INodeDiscoveryProvider discoveryProvider)
+        public async Task<bool> Invoke(HttpContext context)
         {
-            _discoveryProvider = discoveryProvider;
+            if (_discoveryOptions == null)
+            {
+                return false;
+            }
 
             var request = context.Request;
-            var pathMatch = discoveryOptions.MatchPath;
+            var pathMatch = _discoveryOptions.MatchPath;
             var isCapRequest = request.Path.StartsWithSegments(new PathString(pathMatch));
             if (!isCapRequest)
             {
-                await _next.Invoke(context);
+                return false;
             }
             else
             {
                 //For performance reasons, we need to put this functionality in the else
                 var isSwitchNode = request.Cookies.TryGetValue(NodeCookieName, out var requestNodeId);
-                var isCurrentNode = discoveryOptions.NodeId == requestNodeId;
+                var isCurrentNode = _discoveryOptions.NodeId == requestNodeId;
                 var isNodesPage = request.Path.StartsWithSegments(new PathString(pathMatch + "/nodes"));
 
                 if (!isSwitchNode || isCurrentNode || isNodesPage)
                 {
-                    await _next.Invoke(context);
+                    return false;
                 }
                 else
                 {
-                    _logger.LogDebug("started calling gateway proxy middleware");
+                    _logger.LogDebug("start calling remote endpoint...");
+                    
 
                     if (TryGetRemoteNode(requestNodeId, out var node))
                     {
@@ -79,6 +84,8 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
                             var response = await _requester.GetResponse(DownstreamRequest);
 
                             await SetResponseOnHttpContext(context, response);
+
+                            return true;
                         }
                         catch (Exception ex)
                         {
@@ -88,13 +95,15 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
                     else
                     {
                         context.Response.Cookies.Delete(NodeCookieName);
-                        await _next.Invoke(context);
+                        return false;
                     }
                 }
             }
+
+            return false;
         }
 
-        public async Task SetResponseOnHttpContext(HttpContext context, HttpResponseMessage response)
+        private async Task SetResponseOnHttpContext(HttpContext context, HttpResponseMessage response)
         {
             foreach (var httpResponseHeader in response.Content.Headers)
             {
@@ -115,12 +124,10 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
                 return Task.CompletedTask;
             }, context);
 
-            using (Stream stream = new MemoryStream(content))
+            await using Stream stream = new MemoryStream(content);
+            if (response.StatusCode != HttpStatusCode.NotModified)
             {
-                if (response.StatusCode != HttpStatusCode.NotModified)
-                {
-                    await stream.CopyToAsync(context.Response.Body);
-                }
+                await stream.CopyToAsync(context.Response.Body);
             }
         }
 

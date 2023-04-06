@@ -7,8 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
-using DotNetCore.CAP.Dashboard.GatewayProxy;
-using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
@@ -39,11 +37,6 @@ namespace DotNetCore.CAP
 
             if (options != null)
             {
-                if (provider.GetService<DiscoveryOptions>() != null)
-                {
-                    app.UseMiddleware<GatewayProxyMiddleware>();
-                }
-
                 app.UseStaticFiles(new StaticFileOptions()
                 {
                     RequestPath = options.PathMatch,
@@ -65,7 +58,8 @@ namespace DotNetCore.CAP
                 {
                     if (!await Authentication(httpContext, options))
                     {
-                        httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                        if(httpContext.Response.StatusCode != StatusCodes.Status302Found)
+                            httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         return;
                     }
 
@@ -96,7 +90,6 @@ namespace DotNetCore.CAP
             {
                 await context.ChallengeAsync(options.DefaultChallengeScheme);
                 await context.Response.CompleteAsync();
-
                 return false;
             }
 
