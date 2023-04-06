@@ -2,8 +2,10 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -33,7 +35,10 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             services.AddSingleton<INodeDiscoveryProvider, ConsulNodeDiscoveryProvider>();
         }
     }
+}
 
+namespace Microsoft.Extensions.DependencyInjection
+{
     public static class CapDiscoveryOptionsExtensions
     {
         public static CapOptions UseDiscovery(this CapOptions capOptions)

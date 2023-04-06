@@ -88,10 +88,10 @@ namespace DotNetCore.CAP.Dashboard
             if (_agent != null && await _agent.Invoke(httpContext)) return;
 
             var result = await MonitoringApi.GetStatisticsAsync();
-            SetServersCount(result);
+            await SetServersCountAsync(result);
             await httpContext.Response.WriteAsJsonAsync(result);
 
-            void SetServersCount(StatisticsDto dto)
+            async Task SetServersCountAsync(StatisticsDto dto)
             {
                 if (CapCache.Global.TryGet("cap.nodes.count", out var count))
                 {
@@ -102,7 +102,7 @@ namespace DotNetCore.CAP.Dashboard
                     if (_serviceProvider.GetService<DiscoveryOptions>() != null)
                     {
                         var discoveryProvider = _serviceProvider.GetRequiredService<INodeDiscoveryProvider>();
-                        var nodes = discoveryProvider.GetNodes();
+                        var nodes = await discoveryProvider.GetNodes();
                         dto.Servers = nodes.Count;
                     }
                 }
@@ -335,7 +335,7 @@ namespace DotNetCore.CAP.Dashboard
                 return;
             }
 
-            result = discoveryProvider.GetNodes();
+            result = await discoveryProvider.GetNodes();
 
             await httpContext.Response.WriteAsJsonAsync(result);
         }

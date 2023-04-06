@@ -18,7 +18,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 {
     public class GatewayProxyAgent
     {
-        public const string NodeCookieName = "cap.node";
+        public const string CookieNodeName = "cap.node";
         private readonly ILogger _logger;
 
         private readonly IHttpRequester _requester;
@@ -51,53 +51,41 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             }
 
             var request = context.Request;
-            var pathMatch = _discoveryOptions.MatchPath;
-            var isCapRequest = request.Path.StartsWithSegments(new PathString(pathMatch));
-            if (!isCapRequest)
+            //For performance reasons, we need to put this functionality in the else
+            var isSwitchNode = request.Cookies.TryGetValue(CookieNodeName, out var requestNodeName);
+            var isCurrentNode = _discoveryOptions.NodeName == requestNodeName;
+
+            if (!isSwitchNode || isCurrentNode)
             {
                 return false;
             }
+
+            _logger.LogDebug("start calling remote endpoint...");
+
+            var node = await _discoveryProvider.GetNode(requestNodeName);
+            if (node != null)
+            {
+                try
+                {
+                    DownstreamRequest = await _requestMapper.Map(request);
+
+                    SetDownStreamRequestUri(node, request.Path.Value, request.QueryString.Value);
+
+                    var response = await _requester.GetResponse(DownstreamRequest);
+
+                    await SetResponseOnHttpContext(context, response);
+
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex.Message);
+                }
+            }
             else
             {
-                //For performance reasons, we need to put this functionality in the else
-                var isSwitchNode = request.Cookies.TryGetValue(NodeCookieName, out var requestNodeId);
-                var isCurrentNode = _discoveryOptions.NodeId == requestNodeId;
-                var isNodesPage = request.Path.StartsWithSegments(new PathString(pathMatch + "/nodes"));
-
-                if (!isSwitchNode || isCurrentNode || isNodesPage)
-                {
-                    return false;
-                }
-                else
-                {
-                    _logger.LogDebug("start calling remote endpoint...");
-                    
-
-                    if (TryGetRemoteNode(requestNodeId, out var node))
-                    {
-                        try
-                        {
-                            DownstreamRequest = await _requestMapper.Map(request);
-
-                            SetDownStreamRequestUri(node, request.Path.Value, request.QueryString.Value);
-
-                            var response = await _requester.GetResponse(DownstreamRequest);
-
-                            await SetResponseOnHttpContext(context, response);
-
-                            return true;
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex.Message);
-                        }
-                    }
-                    else
-                    {
-                        context.Response.Cookies.Delete(NodeCookieName);
-                        return false;
-                    }
-                }
+                context.Response.Cookies.Delete(CookieNodeName);
+                return false;
             }
 
             return false;
@@ -113,13 +101,13 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             var content = await response.Content.ReadAsByteArrayAsync();
 
             AddHeaderIfDoesntExist(context,
-                new KeyValuePair<string, IEnumerable<string>>("Content-Length", new[] {content.Length.ToString()}));
+                new KeyValuePair<string, IEnumerable<string>>("Content-Length", new[] { content.Length.ToString() }));
 
             context.Response.OnStarting(state =>
             {
-                var httpContext = (HttpContext) state;
+                var httpContext = (HttpContext)state;
 
-                httpContext.Response.StatusCode = (int) response.StatusCode;
+                httpContext.Response.StatusCode = (int)response.StatusCode;
 
                 return Task.CompletedTask;
             }, context);
@@ -129,14 +117,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             {
                 await stream.CopyToAsync(context.Response.Body);
             }
-        }
-
-        private bool TryGetRemoteNode(string requestNodeId, out Node node)
-        {
-            var nodes = _discoveryProvider.GetNodes();
-            node = nodes.FirstOrDefault(x => x.Id == requestNodeId);
-            return node != null;
-        }
+        } 
 
         private void SetDownStreamRequestUri(Node node, string requestPath, string queryString)
         {

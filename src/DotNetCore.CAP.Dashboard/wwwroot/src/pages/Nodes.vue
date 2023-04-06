@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 class="text-left mb-4">{{ $t("Nodes") }}</h2>
-    <b-table :fields="fields" :items="items" :busy="isBusy" show-empty empty-text="Unconfigure node discovery !">
+    <b-table :fields="fields" :items="items" :busy="isBusy"  variant="dark" show-empty empty-text="Unconfigure node discovery !">
       <template #table-busy>
         <div class="text-center text-secondary my-2">
           <b-spinner class="align-middle"></b-spinner>
@@ -55,11 +55,11 @@ export default {
   methods: {
     fetchData() {
       this.isBusy = true;
-      var id = this.getCookie('cap.node');
+      var name = this.getCookie('cap.node');
       axios.get('/nodes').then(res => {
         for (var item of res.data) {
-          if (item.id == id) {
-            item._rowVariant = 'primary'
+          if (item.name == name) {
+            item._rowVariant = 'dark'
           }
         }
         this.items = res.data;
@@ -68,7 +68,7 @@ export default {
     },
 
     switchNode(item) {
-      document.cookie = `cap.node=${escape(item.id)};`;
+      document.cookie = `cap.node=${escape(item.name)};`;
       window.location.reload();
     },
 

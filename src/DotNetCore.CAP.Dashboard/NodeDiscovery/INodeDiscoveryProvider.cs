@@ -9,7 +9,9 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
     public interface INodeDiscoveryProvider
     {
-        IList<Node> GetNodes(CancellationToken cancellationToken = default);
+        Task<IList<Node>> GetNodes(CancellationToken cancellationToken = default);
+
+        Task<Node> GetNode(string nodeName, CancellationToken cancellationToken = default);
 
         Task RegisterNode(CancellationToken cancellationToken = default);
     }

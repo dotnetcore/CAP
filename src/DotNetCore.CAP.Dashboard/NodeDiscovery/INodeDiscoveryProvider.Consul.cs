@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Consul;
@@ -22,7 +23,37 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             _options = options;
         }
 
-        public IList<Node> GetNodes(CancellationToken cancellationToken)
+        public async Task<Node> GetNode(string nodeName, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                using var consul = new ConsulClient(config =>
+                {
+                    config.WaitTime = TimeSpan.FromSeconds(5);
+                    config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
+                });
+                var serviceCatalog = await consul.Catalog.Service(nodeName, "CAP", cancellationToken);
+                if (serviceCatalog.StatusCode == HttpStatusCode.OK)
+                {
+                    return serviceCatalog.Response.Select(info => new Node
+                    {
+                        Id = info.ServiceID,
+                        Name = info.ServiceName,
+                        Address = info.ServiceAddress,
+                        Port = info.ServicePort,
+                        Tags = string.Join(", ", info.ServiceTags)
+                    }).FirstOrDefault();
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Get consul nodes raised an exception. Exception:{ex.Message}");
+            }
+            return null;
+        }
+
+
+        public async Task<IList<Node>> GetNodes(CancellationToken cancellationToken)
         {
             try
             {
@@ -34,20 +65,19 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                     config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
                 });
 
-                var services = consul.Catalog.Services(cancellationToken).GetAwaiter().GetResult();
+                var services = await consul.Catalog.Services(cancellationToken);
 
                 foreach (var service in services.Response)
                 {
-                    var serviceInfo = consul.Catalog.Service(service.Key, cancellationToken).GetAwaiter().GetResult();
-                    var node = serviceInfo.Response.SkipWhile(x => !x.ServiceTags.Contains("CAP"))
-                        .Select(info => new Node
-                        {
-                            Id = info.ServiceID,
-                            Name = info.ServiceName,
-                            Address = info.ServiceAddress,
-                            Port = info.ServicePort,
-                            Tags = string.Join(", ", info.ServiceTags)
-                        }).ToList();
+                    var serviceInfo = consul.Catalog.Service(service.Key, "CAP", cancellationToken).GetAwaiter().GetResult();
+                    var node = serviceInfo.Response.Select(info => new Node
+                    {
+                        Id = info.ServiceID,
+                        Name = info.ServiceName,
+                        Address = info.ServiceAddress,
+                        Port = info.ServicePort,
+                        Tags = string.Join(", ", info.ServiceTags)
+                    }).ToList();
 
                     nodes.AddRange(node);
                 }
