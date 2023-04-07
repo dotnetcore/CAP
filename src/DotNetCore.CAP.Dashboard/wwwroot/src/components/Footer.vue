@@ -3,16 +3,16 @@
     <b-container class="d-block">
       <b-row class="align-items-start">
         <b-col v-if="nodeName">
-          <BBadge variant="warning" pill> SwitchedNode: {{ nodeName }}</BBadge>
+          <BBadge variant="warning" pill> {{$t("SwitchedNode")}}: {{ nodeName }}</BBadge>
         </b-col>
         <b-col>
           <BBadge variant="dark" pill>{{ meta.cap?.name }}: {{ meta.cap?.version.substring(0, 5) }}</BBadge>
         </b-col>
         <b-col>
-          <BBadge variant="dark" pill> Storage : {{ meta.storage?.name }}</BBadge>
+          <BBadge variant="dark" pill> {{$t("Storage")}}: {{ meta.storage?.name }}</BBadge>
         </b-col>
         <b-col>
-          <BBadge variant="dark" pill> Broker: {{ meta.broker?.name }}</BBadge>
+          <BBadge variant="dark" pill> {{$t("Transport")}}: {{ meta.broker?.name }}</BBadge>
         </b-col>
       </b-row>
     </b-container>
