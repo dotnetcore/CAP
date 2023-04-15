@@ -77,7 +77,7 @@ public class ConsumerExecutorDescriptorComparer : IEqualityComparer<ConsumerExec
         var ret = x.TopicName.Equals(y.TopicName, StringComparison.OrdinalIgnoreCase) &&
                   x.Attribute.Group.Equals(y.Attribute.Group, StringComparison.OrdinalIgnoreCase);
 
-        if (ret) _logger.ConsumerDuplicates(x.TopicName, x.Attribute.Group);
+        if (ret && (x.ImplTypeInfo != y.ImplTypeInfo || x.MethodInfo != y.MethodInfo)) _logger.ConsumerDuplicates(x.TopicName, x.Attribute.Group);
 
         return ret;
     }
