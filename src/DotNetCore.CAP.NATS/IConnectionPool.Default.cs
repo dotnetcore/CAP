@@ -41,10 +41,7 @@ namespace DotNetCore.CAP.NATS
 
             if (_options.Options != null)
             {
-                if (_options.Servers != null)
-                {
-                    _options.Options.Url = _options.Servers;
-                }
+                _options.Options.Url = _options.Servers;
                 connection = _connectionFactory.CreateConnection(_options.Options);
             }
             else

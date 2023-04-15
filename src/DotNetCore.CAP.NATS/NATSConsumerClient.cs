@@ -34,7 +34,7 @@ namespace DotNetCore.CAP.NATS
 
         public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-        public BrokerAddress BrokerAddress => new ("NATS", _natsOptions.Servers);
+        public BrokerAddress BrokerAddress => new("NATS", _natsOptions.Servers);
 
         public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
         {
@@ -46,28 +46,21 @@ namespace DotNetCore.CAP.NATS
 
             foreach (var subjectStream in streamGroup)
             {
+                var builder = StreamConfiguration.Builder()
+                       .WithName(subjectStream.Key)
+                       .WithNoAck(false)
+                       .WithStorageType(StorageType.Memory)
+                       .WithSubjects(subjectStream.ToList());
+
+                _natsOptions.StreamOptions?.Invoke(builder);
+
                 try
                 {
-                    jsm.GetStreamInfo(subjectStream.Key); // this throws if the stream does not exist
+                    jsm.AddStream(builder.Build());
                 }
-                catch (NATSJetStreamException)
+                catch
                 {
-                    var builder = StreamConfiguration.Builder()
-                        .WithName(subjectStream.Key)
-                        .WithNoAck(false)
-                        .WithStorageType(StorageType.Memory)
-                        .WithSubjects(subjectStream.ToList());
-
-                    _natsOptions.StreamOptions?.Invoke(builder);
-
-                    try
-                    {
-                        jsm.AddStream(builder.Build());
-                    }
-                    catch
-                    {
-                        // ignored
-                    }
+                    // ignored
                 }
             }
 
@@ -157,10 +150,12 @@ namespace DotNetCore.CAP.NATS
                 {
                     var opts = _natsOptions.Options ?? ConnectionFactory.GetDefaultOptions();
                     opts.Url ??= _natsOptions.Servers;
-                    opts.ClosedEventHandler = ConnectedEventHandler;
-                    opts.DisconnectedEventHandler = ConnectedEventHandler;
+                    opts.DisconnectedEventHandler = DisconnectedEventHandler;
                     opts.AsyncErrorEventHandler = AsyncErrorEventHandler;
                     opts.Timeout = 5000;
+                    opts.AllowReconnect = false;
+                    opts.NoEcho = true;
+
                     _consumerClient = new ConnectionFactory().CreateConnection(opts);
                 }
             }
@@ -170,14 +165,17 @@ namespace DotNetCore.CAP.NATS
             }
         }
 
-        private void ConnectedEventHandler(object? sender, ConnEventArgs e)
+        private void DisconnectedEventHandler(object? sender, ConnEventArgs e)
         {
-            var logArgs = new LogMessageEventArgs
+            if (e.Error is { Message: "Server closed the connection." })
             {
-                LogType = MqLogType.ConnectError,
-                Reason = e.Error?.ToString()
-            };
-            OnLogCallback!(logArgs);
+                var logArgs = new LogMessageEventArgs
+                {
+                    LogType = MqLogType.ConnectError,
+                    Reason = e.Error.ToString()
+                };
+                OnLogCallback!(logArgs);
+            }
         }
 
         private void AsyncErrorEventHandler(object? sender, ErrEventArgs e)
