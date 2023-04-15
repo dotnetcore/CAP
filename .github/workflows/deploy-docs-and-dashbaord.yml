@@ -1,4 +1,4 @@
-name: Publish docs & Build dashboard
+name: docs & dashboard-dist
 on:
   push:
     branches:

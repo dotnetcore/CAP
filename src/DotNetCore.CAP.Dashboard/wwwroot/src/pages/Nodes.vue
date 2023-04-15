@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 class="text-left mb-4">{{ $t("Nodes") }}</h2>
-    <b-table :fields="fields" :items="items" :busy="isBusy"  variant="dark" show-empty empty-text="Unconfigure node discovery !">
+    <b-table :fields="fields" :items="items" :busy="isBusy"  show-empty empty-text="Unconfigure node discovery !">
       <template #table-busy>
         <div class="text-center text-secondary my-2">
           <b-spinner class="align-middle"></b-spinner>
@@ -17,7 +17,7 @@
 
       <template #cell(actions)="data">
         <b-button size="sm" @click="switchNode(data.item)" class="mr-1">
-          Switch
+          {{ $t("Switch") }}
         </b-button>
       </template>
     </b-table>
@@ -91,3 +91,8 @@ export default {
 
 };
 </script>
+<style >
+.table-dark td {
+  border-color: #c6c8ca;
+}
+</style>

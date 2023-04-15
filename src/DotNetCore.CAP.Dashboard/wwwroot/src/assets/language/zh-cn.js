@@ -56,5 +56,9 @@ export default {
     Tags: "标签",
     Actions: "动作",
     ReexcuteSuccess: "重新消费成功!",
-    RequeueSuccess: "重新执行成功!"
+    RequeueSuccess: "重新执行成功!",    
+    SwitchedNode: "切换的节点",
+    Storage: "存储",
+    Transport: "传输",
+    Switch: "切换"
 }
