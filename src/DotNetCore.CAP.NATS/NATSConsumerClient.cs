@@ -47,20 +47,29 @@ namespace DotNetCore.CAP.NATS
             foreach (var subjectStream in streamGroup)
             {
                 var builder = StreamConfiguration.Builder()
-                       .WithName(subjectStream.Key)
-                       .WithNoAck(false)
-                       .WithStorageType(StorageType.Memory)
-                       .WithSubjects(subjectStream.ToList());
+                    .WithName(subjectStream.Key)
+                    .WithNoAck(false)
+                    .WithStorageType(StorageType.Memory)
+                    .WithSubjects(subjectStream.ToList());
 
                 _natsOptions.StreamOptions?.Invoke(builder);
 
                 try
                 {
-                    jsm.AddStream(builder.Build());
+                    jsm.GetStreamInfo(subjectStream.Key); // this throws if the stream does not exist
+
+                    jsm.UpdateStream(builder.Build());
                 }
-                catch
+                catch (NATSJetStreamException)
                 {
-                    // ignored
+                    try
+                    {
+                        jsm.AddStream(builder.Build());
+                    }
+                    catch
+                    {
+                        // ignored
+                    }
                 }
             }
 
@@ -77,17 +86,36 @@ namespace DotNetCore.CAP.NATS
             Connect();
 
             var js = _consumerClient!.CreateJetStreamContext();
+            var streamGroup = topics.GroupBy(x => _natsOptions.NormalizeStreamName(x));
 
-            foreach (var subject in topics)
+            ConnectionLock.Wait();
+            foreach (var subjectStream in streamGroup)
             {
-                var streamName = _natsOptions.NormalizeStreamName(subject);
-                var pso = PushSubscribeOptions.Builder()
-                    .WithStream(streamName)
-                    .WithConfiguration(ConsumerConfiguration.Builder().WithDeliverPolicy(DeliverPolicy.New).Build())
-                    .Build();
+                var groupName = Helper.Normalized(_groupId);
 
-                js.PushSubscribeAsync(subject, Helper.Normalized(_groupId), SubscriptionMessageHandler, false, pso);
+                foreach (var subject in subjectStream)
+                {
+                    try
+                    {
+                        var pso = PushSubscribeOptions.Builder()
+                            .WithStream(subjectStream.Key)
+                            .WithConfiguration(ConsumerConfiguration.Builder()
+                                .WithDurable(Helper.Normalized(groupName + "-" + subject))
+                                .WithDeliverPolicy(DeliverPolicy.All)
+                                .WithAckWait(10000)
+                                .WithAckPolicy(AckPolicy.Explicit)
+                                .Build())
+                            .Build();
+
+                        js.PushSubscribeAsync(subject, groupName, SubscriptionMessageHandler, false, pso);
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine(e);
+                    }
+                }
             }
+            ConnectionLock.Release();
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
