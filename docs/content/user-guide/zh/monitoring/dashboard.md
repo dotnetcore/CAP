@@ -2,6 +2,9 @@
 
 CAP 原生提供了 Dashboard 供查看消息，利用 Dashboard 提供的功能可以很方便的查看和管理消息。
 
+!!! WARNING "使用限制"
+    Dashboard 只支持在 ASP.NET Core 中使用，不支持控制台应用(Console App)
+
 ## 启用 Dashboard
 
 首先，你需要安装Dashboard的 NuGet 包。
