@@ -1,18 +1,18 @@
 <template>
-  <b-navbar fixed="bottom" toggleable="lg" type="light" variant="secondary">
+  <b-navbar fixed="bottom" toggleable="lg" type="light" variant="light">
     <b-container class="d-block">
       <b-row class="align-items-start">
         <b-col v-if="nodeName">
           <BBadge variant="warning" pill> {{$t("SwitchedNode")}}: {{ nodeName }}</BBadge>
         </b-col>
         <b-col>
-          <BBadge variant="dark" pill>{{ meta.cap?.name }}: {{ meta.cap?.version.substring(0, 5) }}</BBadge>
+          <BBadge variant="secondary" pill>{{ meta.cap?.name }}: {{ meta.cap?.version.substring(0, 5) }}</BBadge>
         </b-col>
         <b-col>
-          <BBadge variant="dark" pill> {{$t("Storage")}}: {{ meta.storage?.name }}</BBadge>
+          <BBadge variant="secondary" pill> {{$t("Storage")}}: {{ meta.storage?.name }}</BBadge>
         </b-col>
         <b-col>
-          <BBadge variant="dark" pill> {{$t("Transport")}}: {{ meta.broker?.name }}</BBadge>
+          <BBadge variant="secondary" pill> {{$t("Transport")}}: {{ meta.broker?.name }}</BBadge>
         </b-col>
       </b-row>
     </b-container>
