@@ -162,23 +162,24 @@ namespace DotNetCore.CAP
             var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
             return new CapEFDbTransaction(capTrans);
         }
-        
+
         /// <summary>
         /// Start the CAP transaction async
         /// </summary>
         /// <param name="database">The <see cref="DatabaseFacade" />.</param>
         /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
         /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
         public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
-            ICapPublisher publisher, bool autoCommit = false)
+            ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
         {
-            var trans = await database.BeginTransactionAsync();
+            var trans = await database.BeginTransactionAsync(cancellationToken);
             publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
             var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
             return new CapEFDbTransaction(capTrans);
         }
-        
+
         /// <summary>
         /// Start the CAP transaction async
         /// </summary>
@@ -186,11 +187,12 @@ namespace DotNetCore.CAP
         /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
         /// <param name="isolationLevel">The <see cref="IsolationLevel" /> to use</param>
         /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+        /// <param name="cancellationToken">A <see cref="CancellationToken" /> to observe while waiting for the task to complete.</param>
         /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
         public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
-            IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
+            IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
         {
-            var trans = await database.BeginTransactionAsync(isolationLevel);
+            var trans = await database.BeginTransactionAsync(isolationLevel, cancellationToken);
             publisher.Transaction.Value = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
             var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
             return new CapEFDbTransaction(capTrans);
