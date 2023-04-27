@@ -258,11 +258,11 @@ internal class ConsumerRegister : IConsumerRegister
                     var mediumMessage = await _storage.StoreReceivedMessageAsync(name, group, message);
                     mediumMessage.Origin = message;
 
-                    client.Commit(sender);
-
                     TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
 
                     await _dispatcher.EnqueueToExecute(mediumMessage, executor!);
+                    
+                    client.Commit(sender);
                 }
             }
             catch (Exception e)
