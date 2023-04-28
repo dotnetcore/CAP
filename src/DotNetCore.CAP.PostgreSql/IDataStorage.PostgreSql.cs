@@ -45,7 +45,7 @@ namespace DotNetCore.CAP.PostgreSql
         public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
         {
             string sql =
-                $"UPDATE {_lockName} SET \"Instance\"=@Instance,\"LastLockTime\"=@LastLockTime WHERE \"Key\"='@Key AND \"LastLockTime\" < @TTL;";
+                $"UPDATE {_lockName} SET \"Instance\"=@Instance,\"LastLockTime\"=@LastLockTime WHERE \"Key\"=@Key AND \"LastLockTime\" < @TTL;";
             var connection = new NpgsqlConnection(_options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
             object[] sqlParams =
