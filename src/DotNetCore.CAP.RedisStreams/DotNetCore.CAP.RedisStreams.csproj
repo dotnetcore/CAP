@@ -12,6 +12,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<InternalsVisibleTo Include="DotNetCore.CAP.RedisStreams.Test" />
+		
 		<PackageReference Include="StackExchange.Redis" Version="2.6.70" />
 	</ItemGroup>
 

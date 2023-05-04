@@ -29,12 +29,23 @@ namespace DotNetCore.CAP.RedisStreams
             Init().GetAwaiter().GetResult();
         }
 
-        private AsyncLazyRedisConnection? QuietConnection
+        private ValueTask<IConnectionMultiplexer> QuietConnection => _poolAlreadyConfigured ? new(GetDefaultConnection()) : default;
+
+        private async Task<IConnectionMultiplexer> GetDefaultConnection()
         {
-            get
+            using var enumerator = _connections.GetEnumerator();
+
+            RedisConnection min = default!;
+
+            while (enumerator.MoveNext())
             {
-                return _poolAlreadyConfigured ? _connections.OrderBy(async c => (await c).ConnectionCapacity).First() : null;
+                var current = await enumerator.Current;
+
+                if (min == null || min.ConnectionCapacity > current.ConnectionCapacity)
+                    min = current;
             }
+
+            return min.Connection;
         }
 
         public void Dispose()
@@ -45,11 +56,11 @@ namespace DotNetCore.CAP.RedisStreams
 
         public async Task<IConnectionMultiplexer> ConnectAsync()
         {
-            if (QuietConnection == null)
+            if (await QuietConnection == null)
             {
                 _poolAlreadyConfigured = _connections.Count(c => c.IsValueCreated) == _redisOptions.ConnectionPoolSize;
-                if (QuietConnection != null)
-                    return (await QuietConnection).Connection;
+                if (await QuietConnection is { } connection)
+                    return connection;
             }
 
             foreach (var lazy in _connections)
@@ -62,7 +73,7 @@ namespace DotNetCore.CAP.RedisStreams
                     return connection.Connection;
             }
 
-            return (await _connections.OrderBy(async c => (await c).ConnectionCapacity).First()).Connection;
+            return await GetDefaultConnection();
         }
 
         private async Task Init()
