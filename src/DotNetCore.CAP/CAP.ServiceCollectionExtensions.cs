@@ -2,11 +2,13 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+
 using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Serialization;
 using DotNetCore.CAP.Transport;
+
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -29,7 +31,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton(_ => services);
         services.TryAddSingleton(new CapMarkerService("CAP"));
-
+        services.AddSingleton<ISnowflakeId>(_ => new SnowflakeId(Util.GenerateWorkerId(1023)));
         services.TryAddSingleton<ICapPublisher, CapPublisher>();
 
         services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();

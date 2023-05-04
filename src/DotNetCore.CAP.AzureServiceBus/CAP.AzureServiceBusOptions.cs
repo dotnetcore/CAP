@@ -3,9 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+
 using Azure.Messaging.ServiceBus;
+
 using DotNetCore.CAP.AzureServiceBus;
 using DotNetCore.CAP.AzureServiceBus.Producer;
+using DotNetCore.CAP.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
@@ -63,12 +66,21 @@ namespace DotNetCore.CAP
         public Func<ServiceBusReceivedMessage, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
 
         /// <summary>
+        /// Use this function to write additional headers from the original ASB Message or any Custom Header, i.e. to allow compatibility with heterogeneous systems, into <see cref="CapHeader"/>       
+        /// </summary>
+        /// <remarks>
+        /// This property is a copy cat of <see cref="CustomHeaders"/>. The difference is: It also accpets a <see cref="IServiceProvider"/> to use DI services.
+        /// This is added due to converting <see cref="SnowflakeId"/> into a singleton service.
+        /// </remarks>
+        public Func<ServiceBusReceivedMessage, IServiceProvider, List<KeyValuePair<string, string>>>? CustomHeadersBuilder { get; set; }
+
+        /// <summary>
         /// Custom SQL Filters for topic subscription , more about SQL Filters and its rules 
         /// Key: Rule Name , Value: SQL Expression 
         /// https://learn.microsoft.com/en-us/azure/service-bus-messaging/service-bus-messaging-sql-filter
         /// </summary>
-        public List<KeyValuePair<string,string>>? SQLFilters { get; set; }
-        
+        public List<KeyValuePair<string, string>>? SQLFilters { get; set; }
+
         public AzureServiceBusOptions ConfigureCustomProducer<T>(Action<ServiceBusProducerDescriptorBuilder<T>> configuration)
         {
             var builder = new ServiceBusProducerDescriptorBuilder<T>();
