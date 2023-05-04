@@ -40,204 +40,213 @@ namespace DotNetCore.CAP.OpenTelemetry
             switch (evt.Key)
             {
                 case CapEvents.BeforePublishMessageStore:
+                {
+                    var eventData = (CapEventDataPubStore)evt.Value!;
+                    ActivityContext parentContext = default;
+
+                    if (Activity.Current != null && Activity.Current.Source.Name == "OpenTelemetry.Instrumentation.AspNetCore")
                     {
-                        var eventData = (CapEventDataPubStore)evt.Value!;
-                        ActivityContext parentContext = default;
+                        _contexts.TryAdd(eventData.Message.GetId(), parentContext = Activity.Current.Context);
+                    }
+                    else
+                    {
+                        Activity.Current = null;
+                    }
 
-                        if (Activity.Current != null && Activity.Current.Source.Name == "OpenTelemetry.Instrumentation.AspNetCore")
-                        {
-                            _contexts.TryAdd(eventData.Message.GetId(), parentContext = Activity.Current.Context);
-                        }
-                        else
-                        {
-                            Activity.Current = null;
-                        }
-
-                        var activity = ActivitySource.StartActivity("Event Persistence: " + eventData.Operation, ActivityKind.Internal, parentContext);
-                        if (activity != null)
-                        {
-                            activity.SetTag("message.name", eventData.Operation);
+                    var activity = ActivitySource.StartActivity("Event Persistence: " + eventData.Operation, ActivityKind.Internal, parentContext);
+                    if (activity != null)
+                    {
+                        activity.SetTag("message.name", eventData.Operation);
+                        if (eventData.OperationTimestamp is { } timestamp)
                             activity.AddEvent(new ActivityEvent("CAP message persistence start...",
-                                DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
+                                DateTimeOffset.FromUnixTimeMilliseconds(timestamp)));
 
-                            if (parentContext != default)
-                            {
-                                _contexts[eventData.Message.GetId()] = Activity.Current!.Context;
-                            }
+                        if (parentContext != default)
+                        {
+                            _contexts[eventData.Message.GetId()] = activity.Context;
                         }
                     }
+                }
                     break;
                 case CapEvents.AfterPublishMessageStore:
-                    {
-                        var eventData = (CapEventDataPubStore)evt.Value!;
+                {
+                    var eventData = (CapEventDataPubStore)evt.Value!;
 
+                    if (eventData.OperationTimestamp is { } timestamp)
                         Activity.Current?.AddEvent(new ActivityEvent("CAP message persistence succeeded!",
-                            DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value),
+                            DateTimeOffset.FromUnixTimeMilliseconds(timestamp),
                             new ActivityTagsCollection { new("cap.persistence.duration", eventData.ElapsedTimeMs) })
                         );
 
-                        Activity.Current?.Stop();
-                    }
+                    Activity.Current?.Stop();
+                }
                     break;
                 case CapEvents.ErrorPublishMessageStore:
+                {
+                    var eventData = (CapEventDataPubStore)evt.Value!;
+                    if (Activity.Current is { } activity)
                     {
-                        var eventData = (CapEventDataPubStore)evt.Value!;
-                        if (Activity.Current is { } activity)
-                        {
-                            var exception = eventData.Exception!;
-                            activity.SetStatus(Status.Error.WithDescription(exception.Message));
-                            activity.RecordException(exception);
-                            activity.Stop();
-                        }
+                        var exception = eventData.Exception!;
+                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
+                        activity.RecordException(exception);
+                        activity.Stop();
                     }
+                }
                     break;
                 case CapEvents.BeforePublish:
+                {
+                    var eventData = (CapEventDataPubSend)evt.Value!;
+                    _contexts.TryRemove(eventData.TransportMessage.GetId(), out var context);
+                    var activity = ActivitySource.StartActivity(OperateNamePrefix + eventData.Operation + ProducerOperateNameSuffix, ActivityKind.Producer, context);
+                    if (activity != null)
                     {
-                        var eventData = (CapEventDataPubSend)evt.Value!;
-                        _contexts.TryRemove(eventData.TransportMessage.GetId(), out var context);
-                        var activity = ActivitySource.StartActivity(OperateNamePrefix + eventData.Operation + ProducerOperateNameSuffix, ActivityKind.Producer, context);
-                        if (activity != null)
-                        {
-                            activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
-                            activity.SetTag("messaging.destination", eventData.Operation);
-                            activity.SetTag("messaging.destination_kind", "topic");
-                            activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint!.Replace("-1", "5672"));
-                            activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
-                            activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
+                        activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
+                        activity.SetTag("messaging.destination", eventData.Operation);
+                        activity.SetTag("messaging.destination_kind", "topic");
+                        if (eventData.BrokerAddress.Endpoint is { } endpoint)
+                            activity.SetTag("messaging.url", endpoint.Replace("-1", "5672"));
+                        activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
+                        activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
 
+                        if (eventData.OperationTimestamp is { } timestamp)
                             activity.AddEvent(new ActivityEvent("Message publishing start...",
-                                DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
+                                DateTimeOffset.FromUnixTimeMilliseconds(timestamp)));
 
-                            Propagator.Inject(new PropagationContext(activity.Context, Baggage.Current), eventData.TransportMessage,
+                        Propagator.Inject(new PropagationContext(activity.Context, Baggage.Current), eventData.TransportMessage,
                                 (msg, key, value) =>
                                 {
                                     msg.Headers[key] = value;
                                 });
-                        }
                     }
+                }
                     break;
                 case CapEvents.AfterPublish:
+                {
+                    var eventData = (CapEventDataPubSend)evt.Value!;
+                    if (Activity.Current is { } activity)
                     {
-                        var eventData = (CapEventDataPubSend)evt.Value!;
-                        if (Activity.Current is { } activity)
-                        {
+                        if (eventData.OperationTimestamp is { } timestamp)
                             activity.AddEvent(new ActivityEvent("Message publishing succeeded!",
-                                DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value),
+                                DateTimeOffset.FromUnixTimeMilliseconds(timestamp),
                                 new ActivityTagsCollection { new("cap.send.duration", eventData.ElapsedTimeMs) })
                             );
-                            activity.Stop();
-                        }
+                        activity.Stop();
                     }
+                }
                     break;
                 case CapEvents.ErrorPublish:
+                {
+                    var eventData = (CapEventDataPubSend)evt.Value!;
+                    if (Activity.Current is { } activity)
                     {
-                        var eventData = (CapEventDataPubSend)evt.Value!;
-                        if (Activity.Current is { } activity)
-                        {
-                            var exception = eventData.Exception!;
-                            activity.SetStatus(Status.Error.WithDescription(exception.Message));
-                            activity.RecordException(exception);
-                            activity.Stop();
-                        }
+                        var exception = eventData.Exception!;
+                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
+                        activity.RecordException(exception);
+                        activity.Stop();
                     }
+                }
                     break;
                 case CapEvents.BeforeConsume:
+                {
+                    var eventData = (CapEventDataSubStore)evt.Value!;
+                    var parentContext = Propagator.Extract(default, eventData.TransportMessage, (msg, key) =>
                     {
-                        var eventData = (CapEventDataSubStore)evt.Value!;
-                        var parentContext = Propagator.Extract(default, eventData.TransportMessage, (msg, key) =>
+                        if (msg.Headers.TryGetValue(key, out string? value))
                         {
-                            if (msg.Headers.TryGetValue(key, out string? value))
-                            {
                                 return new[] { value };
-                            }
-                            return Enumerable.Empty<string>();
-                        });
-
-                        var activity = ActivitySource.StartActivity(OperateNamePrefix + eventData.Operation + ConsumerOperateNameSuffix,
-                            ActivityKind.Consumer,
-                            parentContext.ActivityContext);
-
-                        if (activity != null)
-                        {
-                            activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
-                            activity.SetTag("messaging.destination", eventData.Operation);
-                            activity.SetTag("messaging.destination_kind", "topic");
-                            activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint!.Replace("-1", "5672"));
-                            activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
-                            activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
-
-                            activity.AddEvent(new ActivityEvent("CAP message persistence start...",
-                                DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
-
-                            _contexts[eventData.TransportMessage.GetId() + eventData.TransportMessage.GetGroup()] = activity.Context;
                         }
+                        return Enumerable.Empty<string>();
+                    });
+
+                    var activity = ActivitySource.StartActivity(OperateNamePrefix + eventData.Operation + ConsumerOperateNameSuffix,
+                        ActivityKind.Consumer,
+                        parentContext.ActivityContext);
+
+                    if (activity != null)
+                    {
+                        activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
+                        activity.SetTag("messaging.destination", eventData.Operation);
+                        activity.SetTag("messaging.destination_kind", "topic");
+                        if (eventData.BrokerAddress.Endpoint is { } endpoint)
+                            activity.SetTag("messaging.url", endpoint.Replace("-1", "5672"));
+                        activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
+                        activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
+
+                        if (eventData.OperationTimestamp is { } timestamp)
+                            activity.AddEvent(new ActivityEvent("CAP message persistence start...",
+                                DateTimeOffset.FromUnixTimeMilliseconds(timestamp)));
+
+                        _contexts[eventData.TransportMessage.GetId() + eventData.TransportMessage.GetGroup()] = activity.Context;
                     }
+                }
                     break;
                 case CapEvents.AfterConsume:
+                {
+                    var eventData = (CapEventDataSubStore)evt.Value!;
+                    if (Activity.Current is { } activity)
                     {
-                        var eventData = (CapEventDataSubStore)evt.Value!;
-                        if (Activity.Current is { } activity)
-                        {
+                        if (eventData.OperationTimestamp is { } timestamp)
                             activity.AddEvent(new ActivityEvent("CAP message persistence succeeded!",
-                                DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value),
+                                DateTimeOffset.FromUnixTimeMilliseconds(timestamp),
                                 new ActivityTagsCollection { new("cap.receive.duration", eventData.ElapsedTimeMs) }));
 
-                            activity.Stop();
-                        }
+                        activity.Stop();
                     }
+                }
                     break;
                 case CapEvents.ErrorConsume:
+                {
+                    var eventData = (CapEventDataSubStore)evt.Value!;
+                    if (Activity.Current is { } activity)
                     {
-                        var eventData = (CapEventDataSubStore)evt.Value!;
-                        if (Activity.Current is { } activity)
-                        {
-                            var exception = eventData.Exception!;
-                            activity.SetStatus(Status.Error.WithDescription(exception.Message));
-                            activity.RecordException(exception);
-                            activity.Stop();
-                        }
+                        var exception = eventData.Exception!;
+                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
+                        activity.RecordException(exception);
+                        activity.Stop();
                     }
+                }
                     break;
                 case CapEvents.BeforeSubscriberInvoke:
+                {
+                    var eventData = (CapEventDataSubExecute)evt.Value!;
+                    _contexts.TryRemove(eventData.Message.GetId() + eventData.Message.GetGroup(), out var context);
+                    var activity = ActivitySource.StartActivity("Subscriber Invoke: " + eventData.MethodInfo?.Name, ActivityKind.Internal, context);
+                    if (activity != null)
                     {
-                        var eventData = (CapEventDataSubExecute)evt.Value!;
-                        _contexts.TryRemove(eventData.Message.GetId() + eventData.Message.GetGroup(), out var context);
-                        var activity = ActivitySource.StartActivity("Subscriber Invoke: " + eventData.MethodInfo!.Name, ActivityKind.Internal,
-                            context);
-                        if (activity != null)
-                        {
-                            activity.SetTag("messaging.operation", "process");
-                            activity.SetTag("code.function", eventData.MethodInfo.Name);
+                        activity.SetTag("messaging.operation", "process");
+                        activity.SetTag("code.function", eventData.MethodInfo.Name);
 
+                        if (eventData.OperationTimestamp is { } timestamp)
                             activity.AddEvent(new ActivityEvent("Begin invoke the subscriber:" + eventData.MethodInfo.Name,
-                                DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
-                        }
+                                DateTimeOffset.FromUnixTimeMilliseconds(timestamp)));
                     }
+                }
                     break;
                 case CapEvents.AfterSubscriberInvoke:
+                {
+                    var eventData = (CapEventDataSubExecute)evt.Value!;
+                    if (Activity.Current is { } activity)
                     {
-                        var eventData = (CapEventDataSubExecute)evt.Value!;
-                        if (Activity.Current is { } activity)
-                        {
+                        if (eventData.OperationTimestamp is { } timestamp)
                             activity.AddEvent(new ActivityEvent("Subscriber invoke succeeded!",
-                                DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value),
+                                DateTimeOffset.FromUnixTimeMilliseconds(timestamp),
                                 new ActivityTagsCollection { new("cap.invoke.duration", eventData.ElapsedTimeMs) }));
 
-                            activity.Stop();
-                        }
+                        activity.Stop();
                     }
+                }
                     break;
                 case CapEvents.ErrorSubscriberInvoke:
+                {
+                    var eventData = (CapEventDataSubExecute)evt.Value!;
+                    if (Activity.Current is { } activity)
                     {
-                        var eventData = (CapEventDataSubExecute)evt.Value!;
-                        if (Activity.Current is { } activity)
-                        {
-                            var exception = eventData.Exception!;
-                            activity.SetStatus(Status.Error.WithDescription(exception.Message));
-                            activity.RecordException(exception);
-                            activity.Stop();
-                        }
+                        var exception = eventData.Exception!;
+                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
+                        activity.RecordException(exception);
+                        activity.Stop();
                     }
+                }
                     break;
             }
         }
