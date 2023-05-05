@@ -8,7 +8,7 @@ using System.Threading;
 
 namespace DotNetCore.CAP.Internal;
 
-public class SnowflakeId
+public class SnowflakeId : ISnowflakeId
 {
     /// <summary>
     /// Start time 2010-11-04 09:42:54
@@ -40,10 +40,6 @@ public class SnowflakeId
     /// </summary>
     private const long TimestampAndSequenceMask = ~(-1L << (TimestampBits + SequenceBits));
 
-    private static SnowflakeId? _snowflakeId;
-
-    private static readonly object SLock = new();
-
     private readonly object _lock = new();
 
     /// <summary>
@@ -58,10 +54,10 @@ public class SnowflakeId
     {
         InitTimestampAndSequence();
         // sanity check for workerId
-        if (workerId > MaxWorkerId || workerId < 0)
+        if (workerId is > MaxWorkerId or < 0)
             throw new ArgumentException($"worker Id can't be greater than {MaxWorkerId} or less than 0");
 
-        _workerId = workerId << (TimestampBits + SequenceBits);
+        WorkerId = workerId << (TimestampBits + SequenceBits);
     }
 
     /// <summary>
@@ -71,22 +67,7 @@ public class SnowflakeId
     /// middle 10 bit: workerId
     /// lowest 53 bit: all 0
     /// </summary>
-    private long _workerId { get; }
-
-    public static SnowflakeId Default()
-    {
-        if (_snowflakeId != null) return _snowflakeId;
-
-        lock (SLock)
-        {
-            if (_snowflakeId != null) return _snowflakeId;
-
-            if (!long.TryParse(Environment.GetEnvironmentVariable("CAP_WORKERID"), out var workerId))
-                workerId = Util.GenerateWorkerId(MaxWorkerId);
-
-            return _snowflakeId = new SnowflakeId(workerId);
-        }
-    }
+    private long WorkerId { get; }
 
     public virtual long NextId()
     {
@@ -94,7 +75,7 @@ public class SnowflakeId
         {
             WaitIfNecessary();
             var timestampWithSequence = _timestampAndSequence & TimestampAndSequenceMask;
-            return _workerId | timestampWithSequence;
+            return WorkerId | timestampWithSequence;
         }
     }
 
@@ -125,7 +106,7 @@ public class SnowflakeId
     /// get newest timestamp relative to twepoch
     /// </summary>
     /// <returns></returns>
-    private long GetNewestTimestamp()
+    private static long GetNewestTimestamp()
     {
         return DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - Twepoch;
     }

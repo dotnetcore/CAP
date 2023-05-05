@@ -1,4 +1,6 @@
 using System;
+
+using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,6 +40,7 @@ namespace DotNetCore.CAP.MySql.Test
             services.AddSingleton<MySqlDataStorage>();            
             services.AddSingleton<IStorageInitializer,MySqlStorageInitializer>();
             services.AddSingleton<ISerializer, JsonUtf8Serializer>();
+            services.AddSingleton<ISnowflakeId>(e => new SnowflakeId(10));
             _services = services;
         }
 

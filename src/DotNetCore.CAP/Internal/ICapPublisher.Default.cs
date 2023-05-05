@@ -22,6 +22,7 @@ internal class CapPublisher : ICapPublisher
         new(CapDiagnosticListenerNames.DiagnosticListenerName);
 
     private readonly CapOptions _capOptions;
+    private readonly ISnowflakeId _snowflakeId;
     private readonly IDispatcher _dispatcher;
     private readonly IDataStorage _storage;
     private readonly IBootstrapper _bootstrapper;
@@ -33,6 +34,7 @@ internal class CapPublisher : ICapPublisher
         _dispatcher = service.GetRequiredService<IDispatcher>();
         _storage = service.GetRequiredService<IDataStorage>();
         _capOptions = service.GetRequiredService<IOptions<CapOptions>>().Value;
+        _snowflakeId = service.GetRequiredService<ISnowflakeId>();
         Transaction = new AsyncLocal<ICapTransaction>();
     }
 
@@ -112,7 +114,7 @@ internal class CapPublisher : ICapPublisher
 
         if (!headers.ContainsKey(Headers.MessageId))
         {
-            var messageId = SnowflakeId.Default().NextId().ToString();
+            var messageId = _snowflakeId.NextId().ToString();
             headers.Add(Headers.MessageId, messageId);
         }
 
