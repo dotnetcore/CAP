@@ -6,11 +6,15 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
+
 using Microsoft.Extensions.Options;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
+
 using Headers = DotNetCore.CAP.Messages.Headers;
 
 namespace DotNetCore.CAP.RabbitMQ
@@ -20,6 +24,7 @@ namespace DotNetCore.CAP.RabbitMQ
         private readonly object _syncLock = new();
 
         private readonly IConnectionChannelPool _connectionChannelPool;
+        private readonly IServiceProvider _serviceProvider;
         private readonly string _exchangeName;
         private readonly string _queueName;
         private readonly RabbitMQOptions _rabbitMQOptions;
@@ -27,10 +32,12 @@ namespace DotNetCore.CAP.RabbitMQ
 
         public RabbitMQConsumerClient(string queueName,
             IConnectionChannelPool connectionChannelPool,
-            IOptions<RabbitMQOptions> options)
+            IOptions<RabbitMQOptions> options,
+            IServiceProvider serviceProvider)
         {
             _queueName = queueName;
             _connectionChannelPool = connectionChannelPool;
+            _serviceProvider = serviceProvider;
             _rabbitMQOptions = options.Value;
             _exchangeName = connectionChannelPool.Exchange;
         }
@@ -201,6 +208,15 @@ namespace DotNetCore.CAP.RabbitMQ
             if (_rabbitMQOptions.CustomHeaders != null)
             {
                 var customHeaders = _rabbitMQOptions.CustomHeaders(e);
+                foreach (var customHeader in customHeaders)
+                {
+                    headers[customHeader.Key] = customHeader.Value;
+                }
+            }
+
+            if (_rabbitMQOptions.CustomHeadersBuilder != null)
+            {
+                var customHeaders = _rabbitMQOptions.CustomHeadersBuilder(e, _serviceProvider);
                 foreach (var customHeader in customHeaders)
                 {
                     headers[customHeader.Key] = customHeader.Value;

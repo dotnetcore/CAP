@@ -7,11 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Confluent.Kafka;
 using Confluent.Kafka.Admin;
+
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
+
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Kafka
@@ -21,12 +24,14 @@ namespace DotNetCore.CAP.Kafka
         private static readonly SemaphoreSlim ConnectionLock = new(initialCount: 1, maxCount: 1);
 
         private readonly string _groupId;
+        private readonly IServiceProvider _serviceProvider;
         private readonly KafkaOptions _kafkaOptions;
         private IConsumer<string, byte[]>? _consumerClient;
 
-        public KafkaConsumerClient(string groupId, IOptions<KafkaOptions> options)
+        public KafkaConsumerClient(string groupId, IOptions<KafkaOptions> options, IServiceProvider serviceProvider)
         {
             _groupId = groupId;
+            _serviceProvider = serviceProvider;
             _kafkaOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
@@ -124,6 +129,15 @@ namespace DotNetCore.CAP.Kafka
                 if (_kafkaOptions.CustomHeaders != null)
                 {
                     var customHeaders = _kafkaOptions.CustomHeaders(consumerResult);
+                    foreach (var customHeader in customHeaders)
+                    {
+                        headers[customHeader.Key] = customHeader.Value;
+                    }
+                }
+
+                if (_kafkaOptions.CustomHeadersBuilder != null)
+                {
+                    var customHeaders = _kafkaOptions.CustomHeadersBuilder(consumerResult, _serviceProvider);
                     foreach (var customHeader in customHeaders)
                     {
                         headers[customHeader.Key] = customHeader.Value;
