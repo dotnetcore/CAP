@@ -1,7 +1,7 @@
 <template>
   <div>
     <h2 class="text-left mb-4">{{ $t("Nodes") }}</h2>
-    <b-table :fields="fields" :items="items" :busy="isBusy"  show-empty empty-text="Unconfigure node discovery !">
+    <b-table :fields="fields" :items="items" :busy="isBusy" small fixed head-variant="light" show-empty empty-text="Unconfigure node discovery !">
       <template #table-busy>
         <div class="text-center text-secondary my-2">
           <b-spinner class="align-middle"></b-spinner>
@@ -10,7 +10,7 @@
       </template>
 
       <template #empty="scope">
-        <h5 class="alert alert-primary" role="alert">
+        <h5 class="alert alert-info" role="alert">
           <b-icon-info-circle-fill /> {{ scope.emptyText }}
         </h5>
       </template>
