@@ -33,7 +33,8 @@ namespace DotNetCore.CAP.RedisStreams
         {
             get
             {
-                return _poolAlreadyConfigured ? _connections.OrderBy(async c => (await c).ConnectionCapacity).First() : null;
+                return _poolAlreadyConfigured ? _connections.OrderBy(static c => c.CreatedConnection?.ConnectionCapacity
+                ?? int.MaxValue).First() : null;
             }
         }
 
@@ -47,22 +48,27 @@ namespace DotNetCore.CAP.RedisStreams
         {
             if (QuietConnection == null)
             {
-                _poolAlreadyConfigured = _connections.Count(c => c.IsValueCreated) == _redisOptions.ConnectionPoolSize;
+                _poolAlreadyConfigured = _connections.Count(static c => c.IsValueCreated) == _redisOptions.ConnectionPoolSize;
                 if (QuietConnection != null)
-                    return (await QuietConnection).Connection;
+                {
+                    return QuietConnection.CreatedConnection!.Connection;
+                }
             }
 
             foreach (var lazy in _connections)
             {
                 if (!lazy.IsValueCreated)
+                {
                     return (await lazy).Connection;
+                }
 
-                var connection = await lazy;
-                if (connection.ConnectionCapacity == default)
-                    return connection.Connection;
+                if (lazy.CreatedConnection!.ConnectionCapacity == default)
+                {
+                    return lazy.CreatedConnection.Connection;
+                }
             }
 
-            return (await _connections.OrderBy(async c => (await c).ConnectionCapacity).First()).Connection;
+            return (await _connections.OrderBy(static c => c.CreatedConnection!.ConnectionCapacity).First()).Connection;
         }
 
         private async Task Init()
@@ -71,8 +77,7 @@ namespace DotNetCore.CAP.RedisStreams
             {
                 await _poolLock.WaitAsync();
 
-                if (_connections.Any())
-                    return;
+                if (_connections.Any()) return;
 
                 for (var i = 0; i < _redisOptions.ConnectionPoolSize; i++)
                 {
@@ -90,17 +95,17 @@ namespace DotNetCore.CAP.RedisStreams
 
         private void Dispose(bool disposing)
         {
-            if (_isDisposed)
-                return;
+            if (_isDisposed) return;
 
             if (disposing)
+            {
                 foreach (var connection in _connections)
                 {
-                    if (!connection.IsValueCreated)
-                        continue;
+                    if (!connection.IsValueCreated) continue;
 
-                    connection.GetAwaiter().GetResult().Dispose();
+                    connection.CreatedConnection!.Dispose();
                 }
+            }
 
             _isDisposed = true;
         }
