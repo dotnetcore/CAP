@@ -11,6 +11,9 @@ namespace DotNetCore.CAP.RedisStreams
 {
     public class AsyncLazyRedisConnection : Lazy<Task<RedisConnection>>
     {
+        public RedisConnection? CreatedConnection
+            => IsValueCreated ? Value.GetAwaiter().GetResult() : null;
+
         public AsyncLazyRedisConnection(CapRedisOptions redisOptions,
             ILogger<AsyncLazyRedisConnection> logger) : base(() => ConnectAsync(redisOptions, logger))
         {
@@ -32,22 +35,29 @@ namespace DotNetCore.CAP.RedisStreams
 
             while (attemp <= 5)
             {
-                connection = await ConnectionMultiplexer.ConnectAsync(redisOptions.Configuration, redisLogger)
-                .ConfigureAwait(false);
+                connection = await ConnectionMultiplexer.ConnectAsync(redisOptions.Configuration!, redisLogger)
+                                                        .ConfigureAwait(false);
 
                 connection.LogEvents(logger);
 
                 if (!connection.IsConnected)
                 {
                     logger.LogWarning($"Can't establish redis connection,trying to establish connection [attemp {attemp}].");
-                    await Task.Delay(TimeSpan.FromSeconds(2));
+
+                    await Task.Delay(TimeSpan.FromSeconds(2))
+                              .ConfigureAwait(false);
+
                     ++attemp;
                 }
                 else
+                {
                     attemp = 6;
+                }
             }
             if (connection == null)
+            {
                 throw new Exception($"Can't establish redis connection,after [{attemp}] attemps.");
+            }
 
             return new RedisConnection(connection);
         }
@@ -73,8 +83,7 @@ namespace DotNetCore.CAP.RedisStreams
 
         private void Dispose(bool disposing)
         {
-            if (_isDisposed)
-                return;
+            if (_isDisposed) return;
 
             if (disposing) Connection.Dispose();
 
