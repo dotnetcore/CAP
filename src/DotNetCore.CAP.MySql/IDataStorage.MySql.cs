@@ -26,7 +26,6 @@ public class MySqlDataStorage : IDataStorage
     private readonly string _pubName;
     private readonly string _recName;
     private readonly ISerializer _serializer;
-    private readonly bool _supportSkipLocked;
     private readonly string _lockName;
 
     public MySqlDataStorage(
@@ -42,8 +41,9 @@ public class MySqlDataStorage : IDataStorage
         _pubName = initializer.GetPublishedTableName();
         _recName = initializer.GetReceivedTableName();
         _lockName = initializer.GetLockTableName();
-        _supportSkipLocked = ((MySqlStorageInitializer)initializer).IsSupportSkipLocked();
     }
+
+    bool SupportSkipLocked => ((MySqlStorageInitializer)_initializer).IsSupportSkipLocked();
 
     public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
     {
@@ -222,7 +222,7 @@ public class MySqlDataStorage : IDataStorage
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
         CancellationToken token = default)
     {
-        var lockSql = _supportSkipLocked ? "FOR UPDATE SKIP LOCKED" : "FOR UPDATE";
+        var lockSql = SupportSkipLocked ? "FOR UPDATE SKIP LOCKED" : "FOR UPDATE";
 
         var sql =
             $"SELECT `Id`,`Content`,`Retries`,`Added`,`ExpiresAt` FROM `{_pubName}` WHERE `Version`=@Version " +
