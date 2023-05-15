@@ -41,23 +41,23 @@ namespace DotNetCore.CAP.Dashboard
         {
             var prefixMatch = _options.PathMatch + "/api";
 
-            _builder.MapGet(prefixMatch + "/metrics-realtime", Metrics);
-            _builder.MapGet(prefixMatch + "/meta", MetaInfo);
-            _builder.MapGet(prefixMatch + "/stats", Stats);
-            _builder.MapGet(prefixMatch + "/metrics-history", MetricsHistory);
-            _builder.MapGet(prefixMatch + "/health", Health);
-            _builder.MapGet(prefixMatch + "/published/message/{id:long}", PublishedMessageDetails);
-            _builder.MapGet(prefixMatch + "/received/message/{id:long}", ReceivedMessageDetails);
+            _builder.MapGet(prefixMatch + "/metrics-realtime", Metrics).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/meta", MetaInfo).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/stats", Stats).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/metrics-history", MetricsHistory).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/health", Health).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/published/message/{id:long}", PublishedMessageDetails).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/received/message/{id:long}", ReceivedMessageDetails).AllowAnonymousIf(_options.AllowAnonymousExplicit);
 
-            _builder.MapPost(prefixMatch + "/published/requeue", PublishedRequeue);
-            _builder.MapPost(prefixMatch + "/received/reexecute", ReceivedRequeue);
+            _builder.MapPost(prefixMatch + "/published/requeue", PublishedRequeue).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapPost(prefixMatch + "/received/reexecute", ReceivedRequeue).AllowAnonymousIf(_options.AllowAnonymousExplicit);
 
-            _builder.MapGet(prefixMatch + "/published/{status}", PublishedList);
-            _builder.MapGet(prefixMatch + "/received/{status}", ReceivedList);
-            _builder.MapGet(prefixMatch + "/subscriber", Subscribers);
-            _builder.MapGet(prefixMatch + "/nodes", Nodes);
+            _builder.MapGet(prefixMatch + "/published/{status}", PublishedList).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/received/{status}", ReceivedList).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/subscriber", Subscribers).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/nodes", Nodes).AllowAnonymousIf(_options.AllowAnonymousExplicit);
         }
-
+         
         public async Task Metrics(HttpContext httpContext)
         {
             if (_agent != null && await _agent.Invoke(httpContext)) return;

@@ -55,6 +55,6 @@ export default {
     Port: "Port",
     Tags: "Tags",
     Actions: "Actions",
-    ReexecuteSuccess: "Reexecute Successful !",
-    RequeueSuccess: "Requeue Successfull !"
+    ReexecuteSuccess: "😀 Reexecute Successful !",
+    RequeueSuccess: "😀 Requeue Successfull !"
 }
