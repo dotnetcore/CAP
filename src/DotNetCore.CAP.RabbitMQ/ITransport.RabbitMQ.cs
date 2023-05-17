@@ -39,9 +39,12 @@ namespace DotNetCore.CAP.RabbitMQ
                 var props = channel.CreateBasicProperties();
                 props.DeliveryMode = 2;
                 props.Headers = message.Headers.ToDictionary(x => x.Key, x => (object?)x.Value);
-
+                
+                // Set the message ID of RabbitMQ to be consistent with the message ID of cap 
+                props.MessageId = props.Headers[Messages.Headers.MessageId]?.ToString();
+                
                 channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
-
+                	
                 // Enable publish confirms
                 if (channel.NextPublishSeqNo > 0)
                 {
