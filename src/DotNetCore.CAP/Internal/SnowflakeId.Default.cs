@@ -52,7 +52,8 @@ public class SnowflakeId : ISnowflakeId
 
     public SnowflakeId()
     {
-        var workerId = Util.GenerateWorkerId(1023);
+        if (!long.TryParse(Environment.GetEnvironmentVariable("CAP_WORKERID"), out var workerId))
+            workerId = Util.GenerateWorkerId(MaxWorkerId);
 
         Initialize(workerId);
     }
