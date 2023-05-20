@@ -31,7 +31,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton(_ => services);
         services.TryAddSingleton(new CapMarkerService("CAP"));
-        services.AddSingleton<ISnowflakeId>(_ => new SnowflakeId(Util.GenerateWorkerId(1023)));
+        services.AddSingleton<ISnowflakeId, SnowflakeId>();
         services.TryAddSingleton<ICapPublisher, CapPublisher>();
 
         services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();

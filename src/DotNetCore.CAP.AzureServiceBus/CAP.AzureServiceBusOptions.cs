@@ -63,15 +63,12 @@ namespace DotNetCore.CAP
         /// <summary>
         /// Use this function to write additional headers from the original ASB Message or any Custom Header, i.e. to allow compatibility with heterogeneous systems, into <see cref="CapHeader"/>
         /// </summary>
+        [Obsolete("Will be dropped in the next releases in favor of the CustomHeadersBuilder property")]
         public Func<ServiceBusReceivedMessage, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
 
         /// <summary>
-        /// Use this function to write additional headers from the original ASB Message or any Custom Header, i.e. to allow compatibility with heterogeneous systems, into <see cref="CapHeader"/>       
+        /// Use this function to write additional headers from the original ASB Message or any Custom Header, i.e. to allow compatibility with heterogeneous systems, into <see cref="CapHeader"/>
         /// </summary>
-        /// <remarks>
-        /// This property is a copy cat of <see cref="CustomHeaders"/>. The difference is: It also accpets a <see cref="IServiceProvider"/> to use DI services.
-        /// This is added due to converting <see cref="SnowflakeId"/> into a singleton service.
-        /// </remarks>
         public Func<ServiceBusReceivedMessage, IServiceProvider, List<KeyValuePair<string, string>>>? CustomHeadersBuilder { get; set; }
 
         /// <summary>

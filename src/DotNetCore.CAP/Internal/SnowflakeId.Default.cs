@@ -50,14 +50,16 @@ public class SnowflakeId : ISnowflakeId
     /// </summary>
     private long _timestampAndSequence;
 
+    public SnowflakeId()
+    {
+        var workerId = Util.GenerateWorkerId(1023);
+
+        Initialize(workerId);
+    }
+
     public SnowflakeId(long workerId)
     {
-        InitTimestampAndSequence();
-        // sanity check for workerId
-        if (workerId is > MaxWorkerId or < 0)
-            throw new ArgumentException($"worker Id can't be greater than {MaxWorkerId} or less than 0");
-
-        WorkerId = workerId << (TimestampBits + SequenceBits);
+        Initialize(workerId);
     }
 
     /// <summary>
@@ -67,7 +69,7 @@ public class SnowflakeId : ISnowflakeId
     /// middle 10 bit: workerId
     /// lowest 53 bit: all 0
     /// </summary>
-    private long WorkerId { get; }
+    private long WorkerId { get; set; }
 
     public virtual long NextId()
     {
@@ -100,6 +102,21 @@ public class SnowflakeId : ISnowflakeId
         var newest = GetNewestTimestamp();
 
         if (current >= newest) Thread.Sleep(5);
+    }
+
+    /// <summary>
+    /// Common method for initializing <see cref="SnowflakeId"/>
+    /// </summary>
+    /// <param name="workerId"></param>
+    /// <exception cref="ArgumentException"></exception>
+    private void Initialize(long workerId)
+    {
+        InitTimestampAndSequence();
+        // sanity check for workerId
+        if (workerId is > MaxWorkerId or < 0)
+            throw new ArgumentException($"worker Id can't be greater than {MaxWorkerId} or less than 0");
+
+        WorkerId = workerId << (TimestampBits + SequenceBits);
     }
 
     /// <summary>
