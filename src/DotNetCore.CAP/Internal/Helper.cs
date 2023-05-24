@@ -6,6 +6,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Runtime.ExceptionServices;
 using System.Text.RegularExpressions;
 
 namespace DotNetCore.CAP.Internal;
@@ -122,5 +123,10 @@ public static class Helper
                type == typeof(DateTimeOffset) ||
                type == typeof(TimeSpan) ||
                type == typeof(Uri);
+    }
+
+    internal static void ReThrow(this Exception exception)
+    {
+        ExceptionDispatchInfo.Capture(exception).Throw();
     }
 }
