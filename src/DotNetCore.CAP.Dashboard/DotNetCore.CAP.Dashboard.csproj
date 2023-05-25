@@ -9,6 +9,7 @@
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Consul" Version="1.6.10.7" />
+		<PackageReference Include="KubernetesClient" Version="11.0.9" />
 		<SupportedPlatform Include="browser" />
 	</ItemGroup>
 

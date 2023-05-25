@@ -41,6 +41,7 @@ axios.interceptors.request.use(
   }
 );
 
+
 Vue.config.productionTip = false
 
 Vue.use(BootstrapVue)

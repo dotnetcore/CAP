@@ -19,6 +19,8 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
     public class GatewayProxyAgent
     {
         public const string CookieNodeName = "cap.node";
+        public const string CookieNodeNsName = "cap.node.ns";
+        private readonly bool _isK8S = false;
         private readonly ILogger _logger;
 
         private readonly IHttpRequester _requester;
@@ -39,6 +41,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             _requester = requester;
             _discoveryProvider = discoveryProvider;
             _discoveryOptions = discoveryOptions;
+            _isK8S = _discoveryOptions.K8SOptions != null;
         }
 
         protected HttpRequestMessage DownstreamRequest { get; set; }
@@ -53,7 +56,8 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             var request = context.Request;
             //For performance reasons, we need to put this functionality in the else
             var isSwitchNode = request.Cookies.TryGetValue(CookieNodeName, out var requestNodeName);
-            var isCurrentNode = _discoveryOptions.NodeName == requestNodeName;
+
+            var isCurrentNode = false;//TODO:_discoveryOptions.ConsulOptions.NodeName == requestNodeName;
 
             if (!isSwitchNode || isCurrentNode)
             {
@@ -62,7 +66,22 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 
             _logger.LogDebug("start calling remote endpoint...");
 
-            var node = await _discoveryProvider.GetNode(requestNodeName);
+            Node node = null;
+            if (_isK8S)
+            {
+                if (request.Cookies.TryGetValue(CookieNodeNsName, out var ns))
+                {
+                    node = await _discoveryProvider.GetNode(requestNodeName, ns);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                node = await _discoveryProvider.GetNode(requestNodeName);
+            }
             if (node != null)
             {
                 try
@@ -117,7 +136,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             {
                 await stream.CopyToAsync(context.Response.Body);
             }
-        } 
+        }
 
         private void SetDownStreamRequestUri(Node node, string requestPath, string queryString)
         {

@@ -1,9 +1,32 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
+using k8s;
+
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
     public class DiscoveryOptions
+    {
+        internal KubernetesClientConfiguration K8SOptions { get; set; }
+
+        internal ConsulOptions ConsulOptions { get; set; }
+
+        public void UseConsul(Action<ConsulOptions> options)
+        {
+            var opt = new ConsulOptions();
+            options.Invoke(opt);
+        }
+
+        public void UseK8S(Action<KubernetesClientConfiguration> options = null)
+        {
+            K8SOptions = KubernetesClientConfiguration.BuildDefaultConfig();
+
+            options?.Invoke(K8SOptions);
+        }
+    }
+
+    public class ConsulOptions
     {
         public const string DefaultDiscoveryServerHost = "localhost";
         public const int DefaultDiscoveryServerPort = 8500;
@@ -15,7 +38,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 
         public const string DefaultScheme = "http";
 
-        public DiscoveryOptions()
+        public ConsulOptions()
         {
             DiscoveryServerHostName = DefaultDiscoveryServerHost;
             DiscoveryServerPort = DefaultDiscoveryServerPort;

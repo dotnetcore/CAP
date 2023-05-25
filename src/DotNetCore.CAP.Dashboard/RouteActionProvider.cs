@@ -3,7 +3,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
@@ -12,8 +17,12 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
+using IdentityModel.OidcClient;
+using k8s;
+using k8s.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
@@ -56,8 +65,12 @@ namespace DotNetCore.CAP.Dashboard
             _builder.MapGet(prefixMatch + "/received/{status}", ReceivedList).AllowAnonymousIf(_options.AllowAnonymousExplicit);
             _builder.MapGet(prefixMatch + "/subscriber", Subscribers).AllowAnonymousIf(_options.AllowAnonymousExplicit);
             _builder.MapGet(prefixMatch + "/nodes", Nodes).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+
+            _builder.MapGet(prefixMatch + "/list-ns", ListNamespaces).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/list-svc/{namespace}", ListServices).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/ping", PingServices).AllowAnonymousIf(_options.AllowAnonymousExplicit);
         }
-         
+
         public async Task Metrics(HttpContext httpContext)
         {
             if (_agent != null && await _agent.Invoke(httpContext)) return;
@@ -338,6 +351,79 @@ namespace DotNetCore.CAP.Dashboard
             result = await discoveryProvider.GetNodes();
 
             await httpContext.Response.WriteAsJsonAsync(result);
+        }
+
+        public async Task ListNamespaces(HttpContext httpContext)
+        {
+            var discoveryProvider = _serviceProvider.GetService<INodeDiscoveryProvider>();
+            if (discoveryProvider == null)
+            {
+                await httpContext.Response.WriteAsJsonAsync(new List<string>());
+                return;
+            }
+            await httpContext.Response.WriteAsJsonAsync(await discoveryProvider.GetNamespaces(httpContext.RequestAborted));
+        }
+
+        public async Task ListServices(HttpContext httpContext)
+        {
+            var @namespace = string.Empty;
+
+            if (httpContext.Request.RouteValues.TryGetValue("namespace", out var val))
+            {
+                @namespace = val!.ToString();
+            }
+
+            var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
+            var client = new Kubernetes(config);
+            var services = await client.CoreV1.ListNamespacedServiceAsync(@namespace);
+
+            var result = new List<Node>();
+            foreach (var service in services.Items)
+            {
+                result.Add(new Node()
+                {
+                    Id = service.Uid(),
+                    Name = service.Name(),
+                    Address = "http://" + service.Metadata.Name + "." + @namespace,
+                    Port = service.Spec.Ports?[0].Port ?? 0,
+                    Tags = string.Join(',', service.Labels()?.Select(x => x.Key + ":" + x.Value) ?? Array.Empty<string>())
+                });
+            }
+            await httpContext.Response.WriteAsJsonAsync(result);
+        }
+
+        public async Task PingServices(HttpContext httpContext)
+        {
+            var endpoint = httpContext.Request.Query["endpoint"];
+
+            var httpClient = new HttpClient();
+            var sw = new Stopwatch();
+            try
+            {
+                sw.Restart();
+                //if (Random.Shared.Next(10, 100)>45)
+                //{
+                //    await httpContext.Response.WriteAsync("22");
+                //    return;
+                //}
+                var healthEndpoint = endpoint + _options.PathMatch + "/api/health";
+                var response = await httpClient.GetStringAsync(healthEndpoint);
+                sw.Stop();
+
+                if (response == "OK")
+                {
+                    await httpContext.Response.WriteAsync(sw.ElapsedMilliseconds.ToString());
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                httpContext.Response.StatusCode = (int)e.StatusCode.GetValueOrDefault(HttpStatusCode.BadGateway);
+                await httpContext.Response.WriteAsync(e.Message);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
         }
 
         private async Task<bool> Auth(HttpContext httpContext)

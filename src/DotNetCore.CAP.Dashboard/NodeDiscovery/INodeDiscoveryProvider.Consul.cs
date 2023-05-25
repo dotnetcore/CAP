@@ -15,15 +15,15 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
     public class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider
     {
         private readonly ILogger<ConsulNodeDiscoveryProvider> _logger;
-        private readonly DiscoveryOptions _options;
+        private readonly ConsulOptions _options;
 
         public ConsulNodeDiscoveryProvider(ILoggerFactory logger, DiscoveryOptions options)
         {
             _logger = logger.CreateLogger<ConsulNodeDiscoveryProvider>();
-            _options = options;
+            _options = options.ConsulOptions;
         }
 
-        public async Task<Node> GetNode(string nodeName, CancellationToken cancellationToken = default)
+        public async Task<Node> GetNode(string nodeName, string ns, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
         }
 
 
-        public async Task<IList<Node>> GetNodes(CancellationToken cancellationToken)
+        public async Task<IList<Node>> GetNodes(string ns, CancellationToken cancellationToken)
         {
             try
             {

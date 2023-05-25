@@ -31,8 +31,16 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
             services.AddSingleton<IRequestMapper, RequestMapper>();
             services.AddSingleton<GatewayProxyAgent>();
-            services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
-            services.AddSingleton<INodeDiscoveryProvider, ConsulNodeDiscoveryProvider>();
+
+            if (discoveryOptions.ConsulOptions != null)
+            {
+                services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
+                services.AddSingleton<INodeDiscoveryProvider, ConsulNodeDiscoveryProvider>();
+            }
+            else if (discoveryOptions.K8SOptions != null)
+            {
+                services.AddSingleton<INodeDiscoveryProvider, K8SNodeDiscoveryProvider>();
+            }
         }
     }
 }
@@ -41,9 +49,15 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CapDiscoveryOptionsExtensions
     {
+        /// <summary>
+        /// Default use kubernetes as service discovery.
+        /// </summary>
         public static CapOptions UseDiscovery(this CapOptions capOptions)
         {
-            return capOptions.UseDiscovery(opt => { });
+            return capOptions.UseDiscovery(opt =>
+            {
+                opt.UseK8S();
+            });
         }
 
         public static CapOptions UseDiscovery(this CapOptions capOptions, Action<DiscoveryOptions> options)
