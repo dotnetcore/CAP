@@ -16,13 +16,14 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
         {
             var opt = new ConsulOptions();
             options.Invoke(opt);
+            ConsulOptions = opt;
         }
 
         public void UseK8S(Action<KubernetesClientConfiguration> options = null)
         {
             K8SOptions = KubernetesClientConfiguration.BuildDefaultConfig();
-
             options?.Invoke(K8SOptions);
+
         }
     }
 

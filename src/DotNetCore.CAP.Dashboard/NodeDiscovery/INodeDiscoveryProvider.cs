@@ -19,7 +19,12 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             throw new NotImplementedException();
         }
 
-        Task<IList<string>> GetNamespaces(CancellationToken cancellationToken)
+        Task<List<string>> GetNamespaces(CancellationToken cancellationToken)
+        {
+            return Task.FromResult(new List<string>());
+        }
+
+        Task<IList<Node>> ListServices(string ns = null)
         {
             throw new NotImplementedException();
         }

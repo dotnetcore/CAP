@@ -74,7 +74,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                     {
                         Id = info.ServiceID,
                         Name = info.ServiceName,
-                        Address = info.ServiceAddress,
+                        Address = "http://" + info.ServiceAddress,
                         Port = info.ServicePort,
                         Tags = string.Join(", ", info.ServiceTags)
                     }).ToList();

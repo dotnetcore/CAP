@@ -2,9 +2,9 @@
   <div>
     <h2 class="text-left mb-4">{{ $t("Nodes") }}</h2>
 
-    <b-row class="mb-3" v-if="options">
+    <b-row class="mb-3" v-if="nsList.length > 0">
       <b-col>
-        <b-form-select v-model="selected" value-field="item" text-field="name" @change="fetchSvcs()" :options="options">
+        <b-form-select v-model="selected" value-field="item" text-field="name" @change="fetchSvcs()" :options="nsList">
           <template #first>
             <b-form-select-option :value="null" disabled>{{ $t("SelectNamespaces") }}</b-form-select-option>
           </template>
@@ -97,7 +97,7 @@ export default {
     return {
       pinging: false,
       selected: null,
-      options: [],
+      nsList: [],
       isBusy: false,
       items: []
     }
@@ -134,7 +134,9 @@ export default {
     fetchNsOptions() {
       this.isBusy = true;
       axios.get('/list-ns').then(res => {
-        this.options = res.data;
+        if (res.data.length > 0) {
+          this.nsList = res.data;
+        }
       });
       this.isBusy = false;
       let ns = this.getCookie("cap.node.ns");
@@ -146,7 +148,7 @@ export default {
 
     fetchSvcs() {
       if (!this.selected) return;
-      
+
       this.isBusy = true;
       var name = this.getCookie('cap.node');
       if (this.pinging == true) {

@@ -81,11 +81,33 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             }
         }
 
-        public async Task<IList<string>> GetNamespaces(CancellationToken cancellationToken)
+        public async Task<List<string>> GetNamespaces(CancellationToken cancellationToken)
         {
             var client = new Kubernetes(_options);
             var namespaces = await client.ListNamespaceAsync(cancellationToken: cancellationToken);
             return namespaces.Items.Select(x => x.Name()).ToList();
+        }
+
+        public async Task<IList<Node>> ListServices(string ns = null)
+        {
+            var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
+            var client = new Kubernetes(config);
+            var services = await client.CoreV1.ListNamespacedServiceAsync(ns);
+
+            var result = new List<Node>();
+            foreach (var service in services.Items)
+            {
+                result.Add(new Node()
+                {
+                    Id = service.Uid(),
+                    Name = service.Name(),
+                    Address = "http://" + service.Metadata.Name + "." + ns,
+                    Port = service.Spec.Ports?[0].Port ?? 0,
+                    Tags = string.Join(',', service.Labels()?.Select(x => x.Key + ":" + x.Value) ?? Array.Empty<string>())
+                });
+            }
+
+            return result;
         }
     }
 }

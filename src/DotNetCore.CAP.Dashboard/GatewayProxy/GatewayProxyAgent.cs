@@ -20,7 +20,7 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
     {
         public const string CookieNodeName = "cap.node";
         public const string CookieNodeNsName = "cap.node.ns";
-        private readonly bool _isK8S = false;
+        private readonly bool _isK8S;
         private readonly ILogger _logger;
 
         private readonly IHttpRequester _requester;
@@ -56,17 +56,14 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             var request = context.Request;
             //For performance reasons, we need to put this functionality in the else
             var isSwitchNode = request.Cookies.TryGetValue(CookieNodeName, out var requestNodeName);
-
-            var isCurrentNode = false;//TODO:_discoveryOptions.ConsulOptions.NodeName == requestNodeName;
-
-            if (!isSwitchNode || isCurrentNode)
+            if (!isSwitchNode)
             {
                 return false;
             }
 
             _logger.LogDebug("start calling remote endpoint...");
 
-            Node node = null;
+            Node node;
             if (_isK8S)
             {
                 if (request.Cookies.TryGetValue(CookieNodeNsName, out var ns))
@@ -80,6 +77,11 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             }
             else
             {
+                if (_discoveryOptions.ConsulOptions.NodeName == requestNodeName)
+                {
+                    return false;
+                }
+
                 node = await _discoveryProvider.GetNode(requestNodeName);
             }
             if (node != null)

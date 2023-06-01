@@ -361,7 +361,16 @@ namespace DotNetCore.CAP.Dashboard
                 await httpContext.Response.WriteAsJsonAsync(new List<string>());
                 return;
             }
-            await httpContext.Response.WriteAsJsonAsync(await discoveryProvider.GetNamespaces(httpContext.RequestAborted));
+
+            var nsList = await discoveryProvider.GetNamespaces(httpContext.RequestAborted);
+            if (nsList == null)
+            {
+                httpContext.Response.StatusCode = 404;
+            }
+            else
+            {
+                await httpContext.Response.WriteAsJsonAsync(await discoveryProvider.GetNamespaces(httpContext.RequestAborted));
+            }
         }
 
         public async Task ListServices(HttpContext httpContext)
@@ -373,22 +382,16 @@ namespace DotNetCore.CAP.Dashboard
                 @namespace = val!.ToString();
             }
 
-            var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
-            var client = new Kubernetes(config);
-            var services = await client.CoreV1.ListNamespacedServiceAsync(@namespace);
-
-            var result = new List<Node>();
-            foreach (var service in services.Items)
+            var discoveryProvider = _serviceProvider.GetService<INodeDiscoveryProvider>();
+            if (discoveryProvider == null)
             {
-                result.Add(new Node()
-                {
-                    Id = service.Uid(),
-                    Name = service.Name(),
-                    Address = "http://" + service.Metadata.Name + "." + @namespace,
-                    Port = service.Spec.Ports?[0].Port ?? 0,
-                    Tags = string.Join(',', service.Labels()?.Select(x => x.Key + ":" + x.Value) ?? Array.Empty<string>())
-                });
+                await httpContext.Response.WriteAsJsonAsync(new List<Node>());
+                return;
             }
+
+            var result = await discoveryProvider.ListServices(@namespace);
+            
+
             await httpContext.Response.WriteAsJsonAsync(result);
         }
 
@@ -400,7 +403,7 @@ namespace DotNetCore.CAP.Dashboard
             var sw = new Stopwatch();
             try
             {
-                sw.Restart(); 
+                sw.Restart();
                 var healthEndpoint = endpoint + _options.PathMatch + "/api/health";
                 var response = await httpClient.GetStringAsync(healthEndpoint);
                 sw.Stop();
