@@ -2,7 +2,7 @@ export default {
     LanguageName: "English",
     Published: "Published",
     Delayed: "Delayed",
-    Received: "Received",    
+    Received: "Received",
     Subscriber: "Subscriber",
     Nodes: "Nodes",
     Dashboard: "Dashboard",
@@ -56,5 +56,6 @@ export default {
     Tags: "Tags",
     Actions: "Actions",
     ReexecuteSuccess: "😀 Reexecute Successful !",
-    RequeueSuccess: "😀 Requeue Successfull !"
+    RequeueSuccess: "😀 Requeue Successfull !",
+    SelectNamespaces: "-- Please select a kubernetes namespace --"
 }

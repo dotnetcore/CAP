@@ -61,5 +61,6 @@ export default {
     SwitchedNode: "切换的节点",
     Storage: "存储",
     Transport: "传输",
-    Switch: "切换"
+    Switch: "切换",
+    SelectNamespaces: "-- 请选择一个 kubernetes 命名空间 --"
 }

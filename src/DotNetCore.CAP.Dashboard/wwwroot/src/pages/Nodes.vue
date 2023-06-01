@@ -2,11 +2,11 @@
   <div>
     <h2 class="text-left mb-4">{{ $t("Nodes") }}</h2>
 
-    <b-row class="mb-3">
+    <b-row class="mb-3" v-if="options">
       <b-col>
         <b-form-select v-model="selected" value-field="item" text-field="name" @change="fetchSvcs()" :options="options">
           <template #first>
-            <b-form-select-option :value="null" disabled>-- Please select a namespace --</b-form-select-option>
+            <b-form-select-option :value="null" disabled>{{ $t("SelectNamespaces") }}</b-form-select-option>
           </template>
         </b-form-select>
       </b-col>
@@ -145,6 +145,8 @@ export default {
     },
 
     fetchSvcs() {
+      if (!this.selected) return;
+      
       this.isBusy = true;
       var name = this.getCookie('cap.node');
       if (this.pinging == true) {
@@ -161,6 +163,7 @@ export default {
         this.items = res.data;
         this.isBusy = false;
       });
+
     },
 
     async pingSvcs() {
