@@ -400,12 +400,7 @@ namespace DotNetCore.CAP.Dashboard
             var sw = new Stopwatch();
             try
             {
-                sw.Restart();
-                //if (Random.Shared.Next(10, 100)>45)
-                //{
-                //    await httpContext.Response.WriteAsync("22");
-                //    return;
-                //}
+                sw.Restart(); 
                 var healthEndpoint = endpoint + _options.PathMatch + "/api/health";
                 var response = await httpClient.GetStringAsync(healthEndpoint);
                 sw.Stop();
@@ -422,7 +417,7 @@ namespace DotNetCore.CAP.Dashboard
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                await httpContext.Response.WriteAsync(e.Message);
             }
         }
 

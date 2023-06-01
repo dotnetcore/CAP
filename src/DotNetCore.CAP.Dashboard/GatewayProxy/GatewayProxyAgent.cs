@@ -140,7 +140,15 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
 
         private void SetDownStreamRequestUri(Node node, string requestPath, string queryString)
         {
-            var uriBuilder = new UriBuilder("http://", node.Address, node.Port, requestPath, queryString);
+            UriBuilder uriBuilder;
+            if (node.Address.StartsWith("http"))
+            {
+                uriBuilder = new UriBuilder(node.Address + requestPath + queryString);
+            }
+            else
+            {
+                uriBuilder = new UriBuilder("http://", node.Address, node.Port, requestPath, queryString);
+            }
             DownstreamRequest.RequestUri = uriBuilder.Uri;
         }
 
