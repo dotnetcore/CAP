@@ -198,7 +198,8 @@ namespace DotNetCore.CAP.AzureServiceBus
                             var subscriptionDescription =
                                 new CreateSubscriptionOptions(topicPath, _subscriptionName)
                                 {
-                                    RequiresSession = _asbOptions.EnableSessions
+                                    RequiresSession = _asbOptions.EnableSessions,
+                                    AutoDeleteOnIdle = _asbOptions.SubscriptionAutoDeleteOnIdle
                                 };
 
                             await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
