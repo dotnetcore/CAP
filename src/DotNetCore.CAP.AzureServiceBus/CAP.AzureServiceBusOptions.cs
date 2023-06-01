@@ -42,6 +42,12 @@ namespace DotNetCore.CAP
         public string TopicPath { get; set; } = DefaultTopicPath;
 
         /// <summary>
+        /// The <see cref="TimeSpan"/> idle interval after which the subscription is automatically deleted.
+        /// </summary>
+        /// <remarks>The minimum duration is 5 minutes. Default value is <see cref="TimeSpan.MaxValue"/>.</remarks>
+        public TimeSpan SubscriptionAutoDeleteOnIdle { get; set; } = TimeSpan.MaxValue;
+
+        /// <summary>
         /// Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing.
         /// If the message handler triggers an exception, the message will not be automatically completed.
         /// </summary>
