@@ -62,5 +62,7 @@ export default {
     Storage: "存储",
     Transport: "传输",
     Switch: "切换",
-    SelectNamespaces: "-- 请选择一个 kubernetes 命名空间 --"
+    SelectNamespaces: "-- 请选择一个 kubernetes 命名空间 --",
+    NonDiscovery: "未配置Consul或K8S服务发现 !",
+    EmptyRecords: "没有要显示的记录"
 }

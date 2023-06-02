@@ -1,11 +1,6 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using k8s;
 using k8s.Models;
 using Microsoft.Extensions.Logging;
@@ -17,13 +12,13 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
         private readonly ILogger<ConsulNodeDiscoveryProvider> _logger;
         private readonly KubernetesClientConfiguration _options;
 
-        public K8SNodeDiscoveryProvider(ILoggerFactory logger, DiscoveryOptions options)
+        public K8SNodeDiscoveryProvider(ILoggerFactory logger, K8SDiscoveryOptions options)
         {
             _logger = logger.CreateLogger<ConsulNodeDiscoveryProvider>();
-            _options = options.K8SOptions;
+            _options = options.K8SClientConfig;
         }
 
-        public async Task<Node> GetNode(string svcName, string ns, CancellationToken cancellationToken = default)
+        public async Task<Node?> GetNode(string svcName, string ns, CancellationToken cancellationToken = default)
         {
             try
             {
@@ -47,11 +42,12 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             return null;
         }
 
-        public async Task<IList<Node>> GetNodes(string ns, CancellationToken cancellationToken)
+        public async Task<IList<Node>> GetNodes(string? ns, CancellationToken cancellationToken)
         {
             try
             {
                 if (ns == null) return new List<Node>();
+
                 var client = new Kubernetes(_options);
                 var services = await client.CoreV1.ListNamespacedServiceAsync(ns, cancellationToken: cancellationToken);
 
@@ -75,9 +71,8 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             {
                 CapCache.Global.AddOrUpdate("cap.nodes.count", 0, TimeSpan.FromSeconds(20));
 
-                _logger.LogError(
-                    $"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException?.Message}");
-                return null;
+                _logger.LogError($"Get k8s services raised an exception. Exception:{ex.Message},{ex.InnerException?.Message}");
+                return new List<Node>();
             }
         }
 
@@ -88,7 +83,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             return namespaces.Items.Select(x => x.Name()).ToList();
         }
 
-        public async Task<IList<Node>> ListServices(string ns = null)
+        public async Task<IList<Node>> ListServices(string? ns = null)
         {
             var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
             var client = new Kubernetes(config);

@@ -4,11 +4,9 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
@@ -17,12 +15,8 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
-using IdentityModel.OidcClient;
-using k8s;
-using k8s.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Primitives;
@@ -112,7 +106,7 @@ namespace DotNetCore.CAP.Dashboard
                 }
                 else
                 {
-                    if (_serviceProvider.GetService<DiscoveryOptions>() != null)
+                    if (_serviceProvider.GetService<ConsulDiscoveryOptions>() != null)
                     {
                         var discoveryProvider = _serviceProvider.GetRequiredService<INodeDiscoveryProvider>();
                         var nodes = await discoveryProvider.GetNodes();
@@ -412,6 +406,11 @@ namespace DotNetCore.CAP.Dashboard
                 {
                     await httpContext.Response.WriteAsync(sw.ElapsedMilliseconds.ToString());
                 }
+                else
+                {
+                    httpContext.Response.StatusCode = 501;
+                    await httpContext.Response.WriteAsync(response);
+                }
             }
             catch (HttpRequestException e)
             {
@@ -420,6 +419,7 @@ namespace DotNetCore.CAP.Dashboard
             }
             catch (Exception e)
             {
+                httpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
                 await httpContext.Response.WriteAsync(e.Message);
             }
         }

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
@@ -20,41 +21,33 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
     {
         public const string CookieNodeName = "cap.node";
         public const string CookieNodeNsName = "cap.node.ns";
-        private readonly bool _isK8S;
         private readonly ILogger _logger;
 
         private readonly IHttpRequester _requester;
         private readonly IRequestMapper _requestMapper;
 
-        private readonly DiscoveryOptions _discoveryOptions;
+        private readonly ConsulDiscoveryOptions _consulDiscoveryOptions;
         private readonly INodeDiscoveryProvider _discoveryProvider;
 
         public GatewayProxyAgent(
             ILoggerFactory loggerFactory,
             IRequestMapper requestMapper,
             IHttpRequester requester,
-            DiscoveryOptions discoveryOptions,
+            IServiceProvider serviceProvider,
             INodeDiscoveryProvider discoveryProvider)
         {
             _logger = loggerFactory.CreateLogger<GatewayProxyAgent>();
             _requestMapper = requestMapper;
             _requester = requester;
             _discoveryProvider = discoveryProvider;
-            _discoveryOptions = discoveryOptions;
-            _isK8S = _discoveryOptions.K8SOptions != null;
+            _consulDiscoveryOptions = serviceProvider.GetService<ConsulDiscoveryOptions>();
         }
 
         protected HttpRequestMessage DownstreamRequest { get; set; }
 
         public async Task<bool> Invoke(HttpContext context)
         {
-            if (_discoveryOptions == null)
-            {
-                return false;
-            }
-
             var request = context.Request;
-            //For performance reasons, we need to put this functionality in the else
             var isSwitchNode = request.Cookies.TryGetValue(CookieNodeName, out var requestNodeName);
             if (!isSwitchNode)
             {
@@ -64,11 +57,19 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             _logger.LogDebug("start calling remote endpoint...");
 
             Node node;
-            if (_isK8S)
+            if (_consulDiscoveryOptions == null) // it's k8s
             {
                 if (request.Cookies.TryGetValue(CookieNodeNsName, out var ns))
                 {
-                    node = await _discoveryProvider.GetNode(requestNodeName, ns);
+                    if (CapCache.Global.TryGet(requestNodeName + ns, out var nodeObj))
+                    {
+                        node = (Node)nodeObj;
+                    }
+                    else
+                    {
+                        node = await _discoveryProvider.GetNode(requestNodeName, ns);
+                        CapCache.Global.AddOrUpdate(requestNodeName + ns, node);
+                    }
                 }
                 else
                 {
@@ -77,12 +78,20 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             }
             else
             {
-                if (_discoveryOptions.ConsulOptions.NodeName == requestNodeName)
+                if (_consulDiscoveryOptions.NodeName == requestNodeName)
                 {
                     return false;
                 }
 
-                node = await _discoveryProvider.GetNode(requestNodeName);
+                if (CapCache.Global.TryGet(requestNodeName, out var nodeObj))
+                {
+                    node = (Node)nodeObj;
+                }
+                else
+                {
+                    node = await _discoveryProvider.GetNode(requestNodeName);
+                    CapCache.Global.AddOrUpdate(requestNodeName, node);
+                }
             }
             if (node != null)
             {

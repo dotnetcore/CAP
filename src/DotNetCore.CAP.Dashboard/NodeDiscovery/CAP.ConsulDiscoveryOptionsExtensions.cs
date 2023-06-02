@@ -11,18 +11,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
-    internal sealed class DiscoveryOptionsExtension : ICapOptionsExtension
+    internal sealed class ConsulDiscoveryOptionsExtension : ICapOptionsExtension
     {
-        private readonly Action<DiscoveryOptions> _options;
+        private readonly Action<ConsulDiscoveryOptions> _options;
 
-        public DiscoveryOptionsExtension(Action<DiscoveryOptions> option)
+        public ConsulDiscoveryOptionsExtension(Action<ConsulDiscoveryOptions> option)
         {
             _options = option;
         }
 
         public void AddServices(IServiceCollection services)
         {
-            var discoveryOptions = new DiscoveryOptions();
+            var discoveryOptions = new ConsulDiscoveryOptions();
 
             _options?.Invoke(discoveryOptions);
             services.AddSingleton(discoveryOptions);
@@ -31,16 +31,8 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
             services.AddSingleton<IHttpClientCache, MemoryHttpClientCache>();
             services.AddSingleton<IRequestMapper, RequestMapper>();
             services.AddSingleton<GatewayProxyAgent>();
-
-            if (discoveryOptions.ConsulOptions != null)
-            {
-                services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
-                services.AddSingleton<INodeDiscoveryProvider, ConsulNodeDiscoveryProvider>();
-            }
-            else if (discoveryOptions.K8SOptions != null)
-            {
-                services.AddSingleton<INodeDiscoveryProvider, K8SNodeDiscoveryProvider>();
-            }
+            services.AddSingleton<IProcessingServer, ConsulProcessingNodeServer>();
+            services.AddSingleton<INodeDiscoveryProvider, ConsulNodeDiscoveryProvider>();
         }
     }
 }
@@ -52,22 +44,19 @@ namespace Microsoft.Extensions.DependencyInjection
         /// <summary>
         /// Default use kubernetes as service discovery.
         /// </summary>
-        public static CapOptions UseDiscovery(this CapOptions capOptions)
+        public static CapOptions UseConsulDiscovery(this CapOptions capOptions)
         {
-            return capOptions.UseDiscovery(opt =>
-            {
-                opt.UseK8S();
-            });
+            return capOptions.UseConsulDiscovery(_ =>  { });
         }
 
-        public static CapOptions UseDiscovery(this CapOptions capOptions, Action<DiscoveryOptions> options)
+        public static CapOptions UseConsulDiscovery(this CapOptions capOptions, Action<ConsulDiscoveryOptions> options)
         {
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
 
-            capOptions.RegisterExtension(new DiscoveryOptionsExtension(options));
+            capOptions.RegisterExtension(new ConsulDiscoveryOptionsExtension(options));
 
             return capOptions;
         }

@@ -20,7 +20,7 @@
     </b-row>
 
     <b-table :fields="fields" :items="items" :busy="isBusy" small head-variant="light" show-empty striped hover responsive
-      thead-tr-class="text-left" empty-text="Unconfigure node discovery !">
+      thead-tr-class="text-left" :empty-text="nsList.length == 0 ? $t('NonDiscovery') : $t('EmptyRecords')">
 
       <template #table-colgroup="scope">
         <col v-for="field in scope.fields" :key="field.key" :style="{ width: colWidth(field.key) }">
@@ -139,8 +139,8 @@ export default {
         }
       });
       this.isBusy = false;
-      let ns = this.getCookie("cap.node.ns");
-      if (ns != null) {
+      var ns = this.getCookie("cap.node.ns");
+      if (ns) {
         this.selected = ns;
         this.fetchSvcs();
       }
@@ -210,14 +210,15 @@ export default {
         },
         timeout: 3000
       }).then(res => {
+        console.log(res);
         item.latency = res.data;
         document.cookie = `cap.node=${escape(item.name)};`;
         document.cookie = `cap.node.ns=${this.selected};`;
         item._ping = false;
-        location.reload();
+       // location.reload();
       }).catch(err => {
         if (axios.isAxiosError(err)) {
-          item.latency = err.response.data;
+          item.latency = err.response?.data;
           this.$bvToast.toast("Switch to [" + item.name + "] failed! Endpoint: " + item.address, {
             title: "Warning",
             variant: "danger",
