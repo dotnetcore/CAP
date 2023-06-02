@@ -215,7 +215,7 @@ export default {
         document.cookie = `cap.node=${escape(item.name)};`;
         document.cookie = `cap.node.ns=${this.selected};`;
         item._ping = false;
-       // location.reload();
+        location.reload();
       }).catch(err => {
         if (axios.isAxiosError(err)) {
           item.latency = err.response?.data;
