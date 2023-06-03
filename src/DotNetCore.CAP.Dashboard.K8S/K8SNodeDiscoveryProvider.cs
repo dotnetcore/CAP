@@ -1,11 +1,12 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using Microsoft.Extensions.Logging;
+using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using k8s;
 using k8s.Models;
-using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP.Dashboard.NodeDiscovery
+namespace DotNetCore.CAP.Dashboard.K8S
 {
     public class K8SNodeDiscoveryProvider : INodeDiscoveryProvider
     {

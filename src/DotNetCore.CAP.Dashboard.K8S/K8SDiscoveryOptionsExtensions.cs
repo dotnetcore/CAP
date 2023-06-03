@@ -4,16 +4,17 @@
 using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+using DotNetCore.CAP.Dashboard.K8S;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetCore.CAP.Dashboard.NodeDiscovery
+namespace DotNetCore.CAP.Dashboard.K8S
 {
     internal sealed class K8SDiscoveryOptionsExtension : ICapOptionsExtension
     {
-        private readonly Action<K8SDiscoveryOptions> _options;
+        private readonly Action<K8SDiscoveryOptions>? _options;
 
-        public K8SDiscoveryOptionsExtension(Action<K8SDiscoveryOptions> option)
+        public K8SDiscoveryOptionsExtension(Action<K8SDiscoveryOptions>? option)
         {
             _options = option;
         }
