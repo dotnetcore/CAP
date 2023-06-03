@@ -3,7 +3,7 @@
 
 using k8s;
 
-namespace DotNetCore.CAP.Dashboard.NodeDiscovery
+namespace DotNetCore.CAP.Dashboard.K8S
 {
     public class K8SDiscoveryOptions
     {
