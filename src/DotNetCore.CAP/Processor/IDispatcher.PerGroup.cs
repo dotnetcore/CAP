@@ -47,7 +47,7 @@ internal class DispatcherPerGroup : IDispatcher
         _storage = storage;
     }
 
-    public async Task Start(CancellationToken stoppingToken)
+    public Task Start(CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
         _tasksCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, CancellationToken.None);
@@ -63,7 +63,7 @@ internal class DispatcherPerGroup : IDispatcher
                 FullMode = BoundedChannelFullMode.Wait
             });
 
-        await Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
+        _ = Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
             .Select(_ => Task.Run(Sending, _tasksCts.Token)).ToArray());
 
         _receivedChannels =
@@ -117,6 +117,7 @@ internal class DispatcherPerGroup : IDispatcher
         }, _tasksCts.Token).ConfigureAwait(false);
 
         _logger.LogInformation("Starting DispatcherPerGroup");
+        return Task.CompletedTask;
     }
 
     public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null)
