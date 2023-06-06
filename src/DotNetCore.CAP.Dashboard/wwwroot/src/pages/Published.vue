@@ -19,7 +19,7 @@
       </b-col>
 
       <b-col md="9">
-        <h2 class="page-line mb-3">{{ $t("Published Message") }}</h2>
+        <h2 class="page-line mb-2">{{ $t("Published Message") }}</h2>
 
         <b-form class="d-flex">
           <div class="col-sm-10">
@@ -33,12 +33,10 @@
                 :placeholder="$t('Content')" />
             </div>
           </div>
-          <div class="align-self-end">
-            <b-button variant="dark" @click="onSearch">
-              <b-icon-search></b-icon-search>
-              {{ $t("Search") }}
-            </b-button>
-          </div>
+          <b-button variant="dark" class="ml-2 align-self-end" @click="onSearch">
+            <b-icon-search></b-icon-search>
+            {{ $t("Search") }}
+          </b-button>
         </b-form>
       </b-col>
     </b-row>
