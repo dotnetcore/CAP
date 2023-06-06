@@ -200,13 +200,13 @@ internal class DispatcherPerGroup : IDispatcher
                 });
 
             Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
-                .Select(_ => Task.Run(() => Processing(group, channel), _tasksCts!.Token)).ToArray());
+               .Select(_ => Task.Run(() => Processing(group, channel), _tasksCts!.Token)).ToArray());
 
             return channel;
         });
     }
 
-    private async Task Sending()
+    private async ValueTask Sending()
     {
         try
         {
@@ -232,7 +232,7 @@ internal class DispatcherPerGroup : IDispatcher
         }
     }
 
-    private async Task Processing(string group, Channel<(MediumMessage, ConsumerExecutorDescriptor?)> channel)
+    private async ValueTask Processing(string group, Channel<(MediumMessage, ConsumerExecutorDescriptor?)> channel)
     {
         try
         {
