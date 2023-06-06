@@ -11,6 +11,7 @@ namespace DotNetCore.CAP
         {
             PathMatch = "/cap";
             StatsPollingInterval = 2000;
+            AllowAnonymousExplicit = true;
         }
 
         /// <summary>
@@ -52,5 +53,10 @@ namespace DotNetCore.CAP
         /// Authorization policy. If no policy is set, authorization will be inactive.
         /// </summary>
         public string AuthorizationPolicy { get; set; }
+
+        /// <summary>
+        /// Allow Explicit to set AllowAnonymous for the CAP dashboard API without use ASP.NET Core global authorization filter. Default true
+        /// </summary>
+        public bool AllowAnonymousExplicit { get; set; }
     }
 }

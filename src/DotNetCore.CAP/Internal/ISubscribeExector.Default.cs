@@ -203,7 +203,7 @@ internal class SubscribeExecutor : ISubscribeExecutor
 
             TracingError(tracingTimestamp, message.Origin, descriptor.MethodInfo, e);
 
-            throw e;
+            e.ReThrow();
         }
     }
 

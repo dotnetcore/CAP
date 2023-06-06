@@ -25,8 +25,7 @@
           <div class="col-sm-10">
             <div class="form-row mb-2">
               <label for="form-input-name" class="sr-only">{{ $t("Name") }}</label>
-              <b-form-input v-model="formData.name" id="form-input-name" class="form-control"
-                :placeholder="$t('Name')" />
+              <b-form-input v-model="formData.name" id="form-input-name" class="form-control" :placeholder="$t('Name')" />
             </div>
             <div class="form-row">
               <label class="sr-only" for="inline-form-input-content">{{ $t("Content") }}</label>
@@ -60,8 +59,9 @@
             </b-button-group>
           </div>
         </b-btn-toolbar>
-        <b-table id="datatable" :busy="isBusy" class="mt-3" striped thead-tr-class="text-left"  details-td-class="align-middle"
-          tbody-tr-class="text-left" small :fields="fields" :items="items" select-mode="range">
+        <b-table id="datatable" :busy="isBusy" class="mt-3" striped thead-tr-class="text-left " head-variant="light"
+          details-td-class="align-middle" tbody-tr-class="text-left" small :fields="fields" :items="items"
+          select-mode="range">
           <template #table-busy>
             <div class="text-center text-secondary my-2">
               <b-spinner class="align-middle"></b-spinner>
@@ -266,12 +266,16 @@ export default {
     requeue: function () {
       const _this = this;
       axios.post('/published/requeue', this.selectedItems.map((item) => item.id)).then(() => {
-        _this.clear();
-        _this.$bvToast.toast(this.$t("RequeueSuccess"), {
-          title: "Tips",
-          autoHideDelay: 500,
-          appendToast: false,
+        this.selectedItems.map((item) => {
+          _this.$bvToast.toast(this.$t("RequeueSuccess") + "   " + item.id, {
+            title: "Tips",
+            variant: "secondary",
+            autoHideDelay: 1000,
+            appendToast: true,
+            solid: true
+          });
         });
+        _this.clear();
       });
     },
     clear() {
@@ -311,7 +315,8 @@ export default {
   color: white;
   background-color: black;
 }
-.my-align-middle{
+
+.my-align-middle {
   vertical-align: middle;
 }
 </style>

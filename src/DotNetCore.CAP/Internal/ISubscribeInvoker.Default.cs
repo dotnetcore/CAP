@@ -113,7 +113,7 @@ public class SubscribeInvoker : ISubscribeInvoker
             {
                 var exContext = new ExceptionContext(context, e);
                 await filter.OnSubscribeExceptionAsync(exContext).ConfigureAwait(false);
-                if (!exContext.ExceptionHandled) throw exContext.Exception;
+                if (!exContext.ExceptionHandled) exContext.Exception.ReThrow();
 
                 if (exContext.Result != null) resultObj = exContext.Result;
             }

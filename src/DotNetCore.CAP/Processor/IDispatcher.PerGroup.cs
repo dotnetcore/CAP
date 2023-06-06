@@ -64,8 +64,7 @@ internal class DispatcherPerGroup : IDispatcher
             });
 
         await Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
-            .Select(_ => Task.Factory.StartNew(Sending, _tasksCts.Token,
-                TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
+            .Select(_ => Task.Run(Sending, _tasksCts.Token)).ToArray());
 
         _receivedChannels =
             new ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor?)>>(
@@ -73,7 +72,7 @@ internal class DispatcherPerGroup : IDispatcher
 
         GetOrCreateReceiverChannel(_options.DefaultGroupName);
 
-        _ = Task.Factory.StartNew(async () =>
+        _ = Task.Run(async () =>
         {
             //When canceling, place the message status of unsent in the queue to delayed
             _tasksCts.Token.Register(() =>
@@ -115,7 +114,7 @@ internal class DispatcherPerGroup : IDispatcher
                     //Ignore
                 }
             }
-        }, _tasksCts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+        }, _tasksCts.Token).ConfigureAwait(false);
 
         _logger.LogInformation("Starting DispatcherPerGroup");
     }
@@ -201,8 +200,7 @@ internal class DispatcherPerGroup : IDispatcher
                 });
 
             Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
-                .Select(_ => Task.Factory.StartNew(() => Processing(group, channel), _tasksCts!.Token,
-                    TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray());
+                .Select(_ => Task.Run(() => Processing(group, channel), _tasksCts!.Token)).ToArray());
 
             return channel;
         });

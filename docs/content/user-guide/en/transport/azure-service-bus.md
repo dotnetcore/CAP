@@ -39,16 +39,17 @@ public void ConfigureServices(IServiceCollection services)
 
 The AzureServiceBus configuration options provided directly by the CAP:
 
-| NAME                    | DESCRIPTION                                                                                                                                 | TYPE                                                 | DEFAULT |
-| :---------------------- | :------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- | :------ |
-| ConnectionString        | Endpoint address                                                                                                                            | string                                               |
-| EnableSessions          | Enable [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions)                                | bool                                                 | false   |
-| TopicPath               | Topic entity path                                                                                                                           | string                                               | cap     |
-| ManagementTokenProvider | Token provider                                                                                                                              | ITokenProvider                                       | null    |
-| AutoCompleteMessages    | Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing | bool                                                 | false   |
-| CustomHeaders           | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                                                      | `Func<Message, List<KeyValuePair<string, string>>>?` | null    |
-| Namespace               | Namespace of Servicebus , Needs to be set when using with TokenCredential Property                                                          | string                                               | null    |
-| SQLFilters              | Custom SQL Filters by name and expression on Topic Subscribtion                                                                             | List<KeyValuePair<string, string>>                   | null    |
+| NAME                         | DESCRIPTION                                                                                                                                 | TYPE                                                 | DEFAULT           |
+| :----------------------      | :------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- | :---------------- |
+| ConnectionString             | Endpoint address                                                                                                                            | string                                               |                   |
+| EnableSessions               | Enable [Service bus sessions](https://docs.microsoft.com/en-us/azure/service-bus-messaging/message-sessions)                                | bool                                                 | false             |
+| TopicPath                    | Topic entity path                                                                                                                           | string                                               | cap               |
+| SubscriptionAutoDeleteOnIdle | Automatically delete subscription after a certain idle interval.                                                                            | TimeSpan                                             | TimeSpan.MaxValue |
+| ManagementTokenProvider      | Token provider                                                                                                                              | ITokenProvider                                       | null              |
+| AutoCompleteMessages         | Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing | bool                                                 | false             |
+| CustomHeaders                | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                                                      | `Func<Message, List<KeyValuePair<string, string>>>?` | null              |
+| Namespace                    | Namespace of Servicebus , Needs to be set when using with TokenCredential Property                                                          | string                                               | null              |
+| SQLFilters                   | Custom SQL Filters by name and expression on Topic Subscribtion                                                                             | List<KeyValuePair<string, string>>                   | null              |
 
 #### Sessions
 

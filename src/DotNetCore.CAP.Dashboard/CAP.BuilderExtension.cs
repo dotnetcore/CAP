@@ -52,13 +52,13 @@ namespace DotNetCore.CAP
                     httpContext.Response.StatusCode = 301;
                     httpContext.Response.Headers["Location"] = redirectUrl;
                     return Task.CompletedTask;
-                });
+                }).AllowAnonymousIf(options.AllowAnonymousExplicit);
 
                 endPointRouteBuilder.MapGet(options.PathMatch + "/index.html", async httpContext =>
                 {
                     if (!await Authentication(httpContext, options))
                     {
-                        if(httpContext.Response.StatusCode != StatusCodes.Status302Found)
+                        if (httpContext.Response.StatusCode != StatusCodes.Status302Found)
                             httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
                         return;
                     }
@@ -74,7 +74,7 @@ namespace DotNetCore.CAP
                     htmlBuilder.Replace("%(servicePrefix)", options.PathBase + options.PathMatch + "/api");
                     htmlBuilder.Replace("%(pollingInterval)", options.StatsPollingInterval.ToString());
                     await httpContext.Response.WriteAsync(htmlBuilder.ToString(), Encoding.UTF8);
-                });
+                }).AllowAnonymousIf(options.AllowAnonymousExplicit);
 
                 new RouteActionProvider(endPointRouteBuilder, options).MapDashboardRoutes();
             }
@@ -132,6 +132,11 @@ namespace DotNetCore.CAP
                 }
             }
             return true;
+        }
+
+        internal static IEndpointConventionBuilder AllowAnonymousIf(this IEndpointConventionBuilder builder, bool allowAnonymous)
+        {
+            return allowAnonymous ? builder.AllowAnonymous() : builder;
         }
     }
 }

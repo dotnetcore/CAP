@@ -64,8 +64,7 @@ public class Dispatcher : IDispatcher
             });
 
         await Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
-            .Select(_ => Task.Factory.StartNew(Sending, _tasksCts.Token,
-                TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray()).ConfigureAwait(false);
+            .Select(_ => Task.Run(Sending, _tasksCts.Token)).ToArray()).ConfigureAwait(false);
 
         if (_enablePrefetch)
         {
@@ -80,11 +79,9 @@ public class Dispatcher : IDispatcher
                 });
 
             await Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
-                .Select(_ => Task.Factory.StartNew(Processing, _tasksCts.Token,
-                    TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray()).ConfigureAwait(false);
+                .Select(_ => Task.Run(Processing, _tasksCts.Token)).ToArray()).ConfigureAwait(false);
         }
-
-        _ = Task.Factory.StartNew(async () =>
+        _ = Task.Run(async () =>
         {
             //When canceling, place the message status of unsent in the queue to delayed
             _tasksCts.Token.Register(() =>
@@ -102,7 +99,7 @@ public class Dispatcher : IDispatcher
                     _logger.LogWarning(e, "Update storage fails of delayed message in memory queue!");
                 }
             });
-
+            
             while (!_tasksCts.Token.IsCancellationRequested)
             {
                 try
@@ -126,7 +123,7 @@ public class Dispatcher : IDispatcher
                     //Ignore
                 }
             }
-        }, _tasksCts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default).ConfigureAwait(false);
+        }, _tasksCts.Token).ConfigureAwait(false);
 
         _logger.LogInformation("Starting default Dispatcher");
     }
