@@ -47,7 +47,7 @@ public class Dispatcher : IDispatcher
         _enablePrefetch = options.Value.EnableConsumerPrefetch;
     }
 
-    public async Task Start(CancellationToken stoppingToken)
+    public Task Start(CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
         _tasksCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, CancellationToken.None);
@@ -63,7 +63,7 @@ public class Dispatcher : IDispatcher
                 FullMode = BoundedChannelFullMode.Wait
             });
 
-        await Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
+        _ = Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
             .Select(_ => Task.Run(Sending, _tasksCts.Token)).ToArray()).ConfigureAwait(false);
 
         if (_enablePrefetch)
@@ -78,7 +78,7 @@ public class Dispatcher : IDispatcher
                     FullMode = BoundedChannelFullMode.Wait
                 });
 
-            await Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
+            Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
                 .Select(_ => Task.Run(Processing, _tasksCts.Token)).ToArray()).ConfigureAwait(false);
         }
         _ = Task.Run(async () =>
@@ -126,6 +126,7 @@ public class Dispatcher : IDispatcher
         }, _tasksCts.Token).ConfigureAwait(false);
 
         _logger.LogInformation("Starting default Dispatcher");
+        return Task.CompletedTask;
     }
 
     public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null)
