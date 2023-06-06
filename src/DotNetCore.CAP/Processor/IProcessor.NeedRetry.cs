@@ -49,6 +49,9 @@ public class MessageNeedToRetryProcessor : IProcessor
         if (_options.Value.UseStorageLock && _failedRetryConsumeTask is { IsCompleted: false })
         {
             await _dataStorage.RenewLockAsync($"received_retry_{_options.Value.Version}", _ttl, _instance, context.CancellationToken);
+            
+            await context.WaitAsync(_waitingInterval).ConfigureAwait(false);
+            
             return;
         }
 
