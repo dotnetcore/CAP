@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
@@ -82,7 +83,13 @@ namespace DotNetCore.CAP
         /// <summary>
         /// If you need to get additional native delivery args, you can use this function to write into <see cref="CapHeader"/>.
         /// </summary>
+        [Obsolete("Will be dropped in the next releases in favor of the CustomHeadersBuilder property")]
         public Func<BasicDeliverEventArgs, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
+
+        /// <summary>
+        /// If you need to get additional native delivery args, you can use this function to write into <see cref="CapHeader"/>.
+        /// </summary>
+        public Func<BasicDeliverEventArgs, IServiceProvider, List<KeyValuePair<string, string>>>? CustomHeadersBuilder { get; set; }
 
         /// <summary>
         /// RabbitMQ native connection factory options
@@ -118,9 +125,9 @@ namespace DotNetCore.CAP
             /// </summary>
             public string QueueType { get; set; } = default!;
         }
-                
+
         public class BasicQos
-        {       
+        {
             /// <summary>
             /// New instance of BasicQos sets the use of basic qos setup on the basic channel.
             /// </summary>            
@@ -130,7 +137,7 @@ namespace DotNetCore.CAP
             {
                 PrefetchCount = prefetchCount;
                 Global = global;
-            }   
+            }
 
             /// <summary>
             /// Gets the PrefetchCount, a value of 0 is treated as infinite, allowing any number of unacknowledged message being pushed to consumer.

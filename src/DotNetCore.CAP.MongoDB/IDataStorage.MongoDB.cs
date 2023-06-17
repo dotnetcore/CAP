@@ -24,18 +24,21 @@ public class MongoDBDataStorage : IDataStorage
     private readonly IMongoDatabase _database;
     private readonly IOptions<MongoDBOptions> _options;
     private readonly ISerializer _serializer;
+    private readonly ISnowflakeId _snowflakeId;
 
     public MongoDBDataStorage(
         IOptions<CapOptions> capOptions,
         IOptions<MongoDBOptions> options,
         IMongoClient client,
-        ISerializer serializer)
+        ISerializer serializer,
+        ISnowflakeId snowflakeId)
     {
         _capOptions = capOptions;
         _options = options;
         _client = client;
         _database = _client.GetDatabase(_options.Value.DatabaseName);
         _serializer = serializer;
+        _snowflakeId = snowflakeId;
     }
 
     public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
@@ -168,7 +171,7 @@ public class MongoDBDataStorage : IDataStorage
 
         var store = new ReceivedMessage
         {
-            Id = SnowflakeId.Default().NextId(),
+            Id = _snowflakeId.NextId(),
             Group = group,
             Name = name,
             Content = content,
@@ -186,7 +189,7 @@ public class MongoDBDataStorage : IDataStorage
     {
         var mdMessage = new MediumMessage
         {
-            DbId = SnowflakeId.Default().NextId().ToString(),
+            DbId = _snowflakeId.NextId().ToString(),
             Origin = message,
             Added = DateTime.Now,
             ExpiresAt = null,

@@ -26,18 +26,21 @@ public class SqlServerDataStorage : IDataStorage
     private readonly string _pubName;
     private readonly string _recName;
     private readonly ISerializer _serializer;
+    private readonly ISnowflakeId _snowflakeId;
     private readonly string _lockName;
 
     public SqlServerDataStorage(
         IOptions<CapOptions> capOptions,
         IOptions<SqlServerOptions> options,
         IStorageInitializer initializer,
-        ISerializer serializer)
+        ISerializer serializer,
+        ISnowflakeId snowflakeId)
     {
         _options = options;
         _initializer = initializer;
         _capOptions = capOptions;
         _serializer = serializer;
+        _snowflakeId = snowflakeId;
         _pubName = initializer.GetPublishedTableName();
         _recName = initializer.GetReceivedTableName();
         _lockName = initializer.GetLockTableName();
@@ -156,7 +159,7 @@ public class SqlServerDataStorage : IDataStorage
     {
         object[] sqlParams =
         {
-            new SqlParameter("@Id", SnowflakeId.Default().NextId().ToString()),
+            new SqlParameter("@Id", _snowflakeId.NextId().ToString()),
             new SqlParameter("@Name", name),
             new SqlParameter("@Group", group),
             new SqlParameter("@Content", content),
@@ -173,7 +176,7 @@ public class SqlServerDataStorage : IDataStorage
     {
         var mdMessage = new MediumMessage
         {
-            DbId = SnowflakeId.Default().NextId().ToString(),
+            DbId = _snowflakeId.NextId().ToString(),
             Origin = message,
             Added = DateTime.Now,
             ExpiresAt = null,

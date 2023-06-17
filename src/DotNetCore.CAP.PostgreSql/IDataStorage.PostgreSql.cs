@@ -23,6 +23,7 @@ namespace DotNetCore.CAP.PostgreSql
         private readonly IStorageInitializer _initializer;
         private readonly IOptions<PostgreSqlOptions> _options;
         private readonly ISerializer _serializer;
+        private readonly ISnowflakeId _snowflakeId;
         private readonly string _pubName;
         private readonly string _recName;
         private readonly string _lockName;
@@ -31,12 +32,14 @@ namespace DotNetCore.CAP.PostgreSql
             IOptions<PostgreSqlOptions> options,
             IOptions<CapOptions> capOptions,
             IStorageInitializer initializer,
-            ISerializer serializer)
+            ISerializer serializer,
+            ISnowflakeId snowflakeId)
         {
             _capOptions = capOptions;
             _initializer = initializer;
             _options = options;
             _serializer = serializer;
+            _snowflakeId = snowflakeId;
             _pubName = initializer.GetPublishedTableName();
             _recName = initializer.GetReceivedTableName();
             _lockName = initializer.GetLockTableName();
@@ -151,7 +154,7 @@ namespace DotNetCore.CAP.PostgreSql
         {
             object[] sqlParams =
             {
-                new NpgsqlParameter("@Id", SnowflakeId.Default().NextId()),
+                new NpgsqlParameter("@Id", _snowflakeId.NextId()),
                 new NpgsqlParameter("@Name", name),
                 new NpgsqlParameter("@Group", group),
                 new NpgsqlParameter("@Content", content),
@@ -168,7 +171,7 @@ namespace DotNetCore.CAP.PostgreSql
         {
             var mdMessage = new MediumMessage
             {
-                DbId = SnowflakeId.Default().NextId().ToString(),
+                DbId = _snowflakeId.NextId().ToString(),
                 Origin = message,
                 Added = DateTime.Now,
                 ExpiresAt = null,

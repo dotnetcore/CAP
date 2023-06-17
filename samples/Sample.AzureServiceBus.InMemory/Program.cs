@@ -1,5 +1,6 @@
 using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
+
 using Sample.AzureServiceBus.InMemory;
 using Sample.AzureServiceBus.InMemory.Contracts.DomainEvents;
 using Sample.AzureServiceBus.InMemory.Contracts.IntegrationEvents;
@@ -10,21 +11,28 @@ builder.Services.AddLogging(l => l.AddConsole());
 
 builder.Services.AddCap(c =>
 {
+
     c.UseInMemoryStorage();
     c.UseAzureServiceBus(asb =>
     {
         asb.ConnectionString = builder.Configuration.GetConnectionString("AzureServiceBus")!;
-        asb.CustomHeaders = message => new List<KeyValuePair<string, string>>()
+        asb.CustomHeadersBuilder = (message, serviceProvider) =>
         {
-            new(DotNetCore.CAP.Messages.Headers.MessageId,
-                SnowflakeId.Default().NextId().ToString()),
-            new(DotNetCore.CAP.Messages.Headers.MessageName, message.Subject),
-            new("IsFromSampleProject", "'true'")
+            var snowFlakeId = serviceProvider.GetRequiredService<ISnowflakeId>();
+
+            return new List<KeyValuePair<string, string>>()
+                        {
+
+                            new(DotNetCore.CAP.Messages.Headers.MessageId,
+                                snowFlakeId.NextId().ToString()),
+                            new(DotNetCore.CAP.Messages.Headers.MessageName, message.Subject),
+                            new("IsFromSampleProject", "'true'")
+                        };
         };
         asb.SQLFilters = new List<KeyValuePair<string, string>>() {
             new("IsFromSampleProjectFilter","IsFromSampleProject = 'true'")
         };
-        
+
         asb.ConfigureCustomProducer<EntityCreatedForIntegration>(cfg => cfg.WithTopic("entity-created"));
         asb.ConfigureCustomProducer<EntityDeletedForIntegration>(cfg => cfg.WithTopic("entity-deleted"));
     });

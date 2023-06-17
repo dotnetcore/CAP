@@ -26,18 +26,22 @@ public class MySqlDataStorage : IDataStorage
     private readonly string _pubName;
     private readonly string _recName;
     private readonly ISerializer _serializer;
+    private readonly ISnowflakeId _snowflakeId;
+    private readonly bool _supportSkipLocked;
     private readonly string _lockName;
 
     public MySqlDataStorage(
         IOptions<MySqlOptions> options,
         IOptions<CapOptions> capOptions,
         IStorageInitializer initializer,
-        ISerializer serializer)
+        ISerializer serializer,
+        ISnowflakeId snowflakeId)
     {
         _options = options;
         _capOptions = capOptions;
         _initializer = initializer;
         _serializer = serializer;
+        _snowflakeId = snowflakeId;
         _pubName = initializer.GetPublishedTableName();
         _recName = initializer.GetReceivedTableName();
         _lockName = initializer.GetLockTableName();
@@ -158,7 +162,7 @@ public class MySqlDataStorage : IDataStorage
     {
         object[] sqlParams =
         {
-            new MySqlParameter("@Id", SnowflakeId.Default().NextId().ToString()),
+            new MySqlParameter("@Id", _snowflakeId.NextId().ToString()),
             new MySqlParameter("@Name", name),
             new MySqlParameter("@Group", group),
             new MySqlParameter("@Content", content),
@@ -175,7 +179,7 @@ public class MySqlDataStorage : IDataStorage
     {
         var mdMessage = new MediumMessage
         {
-            DbId = SnowflakeId.Default().NextId().ToString(),
+            DbId = _snowflakeId.NextId().ToString(),
             Origin = message,
             Added = DateTime.Now,
             ExpiresAt = null,

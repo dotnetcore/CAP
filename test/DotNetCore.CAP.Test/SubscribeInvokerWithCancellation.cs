@@ -22,6 +22,7 @@ namespace DotNetCore.CAP.Test
             serviceCollection.AddSingleton<IBootstrapper, Bootstrapper>();
             serviceCollection.AddSingleton<ISerializer, JsonUtf8Serializer>();
             serviceCollection.AddSingleton<ISubscribeInvoker, SubscribeInvoker>();
+            serviceCollection.AddSingleton<ISnowflakeId>(r => new SnowflakeId(Util.GenerateWorkerId(1023)));
             _serviceProvider = serviceCollection.BuildServiceProvider();
         }
 
@@ -30,6 +31,7 @@ namespace DotNetCore.CAP.Test
         [Fact]
         public async Task InvokeTest()
         {
+            var snowflakeId = _serviceProvider.GetRequiredService<ISnowflakeId>();
             var descriptor = new ConsumerExecutorDescriptor()
             {
                 Attribute = new CandidatesTopic("fake.output.withcancellation"),
@@ -49,7 +51,7 @@ namespace DotNetCore.CAP.Test
 
             var header = new Dictionary<string, string>()
             {
-                [Headers.MessageId] = SnowflakeId.Default().NextId().ToString(),
+                [Headers.MessageId] = snowflakeId.NextId().ToString(),
                 [Headers.MessageName] = "fake.output.withcancellation"
             };
             var message = new Message(header, null);

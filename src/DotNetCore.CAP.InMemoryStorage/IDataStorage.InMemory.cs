@@ -7,11 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
+
 using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.InMemoryStorage
@@ -20,11 +22,13 @@ namespace DotNetCore.CAP.InMemoryStorage
     {
         private readonly IOptions<CapOptions> _capOptions;
         private readonly ISerializer _serializer;
+        private readonly ISnowflakeId _snowflakeId;
 
-        public InMemoryStorage(IOptions<CapOptions> capOptions, ISerializer serializer)
+        public InMemoryStorage(IOptions<CapOptions> capOptions, ISerializer serializer, ISnowflakeId snowflakeId)
         {
             _capOptions = capOptions;
             _serializer = serializer;
+            _snowflakeId = snowflakeId;
         }
 
         public static ConcurrentDictionary<string, MemoryMessage> PublishedMessages { get; } = new();
@@ -99,7 +103,7 @@ namespace DotNetCore.CAP.InMemoryStorage
 
         public Task StoreReceivedExceptionMessageAsync(string name, string group, string content)
         {
-            var id = SnowflakeId.Default().NextId().ToString();
+            var id = _snowflakeId.NextId().ToString();
 
             ReceivedMessages[id] = new MemoryMessage
             {
@@ -121,7 +125,7 @@ namespace DotNetCore.CAP.InMemoryStorage
         {
             var mdMessage = new MediumMessage
             {
-                DbId = SnowflakeId.Default().NextId().ToString(),
+                DbId = _snowflakeId.NextId().ToString(),
                 Origin = message,
                 Added = DateTime.Now,
                 ExpiresAt = null,

@@ -8,10 +8,17 @@ namespace DotNetCore.CAP.Test
 {
     public class SnowflakeIdTest
     {
+        ISnowflakeId _snowflakeId;
+
+        public SnowflakeIdTest()
+        {
+            _snowflakeId = new SnowflakeId(Util.GenerateWorkerId(1023));
+        }
+
         [Fact]
         public void NextIdTest()
         {
-            var instance = SnowflakeId.Default();
+            var instance = _snowflakeId;
             var result = instance.NextId();
             var result2 = instance.NextId();
 
@@ -25,7 +32,7 @@ namespace DotNetCore.CAP.Test
 
             Parallel.For(0, 1000, i =>
             {
-                var id = SnowflakeId.Default().NextId();
+                var id = _snowflakeId.NextId();
                 array[i] = id;
             });
 
