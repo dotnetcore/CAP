@@ -13,6 +13,7 @@ namespace DotNetCore.CAP.MySql.Test
     public class MySqlStorageConnectionTest : DatabaseTestHost
     {
         private readonly MySqlDataStorage _storage;
+        private ISnowflakeId _snowflakeId;
 
         public MySqlStorageConnectionTest()
         {
@@ -20,13 +21,14 @@ namespace DotNetCore.CAP.MySql.Test
             var options = GetService<IOptions<MySqlOptions>>();
             var capOptions = GetService<IOptions<CapOptions>>();
             var initializer = GetService<IStorageInitializer>();
-            _storage = new MySqlDataStorage(options, capOptions, initializer, serializer);
+            _snowflakeId = GetService<ISnowflakeId>();
+            _storage = new MySqlDataStorage(options, capOptions, initializer, serializer, _snowflakeId);
         }
 
         [Fact]
         public void StorageMessageTest()
         {
-            var msgId = SnowflakeId.Default().NextId().ToString();
+            var msgId = _snowflakeId.NextId().ToString();
             var header = new Dictionary<string, string>()
             {
                 [Headers.MessageId] = msgId
@@ -40,7 +42,7 @@ namespace DotNetCore.CAP.MySql.Test
         [Fact]
         public void StoreReceivedMessageTest()
         {
-            var msgId = SnowflakeId.Default().NextId().ToString();
+            var msgId = _snowflakeId.NextId().ToString();
             var header = new Dictionary<string, string>()
             {
                 [Headers.MessageId] = msgId
@@ -60,7 +62,7 @@ namespace DotNetCore.CAP.MySql.Test
         [Fact]
         public async Task ChangePublishStateTest()
         {
-            var msgId = SnowflakeId.Default().NextId().ToString();
+            var msgId = _snowflakeId.NextId().ToString();
             var header = new Dictionary<string, string>()
             {
                 [Headers.MessageId] = msgId
@@ -75,7 +77,7 @@ namespace DotNetCore.CAP.MySql.Test
         [Fact]
         public async Task ChangeReceiveStateTest()
         {
-            var msgId = SnowflakeId.Default().NextId().ToString();
+            var msgId = _snowflakeId.NextId().ToString();
             var header = new Dictionary<string, string>()
             {
                 [Headers.MessageId] = msgId

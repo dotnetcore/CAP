@@ -21,6 +21,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private readonly ILogger _logger;
         private readonly string _subscriptionName;
+        private readonly IServiceProvider _serviceProvider;
         private readonly AzureServiceBusOptions _asbOptions;
 
         private ServiceBusAdministrationClient? _administrationClient;
@@ -30,11 +31,13 @@ namespace DotNetCore.CAP.AzureServiceBus
         public AzureServiceBusConsumerClient(
             ILogger logger,
             string subscriptionName,
-            IOptions<AzureServiceBusOptions> options)
+            IOptions<AzureServiceBusOptions> options,
+            IServiceProvider serviceProvider)
         {
             
             _logger = logger;
             _subscriptionName = subscriptionName;
+            _serviceProvider = serviceProvider;
             _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
