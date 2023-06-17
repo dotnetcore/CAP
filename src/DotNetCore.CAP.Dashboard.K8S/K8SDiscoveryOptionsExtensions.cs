@@ -4,11 +4,11 @@
 using DotNetCore.CAP;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
-using DotNetCore.CAP.Dashboard.K8S;
+using DotNetCore.CAP.Dashboard.K8s;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace DotNetCore.CAP.Dashboard.K8S
+namespace DotNetCore.CAP.Dashboard.K8s
 {
     internal sealed class K8SDiscoveryOptionsExtension : ICapOptionsExtension
     {
@@ -39,12 +39,12 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CapDiscoveryOptionsExtensions
     {
-        public static CapOptions UseK8SDiscovery(this CapOptions capOptions)
+        public static CapOptions UseK8sDiscovery(this CapOptions capOptions)
         {
-            return capOptions.UseK8SDiscovery(opt => { });
+            return capOptions.UseK8sDiscovery(opt => { });
         }
 
-        public static CapOptions UseK8SDiscovery(this CapOptions capOptions, Action<K8SDiscoveryOptions> options)
+        public static CapOptions UseK8sDiscovery(this CapOptions capOptions, Action<K8SDiscoveryOptions> options)
         {
             if (options == null)
             {

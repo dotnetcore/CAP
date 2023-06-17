@@ -6,7 +6,7 @@ using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using k8s;
 using k8s.Models;
 
-namespace DotNetCore.CAP.Dashboard.K8S
+namespace DotNetCore.CAP.Dashboard.K8s
 {
     public class K8SNodeDiscoveryProvider : INodeDiscoveryProvider
     {

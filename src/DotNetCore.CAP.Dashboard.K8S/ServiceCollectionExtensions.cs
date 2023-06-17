@@ -2,7 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using DotNetCore.CAP;
-using DotNetCore.CAP.Dashboard.K8S;
+using DotNetCore.CAP.Dashboard.K8s;
 
 // ReSharper disable once CheckNamespace
 namespace Microsoft.Extensions.DependencyInjection;
