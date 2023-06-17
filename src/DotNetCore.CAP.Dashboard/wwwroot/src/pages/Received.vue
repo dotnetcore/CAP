@@ -14,7 +14,7 @@
         <h2 class="page-line mb-2">{{ $t("Received Message") }}</h2>
         <b-form class="d-flex">
           <div class="col-sm-10">
-            <div class="row mb-2">
+            <div class="form-row mb-2">
               <label class="sr-only" for="inline-form-input-name">{{ $t("Name") }}</label>
               <b-form-input v-model="formData.name" id="inline-form-input-name" class="form-control col mr-4"
                 :placeholder="$t('Name')" />
@@ -23,7 +23,7 @@
               <b-form-input v-model="formData.group" id="inline-form-input-group" class="form-control col"
                 :placeholder="$t('Group')" />
             </div>
-            <div class="row">
+            <div class="form-row">
               <label class="sr-only" for="inline-form-input-content">{{ $t("Content") }}</label>
               <b-form-input v-model="formData.content" id="inline-form-input-content" class="form-control"
                 :placeholder="$t('Content')" />

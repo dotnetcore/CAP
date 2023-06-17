@@ -86,8 +86,7 @@ namespace DotNetCore.CAP.Dashboard.K8S
 
         public async Task<IList<Node>> ListServices(string? ns = null)
         {
-            var config = KubernetesClientConfiguration.BuildConfigFromConfigFile();
-            var client = new Kubernetes(config);
+            var client = new Kubernetes(_options);
             var services = await client.CoreV1.ListNamespacedServiceAsync(ns);
 
             var result = new List<Node>();
