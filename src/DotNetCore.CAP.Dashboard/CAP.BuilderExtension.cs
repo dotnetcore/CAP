@@ -18,7 +18,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 
-[assembly: InternalsVisibleTo("DotNetCore.CAP.Dashboard.K8S")]
+[assembly: InternalsVisibleTo("DotNetCore.CAP.Dashboard.K8s")]
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP

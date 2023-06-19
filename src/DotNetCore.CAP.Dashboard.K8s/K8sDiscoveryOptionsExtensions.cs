@@ -39,11 +39,13 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CapDiscoveryOptionsExtensions
     {
+        // ReSharper disable once InconsistentNaming
         public static CapOptions UseK8sDiscovery(this CapOptions capOptions)
         {
             return capOptions.UseK8sDiscovery(opt => { });
         }
 
+        // ReSharper disable once InconsistentNaming
         public static CapOptions UseK8sDiscovery(this CapOptions capOptions, Action<K8SDiscoveryOptions> options)
         {
             if (options == null)
