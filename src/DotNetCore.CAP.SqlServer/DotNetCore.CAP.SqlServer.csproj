@@ -9,7 +9,7 @@
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore" Version="6.0.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.0" />
-		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.0.1" />
+		<PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.1" />
 		<ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
 	</ItemGroup>
 
