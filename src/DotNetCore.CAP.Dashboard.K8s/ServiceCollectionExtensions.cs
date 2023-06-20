@@ -17,14 +17,14 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The services available in the application.</param>
     /// <param name="option">An action to configure the <see cref="DashboardOptions" />.</param>
-    /// <param name="k8SOption">An action to configure the <see cref="K8SDiscoveryOptions" />.</param>
+    /// <param name="k8SOption">An action to configure the <see cref="K8sDiscoveryOptions" />.</param>
     /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
     public static IServiceCollection AddCapDashboardStandalone(this IServiceCollection services,
         Action<DashboardOptions>? option = null,
-        Action<K8SDiscoveryOptions>? k8SOption = null)
+        Action<K8sDiscoveryOptions>? k8SOption = null)
     {
         new DashboardOptionsExtension(option ?? (_ => { })).AddServices(services);
-        new K8SDiscoveryOptionsExtension(k8SOption).AddServices(services);
+        new K8sDiscoveryOptionsExtension(k8SOption).AddServices(services);
         return services;
     }
 }

@@ -8,12 +8,13 @@ using k8s.Models;
 
 namespace DotNetCore.CAP.Dashboard.K8s
 {
-    public class K8SNodeDiscoveryProvider : INodeDiscoveryProvider
+    // ReSharper disable once InconsistentNaming
+    public class K8sNodeDiscoveryProvider : INodeDiscoveryProvider
     {
         private readonly ILogger<ConsulNodeDiscoveryProvider> _logger;
         private readonly KubernetesClientConfiguration _options;
 
-        public K8SNodeDiscoveryProvider(ILoggerFactory logger, K8SDiscoveryOptions options)
+        public K8sNodeDiscoveryProvider(ILoggerFactory logger, K8sDiscoveryOptions options)
         {
             _logger = logger.CreateLogger<ConsulNodeDiscoveryProvider>();
             _options = options.K8SClientConfig;

@@ -5,11 +5,15 @@ using k8s;
 
 namespace DotNetCore.CAP.Dashboard.K8s
 {
-    public class K8SDiscoveryOptions
+    // ReSharper disable once InconsistentNaming
+    /// <summary>
+    /// Represents all the option you can use to configure the k8s discovery.
+    /// </summary>
+    public class K8sDiscoveryOptions
     {
         public KubernetesClientConfiguration K8SClientConfig { get; set; }
 
-        public K8SDiscoveryOptions()
+        public K8sDiscoveryOptions()
         {
             K8SClientConfig = KubernetesClientConfiguration.BuildDefaultConfig();
         }
