@@ -233,7 +233,18 @@ namespace DotNetCore.CAP.AzureServiceBus
             
             headers.Add(Headers.Group, _subscriptionName);
 
-            var customHeaders = _asbOptions.CustomHeaders?.Invoke(message);
+            List<KeyValuePair<string, string>>? customHeaders = null;
+#pragma warning disable CS0618 // Type or member is obsolete
+            if (_asbOptions.CustomHeaders != null)
+            {
+                customHeaders = _asbOptions.CustomHeaders(message).ToList();
+            }
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            if (_asbOptions.CustomHeadersBuilder != null)
+            {
+                customHeaders = _asbOptions.CustomHeadersBuilder(message,_serviceProvider).ToList();
+            }
             
             if (customHeaders?.Any() == true)
             {

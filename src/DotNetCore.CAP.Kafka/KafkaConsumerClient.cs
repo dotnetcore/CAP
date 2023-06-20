@@ -126,6 +126,7 @@ namespace DotNetCore.CAP.Kafka
                 }
                 headers.Add(Messages.Headers.Group, _groupId);
 
+#pragma warning disable CS0618 // Type or member is obsolete
                 if (_kafkaOptions.CustomHeaders != null)
                 {
                     var customHeaders = _kafkaOptions.CustomHeaders(consumerResult);
@@ -134,6 +135,7 @@ namespace DotNetCore.CAP.Kafka
                         headers[customHeader.Key] = customHeader.Value;
                     }
                 }
+#pragma warning restore CS0618 // Type or member is obsolete
 
                 if (_kafkaOptions.CustomHeadersBuilder != null)
                 {

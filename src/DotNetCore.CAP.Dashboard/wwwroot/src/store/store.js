@@ -3,7 +3,7 @@ import Vuex from 'vuex';
 
 Vue.use(Vuex);
 
-let store = new Vuex.Store({ 
+let store = new Vuex.Store({
     state: {
         metric: {},
         info: {}
@@ -18,7 +18,7 @@ let store = new Vuex.Store({
         setMertic(state, val) {
             state.metric = val;
         },
-        setInfo(state, val){
+        setInfo(state, val) {
             state.info = val;
         }
     },

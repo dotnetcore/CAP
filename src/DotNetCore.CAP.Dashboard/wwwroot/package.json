@@ -1,7 +1,14 @@
 {
   "name": "cap-dashboard",
-  "version": "7.0.0",
-  "private": true,
+  "version": "7.2.0",
+  "description": "Dashboard for CAP",
+  "author": "Savorboard, NCC",
+  "homepage": "https://github.com/dotnetcore/CAP",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotnetcore/CAP.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -14,14 +21,13 @@
     "bootstrap-vue": "^2.21.2",
     "json-bigint": "^1.0.0",
     "vue": "^2.7.7",
-    "vuex": "^3.6.2",
-    "vue-router": "^3.5.4",
     "vue-i18n": "^8.26.7",
-    "vue-json-pretty": "^1.8.0"
+    "vue-json-pretty": "^1.8.0",
+    "vue-router": "^3.5.4",
+    "vuex": "^3.6.2"
   },
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.1.0",
-    "@vitejs/plugin-legacy": "^2.0.0",
     "@vitejs/plugin-vue2": "^1.1.2",
     "@vue/eslint-config-prettier": "^7.0.0",
     "eslint": "^8.5.0",

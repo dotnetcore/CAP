@@ -3,7 +3,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard.GatewayProxy;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
@@ -56,8 +59,12 @@ namespace DotNetCore.CAP.Dashboard
             _builder.MapGet(prefixMatch + "/received/{status}", ReceivedList).AllowAnonymousIf(_options.AllowAnonymousExplicit);
             _builder.MapGet(prefixMatch + "/subscriber", Subscribers).AllowAnonymousIf(_options.AllowAnonymousExplicit);
             _builder.MapGet(prefixMatch + "/nodes", Nodes).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+
+            _builder.MapGet(prefixMatch + "/list-ns", ListNamespaces).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/list-svc/{namespace}", ListServices).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+            _builder.MapGet(prefixMatch + "/ping", PingServices).AllowAnonymousIf(_options.AllowAnonymousExplicit);
         }
-         
+
         public async Task Metrics(HttpContext httpContext)
         {
             if (_agent != null && await _agent.Invoke(httpContext)) return;
@@ -99,7 +106,7 @@ namespace DotNetCore.CAP.Dashboard
                 }
                 else
                 {
-                    if (_serviceProvider.GetService<DiscoveryOptions>() != null)
+                    if (_serviceProvider.GetService<ConsulDiscoveryOptions>() != null)
                     {
                         var discoveryProvider = _serviceProvider.GetRequiredService<INodeDiscoveryProvider>();
                         var nodes = await discoveryProvider.GetNodes();
@@ -194,9 +201,7 @@ namespace DotNetCore.CAP.Dashboard
         {
             if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
-
-            //var form = await httpContext.Request.ReadFormAsync();
-            //var messageIds =  form["messages[]"]
+             
             var messageIds = await httpContext.Request.ReadFromJsonAsync<long[]>();
             if (messageIds == null || messageIds.Length == 0)
             {
@@ -338,6 +343,83 @@ namespace DotNetCore.CAP.Dashboard
             result = await discoveryProvider.GetNodes();
 
             await httpContext.Response.WriteAsJsonAsync(result);
+        }
+
+        public async Task ListNamespaces(HttpContext httpContext)
+        {
+            var discoveryProvider = _serviceProvider.GetService<INodeDiscoveryProvider>();
+            if (discoveryProvider == null)
+            {
+                await httpContext.Response.WriteAsJsonAsync(new List<string>());
+                return;
+            }
+
+            var nsList = await discoveryProvider.GetNamespaces(httpContext.RequestAborted);
+            if (nsList == null)
+            {
+                httpContext.Response.StatusCode = 404;
+            }
+            else
+            {
+                await httpContext.Response.WriteAsJsonAsync(await discoveryProvider.GetNamespaces(httpContext.RequestAborted));
+            }
+        }
+
+        public async Task ListServices(HttpContext httpContext)
+        {
+            var @namespace = string.Empty;
+
+            if (httpContext.Request.RouteValues.TryGetValue("namespace", out var val))
+            {
+                @namespace = val!.ToString();
+            }
+
+            var discoveryProvider = _serviceProvider.GetService<INodeDiscoveryProvider>();
+            if (discoveryProvider == null)
+            {
+                await httpContext.Response.WriteAsJsonAsync(new List<Node>());
+                return;
+            }
+
+            var result = await discoveryProvider.ListServices(@namespace);
+            
+
+            await httpContext.Response.WriteAsJsonAsync(result);
+        }
+
+        public async Task PingServices(HttpContext httpContext)
+        {
+            var endpoint = httpContext.Request.Query["endpoint"];
+
+            var httpClient = new HttpClient();
+            var sw = new Stopwatch();
+            try
+            {
+                sw.Restart();
+                var healthEndpoint = endpoint + _options.PathMatch + "/api/health";
+                var response = await httpClient.GetStringAsync(healthEndpoint);
+                sw.Stop();
+
+                if (response == "OK")
+                {
+                    await httpContext.Response.WriteAsync(sw.ElapsedMilliseconds.ToString());
+                }
+                else
+                {
+                    httpContext.Response.StatusCode = 501;
+                    await httpContext.Response.WriteAsync(response);
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                httpContext.Response.StatusCode = (int)e.StatusCode.GetValueOrDefault(HttpStatusCode.BadGateway);
+                await httpContext.Response.WriteAsync(e.Message);
+            }
+            catch (Exception e)
+            {
+                httpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
+                await httpContext.Response.WriteAsync(e.Message);
+            }
         }
 
         private async Task<bool> Auth(HttpContext httpContext)

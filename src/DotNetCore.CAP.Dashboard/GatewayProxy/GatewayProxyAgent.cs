@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
 using DotNetCore.CAP.Dashboard.NodeDiscovery;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Primitives;
 
@@ -19,50 +20,79 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
     public class GatewayProxyAgent
     {
         public const string CookieNodeName = "cap.node";
+        public const string CookieNodeNsName = "cap.node.ns";
         private readonly ILogger _logger;
 
         private readonly IHttpRequester _requester;
         private readonly IRequestMapper _requestMapper;
 
-        private readonly DiscoveryOptions _discoveryOptions;
+        private readonly ConsulDiscoveryOptions _consulDiscoveryOptions;
         private readonly INodeDiscoveryProvider _discoveryProvider;
 
         public GatewayProxyAgent(
             ILoggerFactory loggerFactory,
             IRequestMapper requestMapper,
             IHttpRequester requester,
-            DiscoveryOptions discoveryOptions,
+            IServiceProvider serviceProvider,
             INodeDiscoveryProvider discoveryProvider)
         {
             _logger = loggerFactory.CreateLogger<GatewayProxyAgent>();
             _requestMapper = requestMapper;
             _requester = requester;
             _discoveryProvider = discoveryProvider;
-            _discoveryOptions = discoveryOptions;
+            _consulDiscoveryOptions = serviceProvider.GetService<ConsulDiscoveryOptions>();
         }
 
         protected HttpRequestMessage DownstreamRequest { get; set; }
 
         public async Task<bool> Invoke(HttpContext context)
         {
-            if (_discoveryOptions == null)
-            {
-                return false;
-            }
-
             var request = context.Request;
-            //For performance reasons, we need to put this functionality in the else
             var isSwitchNode = request.Cookies.TryGetValue(CookieNodeName, out var requestNodeName);
-            var isCurrentNode = _discoveryOptions.NodeName == requestNodeName;
-
-            if (!isSwitchNode || isCurrentNode)
+            if (!isSwitchNode)
             {
                 return false;
             }
 
             _logger.LogDebug("start calling remote endpoint...");
 
-            var node = await _discoveryProvider.GetNode(requestNodeName);
+            Node node;
+            if (_consulDiscoveryOptions == null) // it's k8s
+            {
+                if (request.Cookies.TryGetValue(CookieNodeNsName, out var ns))
+                {
+                    if (CapCache.Global.TryGet(requestNodeName + ns, out var nodeObj))
+                    {
+                        node = (Node)nodeObj;
+                    }
+                    else
+                    {
+                        node = await _discoveryProvider.GetNode(requestNodeName, ns);
+                        CapCache.Global.AddOrUpdate(requestNodeName + ns, node);
+                    }
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (_consulDiscoveryOptions.NodeName == requestNodeName)
+                {
+                    return false;
+                }
+
+                if (CapCache.Global.TryGet(requestNodeName, out var nodeObj))
+                {
+                    node = (Node)nodeObj;
+                }
+                else
+                {
+                    node = await _discoveryProvider.GetNode(requestNodeName);
+                    CapCache.Global.AddOrUpdate(requestNodeName, node);
+                }
+            }
             if (node != null)
             {
                 try
@@ -117,11 +147,19 @@ namespace DotNetCore.CAP.Dashboard.GatewayProxy
             {
                 await stream.CopyToAsync(context.Response.Body);
             }
-        } 
+        }
 
         private void SetDownStreamRequestUri(Node node, string requestPath, string queryString)
         {
-            var uriBuilder = new UriBuilder("http://", node.Address, node.Port, requestPath, queryString);
+            UriBuilder uriBuilder;
+            if (node.Address.StartsWith("http"))
+            {
+                uriBuilder = new UriBuilder(node.Address + requestPath + queryString);
+            }
+            else
+            {
+                uriBuilder = new UriBuilder("http://", node.Address, node.Port, requestPath, queryString);
+            }
             DownstreamRequest.RequestUri = uriBuilder.Uri;
         }
 

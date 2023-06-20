@@ -49,21 +49,7 @@ builder.Services.AddAuthentication(options =>
     });
 builder.Services.AddAuthorization();
 
-builder.Services.AddCap(cap =>
-{
-    cap.UseDashboard(d =>
-    {
-        d.UseAuth = true;
-        d.DefaultAuthenticationScheme = JwtBearerDefaults.AuthenticationScheme;
-    });
-    cap.UseMySql("server=192.168.3.57;port=3307;database=cap;UserId=root;Password=123123;");
-    cap.UseRabbitMQ(aa =>
-    {
-        aa.HostName = "192.168.3.57";
-        aa.UserName = "user";
-        aa.Password = "wJ0p5gSs17";
-    });
-});
+builder.Services.AddCapDashboardStandalone();
 
 var app = builder.Build();
 

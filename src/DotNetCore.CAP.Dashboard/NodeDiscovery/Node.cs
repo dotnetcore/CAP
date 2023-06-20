@@ -14,5 +14,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
         public int Port { get; set; }
 
         public string Tags { get; set; }
+
+        public string Latency { get; set; }
     }
 }

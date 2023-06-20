@@ -11,18 +11,18 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
-    internal sealed class DiscoveryOptionsExtension : ICapOptionsExtension
+    internal sealed class ConsulDiscoveryOptionsExtension : ICapOptionsExtension
     {
-        private readonly Action<DiscoveryOptions> _options;
+        private readonly Action<ConsulDiscoveryOptions> _options;
 
-        public DiscoveryOptionsExtension(Action<DiscoveryOptions> option)
+        public ConsulDiscoveryOptionsExtension(Action<ConsulDiscoveryOptions> option)
         {
             _options = option;
         }
 
         public void AddServices(IServiceCollection services)
         {
-            var discoveryOptions = new DiscoveryOptions();
+            var discoveryOptions = new ConsulDiscoveryOptions();
 
             _options?.Invoke(discoveryOptions);
             services.AddSingleton(discoveryOptions);
@@ -41,19 +41,22 @@ namespace Microsoft.Extensions.DependencyInjection
 {
     public static class CapDiscoveryOptionsExtensions
     {
-        public static CapOptions UseDiscovery(this CapOptions capOptions)
+        /// <summary>
+        /// Default use kubernetes as service discovery.
+        /// </summary>
+        public static CapOptions UseConsulDiscovery(this CapOptions capOptions)
         {
-            return capOptions.UseDiscovery(opt => { });
+            return capOptions.UseConsulDiscovery(_ =>  { });
         }
 
-        public static CapOptions UseDiscovery(this CapOptions capOptions, Action<DiscoveryOptions> options)
+        public static CapOptions UseConsulDiscovery(this CapOptions capOptions, Action<ConsulDiscoveryOptions> options)
         {
             if (options == null)
             {
                 throw new ArgumentNullException(nameof(options));
             }
 
-            capOptions.RegisterExtension(new DiscoveryOptionsExtension(options));
+            capOptions.RegisterExtension(new ConsulDiscoveryOptionsExtension(options));
 
             return capOptions;
         }

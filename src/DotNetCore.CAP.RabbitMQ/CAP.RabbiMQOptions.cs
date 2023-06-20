@@ -10,6 +10,7 @@ using RabbitMQ.Client.Events;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP
 {
+    // ReSharper disable once InconsistentNaming
     public class RabbitMQOptions
     {
         /// <summary>

@@ -205,6 +205,7 @@ namespace DotNetCore.CAP.RabbitMQ
 
             headers.Add(Headers.Group, _queueName);
 
+#pragma warning disable CS0618 // Type or member is obsolete
             if (_rabbitMQOptions.CustomHeaders != null)
             {
                 var customHeaders = _rabbitMQOptions.CustomHeaders(e);
@@ -213,6 +214,7 @@ namespace DotNetCore.CAP.RabbitMQ
                     headers[customHeader.Key] = customHeader.Value;
                 }
             }
+#pragma warning restore CS0618 // Type or member is obsolete
 
             if (_rabbitMQOptions.CustomHeadersBuilder != null)
             {

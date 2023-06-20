@@ -27,7 +27,6 @@ public class MySqlDataStorage : IDataStorage
     private readonly string _recName;
     private readonly ISerializer _serializer;
     private readonly ISnowflakeId _snowflakeId;
-    private readonly bool _supportSkipLocked;
     private readonly string _lockName;
 
     public MySqlDataStorage(
@@ -47,11 +46,11 @@ public class MySqlDataStorage : IDataStorage
         _lockName = initializer.GetLockTableName();
     }
 
-    bool SupportSkipLocked => ((MySqlStorageInitializer)_initializer).IsSupportSkipLocked();
+    private bool SupportSkipLocked => ((MySqlStorageInitializer)_initializer).IsSupportSkipLocked();
 
     public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
     {
-        string sql =
+        var sql =
             $"UPDATE `{_lockName}` SET `Instance`=@Instance,`LastLockTime`=@LastLockTime WHERE `Key`=@Key AND `LastLockTime` < @TTL;";
         var connection = new MySqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
@@ -68,7 +67,7 @@ public class MySqlDataStorage : IDataStorage
 
     public async Task ReleaseLockAsync(string key, string instance, CancellationToken token = default)
     {
-        string sql =
+        var sql =
             $"UPDATE `{_lockName}` SET `Instance`='',`LastLockTime`=@LastLockTime WHERE `Key`=@Key AND `Instance`=@Instance;";
         var connection = new MySqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);

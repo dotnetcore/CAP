@@ -4,6 +4,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Dashboard;
@@ -16,6 +17,8 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
+
+[assembly: InternalsVisibleTo("DotNetCore.CAP.Dashboard.K8s")]
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP

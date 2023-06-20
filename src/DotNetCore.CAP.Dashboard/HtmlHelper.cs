@@ -21,8 +21,14 @@ namespace DotNetCore.CAP.Dashboard
             {
                 async = WrapKeyword("async");
                 var asyncResultType = coercedAwaitableInfo.AwaitableInfo.ResultType;
-
-                @return = WrapType("Task") + WrapIdentifier("<") + WrapType(asyncResultType) + WrapIdentifier(">");
+                if (asyncResultType.Name == "Void")
+                {
+                    @return = WrapType("Task");
+                }
+                else
+                {
+                    @return = WrapType("Task") + WrapIdentifier("<") + WrapType(asyncResultType) + WrapIdentifier(">");
+                }
             }
             else
             {

@@ -5,6 +5,9 @@
 
 namespace DotNetCore.CAP
 {
+    /// <summary>
+    /// Represents all the option you can use to configure the dashboard.
+    /// </summary>
     public class DashboardOptions
     {
         public DashboardOptions()

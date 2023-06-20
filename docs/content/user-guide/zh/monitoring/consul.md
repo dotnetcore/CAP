@@ -18,7 +18,7 @@ services.AddCap(x =>
     x.UseMySql(Configuration.GetValue<string>("ConnectionString"));
     x.UseRabbitMQ("localhost");
     x.UseDashboard();
-    x.UseDiscovery(_ =>
+    x.UseConsulDiscovery(_ =>
     {
         _.DiscoveryServerHostName = "localhost";
         _.DiscoveryServerPort = 8500;

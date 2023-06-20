@@ -128,6 +128,7 @@ nav:
       - Monitoring:
           - Consul: user-guide/en/monitoring/consul.md
           - Dashboard: user-guide/en/monitoring/dashboard.md
+          - Kubernetes: user-guide/en/monitoring/kubernetes.md
           - Diagnostics: user-guide/en/monitoring/diagnostics.md
           - OpenTelemetry: user-guide/en/monitoring/opentelemetry.md
       - Samples:
@@ -166,6 +167,7 @@ nav:
       - 监控:
           - Consul: user-guide/zh/monitoring/consul.md
           - Dashboard: user-guide/zh/monitoring/dashboard.md
+          - Kubernetes: user-guide/zh/monitoring/kubernetes.md
           - Diagnostics: user-guide/zh/monitoring/diagnostics.md
           - OpenTelemetry: user-guide/zh/monitoring/opentelemetry.md
       - 示例:

@@ -2,10 +2,12 @@ export default {
     LanguageName: "English",
     Published: "Published",
     Delayed: "Delayed",
-    Received: "Received",    
+    Received: "Received",
     Subscriber: "Subscriber",
     Nodes: "Nodes",
     Dashboard: "Dashboard",
+    Transport: "Transport",
+    Storage: "Storage",
     "CAP Dashboard": "CAP Dashboard",
     Loading: "Loading",
     First: "First",
@@ -56,5 +58,9 @@ export default {
     Tags: "Tags",
     Actions: "Actions",
     ReexecuteSuccess: "😀 Reexecute Successful !",
-    RequeueSuccess: "😀 Requeue Successfull !"
+    RequeueSuccess: "😀 Requeue Successfull !",
+    SelectNamespaces: "-- Please select a kubernetes namespace --",
+    Latency: "Latency",
+    NonDiscovery: "Unconfigure node discovery !",
+    EmptyRecords: "No records to show"
 }

@@ -13,6 +13,7 @@ import Navigation from "@/components/Navigation.vue";
 import Footer from "@/components/Footer.vue";
 import axios from "axios";
 
+
 export default {
   name: "App",
   components: {
@@ -37,6 +38,21 @@ export default {
     }
   },
   mounted() {
+    axios.interceptors.response.use(
+      res => {
+        if (res.status === 500) {
+          this.$bvToast.toast("request failed", {
+            title: "Request Error",
+            variant: "danger",
+            autoHideDelay: 1000,
+            appendToast: true,
+            solid: true
+          });
+        }
+        return res;
+      }
+    );
+
     this.getData();
   },
   beforeDestroy() {

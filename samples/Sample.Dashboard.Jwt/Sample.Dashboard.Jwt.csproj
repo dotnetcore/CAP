@@ -10,15 +10,16 @@
     <ItemGroup>
         <PackageReference Include="Invio.Extensions.Authentication.JwtBearer" Version="2.0.1" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.15" />
-        <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.31.0" />
-        <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="6.31.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard\DotNetCore.CAP.Dashboard.csproj" />
-        <ProjectReference Include="..\..\src\DotNetCore.CAP.MySql\DotNetCore.CAP.MySql.csproj" />
-        <ProjectReference Include="..\..\src\DotNetCore.CAP.RabbitMQ\DotNetCore.CAP.RabbitMQ.csproj" />
-        <ProjectReference Include="..\..\src\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+      <ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard.K8s\DotNetCore.CAP.Dashboard.K8s.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Dockerfile">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

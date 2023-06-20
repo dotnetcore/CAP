@@ -50,15 +50,19 @@ export default {
     SubscriberDescription: "节点下的所有订阅方法,按照 Group信息 进行分组",
     Method: "方法",
     Id: "Id",
+    Latency: "延迟",
     "Node Name": "节点名称",
     "Ip Address": "地址",
     Port: "端口",
     Tags: "标签",
     Actions: "动作",
     ReexecuteSuccess: "😀 重新执行成功！",
-    RequeueSuccess: "😀 重新发布成功！",    
+    RequeueSuccess: "😀 重新发布成功！",
     SwitchedNode: "切换的节点",
     Storage: "存储",
     Transport: "传输",
-    Switch: "切换"
+    Switch: "切换",
+    SelectNamespaces: "-- 请选择一个 kubernetes 命名空间 --",
+    NonDiscovery: "未配置Consul或K8S服务发现 !",
+    EmptyRecords: "没有要显示的记录"
 }

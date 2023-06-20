@@ -3,7 +3,7 @@
 
 namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 {
-    public class DiscoveryOptions
+    public class ConsulDiscoveryOptions
     {
         public const string DefaultDiscoveryServerHost = "localhost";
         public const int DefaultDiscoveryServerPort = 8500;
@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
 
         public const string DefaultScheme = "http";
 
-        public DiscoveryOptions()
+        public ConsulDiscoveryOptions()
         {
             DiscoveryServerHostName = DefaultDiscoveryServerHost;
             DiscoveryServerPort = DefaultDiscoveryServerPort;

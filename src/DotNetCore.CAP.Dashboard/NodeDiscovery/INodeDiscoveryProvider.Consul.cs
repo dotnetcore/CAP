@@ -15,22 +15,22 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
     public class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider
     {
         private readonly ILogger<ConsulNodeDiscoveryProvider> _logger;
-        private readonly DiscoveryOptions _options;
+        private readonly ConsulDiscoveryOptions _discoveryOptions;
 
-        public ConsulNodeDiscoveryProvider(ILoggerFactory logger, DiscoveryOptions options)
+        public ConsulNodeDiscoveryProvider(ILoggerFactory logger, ConsulDiscoveryOptions options)
         {
             _logger = logger.CreateLogger<ConsulNodeDiscoveryProvider>();
-            _options = options;
+            _discoveryOptions = options;
         }
 
-        public async Task<Node> GetNode(string nodeName, CancellationToken cancellationToken = default)
+        public async Task<Node> GetNode(string nodeName, string ns, CancellationToken cancellationToken = default)
         {
             try
             {
                 using var consul = new ConsulClient(config =>
                 {
                     config.WaitTime = TimeSpan.FromSeconds(5);
-                    config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
+                    config.Address = new Uri($"http://{_discoveryOptions.DiscoveryServerHostName}:{_discoveryOptions.DiscoveryServerPort}");
                 });
                 var serviceCatalog = await consul.Catalog.Service(nodeName, "CAP", cancellationToken);
                 if (serviceCatalog.StatusCode == HttpStatusCode.OK)
@@ -53,7 +53,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
         }
 
 
-        public async Task<IList<Node>> GetNodes(CancellationToken cancellationToken)
+        public async Task<IList<Node>> GetNodes(string ns, CancellationToken cancellationToken)
         {
             try
             {
@@ -62,7 +62,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                 using var consul = new ConsulClient(config =>
                 {
                     config.WaitTime = TimeSpan.FromSeconds(5);
-                    config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
+                    config.Address = new Uri($"http://{_discoveryOptions.DiscoveryServerHostName}:{_discoveryOptions.DiscoveryServerPort}");
                 });
 
                 var services = await consul.Catalog.Services(cancellationToken);
@@ -74,7 +74,7 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                     {
                         Id = info.ServiceID,
                         Name = info.ServiceName,
-                        Address = info.ServiceAddress,
+                        Address = "http://" + info.ServiceAddress,
                         Port = info.ServicePort,
                         Tags = string.Join(", ", info.ServiceTags)
                     }).ToList();
@@ -107,29 +107,29 @@ namespace DotNetCore.CAP.Dashboard.NodeDiscovery
                     Status = HealthStatus.Passing
                 };
 
-                if (_options.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase))
-                    healthCheck.HTTP = $"http://{_options.CurrentNodeHostName}:{_options.CurrentNodePort}{_options.MatchPath}/api/health";
-                else if (_options.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
-                    healthCheck.TCP = $"{_options.CurrentNodeHostName}:{_options.CurrentNodePort}";
+                if (_discoveryOptions.Scheme.Equals("http", StringComparison.OrdinalIgnoreCase))
+                    healthCheck.HTTP = $"http://{_discoveryOptions.CurrentNodeHostName}:{_discoveryOptions.CurrentNodePort}{_discoveryOptions.MatchPath}/api/health";
+                else if (_discoveryOptions.Scheme.Equals("https", StringComparison.OrdinalIgnoreCase))
+                    healthCheck.TCP = $"{_discoveryOptions.CurrentNodeHostName}:{_discoveryOptions.CurrentNodePort}";
 
                 var tags = new[] { "CAP", "Client", "Dashboard" };
-                if (_options.CustomTags != null && _options.CustomTags.Length > 0)
+                if (_discoveryOptions.CustomTags != null && _discoveryOptions.CustomTags.Length > 0)
                 {
-                    tags = tags.Union(_options.CustomTags).ToArray();
+                    tags = tags.Union(_discoveryOptions.CustomTags).ToArray();
                 }
 
                 using var consul = new ConsulClient(config =>
                 {
                     config.WaitTime = TimeSpan.FromSeconds(5);
-                    config.Address = new Uri($"http://{_options.DiscoveryServerHostName}:{_options.DiscoveryServerPort}");
+                    config.Address = new Uri($"http://{_discoveryOptions.DiscoveryServerHostName}:{_discoveryOptions.DiscoveryServerPort}");
                 });
 
                 var result = await consul.Agent.ServiceRegister(new AgentServiceRegistration
                 {
-                    ID = _options.NodeId,
-                    Name = _options.NodeName,
-                    Address = _options.CurrentNodeHostName,
-                    Port = _options.CurrentNodePort,
+                    ID = _discoveryOptions.NodeId,
+                    Name = _discoveryOptions.NodeName,
+                    Address = _discoveryOptions.CurrentNodeHostName,
+                    Port = _discoveryOptions.CurrentNodePort,
                     Tags = tags,
                     Check = healthCheck
                 }, cancellationToken);
