@@ -1,7 +1,14 @@
 {
   "name": "cap-dashboard",
-  "version": "7.0.0",
-  "private": true,
+  "version": "7.2.0",
+  "description": "Dashboard for CAP",
+  "author": "Savorboard, NCC",
+  "homepage": "https://github.com/dotnetcore/CAP",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dotnetcore/CAP.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
