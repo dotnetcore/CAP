@@ -201,9 +201,7 @@ namespace DotNetCore.CAP.Dashboard
         {
             if (_agent != null && await _agent.Invoke(httpContext)) return;
             if (!await Auth(httpContext)) return;
-
-            //var form = await httpContext.Request.ReadFormAsync();
-            //var messageIds =  form["messages[]"]
+             
             var messageIds = await httpContext.Request.ReadFromJsonAsync<long[]>();
             if (messageIds == null || messageIds.Length == 0)
             {

@@ -41,7 +41,6 @@ export default {
     axios.interceptors.response.use(
       res => {
         if (res.status === 500) {
-          console.log(res);
           this.$bvToast.toast("request failed", {
             title: "Request Error",
             variant: "danger",

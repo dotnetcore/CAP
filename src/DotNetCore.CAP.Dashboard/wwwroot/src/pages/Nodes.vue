@@ -210,7 +210,6 @@ export default {
         },
         timeout: 3000
       }).then(res => {
-        console.log(res);
         item.latency = res.data;
         document.cookie = `cap.node=${escape(item.name)};`;
         document.cookie = `cap.node.ns=${this.selected};`;
