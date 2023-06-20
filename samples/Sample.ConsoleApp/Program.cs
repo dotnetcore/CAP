@@ -2,6 +2,7 @@
 using DotNetCore.CAP;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Savorboard.CAP.InMemoryMessageQueue;
 
 namespace Sample.ConsoleApp
 {
@@ -16,13 +17,8 @@ namespace Sample.ConsoleApp
             {
                 //console app does not support dashboard
 
-                x.UseMySql("<ConnectionString>");
-                x.UseRabbitMQ(z =>
-                {
-                    z.HostName = "192.168.3.57";
-                    z.UserName = "user";
-                    z.Password = "wJ0p5gSs17";
-                });
+                x.UseInMemoryStorage();
+                x.UseInMemoryMessageQueue();
             });
 
             container.AddSingleton<EventSubscriber>();

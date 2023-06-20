@@ -13,7 +13,13 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard.K8S\DotNetCore.CAP.Dashboard.K8S.csproj" />
+      <ProjectReference Include="..\..\src\DotNetCore.CAP.Dashboard.K8s\DotNetCore.CAP.Dashboard.K8s.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="Dockerfile">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>
