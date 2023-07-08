@@ -6,6 +6,9 @@
 
 你可以阅读 [quick-start](../getting-started/quick-start.md#_3) 来学习如何发送和处理消息。
 
+!!! WARNING "消费者中使用 HTTPClient 引发的 TimeoutException"
+    默认情况下，如果消费者抛出 `OperationCanceledException`（包括 `TaskCanceledException`），我们会认为这是用户的正常行为而对异常进行忽略。如果你在消费者方法中使用 HTTPClient 并且进行了配置了Timeout配置，由于HTTP Client的[设计问题](https://github.com/dotnet/runtime/issues/21965)，你可能需要单独对异常进行处理并重新引发非OperationCanceledException，参考 #1368
+
 ## 补偿事务
 
 [Compensating transaction](https://en.wikipedia.org/wiki/Compensating_transaction)

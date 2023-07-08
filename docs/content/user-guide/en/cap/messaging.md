@@ -2,6 +2,9 @@
 
 The data sent by using the `ICapPublisher` interface is called `Message`.
 
+!!! WARNING "TimeoutException thrown in consumer using HTTPClient"
+    By default, if the consumer throws an `OperationCanceledException` (including `TaskCanceledException`), we consider this to be normal user behavior and ignore the exception. If you use HTTPClient in the consumer method and configure the request timeout, due to the [design issue](https://github.com/dotnet/runtime/issues/21965) of HTTP Client, you may need to handle the exception separately and re-throw non `OperationCanceledException`, refer to #1368.
+
 ## Compensating transaction
 
 Wiki :
