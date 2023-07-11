@@ -32,7 +32,7 @@ public class ServiceBusTransportTests
         var transportMessage = new TransportMessage(
             headers: new Dictionary<string, string?>()
             {
-                {Headers.MessageName, nameof(EntityCreated)}
+                {Headers.MessageName, "entity-created"}
             },
             body: null);
 
