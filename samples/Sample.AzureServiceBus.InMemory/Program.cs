@@ -29,8 +29,8 @@ builder.Services.AddCap(c =>
                         };
         };
 
-        asb.ConfigureCustomProducer<EntityCreatedForIntegration>("entity-created");
-        asb.ConfigureCustomProducer<EntityDeletedForIntegration>("entity-deleted");
+        asb.ConfigureCustomProducer("entity-created");
+        asb.ConfigureCustomProducer("entity-deleted");
     });
 
     c.UseDashboard();

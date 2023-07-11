@@ -18,7 +18,7 @@ public class ServiceBusTransportTests
     public ServiceBusTransportTests()
     {
         var config = new AzureServiceBusOptions();
-        config.ConfigureCustomProducer<EntityCreated>("entity-created");
+        config.ConfigureCustomProducer("entity-created");
 
         _options = Options.Create(config);
     }
@@ -39,8 +39,6 @@ public class ServiceBusTransportTests
         // When
         var producer = transport.CreateProducerForMessage(transportMessage);
 
-        // Then
-        producer.MessageTypeName.ShouldBe(nameof(EntityCreated));
         producer.TopicPath.ShouldBe("entity-created");
     }
 }
