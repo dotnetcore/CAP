@@ -46,7 +46,7 @@ namespace DotNetCore.CAP.AzureServiceBus
         public IServiceBusProducerDescriptor CreateProducerForMessage(TransportMessage transportMessage)
             => _asbOptions
                    .CustomProducers
-                   .Single(p => p.MessageTypeName == transportMessage.GetName());
+                   .Single(p => p.TopicPath == transportMessage.GetName());
         
         public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {

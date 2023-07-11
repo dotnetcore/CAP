@@ -8,19 +8,15 @@ namespace DotNetCore.CAP.AzureServiceBus.Producer;
 public interface IServiceBusProducerDescriptor
 {
     string TopicPath { get; }
-    string MessageTypeName { get; }
 
 }
 
 public class ServiceBusProducerDescriptor : IServiceBusProducerDescriptor
 {
-    public ServiceBusProducerDescriptor(string typeName, string topicPath)
+    public ServiceBusProducerDescriptor(string topicPath)
     {
-        MessageTypeName = typeName;
         TopicPath = topicPath;
     }
 
     public string TopicPath { get; set; }
-
-    public string MessageTypeName { get; }
 }

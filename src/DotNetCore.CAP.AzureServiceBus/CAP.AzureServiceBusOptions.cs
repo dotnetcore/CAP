@@ -54,16 +54,10 @@ namespace DotNetCore.CAP
         /// </summary>
         public Func<ServiceBusReceivedMessage, IServiceProvider, List<KeyValuePair<string, string>>>? CustomHeadersBuilder { get; set; }
 
-        public AzureServiceBusOptions ConfigureCustomProducer(string typeName, string topicName)
-        {
-            CustomProducers.Add(new ServiceBusProducerDescriptor(typeName, topicName));
 
-            return this;
-        }
-
-        public AzureServiceBusOptions ConfigureCustomProducer<T>(string topicName)
+        public AzureServiceBusOptions ConfigureCustomProducer(string topicName)
         {
-            CustomProducers.Add(new ServiceBusProducerDescriptor(typeof(T).Name, topicName));
+            CustomProducers.Add(new ServiceBusProducerDescriptor(topicName));
             
             return this;
         }
