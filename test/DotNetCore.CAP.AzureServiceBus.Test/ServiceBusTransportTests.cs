@@ -18,7 +18,7 @@ public class ServiceBusTransportTests
     public ServiceBusTransportTests()
     {
         var config = new AzureServiceBusOptions();
-        config.ConfigureCustomProducer<EntityCreated>(cfg => cfg.WithTopic("entity-created"));
+        config.ConfigureCustomProducer<EntityCreated>("entity-created");
 
         _options = Options.Create(config);
     }
@@ -42,26 +42,5 @@ public class ServiceBusTransportTests
         // Then
         producer.MessageTypeName.ShouldBe(nameof(EntityCreated));
         producer.TopicPath.ShouldBe("entity-created");
-    }
-
-    [Fact]
-    public void Default_Producer_Should_Have_Default_Topic()
-    {
-        // Given
-        var transport = new AzureServiceBusTransport(NullLogger<AzureServiceBusTransport>.Instance, _options);
-
-        var transportMessage = new TransportMessage(
-            headers: new Dictionary<string, string?>()
-            {
-                {Headers.MessageName, nameof(EntityDeleted)}
-            },
-            body: null);
-
-        // When
-        var producer = transport.CreateProducerForMessage(transportMessage);
-
-        // Then
-        producer.MessageTypeName.ShouldBe(nameof(EntityDeleted));
-        producer.TopicPath.ShouldBe(_options.Value.TopicPath);
     }
 }
