@@ -11,7 +11,6 @@ builder.Services.AddLogging(l => l.AddConsole());
 
 builder.Services.AddCap(c =>
 {
-
     c.UseInMemoryStorage();
     c.UseAzureServiceBus(asb =>
     {
@@ -29,12 +28,9 @@ builder.Services.AddCap(c =>
                             new("IsFromSampleProject", "'true'")
                         };
         };
-        asb.SQLFilters = new List<KeyValuePair<string, string>>() {
-            new("IsFromSampleProjectFilter","IsFromSampleProject = 'true'")
-        };
 
-        asb.ConfigureCustomProducer<EntityCreatedForIntegration>(cfg => cfg.WithTopic("entity-created"));
-        asb.ConfigureCustomProducer<EntityDeletedForIntegration>(cfg => cfg.WithTopic("entity-deleted"));
+        asb.ConfigureCustomProducer<EntityCreatedForIntegration>("entity-created");
+        asb.ConfigureCustomProducer<EntityDeletedForIntegration>("entity-deleted");
     });
 
     c.UseDashboard();

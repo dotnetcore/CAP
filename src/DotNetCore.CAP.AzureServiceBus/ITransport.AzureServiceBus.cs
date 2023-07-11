@@ -13,16 +13,17 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Azure.Messaging.ServiceBus.Administration;
 
 namespace DotNetCore.CAP.AzureServiceBus
 {
-    internal class AzureServiceBusTransport : ITransport, IServiceBusProducerDescriptorFactory
+    internal class AzureServiceBusTransport : ITransport, IServiceBusProducerDescriptorFactory, IDisposable
     {
         private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
         private readonly ILogger _logger;
-        private readonly IOptions<AzureServiceBusOptions> _asbOptions;
-
+        private readonly AzureServiceBusOptions _asbOptions;
+        
         private ServiceBusClient? _client;
         private readonly ConcurrentDictionary<string, ServiceBusSender?> _senders = new();
         
@@ -31,10 +32,10 @@ namespace DotNetCore.CAP.AzureServiceBus
             IOptions<AzureServiceBusOptions> asbOptions)
         {
             _logger = logger;
-            _asbOptions = asbOptions;
+            _asbOptions = asbOptions.Value ?? throw new ArgumentNullException(nameof(asbOptions));
         }
 
-        public BrokerAddress BrokerAddress => new BrokerAddress("AzureServiceBus", _asbOptions.Value.ConnectionString);
+        public BrokerAddress BrokerAddress => new BrokerAddress("AzureServiceBus", _asbOptions.ConnectionString);
 
         /// <summary>
         /// Creates a producer descriptor for the given message. If there's no custom producer configuration for the
@@ -43,20 +44,16 @@ namespace DotNetCore.CAP.AzureServiceBus
         /// <param name="transportMessage"></param>
         /// <returns></returns>
         public IServiceBusProducerDescriptor CreateProducerForMessage(TransportMessage transportMessage)
-            => _asbOptions.Value
+            => _asbOptions
                    .CustomProducers
-                   .SingleOrDefault(p => p.MessageTypeName == transportMessage.GetName())
-               ??
-               new ServiceBusProducerDescriptor(
-                   typeName: transportMessage.GetName(),
-                   topicPath: _asbOptions.Value.TopicPath);
+                   .Single(p => p.MessageTypeName == transportMessage.GetName());
         
         public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
         {
             try
             {
                 var producer = CreateProducerForMessage(transportMessage);
-                var sender = GetSenderForProducer(producer);
+                var sender = await GetSenderForProducerAsync(producer);
                 
                 var message = new ServiceBusMessage(transportMessage.Body.ToArray())
                 {
@@ -65,10 +62,9 @@ namespace DotNetCore.CAP.AzureServiceBus
                     CorrelationId = transportMessage.GetCorrelationId()
                 };
 
-                if (_asbOptions.Value.EnableSessions)
+                if (transportMessage.Headers.TryGetValue(AzureServiceBusHeaders.SessionId, out var sessionId))
                 {
-                    transportMessage.Headers.TryGetValue(AzureServiceBusHeaders.SessionId, out var sessionId);
-                    message.SessionId = string.IsNullOrEmpty(sessionId) ? transportMessage.GetId() : sessionId;
+                    message.SessionId = sessionId;
                 }
 
                 if (
@@ -104,35 +100,55 @@ namespace DotNetCore.CAP.AzureServiceBus
         /// </summary>
         /// <param name="producerDescriptor"></param>
         /// <returns><see cref="ServiceBusSender"/></returns>
-        private ServiceBusSender GetSenderForProducer(IServiceBusProducerDescriptor producerDescriptor)
+        private async Task<ServiceBusSender> GetSenderForProducerAsync(IServiceBusProducerDescriptor producerDescriptor)
         {
-            if (_senders.TryGetValue(producerDescriptor.TopicPath, out var sender) && sender != null)
-            {
-                _logger.LogTrace("Topic {TopicPath} connection already present as a Publish destination.",
-                    producerDescriptor.TopicPath);
+            var topicPath = producerDescriptor.TopicPath;
 
-                return sender;
+            if (!_senders.TryGetValue(topicPath, out var sender) && sender == null)
+            {
+                await _connectionLock.WaitAsync();
+
+                try
+                {
+                    if (!_senders.TryGetValue(topicPath, out sender) && sender == null)
+                    {
+                        _client ??= _asbOptions.TokenCredential is null
+                            ? new ServiceBusClient(_asbOptions.ConnectionString)
+                            : new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
+
+
+                        var newSender = _client.CreateSender(topicPath);
+
+                        _senders.AddOrUpdate(
+                            key: topicPath,
+                            addValue: newSender,
+                            updateValueFactory: (_, _) => newSender);
+
+                        return newSender;
+                    }
+                }
+                finally
+                {
+                    _connectionLock.Release();
+                }
             }
 
-            _connectionLock.Wait();
+            _logger.LogTrace("Topic {TopicPath} connection already present as a Publish destination.",
+                topicPath);
 
-            try
+            return sender;
+        }
+
+        public void Dispose()
+        {
+            _connectionLock.Dispose();
+
+            foreach (var sender in _senders)
             {
-                _client ??= _asbOptions.Value.TokenCredential is null ? new ServiceBusClient(_asbOptions.Value.ConnectionString) :
-                                                                         new ServiceBusClient(_asbOptions.Value.Namespace,_asbOptions.Value.TokenCredential);
-
-                var newSender = _client.CreateSender(producerDescriptor.TopicPath);
-                _senders.AddOrUpdate(
-                    key: producerDescriptor.TopicPath,
-                    addValue: newSender,
-                    updateValueFactory: (_, _) => newSender);
-
-                return newSender;
+                sender.Value?.DisposeAsync().GetAwaiter().GetResult();
             }
-            finally
-            {
-                _connectionLock.Release();
-            }
+
+            _client?.DisposeAsync().GetAwaiter().GetResult();
         }
     }
 }

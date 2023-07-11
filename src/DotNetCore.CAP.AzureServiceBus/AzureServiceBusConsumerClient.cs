@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,8 +18,6 @@ namespace DotNetCore.CAP.AzureServiceBus
 {
     internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     {
-        private readonly SemaphoreSlim _connectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
-
         private readonly ILogger _logger;
         private readonly string _subscriptionName;
         private readonly IServiceProvider _serviceProvider;
@@ -26,7 +25,7 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         private ServiceBusAdministrationClient? _administrationClient;
         private ServiceBusClient? _serviceBusClient;
-        private ServiceBusProcessor? _serviceBusProcessor;
+        private readonly ConcurrentBag<ServiceBusProcessor> _serviceBusProcessors = new();
 
         public AzureServiceBusConsumerClient(
             ILogger logger,
@@ -39,6 +38,8 @@ namespace DotNetCore.CAP.AzureServiceBus
             _subscriptionName = subscriptionName;
             _serviceProvider = serviceProvider;
             _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
+
+            Connect();
         }
 
         public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
@@ -47,67 +48,45 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public BrokerAddress BrokerAddress => new ("AzureServiceBus", _asbOptions.ConnectionString);
 
-        
-        public void Subscribe(IEnumerable<string> topics)
+        public ICollection<string> FetchTopics(IEnumerable<string> receiveTopics)
         {
-            if (topics == null)
+            var topicPaths = receiveTopics
+                .Distinct()
+                .ToArray();
+
+            CreateTopicsAndSubscriptionIfNotExistAsync(topicPaths).GetAwaiter().GetResult();
+
+            return topicPaths;
+        }
+
+        public void Subscribe(IEnumerable<string> receiveTopics)
+        {
+            foreach (var topic in receiveTopics)
             {
-                throw new ArgumentNullException(nameof(topics));
-            }
-
-            ConnectAsync().GetAwaiter().GetResult();
-
-            topics = topics.Concat(_asbOptions!.SQLFilters?.Select(o => o.Key) ?? Enumerable.Empty<string>());
-            var allRules = _administrationClient!.GetRulesAsync(_asbOptions!.TopicPath, _subscriptionName).ToEnumerable();
-            var allRuleNames = allRules.Select(o => o.Name);
-
-            
-            foreach (var newRule in topics.Except(allRuleNames))
-            {
-                var isSqlRule = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value is not null;
-
-                RuleFilter? currentRuleToAdd = default;
-
-                if (isSqlRule)
-                {
-                    var sqlExpression = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value;
-                    currentRuleToAdd = new SqlRuleFilter(sqlExpression);
-                }
-                else
-                {
-                    currentRuleToAdd = new CorrelationRuleFilter()
+                _serviceBusProcessors.Add(_serviceBusClient.CreateProcessor(topic, _subscriptionName,
+                    new ServiceBusProcessorOptions
                     {
-                        Subject = newRule
-                    };
-                }
-
-                _administrationClient.CreateRuleAsync(_asbOptions.TopicPath, _subscriptionName,
-                                        new CreateRuleOptions()
-                                        {
-                                            Name = newRule,
-                                            Filter = currentRuleToAdd
-                                        });
-
-                _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
+                        MaxConcurrentCalls = _asbOptions.MaxConcurrentCalls,
+                        MaxAutoLockRenewalDuration = _asbOptions.LockRenewalDuration
+                    }));
             }
-
-            foreach (var oldRule in allRuleNames.Except(topics))
-            {
-                _administrationClient.DeleteRuleAsync(_asbOptions.TopicPath, _subscriptionName, oldRule).GetAwaiter().GetResult();
-
-                _logger.LogInformation($"Azure Service Bus remove rule: {oldRule}");
-            }
-
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
         {
-            ConnectAsync().GetAwaiter().GetResult();
+            foreach (var processor in _serviceBusProcessors)
+            {
+                processor.ProcessMessageAsync += _serviceBusProcessor_ProcessMessageAsync;
+                processor.ProcessErrorAsync += _serviceBusProcessor_ProcessErrorAsync;
 
-            _serviceBusProcessor!.ProcessMessageAsync += _serviceBusProcessor_ProcessMessageAsync;
-            _serviceBusProcessor.ProcessErrorAsync += _serviceBusProcessor_ProcessErrorAsync;
+                processor.StartProcessingAsync(cancellationToken).GetAwaiter().GetResult();
+            }
 
-            _serviceBusProcessor.StartProcessingAsync(cancellationToken).GetAwaiter().GetResult();
+            //continue the infinite loop to keep the object alive...
+            while (true)
+            {
+                Task.Delay(1000, cancellationToken);
+            }
         }
 
         private Task _serviceBusProcessor_ProcessErrorAsync(ProcessErrorEventArgs args)
@@ -140,10 +119,8 @@ namespace DotNetCore.CAP.AzureServiceBus
         public void Commit(object? sender)
         {
             var commitInput = (AzureServiceBusConsumerCommitInput)sender!;
-            if (_serviceBusProcessor?.AutoCompleteMessages ?? false)
-            {
-                commitInput.ProcessMessageArgs.CompleteMessageAsync(commitInput.ProcessMessageArgs.Message).GetAwaiter().GetResult();
-            }
+
+            commitInput.ProcessMessageArgs.CompleteMessageAsync(commitInput.ProcessMessageArgs.Message).GetAwaiter().GetResult();
         }
 
         public void Reject(object? sender)
@@ -153,78 +130,55 @@ namespace DotNetCore.CAP.AzureServiceBus
 
         public void Dispose()
         {
-            if (!_serviceBusProcessor!.IsProcessing)
+            foreach (var processor in _serviceBusProcessors)
             {
-                _serviceBusProcessor.DisposeAsync().GetAwaiter().GetResult();
+                processor.DisposeAsync().GetAwaiter().GetResult();
             }
+
+            _serviceBusClient?.DisposeAsync().GetAwaiter().GetResult();
         }
 
-        public async Task ConnectAsync()
+        public void Connect()
         {
-            if (_serviceBusProcessor != null)
+            if (_asbOptions.TokenCredential != null)
             {
-                return;
+                _administrationClient =
+                    new ServiceBusAdministrationClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
+                _serviceBusClient =
+                    new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
             }
-
-            await _connectionLock.WaitAsync();
-
-            try
+            else
             {
-                if (_serviceBusProcessor == null)
-                {
-                    if (_asbOptions.TokenCredential != null)
-                    {
-                        _administrationClient = new ServiceBusAdministrationClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
-                        _serviceBusClient = new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
-                    }
-                    else
-                    {
-                        _administrationClient = new ServiceBusAdministrationClient(_asbOptions.ConnectionString);
-                        _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString);
-                    }
-
-                    var topicPaths = 
-                        _asbOptions.CustomProducers.Select(producer => producer.TopicPath)
-                            .Append(_asbOptions.TopicPath)
-                            .Distinct();
-
-                    foreach (var topicPath in topicPaths)
-                    {
-                        if (!await _administrationClient.TopicExistsAsync(topicPath))
-                        {
-                            await _administrationClient.CreateTopicAsync(topicPath);
-                            _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
-                        }
-
-                        if (!await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
-                        {
-                            var subscriptionDescription =
-                                new CreateSubscriptionOptions(topicPath, _subscriptionName)
-                                {
-                                    RequiresSession = _asbOptions.EnableSessions,
-                                    AutoDeleteOnIdle = _asbOptions.SubscriptionAutoDeleteOnIdle
-                                };
-
-                            await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
-                            _logger.LogInformation($"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
-                        }
-                    }
-
-                    _serviceBusProcessor = _serviceBusClient.CreateProcessor(_asbOptions.TopicPath, _subscriptionName,_asbOptions.EnableSessions?
-                                           new ServiceBusProcessorOptions {
-                                                AutoCompleteMessages =_asbOptions.AutoCompleteMessages,
-                                                MaxConcurrentCalls=_asbOptions.MaxConcurrentCalls,
-                                                MaxAutoLockRenewalDuration = TimeSpan.FromSeconds(30),
-                                           }:null);
-                }
-            }
-            finally
-            {
-                _connectionLock.Release();
+                _administrationClient = new ServiceBusAdministrationClient(_asbOptions.ConnectionString);
+                _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString);
             }
         }
 
         #region private methods
+
+        private async Task CreateTopicsAndSubscriptionIfNotExistAsync(params string[] topicPaths)
+        {
+            foreach (var topicPath in topicPaths)
+            {
+                if (!await _administrationClient.TopicExistsAsync(topicPath))
+                {
+                    await _administrationClient.CreateTopicAsync(topicPath);
+                    _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
+                }
+
+                if (!await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
+                {
+                    var subscriptionDescription =
+                        new CreateSubscriptionOptions(topicPath, _subscriptionName)
+                        {
+                            AutoDeleteOnIdle = _asbOptions.SubscriptionAutoDeleteOnIdle
+                        };
+
+                    await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
+                    _logger.LogInformation($"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
+                }
+            }
+        }
 
         private TransportMessage ConvertMessage(ServiceBusReceivedMessage message)
         {
@@ -234,12 +188,6 @@ namespace DotNetCore.CAP.AzureServiceBus
             headers.Add(Headers.Group, _subscriptionName);
 
             List<KeyValuePair<string, string>>? customHeaders = null;
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (_asbOptions.CustomHeaders != null)
-            {
-                customHeaders = _asbOptions.CustomHeaders(message).ToList();
-            }
-#pragma warning restore CS0618 // Type or member is obsolete
 
             if (_asbOptions.CustomHeadersBuilder != null)
             {
