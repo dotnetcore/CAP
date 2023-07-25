@@ -12,7 +12,6 @@ using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.SqlServer.Diagnostics;
 using DotNetCore.CAP.Transport;
 using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -185,56 +184,6 @@ public static class CapTransactionExtensions
         var trans = database.BeginTransaction();
         publisher.Transaction.Value =
             ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
-        return new CapEFDbTransaction(capTrans);
-    }
-    
-    /// <summary>
-    /// Start the CAP transaction
-    /// </summary>
-    /// <param name="database">The <see cref="DatabaseFacade" />.</param>
-    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
-    /// <param name="isolationLevel">The <see cref="IsolationLevel" /> to use</param>
-    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-    /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
-    public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
-        IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
-    {
-        var trans = database.BeginTransaction(isolationLevel);
-        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
-        return new CapEFDbTransaction(capTrans);
-    }
-    
-    /// <summary>
-    /// Start the CAP transaction async
-    /// </summary>
-    /// <param name="database">The <see cref="DatabaseFacade" />.</param>
-    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
-    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-    /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
-    public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
-        ICapPublisher publisher, bool autoCommit = false)
-    {
-        var trans = await database.BeginTransactionAsync();
-        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
-        return new CapEFDbTransaction(capTrans);
-    }
-    
-    /// <summary>
-    /// Start the CAP transaction async
-    /// </summary>
-    /// <param name="database">The <see cref="DatabaseFacade" />.</param>
-    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
-    /// <param name="isolationLevel">The <see cref="IsolationLevel" /> to use</param>
-    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-    /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
-    public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
-        IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
-    {
-        var trans = await database.BeginTransactionAsync(isolationLevel);
-        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
         var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
         return new CapEFDbTransaction(capTrans);
     }
