@@ -43,6 +43,7 @@ internal class DiagnosticObserver : IObserver<KeyValuePair<string, object?>>
         {
             case SqlAfterCommitTransactionMicrosoft:
             {
+                if (GetProperty(evt.Value, "Operation") as string == "Rollback") return;
                 if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
                 var transactionKey = sqlConnection.ClientConnectionId;
                 if (_bufferList.TryRemove(transactionKey, out var msgList))
