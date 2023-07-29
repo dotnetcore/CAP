@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Transport;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
@@ -119,11 +120,28 @@ public static class CapTransactionExtensions
     /// <param name="database">The <see cref="DatabaseFacade" />.</param>
     /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
     /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
-    /// <returns>The <see cref="IDbContextTransaction" /> of EF dbcontext transaction object.</returns>
+    /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
     public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
         ICapPublisher publisher, bool autoCommit = false)
     {
         var trans = database.BeginTransaction();
+        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
+        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+        return new CapEFDbTransaction(capTrans);
+    }
+
+    /// <summary>
+    /// Start the CAP transaction
+    /// </summary>
+    /// <param name="database">The <see cref="DatabaseFacade" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    /// <param name="isolationLevel">The <see cref="IsolationLevel" /> to use</param>
+    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+    /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
+    public static IDbContextTransaction BeginTransaction(this DatabaseFacade database,
+        IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
+    {
+        var trans = database.BeginTransaction(isolationLevel);
         publisher.Transaction.Value = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
         var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
         return new CapEFDbTransaction(capTrans);
