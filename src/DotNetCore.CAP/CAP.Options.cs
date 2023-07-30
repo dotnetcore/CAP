@@ -24,7 +24,6 @@ public class CapOptions
         FailedRetryCount = 50;
         ConsumerThreadCount = 1;
         EnableConsumerPrefetch = false;
-        ProducerThreadCount = 1;
         Extensions = new List<ICapOptionsExtension>();
         Version = "v1";
         DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name!.ToLower();
@@ -91,7 +90,7 @@ public class CapOptions
     public int ConsumerThreadCount { get; set; }
 
     /// <summary>
-    /// If true, the message will be pre fetch to memory queue for execute.
+    /// If true, the message will be pre fetch to memory queue for parallel execute by thread pool.
     /// <para>Not available when <see cref="UseDispatchingPerGroup"/> true.</para>
     /// Default is false
     /// </summary>
@@ -103,13 +102,8 @@ public class CapOptions
     /// <para>If true, the <see cref="EnableConsumerPrefetch"/> is not available.</para>
     /// Default is false.
     /// </summary>
+    [Obsolete("Use EnableConsumerPrefetch instead. Setting it to true means that each consumer is now executed concurrently by thread pool, regardless of whether they are in different groups.")]
     public bool UseDispatchingPerGroup { get; set; }
-
-    /// <summary>
-    /// The number of producer thread connections.
-    /// Default is 1
-    /// </summary>
-    public int ProducerThreadCount { get; set; }
 
     /// <summary>
     /// The interval of the collector processor deletes expired messages.

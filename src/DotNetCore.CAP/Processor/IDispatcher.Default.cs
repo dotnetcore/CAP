@@ -53,22 +53,20 @@ public class Dispatcher : IDispatcher
         _tasksCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, CancellationToken.None);
         _tasksCts.Token.Register(() => _delayCts.Cancel());
 
-        var capacity = _options.ProducerThreadCount * 500;
         _publishedChannel = Channel.CreateBounded<MediumMessage>(
-            new BoundedChannelOptions(capacity > 5000 ? 5000 : capacity)
+            new BoundedChannelOptions(5000)
             {
                 AllowSynchronousContinuations = true,
-                SingleReader = _options.ProducerThreadCount == 1,
+                SingleReader = true,
                 SingleWriter = true,
                 FullMode = BoundedChannelFullMode.Wait
             });
 
-        await Task.WhenAll(Enumerable.Range(0, _options.ProducerThreadCount)
-            .Select(_ => Task.Run(Sending, _tasksCts.Token)).ToArray()).ConfigureAwait(false);
+        await Task.Run(Sending, _tasksCts.Token).ConfigureAwait(false); //here return valuetask
 
         if (_enablePrefetch)
         {
-            capacity = _options.ConsumerThreadCount * 300;
+            var capacity = _options.ConsumerThreadCount * 300;
             _receivedChannel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor?)>(
                 new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
                 {
@@ -99,7 +97,7 @@ public class Dispatcher : IDispatcher
                     _logger.LogWarning(e, "Update storage fails of delayed message in memory queue!");
                 }
             });
-            
+
             while (!_tasksCts.Token.IsCancellationRequested)
             {
                 try
@@ -170,6 +168,8 @@ public class Dispatcher : IDispatcher
     {
         try
         {
+            if (_tasksCts!.IsCancellationRequested) return;
+
             if (_enablePrefetch)
             {
                 if (!_receivedChannel.Writer.TryWrite((message, descriptor)))
@@ -207,14 +207,18 @@ public class Dispatcher : IDispatcher
                 while (_publishedChannel.Reader.TryRead(out var message))
                     try
                     {
-                        var result = await _sender.SendAsync(message).ConfigureAwait(false);
-                        if (!result.Succeeded)
-                            _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
+                        var item = message;
+                        _ = Task.Run(async () =>
+                        {
+                            var result = await _sender.SendAsync(item).ConfigureAwait(false);
+                            if (!result.Succeeded)
+                                _logger.MessagePublishException(item.Origin.GetId(), result.ToString(), result.Exception);
+                        });
                     }
                     catch (Exception ex)
                     {
                         _logger.LogError(ex,
-                            $"An exception occurred when sending a message to the MQ. Id:{message.DbId}");
+                            $"An exception occurred when sending a message to the transport. Id:{message.DbId}");
                     }
         }
         catch (OperationCanceledException)
@@ -231,7 +235,9 @@ public class Dispatcher : IDispatcher
                 while (_receivedChannel.Reader.TryRead(out var message))
                     try
                     {
-                        await _executor.ExecuteAsync(message.Item1, message.Item2, _tasksCts.Token).ConfigureAwait(false);
+                        var item1 = message.Item1;
+                        var item2 = message.Item2;
+                        _ = Task.Run(() => _executor.ExecuteAsync(item1, item2, _tasksCts.Token).ConfigureAwait(false));
                     }
                     catch (OperationCanceledException)
                     {
@@ -239,8 +245,7 @@ public class Dispatcher : IDispatcher
                     }
                     catch (Exception e)
                     {
-                        _logger.LogError(e,
-                            $"An exception occurred when invoke subscriber. MessageId:{message.Item1.DbId}");
+                        _logger.LogError(e, $"An exception occurred when invoke subscriber. MessageId:{message.Item1.DbId}");
                     }
         }
         catch (OperationCanceledException)
