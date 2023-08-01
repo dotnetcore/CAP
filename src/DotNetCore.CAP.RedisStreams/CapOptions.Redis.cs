@@ -13,7 +13,13 @@ namespace DotNetCore.CAP
         /// </summary>
         public ConfigurationOptions? Configuration { get; set; }
 
-        internal string Endpoint { get; set; } = default!;
+        internal string Endpoint
+        {
+            get
+            {
+                return this.Configuration?.ToString() ?? string.Empty;
+            }
+        }
 
         /// <summary>
         ///     Gets or sets the count of entries consumed from stream
