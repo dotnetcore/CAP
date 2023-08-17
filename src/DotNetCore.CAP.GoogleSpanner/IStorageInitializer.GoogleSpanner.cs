@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Spanner
 {
     internal class GoogleSpannerStorageInitializer : IStorageInitializer
     {

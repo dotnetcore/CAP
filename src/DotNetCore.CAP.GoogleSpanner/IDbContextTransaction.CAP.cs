@@ -4,7 +4,7 @@ using System;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP
+namespace Microsoft.EntityFrameworkCore.Storage
 {
     internal class CapEFDbTransaction : IDbContextTransaction
     {

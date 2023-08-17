@@ -40,22 +40,24 @@ namespace DotNetCore.CAP
                 var provider = scope.ServiceProvider;
                 using var dbContext = (DbContext)provider.GetRequiredService(options.DbContextType);
 
-                var connectionString = dbContext.Database.GetDbConnection().ConnectionString;
+                var connectionString = dbContext.Database.GetConnectionString();
 
-                if(string.IsNullOrEmpty(connectionString))
+                if (string.IsNullOrEmpty(connectionString))
                 {
                     throw new ArgumentNullException(connectionString);
                 }
 
                 options.ConnectionString = connectionString;
             }
-
-            SpannerConnectionStringBuilder builder = new(options.ConnectionString)
+            else
             {
-                EmulatorDetection = options.Emulator,
-            };
+                SpannerConnectionStringBuilder builder = new(options.ConnectionString)
+                {
+                    EmulatorDetection = options.Emulator,
+                };
 
-            options.ConnectionString = builder.ConnectionString;
+                options.ConnectionString = builder.ConnectionString;
+            }
         }
     }
 }

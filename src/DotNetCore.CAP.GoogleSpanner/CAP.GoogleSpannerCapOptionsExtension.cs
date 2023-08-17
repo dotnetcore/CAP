@@ -1,5 +1,6 @@
 ﻿using DotNetCore.CAP;
 using DotNetCore.CAP.Persistence;
+using DotNetCore.CAP.Spanner;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using System;

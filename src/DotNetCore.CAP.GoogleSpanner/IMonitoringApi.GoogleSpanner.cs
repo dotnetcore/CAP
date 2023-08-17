@@ -10,7 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Spanner
 {
     internal class GoogleSpannerMonitoringApi : IMonitoringApi
     {
@@ -219,7 +219,7 @@ namespace DotNetCore.CAP
                             WHERE `StatusName` = 'Succeeded'
                         GROUP BY FORMAT_TIMESTAMP('%F-%H', `Added`, 'UTC')
                     )
-                    SELECT `Key`,`Count` from `aggr` where `Key` >= @minKey and `Key` <= @maxKey";
+                    SELECT `Key`,`Count` from `aggr` where `Key` >= '@minKey' and `Key` <= '@maxKey'";
 
             var sqlParams = new SpannerParameterCollection()
             {
@@ -263,7 +263,7 @@ namespace DotNetCore.CAP
 
         private async Task<MediumMessage?> GetMessageAsync(string tableName, long id)
         {
-            var sql = $@"SELECT `Id` AS `DbId`, `Content`, `Added`, `ExpiresAt`, `Retries` FROM `{tableName}` WHERE `Id`={id}";
+            var sql = $@"SELECT `Id` AS `DbId`, `Content`, `Added`, `ExpiresAt`, `Retries` FROM `{tableName}` WHERE `Id`='{id}'";
 
             using var connection = new SpannerConnection(_options.ConnectionString);
             var cmd = connection.CreateSelectCommand(sql);

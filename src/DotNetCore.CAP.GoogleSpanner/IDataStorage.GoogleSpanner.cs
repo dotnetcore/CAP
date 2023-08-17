@@ -14,7 +14,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP.Spanner
 {
     public class GoogleSpannerDataStorage : IDataStorage
     {
@@ -140,14 +140,17 @@ namespace DotNetCore.CAP
 
             var connection = new SpannerConnection(options.Value.ConnectionString);
             await using var _ = connection.ConfigureAwait(false);
-            var cmd = connection.CreateInsertCommand(pubName, sqlParams);
+            DbCommand cmd = connection.CreateInsertCommand(pubName, sqlParams);
 
             if (transaction != null)
             {
-                var dbTrans = transaction as IDbTransaction;
+                DbTransaction? dbTrans = transaction as DbTransaction;
                 if (dbTrans == null && transaction is IDbContextTransaction dbContextTrans)
+                {
                     dbTrans = dbContextTrans.GetDbTransaction();
-                cmd.Transaction = dbTrans as DbTransaction;
+                }
+                
+                cmd.Transaction = dbTrans as SpannerTransactionBase;
             }
 
             await cmd.ExecuteNonQueryAsync().ConfigureAwait(false);
