@@ -75,7 +75,7 @@ namespace DotNetCore.CAP.Spanner
             var sqlParams = new SpannerParameterCollection()
             {
                 { "@Instance",SpannerDbType.String, instance },
-                { "@LastLockTime", SpannerDbType.Timestamp, DateTime.UtcNow },
+                { "@LastLockTime", SpannerDbType.Timestamp, DateTime.MinValue },
                 { "@Key", SpannerDbType.String, key },
             };
 
