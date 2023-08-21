@@ -8,7 +8,7 @@ Title: CAP - A distributed transaction solution in micro-service base on eventua
 # CAP
 
 <img width="140" align="right" src="img/logo.svg">
-[![Docs&Dahsboard](https://github.com/dotnetcore/CAP/actions/workflows/deploy-docs-and-dashbaord.yml/badge.svg?branch=master)](https://github.com/dotnetcore/CAP/actions/workflows/deploy-docs-and-dashbaord.yml)
+[![Docs&Dashboard](https://github.com/dotnetcore/CAP/actions/workflows/deploy-docs-and-dashboard.yml/badge.svg?branch=master)](https://github.com/dotnetcore/CAP/actions/workflows/deploy-docs-and-dashboard.yml)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/v8gfh6pe2u2laqoa/branch/master?svg=true)](https://ci.appveyor.com/project/yuleyule66/cap/branch/master)
 [![NuGet](https://img.shields.io/nuget/v/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
 [![NuGet Preview](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg?label=nuget-pre)](https://www.nuget.org/packages/DotNetCore.CAP/)

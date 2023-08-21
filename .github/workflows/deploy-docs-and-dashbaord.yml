@@ -24,7 +24,7 @@ jobs:
           dashboard:
             - 'src/DotNetCore.CAP.Dashboard/wwwroot/src/**'
   
-  build-dashbaord-and-push:
+  build-dashboard-and-push:
     needs: changes
     if: ${{ needs.changes.outputs.dashboard == 'true' }}    
     runs-on: ubuntu-latest

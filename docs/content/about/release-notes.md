@@ -119,14 +119,14 @@ hide:
 
 * Improve flow control for message cache of in memory. (#935)
 * Add cancellation token support to subscribers. (#912)
-* Add pathbase options for dashbaord. (#901)
-* Add custom authorization scheme support for dashbaord. (#906)
+* Add pathbase options for dashboard. (#901)
+* Add custom authorization scheme support for dashboard. (#906)
 
 **Bug Fixed:**
 
 * Fixed mysql connect timeout expired bug. (#931)
 * Fixed consul health check path invalid bug. (#921)
-* Fixed mongo dashbaord query bug. (#909)
+* Fixed mongo dashboard query bug. (#909)
 
 ## Version 5.1.0 (2021-06-07)
 
@@ -270,7 +270,7 @@ hide:
 
 * Change ISubscribeInvoker interface access modifier to public. (#537)
 * Fix rabbitmq connection may be reused when close forced. (#533)
-* Fix dahsboard message reexecute button throws exception bug. (#525)
+* Fix dashboard message reexecute button throws exception bug. (#525)
 
 ## Version 3.0.2 (2020-02-05)
 

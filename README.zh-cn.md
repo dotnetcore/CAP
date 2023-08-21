@@ -3,7 +3,7 @@
 </p>
 
 # CAP 　　　　　　　　　　　　　　　　　　　　[English](https://github.com/dotnetcore/CAP/blob/master/README.md)
-[![Docs&Dahsboard](https://github.com/dotnetcore/CAP/actions/workflows/deploy-docs-and-dashbaord.yml/badge.svg?branch=master)](https://github.com/dotnetcore/CAP/actions/workflows/deploy-docs-and-dashbaord.yml)
+[![Docs&Dashboard](https://github.com/dotnetcore/CAP/actions/workflows/deploy-docs-and-dashboard.yml/badge.svg?branch=master)](https://github.com/dotnetcore/CAP/actions/workflows/deploy-docs-and-dashboard.yml)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/v8gfh6pe2u2laqoa?svg=true)](https://ci.appveyor.com/project/yang-xiaodong/cap)
 [![NuGet](https://img.shields.io/nuget/v/DotNetCore.CAP.svg)](https://www.nuget.org/packages/DotNetCore.CAP/)
 [![NuGet Preview](https://img.shields.io/nuget/vpre/DotNetCore.CAP.svg?label=nuget-pre)](https://www.nuget.org/packages/DotNetCore.CAP/)
