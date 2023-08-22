@@ -4,7 +4,7 @@
 
 ## Dashboard 中的 Kubernetes
 
-我们的 Dashboard 从 7.2.0 版本开始支持 Kubernetes 作为服务发现。你可以切换到Node节点页面，然后选择命名空间，CAP会列出该命名空间下的所有Services，点击 *切换* 按钮后Dashbaord将检测该节点的CAP服务是否可用，如果可用则会代理到切换的节点进行数据查看。
+我们的 Dashboard 从 7.2.0 版本开始支持 Kubernetes 作为服务发现。你可以切换到Node节点页面，然后选择命名空间，CAP会列出该命名空间下的所有Services，点击 *切换* 按钮后Dashboard将检测该节点的CAP服务是否可用，如果可用则会代理到切换的节点进行数据查看。
 
 以下是一个配置示例
 
