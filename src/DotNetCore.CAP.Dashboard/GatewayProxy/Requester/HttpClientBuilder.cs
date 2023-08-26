@@ -7,54 +7,52 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
+namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+
+internal class HttpClientBuilder : IHttpClientBuilder
 {
-    internal class HttpClientBuilder : IHttpClientBuilder
+    private readonly Dictionary<int, Func<DelegatingHandler>> _handlers = new();
+
+    public IHttpClient Create()
     {
-        private readonly Dictionary<int, Func<DelegatingHandler>> _handlers =
-            new Dictionary<int, Func<DelegatingHandler>>();
+        var httpclientHandler = new HttpClientHandler();
 
-        public IHttpClient Create()
-        {
-            var httpclientHandler = new HttpClientHandler();
+        var client = new HttpClient(CreateHttpMessageHandler(httpclientHandler));
 
-            var client = new HttpClient(CreateHttpMessageHandler(httpclientHandler));
-
-            return new HttpClientWrapper(client);
-        }
-
-        private HttpMessageHandler CreateHttpMessageHandler(HttpMessageHandler httpMessageHandler)
-        {
-            _handlers
-                .OrderByDescending(handler => handler.Key)
-                .Select(handler => handler.Value)
-                .Reverse()
-                .ToList()
-                .ForEach(handler =>
-                {
-                    var delegatingHandler = handler();
-                    delegatingHandler.InnerHandler = httpMessageHandler;
-                    httpMessageHandler = delegatingHandler;
-                });
-            return httpMessageHandler;
-        }
+        return new HttpClientWrapper(client);
     }
 
-    /// <summary>
-    /// This class was made to make unit testing easier when HttpClient is used.
-    /// </summary>
-    internal class HttpClientWrapper : IHttpClient
+    private HttpMessageHandler CreateHttpMessageHandler(HttpMessageHandler httpMessageHandler)
     {
-        public HttpClientWrapper(HttpClient client)
-        {
-            Client = client;
-        }
+        _handlers
+            .OrderByDescending(handler => handler.Key)
+            .Select(handler => handler.Value)
+            .Reverse()
+            .ToList()
+            .ForEach(handler =>
+            {
+                var delegatingHandler = handler();
+                delegatingHandler.InnerHandler = httpMessageHandler;
+                httpMessageHandler = delegatingHandler;
+            });
+        return httpMessageHandler;
+    }
+}
 
-        public HttpClient Client { get; }
+/// <summary>
+/// This class was made to make unit testing easier when HttpClient is used.
+/// </summary>
+internal class HttpClientWrapper : IHttpClient
+{
+    public HttpClientWrapper(HttpClient client)
+    {
+        Client = client;
+    }
 
-        public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
-        {
-            return Client.SendAsync(request);
-        }
+    public HttpClient Client { get; }
+
+    public Task<HttpResponseMessage> SendAsync(HttpRequestMessage request)
+    {
+        return Client.SendAsync(request);
     }
 }

@@ -2,38 +2,37 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-
 using DotNetCore.CAP.Transport;
-
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.RabbitMQ
+namespace DotNetCore.CAP.RabbitMQ;
+
+internal sealed class RabbitMQConsumerClientFactory : IConsumerClientFactory
 {
-    internal sealed class RabbitMQConsumerClientFactory : IConsumerClientFactory
+    private readonly IConnectionChannelPool _connectionChannelPool;
+    private readonly IOptions<RabbitMQOptions> _rabbitMQOptions;
+    private readonly IServiceProvider _serviceProvider;
+
+    public RabbitMQConsumerClientFactory(IOptions<RabbitMQOptions> rabbitMQOptions, IConnectionChannelPool channelPool,
+        IServiceProvider serviceProvider)
     {
-        private readonly IConnectionChannelPool _connectionChannelPool;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly IOptions<RabbitMQOptions> _rabbitMQOptions;
+        _rabbitMQOptions = rabbitMQOptions;
+        _connectionChannelPool = channelPool;
+        _serviceProvider = serviceProvider;
+    }
 
-        public RabbitMQConsumerClientFactory(IOptions<RabbitMQOptions> rabbitMQOptions, IConnectionChannelPool channelPool, IServiceProvider serviceProvider)
+    public IConsumerClient Create(string groupId)
+    {
+        try
         {
-            _rabbitMQOptions = rabbitMQOptions;
-            _connectionChannelPool = channelPool;
-            _serviceProvider = serviceProvider;
+            var client =
+                new RabbitMQConsumerClient(groupId, _connectionChannelPool, _rabbitMQOptions, _serviceProvider);
+            client.Connect();
+            return client;
         }
-
-        public IConsumerClient Create(string groupId)
+        catch (Exception e)
         {
-            try
-            {
-                var client = new RabbitMQConsumerClient(groupId, _connectionChannelPool, _rabbitMQOptions, _serviceProvider);
-                client.Connect();
-                return client;
-            }
-            catch (Exception e)
-            {
-                throw new BrokerConnectionException(e);
-            }
+            throw new BrokerConnectionException(e);
         }
     }
 }

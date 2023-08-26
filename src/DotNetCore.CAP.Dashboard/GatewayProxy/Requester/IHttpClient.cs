@@ -4,12 +4,11 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
-{
-    public interface IHttpClient
-    {
-        HttpClient Client { get; }
+namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
 
-        Task<HttpResponseMessage> SendAsync(HttpRequestMessage request);
-    }
+public interface IHttpClient
+{
+    HttpClient Client { get; }
+
+    Task<HttpResponseMessage> SendAsync(HttpRequestMessage request);
 }

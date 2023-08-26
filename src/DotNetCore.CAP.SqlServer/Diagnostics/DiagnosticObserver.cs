@@ -42,37 +42,35 @@ internal class DiagnosticObserver : IObserver<KeyValuePair<string, object?>>
         switch (evt.Key)
         {
             case SqlAfterCommitTransactionMicrosoft:
+            {
+                if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
+                var transactionKey = sqlConnection.ClientConnectionId;
+
+                if (_bufferList.TryRemove(transactionKey, out var msgList))
+                {
+                    if (GetProperty(evt.Value, "Operation") as string == "Rollback")
+                        return;
+                    foreach (var message in msgList)
+                    {
+                        _dispatcher.EnqueueToPublish(message);
+                    }
+                }
+
+                break;
+            }
+            case SqlErrorCommitTransactionMicrosoft or SqlAfterRollbackTransactionMicrosoft
+                or SqlBeforeCloseConnectionMicrosoft:
+            {
+                if (!_bufferList.IsEmpty)
                 {
                     if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
                     var transactionKey = sqlConnection.ClientConnectionId;
 
-                    if (_bufferList.TryRemove(transactionKey, out var msgList))
-                    {
-                        if (GetProperty(evt.Value, "Operation") as string == "Rollback")
-                        {
-                            return;
-                        }
-                        else
-                        {
-                            foreach (var message in msgList)
-                                _dispatcher.EnqueueToPublish(message);
-                        }
-                    }
-                    break;
+                    _bufferList.TryRemove(transactionKey, out _);
                 }
-            case SqlErrorCommitTransactionMicrosoft or SqlAfterRollbackTransactionMicrosoft
-                or SqlBeforeCloseConnectionMicrosoft:
-                {
-                    if (!_bufferList.IsEmpty)
-                    {
-                        if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
-                        var transactionKey = sqlConnection.ClientConnectionId;
 
-                        _bufferList.TryRemove(transactionKey, out _);
-                    }
-
-                    break;
-                }
+                break;
+            }
         }
     }
 

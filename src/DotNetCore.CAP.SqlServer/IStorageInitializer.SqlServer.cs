@@ -14,9 +14,9 @@ namespace DotNetCore.CAP.SqlServer;
 
 public class SqlServerStorageInitializer : IStorageInitializer
 {
+    private readonly IOptions<CapOptions> _capOptions;
     private readonly ILogger _logger;
     private readonly IOptions<SqlServerOptions> _options;
-    private readonly IOptions<CapOptions> _capOptions;
 
     public SqlServerStorageInitializer(
         ILogger<SqlServerStorageInitializer> logger,
@@ -53,7 +53,7 @@ public class SqlServerStorageInitializer : IStorageInitializer
         {
             new SqlParameter("@PubKey", $"publish_retry_{_capOptions.Value.Version}"),
             new SqlParameter("@RecKey", $"received_retry_{_capOptions.Value.Version}"),
-            new SqlParameter("@LastLockTime", DateTime.MinValue){ SqlDbType = SqlDbType.DateTime2 },
+            new SqlParameter("@LastLockTime", DateTime.MinValue) { SqlDbType = SqlDbType.DateTime2 }
         };
         await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
 

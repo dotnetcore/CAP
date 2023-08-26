@@ -7,87 +7,85 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using StackExchange.Redis;
 
-namespace DotNetCore.CAP.RedisStreams
+namespace DotNetCore.CAP.RedisStreams;
+
+public class AsyncLazyRedisConnection : Lazy<Task<RedisConnection>>
 {
-    public class AsyncLazyRedisConnection : Lazy<Task<RedisConnection>>
+    public AsyncLazyRedisConnection(CapRedisOptions redisOptions,
+        ILogger<AsyncLazyRedisConnection> logger) : base(() => ConnectAsync(redisOptions, logger))
     {
-        public RedisConnection? CreatedConnection
-            => IsValueCreated ? Value.GetAwaiter().GetResult() : null;
-
-        public AsyncLazyRedisConnection(CapRedisOptions redisOptions,
-            ILogger<AsyncLazyRedisConnection> logger) : base(() => ConnectAsync(redisOptions, logger))
-        {
-        }
-
-        public TaskAwaiter<RedisConnection> GetAwaiter()
-        {
-            return Value.GetAwaiter();
-        }
-
-        private static async Task<RedisConnection> ConnectAsync(CapRedisOptions redisOptions,
-            ILogger<AsyncLazyRedisConnection> logger)
-        {
-            int attemp = 1;
-
-            var redisLogger = new RedisLogger(logger);
-
-            ConnectionMultiplexer? connection = null;
-
-            while (attemp <= 5)
-            {
-                connection = await ConnectionMultiplexer.ConnectAsync(redisOptions.Configuration!, redisLogger)
-                                                        .ConfigureAwait(false);
-
-                connection.LogEvents(logger);
-
-                if (!connection.IsConnected)
-                {
-                    logger.LogWarning($"Can't establish redis connection,trying to establish connection [attemp {attemp}].");
-
-                    await Task.Delay(TimeSpan.FromSeconds(2))
-                              .ConfigureAwait(false);
-
-                    ++attemp;
-                }
-                else
-                {
-                    attemp = 6;
-                }
-            }
-            if (connection == null)
-            {
-                throw new Exception($"Can't establish redis connection,after [{attemp}] attemps.");
-            }
-
-            return new RedisConnection(connection);
-        }
     }
 
-    public class RedisConnection : IDisposable
+    public RedisConnection? CreatedConnection
+        => IsValueCreated ? Value.GetAwaiter().GetResult() : null;
+
+    public TaskAwaiter<RedisConnection> GetAwaiter()
     {
-        private bool _isDisposed;
+        return Value.GetAwaiter();
+    }
 
-        public RedisConnection(IConnectionMultiplexer connection)
+    private static async Task<RedisConnection> ConnectAsync(CapRedisOptions redisOptions,
+        ILogger<AsyncLazyRedisConnection> logger)
+    {
+        var attemp = 1;
+
+        var redisLogger = new RedisLogger(logger);
+
+        ConnectionMultiplexer? connection = null;
+
+        while (attemp <= 5)
         {
-            Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+            connection = await ConnectionMultiplexer.ConnectAsync(redisOptions.Configuration!, redisLogger)
+                .ConfigureAwait(false);
+
+            connection.LogEvents(logger);
+
+            if (!connection.IsConnected)
+            {
+                logger.LogWarning(
+                    $"Can't establish redis connection,trying to establish connection [attemp {attemp}].");
+
+                await Task.Delay(TimeSpan.FromSeconds(2))
+                    .ConfigureAwait(false);
+
+                ++attemp;
+            }
+            else
+            {
+                attemp = 6;
+            }
         }
 
-        public IConnectionMultiplexer Connection { get; }
-        public long ConnectionCapacity => Connection.GetCounters().TotalOutstanding;
+        if (connection == null) throw new Exception($"Can't establish redis connection,after [{attemp}] attemps.");
 
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+        return new RedisConnection(connection);
+    }
+}
 
-        private void Dispose(bool disposing)
-        {
-            if (_isDisposed) return;
+public class RedisConnection : IDisposable
+{
+    private bool _isDisposed;
 
-            if (disposing) Connection.Dispose();
+    public RedisConnection(IConnectionMultiplexer connection)
+    {
+        Connection = connection ?? throw new ArgumentNullException(nameof(connection));
+    }
 
-            _isDisposed = true;
-        }
+    public IConnectionMultiplexer Connection { get; }
+    public long ConnectionCapacity => Connection.GetCounters().TotalOutstanding;
+
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    private void Dispose(bool disposing)
+    {
+        if (_isDisposed) return;
+
+        if (disposing) Connection.Dispose();
+
+        _isDisposed = true;
     }
 }

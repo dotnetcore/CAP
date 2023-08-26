@@ -3,14 +3,13 @@
 
 using Confluent.Kafka;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Kafka;
+
+public interface IConnectionPool
 {
-    public interface IConnectionPool
-    {
-        string ServersAddress { get; }
+    string ServersAddress { get; }
 
-        IProducer<string, byte[]> RentProducer();
+    IProducer<string, byte[]> RentProducer();
 
-        bool Return(IProducer<string, byte[]> producer);
-    }
+    bool Return(IProducer<string, byte[]> producer);
 }

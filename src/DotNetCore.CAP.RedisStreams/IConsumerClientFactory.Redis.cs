@@ -5,25 +5,24 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.RedisStreams
+namespace DotNetCore.CAP.RedisStreams;
+
+internal class RedisConsumerClientFactory : IConsumerClientFactory
 {
-    internal class RedisConsumerClientFactory : IConsumerClientFactory
+    private readonly ILogger<RedisConsumerClient> _logger;
+    private readonly IRedisStreamManager _redis;
+    private readonly IOptions<CapRedisOptions> _redisOptions;
+
+    public RedisConsumerClientFactory(IOptions<CapRedisOptions> redisOptions, IRedisStreamManager redis,
+        ILogger<RedisConsumerClient> logger)
     {
-        private readonly ILogger<RedisConsumerClient> _logger;
-        private readonly IRedisStreamManager _redis;
-        private readonly IOptions<CapRedisOptions> _redisOptions;
+        _redisOptions = redisOptions;
+        _redis = redis;
+        _logger = logger;
+    }
 
-        public RedisConsumerClientFactory(IOptions<CapRedisOptions> redisOptions, IRedisStreamManager redis,
-            ILogger<RedisConsumerClient> logger)
-        {
-            _redisOptions = redisOptions;
-            _redis = redis;
-            _logger = logger;
-        }
-
-        public IConsumerClient Create(string groupId)
-        {
-            return new RedisConsumerClient(groupId, _redis, _redisOptions, _logger);
-        }
+    public IConsumerClient Create(string groupId)
+    {
+        return new RedisConsumerClient(groupId, _redis, _redisOptions, _logger);
     }
 }

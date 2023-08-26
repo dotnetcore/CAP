@@ -2,10 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 // ReSharper disable once CheckNamespace
+
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using DotNetCore.CAP.Pulsar;
+using Pulsar.Client.Api;
+
 namespace DotNetCore.CAP
 {
-    using Pulsar;
-
     /// <summary>
     /// Provides programmatic configuration for the CAP pulsar project.
     /// </summary>
@@ -21,19 +25,16 @@ namespace DotNetCore.CAP
 
 namespace DotNetCore.CAP.Pulsar
 {
-    using System.Security.Authentication;
-    using System.Security.Cryptography.X509Certificates;
-
     public class TlsOptions
     {
-        private static readonly global::Pulsar.Client.Api.PulsarClientConfiguration Default =
-            global::Pulsar.Client.Api.PulsarClientConfiguration.Default;
+        private static readonly PulsarClientConfiguration Default =
+            PulsarClientConfiguration.Default;
 
         public bool UseTls { get; set; } = Default.UseTls;
         public bool TlsHostnameVerificationEnable { get; set; } = Default.TlsHostnameVerificationEnable;
         public bool TlsAllowInsecureConnection { get; set; } = Default.TlsAllowInsecureConnection;
         public X509Certificate2 TlsTrustCertificate { get; set; } = Default.TlsTrustCertificate;
-        public global::Pulsar.Client.Api.Authentication Authentication { get; set; } = Default.Authentication;
+        public Authentication Authentication { get; set; } = Default.Authentication;
         public SslProtocols TlsProtocols { get; set; } = Default.TlsProtocols;
     }
 }

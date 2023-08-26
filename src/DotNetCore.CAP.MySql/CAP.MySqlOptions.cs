@@ -39,11 +39,8 @@ internal class ConfigureMySqlOptions : IConfigureOptions<MySqlOptions>
             var provider = scope.ServiceProvider;
             using var dbContext = (DbContext)provider.GetRequiredService(options.DbContextType);
             var connectionString = dbContext.Database.GetConnectionString();
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                throw new ArgumentNullException(connectionString);
-            }
-            options.ConnectionString = connectionString; 
+            if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException(connectionString);
+            options.ConnectionString = connectionString;
         }
     }
 }

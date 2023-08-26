@@ -9,59 +9,59 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Npgsql;
 
-namespace DotNetCore.CAP.PostgreSql
+namespace DotNetCore.CAP.PostgreSql;
+
+public class PostgreSqlStorageInitializer : IStorageInitializer
 {
-    public class PostgreSqlStorageInitializer : IStorageInitializer
+    private readonly IOptions<CapOptions> _capOptions;
+    private readonly ILogger _logger;
+    private readonly IOptions<PostgreSqlOptions> _options;
+
+    public PostgreSqlStorageInitializer(
+        ILogger<PostgreSqlStorageInitializer> logger,
+        IOptions<PostgreSqlOptions> options, IOptions<CapOptions> capOptions)
     {
-        private readonly ILogger _logger;
-        private readonly IOptions<PostgreSqlOptions> _options;
-        private readonly IOptions<CapOptions> _capOptions;
+        _capOptions = capOptions;
+        _options = options;
+        _logger = logger;
+    }
 
-        public PostgreSqlStorageInitializer(
-            ILogger<PostgreSqlStorageInitializer> logger,
-            IOptions<PostgreSqlOptions> options, IOptions<CapOptions> capOptions)
+    public virtual string GetPublishedTableName()
+    {
+        return $"\"{_options.Value.Schema}\".\"published\"";
+    }
+
+    public virtual string GetReceivedTableName()
+    {
+        return $"\"{_options.Value.Schema}\".\"received\"";
+    }
+
+    public virtual string GetLockTableName()
+    {
+        return $"\"{_options.Value.Schema}\".\"lock\"";
+    }
+
+    public async Task InitializeAsync(CancellationToken cancellationToken)
+    {
+        if (cancellationToken.IsCancellationRequested) return;
+
+        var sql = CreateDbTablesScript(_options.Value.Schema);
+        var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        object[] sqlParams =
         {
-            _capOptions = capOptions;
-            _options = options;
-            _logger = logger;
-        }
+            new NpgsqlParameter("@PubKey", $"publish_retry_{_capOptions.Value.Version}"),
+            new NpgsqlParameter("@RecKey", $"received_retry_{_capOptions.Value.Version}"),
+            new NpgsqlParameter("@LastLockTime", DateTime.MinValue)
+        };
+        await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
 
-        public virtual string GetPublishedTableName()
-        {
-            return $"\"{_options.Value.Schema}\".\"published\"";
-        }
+        _logger.LogDebug("Ensuring all create database tables script are applied.");
+    }
 
-        public virtual string GetReceivedTableName()
-        {
-            return $"\"{_options.Value.Schema}\".\"received\"";
-        }
-
-        public virtual string GetLockTableName()
-        {
-            return $"\"{_options.Value.Schema}\".\"lock\"";
-        }
-
-        public async Task InitializeAsync(CancellationToken cancellationToken)
-        {
-            if (cancellationToken.IsCancellationRequested) return;
-
-            var sql = CreateDbTablesScript(_options.Value.Schema);
-            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
-            await using var _ = connection.ConfigureAwait(false);
-            object[] sqlParams =
-            {
-                new NpgsqlParameter("@PubKey", $"publish_retry_{_capOptions.Value.Version}"),
-                new NpgsqlParameter("@RecKey", $"received_retry_{_capOptions.Value.Version}"),
-                new NpgsqlParameter("@LastLockTime", DateTime.MinValue),
-            };
-            await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
-
-            _logger.LogDebug("Ensuring all create database tables script are applied.");
-        }
-
-        protected virtual string CreateDbTablesScript(string schema)
-        {
-            var batchSql = $@"
+    protected virtual string CreateDbTablesScript(string schema)
+    {
+        var batchSql = $@"
 CREATE SCHEMA IF NOT EXISTS ""{schema}"";
 
 CREATE TABLE IF NOT EXISTS {GetReceivedTableName()}(
@@ -87,8 +87,8 @@ CREATE TABLE IF NOT EXISTS {GetPublishedTableName()}(
 	""StatusName"" VARCHAR(50) NOT NULL
 );
 ";
-            if (_capOptions.Value.UseStorageLock)
-                batchSql += $@"
+        if (_capOptions.Value.UseStorageLock)
+            batchSql += $@"
 CREATE TABLE IF NOT EXISTS {GetLockTableName()}(
 	""Key"" VARCHAR(128) PRIMARY KEY NOT NULL,
     ""Instance"" VARCHAR(256),
@@ -98,7 +98,6 @@ CREATE TABLE IF NOT EXISTS {GetLockTableName()}(
 INSERT INTO {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES(@PubKey,'',@LastLockTime) ON CONFLICT DO NOTHING;
 INSERT INTO {GetLockTableName()} (""Key"",""Instance"",""LastLockTime"") VALUES(@RecKey,'',@LastLockTime) ON CONFLICT DO NOTHING;";
 
-            return batchSql;
-        }
+        return batchSql;
     }
 }

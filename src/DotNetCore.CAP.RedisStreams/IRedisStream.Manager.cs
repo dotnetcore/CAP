@@ -7,19 +7,18 @@ using System.Threading;
 using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace DotNetCore.CAP.RedisStreams
+namespace DotNetCore.CAP.RedisStreams;
+
+internal interface IRedisStreamManager
 {
-    internal interface IRedisStreamManager
-    {
-        Task CreateStreamWithConsumerGroupAsync(string stream, string consumerGroup);
-        Task PublishAsync(string stream, NameValueEntry[] message);
+    Task CreateStreamWithConsumerGroupAsync(string stream, string consumerGroup);
+    Task PublishAsync(string stream, NameValueEntry[] message);
 
-        IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsLatestMessagesAsync(string[] streams, string consumerGroup,
-            TimeSpan pollDelay, CancellationToken token);
+    IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsLatestMessagesAsync(string[] streams, string consumerGroup,
+        TimeSpan pollDelay, CancellationToken token);
 
-        IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsPendingMessagesAsync(string[] streams, string consumerGroup,
-            TimeSpan pollDelay, CancellationToken token);
+    IAsyncEnumerable<IEnumerable<RedisStream>> PollStreamsPendingMessagesAsync(string[] streams, string consumerGroup,
+        TimeSpan pollDelay, CancellationToken token);
 
-        Task Ack(string stream, string consumerGroup, string messageId);
-    }
+    Task Ack(string stream, string consumerGroup, string messageId);
 }

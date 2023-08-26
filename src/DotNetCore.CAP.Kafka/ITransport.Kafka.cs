@@ -9,63 +9,66 @@ using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
+using Headers = Confluent.Kafka.Headers;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Kafka;
+
+internal class KafkaTransport : ITransport
 {
-    internal class KafkaTransport : ITransport
+    private readonly IConnectionPool _connectionPool;
+    private readonly ILogger _logger;
+
+    public KafkaTransport(ILogger<KafkaTransport> logger, IConnectionPool connectionPool)
     {
-        private readonly IConnectionPool _connectionPool;
-        private readonly ILogger _logger;
+        _logger = logger;
+        _connectionPool = connectionPool;
+    }
 
-        public KafkaTransport(ILogger<KafkaTransport> logger, IConnectionPool connectionPool)
+    public BrokerAddress BrokerAddress => new("Kafka", _connectionPool.ServersAddress);
+
+    public async Task<OperateResult> SendAsync(TransportMessage message)
+    {
+        var producer = _connectionPool.RentProducer();
+
+        try
         {
-            _logger = logger;
-            _connectionPool = connectionPool;
+            var headers = new Headers();
+
+            foreach (var header in message.Headers)
+            {
+                headers.Add(header.Value != null
+                    ? new Header(header.Key, Encoding.UTF8.GetBytes(header.Value))
+                    : new Header(header.Key, null));
+            }
+
+            var result = await producer.ProduceAsync(message.GetName(), new Message<string, byte[]>
+            {
+                Headers = headers,
+                Key = message.Headers.TryGetValue(KafkaHeaders.KafkaKey, out var kafkaMessageKey) &&
+                      !string.IsNullOrEmpty(kafkaMessageKey)
+                    ? kafkaMessageKey
+                    : message.GetId(),
+                Value = message.Body.ToArray()!
+            });
+
+            if (result.Status is PersistenceStatus.Persisted or PersistenceStatus.PossiblyPersisted)
+            {
+                _logger.LogDebug($"kafka topic message [{message.GetName()}] has been published.");
+
+                return OperateResult.Success;
+            }
+
+            throw new PublisherSentFailedException("kafka message persisted failed!");
         }
-
-        public BrokerAddress BrokerAddress => new BrokerAddress("Kafka", _connectionPool.ServersAddress);
-
-        public async Task<OperateResult> SendAsync(TransportMessage message)
+        catch (Exception ex)
         {
-            var producer = _connectionPool.RentProducer();
+            var warpEx = new PublisherSentFailedException(ex.Message, ex);
 
-            try
-            {
-                var headers = new Confluent.Kafka.Headers();
-
-                foreach (var header in message.Headers)
-                {
-                    headers.Add(header.Value != null
-                        ? new Header(header.Key, Encoding.UTF8.GetBytes(header.Value))
-                        : new Header(header.Key, null));
-                }
-               
-                var result = await producer.ProduceAsync(message.GetName(), new Message<string, byte[]>
-                {
-                    Headers = headers,
-                    Key = message.Headers.TryGetValue(KafkaHeaders.KafkaKey, out string? kafkaMessageKey) && !string.IsNullOrEmpty(kafkaMessageKey) ? kafkaMessageKey : message.GetId(),
-                    Value = message.Body.ToArray()!
-                });
-
-                if (result.Status is PersistenceStatus.Persisted or PersistenceStatus.PossiblyPersisted)
-                {
-                    _logger.LogDebug($"kafka topic message [{message.GetName()}] has been published.");
-
-                    return OperateResult.Success;
-                }
-
-                throw new PublisherSentFailedException("kafka message persisted failed!");
-            }
-            catch (Exception ex)
-            {
-                var warpEx = new PublisherSentFailedException(ex.Message, ex);
-
-                return OperateResult.Failed(warpEx);
-            }
-            finally
-            {
-                _connectionPool.Return(producer);
-            }
+            return OperateResult.Failed(warpEx);
+        }
+        finally
+        {
+            _connectionPool.Return(producer);
         }
     }
 }

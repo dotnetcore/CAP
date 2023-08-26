@@ -142,7 +142,7 @@ SELECT
         }, sqlParams: sqlParams).ConfigureAwait(false);
 
         return new PagedQueryResult<MessageDto>
-        { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
+            { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
     }
 
     public ValueTask<int> PublishedFailedCount()
@@ -231,15 +231,20 @@ WHERE `Key` >= @minKey
             {
                 var dictionary = new Dictionary<string, int>();
 
-                while (await reader.ReadAsync()) dictionary.Add(reader.GetString(0), reader.GetInt32(1));
+                while (await reader.ReadAsync())
+                {
+                    dictionary.Add(reader.GetString(0), reader.GetInt32(1));
+                }
 
                 return dictionary;
             }, sqlParams: sqlParams).ConfigureAwait(false);
         }
 
         foreach (var key in keyMaps.Keys)
+        {
             if (!valuesMap.ContainsKey(key))
                 valuesMap.Add(key, 0);
+        }
 
         var result = new Dictionary<DateTime, int>();
         for (var i = 0; i < keyMaps.Count; i++)
@@ -262,6 +267,7 @@ WHERE `Key` >= @minKey
             MediumMessage? message = null;
 
             while (await reader.ReadAsync().ConfigureAwait(false))
+            {
                 message = new MediumMessage
                 {
                     DbId = reader.GetInt64(0).ToString(),
@@ -271,6 +277,7 @@ WHERE `Key` >= @minKey
                     ExpiresAt = reader.GetDateTime(3),
                     Retries = reader.GetInt32(4)
                 };
+            }
 
             return message;
         }).ConfigureAwait(false);

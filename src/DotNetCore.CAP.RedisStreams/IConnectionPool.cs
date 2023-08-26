@@ -4,10 +4,9 @@
 using System.Threading.Tasks;
 using StackExchange.Redis;
 
-namespace DotNetCore.CAP.RedisStreams
+namespace DotNetCore.CAP.RedisStreams;
+
+internal interface IRedisConnectionPool
 {
-    internal interface IRedisConnectionPool
-    {
-        Task<IConnectionMultiplexer> ConnectAsync();
-    }
+    Task<IConnectionMultiplexer> ConnectAsync();
 }

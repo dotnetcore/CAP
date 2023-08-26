@@ -9,58 +9,57 @@ using DotNetCore.CAP;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.EntityFrameworkCore.Storage
+namespace Microsoft.EntityFrameworkCore.Storage;
+
+internal class CapEFDbTransaction : IDbContextTransaction, IInfrastructure<DbTransaction>
 {
-    internal class CapEFDbTransaction : IDbContextTransaction, IInfrastructure<DbTransaction>
+    private readonly ICapTransaction _transaction;
+
+    public CapEFDbTransaction(ICapTransaction transaction)
     {
-        private readonly ICapTransaction _transaction;
+        _transaction = transaction;
+        var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction!;
+        TransactionId = dbContextTransaction.TransactionId;
+    }
 
-        public CapEFDbTransaction(ICapTransaction transaction)
+    public void Dispose()
+    {
+        _transaction.Dispose();
+    }
+
+    public void Commit()
+    {
+        _transaction.Commit();
+    }
+
+    public void Rollback()
+    {
+        _transaction.Rollback();
+    }
+
+    public Task CommitAsync(CancellationToken cancellationToken = default)
+    {
+        return _transaction.CommitAsync(cancellationToken);
+    }
+
+    public Task RollbackAsync(CancellationToken cancellationToken = default)
+    {
+        return _transaction.RollbackAsync(cancellationToken);
+    }
+
+    public Guid TransactionId { get; }
+
+    public ValueTask DisposeAsync()
+    {
+        return new ValueTask(Task.Run(() => _transaction.Dispose()));
+    }
+
+    public DbTransaction Instance
+    {
+        get
         {
-            _transaction = transaction;
             var dbContextTransaction = (IDbContextTransaction)_transaction.DbTransaction!;
-            TransactionId = dbContextTransaction.TransactionId;
-        }
-
-        public void Dispose()
-        {
-            _transaction.Dispose();
-        }
-
-        public void Commit()
-        {
-            _transaction.Commit();
-        }
-
-        public void Rollback()
-        {
-            _transaction.Rollback();
-        }
-
-        public Task CommitAsync(CancellationToken cancellationToken = default)
-        {
-            return _transaction.CommitAsync(cancellationToken);
-        }
-
-        public Task RollbackAsync(CancellationToken cancellationToken = default)
-        {
-            return _transaction.RollbackAsync(cancellationToken);
-        }
-
-        public Guid TransactionId { get; }
-
-        public ValueTask DisposeAsync()
-        {
-            return new ValueTask(Task.Run(() => _transaction.Dispose()));
-        }
-
-        public DbTransaction Instance
-        {
-            get
-            {
-                var dbContextTransaction = (IDbContextTransaction) _transaction.DbTransaction!;
-                return dbContextTransaction.GetDbTransaction();
-            }
+            return dbContextTransaction.GetDbTransaction();
         }
     }
 }

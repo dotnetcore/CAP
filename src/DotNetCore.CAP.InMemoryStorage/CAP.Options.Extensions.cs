@@ -4,14 +4,13 @@
 using DotNetCore.CAP;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class CapOptionsExtensions
 {
-    public static class CapOptionsExtensions
+    public static CapOptions UseInMemoryStorage(this CapOptions options)
     {
-        public static CapOptions UseInMemoryStorage(this CapOptions options)
-        {
-            options.RegisterExtension(new InMemoryCapOptionsExtension());
-            return options;
-        } 
+        options.RegisterExtension(new InMemoryCapOptionsExtension());
+        return options;
     }
 }

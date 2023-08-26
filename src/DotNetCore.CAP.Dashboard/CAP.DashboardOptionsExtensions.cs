@@ -29,7 +29,7 @@ namespace DotNetCore.CAP
         }
     }
 
-    sealed class CapStartupFilter : IStartupFilter
+    internal sealed class CapStartupFilter : IStartupFilter
     {
         public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next)
         {
@@ -54,10 +54,7 @@ namespace Microsoft.Extensions.DependencyInjection
 
         public static CapOptions UseDashboard(this CapOptions capOptions, Action<DashboardOptions> options)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
+            if (options == null) throw new ArgumentNullException(nameof(options));
 
             capOptions.RegisterExtension(new DashboardOptionsExtension(options));
 

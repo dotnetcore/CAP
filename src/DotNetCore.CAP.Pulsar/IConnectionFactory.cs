@@ -4,14 +4,13 @@
 using System.Threading.Tasks;
 using Pulsar.Client.Api;
 
-namespace DotNetCore.CAP.Pulsar
+namespace DotNetCore.CAP.Pulsar;
+
+public interface IConnectionFactory
 {
-    public interface IConnectionFactory
-    {
-        string ServersAddress { get; }
+    string ServersAddress { get; }
 
-        Task<IProducer<byte[]>> CreateProducerAsync(string topic);
+    Task<IProducer<byte[]>> CreateProducerAsync(string topic);
 
-        PulsarClient RentClient();
-    }
+    PulsarClient RentClient();
 }

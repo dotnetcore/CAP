@@ -41,16 +41,20 @@ public class MongoDBDataStorage : IDataStorage
         _snowflakeId = snowflakeId;
     }
 
-    public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance, CancellationToken token = default)
+    public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance,
+        CancellationToken token = default)
     {
         var collection = _database.GetCollection<Lock>(_options.Value.LockCollection);
         using var session = await _client.StartSessionAsync(cancellationToken: token).ConfigureAwait(false);
-        var transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
+        var transactionOptions =
+            new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
         session.StartTransaction(transactionOptions);
         try
         {
-            var opResult = await collection.UpdateOneAsync(session, model => model.Key == key && model.LastLockTime < DateTime.Now.Subtract(ttl),
-                Builders<Lock>.Update.Set(model => model.Instance, instance).Set(model => model.LastLockTime, DateTime.Now), null, token);
+            var opResult = await collection.UpdateOneAsync(session,
+                model => model.Key == key && model.LastLockTime < DateTime.Now.Subtract(ttl),
+                Builders<Lock>.Update.Set(model => model.Instance, instance)
+                    .Set(model => model.LastLockTime, DateTime.Now), null, token);
             var isAcquired = opResult.IsModifiedCountAvailable && opResult.ModifiedCount > 0;
             await session.CommitTransactionAsync(token).ConfigureAwait(false);
             return isAcquired;
@@ -76,7 +80,8 @@ public class MongoDBDataStorage : IDataStorage
         var collection = _database.GetCollection<Lock>(_options.Value.LockCollection);
         var filter = Builders<Lock>.Filter.Where(it => it.Key == key && it.Instance == instance);
         var pipeline = new EmptyPipelineDefinition<Lock>()
-            .AppendStage<Lock, Lock, Lock>($"{{$set:{{LastLockTime:{{$add:[ \"$LastLockTime\",  {ttl.TotalMilliseconds} ]}}}}}}");
+            .AppendStage<Lock, Lock, Lock>(
+                $"{{$set:{{LastLockTime:{{$add:[ \"$LastLockTime\",  {ttl.TotalMilliseconds} ]}}}}}}");
         var update = Builders<Lock>.Update.Pipeline(pipeline);
         await collection.UpdateOneAsync(filter, update, cancellationToken: token).ConfigureAwait(false);
     }
@@ -103,7 +108,8 @@ public class MongoDBDataStorage : IDataStorage
         if (transaction != null)
         {
             var session = transaction as IClientSessionHandle;
-            await collection.UpdateOneAsync(session, x => x.Id == long.Parse(message.DbId), updateDef).ConfigureAwait(false);
+            await collection.UpdateOneAsync(session, x => x.Id == long.Parse(message.DbId), updateDef)
+                .ConfigureAwait(false);
         }
         else
         {
@@ -217,19 +223,26 @@ public class MongoDBDataStorage : IDataStorage
         return mdMessage;
     }
 
-    public async Task<int> DeleteExpiresAsync(string collection, DateTime timeout, int batchCount = 1000, CancellationToken cancellationToken = default)
+    public async Task<int> DeleteExpiresAsync(string collection, DateTime timeout, int batchCount = 1000,
+        CancellationToken cancellationToken = default)
     {
         if (collection == _options.Value.PublishedCollection)
         {
             var publishedCollection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
-            var ret = await publishedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout && (x.StatusName == nameof(StatusName.Succeeded) || x.StatusName == nameof(StatusName.Failed)), cancellationToken)
+            var ret = await publishedCollection
+                .DeleteManyAsync(
+                    x => x.ExpiresAt < timeout && (x.StatusName == nameof(StatusName.Succeeded) ||
+                                                   x.StatusName == nameof(StatusName.Failed)), cancellationToken)
                 .ConfigureAwait(false);
             return (int)ret.DeletedCount;
         }
         else
         {
             var receivedCollection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
-            var ret = await receivedCollection.DeleteManyAsync(x => x.ExpiresAt < timeout && (x.StatusName == nameof(StatusName.Succeeded) || x.StatusName == nameof(StatusName.Failed)), cancellationToken)
+            var ret = await receivedCollection
+                .DeleteManyAsync(
+                    x => x.ExpiresAt < timeout && (x.StatusName == nameof(StatusName.Succeeded) ||
+                                                   x.StatusName == nameof(StatusName.Failed)), cancellationToken)
                 .ConfigureAwait(false);
             return (int)ret.DeletedCount;
         }
@@ -254,7 +267,6 @@ public class MongoDBDataStorage : IDataStorage
             Retries = x.Retries,
             Added = x.Added
         }).ToList();
-
     }
 
     public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
@@ -278,23 +290,27 @@ public class MongoDBDataStorage : IDataStorage
         }).ToList();
     }
 
-    public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask, CancellationToken token = default)
+    public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
+        CancellationToken token = default)
     {
         var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
 
         var update = Builders<PublishedMessage>.Update.Set(x => x._lockToken, ObjectId.GenerateNewId());
 
         var filter = Builders<PublishedMessage>.Filter.Where(x => x.Version == _capOptions.Value.Version
-                                                     && ((x.StatusName == nameof(StatusName.Delayed) && x.ExpiresAt < DateTime.Now.AddMinutes(2))
-                                                         ||
-                                                         (x.StatusName == nameof(StatusName.Queued) && x.ExpiresAt < DateTime.Now.AddMinutes(-1)))
-                                                     );
+                                                                  && ((x.StatusName == nameof(StatusName.Delayed) &&
+                                                                       x.ExpiresAt < DateTime.Now.AddMinutes(2))
+                                                                      ||
+                                                                      (x.StatusName == nameof(StatusName.Queued) &&
+                                                                       x.ExpiresAt < DateTime.Now.AddMinutes(-1)))
+        );
 
         using var timeoutTs = new CancellationTokenSource(TimeSpan.FromSeconds(10));
         using var linkedTs = CancellationTokenSource.CreateLinkedTokenSource(timeoutTs.Token, token);
 
         using var session = await _client.StartSessionAsync(cancellationToken: token).ConfigureAwait(false);
-        var transactionOptions = new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
+        var transactionOptions =
+            new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
         session.StartTransaction(transactionOptions);
 
         while (!timeoutTs.IsCancellationRequested)
@@ -303,9 +319,11 @@ public class MongoDBDataStorage : IDataStorage
             {
                 try
                 {
-                    await collection.UpdateManyAsync(session, filter, update, cancellationToken: linkedTs.Token).ConfigureAwait(false);
+                    await collection.UpdateManyAsync(session, filter, update, cancellationToken: linkedTs.Token)
+                        .ConfigureAwait(false);
 
-                    var queryResult = await collection.Find(session, filter).ToListAsync(linkedTs.Token).ConfigureAwait(false);
+                    var queryResult = await collection.Find(session, filter).ToListAsync(linkedTs.Token)
+                        .ConfigureAwait(false);
 
                     var result = queryResult.Select(x => new MediumMessage
                     {
@@ -322,10 +340,12 @@ public class MongoDBDataStorage : IDataStorage
 
                     break;
                 }
-                catch (MongoCommandException e) when (e.HasErrorLabel("TransientTransactionError") && e.CodeName == "WriteConflict")
+                catch (MongoCommandException e) when (e.HasErrorLabel("TransientTransactionError") &&
+                                                      e.CodeName == "WriteConflict")
                 {
                     await session.AbortTransactionAsync(linkedTs.Token).ConfigureAwait(false);
-                    await Task.Delay(TimeSpan.FromMilliseconds(Random.Shared.Next(5, 20)), linkedTs.Token).ConfigureAwait(false);
+                    await Task.Delay(TimeSpan.FromMilliseconds(Random.Shared.Next(5, 20)), linkedTs.Token)
+                        .ConfigureAwait(false);
                     session.StartTransaction(transactionOptions);
                 }
             }
@@ -338,6 +358,6 @@ public class MongoDBDataStorage : IDataStorage
 
     public IMonitoringApi GetMonitoringApi()
     {
-        return new MongoDBMonitoringApi(_client, _options,_serializer);
+        return new MongoDBMonitoringApi(_client, _options, _serializer);
     }
 }

@@ -22,7 +22,8 @@ internal class SqlServerMonitoringApi : IMonitoringApi
     private readonly string _recName;
     private readonly ISerializer _serializer;
 
-    public SqlServerMonitoringApi(IOptions<SqlServerOptions> options, IStorageInitializer initializer, ISerializer serializer)
+    public SqlServerMonitoringApi(IOptions<SqlServerOptions> options, IStorageInitializer initializer,
+        ISerializer serializer)
     {
         _options = options.Value ?? throw new ArgumentNullException(nameof(options));
         _pubName = initializer.GetPublishedTableName();
@@ -247,15 +248,18 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
                     var dictionary = new Dictionary<string, int>();
 
                     while (await reader.ReadAsync().ConfigureAwait(false))
+                    {
                         dictionary.Add(reader.GetString(0), reader.GetInt32(1));
+                    }
 
                     return dictionary;
                 }, sqlParams: sqlParams).ConfigureAwait(false);
         }
 
         foreach (var key in keyMaps.Keys)
-            if (!valuesMap.ContainsKey(key))
-                valuesMap.Add(key, 0);
+        {
+            valuesMap.TryAdd(key, 0);
+        }
 
         var result = new Dictionary<DateTime, int>();
         for (var i = 0; i < keyMaps.Count; i++)
@@ -279,6 +283,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
             MediumMessage? message = null;
 
             while (await reader.ReadAsync().ConfigureAwait(false))
+            {
                 message = new MediumMessage
                 {
                     DbId = reader.GetInt64(0).ToString(),
@@ -288,6 +293,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
                     ExpiresAt = reader.GetDateTime(3),
                     Retries = reader.GetInt32(4)
                 };
+            }
 
             return message;
         }).ConfigureAwait(false);

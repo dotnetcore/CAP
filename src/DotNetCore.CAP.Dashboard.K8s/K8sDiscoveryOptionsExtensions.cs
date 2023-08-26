@@ -55,14 +55,11 @@ namespace Microsoft.Extensions.DependencyInjection
         /// Use K8s as a service discovery to view data from other nodes in the Dashboard.
         /// </summary>
         /// <param name="capOptions"></param>
-        /// <param name="options">The option of <see cref="K8sDiscoveryOptions"/></param>
+        /// <param name="options">The option of <see cref="K8sDiscoveryOptions" /></param>
         /// <exception cref="ArgumentNullException"></exception>
         public static CapOptions UseK8sDiscovery(this CapOptions capOptions, Action<K8sDiscoveryOptions> options)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
+            if (options == null) throw new ArgumentNullException(nameof(options));
 
             capOptions.RegisterExtension(new K8sDiscoveryOptionsExtension(options));
 

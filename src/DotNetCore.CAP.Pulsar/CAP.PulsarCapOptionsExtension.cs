@@ -7,26 +7,25 @@ using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.DependencyInjection;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+internal sealed class PulsarCapOptionsExtension : ICapOptionsExtension
 {
-    internal sealed class PulsarCapOptionsExtension : ICapOptionsExtension
+    private readonly Action<PulsarOptions> _configure;
+
+    public PulsarCapOptionsExtension(Action<PulsarOptions> configure)
     {
-        private readonly Action<PulsarOptions> _configure;
+        _configure = configure;
+    }
 
-        public PulsarCapOptionsExtension(Action<PulsarOptions> configure)
-        {
-            _configure = configure;
-        }
+    public void AddServices(IServiceCollection services)
+    {
+        services.AddSingleton(new CapMessageQueueMakerService("Apache Pulsar"));
 
-        public void AddServices(IServiceCollection services)
-        {
-            services.AddSingleton(new CapMessageQueueMakerService("Apache Pulsar"));
+        services.Configure(_configure);
 
-            services.Configure(_configure);
-
-            services.AddSingleton<ITransport, PulsarTransport>();
-            services.AddSingleton<IConsumerClientFactory, PulsarConsumerClientFactory>();
-            services.AddSingleton<IConnectionFactory, ConnectionFactory>();
-        }
+        services.AddSingleton<ITransport, PulsarTransport>();
+        services.AddSingleton<IConsumerClientFactory, PulsarConsumerClientFactory>();
+        services.AddSingleton<IConnectionFactory, ConnectionFactory>();
     }
 }

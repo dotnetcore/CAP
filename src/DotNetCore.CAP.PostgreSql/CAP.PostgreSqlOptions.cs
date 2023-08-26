@@ -8,43 +8,38 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
-namespace DotNetCore.CAP
+namespace DotNetCore.CAP;
+
+public class PostgreSqlOptions : EFOptions
 {
-    public class PostgreSqlOptions : EFOptions
+    /// <summary>
+    /// Gets or sets the database's connection string that will be used to store database entities.
+    /// </summary>
+    public string ConnectionString { get; set; } = default!;
+}
+
+internal class ConfigurePostgreSqlOptions : IConfigureOptions<PostgreSqlOptions>
+{
+    private readonly IServiceScopeFactory _serviceScopeFactory;
+
+    public ConfigurePostgreSqlOptions(IServiceScopeFactory serviceScopeFactory)
     {
-        /// <summary>
-        /// Gets or sets the database's connection string that will be used to store database entities.
-        /// </summary>
-        public string ConnectionString { get; set; } = default!;
+        _serviceScopeFactory = serviceScopeFactory;
     }
 
-    internal class ConfigurePostgreSqlOptions : IConfigureOptions<PostgreSqlOptions>
+    public void Configure(PostgreSqlOptions options)
     {
-        private readonly IServiceScopeFactory _serviceScopeFactory;
+        if (options.DbContextType == null) return;
 
-        public ConfigurePostgreSqlOptions(IServiceScopeFactory serviceScopeFactory)
-        {
-            _serviceScopeFactory = serviceScopeFactory;
-        }
+        if (Helper.IsUsingType<ICapPublisher>(options.DbContextType))
+            throw new InvalidOperationException(
+                "We detected that you are using ICapPublisher in DbContext, please change the configuration to use the storage extension directly to avoid circular references! eg:  x.UsePostgreSql()");
 
-        public void Configure(PostgreSqlOptions options)
-        {
-            if (options.DbContextType == null) return;
-
-            if (Helper.IsUsingType<ICapPublisher>(options.DbContextType))
-            {
-                throw new InvalidOperationException("We detected that you are using ICapPublisher in DbContext, please change the configuration to use the storage extension directly to avoid circular references! eg:  x.UsePostgreSql()");
-            }
-
-            using var scope = _serviceScopeFactory.CreateScope();
-            var provider = scope.ServiceProvider;
-            using var dbContext = (DbContext) provider.GetRequiredService(options.DbContextType);
-            var connectionString = dbContext.Database.GetConnectionString();
-            if (string.IsNullOrEmpty(connectionString))
-            {
-                throw new ArgumentNullException(connectionString);
-            }
-            options.ConnectionString = connectionString; 
-        }
+        using var scope = _serviceScopeFactory.CreateScope();
+        var provider = scope.ServiceProvider;
+        using var dbContext = (DbContext)provider.GetRequiredService(options.DbContextType);
+        var connectionString = dbContext.Database.GetConnectionString();
+        if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException(connectionString);
+        options.ConnectionString = connectionString;
     }
 }

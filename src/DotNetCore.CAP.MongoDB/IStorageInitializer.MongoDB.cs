@@ -3,7 +3,6 @@
 
 using System;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
@@ -15,15 +14,15 @@ namespace DotNetCore.CAP.MongoDB;
 
 public class MongoDBStorageInitializer : IStorageInitializer
 {
+    private readonly IOptions<CapOptions> _capOptions;
     private readonly IMongoClient _client;
     private readonly ILogger _logger;
     private readonly IOptions<MongoDBOptions> _options;
-    private readonly IOptions<CapOptions> _capOptions;
 
     public MongoDBStorageInitializer(
         ILogger<MongoDBStorageInitializer> logger,
         IMongoClient client,
-        IOptions<MongoDBOptions> options,IOptions<CapOptions> capOptions)
+        IOptions<MongoDBOptions> options, IOptions<CapOptions> capOptions)
     {
         _capOptions = capOptions;
         _options = options;
@@ -64,27 +63,29 @@ public class MongoDBStorageInitializer : IStorageInitializer
             await database.CreateCollectionAsync(options.PublishedCollection, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
 
-        if (_capOptions.Value.UseStorageLock&&names.All(n => n != options.LockCollection))
+        if (_capOptions.Value.UseStorageLock && names.All(n => n != options.LockCollection))
             await database.CreateCollectionAsync(options.LockCollection, cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
-        
+
         await Task.WhenAll(
             TryCreateIndexesAsync<ReceivedMessage>(options.ReceivedCollection),
             TryCreateIndexesAsync<PublishedMessage>(options.PublishedCollection)).ConfigureAwait(false);
-        
+
         if (_capOptions.Value.UseStorageLock)
         {
             await database.GetCollection<Lock>(options.LockCollection)
-                .UpdateOneAsync(it=>it.Key==$"publish_retry_{_capOptions.Value.Version}",
-                    Builders<Lock>.Update.Set(model=>model.Key,$"publish_retry_{_capOptions.Value.Version}").SetOnInsert(model=>model.LastLockTime,DateTime.MinValue), 
-                    new UpdateOptions() { IsUpsert = true },cancellationToken);
-            
+                .UpdateOneAsync(it => it.Key == $"publish_retry_{_capOptions.Value.Version}",
+                    Builders<Lock>.Update.Set(model => model.Key, $"publish_retry_{_capOptions.Value.Version}")
+                        .SetOnInsert(model => model.LastLockTime, DateTime.MinValue),
+                    new UpdateOptions { IsUpsert = true }, cancellationToken);
+
             await database.GetCollection<Lock>(options.LockCollection)
-                .UpdateOneAsync(it=>it.Key==$"received_retry_{_capOptions.Value.Version}",
-                    Builders<Lock>.Update.Set(model=>model.Key,$"received_retry_{_capOptions.Value.Version}").SetOnInsert(model=>model.LastLockTime,DateTime.MinValue), 
-                    new UpdateOptions() { IsUpsert = true },cancellationToken);
+                .UpdateOneAsync(it => it.Key == $"received_retry_{_capOptions.Value.Version}",
+                    Builders<Lock>.Update.Set(model => model.Key, $"received_retry_{_capOptions.Value.Version}")
+                        .SetOnInsert(model => model.LastLockTime, DateTime.MinValue),
+                    new UpdateOptions { IsUpsert = true }, cancellationToken);
         }
-       
+
         _logger.LogDebug("Ensuring all create database tables script are applied.");
 
 

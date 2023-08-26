@@ -46,15 +46,12 @@ namespace Microsoft.Extensions.DependencyInjection
         /// </summary>
         public static CapOptions UseConsulDiscovery(this CapOptions capOptions)
         {
-            return capOptions.UseConsulDiscovery(_ =>  { });
+            return capOptions.UseConsulDiscovery(_ => { });
         }
 
         public static CapOptions UseConsulDiscovery(this CapOptions capOptions, Action<ConsulDiscoveryOptions> options)
         {
-            if (options == null)
-            {
-                throw new ArgumentNullException(nameof(options));
-            }
+            if (options == null) throw new ArgumentNullException(nameof(options));
 
             capOptions.RegisterExtension(new ConsulDiscoveryOptionsExtension(options));
 

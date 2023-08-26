@@ -17,11 +17,14 @@ internal static class DbConnectionExtensions
         if (connection.State == ConnectionState.Closed) await connection.OpenAsync().ConfigureAwait(false);
 
         var command = connection.CreateCommand();
-        
+
         await using var _ = command.ConfigureAwait(false);
         command.CommandType = CommandType.Text;
         command.CommandText = sql;
-        foreach (var param in sqlParams) command.Parameters.Add(param);
+        foreach (var param in sqlParams)
+        {
+            command.Parameters.Add(param);
+        }
 
         if (transaction != null) command.Transaction = transaction;
 
@@ -37,7 +40,10 @@ internal static class DbConnectionExtensions
         await using var _ = command.ConfigureAwait(false);
         command.CommandType = CommandType.Text;
         command.CommandText = sql;
-        foreach (var param in sqlParams) command.Parameters.Add(param);
+        foreach (var param in sqlParams)
+        {
+            command.Parameters.Add(param);
+        }
 
         if (transaction != null) command.Transaction = transaction;
 
@@ -58,7 +64,10 @@ internal static class DbConnectionExtensions
         await using var _ = command.ConfigureAwait(false);
         command.CommandType = CommandType.Text;
         command.CommandText = sql;
-        foreach (var param in sqlParams) command.Parameters.Add(param);
+        foreach (var param in sqlParams)
+        {
+            command.Parameters.Add(param);
+        }
 
         var objValue = await command.ExecuteScalarAsync().ConfigureAwait(false);
 

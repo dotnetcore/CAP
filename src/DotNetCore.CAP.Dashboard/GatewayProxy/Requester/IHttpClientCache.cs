@@ -3,16 +3,15 @@
 
 using System;
 
-namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
+namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+
+public interface IHttpClientCache
 {
-    public interface IHttpClientCache
-    {
-        bool Exists(string id);
+    bool Exists(string id);
 
-        IHttpClient Get(string id);
+    IHttpClient Get(string id);
 
-        void Remove(string id);
+    void Remove(string id);
 
-        void Set(string id, IHttpClient handler, TimeSpan expirationTime);
-    }
+    void Set(string id, IHttpClient handler, TimeSpan expirationTime);
 }

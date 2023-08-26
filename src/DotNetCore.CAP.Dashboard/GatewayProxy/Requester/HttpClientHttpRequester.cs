@@ -6,59 +6,55 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
+namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+
+public class HttpClientHttpRequester : IHttpRequester
 {
-    public class HttpClientHttpRequester : IHttpRequester
+    private readonly IHttpClientCache _cacheHandlers;
+    private readonly ILogger _logger;
+
+    public HttpClientHttpRequester(ILoggerFactory loggerFactory, IHttpClientCache cacheHandlers)
     {
-        private readonly IHttpClientCache _cacheHandlers;
-        private readonly ILogger _logger;
+        _logger = loggerFactory.CreateLogger<HttpClientHttpRequester>();
+        _cacheHandlers = cacheHandlers;
+    }
 
-        public HttpClientHttpRequester(ILoggerFactory loggerFactory, IHttpClientCache cacheHandlers)
+    public async Task<HttpResponseMessage> GetResponse(HttpRequestMessage request)
+    {
+        var builder = new HttpClientBuilder();
+
+        var cacheKey = GetCacheKey(request, builder);
+
+        var httpClient = GetHttpClient(cacheKey, builder);
+
+        try
         {
-            _logger = loggerFactory.CreateLogger<HttpClientHttpRequester>();
-            _cacheHandlers = cacheHandlers;
+            return await httpClient.SendAsync(request);
         }
-
-        public async Task<HttpResponseMessage> GetResponse(HttpRequestMessage request)
+        catch (Exception exception)
         {
-            var builder = new HttpClientBuilder();
-
-            var cacheKey = GetCacheKey(request, builder);
-
-            var httpClient = GetHttpClient(cacheKey, builder);
-
-            try
-            {
-                return await httpClient.SendAsync(request);
-            }
-            catch (Exception exception)
-            {
-                _logger.LogError("Error making http request, exception:" + exception.Message);
-                throw;
-            }
-            finally
-            {
-                _cacheHandlers.Set(cacheKey, httpClient, TimeSpan.FromHours(24));
-            }
+            _logger.LogError("Error making http request, exception:" + exception.Message);
+            throw;
         }
-
-        private IHttpClient GetHttpClient(string cacheKey, IHttpClientBuilder builder)
+        finally
         {
-            var httpClient = _cacheHandlers.Get(cacheKey);
-
-            if (httpClient == null)
-            {
-                httpClient = builder.Create();
-            }
-
-            return httpClient;
+            _cacheHandlers.Set(cacheKey, httpClient, TimeSpan.FromHours(24));
         }
+    }
 
-        private string GetCacheKey(HttpRequestMessage request, IHttpClientBuilder builder)
-        {
-            var baseUrl = $"{request.RequestUri.Scheme}://{request.RequestUri.Authority}";
+    private IHttpClient GetHttpClient(string cacheKey, IHttpClientBuilder builder)
+    {
+        var httpClient = _cacheHandlers.Get(cacheKey);
 
-            return baseUrl;
-        }
+        if (httpClient == null) httpClient = builder.Create();
+
+        return httpClient;
+    }
+
+    private string GetCacheKey(HttpRequestMessage request, IHttpClientBuilder builder)
+    {
+        var baseUrl = $"{request.RequestUri.Scheme}://{request.RequestUri.Authority}";
+
+        return baseUrl;
     }
 }

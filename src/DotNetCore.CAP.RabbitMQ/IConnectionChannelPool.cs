@@ -3,18 +3,17 @@
 
 using RabbitMQ.Client;
 
-namespace DotNetCore.CAP.RabbitMQ
+namespace DotNetCore.CAP.RabbitMQ;
+
+public interface IConnectionChannelPool
 {
-    public interface IConnectionChannelPool
-    {
-        string HostAddress { get; }
+    string HostAddress { get; }
 
-        string Exchange { get; }
+    string Exchange { get; }
 
-        IConnection GetConnection();
+    IConnection GetConnection();
 
-        IModel Rent();
+    IModel Rent();
 
-        bool Return(IModel context);
-    }
+    bool Return(IModel context);
 }

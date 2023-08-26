@@ -4,10 +4,9 @@
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester
+namespace DotNetCore.CAP.Dashboard.GatewayProxy.Requester;
+
+public interface IHttpRequester
 {
-    public interface IHttpRequester
-    {
-        Task<HttpResponseMessage> GetResponse(HttpRequestMessage request);
-    }
+    Task<HttpResponseMessage> GetResponse(HttpRequestMessage request);
 }

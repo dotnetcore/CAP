@@ -9,47 +9,46 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 
-namespace DotNetCore.CAP.Pulsar
+namespace DotNetCore.CAP.Pulsar;
+
+internal class PulsarTransport : ITransport
 {
-    internal class PulsarTransport : ITransport
+    private readonly IConnectionFactory _connectionFactory;
+    private readonly ILogger _logger;
+
+    public PulsarTransport(ILogger<PulsarTransport> logger, IConnectionFactory connectionFactory)
     {
-        private readonly IConnectionFactory _connectionFactory;
-        private readonly ILogger _logger;
+        _logger = logger;
+        _connectionFactory = connectionFactory;
+    }
 
-        public PulsarTransport(ILogger<PulsarTransport> logger, IConnectionFactory connectionFactory)
+    public BrokerAddress BrokerAddress => new("Pulsar", _connectionFactory.ServersAddress);
+
+    public async Task<OperateResult> SendAsync(TransportMessage message)
+    {
+        var producer = await _connectionFactory.CreateProducerAsync(message.GetName());
+
+        try
         {
-            _logger = logger;
-            _connectionFactory = connectionFactory;
+            var headerDic = new Dictionary<string, string?>(message.Headers);
+            headerDic.TryGetValue(PulsarHeaders.PulsarKey, out var key);
+            var pulsarMessage = producer.NewMessage(message.Body.ToArray()!, key, headerDic);
+            var result = await producer.SendAsync(pulsarMessage);
+
+            if (result.Type != null)
+            {
+                _logger.LogDebug($"pulsar topic message [{message.GetName()}] has been published.");
+
+                return OperateResult.Success;
+            }
+
+            throw new PublisherSentFailedException("pulsar message persisted failed!");
         }
-
-        public BrokerAddress BrokerAddress => new ("Pulsar", _connectionFactory.ServersAddress);
-
-        public async Task<OperateResult> SendAsync(TransportMessage message)
+        catch (Exception ex)
         {
-            var producer = await _connectionFactory.CreateProducerAsync(message.GetName());
+            var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
 
-            try
-            {
-                var headerDic = new Dictionary<string, string?>(message.Headers);
-                headerDic.TryGetValue(PulsarHeaders.PulsarKey, out var key);
-                var pulsarMessage = producer.NewMessage(message.Body.ToArray()!, key, headerDic);
-                var result = await producer.SendAsync(pulsarMessage);
-
-                if (result.Type != null)
-                {
-                    _logger.LogDebug($"pulsar topic message [{message.GetName()}] has been published.");
-
-                    return OperateResult.Success;
-                }
-
-                throw new PublisherSentFailedException("pulsar message persisted failed!");
-            }
-            catch (Exception ex)
-            {
-                var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
-
-                return OperateResult.Failed(wrapperEx);
-            }
+            return OperateResult.Failed(wrapperEx);
         }
     }
 }

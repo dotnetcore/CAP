@@ -201,7 +201,8 @@ public static class CapTransactionExtensions
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
     {
         var trans = database.BeginTransaction(isolationLevel);
-        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
+        publisher.Transaction.Value =
+            ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
         var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
         return new CapEFDbTransaction(capTrans);
     }

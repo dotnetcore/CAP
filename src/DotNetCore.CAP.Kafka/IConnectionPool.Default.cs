@@ -9,78 +9,76 @@ using Confluent.Kafka;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.Kafka
+namespace DotNetCore.CAP.Kafka;
+
+public class ConnectionPool : IConnectionPool, IDisposable
 {
-    public class ConnectionPool : IConnectionPool, IDisposable
+    private readonly KafkaOptions _options;
+    private readonly ConcurrentQueue<IProducer<string, byte[]>> _producerPool;
+    private int _maxSize;
+    private int _pCount;
+
+    public ConnectionPool(ILogger<ConnectionPool> logger, IOptions<KafkaOptions> options)
     {
-        private readonly KafkaOptions _options;
-        private readonly ConcurrentQueue<IProducer<string, byte[]>> _producerPool;
-        private int _pCount;
-        private int _maxSize;
+        _options = options.Value;
+        _producerPool = new ConcurrentQueue<IProducer<string, byte[]>>();
+        _maxSize = _options.ConnectionPoolSize;
 
-        public ConnectionPool(ILogger<ConnectionPool> logger, IOptions<KafkaOptions> options)
+        logger.LogDebug("CAP Kafka servers: {0}", _options.Servers);
+    }
+
+    public string ServersAddress => _options.Servers;
+
+    public IProducer<string, byte[]> RentProducer()
+    {
+        if (_producerPool.TryDequeue(out var producer))
         {
-            _options = options.Value;
-            _producerPool = new ConcurrentQueue<IProducer<string, byte[]>>();
-            _maxSize = _options.ConnectionPoolSize;
-
-            logger.LogDebug("CAP Kafka servers: {0}", _options.Servers);
-        }
-
-        public string ServersAddress => _options.Servers;
-
-        public IProducer<string, byte[]> RentProducer()
-        {
-            if (_producerPool.TryDequeue(out var producer))
-            {
-                Interlocked.Decrement(ref _pCount);
-
-                return producer;
-            }
-
-            var config = new ProducerConfig(new Dictionary<string, string>(_options.MainConfig))
-            {
-                BootstrapServers = _options.Servers,
-                QueueBufferingMaxMessages = 10,
-                MessageTimeoutMs = 5000,
-                RequestTimeoutMs = 3000
-            };
-
-            producer = BuildProducer(config);
+            Interlocked.Decrement(ref _pCount);
 
             return producer;
         }
 
-        protected virtual IProducer<string, byte[]> BuildProducer(ProducerConfig config)
+        var config = new ProducerConfig(new Dictionary<string, string>(_options.MainConfig))
         {
-            return  new ProducerBuilder<string, byte[]>(config).Build();
+            BootstrapServers = _options.Servers,
+            QueueBufferingMaxMessages = 10,
+            MessageTimeoutMs = 5000,
+            RequestTimeoutMs = 3000
+        };
+
+        producer = BuildProducer(config);
+
+        return producer;
+    }
+
+    public bool Return(IProducer<string, byte[]> producer)
+    {
+        if (Interlocked.Increment(ref _pCount) <= _maxSize)
+        {
+            _producerPool.Enqueue(producer);
+
+            return true;
         }
 
-        public bool Return(IProducer<string, byte[]> producer)
+        producer.Dispose();
+
+        Interlocked.Decrement(ref _pCount);
+
+        return false;
+    }
+
+    public void Dispose()
+    {
+        _maxSize = 0;
+
+        while (_producerPool.TryDequeue(out var context))
         {
-            if (Interlocked.Increment(ref _pCount) <= _maxSize)
-            {
-                _producerPool.Enqueue(producer);
-
-                return true;
-            }
-
-            producer.Dispose();
-
-            Interlocked.Decrement(ref _pCount);
-
-            return false;
+            context.Dispose();
         }
+    }
 
-        public void Dispose()
-        {
-            _maxSize = 0;
-
-            while (_producerPool.TryDequeue(out var context))
-            {
-                context.Dispose();
-
-            }
-        }
+    protected virtual IProducer<string, byte[]> BuildProducer(ProducerConfig config)
+    {
+        return new ProducerBuilder<string, byte[]>(config).Build();
     }
 }

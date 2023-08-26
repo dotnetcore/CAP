@@ -5,36 +5,32 @@ using System;
 using DotNetCore.CAP;
 
 // ReSharper disable once CheckNamespace
-namespace Microsoft.Extensions.DependencyInjection
+namespace Microsoft.Extensions.DependencyInjection;
+
+public static class CapOptionsExtensions
 {
-    public static class CapOptionsExtensions
+    /// <summary>
+    /// Configuration to use pulsar in CAP.
+    /// </summary>
+    /// <param name="options">CAP configuration options</param>
+    /// <param name="serverUrl">Pulsar bootstrap server urls.</param>
+    public static CapOptions UsePulsar(this CapOptions options, string serverUrl)
     {
-        /// <summary>
-        /// Configuration to use pulsar in CAP.
-        /// </summary>
-        /// <param name="options">CAP configuration options</param>
-        /// <param name="serverUrl">Pulsar bootstrap server urls.</param>
-        public static CapOptions UsePulsar(this CapOptions options, string serverUrl)
-        {
-            return options.UsePulsar(opt => { opt.ServiceUrl = serverUrl; });
-        }
+        return options.UsePulsar(opt => { opt.ServiceUrl = serverUrl; });
+    }
 
-        /// <summary>
-        /// Configuration to use pulsar in CAP.
-        /// </summary>
-        /// <param name="options">CAP configuration options</param>
-        /// <param name="configure">Provides programmatic configuration for the pulsar .</param>
-        /// <returns></returns>
-        public static CapOptions UsePulsar(this CapOptions options, Action<PulsarOptions> configure)
-        {
-            if (configure == null)
-            {
-                throw new ArgumentNullException(nameof(configure));
-            }
+    /// <summary>
+    /// Configuration to use pulsar in CAP.
+    /// </summary>
+    /// <param name="options">CAP configuration options</param>
+    /// <param name="configure">Provides programmatic configuration for the pulsar .</param>
+    /// <returns></returns>
+    public static CapOptions UsePulsar(this CapOptions options, Action<PulsarOptions> configure)
+    {
+        if (configure == null) throw new ArgumentNullException(nameof(configure));
 
-            options.RegisterExtension(new PulsarCapOptionsExtension(configure));
+        options.RegisterExtension(new PulsarCapOptionsExtension(configure));
 
-            return options;
-        }
+        return options;
     }
 }
