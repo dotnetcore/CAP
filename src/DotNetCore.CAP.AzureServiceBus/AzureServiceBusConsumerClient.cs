@@ -215,7 +215,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                     }
                 }
 
-                _serviceBusProcessor = _asbOptions.EnableSessions
+                _serviceBusProcessor = !_asbOptions.EnableSessions
                     ? new ServiceBusProcessorFacade(
                         _serviceBusClient.CreateProcessor(_asbOptions.TopicPath, _subscriptionName))
                     : new ServiceBusProcessorFacade(
