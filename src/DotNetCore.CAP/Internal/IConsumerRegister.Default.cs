@@ -119,6 +119,7 @@ internal class ConsumerRegister : IConsumerRegister
             ICollection<string> topics;
             try
             {
+                // ReSharper disable once ConvertToUsingDeclaration
                 using (var client = _consumerClientFactory.Create(matchGroup.Key))
                 {
                     client.OnLogCallback = WriteLog;
@@ -139,6 +140,7 @@ internal class ConsumerRegister : IConsumerRegister
                   {
                       try
                       {
+                          // ReSharper disable once ConvertToUsingDeclaration
                           using (var client = _consumerClientFactory.Create(matchGroup.Key))
                           {
                               _serverAddress = client.BrokerAddress;

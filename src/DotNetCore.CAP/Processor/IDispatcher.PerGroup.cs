@@ -27,6 +27,7 @@ internal class DispatcherPerGroup : IDispatcher
     private readonly IMessageSender _sender;
     private readonly IDataStorage _storage;
     private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
+    private readonly bool _enablePrefetch;
 
     private Channel<MediumMessage> _publishedChannel = default!;
     private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor?)>> _receivedChannels = default!;
@@ -45,6 +46,7 @@ internal class DispatcherPerGroup : IDispatcher
         _executor = executor;
         _schedulerQueue = new PriorityQueue<MediumMessage, DateTime>();
         _storage = storage;
+        _enablePrefetch = options.Value.EnableConsumerPrefetch;
     }
 
     public async Task Start(CancellationToken stoppingToken)
@@ -242,7 +244,15 @@ internal class DispatcherPerGroup : IDispatcher
 
                         var item1 = message.Item1;
                         var item2 = message.Item2;
-                        _ = Task.Run(() => _executor.ExecuteAsync(item1, item2, _tasksCts.Token).ConfigureAwait(false));
+
+                        if (_enablePrefetch)
+                        {
+                            _ = Task.Run(() => _executor.ExecuteAsync(item1, item2, _tasksCts.Token).ConfigureAwait(false));
+                        }
+                        else
+                        {
+                            await _executor.ExecuteAsync(item1, item2, _tasksCts.Token).ConfigureAwait(false);
+                        }
                     }
                     catch (OperationCanceledException)
                     {
