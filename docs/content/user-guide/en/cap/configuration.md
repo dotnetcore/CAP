@@ -138,14 +138,12 @@ The expiration time (in seconds) of the failed message. When the message is sent
 
 If `true` then all consumers within the same group pushes received messages to own dispatching pipeline channel. Each channel has set thread count to `ConsumerThreadCount` value.
 
-!!! WARNING "If option set true, the EnableConsumerPrefetch option is disabled"
-
 #### EnableConsumerPrefetch
 
 > Default: false， Before version 7.0 the default behavior is true
 
 By default, CAP will only read one message from the message queue, then execute the subscription method. After the execution is done, it will read the next message for execution.
-If set to true, the consumer will prefetch some messages to the memory queue, and then distribute them to the scheduler for execution.
+If set to true, the consumer will prefetch some messages to the memory queue, and then distribute them to the .NET thread pool for execution.
 
 !!! note "Precautions"
     Setting it to true may cause some problems. When the subscription method executes too slowly and takes too long, it will cause the retry thread to pick up messages that have not yet been executed. The retry thread picks up messages from 4 minutes ago by default, that is to say, if the message backlog of more than 4 minutes on the consumer side will be picked up again and executed again
