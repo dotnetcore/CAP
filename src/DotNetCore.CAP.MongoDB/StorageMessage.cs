@@ -20,8 +20,10 @@ internal class ReceivedMessage
 
     public string Content { get; set; } = default!;
 
+    [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
     public DateTime Added { get; set; }
 
+    [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
     public DateTime? ExpiresAt { get; set; }
 
     public int Retries { get; set; }
@@ -39,8 +41,10 @@ internal class PublishedMessage
 
     public string Content { get; set; } = default!;
 
+    [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
     public DateTime Added { get; set; }
 
+    [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
     public DateTime? ExpiresAt { get; set; }
 
     public int Retries { get; set; }
@@ -58,5 +62,6 @@ public class Lock
 
     public string Instance { get; set; } = default!;
 
+    [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
     public DateTime LastLockTime { get; set; }
 }
