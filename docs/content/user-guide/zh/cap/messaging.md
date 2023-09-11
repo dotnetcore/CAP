@@ -116,13 +116,15 @@ CAP 接收到消息之后会将消息进行 Persistent（持久化）， 有关 
 
 在消息发送过程中，当出现 Broker 宕机或者连接失败的情况亦或者出现异常的情况下，这个时候 CAP 会对发送的重试，第一次重试次数为 3，4分钟后以后每分钟重试一次，进行次数 +1，当总次数达到50次后，CAP将不对其进行重试。
 
-你可以在 CapOptions 中设置 [FailedRetryCount](../configuration#failedretrycount) 来调整默认重试的总次数。
+你可以在 CapOptions 中设置 [FailedRetryCount](../configuration#failedretrycount) 来调整默认重试的总次数，或使用 [FailedThresholdCallback](../configuration#FailedThresholdCallback) 在达到最大重试次数时收到通知。
 
 当失败总次数达到默认失败总次数后，就不会进行重试了，你可以在 Dashboard 中查看消息失败的原因，然后进行人工重试处理。
 
 2、 消费重试
 
 当 Consumer 接收到消息时，会执行消费者方法，在执行消费者方法出现异常时，会进行重试。这个重试策略和上面的 发送重试 是相同的。
+
+无论发送失败或者消费失败，我们会将异常消息同时存储到消息 header 中的 cap-exception 字段中，你可以在数据库表的 Content 字段的json中找到。
 
 ## 消息数据清理
 

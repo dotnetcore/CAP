@@ -114,7 +114,7 @@ Retrying plays an important role in the overall CAP architecture design, CAP ret
 
 During the message sending process, when the broker crashes or the connection fails or an abnormality occurs, CAP will retry the sending. Retry 3 times for the first time, retry every minute after 4 minutes, and +1 retry. When the total number of retries reaches 50, CAP will stop retrying.
 
-You can adjust the total number of retries by setting [FailedRetryCount](../configuration#failedretrycount) in CapOptions.
+You can adjust the total number of retries by setting [FailedRetryCount](../configuration#failedretrycount) in CapOptions Or use [FailedThresholdCallback](../configuration#failedthresholdcallback) to receive notifications when the maximum retry count is reached.
 
 It will stop when the maximum number of times is reached. You can see the reason for the failure in Dashboard and choose whether to manually retry.
 
@@ -123,6 +123,8 @@ It will stop when the maximum number of times is reached. You can see the reason
 The consumer method is executed when the Consumer receives the message and will retry when an exception occurs. This retry strategy is the same as the send retry.
 
 We introduced database-based distributed locks in version 7.1.0 to deal with the problem of concurrent data acquisition of database retries under multiple instances, you need to explicitly configure `UseStorageLock` option to true.
+
+Whether sending fails or consumption fails, we will store the exception message in the cap-exception field within the message header. You can find it in the Content field's JSON in the database table.
 
 ## Data Cleanup
 
