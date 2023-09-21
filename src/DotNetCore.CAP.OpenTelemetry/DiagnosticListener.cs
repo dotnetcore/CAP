@@ -58,7 +58,13 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     activity.AddEvent(new ActivityEvent("CAP message persistence start...",
                         DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
 
-                    if (parentContext != default) _contexts[eventData.Message.GetId()] = Activity.Current!.Context;
+                    if (parentContext != default)
+                    {
+                        _contexts[eventData.Message.GetId()] = Activity.Current!.Context;
+                        Propagator.Inject(new PropagationContext(Activity.Current.Context, Baggage.Current),
+                            eventData.Message,
+                            (msg, key, value) => { msg.Headers[key] = value; });
+                    };
                 }
             }
                 break;
@@ -89,10 +95,14 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
             case CapEvents.BeforePublish:
             {
                 var eventData = (CapEventDataPubSend)evt.Value!;
+                var parentContext = Propagator.Extract(default, eventData.TransportMessage, (msg, key) =>
+                {
+                    return msg.Headers.TryGetValue(key, out var value) ? (new[] { value }) : Enumerable.Empty<string>();
+                });
                 _contexts.TryRemove(eventData.TransportMessage.GetId(), out var context);
                 var activity = ActivitySource.StartActivity(
                     OperateNamePrefix + eventData.Operation + ProducerOperateNameSuffix, ActivityKind.Producer,
-                    context);
+                    parentContext.ActivityContext);
                 if (activity != null)
                 {
                     activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
