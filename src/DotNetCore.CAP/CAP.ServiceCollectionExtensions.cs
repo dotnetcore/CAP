@@ -2,13 +2,11 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-
 using DotNetCore.CAP;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Processor;
 using DotNetCore.CAP.Serialization;
 using DotNetCore.CAP.Transport;
-
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
@@ -31,7 +29,7 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton(_ => services);
         services.TryAddSingleton(new CapMarkerService("CAP"));
-        services.AddSingleton<ISnowflakeId, SnowflakeId>();
+        services.TryAddSingleton<ISnowflakeId, SnowflakeId>();
         services.TryAddSingleton<ICapPublisher, CapPublisher>();
 
         services.TryAddSingleton<IConsumerServiceSelector, ConsumerServiceSelector>();
@@ -41,11 +39,8 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton<IConsumerRegister, ConsumerRegister>();
 
         //Processors
-        services.TryAddEnumerable(
-            ServiceDescriptor.Singleton<IProcessingServer, IDispatcher>(sp => sp.GetRequiredService<IDispatcher>()));
-        services.TryAddEnumerable(
-            ServiceDescriptor.Singleton<IProcessingServer, IConsumerRegister>(sp =>
-                sp.GetRequiredService<IConsumerRegister>()));
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, IDispatcher>(sp => sp.GetRequiredService<IDispatcher>()));
+        services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, IConsumerRegister>(sp => sp.GetRequiredService<IConsumerRegister>()));
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, CapProcessingServer>());
 
         //Queue's message processor
@@ -72,7 +67,9 @@ public static class ServiceCollectionExtensions
         else
             services.TryAddSingleton<IDispatcher, Dispatcher>();
 
-        foreach (var serviceExtension in options.Extensions) serviceExtension.AddServices(services);
+        foreach (var serviceExtension in options.Extensions)
+            serviceExtension.AddServices(services);
+
         services.Configure(setupAction);
 
         //Startup and Hosted 
