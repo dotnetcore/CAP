@@ -41,6 +41,7 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 Options | NATS client configuration | Options | Options
 Servers | Server url/urls used to connect to the NATs server. | string | NULL
 ConnectionPoolSize  | number of connections pool | uint | 10
+DeliverPolicy | The point in the stream to receive messages from | enum | DeliverPolicy.New
 
 #### NATS ConfigurationOptions
 

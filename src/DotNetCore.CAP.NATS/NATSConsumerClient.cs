@@ -101,7 +101,7 @@ namespace DotNetCore.CAP.NATS
                             .WithStream(subjectStream.Key)
                             .WithConfiguration(ConsumerConfiguration.Builder()
                                 .WithDurable(Helper.Normalized(groupName + "-" + subject))
-                                .WithDeliverPolicy(DeliverPolicy.All)
+                                .WithDeliverPolicy(_natsOptions.DeliverPolicy)
                                 .WithAckWait(10000)
                                 .WithAckPolicy(AckPolicy.Explicit)
                                 .Build())
