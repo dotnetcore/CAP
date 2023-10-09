@@ -44,11 +44,8 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                 var eventData = (CapEventDataPubStore)evt.Value!;
                 ActivityContext parentContext = default;
 
-                if (Activity.Current != null &&
-                    Activity.Current.Source.Name == "OpenTelemetry.Instrumentation.AspNetCore")
+                if (Activity.Current != null)
                     _contexts.TryAdd(eventData.Message.GetId(), parentContext = Activity.Current.Context);
-                else
-                    Activity.Current = null;
 
                 var activity = ActivitySource.StartActivity("Event Persistence: " + eventData.Operation,
                     ActivityKind.Internal, parentContext);
