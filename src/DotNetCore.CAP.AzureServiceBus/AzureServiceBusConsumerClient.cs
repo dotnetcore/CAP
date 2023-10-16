@@ -187,12 +187,14 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                     _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString);
                 }
 
-                var topicPaths =
-                    _asbOptions.CustomProducers.Select(producer => producer.TopicPath)
-                        .Append(_asbOptions.TopicPath)
-                        .Distinct();
+                var topicConfigs =
+                    _asbOptions.CustomProducers.Select(producer =>
+                            (topicPaths: producer.TopicPath, subscribe: producer.CreateSubscription))
+                        .Append((topicPaths: _asbOptions.TopicPath, subscribe: true))
+                        .GroupBy(n => n.topicPaths, StringComparer.OrdinalIgnoreCase)
+                        .Select(n => (topicPaths: n.Key, subscribe: n.Max(o => o.subscribe)));
 
-                foreach (var topicPath in topicPaths)
+                foreach (var (topicPath, subscribe) in topicConfigs)
                 {
                     if (!await _administrationClient.TopicExistsAsync(topicPath))
                     {
@@ -200,7 +202,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                         _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
                     }
 
-                    if (!await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
+                    if (subscribe && !await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
                     {
                         var subscriptionDescription =
                             new CreateSubscriptionOptions(topicPath, _subscriptionName)
