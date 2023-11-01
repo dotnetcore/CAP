@@ -3,7 +3,7 @@ os: Visual Studio 2022
 environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
-  Cap_MySql_ConnectionString: Server=localhost;Database=cap_test;Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=none
+  Cap_MySql_ConnectionString: Server=localhost;Database=cap_test;Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=Required
 services:
   - mysql
 init:
