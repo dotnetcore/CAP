@@ -18,7 +18,7 @@ public class ServiceBusTransportTests
     public ServiceBusTransportTests()
     {
         var config = new AzureServiceBusOptions();
-        config.ConfigureCustomProducer<EntityCreated>(cfg => cfg.WithTopic("entity-created"));
+        config.ConfigureCustomProducer<EntityCreated>(cfg => cfg.UseTopic("entity-created").WithSubscription());
 
         _options = Options.Create(config);
     }
