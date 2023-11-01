@@ -88,10 +88,10 @@ public class RouteActionProvider
         if (_agent != null && await _agent.Invoke(httpContext)) return;
         if (!await Auth(httpContext)) return;
 
-        var cap = _serviceProvider.GetRequiredService<CapMarkerService>();
-        var broker = _serviceProvider.GetRequiredService<CapMessageQueueMakerService>();
-        var storage = _serviceProvider.GetRequiredService<CapStorageMarkerService>();
-
+        var cap = _serviceProvider.GetService<CapMarkerService>();
+        var broker = _serviceProvider.GetService<CapMessageQueueMakerService>();
+        var storage = _serviceProvider.GetService<CapStorageMarkerService>();
+        
         await httpContext.Response.WriteAsJsonAsync(new
         {
             cap,

@@ -67,10 +67,16 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
         consumer.ConsumerCancelled += OnConsumerConsumerCancelled;
 
         if (_rabbitMQOptions.BasicQosOptions != null)
-            _channel?.BasicQos(0, _rabbitMQOptions.BasicQosOptions.PrefetchCount,
-                _rabbitMQOptions.BasicQosOptions.Global);
+            _channel?.BasicQos(0, _rabbitMQOptions.BasicQosOptions.PrefetchCount, _rabbitMQOptions.BasicQosOptions.Global);
 
-        _channel.BasicConsume(_queueName, false, consumer);
+        try
+        {
+            _channel.BasicConsume(_queueName, false, consumer);
+        }
+        catch (TimeoutException ex)
+        {
+            OnConsumerShutdown(null, new ShutdownEventArgs(ShutdownInitiator.Application, 0, ex.Message + "-->" + nameof(_channel.BasicConsume)));
+        }
 
         while (true)
         {
@@ -121,7 +127,14 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
                 if (!string.IsNullOrEmpty(_rabbitMQOptions.QueueArguments.QueueType))
                     arguments.Add("x-queue-type", _rabbitMQOptions.QueueArguments.QueueType);
 
-                _channel.QueueDeclare(_queueName, true, false, false, arguments);
+                try
+                {
+                    _channel.QueueDeclare(_queueName, true, false, false, arguments);
+                }
+                catch (TimeoutException ex)
+                {
+                    OnConsumerShutdown(null, new ShutdownEventArgs(ShutdownInitiator.Application, 0, ex.Message + "-->" + nameof(_channel.QueueDeclare)));
+                }
             }
         }
     }

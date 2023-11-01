@@ -42,6 +42,8 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 Options | NATS 客户端配置 | Options | Options
 Servers | 服务器Urls地址 | string | NULL
 ConnectionPoolSize  | 连接池数量 | uint | 10
+DeliverPolicy | 消费消息的策略点 | enum | DeliverPolicy.New
+
 
 #### NATS ConfigurationOptions
 

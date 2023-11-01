@@ -26,7 +26,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
     private ServiceBusAdministrationClient? _administrationClient;
     private ServiceBusClient? _serviceBusClient;
-    private ServiceBusProcessor? _serviceBusProcessor;
+    private ServiceBusProcessorFacade? _serviceBusProcessor;
 
     public AzureServiceBusConsumerClient(
         ILogger logger,
@@ -100,6 +100,15 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     {
         ConnectAsync().GetAwaiter().GetResult();
 
+        if (_serviceBusProcessor!.IsSessionProcessor)
+        {
+            _serviceBusProcessor!.ProcessSessionMessageAsync += _serviceBusProcessor_ProcessSessionMessageAsync;
+        }
+        else
+        {
+            _serviceBusProcessor!.ProcessMessageAsync += _serviceBusProcessor_ProcessMessageAsync;
+        }
+
         _serviceBusProcessor!.ProcessMessageAsync += _serviceBusProcessor_ProcessMessageAsync;
         _serviceBusProcessor.ProcessErrorAsync += _serviceBusProcessor_ProcessErrorAsync;
 
@@ -110,8 +119,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     {
         var commitInput = (AzureServiceBusConsumerCommitInput)sender!;
         if (_serviceBusProcessor?.AutoCompleteMessages ?? false)
-            commitInput.ProcessMessageArgs.CompleteMessageAsync(commitInput.ProcessMessageArgs.Message).GetAwaiter()
-                .GetResult();
+            commitInput.CompleteMessageAsync().GetAwaiter().GetResult();
     }
 
     public void Reject(object? sender)
@@ -150,6 +158,13 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(arg));
     }
 
+    private async Task _serviceBusProcessor_ProcessSessionMessageAsync(ProcessSessionMessageEventArgs arg)
+    {
+        var context = ConvertMessage(arg.Message);
+
+        await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(arg));
+    }
+
     public async Task ConnectAsync()
     {
         if (_serviceBusProcessor != null) return;
@@ -172,12 +187,14 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                     _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString);
                 }
 
-                var topicPaths =
-                    _asbOptions.CustomProducers.Select(producer => producer.TopicPath)
-                        .Append(_asbOptions.TopicPath)
-                        .Distinct();
+                var topicConfigs =
+                    _asbOptions.CustomProducers.Select(producer =>
+                            (topicPaths: producer.TopicPath, subscribe: producer.CreateSubscription))
+                        .Append((topicPaths: _asbOptions.TopicPath, subscribe: true))
+                        .GroupBy(n => n.topicPaths, StringComparer.OrdinalIgnoreCase)
+                        .Select(n => (topicPaths: n.Key, subscribe: n.Max(o => o.subscribe)));
 
-                foreach (var topicPath in topicPaths)
+                foreach (var (topicPath, subscribe) in topicConfigs)
                 {
                     if (!await _administrationClient.TopicExistsAsync(topicPath))
                     {
@@ -185,7 +202,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                         _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
                     }
 
-                    if (!await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
+                    if (subscribe && !await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
                     {
                         var subscriptionDescription =
                             new CreateSubscriptionOptions(topicPath, _subscriptionName)
@@ -200,15 +217,18 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                     }
                 }
 
-                _serviceBusProcessor = _serviceBusClient.CreateProcessor(_asbOptions.TopicPath, _subscriptionName,
-                    _asbOptions.EnableSessions
-                        ? new ServiceBusProcessorOptions
-                        {
-                            AutoCompleteMessages = _asbOptions.AutoCompleteMessages,
-                            MaxConcurrentCalls = _asbOptions.MaxConcurrentCalls,
-                            MaxAutoLockRenewalDuration = TimeSpan.FromSeconds(30)
-                        }
-                        : null);
+                _serviceBusProcessor = !_asbOptions.EnableSessions
+                    ? new ServiceBusProcessorFacade(
+                        _serviceBusClient.CreateProcessor(_asbOptions.TopicPath, _subscriptionName))
+                    : new ServiceBusProcessorFacade(
+                        serviceBusSessionProcessor: _serviceBusClient.CreateSessionProcessor(_asbOptions.TopicPath,
+                            _subscriptionName,
+                            new ServiceBusSessionProcessorOptions
+                            {
+                                AutoCompleteMessages = _asbOptions.AutoCompleteMessages,
+                                MaxConcurrentCallsPerSession = _asbOptions.MaxConcurrentCalls,
+                                MaxAutoLockRenewalDuration = TimeSpan.FromSeconds(30),
+                            }));
             }
         }
         finally

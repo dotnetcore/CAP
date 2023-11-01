@@ -31,6 +31,12 @@ namespace DotNetCore.CAP
 
         public Action<StreamConfiguration.StreamConfigurationBuilder>? StreamOptions { get; set; }
 
+        /// <summary>
+        /// The point in the stream to receive messages from, 
+        /// either DeliverAll, DeliverLast, DeliverNew, DeliverByStartSequence, DeliverByStartTime, or DeliverLastPerSubject.
+        /// </summary>
+        public DeliverPolicy DeliverPolicy { get; set; } = DeliverPolicy.New;
+
         public Func<string, string> NormalizeStreamName { get; set; } = origin => origin.Split('.')[0];
     }
 }
