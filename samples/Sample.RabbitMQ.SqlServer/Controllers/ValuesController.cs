@@ -57,6 +57,28 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
             return Ok();
         }
 
+        [Route("~/delay/transaction/{delaySeconds:int}")]
+        public async Task<IActionResult> DelayWithTransaction(int delaySeconds)
+        {
+            using (var connection = new SqlConnection(AppDbContext.ConnectionString))
+            {
+                using (var transaction = connection.BeginTransaction(_capBus, true))
+                {
+                    //your business code
+                    connection.Execute("insert into test(name) values('test')", transaction: transaction);
+
+                    await _capBus.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "sample.rabbitmq.sqlserver",
+                        new Person()
+                        {
+                            Id = 123,
+                            Name = "Bar"
+                        });
+                }
+            }
+
+            return Ok();
+        }
+
         [Route("~/adonet/transaction")]
         public IActionResult AdonetWithTransaction()
         {
