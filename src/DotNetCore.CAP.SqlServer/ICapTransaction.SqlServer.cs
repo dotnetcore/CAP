@@ -161,15 +161,14 @@ public static class CapTransactionExtensions
     /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
     /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
     /// <returns>The <see cref="ICapTransaction" /> object.</returns>
-    public static IDbTransaction BeginTransaction(this IDbConnection dbConnection,
+    public static ICapTransaction BeginTransaction(this IDbConnection dbConnection,
         ICapPublisher publisher, bool autoCommit = false)
     {
         if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
         var dbTransaction = dbConnection.BeginTransaction();
         publisher.Transaction.Value =
             ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
-        var capTransaction = publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
-        return (IDbTransaction)capTransaction.DbTransaction!;
+        return publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
     }
 
     /// <summary>
