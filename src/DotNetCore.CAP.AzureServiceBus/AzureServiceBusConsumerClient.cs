@@ -109,7 +109,6 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
             _serviceBusProcessor!.ProcessMessageAsync += _serviceBusProcessor_ProcessMessageAsync;
         }
 
-        _serviceBusProcessor!.ProcessMessageAsync += _serviceBusProcessor_ProcessMessageAsync;
         _serviceBusProcessor.ProcessErrorAsync += _serviceBusProcessor_ProcessErrorAsync;
 
         _serviceBusProcessor.StartProcessingAsync(cancellationToken).GetAwaiter().GetResult();
