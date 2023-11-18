@@ -105,7 +105,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
                     activity.SetTag("messaging.destination", eventData.Operation);
                     activity.SetTag("messaging.destination_kind", "topic");
-                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint!.Replace("-1", "5672"));
+                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint.Replace("-1", "5672"));
                     activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
                     activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
 
@@ -162,7 +162,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
                     activity.SetTag("messaging.destination", eventData.Operation);
                     activity.SetTag("messaging.destination_kind", "topic");
-                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint!.Replace("-1", "5672"));
+                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint.Replace("-1", "5672"));
                     activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
                     activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
 
