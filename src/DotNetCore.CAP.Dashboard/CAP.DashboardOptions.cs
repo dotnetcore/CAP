@@ -14,7 +14,7 @@ public class DashboardOptions
     {
         PathMatch = "/cap";
         StatsPollingInterval = 2000;
-        AllowAnonymousExplicit = true;
+        AllowAnonymousExplicit = false;
     }
 
     /// <summary>
@@ -33,35 +33,13 @@ public class DashboardOptions
     public int StatsPollingInterval { get; set; }
 
     /// <summary>
-    /// Enable authentication on dashboard request.
-    /// </summary>
-    public bool UseAuth { get; set; }
-
-    /// <summary>
-    /// Default scheme used for authentication. If no scheme is set, the DefaultScheme set up in AddAuthentication will be
-    /// used.
-    /// </summary>
-    public string DefaultAuthenticationScheme { get; set; }
-
-    /// <summary>
-    /// Enable authentication challenge on dashboard request.
-    /// </summary>
-    public bool UseChallengeOnAuth { get; set; }
-
-    /// <summary>
-    /// Default scheme used for authentication challenge. If no scheme is set, the DefaultChallengeScheme set up in
-    /// AddAuthentication will be used.
-    /// </summary>
-    public string DefaultChallengeScheme { get; set; }
-
-    /// <summary>
-    /// Authorization policy. If no policy is set, authorization will be inactive.
-    /// </summary>
-    public string AuthorizationPolicy { get; set; }
-
-    /// <summary>
     /// Allow Explicit to set AllowAnonymous for the CAP dashboard API without use ASP.NET Core global authorization filter.
     /// Default true
     /// </summary>
     public bool AllowAnonymousExplicit { get; set; }
+    
+    /// <summary>
+    /// Authorization policy for the Dashboard. Required if <see cref="AllowAnonymousExplicit"/> is false.
+    /// </summary>
+    public string AuthorizationPolicy { get; set; }
 }

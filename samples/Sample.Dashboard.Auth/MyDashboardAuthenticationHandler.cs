@@ -8,6 +8,11 @@ using Microsoft.Extensions.Options;
 
 namespace Sample.Dashboard.Auth
 {
+    public static class MyDashboardAuthenticationSchemeDefaults
+    {
+        public const string Scheme = "MyDashboardAuthenticationScheme";
+    }
+    
     public class MyDashboardAuthenticationSchemeOptions : AuthenticationSchemeOptions
     {
 
@@ -25,24 +30,24 @@ namespace Sample.Dashboard.Auth
         {
             var testAuthHeaderPresent = Request.Headers["X-Base-Token"].Contains("xxx");
 
-            var authResult = testAuthHeaderPresent ? AuthenticatedTestUser() : AuthenticateResult.NoResult();
+            var authResult = testAuthHeaderPresent ? CreateAuthenticatonTicket() : AuthenticateResult.NoResult();
 
             return Task.FromResult(authResult);
         }
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            Response.Headers["WWW-Authenticate"] = "MyDashboardScheme";
+            Response.Headers["WWW-Authenticate"] = MyDashboardAuthenticationSchemeDefaults.Scheme;
 
             return base.HandleChallengeAsync(properties);
         }
 
-        private AuthenticateResult AuthenticatedTestUser()
+        private AuthenticateResult CreateAuthenticatonTicket()
         {
             var claims = new[] { new Claim(ClaimTypes.Name, "My Dashboard user") };
-            var identity = new ClaimsIdentity(claims, "MyDashboardScheme");
+            var identity = new ClaimsIdentity(claims, MyDashboardAuthenticationSchemeDefaults.Scheme);
             var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, "MyDashboardScheme");
+            var ticket = new AuthenticationTicket(principal, MyDashboardAuthenticationSchemeDefaults.Scheme);
 
             return AuthenticateResult.Success(ticket);
         }
