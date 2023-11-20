@@ -3,6 +3,7 @@
 
 // ReSharper disable once CheckNamespace
 
+#nullable enable
 namespace DotNetCore.CAP;
 
 /// <summary>
@@ -14,7 +15,7 @@ public class DashboardOptions
     {
         PathMatch = "/cap";
         StatsPollingInterval = 2000;
-        AllowAnonymousExplicit = false;
+        AllowAnonymousExplicit = true;
     }
 
     /// <summary>
@@ -33,13 +34,12 @@ public class DashboardOptions
     public int StatsPollingInterval { get; set; }
 
     /// <summary>
-    /// Allow Explicit to set AllowAnonymous for the CAP dashboard API without use ASP.NET Core global authorization filter.
-    /// Default true
+    /// Explicitly allows anonymous access for the CAP dashboard API, passing AllowAnonymous to the ASP.NET Core global authorization filter.
     /// </summary>
     public bool AllowAnonymousExplicit { get; set; }
     
     /// <summary>
     /// Authorization policy for the Dashboard. Required if <see cref="AllowAnonymousExplicit"/> is false.
     /// </summary>
-    public string AuthorizationPolicy { get; set; }
+    public string? AuthorizationPolicy { get; set; }
 }

@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+#nullable enable
 using System;
 using System.IO;
 using System.Linq;
@@ -80,13 +81,13 @@ public static class CapBuilderExtension
         return app;
     }
 
-    internal static IEndpointConventionBuilder AllowAnonymousIf(this IEndpointConventionBuilder builder, bool allowAnonymous, params string[] authorizationPolicies)
+    internal static IEndpointConventionBuilder AllowAnonymousIf(this IEndpointConventionBuilder builder, bool allowAnonymous, params string?[] authorizationPolicies)
     {
-        var validAuthorizationPolicies = authorizationPolicies
-            .Where(policy => !string.IsNullOrEmpty(policy))
-            .ToArray();
-
         if (allowAnonymous) return builder.AllowAnonymous();
+        
+        var validAuthorizationPolicies = authorizationPolicies
+            .Where(policy => !string.IsNullOrEmpty(policy))!
+            .ToArray<string>();
         
         if (!validAuthorizationPolicies.Any())
         {
