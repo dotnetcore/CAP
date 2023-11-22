@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);AmazonSQS;SQS</PackageTags>
   </PropertyGroup>
@@ -12,12 +12,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.101.82" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.7.103.4" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.300.7" />
+    <PackageReference Include="AWSSDK.SQS" Version="3.7.300.7" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Microsoft.SourceLink.GitHub" Version="8.0.0" />
   </ItemGroup>
  
 </Project>

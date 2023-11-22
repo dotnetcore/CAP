@@ -1,5 +1,5 @@
-﻿// Copyright (c) .NET Core Community. All rights reserved.
-// Licensed under the MIT License. See License.txt in the project root for license information.
+﻿// Copyright (c) .NET Core Community. All rights reserved. Licensed under the MIT License. See
+// License.txt in the project root for license information.
 
 using System;
 using System.Collections.Concurrent;
@@ -14,9 +14,9 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.Internal;
 
-/// <inheritdoc />
+/// <inheritdoc/>
 /// <summary>
-/// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector" /> implementation.
+/// A default <see cref="T:DotNetCore.CAP.Abstractions.IConsumerServiceSelector"/> implementation.
 /// </summary>
 public class ConsumerServiceSelector : IConsumerServiceSelector
 {
@@ -30,7 +30,7 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
     private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
-    /// Creates a new <see cref="ConsumerServiceSelector" />.
+    /// Creates a new <see cref="ConsumerServiceSelector"/>.
     /// </summary>
     public ConsumerServiceSelector(IServiceProvider serviceProvider)
     {
@@ -79,15 +79,31 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
 
         var serviceCollection = scopeProvider.GetRequiredService<IServiceCollection>();
 
-        foreach (var service in serviceCollection
-                     .Where(o => o.ImplementationType != null || o.ImplementationFactory != null))
+        var implementationList = from svr in serviceCollection
+                                 let isKeyedService = svr.ServiceKey != null
+                                 where (!isKeyedService && (svr.ImplementationType != null || svr.ImplementationFactory != null)) ||
+                                       (isKeyedService && (svr.KeyedImplementationType != null || svr.KeyedImplementationFactory != null))
+                                 select svr;
+
+        foreach (var service in implementationList)
         {
-            var detectType = service.ImplementationType ?? service.ServiceType;
+            var implementationType = service.ServiceKey == null ? service.ImplementationType : service.KeyedImplementationType;
+
+            var detectType = implementationType ?? service.ServiceType;
             if (!capSubscribeTypeInfo.IsAssignableFrom(detectType)) continue;
 
-            var actualType = service.ImplementationType;
-            if (actualType == null && service.ImplementationFactory != null)
-                actualType = scopeProvider.GetRequiredService(service.ServiceType).GetType();
+            var actualType = implementationType;
+            if (actualType == null)
+            {
+                if (service.ServiceKey == null)
+                {
+                    actualType = scopeProvider.GetRequiredService(service.ServiceType).GetType();
+                }
+                else
+                {
+                    actualType = scopeProvider.GetRequiredKeyedService(service.ServiceType, service.ServiceKey).GetType();
+                }
+            }
 
             if (actualType == null) throw new NullReferenceException(nameof(service.ServiceType));
 
