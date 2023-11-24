@@ -126,9 +126,9 @@ public static class CapTransactionExtensions
         if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
 
         var dbTransaction = dbConnection.BeginTransaction();
-        publisher.Transaction.Value =
+        publisher.Transaction =
             ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
-        return publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
+        return publisher.Transaction.Begin(dbTransaction, autoCommit);
     }
 
     /// <summary>
@@ -142,9 +142,9 @@ public static class CapTransactionExtensions
         ICapPublisher publisher, bool autoCommit = false)
     {
         var trans = database.BeginTransaction();
-        publisher.Transaction.Value =
+        publisher.Transaction =
             ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+        var capTrans = publisher.Transaction.Begin(trans, autoCommit);
         return new CapEFDbTransaction(capTrans);
     }
 
@@ -160,9 +160,9 @@ public static class CapTransactionExtensions
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
     {
         var trans = database.BeginTransaction(isolationLevel);
-        publisher.Transaction.Value =
+        publisher.Transaction =
             ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+        var capTrans = publisher.Transaction.Begin(trans, autoCommit);
         return new CapEFDbTransaction(capTrans);
     }
 }

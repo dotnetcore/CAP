@@ -125,8 +125,8 @@ public static class CapTransactionExtensions
         ICapPublisher publisher, bool autoCommit = false)
     {
         var trans = database.BeginTransaction();
-        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+        publisher.Transaction = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
+        var capTrans = publisher.Transaction.Begin(trans, autoCommit);
         return new CapEFDbTransaction(capTrans);
     }
 
@@ -142,8 +142,8 @@ public static class CapTransactionExtensions
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
     {
         var trans = database.BeginTransaction(isolationLevel);
-        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
+        publisher.Transaction = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
+        var capTrans = publisher.Transaction.Begin(trans, autoCommit);
         return new CapEFDbTransaction(capTrans);
     }
 
@@ -160,7 +160,24 @@ public static class CapTransactionExtensions
         if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
 
         var dbTransaction = dbConnection.BeginTransaction();
-        publisher.Transaction.Value = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
-        return publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
+        publisher.Transaction = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
+        return publisher.Transaction.Begin(dbTransaction, autoCommit);
+    }
+
+    /// <summary>
+    /// Start the CAP transaction
+    /// </summary>
+    /// <param name="dbConnection">The <see cref="IDbConnection" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+    /// <returns>The <see cref="ICapTransaction" /> object.</returns>
+    public static async Task<ICapTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
+        ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
+    {
+        if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
+
+        var dbTransaction = await ((DbConnection)dbConnection).BeginTransactionAsync();
+        publisher.Transaction = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
+        return publisher.Transaction.Begin(dbTransaction, autoCommit);
     }
 }
