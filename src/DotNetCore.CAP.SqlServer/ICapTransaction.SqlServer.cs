@@ -166,9 +166,9 @@ public static class CapTransactionExtensions
     {
         if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
         var dbTransaction = dbConnection.BeginTransaction();
-        publisher.Transaction =
+        publisher.Transaction.Value =
             ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
-        var capTransaction = publisher.Transaction.Begin(dbTransaction, autoCommit);
+        var capTransaction = publisher.Transaction.Value.Begin(dbTransaction, autoCommit);
         return (IDbTransaction)capTransaction.DbTransaction!;
     }
 
@@ -183,9 +183,9 @@ public static class CapTransactionExtensions
         ICapPublisher publisher, bool autoCommit = false)
     {
         var trans = database.BeginTransaction();
-        publisher.Transaction =
+        publisher.Transaction.Value =
             ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Begin(trans, autoCommit);
+        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
         return new CapEFDbTransaction(capTrans);
     }
 
@@ -201,9 +201,9 @@ public static class CapTransactionExtensions
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false)
     {
         var trans = database.BeginTransaction(isolationLevel);
-        publisher.Transaction =
+        publisher.Transaction.Value =
             ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Begin(trans, autoCommit);
+        var capTrans = publisher.Transaction.Value.Begin(trans, autoCommit);
         return new CapEFDbTransaction(capTrans);
     }
 }

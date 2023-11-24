@@ -18,7 +18,7 @@ public interface ICapPublisher
     /// <summary>
     /// CAP transaction context object
     /// </summary>
-    ICapTransaction? Transaction { get; set; }
+    AsyncLocal<ICapTransaction> Transaction { get; }
 
     /// <summary>
     /// Asynchronous publish an object message.

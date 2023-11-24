@@ -11,11 +11,6 @@ using DotNetCore.CAP.Transport;
 
 namespace DotNetCore.CAP;
 
-public sealed class CapTransactionHolder
-{
-    public ICapTransaction? Transaction;
-}
-
 public abstract class CapTransactionBase : ICapTransaction
 {
     private readonly ConcurrentQueue<MediumMessage> _bufferList;

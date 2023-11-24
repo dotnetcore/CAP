@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP.Internal;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Xunit;
@@ -54,7 +53,7 @@ namespace DotNetCore.CAP.Test
         {
             public IServiceProvider ServiceProvider { get; }
 
-            public ICapTransaction? Transaction { get; set; }
+            public AsyncLocal<ICapTransaction> Transaction { get; }
 
             public Task PublishAsync<T>(string name, T contentObj, string callbackName = null,
                 CancellationToken cancellationToken = default(CancellationToken))
