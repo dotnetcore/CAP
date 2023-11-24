@@ -90,6 +90,7 @@ internal class InMemoryStorage : IDataStorage
         {
             DbId = message.DbId,
             Name = name,
+            Origin = message.Origin,
             Content = message.Content,
             Retries = message.Retries,
             Added = message.Added,
