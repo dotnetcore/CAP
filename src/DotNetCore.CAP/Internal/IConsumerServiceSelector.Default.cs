@@ -79,8 +79,13 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
 
         var serviceCollection = scopeProvider.GetRequiredService<IServiceCollection>();
 
-        foreach (var service in serviceCollection
-                     .Where(o => o.ImplementationType != null || o.ImplementationFactory != null))
+
+        IEnumerable<ServiceDescriptor>? services = serviceCollection;
+#if NET8_0_OR_GREATER
+        services= services.Where(o => o.IsKeyedService == false);
+#endif
+        services = services.Where(o => o.ImplementationType != null || o.ImplementationFactory != null);
+        foreach (var service in services)
         {
             var detectType = service.ImplementationType ?? service.ServiceType;
             if (!capSubscribeTypeInfo.IsAssignableFrom(detectType)) continue;
