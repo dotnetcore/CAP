@@ -54,7 +54,7 @@ namespace DotNetCore.CAP.Test
         {
             public IServiceProvider ServiceProvider { get; }
 
-            public ICapTransaction? Transaction { get; set; }
+            public ICapTransaction Transaction { get; set; }
 
             public Task PublishAsync<T>(string name, T contentObj, string callbackName = null,
                 CancellationToken cancellationToken = default(CancellationToken))
