@@ -33,9 +33,9 @@ internal class PulsarTransport : ITransport
             var headerDic = new Dictionary<string, string?>(message.Headers);
             headerDic.TryGetValue(PulsarHeaders.PulsarKey, out var key);
             var pulsarMessage = producer.NewMessage(message.Body.ToArray()!, key, headerDic);
-            var result = await producer.SendAsync(pulsarMessage);
-
-            if (result.Type != null)
+            var messageId = await producer.SendAsync(pulsarMessage);
+            
+            if (messageId != null)
             {
                 _logger.LogDebug($"pulsar topic message [{message.GetName()}] has been published.");
 

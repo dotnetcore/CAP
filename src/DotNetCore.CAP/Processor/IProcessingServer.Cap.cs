@@ -75,6 +75,7 @@ public class CapProcessingServer : IProcessingServer
         finally
         {
             _logger.LogInformation("### CAP shutdown!");
+            GC.SuppressFinalize(this);
         }
     }
 

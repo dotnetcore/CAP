@@ -12,7 +12,7 @@
 	<PackageIcon>logo.png</PackageIcon>
     <PackageProjectUrl>https://github.com/dotnetcore/CAP</PackageProjectUrl>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageTags>CAP;EventBus;MicroService</PackageTags>
+    <PackageTags>CAP;EventBus;Outbox Patterns;Distributed transaction</PackageTags>
     <Description>Distributed transaction solution in micro-service base on eventually consistency, also an eventbus with Outbox pattern.</Description>
   </PropertyGroup>
 
