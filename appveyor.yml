@@ -4,10 +4,14 @@ environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
   Cap_MySql_ConnectionString: Server=localhost;Database=cap_test;Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=none
-services:
-  - mysql
+# services:
+#   - mysql
+install:
+  - choco install dotnet-sdk --version 8.0.100
+init:
+  - ps: Start-Service MySQL80
 before_build:
-  - ps: dotnet tool install --global FlubuCore.GlobalTool --version 6.3.2
+  - ps: dotnet tool install --global FlubuCore.Tool --version 8.0.0
 build_script:
   - ps: flubu
 test: off
