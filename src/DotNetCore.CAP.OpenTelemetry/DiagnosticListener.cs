@@ -44,11 +44,8 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                 var eventData = (CapEventDataPubStore)evt.Value!;
                 ActivityContext parentContext = default;
 
-                if (Activity.Current != null &&
-                    Activity.Current.Source.Name == "OpenTelemetry.Instrumentation.AspNetCore")
+                if (Activity.Current != null)
                     _contexts.TryAdd(eventData.Message.GetId(), parentContext = Activity.Current.Context);
-                else
-                    Activity.Current = null;
 
                 var activity = ActivitySource.StartActivity("Event Persistence: " + eventData.Operation,
                     ActivityKind.Internal, parentContext);
@@ -108,7 +105,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
                     activity.SetTag("messaging.destination", eventData.Operation);
                     activity.SetTag("messaging.destination_kind", "topic");
-                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint!.Replace("-1", "5672"));
+                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint.Replace("-1", "5672"));
                     activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
                     activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
 
@@ -165,7 +162,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
                     activity.SetTag("messaging.destination", eventData.Operation);
                     activity.SetTag("messaging.destination_kind", "topic");
-                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint!.Replace("-1", "5672"));
+                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint.Replace("-1", "5672"));
                     activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
                     activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
 

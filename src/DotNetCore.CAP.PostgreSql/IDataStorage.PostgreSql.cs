@@ -231,11 +231,11 @@ public class PostgreSqlDataStorage : IDataStorage
             $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\" FROM {_pubName} WHERE \"Version\"=@Version " +
             $"AND ((\"ExpiresAt\"< @TwoMinutesLater AND \"StatusName\" = '{StatusName.Delayed}') OR (\"ExpiresAt\"< @OneMinutesAgo AND \"StatusName\" = '{StatusName.Queued}')) FOR UPDATE SKIP LOCKED;";
 
-        object[] sqlParams =
+        var sqlParams = new object[]
         {
             new NpgsqlParameter("@Version", _capOptions.Value.Version),
             new NpgsqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
-            new NpgsqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1))
+            new NpgsqlParameter("@OneMinutesAgo", QueuedMessageFetchTime())
         };
 
         await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
@@ -267,6 +267,11 @@ public class PostgreSqlDataStorage : IDataStorage
     public IMonitoringApi GetMonitoringApi()
     {
         return new PostgreSqlMonitoringApi(_options, _initializer, _serializer);
+    }
+
+    protected virtual DateTime QueuedMessageFetchTime()
+    {
+        return DateTime.Now.AddMinutes(-1);
     }
 
     private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state,

@@ -34,7 +34,7 @@ internal class ConsumerRegister : IConsumerRegister
     private IConsumerClientFactory _consumerClientFactory = default!;
     private CancellationTokenSource _cts = new();
     private IDispatcher _dispatcher = default!;
-    private bool _disposed;
+    private int _disposed;
     private bool _isHealthy = true;
 
     private MethodMatcherCache _selector = default!;
@@ -67,7 +67,7 @@ internal class ConsumerRegister : IConsumerRegister
 
         Execute();
 
-        _disposed = false;
+        _disposed = 0;
 
         return Task.CompletedTask;
     }
@@ -87,9 +87,8 @@ internal class ConsumerRegister : IConsumerRegister
 
     public void Dispose()
     {
-        if (_disposed) return;
-
-        _disposed = true;
+        if (Interlocked.CompareExchange(ref _disposed, 1, 0) == 1)
+            return;
 
         try
         {
