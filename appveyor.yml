@@ -7,7 +7,7 @@ environment:
 # services:
 #   - mysql
 install:
-  - choco install dotnet-sdk --version 8.0.100
+  - choco install dotnet-sdk --version 8.0.100 --ignore-dependencies
 init:
   - ps: Start-Service MySQL80
 before_build:
