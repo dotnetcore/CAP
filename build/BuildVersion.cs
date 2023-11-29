@@ -1,14 +1,14 @@
 ﻿namespace BuildScript
 {
-    public class BuildVersion(int major, int minor, int patch, string quality)
+    public class BuildVersion
     {
-        public int Major { get; set; } = major;
+        public int Major { get; init; }
 
-        public int Minor { get; set; } = minor;
+        public int Minor { get; init; }
 
-        public int Patch { get; set; } = patch;
+        public int Patch { get; init; } 
 
-        public string Quality { get; set; } = quality;
+        public string Quality { get; init; }
 
         public string Suffix { get; set; }
 

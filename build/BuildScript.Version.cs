@@ -43,8 +43,14 @@ namespace BuildScript
 
             suffix = string.IsNullOrWhiteSpace(suffix) ? null : suffix;
 
-            var version = new BuildVersion(int.Parse(versionMajor), int.Parse(versionMinor), int.Parse(versionPatch), versionQuality);
-            version.Suffix = suffix;
+            var version = new BuildVersion
+            {
+                Major = int.Parse(versionMajor),
+                Minor = int.Parse(versionMinor),
+                Patch = int.Parse(versionPatch),
+                Quality = versionQuality,
+                Suffix = suffix
+            };
 
             return version;
         }
