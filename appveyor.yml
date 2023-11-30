@@ -6,8 +6,6 @@ environment:
   Cap_MySql_ConnectionString: Server=localhost;Database=cap_test;Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=Required
 # services:
 #   - mysql
-install:
-  - choco install dotnet-sdk
 init:
   - ps: Start-Service MySQL80
 before_build:
