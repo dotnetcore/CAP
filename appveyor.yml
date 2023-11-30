@@ -4,8 +4,8 @@ environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
   Cap_MySql_ConnectionString: Server=localhost;Database=cap_test;Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=Required
- services:
-   - mysql
+services:
+  - mysql
 #init:
 #  - ps: Start-Service MySQL80
 before_build:
