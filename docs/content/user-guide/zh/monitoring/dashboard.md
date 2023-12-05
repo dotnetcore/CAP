@@ -47,67 +47,87 @@ services.AddCap(x =>
 
 此配置项用来配置Dashboard 前端 获取状态接口(/stats)的轮询时间
 
-* UseAuth 
+* AllowAnonymousExplicit
 
-默认值：false
+> Default: true
 
-指定是否开启授权
+显式允许对 CAP 仪表板 API 进行匿名访问，当启用ASP.NET Core 全局授权筛选器请启用 AllowAnonymous。
 
-* DefaultAuthenticationScheme 
+* AuthorizationPolicy
 
-授权默认使用的 Scheme 
+> Default: null.
 
-* UseChallengeOnAuth
+Dashboard 的授权策略。 需设置 `AllowAnonymousExplicit`为 false。
 
-默认值：false
+###  自定义认证
 
-授权是否启用 Challenge
+从版本 8.0.0 开始，CAP 仪表板利用 ASP.NET Core 身份验证机制，允许通过自定义授权策略和 ASP.NET Core 身份验证和授权中间件进行扩展，以授权仪表板访问。 有关 ASP.NET Core 身份验证内部结构的更多详细信息，请查看[官方文档](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-8.0).
 
-* DefaultChallengeScheme 
+您可以在示例项目 `Sample.Dashboard.Auth`中查看示例代码。
 
-Challenge 默认使用的 Scheme
+#### Example: 匿名访问
 
-
-### 自定义认证
- 
-自 5.1.0 开始，CAP Dashboard 授权默认使用 ASP.NET Core 的方式，不再提供自定义授权过滤器。
-
-在 Dashabord 认证时，会从 HttpContext.User?.Identity?.IsAuthenticated 中取值，如果取不到则认证失败，并调用 Challenge Scheme(如进行配置)。
-
-你可以在 Sample.Dashboard.Auth 这个示例项目中查看使用细节。
-
-```C#
-services
-    .AddAuthorization()
-    .AddAuthentication(options =>
+```csharp
+services.AddCap(cap =>
     {
-        options.DefaultScheme =  CookieAuthenticationDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-    })
-    .AddCookie()
-    .AddOpenIdConnect(options =>
-    {
-        options.Authority = "https://demo.duendesoftware.com/";
-        options.ClientId = "interactive.confidential";
-        options.ClientSecret = "secret";
-        options.ResponseType = "code";
-        options.UsePkce = true;
-
-        options.Scope.Clear();
-        options.Scope.Add("openid");
-        options.Scope.Add("profile");
-    })
+        cap.UseDashboard(d =>
+        {
+            d.AllowAnonymousExplicit = true;
+        });
+        cap.UseInMemoryStorage();
+        cap.UseInMemoryMessageQueue();
+    });
 ```
 
-配置
+#### Example: Open Id
 
-```C#
-services.AddCap(cap =>
-{
-    cap.UseDashboard(d =>
+```csharp
+services
+    .AddAuthorization(options =>
+        { 
+            options.AddPolicy(DashboardAuthorizationPolicy, policy => policy
+                .AddAuthenticationSchemes(OpenIdConnectDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+        })
+        .AddAuthentication(opt => opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie()
+        .AddOpenIdConnect(options =>
+        {
+            ...
+        });
+    
+    services.AddCap(cap =>
     {
-        d.UseChallengeOnAuth = true;
-        d.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
+        cap.UseDashboard(d =>
+        {
+            d.AuthorizationPolicy = DashboardAuthorizationPolicy;
+        });
+        cap.UseInMemoryStorage();
+        cap.UseInMemoryMessageQueue();
     });
-}
+```
+
+#### Example: 自定义认证 Scheme
+
+```csharp
+const string MyDashboardAuthenticationPolicy = "MyDashboardAuthenticationPolicy";
+    
+services.AddAuthorization(options =>
+    { 
+        options.AddPolicy(MyDashboardAuthenticationPolicy, policy => policy
+        .AddAuthenticationSchemes(MyDashboardAuthenticationSchemeDefaults.Scheme)
+        .RequireAuthenticatedUser());
+    })
+    .AddAuthentication()
+    .AddScheme<MyDashboardAuthenticationSchemeOptions, MyDashboardAuthenticationHandler>(MyDashboardAuthenticationSchemeDefaults.Scheme,null);
+    
+services.AddCap(cap =>
+    {
+        cap.UseDashboard(d =>
+        {
+            d.AuthorizationPolicy = MyDashboardAuthenticationPolicy;
+        });
+        cap.UseInMemoryStorage();
+        cap.UseInMemoryMessageQueue();
+    });
 ```

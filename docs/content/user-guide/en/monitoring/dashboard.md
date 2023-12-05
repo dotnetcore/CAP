@@ -49,73 +49,73 @@ Authorization policy for the Dashboard. Required if `AllowAnonymousExplicit` is 
 
 ###  Custom Authentication
 
-From version 7.2.3, the CAP Dashboard leverages ASP.NET Core authentication mechanisms allowing extensibility through custom authorization policies and ASP.NET Core authentication and authorization middlewares to authorize Dashboard access. For more details of ASP.NET Core authentication internals, check [the official docs](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-8.0).
+From version 8.0.0, the CAP Dashboard leverages ASP.NET Core authentication mechanisms allowing extensibility through custom authorization policies and ASP.NET Core authentication and authorization middlewares to authorize Dashboard access. For more details of ASP.NET Core authentication internals, check [the official docs](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-8.0).
 
 You can view the examples below in the sample project `Sample.Dashboard.Auth`.
 
 #### Example: Anonymous Access
 
 ```csharp
-    services.AddCap(cap =>
+services.AddCap(cap =>
+    {
+        cap.UseDashboard(d =>
         {
-            cap.UseDashboard(d =>
-            {
-                d.AllowAnonymousExplicit = true;
-            });
-            cap.UseInMemoryStorage();
-            cap.UseInMemoryMessageQueue();
+            d.AllowAnonymousExplicit = true;
         });
+        cap.UseInMemoryStorage();
+        cap.UseInMemoryMessageQueue();
+    });
 ```
 
 #### Example: Open Id
 
 ```csharp
-    services
-        .AddAuthorization(options =>
-            { 
-                options.AddPolicy(DashboardAuthorizationPolicy, policy => policy
-                    .AddAuthenticationSchemes(OpenIdConnectDefaults.AuthenticationScheme)
-                    .RequireAuthenticatedUser());
-            })
-            .AddAuthentication(opt => opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddCookie()
-            .AddOpenIdConnect(options =>
-            {
-                ...
-            });
-        
-        services.AddCap(cap =>
+services
+    .AddAuthorization(options =>
+        { 
+            options.AddPolicy(DashboardAuthorizationPolicy, policy => policy
+                .AddAuthenticationSchemes(OpenIdConnectDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+        })
+        .AddAuthentication(opt => opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie()
+        .AddOpenIdConnect(options =>
         {
-            cap.UseDashboard(d =>
-            {
-                d.AuthorizationPolicy = DashboardAuthorizationPolicy;
-            });
-            cap.UseInMemoryStorage();
-            cap.UseInMemoryMessageQueue();
+            ...
         });
+    
+    services.AddCap(cap =>
+    {
+        cap.UseDashboard(d =>
+        {
+            d.AuthorizationPolicy = DashboardAuthorizationPolicy;
+        });
+        cap.UseInMemoryStorage();
+        cap.UseInMemoryMessageQueue();
+    });
 ```
 
 #### Example: Custom Authentication Scheme
 
 ```csharp
-    const string MyDashboardAuthenticationPolicy = "MyDashboardAuthenticationPolicy";
-        
-    services.AddAuthorization(options =>
-        { 
-            options.AddPolicy(MyDashboardAuthenticationPolicy, policy => policy
-            .AddAuthenticationSchemes(MyDashboardAuthenticationSchemeDefaults.Scheme)
-            .RequireAuthenticatedUser());
-        })
-        .AddAuthentication()
-        .AddScheme<MyDashboardAuthenticationSchemeOptions, MyDashboardAuthenticationHandler>(MyDashboardAuthenticationSchemeDefaults.Scheme,null);
-        
-    services.AddCap(cap =>
+const string MyDashboardAuthenticationPolicy = "MyDashboardAuthenticationPolicy";
+    
+services.AddAuthorization(options =>
+    { 
+        options.AddPolicy(MyDashboardAuthenticationPolicy, policy => policy
+        .AddAuthenticationSchemes(MyDashboardAuthenticationSchemeDefaults.Scheme)
+        .RequireAuthenticatedUser());
+    })
+    .AddAuthentication()
+    .AddScheme<MyDashboardAuthenticationSchemeOptions, MyDashboardAuthenticationHandler>(MyDashboardAuthenticationSchemeDefaults.Scheme,null);
+    
+services.AddCap(cap =>
+    {
+        cap.UseDashboard(d =>
         {
-            cap.UseDashboard(d =>
-            {
-                d.AuthorizationPolicy = MyDashboardAuthenticationPolicy;
-            });
-            cap.UseInMemoryStorage();
-            cap.UseInMemoryMessageQueue();
+            d.AuthorizationPolicy = MyDashboardAuthenticationPolicy;
         });
+        cap.UseInMemoryStorage();
+        cap.UseInMemoryMessageQueue();
+    });
 ```
