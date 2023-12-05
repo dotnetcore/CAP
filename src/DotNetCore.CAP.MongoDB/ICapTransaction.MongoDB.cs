@@ -83,9 +83,8 @@ public static class CapTransactionExtensions
         ICapPublisher publisher, bool autoCommit = false)
     {
         var clientSessionHandle = client.StartSession();
-        publisher.Transaction.Value =
-            ActivatorUtilities.CreateInstance<MongoDBCapTransaction>(publisher.ServiceProvider);
-        var capTrans = publisher.Transaction.Value.Begin(clientSessionHandle, autoCommit);
+        publisher.Transaction = ActivatorUtilities.CreateInstance<MongoDBCapTransaction>(publisher.ServiceProvider);
+        var capTrans = publisher.Transaction.Begin(clientSessionHandle, autoCommit);
         return new CapMongoDbClientSessionHandle(capTrans);
     }
 }

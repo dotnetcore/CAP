@@ -94,7 +94,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                 var eventData = (CapEventDataPubSend)evt.Value!;
                 var parentContext = Propagator.Extract(default, eventData.TransportMessage, (msg, key) =>
                 {
-                    return msg.Headers.TryGetValue(key, out var value) ? (new[] { value }) : Enumerable.Empty<string>();
+                    return msg.Headers.TryGetValue(key, out var value) ? (new[] { value }!) : Enumerable.Empty<string>();
                 });
                 _contexts.TryRemove(eventData.TransportMessage.GetId(), out var context);
                 var activity = ActivitySource.StartActivity(
