@@ -9,7 +9,7 @@ services:
 init:
   - ps: Start-Service MySQL80
 before_build:
-  - ps: dotnet tool install --global FlubuCore.GlobalTool --version 6.3.2
+  - ps: dotnet tool install --global FlubuCore.Tool --version 8.0.0
 build_script:
   - ps: flubu
 test: off

@@ -15,20 +15,20 @@ namespace BuildScript
             XmlDocument doc = new XmlDocument();
             doc.LoadXml(content);
 
-            var versionMajor = doc.DocumentElement.SelectSingleNode("/Project/PropertyGroup/VersionMajor").InnerText;
-            var versionMinor = doc.DocumentElement.SelectSingleNode("/Project/PropertyGroup/VersionMinor").InnerText;
-            var versionPatch = doc.DocumentElement.SelectSingleNode("/Project/PropertyGroup/VersionPatch").InnerText;
-            var versionQuality = doc.DocumentElement.SelectSingleNode("/Project/PropertyGroup/VersionQuality").InnerText;
+            var versionMajor = doc.DocumentElement!.SelectSingleNode("/Project/PropertyGroup/VersionMajor")!.InnerText;
+            var versionMinor = doc.DocumentElement.SelectSingleNode("/Project/PropertyGroup/VersionMinor")!.InnerText;
+            var versionPatch = doc.DocumentElement.SelectSingleNode("/Project/PropertyGroup/VersionPatch")!.InnerText;
+            var versionQuality = doc.DocumentElement.SelectSingleNode("/Project/PropertyGroup/VersionQuality")!.InnerText;
             versionQuality = string.IsNullOrWhiteSpace(versionQuality) ? null : versionQuality;
 
             var suffix = versionQuality;
 
-            bool isCi = false;
-            bool isTagged = false;
+            var isCi = false;
+            var isTagged = false;
             if (!context.BuildServers().IsLocalBuild)
             {
                 isCi = true;
-                bool isTagAppveyor = context.BuildServers().AppVeyor().IsTag;
+                var isTagAppveyor = context.BuildServers().AppVeyor().IsTag;
                 if (context.BuildServers().RunningOn == BuildServerType.AppVeyor && isTagAppveyor ||
                     context.BuildServers().RunningOn == BuildServerType.TravisCI && string.IsNullOrWhiteSpace(context.BuildServers().Travis().TagName))
                 {
@@ -43,8 +43,14 @@ namespace BuildScript
 
             suffix = string.IsNullOrWhiteSpace(suffix) ? null : suffix;
 
-            var version = new BuildVersion(int.Parse(versionMajor), int.Parse(versionMinor), int.Parse(versionPatch), versionQuality);
-            version.Suffix = suffix;
+            var version = new BuildVersion
+            {
+                Major = int.Parse(versionMajor),
+                Minor = int.Parse(versionMinor),
+                Patch = int.Parse(versionPatch),
+                Quality = versionQuality,
+                Suffix = suffix
+            };
 
             return version;
         }

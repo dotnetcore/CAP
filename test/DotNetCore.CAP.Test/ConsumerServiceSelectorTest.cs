@@ -145,7 +145,7 @@ namespace DotNetCore.CAP.Test
             var candidates = selector.SelectCandidates();
 
             var bestCandidate = selector.SelectBestCandidate(topic, candidates);
-            Assert.NotEqual(0, candidates.Count);
+            Assert.NotEmpty( candidates);
             Assert.NotNull(bestCandidate);
             Assert.Equal(bestCandidate.Parameters.Count, parameterCount);
             Assert.Equal(fromCapCount, bestCandidate.Parameters.Count(x => x.IsFromCap));

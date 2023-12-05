@@ -16,7 +16,7 @@ namespace Sample.Dashboard.Auth
     public class MyDashboardAuthenticationHandler : AuthenticationHandler<MyDashboardAuthenticationSchemeOptions>
     {
         public MyDashboardAuthenticationHandler(IOptionsMonitor<MyDashboardAuthenticationSchemeOptions> options,
-            ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock) : base(options, logger, encoder, clock)
+            ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
         {
             options.CurrentValue.ForwardChallenge = "";
         }
@@ -32,8 +32,7 @@ namespace Sample.Dashboard.Auth
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            Response.Headers["WWW-Authenticate"] = "MyDashboardScheme";
-
+            Response.Headers.WWWAuthenticate = "MyDashboardScheme";
             return base.HandleChallengeAsync(properties);
         }
 

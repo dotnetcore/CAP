@@ -79,8 +79,30 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
 
         var serviceCollection = scopeProvider.GetRequiredService<IServiceCollection>();
 
-        foreach (var service in serviceCollection
-                     .Where(o => o.ImplementationType != null || o.ImplementationFactory != null))
+        IEnumerable<ServiceDescriptor>? services = serviceCollection;
+
+#if NET8_0_OR_GREATER
+        var keyedSvc = serviceCollection.Where(o => o.IsKeyedService == true && (o.KeyedImplementationType != null || o.KeyedImplementationFactory != null));
+
+        foreach (var service in keyedSvc)
+        {
+            var detectType = service.KeyedImplementationType ?? service.ServiceType;
+            if (!capSubscribeTypeInfo.IsAssignableFrom(detectType)) continue;
+
+            var actualType = service.KeyedImplementationType;
+            if (actualType == null && service.KeyedImplementationFactory != null)
+                actualType = scopeProvider.GetRequiredKeyedService(service.ServiceType, service.ServiceKey).GetType();
+
+            if (actualType == null) throw new NullReferenceException(nameof(service.ServiceType));
+
+            executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(), service.ServiceType.GetTypeInfo()));
+        }
+
+        services = services.Where(x => x.IsKeyedService == false);
+#endif
+
+        services = services.Where(o => o.ImplementationType != null || o.ImplementationFactory != null);
+        foreach (var service in services)
         {
             var detectType = service.ImplementationType ?? service.ServiceType;
             if (!capSubscribeTypeInfo.IsAssignableFrom(detectType)) continue;
@@ -91,8 +113,7 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
 
             if (actualType == null) throw new NullReferenceException(nameof(service.ServiceType));
 
-            executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(),
-                service.ServiceType.GetTypeInfo()));
+            executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(), service.ServiceType.GetTypeInfo()));
         }
 
         return executorDescriptorList;

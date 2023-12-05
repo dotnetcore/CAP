@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
@@ -20,7 +21,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         }
 
         [Route("~/control/start")]
-        public async Task<IActionResult> Start([FromServices]IBootstrapper bootstrapper)
+        public async Task<IActionResult> Start([FromServices] IBootstrapper bootstrapper)
         {
             await bootstrapper.BootstrapAsync();
             return Ok();
@@ -37,6 +38,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         public async Task<IActionResult> WithoutTransaction()
         {
             await _capBus.PublishAsync("sample.rabbitmq.test", DateTime.Now);
+            await _capBus.PublishAsync("sample.rabbitmq.test2", DateTime.Now);
 
             return Ok();
         }
@@ -88,7 +90,16 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [CapSubscribe("sample.rabbitmq.test")]
         public void Subscriber(string content)
         {
-            Console.WriteLine($"Consume time: {DateTime.Now} \r\n   --> " +content);
+            Thread.Sleep(2000);
+            Console.WriteLine($"Consume time: {DateTime.Now} \r\n   --> " + content);
         }
+
+        //[NonAction]
+        //[CapSubscribe("sample.rabbitmq.test2", Group = "test2")]
+        //public void Subscriber2(DateTime content)
+        //{
+        //    Thread.Sleep(2000);
+        //    Console.WriteLine($"Group2 Consume time: {DateTime.Now} \r\n   --> " + content);
+        //}
     }
 }
