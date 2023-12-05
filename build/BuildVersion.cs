@@ -2,21 +2,13 @@
 {
     public class BuildVersion
     {
-        public BuildVersion(int major, int minor, int patch, string quality)
-        {
-            Major = major;
-            Minor = minor;
-            Patch = patch;
-            Quality = quality;
-        }
+        public int Major { get; init; }
 
-        public int Major { get; set; }
+        public int Minor { get; init; }
 
-        public int Minor { get; set; }
+        public int Patch { get; init; } 
 
-        public int Patch { get; set; }
-
-        public string Quality { get; set; }
+        public string Quality { get; init; }
 
         public string Suffix { get; set; }
 

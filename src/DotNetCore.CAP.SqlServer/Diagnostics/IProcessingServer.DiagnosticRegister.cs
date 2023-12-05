@@ -1,6 +1,7 @@
 // Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
@@ -19,6 +20,7 @@ public class DiagnosticRegister : IProcessingServer
 
     public void Dispose()
     {
+        GC.SuppressFinalize(this);
     }
 
     public Task Start(CancellationToken stoppingToken)

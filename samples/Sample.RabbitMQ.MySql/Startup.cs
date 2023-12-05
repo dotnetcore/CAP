@@ -16,7 +16,9 @@ namespace Sample.RabbitMQ.MySql
                 x.UseEntityFramework<AppDbContext>();
                 x.UseRabbitMQ("localhost");
                 x.UseDashboard();
-                x.FailedRetryCount = 5;
+                //x.EnableConsumerPrefetch = true;
+                x.UseDispatchingPerGroup = true;
+                x.EnableConsumerPrefetch = true;
                 x.FailedThresholdCallback = failed =>
                 {
                     var logger = failed.ServiceProvider.GetService<ILogger<Startup>>();
