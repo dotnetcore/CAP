@@ -27,8 +27,6 @@ internal class CapPublisher : ICapPublisher
     private readonly IDataStorage _storage;
     private readonly IBootstrapper _bootstrapper;
 
-    private readonly AsyncLocal<CapTransactionHolder> _asyncLocal;
-
     public CapPublisher(IServiceProvider service)
     {
         ServiceProvider = service;
@@ -37,21 +35,12 @@ internal class CapPublisher : ICapPublisher
         _storage = service.GetRequiredService<IDataStorage>();
         _capOptions = service.GetRequiredService<IOptions<CapOptions>>().Value;
         _snowflakeId = service.GetRequiredService<ISnowflakeId>();
-        _asyncLocal = new AsyncLocal<CapTransactionHolder>();
-        Transaction = null; //This line use for initialize CapTransactionHolder, don't delete!!;
+        Transaction = new AsyncLocal<ICapTransaction>();
     }
 
     public IServiceProvider ServiceProvider { get; }
 
-    public ICapTransaction? Transaction {
-
-        get => _asyncLocal.Value?.Transaction;
-        set
-        {
-            _asyncLocal.Value ??= new CapTransactionHolder();
-            _asyncLocal.Value.Transaction = value;
-        }
-    }
+    public AsyncLocal<ICapTransaction> Transaction { get; }
 
     public async Task PublishAsync<T>(string name, T? value, IDictionary<string, string?> headers,
         CancellationToken cancellationToken = default)
@@ -157,7 +146,7 @@ internal class CapPublisher : ICapPublisher
         {
             tracingTimestamp = TracingBefore(message);
 
-            if (Transaction == null)
+            if (Transaction.Value?.DbTransaction == null)
             {
                 var mediumMessage = await _storage.StoreMessageAsync(name, message).ConfigureAwait(false);
 
@@ -174,7 +163,7 @@ internal class CapPublisher : ICapPublisher
             }
             else
             {
-                var transaction = (CapTransactionBase)Transaction;
+                var transaction = (CapTransactionBase)Transaction.Value;
 
                 var mediumMessage = await _storage.StoreMessageAsync(name, message, transaction.DbTransaction)
                     .ConfigureAwait(false);
