@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -23,9 +22,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
     private const string ProducerOperateNameSuffix = "/Publisher";
     private const string ConsumerOperateNameSuffix = "/Subscriber";
     private static readonly ActivitySource ActivitySource = new(SourceName, "1.0.0");
-    private static readonly TextMapPropagator Propagator = new TraceContextPropagator();
-
-    private readonly ConcurrentDictionary<string, ActivityContext> _contexts = new();
+    private static readonly TextMapPropagator Propagator = Propagators.DefaultTextMapPropagator;
 
     public void OnCompleted()
     {
@@ -42,10 +39,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
             case CapEvents.BeforePublishMessageStore:
             {
                 var eventData = (CapEventDataPubStore)evt.Value!;
-                ActivityContext parentContext = default;
-
-                if (Activity.Current != null)
-                    _contexts.TryAdd(eventData.Message.GetId(), parentContext = Activity.Current.Context);
+                var parentContext = Activity.Current?.Context ?? default;
 
                 var activity = ActivitySource.StartActivity("Event Persistence: " + eventData.Operation,
                     ActivityKind.Internal, parentContext);
@@ -55,9 +49,8 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     activity.AddEvent(new ActivityEvent("CAP message persistence start...",
                         DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
 
-                    if (parentContext != default)
+                    if (parentContext != default && Activity.Current != null)
                     {
-                        _contexts[eventData.Message.GetId()] = Activity.Current!.Context;
                         Propagator.Inject(new PropagationContext(Activity.Current.Context, Baggage.Current),
                             eventData.Message,
                             (msg, key, value) => { msg.Headers[key] = value; });
@@ -94,9 +87,14 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                 var eventData = (CapEventDataPubSend)evt.Value!;
                 var parentContext = Propagator.Extract(default, eventData.TransportMessage, (msg, key) =>
                 {
-                    return msg.Headers.TryGetValue(key, out var value) ? (new[] { value }) : Enumerable.Empty<string>();
+                    if (msg.Headers.TryGetValue(key, out var value) && !string.IsNullOrEmpty(value))
+                    {
+                        return new string[] { value };
+                    }
+
+                    return Enumerable.Empty<string>();
                 });
-                _contexts.TryRemove(eventData.TransportMessage.GetId(), out var context);
+
                 var activity = ActivitySource.StartActivity(
                     OperateNamePrefix + eventData.Operation + ProducerOperateNameSuffix, ActivityKind.Producer,
                     parentContext.ActivityContext);
@@ -105,7 +103,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
                     activity.SetTag("messaging.destination", eventData.Operation);
                     activity.SetTag("messaging.destination_kind", "topic");
-                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint.Replace("-1", "5672"));
+                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint?.Replace("-1", "5672"));
                     activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
                     activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
 
@@ -152,6 +150,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     return Enumerable.Empty<string>();
                 });
 
+                Baggage.Current = parentContext.Baggage;
                 var activity = ActivitySource.StartActivity(
                     OperateNamePrefix + eventData.Operation + ConsumerOperateNameSuffix,
                     ActivityKind.Consumer,
@@ -162,15 +161,12 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
                     activity.SetTag("messaging.destination", eventData.Operation);
                     activity.SetTag("messaging.destination_kind", "topic");
-                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint.Replace("-1", "5672"));
+                    activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint?.Replace("-1", "5672"));
                     activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
                     activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
 
                     activity.AddEvent(new ActivityEvent("CAP message persistence start...",
                         DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
-
-                    _contexts[eventData.TransportMessage.GetId() + eventData.TransportMessage.GetGroup()] =
-                        activity.Context;
                 }
             }
                 break;
@@ -201,11 +197,24 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                 break;
             case CapEvents.BeforeSubscriberInvoke:
             {
+                ActivityContext context = default;
                 var eventData = (CapEventDataSubExecute)evt.Value!;
-                _contexts.TryRemove(eventData.Message.GetId() + eventData.Message.GetGroup(), out var context);
+                var propagatedContext = Propagator.Extract(default, eventData.Message, (msg, key) =>
+                {
+                    if (msg.Headers.TryGetValue(key, out var value)) return new[] { value };
+                    return Enumerable.Empty<string>();
+                });
+
+                if (propagatedContext != default)
+                {
+                    context = propagatedContext.ActivityContext;
+                    Baggage.Current = propagatedContext.Baggage;
+                }
+
                 var activity = ActivitySource.StartActivity("Subscriber Invoke: " + eventData.MethodInfo!.Name,
                     ActivityKind.Internal,
                     context);
+
                 if (activity != null)
                 {
                     activity.SetTag("messaging.operation", "process");
