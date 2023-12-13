@@ -60,7 +60,9 @@ internal class SubscribeExecutor : ISubscribeExecutor
 
                 TracingError(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), message.Origin, null, new Exception(error));
 
-                return OperateResult.Failed(new SubscriberNotFoundException(error));
+                var ex = new SubscriberNotFoundException(error);
+                await SetFailedState(message, ex);
+                return OperateResult.Failed(ex);
             }
         }
 
