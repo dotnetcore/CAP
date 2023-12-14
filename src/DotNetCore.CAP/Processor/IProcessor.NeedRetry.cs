@@ -33,7 +33,7 @@ public class MessageNeedToRetryProcessor : IProcessor
         _logger = logger;
         _dispatcher = dispatcher;
         _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
-        _coolDownTime = TimeSpan.FromSeconds(options.Value.RetryCoolDownSeconds);
+        _coolDownTime = TimeSpan.FromSeconds(options.Value.FallbackWindowLookbackSeconds);
         _dataStorage = dataStorage;
         _ttl = _waitingInterval.Add(TimeSpan.FromSeconds(10));
 

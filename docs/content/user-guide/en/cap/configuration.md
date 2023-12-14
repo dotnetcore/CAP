@@ -82,7 +82,7 @@ During the message sending process if message transport fails, CAP will try to s
 During the message sending process if consumption method fails, CAP will try to execute the method again. This configuration option is used to configure the interval between each retry.
 
 !!! WARNING "Retry & Interval"
-    By default if failure occurs on send or consume, retry will start after **4 minutes** (RetryCoolDownSeconds) in order to avoid possible problems caused by setting message state delays.    
+    By default if failure occurs on send or consume, retry will start after **4 minutes** (FallbackWindowLookbackSeconds) in order to avoid possible problems caused by setting message state delays.    
     Failures in the process of sending and consuming messages will be retried 3 times immediately, and will be retried polling after 3 times, at which point the FailedRetryInterval configuration will take effect.
 
 !!! WARNING "Multi-instance concurrent retries"
@@ -113,7 +113,7 @@ Number of consumer threads, when this value is greater than 1, the order of mess
 Maximum number of retries. When this value is reached, retry will stop and the maximum number of retries will be modified by setting this parameter.
 
 
-#### RetryCoolDownSeconds
+#### FallbackWindowLookbackSeconds
 
 > Default: 240
 
@@ -154,4 +154,4 @@ By default, CAP will only read one message from the message queue, then execute 
 If set to true, the consumer will prefetch some messages to the memory queue, and then distribute them to the .NET thread pool for execution.
 
 !!! note "Precautions"
-    Setting it to true may cause some problems. When the subscription method executes too slowly and takes too long, it will cause the retry thread to pick up messages that have not yet been executed. The retry thread picks up messages from 4 minutes (RetryCoolDownSeconds) ago by default , that is to say, if the message backlog of more than 4 minutes (RetryCoolDownSeconds) on the consumer side will be picked up again and executed again
+    Setting it to true may cause some problems. When the subscription method executes too slowly and takes too long, it will cause the retry thread to pick up messages that have not yet been executed. The retry thread picks up messages from 4 minutes (FallbackWindowLookbackSeconds) ago by default , that is to say, if the message backlog of more than 4 minutes (FallbackWindowLookbackSeconds) on the consumer side will be picked up again and executed again
