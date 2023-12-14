@@ -29,6 +29,7 @@ public class CapOptions
         DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name!.ToLower();
         CollectorCleaningInterval = 300;
         UseDispatchingPerGroup = false;
+        FallbackWindowLookbackSeconds = 240;
     }
 
     internal IList<ICapOptionsExtension> Extensions { get; }
@@ -101,6 +102,8 @@ public class CapOptions
     /// Default is false.
     /// </summary>
     public bool UseDispatchingPerGroup { get; set; }
+
+    public int FallbackWindowLookbackSeconds { get; set; }
 
     /// <summary>
     /// The interval of the collector processor deletes expired messages.
