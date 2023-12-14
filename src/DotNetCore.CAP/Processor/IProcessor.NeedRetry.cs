@@ -16,6 +16,7 @@ namespace DotNetCore.CAP.Processor;
 
 public class MessageNeedToRetryProcessor : IProcessor
 {
+    const int minSuggestedValueForFallbackWindowLookbackSeconds = 30;
     private readonly ILogger<MessageNeedToRetryProcessor> _logger;
     private readonly IDispatcher _dispatcher;
     private readonly TimeSpan _waitingInterval;
@@ -38,6 +39,8 @@ public class MessageNeedToRetryProcessor : IProcessor
         _ttl = _waitingInterval.Add(TimeSpan.FromSeconds(10));
 
         _instance = string.Concat(Helper.GetInstanceHostname(), "_", Util.GenerateWorkerId(1023));
+
+        CheckSafeOptionsSet();
     }
 
     public virtual async Task ProcessAsync(ProcessingContext context)
@@ -115,6 +118,14 @@ public class MessageNeedToRetryProcessor : IProcessor
             _logger.LogWarning(1, ex, "Get messages from storage failed. Retrying...");
 
             return Enumerable.Empty<T>();
+        }
+    }
+
+    private void CheckSafeOptionsSet()
+    {
+        if (_coolDownTime < TimeSpan.FromSeconds(minSuggestedValueForFallbackWindowLookbackSeconds))
+        {
+            _logger.LogWarning("The provided FallbackWindowLookbackSeconds of {currentSetFallbackWindowLookbackSeconds} is set to a value lower than {minSuggestedSeconds} seconds. This might cause unwanted unsafe behavior if the consumer takes more than the provided FallbackWindowLookbackSeconds to execute. ", _options.Value.FallbackWindowLookbackSeconds, minSuggestedValueForFallbackWindowLookbackSeconds);
         }
     }
 }
