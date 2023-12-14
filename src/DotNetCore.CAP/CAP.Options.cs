@@ -91,7 +91,7 @@ public class CapOptions
     public int ConsumerThreadCount { get; set; }
 
     /// <summary>
-    /// If true, the message will be pre fetch to memory queue for parallel execute by thread pool.
+    /// If true, the message will be prefetch to memory queue for parallel execute by .net thread pool.
     /// Default is false
     /// </summary>
     public bool EnableConsumerPrefetch { get; set; }
@@ -103,6 +103,10 @@ public class CapOptions
     /// </summary>
     public bool UseDispatchingPerGroup { get; set; }
 
+    /// <summary>
+    /// Configure the retry processor to pick up the backtrack time window for Scheduled or Failed status messages.
+    /// Default is 240 seconds.
+    /// </summary>
     public int FallbackWindowLookbackSeconds { get; set; }
 
     /// <summary>

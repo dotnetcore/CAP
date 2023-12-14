@@ -180,11 +180,11 @@ internal class InMemoryStorage : IDataStorage
         return Task.FromResult(removed);
     }
 
-    public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan coolDownTime)
+    public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
         IEnumerable<MediumMessage> result = PublishedMessages.Values
             .Where(x => x.Retries < _capOptions.Value.FailedRetryCount
-                        && x.Added < DateTime.Now.Subtract(coolDownTime)
+                        && x.Added < DateTime.Now.Subtract(lookbackSeconds)
                         && (x.StatusName == StatusName.Scheduled || x.StatusName == StatusName.Failed))
             .Take(200)
             .Select(x => (MediumMessage)x).ToList();
@@ -197,11 +197,11 @@ internal class InMemoryStorage : IDataStorage
         return Task.FromResult(result);
     }
 
-    public Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan coolDownTime)
+    public Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
         IEnumerable<MediumMessage> result = ReceivedMessages.Values
             .Where(x => x.Retries < _capOptions.Value.FailedRetryCount
-                        && x.Added < DateTime.Now.Subtract(coolDownTime)
+                        && x.Added < DateTime.Now.Subtract(lookbackSeconds)
                         && (x.StatusName == StatusName.Scheduled || x.StatusName == StatusName.Failed))
             .Take(200)
             .Select(x => (MediumMessage)x).ToList();

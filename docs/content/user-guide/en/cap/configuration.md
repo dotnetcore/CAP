@@ -60,7 +60,7 @@ Add unified prefixes for topic/queue name.  https://github.com/dotnetcore/CAP/pu
 
 > Default: v1
 
-This is a new configuration option introduced in the CAP v2.4 version. It is used to specify a version of a message to isolate messages of different versions of the service. It is often used in A/B testing or multi-service version scenarios. Following are application scenarios that needs versioning:
+It is used to specify a version of a message to isolate messages of different versions of the service. It is often used in A/B testing or multi-service version scenarios. Following are application scenarios that needs versioning:
 
 !!! info "Business Iterative and compatible"
     Due to the rapid iteration of services, the data structure of the message is not fixed during each service integration process. Sometimes we add or modify certain data structures to accommodate the newly introduced requirements. If you have a brand new system, there's no problem, but if your system is already deployed to a production environment and serves customers, this will cause new features to be incompatible with the old data structure when they go online, and then these changes can cause serious problems. To work around this issue, you can only clean up message queues and persistent messages before starting the application, which is obviously not acceptable for production environments.
@@ -112,13 +112,11 @@ Number of consumer threads, when this value is greater than 1, the order of mess
 
 Maximum number of retries. When this value is reached, retry will stop and the maximum number of retries will be modified by setting this parameter.
 
-
 #### FallbackWindowLookbackSeconds
 
-> Default: 240
+> Default: 240 sec
 
-Time in seconds to wait before continue retrying. 
-
+Configure the retry processor to pick up the fallback window lookback time for `Scheduled` or `Failed` status messages.
 
 #### FailedThresholdCallback
 

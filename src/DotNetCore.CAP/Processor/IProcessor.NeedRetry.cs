@@ -16,14 +16,14 @@ namespace DotNetCore.CAP.Processor;
 
 public class MessageNeedToRetryProcessor : IProcessor
 {
-    const int minSuggestedValueForFallbackWindowLookbackSeconds = 30;
+    private const int MinSuggestedValueForFallbackWindowLookbackSeconds = 30;
     private readonly ILogger<MessageNeedToRetryProcessor> _logger;
     private readonly IDispatcher _dispatcher;
     private readonly TimeSpan _waitingInterval;
     private readonly IOptions<CapOptions> _options;
     private readonly IDataStorage _dataStorage;
     private readonly TimeSpan _ttl;
-    private readonly TimeSpan _coolDownTime;
+    private readonly TimeSpan _lookbackSeconds;
     private readonly string _instance;
     private Task? _failedRetryConsumeTask;
 
@@ -34,7 +34,7 @@ public class MessageNeedToRetryProcessor : IProcessor
         _logger = logger;
         _dispatcher = dispatcher;
         _waitingInterval = TimeSpan.FromSeconds(options.Value.FailedRetryInterval);
-        _coolDownTime = TimeSpan.FromSeconds(options.Value.FallbackWindowLookbackSeconds);
+        _lookbackSeconds = TimeSpan.FromSeconds(options.Value.FallbackWindowLookbackSeconds);
         _dataStorage = dataStorage;
         _ttl = _waitingInterval.Add(TimeSpan.FromSeconds(10));
 
@@ -74,7 +74,7 @@ public class MessageNeedToRetryProcessor : IProcessor
         if (_options.Value.UseStorageLock && !await connection.AcquireLockAsync($"publish_retry_{_options.Value.Version}", _ttl, _instance, context.CancellationToken))
             return;
 
-        var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry, _coolDownTime).ConfigureAwait(false);
+        var messages = await GetSafelyAsync(connection.GetPublishedMessagesOfNeedRetry, _lookbackSeconds).ConfigureAwait(false);
 
         foreach (var message in messages)
         {
@@ -94,7 +94,7 @@ public class MessageNeedToRetryProcessor : IProcessor
         if (_options.Value.UseStorageLock && !await connection.AcquireLockAsync($"received_retry_{_options.Value.Version}", _ttl, _instance, context.CancellationToken))
             return;
 
-        var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry, _coolDownTime).ConfigureAwait(false);
+        var messages = await GetSafelyAsync(connection.GetReceivedMessagesOfNeedRetry, _lookbackSeconds).ConfigureAwait(false);
 
         foreach (var message in messages)
         {
@@ -107,11 +107,11 @@ public class MessageNeedToRetryProcessor : IProcessor
             await connection.ReleaseLockAsync($"received_retry_{_options.Value.Version}", _instance, context.CancellationToken);
     }
 
-    private async Task<IEnumerable<T>> GetSafelyAsync<T>(Func<TimeSpan, Task<IEnumerable<T>>> getMessagesAsync, TimeSpan coolDownTime)
+    private async Task<IEnumerable<T>> GetSafelyAsync<T>(Func<TimeSpan, Task<IEnumerable<T>>> getMessagesAsync, TimeSpan lookbackSeconds)
     {
         try
         {
-            return await getMessagesAsync(coolDownTime).ConfigureAwait(false);
+            return await getMessagesAsync(lookbackSeconds).ConfigureAwait(false);
         }
         catch (Exception ex)
         {
@@ -123,9 +123,9 @@ public class MessageNeedToRetryProcessor : IProcessor
 
     private void CheckSafeOptionsSet()
     {
-        if (_coolDownTime < TimeSpan.FromSeconds(minSuggestedValueForFallbackWindowLookbackSeconds))
+        if (_lookbackSeconds < TimeSpan.FromSeconds(MinSuggestedValueForFallbackWindowLookbackSeconds))
         {
-            _logger.LogWarning("The provided FallbackWindowLookbackSeconds of {currentSetFallbackWindowLookbackSeconds} is set to a value lower than {minSuggestedSeconds} seconds. This might cause unwanted unsafe behavior if the consumer takes more than the provided FallbackWindowLookbackSeconds to execute. ", _options.Value.FallbackWindowLookbackSeconds, minSuggestedValueForFallbackWindowLookbackSeconds);
+            _logger.LogWarning("The provided FallbackWindowLookbackSeconds of {currentSetFallbackWindowLookbackSeconds} is set to a value lower than {minSuggestedSeconds} seconds. This might cause unwanted unsafe behavior if the consumer takes more than the provided FallbackWindowLookbackSeconds to execute. ", _options.Value.FallbackWindowLookbackSeconds, MinSuggestedValueForFallbackWindowLookbackSeconds);
         }
     }
 }
