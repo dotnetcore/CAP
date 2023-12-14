@@ -45,17 +45,21 @@ public abstract class CapTransactionBase : ICapTransaction
     {
         while (!_bufferList.IsEmpty)
         {
+#pragma warning disable CA2012 // Use ValueTasks correctly
             if (_bufferList.TryDequeue(out var message))
             {
                 var isDelayMessage = message.Origin.Headers.ContainsKey(Headers.DelayTime);
                 if (isDelayMessage)
                 {
+
                     _dispatcher.EnqueueToScheduler(message, DateTime.Parse(message.Origin.Headers[Headers.SentTime]!)).ConfigureAwait(false);
+
                 }
                 else
                 {
                     _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
                 }
+#pragma warning restore CA2012 // Use ValueTasks correctly
             }
         }
     }

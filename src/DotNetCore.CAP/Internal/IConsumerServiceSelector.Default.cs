@@ -196,10 +196,10 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
         return descriptor;
     }
 
-    private ConsumerExecutorDescriptor? MatchUsingName(string key,
+    private static ConsumerExecutorDescriptor? MatchUsingName(string key,
         IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
     {
-        if (key == null) throw new ArgumentNullException(nameof(key));
+        ArgumentNullException.ThrowIfNull(key);
 
         return executeDescriptor.FirstOrDefault(x =>
             x.TopicName.Equals(key, StringComparison.InvariantCultureIgnoreCase));
@@ -208,7 +208,7 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
     private ConsumerExecutorDescriptor? MatchWildcardUsingRegex(string key,
         IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
     {
-        var group = executeDescriptor.First().Attribute.Group;
+        var group = executeDescriptor[0].Attribute.Group;
         if (!_cacheList.TryGetValue(group, out var tmpList))
         {
             tmpList = executeDescriptor.Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>

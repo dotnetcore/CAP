@@ -9,15 +9,8 @@ using Npgsql;
 namespace Sample.Kafka.PostgreSql.Controllers
 {
     [Route("api/[controller]")]
-    public class ValuesController : Controller, ICapSubscribe
+    public class ValuesController(ICapPublisher producer) : Controller, ICapSubscribe
     {
-        private readonly ICapPublisher _capBus;
-
-        public ValuesController(ICapPublisher producer)
-        {
-            _capBus = producer;
-        }
-
         [Route("~/control/start")]
         public async Task<IActionResult> Start([FromServices] IBootstrapper bootstrapper)
         {
@@ -36,7 +29,7 @@ namespace Sample.Kafka.PostgreSql.Controllers
         [Route("~/delay/{delaySeconds:int}")]
         public async Task<IActionResult> Delay(int delaySeconds)
         {
-            await _capBus.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "sample.kafka.postgrsql", DateTime.Now);
+            await producer.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "sample.kafka.postgrsql", DateTime.Now);
 
             return Ok();
         }
@@ -45,7 +38,7 @@ namespace Sample.Kafka.PostgreSql.Controllers
         [Route("~/without/transaction")]
         public async Task<IActionResult> WithoutTransaction()
         {
-            await _capBus.PublishAsync("sample.kafka.postgrsql", DateTime.Now);
+            await producer.PublishAsync("sample.kafka.postgrsql", DateTime.Now);
 
             return Ok();
         }
@@ -55,12 +48,12 @@ namespace Sample.Kafka.PostgreSql.Controllers
         {
             using (var connection = new NpgsqlConnection(""))
             {
-                using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
+                using (var transaction = connection.BeginTransaction(producer, autoCommit: false))
                 {
                     //your business code
                     connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
 
-                    _capBus.Publish("sample.kafka.postgrsql", DateTime.Now);
+                    producer.Publish("sample.kafka.postgrsql", DateTime.Now);
 
                     transaction.Commit();
                 }

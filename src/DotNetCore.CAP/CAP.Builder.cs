@@ -111,7 +111,7 @@ public sealed class CapBuilder
     /// <param name="assemblies">Assemblies to scan subscriber</param>
     public CapBuilder AddSubscriberAssembly(params Assembly[] assemblies)
     {
-        if (assemblies == null) throw new ArgumentNullException(nameof(assemblies));
+        ArgumentNullException.ThrowIfNull(assemblies);
 
         Services.Replace(new ServiceDescriptor(typeof(IConsumerServiceSelector),
             x => new AssemblyConsumerServiceSelector(x, assemblies),
@@ -126,7 +126,7 @@ public sealed class CapBuilder
     /// <param name="handlerAssemblyMarkerTypes"></param>
     public CapBuilder AddSubscriberAssembly(params Type[] handlerAssemblyMarkerTypes)
     {
-        if (handlerAssemblyMarkerTypes == null) throw new ArgumentNullException(nameof(handlerAssemblyMarkerTypes));
+        ArgumentNullException.ThrowIfNull(handlerAssemblyMarkerTypes);
 
         AddSubscriberAssembly(handlerAssemblyMarkerTypes.Select(t => t.GetTypeInfo().Assembly).ToArray());
 

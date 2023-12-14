@@ -45,7 +45,7 @@ public class MessageNeedToRetryProcessor : IProcessor
 
     public virtual async Task ProcessAsync(ProcessingContext context)
     {
-        if (context == null) throw new ArgumentNullException(nameof(context));
+        ArgumentNullException.ThrowIfNull(context);
 
         var storage = context.Provider.GetRequiredService<IDataStorage>();
 

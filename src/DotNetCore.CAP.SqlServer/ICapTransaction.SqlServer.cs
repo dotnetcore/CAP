@@ -131,6 +131,7 @@ public class SqlServerCapTransaction : CapTransactionBase
         }
 
         DbTransaction = null;
+        GC.SuppressFinalize(this);
     }
 }
 

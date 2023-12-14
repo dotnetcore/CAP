@@ -25,7 +25,7 @@ public static class ServiceCollectionExtensions
     /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
     public static CapBuilder AddCap(this IServiceCollection services, Action<CapOptions> setupAction)
     {
-        if (setupAction == null) throw new ArgumentNullException(nameof(setupAction));
+        ArgumentNullException.ThrowIfNull(setupAction);
 
         services.AddSingleton(_ => services);
         services.TryAddSingleton(new CapMarkerService("CAP"));

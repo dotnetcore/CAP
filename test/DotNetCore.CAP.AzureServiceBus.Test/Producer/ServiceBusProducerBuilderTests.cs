@@ -2,7 +2,7 @@ using DotNetCore.CAP.AzureServiceBus.Producer;
 using Shouldly;
 using Xunit;
 
-namespace DotNetCore.CAP.AzureServiceBus.Tests.Producer;
+namespace DotNetCore.CAP.AzureServiceBus.Test.Producer;
 
 public record MessagePublished;
 
@@ -12,7 +12,7 @@ public class ServiceBusProducerBuilderTests
     public void Should_HavePropertiesCorrectlySet_When_Obsolete_BuildMethodIsExecuted()
     {
         var producer = new ServiceBusProducerDescriptorBuilder<MessagePublished>()
-            .WithTopic("my-destination")
+            .UseTopic("my-destination")
             .Build();
 
         producer.ShouldNotBeNull();

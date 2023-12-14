@@ -131,7 +131,7 @@ public class CapOptions
     /// <param name="extension"></param>
     public void RegisterExtension(ICapOptionsExtension extension)
     {
-        if (extension == null) throw new ArgumentNullException(nameof(extension));
+        ArgumentNullException.ThrowIfNull(extension);
 
         Extensions.Add(extension);
     }

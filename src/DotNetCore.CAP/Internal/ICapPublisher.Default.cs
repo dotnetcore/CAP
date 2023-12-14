@@ -185,7 +185,7 @@ internal class CapPublisher : ICapPublisher
 
     #region tracing
 
-    private long? TracingBefore(Message message)
+    private static long? TracingBefore(Message message)
     {
         if (s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.BeforePublishMessageStore))
         {
@@ -204,7 +204,7 @@ internal class CapPublisher : ICapPublisher
         return null;
     }
 
-    private void TracingAfter(long? tracingTimestamp, Message message)
+    private static void TracingAfter(long? tracingTimestamp, Message message)
     {
         if (tracingTimestamp != null &&
             s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.AfterPublishMessageStore))
@@ -222,7 +222,7 @@ internal class CapPublisher : ICapPublisher
         }
     }
 
-    private void TracingError(long? tracingTimestamp, Message message, Exception ex)
+    private static void TracingError(long? tracingTimestamp, Message message, Exception ex)
     {
         if (tracingTimestamp != null &&
             s_diagnosticListener.IsEnabled(CapDiagnosticListenerNames.ErrorPublishMessageStore))

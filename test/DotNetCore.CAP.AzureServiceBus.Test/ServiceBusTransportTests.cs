@@ -9,7 +9,7 @@ using Sample.AzureServiceBus.InMemory.Contracts.DomainEvents;
 using Shouldly;
 using Xunit;
 
-namespace DotNetCore.CAP.AzureServiceBus.Tests;
+namespace DotNetCore.CAP.AzureServiceBus.Test;
 
 public class ServiceBusTransportTests
 {
