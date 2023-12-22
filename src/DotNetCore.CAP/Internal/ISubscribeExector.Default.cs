@@ -191,6 +191,9 @@ internal class SubscribeExecutor : ISubscribeExecutor
                     [Headers.CorrelationSequence] = (message.Origin.GetCorrelationSequence() + 1).ToString()
                 };
 
+                if(message.Origin.Headers.TryGetValue(Headers.TraceParent, out var traceparent))
+                    header[Headers.TraceParent] = traceparent;
+
                 await _provider.GetRequiredService<ICapPublisher>()
                     .PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken).ConfigureAwait(false);
             }

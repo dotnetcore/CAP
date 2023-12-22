@@ -32,4 +32,6 @@ public static class Headers
     public const string DelayTime = "cap-delaytime";
 
     public const string Exception = "cap-exception";
+
+    public const string TraceParent = "traceparent"; 
 }
