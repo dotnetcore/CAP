@@ -13,6 +13,7 @@ public class DashboardOptions
 {
     public DashboardOptions()
     {
+        PathBase = string.Empty;
         PathMatch = "/cap";
         StatsPollingInterval = 2000;
         AllowAnonymousExplicit = true;

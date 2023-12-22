@@ -114,7 +114,7 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
         {
             _ = _sqsClient!.DeleteMessageAsync(_queueUrl, (string)sender!).GetAwaiter().GetResult();
         }
-        catch (InvalidIdFormatException ex)
+        catch (ReceiptHandleIsInvalidException ex)
         {
             InvalidIdFormatLog(ex.Message);
         }
