@@ -38,7 +38,6 @@ internal class CapPublisher : ICapPublisher
         _capOptions = service.GetRequiredService<IOptions<CapOptions>>().Value;
         _snowflakeId = service.GetRequiredService<ISnowflakeId>();
         _asyncLocal = new AsyncLocal<CapTransactionHolder>();
-        Transaction = null; //This line use for initialize CapTransactionHolder, don't delete!!;
     }
 
     public IServiceProvider ServiceProvider { get; }
