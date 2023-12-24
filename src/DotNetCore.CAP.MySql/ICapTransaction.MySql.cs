@@ -151,14 +151,14 @@ public static class CapTransactionExtensions
     /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
     /// <param name="cancellationToken"></param>
     /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
-    public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
+    public static Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
     {
-        var dbTransaction = await database.BeginTransactionAsync(isolationLevel,cancellationToken);
+        var dbTransaction = database.BeginTransactionAsync(isolationLevel, cancellationToken).GetAwaiter().GetResult();
         publisher.Transaction = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
         publisher.Transaction.DbTransaction = dbTransaction;
         publisher.Transaction.AutoCommit = autoCommit;
-        return new CapEFDbTransaction(publisher.Transaction);
+        return Task.FromResult<IDbContextTransaction>(new CapEFDbTransaction(publisher.Transaction));
     }
 
     /// <summary>
@@ -202,7 +202,7 @@ public static class CapTransactionExtensions
     /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
     /// <param name="cancellationToken"></param>
     /// <returns>The <see cref="ICapTransaction" /> object.</returns>
-    public static Task<ICapTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
+    public static ValueTask<ICapTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
         ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
     {
         return BeginTransactionAsync(dbConnection, IsolationLevel.Unspecified, publisher, autoCommit, cancellationToken);
@@ -216,15 +216,15 @@ public static class CapTransactionExtensions
     /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
     /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
     /// <param name="cancellationToken"></param>
-    public static async Task<ICapTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
+    public static ValueTask<ICapTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
     {
-        if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
+        if (dbConnection.State == ConnectionState.Closed) ((DbConnection)dbConnection).OpenAsync(cancellationToken).GetAwaiter().GetResult();
 
-        var dbTransaction = await ((DbConnection)dbConnection).BeginTransactionAsync(isolationLevel, cancellationToken);
+        var dbTransaction = ((DbConnection)dbConnection).BeginTransactionAsync(isolationLevel, cancellationToken);
         publisher.Transaction = ActivatorUtilities.CreateInstance<MySqlCapTransaction>(publisher.ServiceProvider);
         publisher.Transaction.DbTransaction = dbTransaction;
         publisher.Transaction.AutoCommit = autoCommit;
-        return publisher.Transaction;
+        return ValueTask.FromResult(publisher.Transaction);
     }
 }

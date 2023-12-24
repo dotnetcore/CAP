@@ -135,7 +135,7 @@ public static class CapTransactionExtensions
     /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
     /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
     /// <param name="cancellationToken"></param>
-    public static Task<ICapTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
+    public static ValueTask<ICapTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
         ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
     {
         return BeginTransactionAsync(dbConnection, IsolationLevel.Unspecified, publisher, autoCommit, cancellationToken);
@@ -149,17 +149,17 @@ public static class CapTransactionExtensions
     /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
     /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
     /// <param name="cancellationToken"></param>
-    public static async Task<ICapTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
+    public static ValueTask<ICapTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
     {
-        if (dbConnection.State == ConnectionState.Closed) dbConnection.Open();
-        var dbTransaction = await ((DbConnection)dbConnection).BeginTransactionAsync(isolationLevel, cancellationToken);
-
+        if (dbConnection.State == ConnectionState.Closed) ((DbConnection)dbConnection).OpenAsync(cancellationToken).GetAwaiter().GetResult();
+        var dbTransaction = ((DbConnection)dbConnection).BeginTransactionAsync(isolationLevel, cancellationToken).AsTask().GetAwaiter().GetResult();
+ 
         publisher.Transaction = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
         publisher.Transaction.DbTransaction = dbTransaction;
         publisher.Transaction.AutoCommit = autoCommit;
 
-        return publisher.Transaction;
+        return ValueTask.FromResult(publisher.Transaction);
     }
 
     /// <summary>
@@ -216,13 +216,13 @@ public static class CapTransactionExtensions
     /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
     /// <param name="cancellationToken"></param>
     /// <returns>The <see cref="IDbContextTransaction" /> of EF DbContext transaction object.</returns>
-    public static async Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
+    public static Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
     {
-        var trans = await database.BeginTransactionAsync(isolationLevel, cancellationToken);
+        var trans = database.BeginTransactionAsync(isolationLevel, cancellationToken).GetAwaiter().GetResult();
         publisher.Transaction = ActivatorUtilities.CreateInstance<PostgreSqlCapTransaction>(publisher.ServiceProvider);
         publisher.Transaction.DbTransaction = trans;
         publisher.Transaction.AutoCommit = autoCommit;
-        return new CapEFDbTransaction(publisher.Transaction);
+        return Task.FromResult<IDbContextTransaction>(new CapEFDbTransaction(publisher.Transaction));
     }
 }

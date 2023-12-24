@@ -89,4 +89,23 @@ public static class CapTransactionExtensions
         var capTrans = publisher.Transaction.Begin(clientSessionHandle, autoCommit);
         return new CapMongoDbClientSessionHandle(capTrans);
     }
+
+    /// <summary>
+    /// Start the CAP transaction
+    /// </summary>
+    /// <param name="client">The <see cref="IMongoClient" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+    /// <param name="options">The <see cref="ClientSessionOptions"/>.</param>
+    /// <param name="cancellationToken">The <see cref="CancellationToken"/>.</param>
+    /// <returns>The <see cref="IClientSessionHandle" /> of MongoDB transaction session object.</returns>
+    public static Task<IClientSessionHandle> StartTransactionAsync(this IMongoClient client,
+        ICapPublisher publisher, bool autoCommit = false, ClientSessionOptions? options = null, CancellationToken cancellationToken = default)
+    {
+        var clientSessionHandle = client.StartSessionAsync(options, cancellationToken).GetAwaiter().GetResult();
+        publisher.Transaction = ActivatorUtilities.CreateInstance<MongoDBCapTransaction>(publisher.ServiceProvider);
+
+        var capTrans = publisher.Transaction.Begin(clientSessionHandle, autoCommit);
+        return Task.FromResult<IClientSessionHandle>(new CapMongoDbClientSessionHandle(capTrans));
+    }
 }
