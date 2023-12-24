@@ -60,7 +60,7 @@ Add unified prefixes for topic/queue name.  https://github.com/dotnetcore/CAP/pu
 
 > Default: v1
 
-This is a new configuration option introduced in the CAP v2.4 version. It is used to specify a version of a message to isolate messages of different versions of the service. It is often used in A/B testing or multi-service version scenarios. Following are application scenarios that needs versioning:
+It is used to specify a version of a message to isolate messages of different versions of the service. It is often used in A/B testing or multi-service version scenarios. Following are application scenarios that needs versioning:
 
 !!! info "Business Iterative and compatible"
     Due to the rapid iteration of services, the data structure of the message is not fixed during each service integration process. Sometimes we add or modify certain data structures to accommodate the newly introduced requirements. If you have a brand new system, there's no problem, but if your system is already deployed to a production environment and serves customers, this will cause new features to be incompatible with the old data structure when they go online, and then these changes can cause serious problems. To work around this issue, you can only clean up message queues and persistent messages before starting the application, which is obviously not acceptable for production environments.
@@ -82,7 +82,7 @@ During the message sending process if message transport fails, CAP will try to s
 During the message sending process if consumption method fails, CAP will try to execute the method again. This configuration option is used to configure the interval between each retry.
 
 !!! WARNING "Retry & Interval"
-    By default if failure occurs on send or consume, retry will start after **4 minutes** in order to avoid possible problems caused by setting message state delays.    
+    By default if failure occurs on send or consume, retry will start after **4 minutes** (FallbackWindowLookbackSeconds) in order to avoid possible problems caused by setting message state delays.    
     Failures in the process of sending and consuming messages will be retried 3 times immediately, and will be retried polling after 3 times, at which point the FailedRetryInterval configuration will take effect.
 
 !!! WARNING "Multi-instance concurrent retries"
@@ -111,6 +111,12 @@ Number of consumer threads, when this value is greater than 1, the order of mess
 > Default: 50
 
 Maximum number of retries. When this value is reached, retry will stop and the maximum number of retries will be modified by setting this parameter.
+
+#### FallbackWindowLookbackSeconds
+
+> Default: 240 sec
+
+Configure the retry processor to pick up the fallback window lookback time for `Scheduled` or `Failed` status messages.
 
 #### FailedThresholdCallback
 
@@ -146,4 +152,4 @@ By default, CAP will only read one message from the message queue, then execute 
 If set to true, the consumer will prefetch some messages to the memory queue, and then distribute them to the .NET thread pool for execution.
 
 !!! note "Precautions"
-    Setting it to true may cause some problems. When the subscription method executes too slowly and takes too long, it will cause the retry thread to pick up messages that have not yet been executed. The retry thread picks up messages from 4 minutes ago by default, that is to say, if the message backlog of more than 4 minutes on the consumer side will be picked up again and executed again
+    Setting it to true may cause some problems. When the subscription method executes too slowly and takes too long, it will cause the retry thread to pick up messages that have not yet been executed. The retry thread picks up messages from 4 minutes (FallbackWindowLookbackSeconds) ago by default , that is to say, if the message backlog of more than 4 minutes (FallbackWindowLookbackSeconds) on the consumer side will be picked up again and executed again

@@ -1,100 +1,123 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using Savorboard.CAP.InMemoryMessageQueue;
 
-namespace Sample.Dashboard.Auth
+namespace Sample.Dashboard.Auth;
+
+public class Startup
 {
-    public class Startup
+    public void ConfigureServices(IServiceCollection services)
     {
-        private readonly IConfiguration _configuration;
-
-        public Startup(IConfiguration configuration)
+        AddCapWithOpenIdAuthorization(services);
+        // AddCapWithAnonymousAccess(services);
+        // AddCapWithCustomAuthorization(services);
+            
+        services.AddCors(x =>
         {
-            _configuration = configuration;
-        }
-
-        public void ConfigureServices(IServiceCollection services)
-        {
-            services                
-               .AddAuthorization((options =>
-               {
-                   // only if you want to apply role filter to CAP Dashboard user 
-                   options.AddPolicy("PolicyCap", policy => policy.RequireRole("admin.events"));
-               }))
-               .AddAuthentication(options =>
-               {
-                   options.DefaultScheme =  CookieAuthenticationDefaults.AuthenticationScheme;
-                   options.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-               })
-               .AddCookie()
-               .AddOpenIdConnect(options =>
-               {
-                   options.Authority = "https://demo.duendesoftware.com/";
-                   options.ClientId = "interactive.confidential";
-                   options.ClientSecret = "secret";
-                   options.ResponseType = "code";
-                   options.UsePkce = true;
-
-                   options.Scope.Clear();
-                   options.Scope.Add("openid");
-                   options.Scope.Add("profile");
-               })
-               .AddScheme<MyDashboardAuthenticationSchemeOptions, MyDashboardAuthenticationHandler>("MyDashboardScheme",null);
-
-            services.AddCors(x =>
+            x.AddDefaultPolicy(p =>
             {
-                x.AddDefaultPolicy(p =>
-                {
-                    p.WithOrigins("http://localhost:8080").AllowCredentials().AllowAnyHeader().AllowAnyMethod();
-                });
+                p.WithOrigins("https://localhost:5001").AllowCredentials().AllowAnyHeader().AllowAnyMethod();
             });
+        });
 
-            services.AddCap(cap =>
-            {
-                cap.UseDashboard(d =>
-                {
-                    d.UseChallengeOnAuth = true;
-                    d.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-                    d.UseAuth = true;
-                    d.DefaultAuthenticationScheme = "MyDashboardScheme";
-                    // only if you want to apply policy authorization filter to CAP Dashboard user 
-                    //d.AuthorizationPolicy = "PolicyCap";
-                });
-                cap.UseMySql("server=192.168.3.57;port=3307;database=cap;UserId=root;Password=123123;");
-                cap.UseRabbitMQ(aa =>
-                {
-                    aa.HostName = "192.168.3.57";
-                    aa.UserName = "user";
-                    aa.Password = "wJ0p5gSs17";
-                });
-                //cap.UseDiscovery(_ =>
-                //{
-                //    _.DiscoveryServerHostName = "localhost";
-                //    _.DiscoveryServerPort = 8500;
-                //    _.CurrentNodeHostName = _configuration.GetValue<string>("ASPNETCORE_HOSTNAME");
-                //    _.CurrentNodePort = _configuration.GetValue<int>("ASPNETCORE_PORT");
-                //    _.NodeId = _configuration.GetValue<string>("NodeId");
-                //    _.NodeName = _configuration.GetValue<string>("NodeName");
-                //});
-            });
-
-            services.AddControllers();
-        }
-
-        public void Configure(IApplicationBuilder app)
-        {
-            app.UseCors();
-            app.UseRouting();
-            app.UseAuthentication();
-            app.UseAuthorization();
-            app.UseCookiePolicy();
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
-        }
+        services.AddControllers();
     }
 
+    public void Configure(IApplicationBuilder app)
+    {
+        app.UseCors();
+        app.UseRouting();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.UseCookiePolicy();
+        app.UseEndpoints(endpoints =>
+        {
+            endpoints.MapControllers();
+        });
+    }
+
+    private IServiceCollection AddCapWithOpenIdAuthorization(IServiceCollection services)
+    {
+        const string DashboardAuthorizationPolicy = "DashboardAuthorizationPolicy";
+        
+        services
+            .AddAuthorization(options =>
+            { 
+                options.AddPolicy(DashboardAuthorizationPolicy, policy => policy
+                    .AddAuthenticationSchemes(OpenIdConnectDefaults.AuthenticationScheme)
+                    .RequireAuthenticatedUser());
+            })
+            .AddAuthentication(opt => opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme)
+            .AddCookie()
+            .AddOpenIdConnect(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.Authority = "https://demo.duendesoftware.com/";
+                options.ClientId = "interactive.confidential";
+                options.ClientSecret = "secret";
+                options.ResponseType = "code";
+                options.UsePkce = true;
+
+                options.Scope.Clear();
+                options.Scope.Add("openid");
+                options.Scope.Add("profile");
+            });
+        
+        services.AddCap(cap =>
+        {
+            cap.UseDashboard(d =>
+            {
+                d.AuthorizationPolicy = DashboardAuthorizationPolicy;
+            });
+            cap.UseInMemoryStorage();
+            cap.UseInMemoryMessageQueue();
+        });
+
+        return services;
+    }
+    
+    private IServiceCollection AddCapWithCustomAuthorization(IServiceCollection services)
+    {
+        const string MyDashboardAuthenticationPolicy = "MyDashboardAuthenticationPolicy";
+        
+        services
+            .AddAuthorization(options =>
+            { 
+                options.AddPolicy(MyDashboardAuthenticationPolicy, policy => policy
+                    .AddAuthenticationSchemes(MyDashboardAuthenticationSchemeDefaults.Scheme)
+                    .RequireAuthenticatedUser());
+            })
+            .AddAuthentication()
+            .AddScheme<MyDashboardAuthenticationSchemeOptions, MyDashboardAuthenticationHandler>(MyDashboardAuthenticationSchemeDefaults.Scheme,null);
+        
+        services.AddCap(cap =>
+        {
+            cap.UseDashboard(d =>
+            {
+                d.AuthorizationPolicy = MyDashboardAuthenticationPolicy;
+            });
+            cap.UseInMemoryStorage();
+            cap.UseInMemoryMessageQueue();
+        });
+
+        return services;
+    }
+    
+    private IServiceCollection AddCapWithAnonymousAccess(IServiceCollection services)
+    {
+        services.AddCap(cap =>
+        {
+            cap.UseDashboard(d =>
+            {
+                d.AllowAnonymousExplicit = true;
+            });
+            cap.UseInMemoryStorage();
+            cap.UseInMemoryMessageQueue();
+        });
+
+        return services;
+    }
 }

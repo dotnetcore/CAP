@@ -190,13 +190,14 @@ public class Dispatcher : IDispatcher
         }
         catch (Exception e)
         {
-            _logger.LogError(e, $"An exception occurred when invoke subscriber. MessageId:{message.DbId}");
+            _logger.LogError(e, "An exception occurred when invoke subscriber. MessageId:{MessageId}", message.DbId);
         }
     }
 
     public void Dispose()
     {
         _tasksCts?.Dispose();
+        GC.SuppressFinalize(this);
     }
 
     private async ValueTask Sending()
@@ -217,8 +218,7 @@ public class Dispatcher : IDispatcher
                     }
                     catch (Exception ex)
                     {
-                        _logger.LogError(ex,
-                            $"An exception occurred when sending a message to the transport. Id:{message.DbId}");
+                        _logger.LogError(ex, "An exception occurred when sending a message to the transport. Id:{MessageId}", message.DbId);
                     }
         }
         catch (OperationCanceledException)
@@ -245,7 +245,7 @@ public class Dispatcher : IDispatcher
                     }
                     catch (Exception e)
                     {
-                        _logger.LogError(e, $"An exception occurred when invoke subscriber. MessageId:{message.Item1.DbId}");
+                        _logger.LogError(e, "An exception occurred when invoking subscriber. MessageId:{MessageId}", message.Item1.DbId);
                     }
         }
         catch (OperationCanceledException)

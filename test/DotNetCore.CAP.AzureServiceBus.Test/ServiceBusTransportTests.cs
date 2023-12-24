@@ -9,7 +9,7 @@ using Sample.AzureServiceBus.InMemory.Contracts.DomainEvents;
 using Shouldly;
 using Xunit;
 
-namespace DotNetCore.CAP.AzureServiceBus.Tests;
+namespace DotNetCore.CAP.AzureServiceBus.Test;
 
 public class ServiceBusTransportTests
 {
@@ -18,7 +18,7 @@ public class ServiceBusTransportTests
     public ServiceBusTransportTests()
     {
         var config = new AzureServiceBusOptions();
-        config.ConfigureCustomProducer<EntityCreated>(cfg => cfg.WithTopic("entity-created"));
+        config.ConfigureCustomProducer<EntityCreated>(cfg => cfg.UseTopic("entity-created").WithSubscription());
 
         _options = Options.Create(config);
     }

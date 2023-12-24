@@ -5,6 +5,169 @@ hide:
 
 # Release Notes
 
+## Version 8.0.0 (Dec 14, 2023)
+
+**Breaking Changes**
+
+Removed `DefaultAuthenticationScheme`, `UseChallengeOnAuth`, `DefaultChallengeScheme` and `AuthorizationPolicy` options of DotNetCore.CAP.Dashboard.
+Now CAP dashboard auth/authz mechanism to leverage the "ASP.NET Core" way of doing it, see #1428.
+
+* Streamlined auth via asp.net middlewares. (#1434) Thanks @mviegas
+  
+**Features:**
+
+* Fully Support .NET 8.
+* Add `FallbackWindowLookbackSeconds` option to configure the retry processor to pick up the backtrack time window for Scheduled or Failed status messages. (#1455) Thanks @apatozi
+* Update IConsumerRegister.Default.cs to make dispose thread safe. (#1438) Thanks @blashbul
+* Compatible with .NET 8's dependency injection KeyedService. (#1436) Thanks @EashShow
+* Add virtual method to custom delay backtrack time window during delayed publishing large messges. (#1429) Thanks @PoteRii
+
+**Bug Fixed:**
+
+* Fixed message infinite retry of messages after subscriber is removed. (#1456) Thanks @bschwehn
+* Fixed open telemetry context lost on consumer retry and Baggage Propagation. (#1452) Thanks @bschwehn
+* Fixed NATS do not handle reconnect if the nats server is forcibly shutdown and then restarted. (#1449) Thanks @davidterins
+* Fixed outbox pattern messages does not recovery when using DotNetCore.CAP.InMemoryStorage. (#1439) Thanks @davidterins
+* Fixed open telemetry subscriber thows null reference when using azure service bus without connection string. (#1432) Thanks @demorgi
+* Fixed double registration of event handler for azure service bus. (#1427) Thanks @demorgi
+* Fixed publish delay message not working in sql server transaction. (#1422) Thanks @xiangxiren
+
+## Version 7.2.2 (Nov 1, 2023)
+
+**Features:**
+
+* NATS support consumer config DeliverPolicy, default to New. (#1404)
+* Be able to configure if to subscribe to custom producer topic. (#1409)  @demorgi
+  
+**Bug Fixed:**
+
+* Try to fixes RabbitMQ basicConsume TimeOutException. (#1405) @yang-xiaodong
+* Change MongoDb index from descending to ascending. (#1415) Thanks @ustaserdar
+* Fixed parent span for "Event Persistence" activity trace. (#1407) Thanks @blashbul
+* Fixed OpenTelemetry Dynatrace IsRemote flag. (#1402) Thanks @phmonte
+* Mark Mongo time serialized to local instance time by default. (#1400) 
+* Fixed k8s dashboard meta query error in standalone mode. @yang-xiaodong
+* Azure Service Bus, consumer fails if subscription has session enabled. (#1396, #1397)  Thanks @demorgi
+
+## Version 7.2.1 (Sep 8, 2023)
+
+**Features:**
+
+*  The options `EnableConsumerPrefetch` and `UseDispatchingPerGroup` will work together without interference. (#1399)
+
+**Bug Fixed:**
+
+* Fixed SqlServer sql case sensitive in dashboard query.  (#1389)
+* Fixed Redis endpoint is null in DotNetCore.CAP.OpenTelemetry. (#1384)
+  
+
+## Version 7.2.0 (Jul 30, 2023)
+
+**Breaking Changes**
+
+* Remove `ProducerThreadCount` configuration option. Now automatically send task managed by the .NET thread pool. (#1380)
+* Change the SnowflakeId from static singleton to dependency injection singleton. (#1322)
+
+**Features:**
+
+* Add support for kubernetes discovery in dashboard. (#1362) 
+* Message send task and consumer execute task managed by .net thread pool. (#1380)
+* Upgrade dependencies of NuGet packages.
+
+**Bug Fixed:**
+
+* Fixed BasicQosOptions not working as expected for RabbitMQ transport. (#1318)
+* Revert BeginTransactionAsync support. (#1376)
+* Fixed SqlServer transaction rollback message still sent out.  (#1378)
+* 
+## Version 7.1.4 (Jun 17, 2023)
+
+**Features:**
+
+* Add suppport `AutoDeleteOnIdle` option for Azure Service Bus. (#1350) Thanks @StevenDevooght
+
+**Bug Fixed:**
+
+* Keep the originall stack when consumer exception occurs. (#1341) Thanks @tomyangOK
+* Fixed multiple invocations caused when the retry processor exceeded the `FailedRetryInterval`. (#1359) Thanks @li-zheng-hao
+* Fixed thread blocking when enable `UseDispatchingPerGroup` option. (#1356) Thanks @sampsonye @li-zheng-hao
+* 
+## Version 7.1.3 (May 17, 2023)
+
+**Features:**
+
+* Allow Explicit to set AllowAnonymous for the dashboard API. (#1335)
+* Update dashboard UI style
+* Add Cancellation token for BeginTransactionAsync. (#1317)  Thanks @denis-tsv
+
+**Bug Fixed:**
+
+* Fixed postgresql AcquireLockAsync sql error. (#1320) Thanks @guochen2
+* Fixed redis transport order pool connections non-lazy created connections. (#1332) Thanks @MahmoudSamir101
+* Fixed mysql 8.0 storage skip locked not available bug. (#1330) Thanks @yang-xiaodong
+
+## Version 7.1.2 (Apr 25, 2023)
+
+**Bug Fixed:**
+
+* Optimizing consumer duplicate detection warning logs. (#1314)
+* Fixes NATS consumption repeat when multiple consumer threads.
+* Fixes NATS transport infinity reconnect race condition. (#1311)
+
+## Version 7.1.1 (Apr 7, 2023)
+
+**Features:**
+
+* Add support topic config for kafka. (#1303)
+* Log in to dashboard with JWT authentication. (#1306) 
+
+**Bug Fixed:**
+
+* Fixed sqlserver character string convert to datetime2 exception. (#1302)
+* Fixed dashboard consul node proxy switch bug. (#1307)
+
+## Version 7.1.0 (Mar 5, 2023)
+
+**Features:**
+
+* Add option to support distributed locks for retry processor. (#1272) Thanks @li-zheng-hao
+* Add option to support set BasicQos for RabbitMQ. (#1267) Thanks @nunorelvao
+* Add option to set queue type for RabbitMQ. (#1281) Thanks @PaulCousinsTTEducation
+* Add support publish to mutiple topics for Azure Service Bus. (#1283) Thanks @jonekdahl @mviegas
+
+**Bug Fixed:**
+
+* Fixed dashboard re-execute message throw null exception for MongoDB. (#1279) Thanks @cagataykiziltan
+
+## Version 7.0.3 (Feb 2, 2023)
+
+**Features:**
+
+* Add SQL Filters option on topic subscribtion for AzureServiceBus. (#1263) Thanks @giorgilekveishvili-meama
+* Add EF BeginTransaction extensions overload with isolationlevel and async version. (#1266) @xshaheen
+
+**Bug Fixed:**
+
+* Fixed dashboard re-execute message throw null exception for SqlServer and Postgres. (#1259) Thanks @coolyuwk
+
+## Version 7.0.2 (Jan 9, 2023)
+
+**Features:**
+
+* Change AzureServiceBus nuget package from Microsoft.Azure.ServiceBus to Azure.Messaging.ServiceBus. (https://github.com/dotnetcore/CAP/pull/1253)
+
+**Bug Fixed:**
+
+* Fixed redis streams json serialize exception. (#1254)
+* Fixed dashboard route in balzor server app. (not support wasm) (#1244)
+
+## Version 7.0.1 (2022-12-16)
+
+**Bug Fixed:**
+
+* Fixed dashboard not working in balzor app. (#1244)
+* Fixed error when published Winform with 'Produce Single File'. (#1245)
+
 ## Version 7.0.0 (2022-11-27)
 
 **Breaking Changes:**

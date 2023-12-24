@@ -79,8 +79,30 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
 
         var serviceCollection = scopeProvider.GetRequiredService<IServiceCollection>();
 
-        foreach (var service in serviceCollection
-                     .Where(o => o.ImplementationType != null || o.ImplementationFactory != null))
+        IEnumerable<ServiceDescriptor>? services = serviceCollection;
+
+#if NET8_0_OR_GREATER
+        var keyedSvc = serviceCollection.Where(o => o.IsKeyedService == true && (o.KeyedImplementationType != null || o.KeyedImplementationFactory != null));
+
+        foreach (var service in keyedSvc)
+        {
+            var detectType = service.KeyedImplementationType ?? service.ServiceType;
+            if (!capSubscribeTypeInfo.IsAssignableFrom(detectType)) continue;
+
+            var actualType = service.KeyedImplementationType;
+            if (actualType == null && service.KeyedImplementationFactory != null)
+                actualType = scopeProvider.GetRequiredKeyedService(service.ServiceType, service.ServiceKey).GetType();
+
+            if (actualType == null) throw new NullReferenceException(nameof(service.ServiceType));
+
+            executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(), service.ServiceType.GetTypeInfo()));
+        }
+
+        services = services.Where(x => x.IsKeyedService == false);
+#endif
+
+        services = services.Where(o => o.ImplementationType != null || o.ImplementationFactory != null);
+        foreach (var service in services)
         {
             var detectType = service.ImplementationType ?? service.ServiceType;
             if (!capSubscribeTypeInfo.IsAssignableFrom(detectType)) continue;
@@ -91,8 +113,7 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
 
             if (actualType == null) throw new NullReferenceException(nameof(service.ServiceType));
 
-            executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(),
-                service.ServiceType.GetTypeInfo()));
+            executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(), service.ServiceType.GetTypeInfo()));
         }
 
         return executorDescriptorList;
@@ -175,10 +196,10 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
         return descriptor;
     }
 
-    private ConsumerExecutorDescriptor? MatchUsingName(string key,
+    private static ConsumerExecutorDescriptor? MatchUsingName(string key,
         IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
     {
-        if (key == null) throw new ArgumentNullException(nameof(key));
+        ArgumentNullException.ThrowIfNull(key);
 
         return executeDescriptor.FirstOrDefault(x =>
             x.TopicName.Equals(key, StringComparison.InvariantCultureIgnoreCase));
@@ -187,7 +208,7 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
     private ConsumerExecutorDescriptor? MatchWildcardUsingRegex(string key,
         IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
     {
-        var group = executeDescriptor.First().Attribute.Group;
+        var group = executeDescriptor[0].Attribute.Group;
         if (!_cacheList.TryGetValue(group, out var tmpList))
         {
             tmpList = executeDescriptor.Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>

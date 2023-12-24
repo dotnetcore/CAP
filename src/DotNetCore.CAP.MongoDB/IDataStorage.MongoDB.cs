@@ -248,9 +248,9 @@ public class MongoDBDataStorage : IDataStorage
         }
     }
 
-    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
+    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        var fourMinAgo = DateTime.Now.AddMinutes(-4);
+        var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds);
         var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
         var queryResult = await collection
             .Find(x => x.Retries < _capOptions.Value.FailedRetryCount
@@ -269,9 +269,9 @@ public class MongoDBDataStorage : IDataStorage
         }).ToList();
     }
 
-    public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
+    public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        var fourMinAgo = DateTime.Now.AddMinutes(-4);
+        var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds);
         var collection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
         var queryResult = await collection
             .Find(x => x.Retries < _capOptions.Value.FailedRetryCount

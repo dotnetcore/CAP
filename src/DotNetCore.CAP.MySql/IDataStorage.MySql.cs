@@ -216,14 +216,14 @@ public class MySqlDataStorage : IDataStorage
             .ConfigureAwait(false);
     }
 
-    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
+    public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        return await GetMessagesOfNeedRetryAsync(_pubName).ConfigureAwait(false);
+        return GetMessagesOfNeedRetryAsync(_pubName, lookbackSeconds);
     }
 
-    public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
+    public Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        return await GetMessagesOfNeedRetryAsync(_recName).ConfigureAwait(false);
+        return GetMessagesOfNeedRetryAsync(_recName, lookbackSeconds);
     }
 
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
@@ -313,9 +313,9 @@ public class MySqlDataStorage : IDataStorage
         await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
     }
 
-    private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
+    private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName, TimeSpan lookbackSeconds)
     {
-        var fourMinAgo = DateTime.Now.AddMinutes(-4);
+        var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds);
         var sql =
             $"SELECT `Id`,`Content`,`Retries`,`Added` FROM `{tableName}` WHERE `Retries`<@Retries " +
             $"AND `Version`=@Version AND `Added`<@Added AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";

@@ -60,7 +60,9 @@ internal class SubscribeExecutor : ISubscribeExecutor
 
                 TracingError(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), message.Origin, null, new Exception(error));
 
-                return OperateResult.Failed(new SubscriberNotFoundException(error));
+                var ex = new SubscriberNotFoundException(error);
+                await SetFailedState(message, ex);
+                return OperateResult.Failed(ex);
             }
         }
 
@@ -188,6 +190,9 @@ internal class SubscribeExecutor : ISubscribeExecutor
                     [Headers.CorrelationId] = message.Origin.GetId(),
                     [Headers.CorrelationSequence] = (message.Origin.GetCorrelationSequence() + 1).ToString()
                 };
+
+                if(message.Origin.Headers.TryGetValue(Headers.TraceParent, out var traceparent))
+                    header[Headers.TraceParent] = traceparent;
 
                 await _provider.GetRequiredService<ICapPublisher>()
                     .PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken).ConfigureAwait(false);

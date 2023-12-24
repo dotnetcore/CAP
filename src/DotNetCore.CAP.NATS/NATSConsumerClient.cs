@@ -195,15 +195,14 @@ namespace DotNetCore.CAP.NATS
 
         private void DisconnectedEventHandler(object? sender, ConnEventArgs e)
         {
-            if (e.Error is { Message: "Server closed the connection." })
+            if (e.Error is null) return;
+
+            var logArgs = new LogMessageEventArgs
             {
-                var logArgs = new LogMessageEventArgs
-                {
-                    LogType = MqLogType.ConnectError,
-                    Reason = e.Error.ToString()
-                };
-                OnLogCallback!(logArgs);
-            }
+                LogType = MqLogType.ConnectError,
+                Reason = e.Error.ToString()
+            };
+            OnLogCallback!(logArgs);
         }
 
         private void AsyncErrorEventHandler(object? sender, ErrEventArgs e)

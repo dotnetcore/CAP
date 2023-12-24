@@ -46,33 +46,22 @@ public class RouteActionProvider
     {
         var prefixMatch = _options.PathMatch + "/api";
 
-        _builder.MapGet(prefixMatch + "/metrics-realtime", Metrics).AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/meta", MetaInfo).AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/stats", Stats).AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/metrics-history", MetricsHistory)
-            .AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/health", Health).AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/published/message/{id:long}", PublishedMessageDetails)
-            .AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/received/message/{id:long}", ReceivedMessageDetails)
-            .AllowAnonymousIf(_options.AllowAnonymousExplicit);
-
-        _builder.MapPost(prefixMatch + "/published/requeue", PublishedRequeue)
-            .AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapPost(prefixMatch + "/received/reexecute", ReceivedRequeue)
-            .AllowAnonymousIf(_options.AllowAnonymousExplicit);
-
-        _builder.MapGet(prefixMatch + "/published/{status}", PublishedList)
-            .AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/received/{status}", ReceivedList)
-            .AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/subscriber", Subscribers).AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/nodes", Nodes).AllowAnonymousIf(_options.AllowAnonymousExplicit);
-
-        _builder.MapGet(prefixMatch + "/list-ns", ListNamespaces).AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/list-svc/{namespace}", ListServices)
-            .AllowAnonymousIf(_options.AllowAnonymousExplicit);
-        _builder.MapGet(prefixMatch + "/ping", PingServices).AllowAnonymousIf(_options.AllowAnonymousExplicit);
+        _builder.MapGet(prefixMatch + "/metrics-realtime", Metrics).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/meta", MetaInfo).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/stats", Stats).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/metrics-history", MetricsHistory).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/health", Health).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/published/message/{id:long}", PublishedMessageDetails).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/received/message/{id:long}", ReceivedMessageDetails).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapPost(prefixMatch + "/published/requeue", PublishedRequeue).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapPost(prefixMatch + "/received/reexecute", ReceivedRequeue).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/published/{status}", PublishedList).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/received/{status}", ReceivedList).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/subscriber", Subscribers).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/nodes", Nodes).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/list-ns", ListNamespaces).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/list-svc/{namespace}", ListServices).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/ping", PingServices).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
     }
 
     public async Task Metrics(HttpContext httpContext)
@@ -86,7 +75,6 @@ public class RouteActionProvider
     public async Task MetaInfo(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        if (!await Auth(httpContext)) return;
 
         var cap = _serviceProvider.GetService<CapMarkerService>();
         var broker = _serviceProvider.GetService<CapMessageQueueMakerService>();
@@ -129,7 +117,6 @@ public class RouteActionProvider
     public async Task MetricsHistory(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        if (!await Auth(httpContext)) return;
 
         const string cacheKey = "dashboard.metrics.history";
         if (CapCache.Global.TryGet(cacheKey, out var ret))
@@ -168,7 +155,6 @@ public class RouteActionProvider
     public async Task PublishedMessageDetails(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        if (!await Auth(httpContext)) return;
 
         if (long.TryParse(httpContext.GetRouteData().Values["id"]?.ToString() ?? string.Empty, out var id))
         {
@@ -190,7 +176,6 @@ public class RouteActionProvider
     public async Task ReceivedMessageDetails(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        if (!await Auth(httpContext)) return;
 
         if (long.TryParse(httpContext.GetRouteData().Values["id"]?.ToString() ?? string.Empty, out var id))
         {
@@ -212,7 +197,6 @@ public class RouteActionProvider
     public async Task PublishedRequeue(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        if (!await Auth(httpContext)) return;
 
         var messageIds = await httpContext.Request.ReadFromJsonAsync<long[]>();
         if (messageIds == null || messageIds.Length == 0)
@@ -234,7 +218,6 @@ public class RouteActionProvider
     public async Task ReceivedRequeue(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        if (!await Auth(httpContext)) return;
 
         var messageIds = await httpContext.Request.ReadFromJsonAsync<long[]>();
         if (messageIds == null || messageIds.Length == 0)
@@ -256,7 +239,6 @@ public class RouteActionProvider
     public async Task PublishedList(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        if (!await Auth(httpContext)) return;
 
         var routeValue = httpContext.GetRouteData().Values;
         var pageSize = httpContext.Request.Query["perPage"].ToInt32OrDefault(20);
@@ -283,7 +265,6 @@ public class RouteActionProvider
     public async Task ReceivedList(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        if (!await Auth(httpContext)) return;
 
         var routeValue = httpContext.GetRouteData().Values;
         var pageSize = httpContext.Request.Query["perPage"].ToInt32OrDefault(20);
@@ -312,8 +293,7 @@ public class RouteActionProvider
     public async Task Subscribers(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        if (!await Auth(httpContext)) return;
-
+        
         var cache = _serviceProvider.GetRequiredService<MethodMatcherCache>();
         var subscribers = cache.GetCandidatesMethodsOfGroupNameGrouped();
 
@@ -344,8 +324,6 @@ public class RouteActionProvider
 
     public async Task Nodes(HttpContext httpContext)
     {
-        if (!await Auth(httpContext)) return;
-
         IList<Node> result = new List<Node>();
         var discoveryProvider = _serviceProvider.GetService<INodeDiscoveryProvider>();
         if (discoveryProvider == null)
@@ -428,19 +406,6 @@ public class RouteActionProvider
             httpContext.Response.StatusCode = (int)HttpStatusCode.BadGateway;
             await httpContext.Response.WriteAsync(e.Message);
         }
-    }
-
-    private async Task<bool> Auth(HttpContext httpContext)
-    {
-        if (!await CapBuilderExtension.Authentication(httpContext, _options)) return false;
-
-        if (!await CapBuilderExtension.Authorize(httpContext, _options))
-        {
-            httpContext.Response.StatusCode = StatusCodes.Status401Unauthorized;
-            return false;
-        }
-
-        return true;
     }
 
     private void BadRequest(HttpContext httpContext)

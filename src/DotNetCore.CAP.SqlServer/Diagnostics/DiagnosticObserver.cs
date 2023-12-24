@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
 using Microsoft.Data.SqlClient;
@@ -42,35 +43,43 @@ internal class DiagnosticObserver : IObserver<KeyValuePair<string, object?>>
         switch (evt.Key)
         {
             case SqlAfterCommitTransactionMicrosoft:
-            {
-                if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
-                var transactionKey = sqlConnection.ClientConnectionId;
-
-                if (_bufferList.TryRemove(transactionKey, out var msgList))
-                {
-                    if (GetProperty(evt.Value, "Operation") as string == "Rollback")
-                        return;
-                    foreach (var message in msgList)
-                    {
-                        _dispatcher.EnqueueToPublish(message);
-                    }
-                }
-
-                break;
-            }
-            case SqlErrorCommitTransactionMicrosoft or SqlAfterRollbackTransactionMicrosoft
-                or SqlBeforeCloseConnectionMicrosoft:
-            {
-                if (!_bufferList.IsEmpty)
                 {
                     if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
                     var transactionKey = sqlConnection.ClientConnectionId;
 
-                    _bufferList.TryRemove(transactionKey, out _);
-                }
+                    if (_bufferList.TryRemove(transactionKey, out var msgList))
+                    {
+                        if (GetProperty(evt.Value, "Operation") as string == "Rollback")
+                            return;
+                        foreach (var message in msgList)
+                        {
+                            var isDelayMessage = message.Origin.Headers.ContainsKey(Headers.DelayTime);
+                            if (isDelayMessage)
+                            {
+                                _dispatcher.EnqueueToScheduler(message, DateTime.Parse(message.Origin.Headers[Headers.SentTime]!)).ConfigureAwait(false);
+                            }
+                            else
+                            {
+                                _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
+                            }
+                        }
+                    }
 
-                break;
-            }
+                    break;
+                }
+            case SqlErrorCommitTransactionMicrosoft or SqlAfterRollbackTransactionMicrosoft
+                or SqlBeforeCloseConnectionMicrosoft:
+                {
+                    if (!_bufferList.IsEmpty)
+                    {
+                        if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
+                        var transactionKey = sqlConnection.ClientConnectionId;
+
+                        _bufferList.TryRemove(transactionKey, out _);
+                    }
+
+                    break;
+                }
         }
     }
 

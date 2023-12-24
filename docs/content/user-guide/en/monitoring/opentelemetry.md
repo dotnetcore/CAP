@@ -26,6 +26,40 @@ services.AddOpenTelemetryTracing((builder) => builder
 );
 ```
 
+If you don't use a framework that does this automatically for you (like aspnetcore), make sure you enable a listener, for example:
+
+```C#
+ActivitySource.AddActivityListener(new ActivityListener()
+{
+    ShouldListenTo = _ => true,
+    Sample = (ref ActivityCreationOptions<ActivityContext> _) => ActivitySamplingResult.AllData,
+    ActivityStarted = activity => Console.WriteLine($"{activity.ParentId}:{activity.Id} - Start"),
+    ActivityStopped = activity => Console.WriteLine($"{activity.ParentId}:{activity.Id} - Stop")
+});
+```
 Here is a diagram of CAP's tracking data in Zipkin:
 
 <img src="/img/opentelemetry.png">
+
+### Context Propagation
+CAP supports [Context
+Propagation](https://opentelemetry.io/docs/instrumentation/js/propagation/) by
+injecting `traceparent` and `baggage` headers when sending messages and
+restoring the context from those headers when receiving messages.
+
+CAP uses the configured Propagators.DefaultTextMapPropagator propagator, which
+is usually set to both TraceContextPropagator and BaggagePropagator [by the
+dotnet OpenTelemetry
+SDK](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry/Sdk.cs#L21)
+but can be set in your your client program. For example, to opt out of the
+Baggage propagation, you can call:
+
+```C#
+OpenTelemetry.Sdk.SetDefaultTextMapPropagator(
+    new TraceContextPropagator());
+```
+
+See the [dotnet OpenTelemetry.Api
+readme](https://github.com/open-telemetry/opentelemetry-dotnet/blob/main/src/OpenTelemetry.Api/README.md?plain=1#L455)
+for more details.
+

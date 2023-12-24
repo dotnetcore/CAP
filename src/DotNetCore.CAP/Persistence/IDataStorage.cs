@@ -33,11 +33,11 @@ public interface IDataStorage
 
     Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000, CancellationToken token = default);
 
-    Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry();
+    Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds);
 
     Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask, CancellationToken token = default);
 
-    Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry();
+    Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds);
 
     //dashboard api
     IMonitoringApi GetMonitoringApi();

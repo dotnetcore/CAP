@@ -214,14 +214,14 @@ public class PostgreSqlDataStorage : IDataStorage
             .ConfigureAwait(false);
     }
 
-    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry()
+    public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        return await GetMessagesOfNeedRetryAsync(_pubName).ConfigureAwait(false);
+        return await GetMessagesOfNeedRetryAsync(_pubName, lookbackSeconds).ConfigureAwait(false);
     }
 
-    public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry()
+    public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
-        return await GetMessagesOfNeedRetryAsync(_recName).ConfigureAwait(false);
+        return await GetMessagesOfNeedRetryAsync(_recName, lookbackSeconds).ConfigureAwait(false);
     }
 
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
@@ -231,11 +231,11 @@ public class PostgreSqlDataStorage : IDataStorage
             $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\" FROM {_pubName} WHERE \"Version\"=@Version " +
             $"AND ((\"ExpiresAt\"< @TwoMinutesLater AND \"StatusName\" = '{StatusName.Delayed}') OR (\"ExpiresAt\"< @OneMinutesAgo AND \"StatusName\" = '{StatusName.Queued}')) FOR UPDATE SKIP LOCKED;";
 
-        object[] sqlParams =
+        var sqlParams = new object[]
         {
             new NpgsqlParameter("@Version", _capOptions.Value.Version),
             new NpgsqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
-            new NpgsqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1))
+            new NpgsqlParameter("@OneMinutesAgo", QueuedMessageFetchTime())
         };
 
         await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
@@ -267,6 +267,11 @@ public class PostgreSqlDataStorage : IDataStorage
     public IMonitoringApi GetMonitoringApi()
     {
         return new PostgreSqlMonitoringApi(_options, _initializer, _serializer);
+    }
+
+    protected virtual DateTime QueuedMessageFetchTime()
+    {
+        return DateTime.Now.AddMinutes(-1);
     }
 
     private async Task ChangeMessageStateAsync(string tableName, MediumMessage message, StatusName state,
@@ -308,9 +313,9 @@ public class PostgreSqlDataStorage : IDataStorage
         await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
     }
 
-    private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName)
+    private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName, TimeSpan lookbackSeconds)
     {
-        var fourMinAgo = DateTime.Now.AddMinutes(-4);
+        var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds);
         var sql =
             $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\" FROM {tableName} WHERE \"Retries\"<@Retries " +
             $"AND \"Version\"=@Version AND \"Added\"<@Added AND (\"StatusName\"='{StatusName.Failed}' OR \"StatusName\"='{StatusName.Scheduled}') LIMIT 200;";

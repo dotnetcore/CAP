@@ -1,6 +1,7 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
+using System;
 using System.Linq;
 
 namespace DotNetCore.CAP.Transport;
@@ -26,12 +27,12 @@ public struct BrokerAddress
     public BrokerAddress(string name, string? endpoint)
     {
         Name = name;
-        Endpoint = endpoint;
+        Endpoint = endpoint ?? String.Empty;
     }
 
     public string Name { get; set; }
 
-    public string? Endpoint { get; set; }
+    public string Endpoint { get; set; }
 
     public override string ToString()
     {
