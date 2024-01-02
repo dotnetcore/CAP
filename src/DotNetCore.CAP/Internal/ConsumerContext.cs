@@ -3,6 +3,7 @@
 
 using System;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Persistence;
 
 namespace DotNetCore.CAP.Internal;
 
@@ -12,7 +13,7 @@ namespace DotNetCore.CAP.Internal;
 public class ConsumerContext
 {
     public ConsumerContext(ConsumerContext context)
-        : this(context.ConsumerDescriptor, context.DeliverMessage)
+        : this(context.ConsumerDescriptor, context.MediumMessage)
     {
     }
 
@@ -21,10 +22,10 @@ public class ConsumerContext
     /// </summary>
     /// <param name="descriptor">consumer method descriptor. </param>
     /// <param name="message"> received message.</param>
-    public ConsumerContext(ConsumerExecutorDescriptor descriptor, Message message)
+    public ConsumerContext(ConsumerExecutorDescriptor descriptor, MediumMessage message)
     {
         ConsumerDescriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
-        DeliverMessage = message ?? throw new ArgumentNullException(nameof(message));
+        MediumMessage = message ?? throw new ArgumentNullException(nameof(message));
     }
 
     /// <summary>
@@ -35,5 +36,10 @@ public class ConsumerContext
     /// <summary>
     /// consumer received message.
     /// </summary>
-    public Message DeliverMessage { get; }
+    public Message DeliverMessage => MediumMessage.Origin;
+
+    /// <summary>
+    /// consumer received medium message.
+    /// </summary>
+    public MediumMessage MediumMessage { get; }
 }

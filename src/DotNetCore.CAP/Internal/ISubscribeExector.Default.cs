@@ -175,7 +175,7 @@ internal class SubscribeExecutor : ISubscribeExecutor
     private async Task InvokeConsumerMethodAsync(MediumMessage message, ConsumerExecutorDescriptor descriptor,
         CancellationToken cancellationToken)
     {
-        var consumerContext = new ConsumerContext(descriptor, message.Origin);
+        var consumerContext = new ConsumerContext(descriptor, message);
         var tracingTimestamp = TracingBefore(message.Origin, descriptor.MethodInfo);
         try
         {
