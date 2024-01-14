@@ -22,6 +22,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     private readonly ILogger<ConnectionChannelPool> _logger;
     private readonly ConcurrentQueue<IModel> _pool;
     private IConnection? _connection;
+    private bool _isDisposed;
 
     private int _count;
     private int _maxSize;
@@ -34,6 +35,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
         _logger = logger;
         _maxSize = DefaultPoolSize;
         _pool = new ConcurrentQueue<IModel>();
+        _isDisposed = false;
 
         var capOptions = capOptionsAccessor.Value;
         var options = optionsAccessor.Value;
@@ -52,7 +54,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     {
         lock (SLock)
         {
-            while (_count > _maxSize)
+            while (_count > _maxSize && _isDisposed == false)
             {
                 Thread.SpinWait(1);
             }
@@ -91,6 +93,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
             channel.Dispose();
         }
 
+        _isDisposed = true;
         _connection?.Dispose();
     }
 
