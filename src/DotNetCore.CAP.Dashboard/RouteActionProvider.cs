@@ -50,7 +50,7 @@ public class RouteActionProvider
         _builder.MapGet(prefixMatch + "/meta", MetaInfo).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapGet(prefixMatch + "/stats", Stats).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapGet(prefixMatch + "/metrics-history", MetricsHistory).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
-        _builder.MapGet(prefixMatch + "/health", Health).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/health", Health).AllowAnonymous();
         _builder.MapGet(prefixMatch + "/published/message/{id:long}", PublishedMessageDetails).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapGet(prefixMatch + "/received/message/{id:long}", ReceivedMessageDetails).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapPost(prefixMatch + "/published/requeue", PublishedRequeue).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
