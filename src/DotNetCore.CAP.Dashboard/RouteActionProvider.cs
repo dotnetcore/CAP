@@ -61,7 +61,7 @@ public class RouteActionProvider
         _builder.MapGet(prefixMatch + "/nodes", Nodes).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapGet(prefixMatch + "/list-ns", ListNamespaces).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapGet(prefixMatch + "/list-svc/{namespace}", ListServices).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
-        _builder.MapGet(prefixMatch + "/ping", PingServices).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapGet(prefixMatch + "/ping", PingServices).AllowAnonymous();
     }
 
     public async Task Metrics(HttpContext httpContext)
