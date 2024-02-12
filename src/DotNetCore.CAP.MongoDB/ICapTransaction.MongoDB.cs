@@ -90,4 +90,21 @@ public static class CapTransactionExtensions
         var capTrans = publisher.Transaction.Value.Begin(clientSessionHandle, autoCommit);
         return new CapMongoDbClientSessionHandle(capTrans);
     }
+
+    /// <summary>
+    /// Start the CAP transaction with a custom session handle
+    /// </summary>
+    /// <param name="client">The <see cref="IMongoClient" />.</param>
+    /// <param name="clientSessionHandle">The <see cref="IClientSessionHandle" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    /// <param name="autoCommit">Whether the transaction is automatically committed when the message is published</param>
+    /// <returns>The <see cref="IClientSessionHandle" /> of MongoDB transaction session object.</returns>
+    public static IClientSessionHandle StartTransaction(this IMongoClient _, IClientSessionHandle clientSessionHandle,
+        ICapPublisher publisher, bool autoCommit = false)
+    {
+        publisher.Transaction.Value =
+            ActivatorUtilities.CreateInstance<MongoDBCapTransaction>(publisher.ServiceProvider);
+        var capTrans = publisher.Transaction.Value.Begin(clientSessionHandle, autoCommit);
+        return new CapMongoDbClientSessionHandle(capTrans);
+    }
 }
