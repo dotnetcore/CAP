@@ -28,6 +28,7 @@ internal class DispatcherPerGroup : IDispatcher
     private readonly IDataStorage _storage;
     private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
     private readonly bool _enablePrefetch;
+    private readonly bool _enableParallelSend;
 
     private Channel<MediumMessage> _publishedChannel = default!;
     private ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor?)>> _receivedChannels = default!;
@@ -47,6 +48,7 @@ internal class DispatcherPerGroup : IDispatcher
         _schedulerQueue = new PriorityQueue<MediumMessage, DateTime>();
         _storage = storage;
         _enablePrefetch = options.Value.EnableConsumerPrefetch;
+        _enableParallelSend = options.Value.EnablePublishParallelSend;
     }
 
     public async Task Start(CancellationToken stoppingToken)
@@ -214,12 +216,19 @@ internal class DispatcherPerGroup : IDispatcher
                 while (_publishedChannel.Reader.TryRead(out var message))
                     try
                     {
-                        _ = Task.Run(async () =>
+                        if (_enableParallelSend)
+                        {
+                            _ = Task.Run(async () =>
+                            {
+                                var result = await _sender.SendAsync(message).ConfigureAwait(false);
+                                if (!result.Succeeded) _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
+                            });
+                        }
+                        else
                         {
                             var result = await _sender.SendAsync(message).ConfigureAwait(false);
-                            if (!result.Succeeded)
-                                _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
-                        });
+                            if (!result.Succeeded) _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
+                        }
                     }
                     catch (Exception ex)
                     {
