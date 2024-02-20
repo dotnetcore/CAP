@@ -4,6 +4,7 @@ using System.Reflection;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -45,7 +46,8 @@ namespace DotNetCore.CAP.Test
                 [Headers.MessageName] = "fake.output.integer"
             };
             var message = new Message(header, null);
-            var context = new ConsumerContext(descriptor, message);
+            var mediumMessage = new MediumMessage() { Origin = message };
+            var context = new ConsumerContext(descriptor, mediumMessage);
 
             var ret = await SubscribeInvoker.InvokeAsync(context);
             Assert.Equal(int.MaxValue, ret.Result);
