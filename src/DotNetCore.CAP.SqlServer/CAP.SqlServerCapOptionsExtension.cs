@@ -28,7 +28,7 @@ internal class SqlServerCapOptionsExtension : ICapOptionsExtension
 
         services.AddSingleton<DiagnosticProcessorObserver>();
         services.AddSingleton<IDataStorage, SqlServerDataStorage>();
-        services.AddSingleton<IStorageInitializer, SqlServerStorageInitializer>();
+        services.TryAddSingleton<IStorageInitializer, SqlServerStorageInitializer>();
         services.TryAddEnumerable(ServiceDescriptor.Singleton<IProcessingServer, DiagnosticRegister>());
 
         services.Configure(_configure);
