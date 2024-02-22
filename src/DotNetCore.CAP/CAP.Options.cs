@@ -23,6 +23,7 @@ public class CapOptions
         FailedRetryInterval = 60;
         FailedRetryCount = 50;
         ConsumerThreadCount = 1;
+        EnablePublishParallelSend = false;
         EnableConsumerPrefetch = false;
         Extensions = new List<ICapOptionsExtension>();
         Version = "v1";
@@ -95,6 +96,12 @@ public class CapOptions
     /// Default is false
     /// </summary>
     public bool EnableConsumerPrefetch { get; set; }
+
+    /// <summary>
+    /// If true, the message send task will be parallel execute by .net thread pool.
+    /// Default is false
+    /// </summary>
+    public bool EnablePublishParallelSend { get; set; }
 
     /// <summary>
     /// If true then each message group will have own independent dispatching pipeline. Each pipeline use as many threads as

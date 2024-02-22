@@ -27,6 +27,7 @@ public class Dispatcher : IDispatcher
     private readonly IDataStorage _storage;
     private readonly PriorityQueue<MediumMessage, long> _schedulerQueue;
     private readonly bool _enablePrefetch;
+    private readonly bool _enableParallelSend;
 
     private Channel<MediumMessage> _publishedChannel = default!;
     private Channel<(MediumMessage, ConsumerExecutorDescriptor?)> _receivedChannel = default!;
@@ -45,6 +46,7 @@ public class Dispatcher : IDispatcher
         _schedulerQueue = new PriorityQueue<MediumMessage, long>();
         _storage = storage;
         _enablePrefetch = options.Value.EnableConsumerPrefetch;
+        _enableParallelSend = options.Value.EnablePublishParallelSend;
     }
 
     public async Task Start(CancellationToken stoppingToken)
@@ -209,12 +211,19 @@ public class Dispatcher : IDispatcher
                     try
                     {
                         var item = message;
-                        _ = Task.Run(async () =>
+                        if (_enableParallelSend)
+                        {
+                            _ = Task.Run(async () =>
+                            {
+                                var result = await _sender.SendAsync(item).ConfigureAwait(false);
+                                if (!result.Succeeded) _logger.MessagePublishException(item.Origin.GetId(), result.ToString(), result.Exception);
+                            });
+                        }
+                        else
                         {
                             var result = await _sender.SendAsync(item).ConfigureAwait(false);
-                            if (!result.Succeeded)
-                                _logger.MessagePublishException(item.Origin.GetId(), result.ToString(), result.Exception);
-                        });
+                            if (!result.Succeeded) _logger.MessagePublishException(item.Origin.GetId(), result.ToString(), result.Exception);
+                        }
                     }
                     catch (Exception ex)
                     {
