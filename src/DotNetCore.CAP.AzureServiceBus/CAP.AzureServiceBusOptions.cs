@@ -56,11 +56,10 @@ public class AzureServiceBusOptions
     public bool AutoCompleteMessages { get; set; }
 
     /// <summary>
-    /// Gets a value that indicates whether to automatically correlate messages using correlation filters.
-    /// If set to false - use <see cref="AzureServiceBusOptions.SQLFilters" /> to setup message correlation manually.
-    /// Default is true.
+    /// Adds additional correlation properties to all correlation filters.
+    /// https://learn.microsoft.com/en-us/azure/service-bus-messaging/topic-filters#correlation-filters
     /// </summary>
-    public bool UseAutomaticCorrelation { get; set; } = true;
+    public IDictionary<string, string> DefaultCorrelationHeaders { get; } = new Dictionary<string, string>();
 
     /// <summary>
     /// Gets the maximum number of concurrent calls to the ProcessMessageAsync message handler the processor should initiate.

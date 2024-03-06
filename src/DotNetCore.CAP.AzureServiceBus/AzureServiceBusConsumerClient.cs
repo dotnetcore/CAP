@@ -53,17 +53,12 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
         ConnectAsync().GetAwaiter().GetResult();
 
-        var correlatedTopics = _asbOptions!.SQLFilters?.Select(o => o.Key) ?? Enumerable.Empty<string>();
-
-        if (_asbOptions.UseAutomaticCorrelation)
-        {
-            correlatedTopics = correlatedTopics.Concat(topics);
-        }
+        topics = topics.Concat(_asbOptions!.SQLFilters?.Select(o => o.Key) ?? Enumerable.Empty<string>());
 
         var allRules = _administrationClient!.GetRulesAsync(_asbOptions!.TopicPath, _subscriptionName).ToEnumerable();
         var allRuleNames = allRules.Select(o => o.Name);
 
-        foreach (var newRule in correlatedTopics.Except(allRuleNames))
+        foreach (var newRule in topics.Except(allRuleNames))
         {
             var isSqlRule = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value is not null;
 
@@ -76,10 +71,17 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
             }
             else
             {
-                currentRuleToAdd = new CorrelationRuleFilter
+                var correlationRule = new CorrelationRuleFilter
                 {
                     Subject = newRule
                 };
+
+                foreach (var correlationHeader in _asbOptions.DefaultCorrelationHeaders)
+                {
+                    correlationRule.ApplicationProperties.Add(correlationHeader.Key, correlationHeader.Value);
+                }
+
+                currentRuleToAdd = correlationRule;
             }
 
             _administrationClient.CreateRuleAsync(_asbOptions.TopicPath, _subscriptionName,
@@ -92,7 +94,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
             _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
         }
 
-        foreach (var oldRule in allRuleNames.Except(correlatedTopics))
+        foreach (var oldRule in allRuleNames.Except(topics))
         {
             _administrationClient.DeleteRuleAsync(_asbOptions.TopicPath, _subscriptionName, oldRule).GetAwaiter()
                 .GetResult();
