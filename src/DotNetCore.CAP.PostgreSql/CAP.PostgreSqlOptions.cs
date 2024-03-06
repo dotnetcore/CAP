@@ -26,7 +26,7 @@ public class PostgreSqlOptions : EFOptions
     /// <summary>
     /// Creates an Npgsql connection from the configured data source.
     /// </summary>
-    public NpgsqlConnection CreateConnection()
+    internal NpgsqlConnection CreateConnection()
     {
         return DataSource != null ? DataSource.CreateConnection() : new NpgsqlConnection(ConnectionString);
     }
