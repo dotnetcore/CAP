@@ -53,12 +53,17 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
         ConnectAsync().GetAwaiter().GetResult();
 
-        topics = topics.Concat(_asbOptions!.SQLFilters?.Select(o => o.Key) ?? Enumerable.Empty<string>());
+        var correlatedTopics = _asbOptions!.SQLFilters?.Select(o => o.Key) ?? Enumerable.Empty<string>();
+
+        if (_asbOptions.UseAutomaticCorrelation)
+        {
+            correlatedTopics = correlatedTopics.Concat(topics);
+        }
+
         var allRules = _administrationClient!.GetRulesAsync(_asbOptions!.TopicPath, _subscriptionName).ToEnumerable();
         var allRuleNames = allRules.Select(o => o.Name);
 
-
-        foreach (var newRule in topics.Except(allRuleNames))
+        foreach (var newRule in correlatedTopics.Except(allRuleNames))
         {
             var isSqlRule = _asbOptions.SQLFilters?.FirstOrDefault(o => o.Key == newRule).Value is not null;
 
@@ -87,7 +92,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
             _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
         }
 
-        foreach (var oldRule in allRuleNames.Except(topics))
+        foreach (var oldRule in allRuleNames.Except(correlatedTopics))
         {
             _administrationClient.DeleteRuleAsync(_asbOptions.TopicPath, _subscriptionName, oldRule).GetAwaiter()
                 .GetResult();
