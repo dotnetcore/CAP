@@ -16,6 +16,7 @@ public class PostgreSqlOptions : EFOptions
     /// <summary>
     /// Gets or sets the database's connection string that will be used to store database entities.
     /// </summary>
+    [Obsolete("Use .DataSource = NpgsqlDataSource.Create(<connectionString>) for same behavior.")]
     public string ConnectionString { get; set; } = default!;
     
     /// <summary>
