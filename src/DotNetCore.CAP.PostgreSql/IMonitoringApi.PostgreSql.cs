@@ -61,7 +61,7 @@ SELECT
     SELECT COUNT(""Id"") FROM {_pubName} WHERE ""StatusName"" = N'Delayed'
 ) AS ""PublishedDelayed"";";
 
-        var connection = new NpgsqlConnection(_options.ConnectionString);
+        var connection = _options.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         var statistics = await connection.ExecuteReaderAsync(sql, async reader =>
         {
@@ -98,7 +98,7 @@ SELECT
         var sqlQuery =
             $"select * from {tableName} where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
 
-        var connection = new NpgsqlConnection(_options.ConnectionString);
+        var connection = _options.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
 
         var count = await connection.ExecuteScalarAsync<int>($"select count(1) from {tableName} where 1=1 {where}",
@@ -182,7 +182,7 @@ SELECT
         var sqlQuery =
             $"select count(\"Id\") from {tableName} where Lower(\"StatusName\") = Lower(@state)";
 
-        var connection = new NpgsqlConnection(_options.ConnectionString);
+        var connection = _options.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         return await connection.ExecuteScalarAsync<int>(sqlQuery, new NpgsqlParameter("@state", statusName))
             .ConfigureAwait(false);
@@ -227,7 +227,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
         };
 
         Dictionary<string, int> valuesMap;
-        var connection = new NpgsqlConnection(_options.ConnectionString);
+        var connection = _options.CreateConnection();
         await using (connection.ConfigureAwait(false))
         {
             valuesMap = await connection.ExecuteReaderAsync(sqlQuery, async reader =>
@@ -264,7 +264,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
         var sql =
             $@"SELECT ""Id"" AS ""DbId"", ""Content"", ""Added"", ""ExpiresAt"", ""Retries"" FROM {tableName} WHERE ""Id""={id} FOR UPDATE SKIP LOCKED";
 
-        var connection = new NpgsqlConnection(_options.ConnectionString);
+        var connection = _options.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         var mediumMessage = await connection.ExecuteReaderAsync(sql, async reader =>
         {
