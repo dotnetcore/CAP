@@ -37,6 +37,7 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 Schema | 数据库架构 | string | cap 
 ConnectionString | 数据库连接字符串 | string | 
+DataSource | [Data source](https://www.npgsql.org/doc/basic-usage.html#data-source) | [NpgsqlDataSource](https://www.npgsql.org/doc/api/Npgsql.NpgsqlDataSource.html) |
 
 ### 自定义表名称
 

@@ -65,13 +65,13 @@ dotnet-counters monitor --process-id=25496 --counters=DotNetCore.CAP.EventCounte
 
 其中 process-id 为 CAP 所属的进程Id。
 
-![img](/img/dotnet-counters.gif)
+![img](../../../img/dotnet-counters.gif)
 
 ### 在 Dashboard 中查看度量
 
 你可以配置 `x.UseDashboard()` 来开启仪表盘以图表的形式查看 Metrics 指标。 如下图：
 
-![img](/img/dashboard-metrics.gif)
+![img](../../../img/dashboard-metrics.gif)
 
 
 在 Realtime Metric Graph 中，时间轴会随着时间实时滚动从而可以看到发布和消费消息每秒的速率，同时我们可以看到消费者执行耗时以“打点”的方式在 Y1 轴上（Y0轴为速率，Y1轴为执行耗时）。

@@ -14,5 +14,5 @@ Web site made with [Material for MkDocs](https://squidfunk.github.io/mkdocs-mate
 
 ```
 cd CAP/docs
-docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material      
+docker run --rm -it -p 8000:8000 -v ${PWD}:/docs squidfunk/mkdocs-material
 ```

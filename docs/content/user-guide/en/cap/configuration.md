@@ -153,3 +153,10 @@ If set to true, the consumer will prefetch some messages to the memory queue, an
 
 !!! note "Precautions"
     Setting it to true may cause some problems. When the subscription method executes too slowly and takes too long, it will cause the retry thread to pick up messages that have not yet been executed. The retry thread picks up messages from 4 minutes (FallbackWindowLookbackSeconds) ago by default , that is to say, if the message backlog of more than 4 minutes (FallbackWindowLookbackSeconds) on the consumer side will be picked up again and executed again
+
+#### EnablePublishParallelSend
+
+> Default: false， The (7.2 <= Version < 8.1) the default behavior is true
+
+By default, messages sent are first placed into the Channel in memory and then processed linearly.
+If set to true, the task of sending messages will be processed in parallel by the .NET thread pool, which will greatly increase the speed of sending.

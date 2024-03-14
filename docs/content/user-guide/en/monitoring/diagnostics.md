@@ -71,13 +71,13 @@ dotnet-counters monitor --process-id=25496 --counters=DotNetCore.CAP.EventCounte
 
 process-id： The ID of the CAP process to collect counter data from.
 
-![img](/img/dotnet-counters.gif)
+![img](../../../img/dotnet-counters.gif)
 
 ### Monitor with dashboard
 
 You can configure `x.UseDashboard()` to open the dashboard to view Metrics graph charts.
 
-![img](/img/dashboard-metrics.gif)
+![img](../../../img/dashboard-metrics.gif)
 
 In the Realtime Metric Graph, the time axis will scroll in real time over time so that you can see the rate of publishing and consuming messages per second, And the consumer execution time is "dotted" on the Y1 axis (Y0 axis is the rates, and the Y1 axis is the execution elpsed time).
  
