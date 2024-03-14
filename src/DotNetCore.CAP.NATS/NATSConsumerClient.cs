@@ -97,14 +97,17 @@ namespace DotNetCore.CAP.NATS
                 {
                     try
                     {
+                        var consumerConfig = ConsumerConfiguration.Builder()
+                                  .WithDurable(Helper.Normalized(groupName + "-" + subject))
+                                  .WithDeliverPolicy(DeliverPolicy.New)
+                                  .WithAckWait(30000)
+                                  .WithAckPolicy(AckPolicy.Explicit);
+                        
+                        _natsOptions.ConsumerOptions?.Invoke(consumerConfig);
+
                         var pso = PushSubscribeOptions.Builder()
                             .WithStream(subjectStream.Key)
-                            .WithConfiguration(ConsumerConfiguration.Builder()
-                                .WithDurable(Helper.Normalized(groupName + "-" + subject))
-                                .WithDeliverPolicy(_natsOptions.DeliverPolicy)
-                                .WithAckWait(10000)
-                                .WithAckPolicy(AckPolicy.Explicit)
-                                .Build())
+                            .WithConfiguration(consumerConfig.Build())
                             .Build();
 
                         js.PushSubscribeAsync(subject, groupName, SubscriptionMessageHandler, false, pso);

@@ -42,8 +42,9 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 Options | NATS 客户端配置 | Options | Options
 Servers | 服务器Urls地址 | string | NULL
 ConnectionPoolSize  | 连接池数量 | uint | 10
-DeliverPolicy | 消费消息的策略点 | enum | DeliverPolicy.New
-
+DeliverPolicy | 消费消息的策略点（⚠️在8.1.0版本移除，使用`ConsumerOptions`替代。） | enum | DeliverPolicy.New
+StreamOptions | 🆕 Stream 配置项 |  Action | NULL
+ConsumerOptions | 🆕 Consumer 配置项 | Action | NULL
 
 #### NATS ConfigurationOptions
 
