@@ -33,7 +33,7 @@ public void TestBar(DateTime value)
 
 在 CAP 启动后，在 AWS SNS 中你将看到
 
-![img](/img/aws-sns-demo.png)
+![img](../../../img/aws-sns-demo.png)
 
 ### SQS
 
@@ -41,7 +41,7 @@ public void TestBar(DateTime value)
 
 该 SQS 队列将订阅 SNS 中的 Topic ，如下图：
 
-![img](/img/aws-sns-demo.png)
+![img](../../../img/aws-sns-demo.png)
 
 !!! warning "注意事项"
     由于 AWS SNS 的限制，当你减少订阅方法时，我们不会主动删除 AWS SNS 或者 SQS 上的相关 Topic 或 Queue，你需要手动删除他们。

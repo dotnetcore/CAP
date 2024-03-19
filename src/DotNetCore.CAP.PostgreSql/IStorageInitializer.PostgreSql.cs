@@ -46,7 +46,7 @@ public class PostgreSqlStorageInitializer : IStorageInitializer
         if (cancellationToken.IsCancellationRequested) return;
 
         var sql = CreateDbTablesScript(_options.Value.Schema);
-        var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         object[] sqlParams =
         {

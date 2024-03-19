@@ -50,7 +50,7 @@ public class PostgreSqlDataStorage : IDataStorage
     {
         var sql =
             $"UPDATE {_lockName} SET \"Instance\"=@Instance,\"LastLockTime\"=@LastLockTime WHERE \"Key\"=@Key AND \"LastLockTime\" < @TTL;";
-        var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         object[] sqlParams =
         {
@@ -67,7 +67,7 @@ public class PostgreSqlDataStorage : IDataStorage
     {
         var sql =
             $"UPDATE {_lockName} SET \"Instance\"='',\"LastLockTime\"=@LastLockTime WHERE \"Key\"=@Key AND \"Instance\"=@Instance;";
-        var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         object[] sqlParams =
         {
@@ -82,7 +82,7 @@ public class PostgreSqlDataStorage : IDataStorage
     {
         var sql =
             $"UPDATE {_lockName} SET \"LastLockTime\"=\"LastLockTime\"+interval '{ttl.TotalSeconds}' second WHERE \"Key\"=@Key AND \"Instance\"=@Instance;";
-        var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         object[] sqlParams =
         {
@@ -96,7 +96,7 @@ public class PostgreSqlDataStorage : IDataStorage
     {
         var sql =
             $"UPDATE {_pubName} SET \"StatusName\"='{StatusName.Delayed}' WHERE \"Id\" IN ({string.Join(',', ids)});";
-        var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
     }
@@ -140,7 +140,7 @@ public class PostgreSqlDataStorage : IDataStorage
 
         if (transaction == null)
         {
-            var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            var connection = _options.Value.CreateConnection();
             await using var _ = connection.ConfigureAwait(false);
             await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
         }
@@ -205,7 +205,7 @@ public class PostgreSqlDataStorage : IDataStorage
     public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
         CancellationToken token = default)
     {
-        var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         return await connection.ExecuteNonQueryAsync(
                 $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout AND (\"StatusName\"='{StatusName.Succeeded}' OR \"StatusName\"='{StatusName.Failed}') LIMIT @batchCount);",
@@ -238,7 +238,7 @@ public class PostgreSqlDataStorage : IDataStorage
             new NpgsqlParameter("@OneMinutesAgo", QueuedMessageFetchTime())
         };
 
-        await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        await using var connection = _options.Value.CreateConnection();
         await connection.OpenAsync(token);
         await using var transaction = await connection.BeginTransactionAsync(token);
         var messageList = await connection.ExecuteReaderAsync(sql, async reader =>
@@ -296,7 +296,7 @@ public class PostgreSqlDataStorage : IDataStorage
         }
         else
         {
-            await using var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+            await using var connection = _options.Value.CreateConnection();
             await using var _ = connection.ConfigureAwait(false);
             await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
         }
@@ -308,7 +308,7 @@ public class PostgreSqlDataStorage : IDataStorage
             $"INSERT INTO {_recName}(\"Id\",\"Version\",\"Name\",\"Group\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\",\"StatusName\")" +
             $"VALUES(@Id,'{_capOptions.Value.Version}',@Name,@Group,@Content,@Retries,@Added,@ExpiresAt,@StatusName) RETURNING \"Id\";";
 
-        var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         await connection.ExecuteNonQueryAsync(sql, sqlParams: sqlParams).ConfigureAwait(false);
     }
@@ -327,7 +327,7 @@ public class PostgreSqlDataStorage : IDataStorage
             new NpgsqlParameter("@Added", fourMinAgo)
         };
 
-        var connection = new NpgsqlConnection(_options.Value.ConnectionString);
+        var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         var result = await connection.ExecuteReaderAsync(sql, async reader =>
         {

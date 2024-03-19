@@ -6,6 +6,7 @@ using DotNetCore.CAP.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Npgsql;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;
@@ -15,7 +16,21 @@ public class PostgreSqlOptions : EFOptions
     /// <summary>
     /// Gets or sets the database's connection string that will be used to store database entities.
     /// </summary>
+    [Obsolete("Use .DataSource = NpgsqlDataSource.Create(<connectionString>) for same behavior.")]
     public string ConnectionString { get; set; } = default!;
+    
+    /// <summary>
+    /// Gets or sets the Npgsql data source that will be used to store database entities.
+    /// </summary>
+    public NpgsqlDataSource? DataSource { get; set; }
+
+    /// <summary>
+    /// Creates an Npgsql connection from the configured data source.
+    /// </summary>
+    internal NpgsqlConnection CreateConnection()
+    {
+        return DataSource != null ? DataSource.CreateConnection() : new NpgsqlConnection(ConnectionString);
+    }
 }
 
 internal class ConfigurePostgreSqlOptions : IConfigureOptions<PostgreSqlOptions>

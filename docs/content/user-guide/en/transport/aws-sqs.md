@@ -32,7 +32,7 @@ public void TestBar(DateTime value)
 ```
 After CAP startups, you will see in SNS management console:
 
-![img](/img/aws-sns-demo.png)
+![img](../../../img/aws-sns-demo.png)
 
 ### SQS
 
@@ -40,7 +40,7 @@ For each consumer group, CAP will create a corresponding SQS queue, the name of 
 
 The SQS queue will subscribe to Topic in SNS, as shown below:
 
-![img](/img/aws-sns-demo.png)
+![img](../../../img/aws-sns-demo.png)
 
 !!! warning "Precautions"
     Due to the limitation of AWS SNS, when you remove the subscription method, CAP will not delete topics or queues on AWS SNS or SQS, you need to delete them manually.

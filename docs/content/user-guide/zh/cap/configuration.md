@@ -157,3 +157,10 @@ services.AddCap(config =>
 
 !!! note "注意事项"
     设置为 true 可能会产生一些问题，当订阅方法执行过慢耗时太久时，会导致重试线程拾取到还未执行的的消息。重试线程默认拾取4分钟前（FallbackWindowLookbackSeconds 配置项）的消息，也就是说如果消费端积压了超过4分钟（FallbackWindowLookbackSeconds 配置项）的消息就会被重新拾取到再次执行
+
+#### EnablePublishParallelSend
+
+> 默认值: false
+
+默认情况下，发送的消息都先放置到内存同一个Channel中，然后线性处理。
+如果设置为 true，则发送消息的任务将由.NET线程池并行处理，这会大大提高发送的速度。

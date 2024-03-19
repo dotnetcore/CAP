@@ -32,10 +32,11 @@ public void ConfigureServices(IServiceCollection services)
 
 #### PostgreSqlOptions
 
-NAME | DESCRIPTION | TYPE | DEFAULT
-:---|:---|---|:---
-Schema | Database schema | string | cap 
-ConnectionString | Database connection string | string | 
+NAME | DESCRIPTION                | TYPE                 | DEFAULT
+:---|:---------------------------|----------------------|:---
+Schema | Database schema            | string               | cap 
+ConnectionString | Database connection string | string               |
+DataSource | [Data source](https://www.npgsql.org/doc/basic-usage.html#data-source) | [NpgsqlDataSource](https://www.npgsql.org/doc/api/Npgsql.NpgsqlDataSource.html) |
 
 ## Publish with transaction
 

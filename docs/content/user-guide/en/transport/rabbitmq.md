@@ -74,7 +74,7 @@ services.AddCap(x =>
 
 When the message sent from the RabbitMQ management console or a heterogeneous system, because of the CAP needs to define additional headers, so an exception will occur at this time. By providing this parameter to set the custom headersn to make the subscriber works.
 
-You can find the description of [Header Information](../cap/messaging#heterogeneous-system-integration) here.
+You can find the description of [Header Information](../cap/messaging.md#heterogeneous-system-integration) here.
 
 Example：
 
