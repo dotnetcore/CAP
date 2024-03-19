@@ -144,6 +144,12 @@ The expiration time (in seconds) of the failed message. When the message is sent
 
 If `true` then all consumers within the same group pushes received messages to own dispatching pipeline channel. Each channel has set thread count to `ConsumerThreadCount` value.
 
+#### DefaultPublishHeaders
+
+> Default: Dictionary<string, string>.Empty
+
+When populated - automatically adds these headers to all outgoing messages, never overrides any existing default headers.
+
 #### EnableConsumerPrefetch
 
 > Default: false， Before version 7.0 the default behavior is true

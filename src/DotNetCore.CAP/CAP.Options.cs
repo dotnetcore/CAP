@@ -111,6 +111,11 @@ public class CapOptions
     public bool UseDispatchingPerGroup { get; set; }
 
     /// <summary>
+    /// Headers to be added to the message when it is published.
+    /// </summary>
+    public IDictionary<string, string> DefaultPublishHeaders { get; } = new Dictionary<string, string>();
+
+    /// <summary>
     /// Configure the retry processor to pick up the backtrack time window for Scheduled or Failed status messages.
     /// Default is 240 seconds.
     /// </summary>

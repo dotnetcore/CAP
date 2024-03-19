@@ -149,6 +149,14 @@ internal class CapPublisher : ICapPublisher
             headers.Add(Headers.SentTime, publishTime.ToString());
         }
 
+        foreach (var defaultPublishHeader in _capOptions.DefaultPublishHeaders)
+        {
+            if (!headers.ContainsKey(defaultPublishHeader.Key))
+            {
+                headers.Add(defaultPublishHeader.Key, defaultPublishHeader.Value);
+            }
+        }
+
         var message = new Message(headers, value);
 
         long? tracingTimestamp = null;
