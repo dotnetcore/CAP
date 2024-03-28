@@ -1,0 +1,3546 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="A distributed transaction solution in micro-service base on eventually consistency, also an eventbus with Outbox pattern.">
+      
+      
+        <meta name="author" content="CAP Team">
+      
+      
+        <link rel="canonical" href="http://cap.dotnetcore.xyz/about/release-notes/">
+      
+      
+        <link rel="prev" href="../contact-us/">
+      
+      
+        <link rel="next" href="../license/">
+      
+      <link rel="icon" href="../../img/favicon.ico">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-9.0.6">
+    
+    
+      
+        <title>Release Notes - CAP</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.558e4712.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.2505c338.min.css">
+      
+      
+
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce((e,_)=>(e<<5)-e+_.charCodeAt(0),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+
+  <script id="__analytics">function __md_analytics(){function n(){dataLayer.push(arguments)}window.dataLayer=window.dataLayer||[],n("js",new Date),n("config","G-YSZ3YE8TE1"),document.addEventListener("DOMContentLoaded",function(){document.forms.search&&document.forms.search.query.addEventListener("blur",function(){this.value&&n("event","search",{search_term:this.value})}),document$.subscribe(function(){var a=document.forms.feedback;if(void 0!==a)for(var e of a.querySelectorAll("[type=submit]"))e.addEventListener("click",function(e){e.preventDefault();var t=document.location.pathname,e=this.getAttribute("data-md-value");n("event","feedback",{page:t,data:e}),a.firstElementChild.disabled=!0;e=a.querySelector(".md-feedback__note [data-md-value='"+e+"']");e&&(e.hidden=!1)}),a.hidden=!1}),location$.subscribe(function(e){n("config","G-YSZ3YE8TE1",{page_path:e.pathname})})});var e=document.createElement("script");e.async=!0,e.src="https://www.googletagmanager.com/gtag/js?id=G-YSZ3YE8TE1",document.getElementById("__analytics").insertAdjacentElement("afterEnd",e)}</script>
+
+  
+    <script>"undefined"!=typeof __md_analytics&&__md_analytics()</script>
+  
+
+    
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="deep-purple" data-md-color-accent="indigo">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#release-notes" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="CAP" class="md-header__button md-logo" aria-label="CAP" data-md-component="logo">
+      
+  <img src="../../img/logo.svg" alt="logo">
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            CAP
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Release Notes
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+      <div class="md-header__option">
+        <div class="md-select">
+          
+          <button class="md-header__button md-icon" aria-label="Select language">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="m12.87 15.07-2.54-2.51.03-.03A17.52 17.52 0 0 0 14.07 6H17V4h-7V2H8v2H1v2h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04M18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12m-2.62 7 1.62-4.33L19.12 17h-3.24Z"/></svg>
+          </button>
+          <div class="md-select__inner">
+            <ul class="md-select__list">
+              
+                <li class="md-select__item">
+                  <a href="/user-guide/en/getting-started/quick-start" hreflang="en" class="md-select__link">
+                    English
+                  </a>
+                </li>
+              
+                <li class="md-select__item">
+                  <a href="/user-guide/zh/getting-started/quick-start" hreflang="zh" class="md-select__link">
+                    中文
+                  </a>
+                </li>
+              
+            </ul>
+          </div>
+        </div>
+      </div>
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/dotnetcore/CAP" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+            
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../.." class="md-tabs__link">
+      Home
+    </a>
+  </li>
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../user-guide/en/getting-started/quick-start/" class="md-tabs__link">
+        Documentation
+      </a>
+    </li>
+  
+
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../user-guide/zh/getting-started/quick-start/" class="md-tabs__link">
+        文档（中文）
+      </a>
+    </li>
+  
+
+  
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../contact-us/" class="md-tabs__link md-tabs__link--active">
+        About
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="CAP" class="md-nav__button md-logo" aria-label="CAP" data-md-component="logo">
+      
+  <img src="../../img/logo.svg" alt="logo">
+
+    </a>
+    CAP
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/dotnetcore/CAP" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_2" type="checkbox" id="__nav_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2" tabindex="0" aria-expanded="false">
+          Documentation
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Documentation" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Documentation
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_2_1" type="checkbox" id="__nav_2_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_1" tabindex="0" aria-expanded="false">
+          Getting Started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting Started" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_1">
+          <span class="md-nav__icon md-icon"></span>
+          Getting Started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/getting-started/quick-start/" class="md-nav__link">
+        Quick Start
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/getting-started/introduction/" class="md-nav__link">
+        Introduction
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/getting-started/contributing/" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_2_2" type="checkbox" id="__nav_2_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_2" tabindex="0" aria-expanded="false">
+          CAP
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="CAP" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_2">
+          <span class="md-nav__icon md-icon"></span>
+          CAP
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/cap/configuration/" class="md-nav__link">
+        Configuration
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/cap/messaging/" class="md-nav__link">
+        Messaging
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/cap/filter/" class="md-nav__link">
+        Filter
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/cap/serialization/" class="md-nav__link">
+        Serialization
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/cap/transactions/" class="md-nav__link">
+        Transactions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/cap/idempotence/" class="md-nav__link">
+        Idempotence
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_2_3" type="checkbox" id="__nav_2_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_3" tabindex="0" aria-expanded="false">
+          Transport
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Transport" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_3">
+          <span class="md-nav__icon md-icon"></span>
+          Transport
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/transport/general/" class="md-nav__link">
+        General
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/transport/aws-sqs/" class="md-nav__link">
+        Amazon SQS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/transport/kafka/" class="md-nav__link">
+        Apache Kafka®
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/transport/pulsar/" class="md-nav__link">
+        Apache Pulsar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/transport/azure-service-bus/" class="md-nav__link">
+        Azure Service Bus
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/transport/nats/" class="md-nav__link">
+        NATS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/transport/rabbitmq/" class="md-nav__link">
+        RabbitMQ
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/transport/redis-streams/" class="md-nav__link">
+        Redis Streams
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/transport/in-memory-queue/" class="md-nav__link">
+        In-Memory Queue
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_2_4" type="checkbox" id="__nav_2_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_4" tabindex="0" aria-expanded="false">
+          Storage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Storage" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_4">
+          <span class="md-nav__icon md-icon"></span>
+          Storage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/storage/general/" class="md-nav__link">
+        General
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/storage/sqlserver/" class="md-nav__link">
+        SQL Server
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/storage/mysql/" class="md-nav__link">
+        MySQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/storage/postgresql/" class="md-nav__link">
+        PostgreSql
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/storage/mongodb/" class="md-nav__link">
+        MongoDB
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/storage/in-memory-storage/" class="md-nav__link">
+        In-Memory
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_5" tabindex="0" aria-expanded="false">
+          Monitoring
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Monitoring" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Monitoring
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/monitoring/consul/" class="md-nav__link">
+        Consul
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/monitoring/dashboard/" class="md-nav__link">
+        Dashboard
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/monitoring/kubernetes/" class="md-nav__link">
+        Kubernetes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/monitoring/diagnostics/" class="md-nav__link">
+        Diagnostics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/monitoring/opentelemetry/" class="md-nav__link">
+        OpenTelemetry
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_2_6" type="checkbox" id="__nav_2_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_2_6" tabindex="0" aria-expanded="false">
+          Samples
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Samples" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_6">
+          <span class="md-nav__icon md-icon"></span>
+          Samples
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/samples/github/" class="md-nav__link">
+        Github
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/samples/eshoponcontainers/" class="md-nav__link">
+        eShopOnContainers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/en/samples/faq/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3" tabindex="0" aria-expanded="false">
+          文档（中文）
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="文档（中文）" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          文档（中文）
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_3_1" type="checkbox" id="__nav_3_1" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_1" tabindex="0" aria-expanded="false">
+          入门
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="入门" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_1">
+          <span class="md-nav__icon md-icon"></span>
+          入门
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/getting-started/quick-start/" class="md-nav__link">
+        快速开始
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/getting-started/introduction/" class="md-nav__link">
+        介绍
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/getting-started/contributing/" class="md-nav__link">
+        贡献
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_3_2" type="checkbox" id="__nav_3_2" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_2" tabindex="0" aria-expanded="false">
+          CAP
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="CAP" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_2">
+          <span class="md-nav__icon md-icon"></span>
+          CAP
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/cap/configuration/" class="md-nav__link">
+        配置
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/cap/messaging/" class="md-nav__link">
+        消息
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/cap/filter/" class="md-nav__link">
+        过滤器
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/cap/serialization/" class="md-nav__link">
+        序列化
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/cap/transactions/" class="md-nav__link">
+        事务
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/cap/idempotence/" class="md-nav__link">
+        幂等性
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_3_3" type="checkbox" id="__nav_3_3" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_3" tabindex="0" aria-expanded="false">
+          传输
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="传输" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_3">
+          <span class="md-nav__icon md-icon"></span>
+          传输
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/transport/general/" class="md-nav__link">
+        简介
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/transport/aws-sqs/" class="md-nav__link">
+        Amazon SQS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/transport/kafka/" class="md-nav__link">
+        Apache Kafka®
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/transport/pulsar/" class="md-nav__link">
+        Apache Pulsar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/transport/azure-service-bus/" class="md-nav__link">
+        Azure Service Bus
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/transport/nats/" class="md-nav__link">
+        NATS
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/transport/rabbitmq/" class="md-nav__link">
+        RabbitMQ
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/transport/redis-streams/" class="md-nav__link">
+        Redis Streams
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/transport/in-memory-queue/" class="md-nav__link">
+        In-Memory Queue
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_3_4" type="checkbox" id="__nav_3_4" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_4" tabindex="0" aria-expanded="false">
+          存储
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="存储" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_4">
+          <span class="md-nav__icon md-icon"></span>
+          存储
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/storage/general/" class="md-nav__link">
+        简介
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/storage/sqlserver/" class="md-nav__link">
+        SQL Server
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/storage/mysql/" class="md-nav__link">
+        MySQL
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/storage/postgresql/" class="md-nav__link">
+        PostgreSql
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/storage/mongodb/" class="md-nav__link">
+        MongoDB
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/storage/in-memory-storage/" class="md-nav__link">
+        In-Memory
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_3_5" type="checkbox" id="__nav_3_5" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_5" tabindex="0" aria-expanded="false">
+          监控
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="监控" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_5">
+          <span class="md-nav__icon md-icon"></span>
+          监控
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/monitoring/consul/" class="md-nav__link">
+        Consul
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/monitoring/dashboard/" class="md-nav__link">
+        Dashboard
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/monitoring/kubernetes/" class="md-nav__link">
+        Kubernetes
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/monitoring/diagnostics/" class="md-nav__link">
+        Diagnostics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/monitoring/opentelemetry/" class="md-nav__link">
+        OpenTelemetry
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_3_6" type="checkbox" id="__nav_3_6" >
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3_6" tabindex="0" aria-expanded="false">
+          示例
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="示例" data-md-level="2">
+        <label class="md-nav__title" for="__nav_3_6">
+          <span class="md-nav__icon md-icon"></span>
+          示例
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/samples/castle.dynamicproxy/" class="md-nav__link">
+        Castle DynamicProxy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/samples/github/" class="md-nav__link">
+        Github
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/samples/eshoponcontainers/" class="md-nav__link">
+        eShopOnContainers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../user-guide/zh/samples/faq/" class="md-nav__link">
+        FAQ
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+      
+      
+      <input class="md-nav__toggle md-toggle " data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4" tabindex="0" aria-expanded="true">
+          About
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="About" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          About
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../contact-us/" class="md-nav__link">
+        Contact Us
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Release Notes
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Release Notes
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-800-dec-14-2023" class="md-nav__link">
+    Version 8.0.0 (Dec 14, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-722-nov-1-2023" class="md-nav__link">
+    Version 7.2.2 (Nov 1, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-721-sep-8-2023" class="md-nav__link">
+    Version 7.2.1 (Sep 8, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-720-jul-30-2023" class="md-nav__link">
+    Version 7.2.0 (Jul 30, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-714-jun-17-2023" class="md-nav__link">
+    Version 7.1.4 (Jun 17, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-713-may-17-2023" class="md-nav__link">
+    Version 7.1.3 (May 17, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-712-apr-25-2023" class="md-nav__link">
+    Version 7.1.2 (Apr 25, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-711-apr-7-2023" class="md-nav__link">
+    Version 7.1.1 (Apr 7, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-710-mar-5-2023" class="md-nav__link">
+    Version 7.1.0 (Mar 5, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-703-feb-2-2023" class="md-nav__link">
+    Version 7.0.3 (Feb 2, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-702-jan-9-2023" class="md-nav__link">
+    Version 7.0.2 (Jan 9, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-701-2022-12-16" class="md-nav__link">
+    Version 7.0.1 (2022-12-16)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-700-2022-11-27" class="md-nav__link">
+    Version 7.0.0 (2022-11-27)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-621-2022-10-15" class="md-nav__link">
+    Version 6.2.1 (2022-10-15)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-620-2022-09-19" class="md-nav__link">
+    Version 6.2.0 (2022-09-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-610-2022-06-10" class="md-nav__link">
+    Version 6.1.0 (2022-06-10)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-601-2022-02-15" class="md-nav__link">
+    Version 6.0.1 (2022-02-15)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-600-2022-01-06" class="md-nav__link">
+    Version 6.0.0 (2022-01-06)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-520-2021-11-12" class="md-nav__link">
+    Version 5.2.0 (2021-11-12)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-512-2021-07-26" class="md-nav__link">
+    Version 5.1.2 (2021-07-26)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-511-2021-07-09" class="md-nav__link">
+    Version 5.1.1 (2021-07-09)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-510-2021-06-07" class="md-nav__link">
+    Version 5.1.0 (2021-06-07)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-503-2021-05-14" class="md-nav__link">
+    Version 5.0.3 (2021-05-14)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-502-2021-04-28" class="md-nav__link">
+    Version 5.0.2 (2021-04-28)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-501-2021-04-07" class="md-nav__link">
+    Version 5.0.1 (2021-04-07)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-500-2021-03-23" class="md-nav__link">
+    Version 5.0.0 (2021-03-23)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-312-2020-12-03" class="md-nav__link">
+    Version 3.1.2 (2020-12-03)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-311-2020-09-23" class="md-nav__link">
+    Version 3.1.1 (2020-09-23)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-310-2020-08-15" class="md-nav__link">
+    Version 3.1.0 (2020-08-15)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-304-2020-05-27" class="md-nav__link">
+    Version 3.0.4 (2020-05-27)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-303-2020-04-01" class="md-nav__link">
+    Version 3.0.3 (2020-04-01)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-302-2020-02-05" class="md-nav__link">
+    Version 3.0.2 (2020-02-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-301-2020-01-19" class="md-nav__link">
+    Version 3.0.1 (2020-01-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-300-2019-12-30" class="md-nav__link">
+    Version 3.0.0 (2019-12-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-260-2019-08-29" class="md-nav__link">
+    Version 2.6.0 (2019-08-29)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-251-2019-06-21" class="md-nav__link">
+    Version 2.5.1 (2019-06-21)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-250-2019-03-30" class="md-nav__link">
+    Version 2.5.0 (2019-03-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-242-2019-01-08" class="md-nav__link">
+    Version 2.4.2 (2019-01-08)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-241-2018-12-19" class="md-nav__link">
+    Version 2.4.1 (2018-12-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-240-2018-12-08" class="md-nav__link">
+    Version 2.4.0 (2018-12-08)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-231-2018-10-29" class="md-nav__link">
+    Version 2.3.1 (2018-10-29)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-230-2018-08-30" class="md-nav__link">
+    Version 2.3.0 (2018-08-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-225-2018-07-19" class="md-nav__link">
+    Version 2.2.5 (2018-07-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-224-2018-06-05" class="md-nav__link">
+    Version 2.2.4 (2018-06-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-223-2018-06-05" class="md-nav__link">
+    Version 2.2.3 (2018-06-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-222-2018-04-28" class="md-nav__link">
+    Version 2.2.2 (2018-04-28)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-221-2018-04-18" class="md-nav__link">
+    Version 2.2.1 (2018-04-18)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-220-2018-04-17" class="md-nav__link">
+    Version 2.2.0 (2018-04-17)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-214-2018-03-16" class="md-nav__link">
+    Version 2.1.4 (2018-03-16)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-213-2018-01-24" class="md-nav__link">
+    Version 2.1.3 (2018-01-24)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-212-2017-12-18" class="md-nav__link">
+    Version 2.1.2 (2017-12-18)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-211-2017-11-28" class="md-nav__link">
+    Version 2.1.1 (2017-11-28)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-210-2017-11-17" class="md-nav__link">
+    Version 2.1.0 (2017-11-17)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-202-2017-09-29" class="md-nav__link">
+    Version 2.0.2 (2017-09-29)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-201-2017-09-16" class="md-nav__link">
+    Version 2.0.1 (2017-09-16)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-200-2017-09-01" class="md-nav__link">
+    Version 2.0.0 (2017-09-01)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-110-2017-08-04" class="md-nav__link">
+    Version 1.1.0 (2017-08-04)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-101-2017-07-25" class="md-nav__link">
+    Version 1.0.1 (2017-07-25)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-100-2017-07-19" class="md-nav__link">
+    Version 1.0.0 (2017-07-19)
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../license/" class="md-nav__link">
+        License
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+                
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#version-800-dec-14-2023" class="md-nav__link">
+    Version 8.0.0 (Dec 14, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-722-nov-1-2023" class="md-nav__link">
+    Version 7.2.2 (Nov 1, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-721-sep-8-2023" class="md-nav__link">
+    Version 7.2.1 (Sep 8, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-720-jul-30-2023" class="md-nav__link">
+    Version 7.2.0 (Jul 30, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-714-jun-17-2023" class="md-nav__link">
+    Version 7.1.4 (Jun 17, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-713-may-17-2023" class="md-nav__link">
+    Version 7.1.3 (May 17, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-712-apr-25-2023" class="md-nav__link">
+    Version 7.1.2 (Apr 25, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-711-apr-7-2023" class="md-nav__link">
+    Version 7.1.1 (Apr 7, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-710-mar-5-2023" class="md-nav__link">
+    Version 7.1.0 (Mar 5, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-703-feb-2-2023" class="md-nav__link">
+    Version 7.0.3 (Feb 2, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-702-jan-9-2023" class="md-nav__link">
+    Version 7.0.2 (Jan 9, 2023)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-701-2022-12-16" class="md-nav__link">
+    Version 7.0.1 (2022-12-16)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-700-2022-11-27" class="md-nav__link">
+    Version 7.0.0 (2022-11-27)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-621-2022-10-15" class="md-nav__link">
+    Version 6.2.1 (2022-10-15)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-620-2022-09-19" class="md-nav__link">
+    Version 6.2.0 (2022-09-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-610-2022-06-10" class="md-nav__link">
+    Version 6.1.0 (2022-06-10)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-601-2022-02-15" class="md-nav__link">
+    Version 6.0.1 (2022-02-15)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-600-2022-01-06" class="md-nav__link">
+    Version 6.0.0 (2022-01-06)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-520-2021-11-12" class="md-nav__link">
+    Version 5.2.0 (2021-11-12)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-512-2021-07-26" class="md-nav__link">
+    Version 5.1.2 (2021-07-26)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-511-2021-07-09" class="md-nav__link">
+    Version 5.1.1 (2021-07-09)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-510-2021-06-07" class="md-nav__link">
+    Version 5.1.0 (2021-06-07)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-503-2021-05-14" class="md-nav__link">
+    Version 5.0.3 (2021-05-14)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-502-2021-04-28" class="md-nav__link">
+    Version 5.0.2 (2021-04-28)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-501-2021-04-07" class="md-nav__link">
+    Version 5.0.1 (2021-04-07)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-500-2021-03-23" class="md-nav__link">
+    Version 5.0.0 (2021-03-23)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-312-2020-12-03" class="md-nav__link">
+    Version 3.1.2 (2020-12-03)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-311-2020-09-23" class="md-nav__link">
+    Version 3.1.1 (2020-09-23)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-310-2020-08-15" class="md-nav__link">
+    Version 3.1.0 (2020-08-15)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-304-2020-05-27" class="md-nav__link">
+    Version 3.0.4 (2020-05-27)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-303-2020-04-01" class="md-nav__link">
+    Version 3.0.3 (2020-04-01)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-302-2020-02-05" class="md-nav__link">
+    Version 3.0.2 (2020-02-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-301-2020-01-19" class="md-nav__link">
+    Version 3.0.1 (2020-01-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-300-2019-12-30" class="md-nav__link">
+    Version 3.0.0 (2019-12-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-260-2019-08-29" class="md-nav__link">
+    Version 2.6.0 (2019-08-29)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-251-2019-06-21" class="md-nav__link">
+    Version 2.5.1 (2019-06-21)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-250-2019-03-30" class="md-nav__link">
+    Version 2.5.0 (2019-03-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-242-2019-01-08" class="md-nav__link">
+    Version 2.4.2 (2019-01-08)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-241-2018-12-19" class="md-nav__link">
+    Version 2.4.1 (2018-12-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-240-2018-12-08" class="md-nav__link">
+    Version 2.4.0 (2018-12-08)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-231-2018-10-29" class="md-nav__link">
+    Version 2.3.1 (2018-10-29)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-230-2018-08-30" class="md-nav__link">
+    Version 2.3.0 (2018-08-30)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-225-2018-07-19" class="md-nav__link">
+    Version 2.2.5 (2018-07-19)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-224-2018-06-05" class="md-nav__link">
+    Version 2.2.4 (2018-06-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-223-2018-06-05" class="md-nav__link">
+    Version 2.2.3 (2018-06-05)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-222-2018-04-28" class="md-nav__link">
+    Version 2.2.2 (2018-04-28)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-221-2018-04-18" class="md-nav__link">
+    Version 2.2.1 (2018-04-18)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-220-2018-04-17" class="md-nav__link">
+    Version 2.2.0 (2018-04-17)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-214-2018-03-16" class="md-nav__link">
+    Version 2.1.4 (2018-03-16)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-213-2018-01-24" class="md-nav__link">
+    Version 2.1.3 (2018-01-24)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-212-2017-12-18" class="md-nav__link">
+    Version 2.1.2 (2017-12-18)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-211-2017-11-28" class="md-nav__link">
+    Version 2.1.1 (2017-11-28)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-210-2017-11-17" class="md-nav__link">
+    Version 2.1.0 (2017-11-17)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-202-2017-09-29" class="md-nav__link">
+    Version 2.0.2 (2017-09-29)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-201-2017-09-16" class="md-nav__link">
+    Version 2.0.1 (2017-09-16)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-200-2017-09-01" class="md-nav__link">
+    Version 2.0.0 (2017-09-01)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-110-2017-08-04" class="md-nav__link">
+    Version 1.1.0 (2017-08-04)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-101-2017-07-25" class="md-nav__link">
+    Version 1.0.1 (2017-07-25)
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#version-100-2017-07-19" class="md-nav__link">
+    Version 1.0.0 (2017-07-19)
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+  
+  
+
+
+
+<h1 id="release-notes">Release Notes<a class="headerlink" href="#release-notes" title="Permanent link">&para;</a></h1>
+<h2 id="version-800-dec-14-2023">Version 8.0.0 (Dec 14, 2023)<a class="headerlink" href="#version-800-dec-14-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Breaking Changes</strong></p>
+<p>Removed <code>DefaultAuthenticationScheme</code>, <code>UseChallengeOnAuth</code>, <code>DefaultChallengeScheme</code> and <code>AuthorizationPolicy</code> options of DotNetCore.CAP.Dashboard.
+Now CAP dashboard auth/authz mechanism to leverage the "ASP.NET Core" way of doing it, see <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1428" title="GitHub Issue: dotnetcore/cap #1428">#1428</a>.</p>
+<ul>
+<li>Streamlined auth via asp.net middlewares. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1434" title="GitHub Issue: dotnetcore/cap #1434">#1434</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/mviegas" title="GitHub User: mviegas">@mviegas</a></li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Fully Support .NET 8.</li>
+<li>Add <code>FallbackWindowLookbackSeconds</code> option to configure the retry processor to pick up the backtrack time window for Scheduled or Failed status messages. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1455" title="GitHub Issue: dotnetcore/cap #1455">#1455</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/apatozi" title="GitHub User: apatozi">@apatozi</a></li>
+<li>Update IConsumerRegister.Default.cs to make dispose thread safe. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1438" title="GitHub Issue: dotnetcore/cap #1438">#1438</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/blashbul" title="GitHub User: blashbul">@blashbul</a></li>
+<li>Compatible with .NET 8's dependency injection KeyedService. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1436" title="GitHub Issue: dotnetcore/cap #1436">#1436</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/EashShow" title="GitHub User: EashShow">@EashShow</a></li>
+<li>Add virtual method to custom delay backtrack time window during delayed publishing large messges. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1429" title="GitHub Issue: dotnetcore/cap #1429">#1429</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/PoteRii" title="GitHub User: PoteRii">@PoteRii</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed message infinite retry of messages after subscriber is removed. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1456" title="GitHub Issue: dotnetcore/cap #1456">#1456</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/bschwehn" title="GitHub User: bschwehn">@bschwehn</a></li>
+<li>Fixed open telemetry context lost on consumer retry and Baggage Propagation. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1452" title="GitHub Issue: dotnetcore/cap #1452">#1452</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/bschwehn" title="GitHub User: bschwehn">@bschwehn</a></li>
+<li>Fixed NATS do not handle reconnect if the nats server is forcibly shutdown and then restarted. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1449" title="GitHub Issue: dotnetcore/cap #1449">#1449</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/davidterins" title="GitHub User: davidterins">@davidterins</a></li>
+<li>Fixed outbox pattern messages does not recovery when using DotNetCore.CAP.InMemoryStorage. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1439" title="GitHub Issue: dotnetcore/cap #1439">#1439</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/davidterins" title="GitHub User: davidterins">@davidterins</a></li>
+<li>Fixed open telemetry subscriber thows null reference when using azure service bus without connection string. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1432" title="GitHub Issue: dotnetcore/cap #1432">#1432</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/demorgi" title="GitHub User: demorgi">@demorgi</a></li>
+<li>Fixed double registration of event handler for azure service bus. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1427" title="GitHub Issue: dotnetcore/cap #1427">#1427</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/demorgi" title="GitHub User: demorgi">@demorgi</a></li>
+<li>Fixed publish delay message not working in sql server transaction. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1422" title="GitHub Issue: dotnetcore/cap #1422">#1422</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/xiangxiren" title="GitHub User: xiangxiren">@xiangxiren</a></li>
+</ul>
+<h2 id="version-722-nov-1-2023">Version 7.2.2 (Nov 1, 2023)<a class="headerlink" href="#version-722-nov-1-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>NATS support consumer config DeliverPolicy, default to New. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1404" title="GitHub Issue: dotnetcore/cap #1404">#1404</a>)</li>
+<li>Be able to configure if to subscribe to custom producer topic. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1409" title="GitHub Issue: dotnetcore/cap #1409">#1409</a>)  <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/demorgi" title="GitHub User: demorgi">@demorgi</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Try to fixes RabbitMQ basicConsume TimeOutException. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1405" title="GitHub Issue: dotnetcore/cap #1405">#1405</a>) <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/yang-xiaodong" title="GitHub User: yang-xiaodong">@yang-xiaodong</a></li>
+<li>Change MongoDb index from descending to ascending. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1415" title="GitHub Issue: dotnetcore/cap #1415">#1415</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/ustaserdar" title="GitHub User: ustaserdar">@ustaserdar</a></li>
+<li>Fixed parent span for "Event Persistence" activity trace. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1407" title="GitHub Issue: dotnetcore/cap #1407">#1407</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/blashbul" title="GitHub User: blashbul">@blashbul</a></li>
+<li>Fixed OpenTelemetry Dynatrace IsRemote flag. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1402" title="GitHub Issue: dotnetcore/cap #1402">#1402</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/phmonte" title="GitHub User: phmonte">@phmonte</a></li>
+<li>Mark Mongo time serialized to local instance time by default. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1400" title="GitHub Issue: dotnetcore/cap #1400">#1400</a>) </li>
+<li>Fixed k8s dashboard meta query error in standalone mode. <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/yang-xiaodong" title="GitHub User: yang-xiaodong">@yang-xiaodong</a></li>
+<li>Azure Service Bus, consumer fails if subscription has session enabled. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1396" title="GitHub Issue: dotnetcore/cap #1396">#1396</a>, <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1397" title="GitHub Issue: dotnetcore/cap #1397">#1397</a>)  Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/demorgi" title="GitHub User: demorgi">@demorgi</a></li>
+</ul>
+<h2 id="version-721-sep-8-2023">Version 7.2.1 (Sep 8, 2023)<a class="headerlink" href="#version-721-sep-8-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>The options <code>EnableConsumerPrefetch</code> and <code>UseDispatchingPerGroup</code> will work together without interference. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1399" title="GitHub Issue: dotnetcore/cap #1399">#1399</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed SqlServer sql case sensitive in dashboard query.  (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1389" title="GitHub Issue: dotnetcore/cap #1389">#1389</a>)</li>
+<li>Fixed Redis endpoint is null in DotNetCore.CAP.OpenTelemetry. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1384" title="GitHub Issue: dotnetcore/cap #1384">#1384</a>)</li>
+</ul>
+<h2 id="version-720-jul-30-2023">Version 7.2.0 (Jul 30, 2023)<a class="headerlink" href="#version-720-jul-30-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Breaking Changes</strong></p>
+<ul>
+<li>Remove <code>ProducerThreadCount</code> configuration option. Now automatically send task managed by the .NET thread pool. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1380" title="GitHub Issue: dotnetcore/cap #1380">#1380</a>)</li>
+<li>Change the SnowflakeId from static singleton to dependency injection singleton. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1322" title="GitHub Issue: dotnetcore/cap #1322">#1322</a>)</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add support for kubernetes discovery in dashboard. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1362" title="GitHub Issue: dotnetcore/cap #1362">#1362</a>) </li>
+<li>Message send task and consumer execute task managed by .net thread pool. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1380" title="GitHub Issue: dotnetcore/cap #1380">#1380</a>)</li>
+<li>Upgrade dependencies of NuGet packages.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed BasicQosOptions not working as expected for RabbitMQ transport. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1318" title="GitHub Issue: dotnetcore/cap #1318">#1318</a>)</li>
+<li>Revert BeginTransactionAsync support. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1376" title="GitHub Issue: dotnetcore/cap #1376">#1376</a>)</li>
+<li>Fixed SqlServer transaction rollback message still sent out.  (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1378" title="GitHub Issue: dotnetcore/cap #1378">#1378</a>)</li>
+<li></li>
+</ul>
+<h2 id="version-714-jun-17-2023">Version 7.1.4 (Jun 17, 2023)<a class="headerlink" href="#version-714-jun-17-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add suppport <code>AutoDeleteOnIdle</code> option for Azure Service Bus. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1350" title="GitHub Issue: dotnetcore/cap #1350">#1350</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/StevenDevooght" title="GitHub User: StevenDevooght">@StevenDevooght</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Keep the originall stack when consumer exception occurs. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1341" title="GitHub Issue: dotnetcore/cap #1341">#1341</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/tomyangOK" title="GitHub User: tomyangOK">@tomyangOK</a></li>
+<li>Fixed multiple invocations caused when the retry processor exceeded the <code>FailedRetryInterval</code>. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1359" title="GitHub Issue: dotnetcore/cap #1359">#1359</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/li-zheng-hao" title="GitHub User: li-zheng-hao">@li-zheng-hao</a></li>
+<li>Fixed thread blocking when enable <code>UseDispatchingPerGroup</code> option. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1356" title="GitHub Issue: dotnetcore/cap #1356">#1356</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/sampsonye" title="GitHub User: sampsonye">@sampsonye</a> <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/li-zheng-hao" title="GitHub User: li-zheng-hao">@li-zheng-hao</a></li>
+<li></li>
+</ul>
+<h2 id="version-713-may-17-2023">Version 7.1.3 (May 17, 2023)<a class="headerlink" href="#version-713-may-17-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Allow Explicit to set AllowAnonymous for the dashboard API. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1335" title="GitHub Issue: dotnetcore/cap #1335">#1335</a>)</li>
+<li>Update dashboard UI style</li>
+<li>Add Cancellation token for BeginTransactionAsync. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1317" title="GitHub Issue: dotnetcore/cap #1317">#1317</a>)  Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/denis-tsv" title="GitHub User: denis-tsv">@denis-tsv</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed postgresql AcquireLockAsync sql error. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1320" title="GitHub Issue: dotnetcore/cap #1320">#1320</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/guochen2" title="GitHub User: guochen2">@guochen2</a></li>
+<li>Fixed redis transport order pool connections non-lazy created connections. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1332" title="GitHub Issue: dotnetcore/cap #1332">#1332</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/MahmoudSamir101" title="GitHub User: MahmoudSamir101">@MahmoudSamir101</a></li>
+<li>Fixed mysql 8.0 storage skip locked not available bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1330" title="GitHub Issue: dotnetcore/cap #1330">#1330</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/yang-xiaodong" title="GitHub User: yang-xiaodong">@yang-xiaodong</a></li>
+</ul>
+<h2 id="version-712-apr-25-2023">Version 7.1.2 (Apr 25, 2023)<a class="headerlink" href="#version-712-apr-25-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Optimizing consumer duplicate detection warning logs. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1314" title="GitHub Issue: dotnetcore/cap #1314">#1314</a>)</li>
+<li>Fixes NATS consumption repeat when multiple consumer threads.</li>
+<li>Fixes NATS transport infinity reconnect race condition. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1311" title="GitHub Issue: dotnetcore/cap #1311">#1311</a>)</li>
+</ul>
+<h2 id="version-711-apr-7-2023">Version 7.1.1 (Apr 7, 2023)<a class="headerlink" href="#version-711-apr-7-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add support topic config for kafka. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1303" title="GitHub Issue: dotnetcore/cap #1303">#1303</a>)</li>
+<li>Log in to dashboard with JWT authentication. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1306" title="GitHub Issue: dotnetcore/cap #1306">#1306</a>) </li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed sqlserver character string convert to datetime2 exception. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1302" title="GitHub Issue: dotnetcore/cap #1302">#1302</a>)</li>
+<li>Fixed dashboard consul node proxy switch bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1307" title="GitHub Issue: dotnetcore/cap #1307">#1307</a>)</li>
+</ul>
+<h2 id="version-710-mar-5-2023">Version 7.1.0 (Mar 5, 2023)<a class="headerlink" href="#version-710-mar-5-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add option to support distributed locks for retry processor. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1272" title="GitHub Issue: dotnetcore/cap #1272">#1272</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/li-zheng-hao" title="GitHub User: li-zheng-hao">@li-zheng-hao</a></li>
+<li>Add option to support set BasicQos for RabbitMQ. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1267" title="GitHub Issue: dotnetcore/cap #1267">#1267</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/nunorelvao" title="GitHub User: nunorelvao">@nunorelvao</a></li>
+<li>Add option to set queue type for RabbitMQ. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1281" title="GitHub Issue: dotnetcore/cap #1281">#1281</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/PaulCousinsTTEducation" title="GitHub User: PaulCousinsTTEducation">@PaulCousinsTTEducation</a></li>
+<li>Add support publish to mutiple topics for Azure Service Bus. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1283" title="GitHub Issue: dotnetcore/cap #1283">#1283</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/jonekdahl" title="GitHub User: jonekdahl">@jonekdahl</a> <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/mviegas" title="GitHub User: mviegas">@mviegas</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed dashboard re-execute message throw null exception for MongoDB. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1279" title="GitHub Issue: dotnetcore/cap #1279">#1279</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/cagataykiziltan" title="GitHub User: cagataykiziltan">@cagataykiziltan</a></li>
+</ul>
+<h2 id="version-703-feb-2-2023">Version 7.0.3 (Feb 2, 2023)<a class="headerlink" href="#version-703-feb-2-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add SQL Filters option on topic subscribtion for AzureServiceBus. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1263" title="GitHub Issue: dotnetcore/cap #1263">#1263</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/giorgilekveishvili-meama" title="GitHub User: giorgilekveishvili-meama">@giorgilekveishvili-meama</a></li>
+<li>Add EF BeginTransaction extensions overload with isolationlevel and async version. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1266" title="GitHub Issue: dotnetcore/cap #1266">#1266</a>) <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/xshaheen" title="GitHub User: xshaheen">@xshaheen</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed dashboard re-execute message throw null exception for SqlServer and Postgres. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1259" title="GitHub Issue: dotnetcore/cap #1259">#1259</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/coolyuwk" title="GitHub User: coolyuwk">@coolyuwk</a></li>
+</ul>
+<h2 id="version-702-jan-9-2023">Version 7.0.2 (Jan 9, 2023)<a class="headerlink" href="#version-702-jan-9-2023" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Change AzureServiceBus nuget package from Microsoft.Azure.ServiceBus to Azure.Messaging.ServiceBus. (<a href="https://github.com/dotnetcore/CAP/pull/1253">https://github.com/dotnetcore/CAP/pull/1253</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed redis streams json serialize exception. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1254" title="GitHub Issue: dotnetcore/cap #1254">#1254</a>)</li>
+<li>Fixed dashboard route in balzor server app. (not support wasm) (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1244" title="GitHub Issue: dotnetcore/cap #1244">#1244</a>)</li>
+</ul>
+<h2 id="version-701-2022-12-16">Version 7.0.1 (2022-12-16)<a class="headerlink" href="#version-701-2022-12-16" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed dashboard not working in balzor app. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1244" title="GitHub Issue: dotnetcore/cap #1244">#1244</a>)</li>
+<li>Fixed error when published Winform with 'Produce Single File'. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1245" title="GitHub Issue: dotnetcore/cap #1245">#1245</a>)</li>
+</ul>
+<h2 id="version-700-2022-11-27">Version 7.0.0 (2022-11-27)<a class="headerlink" href="#version-700-2022-11-27" title="Permanent link">&para;</a></h2>
+<p><strong>Breaking Changes:</strong></p>
+<ul>
+<li><code>SubscribeFilter</code> method to asynchronous.</li>
+<li><code>IConsumerClient</code> interface <code>OnMessage</code> and <code>OnLog</code> is from event to delegate.</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Performance improvement</li>
+<li>Add support publish delay message. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1237" title="GitHub Issue: dotnetcore/cap #1237">#1237</a>)</li>
+<li>Dashbord support viewing and immediately publish for delayed messages.</li>
+<li>Add support for metrics diagnostics. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1230" title="GitHub Issue: dotnetcore/cap #1230">#1230</a>)</li>
+<li>Dashboard support real-time metric graph viewing.</li>
+<li>Add support manual start/stop CAP process. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1238" title="GitHub Issue: dotnetcore/cap #1238">#1238</a>)</li>
+<li>Add EnableConsumerPrefetch option of consumer. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1240" title="GitHub Issue: dotnetcore/cap #1240">#1240</a>)</li>
+<li>Add PublishConfirms options for RabbitMQ.</li>
+</ul>
+<p><strong>Others:</strong></p>
+<ul>
+<li>Change framework target from netstandard to net6.</li>
+<li>Upgrade NuGet to the latest version.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>RabbitMQ cluster connection failed without using default ports. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1232" title="GitHub Issue: dotnetcore/cap #1232">#1232</a>)</li>
+</ul>
+<h2 id="version-621-2022-10-15">Version 6.2.1 (2022-10-15)<a class="headerlink" href="#version-621-2022-10-15" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed EnvironmentVariableTarget.Machine only supported on windows. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1220" title="GitHub Issue: dotnetcore/cap #1220">#1220</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/cuibty" title="GitHub User: cuibty">@cuibty</a></li>
+<li>Fixed RedisStream TryGetOrCreateStreamGroupAsync to create ConsumerGroup when not found. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1212" title="GitHub Issue: dotnetcore/cap #1212">#1212</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/mlatoszek" title="GitHub User: mlatoszek">@mlatoszek</a></li>
+</ul>
+<h2 id="version-620-2022-09-19">Version 6.2.0 (2022-09-19)<a class="headerlink" href="#version-620-2022-09-19" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add Chinese support for dashboard localization.  (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1157" title="GitHub Issue: dotnetcore/cap #1157">#1157</a>)  Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/tetris1128" title="GitHub User: tetris1128">@tetris1128</a></li>
+<li>Make DbTransaction property virtual for extend of CapTransactionBase. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1179" title="GitHub Issue: dotnetcore/cap #1179">#1179</a>)  <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/yang-xiaodong" title="GitHub User: yang-xiaodong">@yang-xiaodong</a> </li>
+<li>Add logs for duplicate subscriber in same group. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1186" title="GitHub Issue: dotnetcore/cap #1186">#1186</a>)  <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/yang-xiaodong" title="GitHub User: yang-xiaodong">@yang-xiaodong</a> </li>
+<li>Record the Instance Id in the executed received messages. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1187" title="GitHub Issue: dotnetcore/cap #1187">#1187</a>)  <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/yang-xiaodong" title="GitHub User: yang-xiaodong">@yang-xiaodong</a> </li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>SnowflakeId excludes virtual and loopback and non-working NICs. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1163" title="GitHub Issue: dotnetcore/cap #1163">#1163</a>)  Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/xiatiandegaga" title="GitHub User: xiatiandegaga">@xiatiandegaga</a></li>
+<li>Fixed the health check could not get the status correctly when RabbitMQ lost connection and quickly recovered. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1193" title="GitHub Issue: dotnetcore/cap #1193">#1193</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/rpenha" title="GitHub User: rpenha">@rpenha</a></li>
+<li>Fixed dashboard gateway proxy request missing QueryString (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1168" title="GitHub Issue: dotnetcore/cap #1168">#1168</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/wwwu" title="GitHub User: wwwu">@wwwu</a></li>
+<li>Fixed the disconnect detection of RabbitMQ connection abnormality. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1178" title="GitHub Issue: dotnetcore/cap #1178">#1178</a>)</li>
+<li>Fixed Mongo queries not returning results when a element convention name is registered. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1193" title="GitHub Issue: dotnetcore/cap #1193">#1193</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/rpenha" title="GitHub User: rpenha">@rpenha</a></li>
+<li>Fixed subscriber lookup in scoped lifecycle of factory mode. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1204" title="GitHub Issue: dotnetcore/cap #1204">#1204</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/sampsonye" title="GitHub User: sampsonye">@sampsonye</a></li>
+</ul>
+<h2 id="version-610-2022-06-10">Version 6.1.0 (2022-06-10)<a class="headerlink" href="#version-610-2022-06-10" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Optimize snowflake algorithm. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1065" title="GitHub Issue: dotnetcore/cap #1065">#1065</a>)  Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/Allen-dududu" title="GitHub User: Allen-dududu">@Allen-dududu</a></li>
+<li>Add authorization policy option feature to CAP dashboard. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1113" title="GitHub Issue: dotnetcore/cap #1113">#1113</a>)  Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/albertopm19" title="GitHub User: albertopm19">@albertopm19</a></li>
+<li>Added support of ScheduledEnqueueTimeUtc for AzureServiceBus transport. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1137" title="GitHub Issue: dotnetcore/cap #1137">#1137</a>)  Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/webinex" title="GitHub User: webinex">@webinex</a></li>
+<li>Add option to configure failed messages expiration term. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1142" title="GitHub Issue: dotnetcore/cap #1142">#1142</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/dima-zhemkov" title="GitHub User: dima-zhemkov">@dima-zhemkov</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed sequence validation error when both enable Challenge and Auth of dashboard authentication. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1097" title="GitHub Issue: dotnetcore/cap #1097">#1097</a>)</li>
+<li>Used concurrentdictionary since PublishedMessages and ReceivedMessages are public and accessed from various places. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1104" title="GitHub Issue: dotnetcore/cap #1104">#1104</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/wakiter" title="GitHub User: wakiter">@wakiter</a></li>
+<li>Fixed the health check could not get the status correctly when RabbitMQ lost connection and quickly recovered. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1140" title="GitHub Issue: dotnetcore/cap #1140">#1140</a>)</li>
+<li>Fixed date file format bug when retrying query from database. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1143" title="GitHub Issue: dotnetcore/cap #1143">#1143</a>)</li>
+<li>Change reading/creating streams and consumer groups to handle non idempotent operations. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1150" title="GitHub Issue: dotnetcore/cap #1150">#1150</a>) Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/MahmoudSamir101" title="GitHub User: MahmoudSamir101">@MahmoudSamir101</a></li>
+</ul>
+<h2 id="version-601-2022-02-15">Version 6.0.1 (2022-02-15)<a class="headerlink" href="#version-601-2022-02-15" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed kafka consume excepiton for GroupLoadInProress errcode (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1085" title="GitHub Issue: dotnetcore/cap #1085">#1085</a>)</li>
+<li>Fixed deserialization exception when message body is empty byte array. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1087" title="GitHub Issue: dotnetcore/cap #1087">#1087</a>)</li>
+<li>Fixed dashboard authentication challenge bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1077" title="GitHub Issue: dotnetcore/cap #1077">#1077</a>)</li>
+</ul>
+<h2 id="version-600-2022-01-06">Version 6.0.0 (2022-01-06)<a class="headerlink" href="#version-600-2022-01-06" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Fully support .NET 6.</li>
+<li>Add support for OpenTelemetry. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/885" title="GitHub Issue: dotnetcore/cap #885">#885</a>)</li>
+<li>Improve support for NATS JetStream wildcard topic. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1047" title="GitHub Issue: dotnetcore/cap #1047">#1047</a>)</li>
+<li>Add support customer header options for Azure Service Bus. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1063" title="GitHub Issue: dotnetcore/cap #1063">#1063</a>) Thanks <a href="https://github.com/mviegas">@Mateus Viegas</a></li>
+</ul>
+<h2 id="version-520-2021-11-12">Version 5.2.0 (2021-11-12)<a class="headerlink" href="#version-520-2021-11-12" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add support for NATS JetStream. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/983" title="GitHub Issue: dotnetcore/cap #983">#983</a>)</li>
+<li>Add support for Apache Pulsar. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/610" title="GitHub Issue: dotnetcore/cap #610">#610</a>)</li>
+<li>Add possibility to process messages for each consumer group indepedently. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1027" title="GitHub Issue: dotnetcore/cap #1027">#1027</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed message content of bigint type cannot be displayed correctly in dashboard. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1028" title="GitHub Issue: dotnetcore/cap #1028">#1028</a>)</li>
+<li>Fixed unobserved tasks of async method calls in Amazon SQS. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1033" title="GitHub Issue: dotnetcore/cap #1033">#1033</a>)</li>
+<li>Fixed RabbitMQ federation plugin message header object values cause exceptions. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/1036" title="GitHub Issue: dotnetcore/cap #1036">#1036</a>)</li>
+</ul>
+<h2 id="version-512-2021-07-26">Version 5.1.2 (2021-07-26)<a class="headerlink" href="#version-512-2021-07-26" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed consumer register cancellation token source null referencee bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/952" title="GitHub Issue: dotnetcore/cap #952">#952</a>)</li>
+<li>Fixed redis streams transport cluster keys cross-hashslot bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/944" title="GitHub Issue: dotnetcore/cap #944">#944</a>)</li>
+</ul>
+<h2 id="version-511-2021-07-09">Version 5.1.1 (2021-07-09)<a class="headerlink" href="#version-511-2021-07-09" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Improve flow control for message cache of in memory. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/935" title="GitHub Issue: dotnetcore/cap #935">#935</a>)</li>
+<li>Add cancellation token support to subscribers. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/912" title="GitHub Issue: dotnetcore/cap #912">#912</a>)</li>
+<li>Add pathbase options for dashboard. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/901" title="GitHub Issue: dotnetcore/cap #901">#901</a>)</li>
+<li>Add custom authorization scheme support for dashboard. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/906" title="GitHub Issue: dotnetcore/cap #906">#906</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed mysql connect timeout expired bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/931" title="GitHub Issue: dotnetcore/cap #931">#931</a>)</li>
+<li>Fixed consul health check path invalid bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/921" title="GitHub Issue: dotnetcore/cap #921">#921</a>)</li>
+<li>Fixed mongo dashboard query bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/909" title="GitHub Issue: dotnetcore/cap #909">#909</a>)</li>
+</ul>
+<h2 id="version-510-2021-06-07">Version 5.1.0 (2021-06-07)<a class="headerlink" href="#version-510-2021-06-07" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add configure options for json serialization. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/879" title="GitHub Issue: dotnetcore/cap #879">#879</a>)</li>
+<li>Add Redis Streams transport support. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/817" title="GitHub Issue: dotnetcore/cap #817">#817</a>)</li>
+<li>New dashboard build with vue. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/880" title="GitHub Issue: dotnetcore/cap #880">#880</a>)</li>
+<li>Add subscribe filter support. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/894" title="GitHub Issue: dotnetcore/cap #894">#894</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed use CapEFDbTransaction to get dbtransaction extension method bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/868" title="GitHub Issue: dotnetcore/cap #868">#868</a>)</li>
+<li>Fixed pending message has not been deleted from buffer list in SQL Server. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/889" title="GitHub Issue: dotnetcore/cap #889">#889</a>)</li>
+<li>Fixed dispatcher processing when storage message exception bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/900" title="GitHub Issue: dotnetcore/cap #900">#900</a>)</li>
+</ul>
+<h2 id="version-503-2021-05-14">Version 5.0.3 (2021-05-14)<a class="headerlink" href="#version-503-2021-05-14" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fix the bug of getting db transaction through the IDbContextTransaction for SQLServer. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/867" title="GitHub Issue: dotnetcore/cap #867">#867</a>)</li>
+<li>Fix RabbitMQ Connection close forced. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/861" title="GitHub Issue: dotnetcore/cap #861">#861</a>)</li>
+</ul>
+<h2 id="version-502-2021-04-28">Version 5.0.2 (2021-04-28)<a class="headerlink" href="#version-502-2021-04-28" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add support for Azure Service Bus sessions. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/829" title="GitHub Issue: dotnetcore/cap #829">#829</a>)</li>
+<li>Add custom message headers support for RabbitMQ consumer. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/818" title="GitHub Issue: dotnetcore/cap #818">#818</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Downgrading Microsoft.Data.SqlClient to 2.0.1. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/839" title="GitHub Issue: dotnetcore/cap #839">#839</a>)</li>
+<li>DiagnosticObserver does not use null connection. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/845" title="GitHub Issue: dotnetcore/cap #845">#845</a>)</li>
+<li>Fix null reference in AmazonSQSTransport. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/846" title="GitHub Issue: dotnetcore/cap #846">#846</a>)</li>
+</ul>
+<h2 id="version-501-2021-04-07">Version 5.0.1 (2021-04-07)<a class="headerlink" href="#version-501-2021-04-07" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add KafkaOptions.MainConfig to AutoCreateTopic. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/810" title="GitHub Issue: dotnetcore/cap #810">#810</a>)</li>
+<li>Add support rewriting the default configuration of Kafka consumer. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/822" title="GitHub Issue: dotnetcore/cap #822">#822</a>)</li>
+<li>Add DefaultChallengeScheme dashboard options to specify dashboard auth challenge scheme. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/815" title="GitHub Issue: dotnetcore/cap #815">#815</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed topic selector in IConsumerServiceSelector. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/806" title="GitHub Issue: dotnetcore/cap #806">#806</a>)</li>
+<li>Update AWS topic subscription and SQS access policy generation. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/808" title="GitHub Issue: dotnetcore/cap #808">#808</a>)</li>
+<li>Fixed memory leak when using transction to publish message. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/816" title="GitHub Issue: dotnetcore/cap #816">#816</a>)</li>
+<li>Fixed SQL content filter on IMonitoringApi.PostgreSql.cs. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/814" title="GitHub Issue: dotnetcore/cap #814">#814</a>)</li>
+<li>Fixed the expiration time display problem in the dashboard due to time zone issues (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/820" title="GitHub Issue: dotnetcore/cap #820">#820</a>)</li>
+<li>Fixed the creation timing of Kafka automatically creating Topic. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/823" title="GitHub Issue: dotnetcore/cap #823">#823</a>)</li>
+<li>Fixed Dashboard metric not update. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/819" title="GitHub Issue: dotnetcore/cap #819">#819</a>)</li>
+</ul>
+<h2 id="version-500-2021-03-23">Version 5.0.0 (2021-03-23)<a class="headerlink" href="#version-500-2021-03-23" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Upgrade to .NET Standard 2.1 and support .NET 5. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/727" title="GitHub Issue: dotnetcore/cap #727">#727</a>)</li>
+<li>Replace Newtonsoft.Json to System.Text.Json. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/740" title="GitHub Issue: dotnetcore/cap #740">#740</a>)</li>
+<li>Support NATS Transport. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/595" title="GitHub Issue: dotnetcore/cap #595">#595</a>,<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/743" title="GitHub Issue: dotnetcore/cap #743">#743</a>)</li>
+<li>Enabling publiser confirms for RabbitMQ. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/730" title="GitHub Issue: dotnetcore/cap #730">#730</a>)</li>
+<li>Support query subscription from DI implementation factory. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/756" title="GitHub Issue: dotnetcore/cap #756">#756</a>)</li>
+<li>Add options to create lazy queue for RabbitMQ. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/772" title="GitHub Issue: dotnetcore/cap #772">#772</a>)</li>
+<li>Support to add custom tags for Consul. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/786" title="GitHub Issue: dotnetcore/cap #786">#786</a>)</li>
+<li>Support custom group and topic prefiex. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/780" title="GitHub Issue: dotnetcore/cap #780">#780</a>)</li>
+<li>Renemae DefaultGroup option to DefaultGroupName.</li>
+<li>Add auto create topic at startup for Kafka. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/795" title="GitHub Issue: dotnetcore/cap #795">#795</a>,<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/744" title="GitHub Issue: dotnetcore/cap #744">#744</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed retrying process earlier than consumer registration to DI. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/760" title="GitHub Issue: dotnetcore/cap #760">#760</a>)</li>
+<li>Fixed Amazon SQS missing pagination topics. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/765" title="GitHub Issue: dotnetcore/cap #765">#765</a>)</li>
+<li>Fixed RabbitMQ MessageTTL option to int type. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/787" title="GitHub Issue: dotnetcore/cap #787">#787</a>)</li>
+<li>Fixed Dashboard auth. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/793" title="GitHub Issue: dotnetcore/cap #793">#793</a>)</li>
+<li>Fixed ClientProvidedName could not be renamed for RabbitMQ. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/791" title="GitHub Issue: dotnetcore/cap #791">#791</a>)</li>
+<li>Fixed EntityFramework transaction will not rollback when exception occurred. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/798" title="GitHub Issue: dotnetcore/cap #798">#798</a>)</li>
+</ul>
+<h2 id="version-312-2020-12-03">Version 3.1.2 (2020-12-03)<a class="headerlink" href="#version-312-2020-12-03" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong>
+* Support record the exception message in the headers. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/679" title="GitHub Issue: dotnetcore/cap #679">#679</a>)
+* Support consul service check for https. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/722" title="GitHub Issue: dotnetcore/cap #722">#722</a>)
+* Support custom producer threads count options for sending. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/731" title="GitHub Issue: dotnetcore/cap #731">#731</a>)
+* Upgrade dependent nuget packages to latest.</p>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed InmemoryQueue expired messages are not removed bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/691" title="GitHub Issue: dotnetcore/cap #691">#691</a>)</li>
+<li>Fixed Executor key change lead to possible null reference exception. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/698" title="GitHub Issue: dotnetcore/cap #698">#698</a>)</li>
+<li>Fixed Postgresql delete expires data logic error. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/714" title="GitHub Issue: dotnetcore/cap #714">#714</a>)</li>
+</ul>
+<h2 id="version-311-2020-09-23">Version 3.1.1 (2020-09-23)<a class="headerlink" href="#version-311-2020-09-23" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add consumer parameter with interface suppport. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/669" title="GitHub Issue: dotnetcore/cap #669">#669</a>)</li>
+<li>Add custom correlation id and message id support. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/668" title="GitHub Issue: dotnetcore/cap #668">#668</a>)</li>
+<li>Enhanced custom serialization support. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/641" title="GitHub Issue: dotnetcore/cap #641">#641</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Solve the issue of being duplicated executors from different assemblies. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/666" title="GitHub Issue: dotnetcore/cap #666">#666</a>)</li>
+<li>Added comparer to remove duplicate ConsumerExecutors. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/653" title="GitHub Issue: dotnetcore/cap #653">#653</a>)</li>
+<li>Add re-enable the auto create topics configuration item for Kafka, it's false by default. now is true. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/635" title="GitHub Issue: dotnetcore/cap #635">#635</a>)</li>
+<li>Fixed postgresql transaction rollback invoke bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/640" title="GitHub Issue: dotnetcore/cap #640">#640</a>)</li>
+<li>Fixed SQLServer table name customize bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/632" title="GitHub Issue: dotnetcore/cap #632">#632</a>)</li>
+</ul>
+<h2 id="version-310-2020-08-15">Version 3.1.0 (2020-08-15)<a class="headerlink" href="#version-310-2020-08-15" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add Amazon SQS support. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/597" title="GitHub Issue: dotnetcore/cap #597">#597</a>)</li>
+<li>Remove Dapper and replace with ADO.NET in storage project. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/583" title="GitHub Issue: dotnetcore/cap #583">#583</a>)</li>
+<li>Add debug symbols package to nuget.</li>
+<li>Upgrade dependent nuget package version to latest.</li>
+<li>English docs grammar correction. Thanks <a class="magiclink magiclink-github magiclink-mention" href="https://github.com/mzorec" title="GitHub User: mzorec">@mzorec</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fix mysql transaction rollback bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/598" title="GitHub Issue: dotnetcore/cap #598">#598</a>)</li>
+<li>Fix dashboard query bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/600" title="GitHub Issue: dotnetcore/cap #600">#600</a>)</li>
+<li>Fix mongo db query bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/611" title="GitHub Issue: dotnetcore/cap #611">#611</a>)</li>
+<li>Fix dashboard browser language detection bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/631" title="GitHub Issue: dotnetcore/cap #631">#631</a>)</li>
+</ul>
+<h2 id="version-304-2020-05-27">Version 3.0.4 (2020-05-27)<a class="headerlink" href="#version-304-2020-05-27" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fix kafka consumer group does not works bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/541" title="GitHub Issue: dotnetcore/cap #541">#541</a>)</li>
+<li>Fix cast object to primitive types failed bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/547" title="GitHub Issue: dotnetcore/cap #547">#547</a>)</li>
+<li>Fix subscriber primitive types convert exception. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/568" title="GitHub Issue: dotnetcore/cap #568">#568</a>)</li>
+<li>Add conosole app sample.</li>
+<li>Upgrade Confluent.Kafka to 1.4.3</li>
+</ul>
+<h2 id="version-303-2020-04-01">Version 3.0.3 (2020-04-01)<a class="headerlink" href="#version-303-2020-04-01" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Change ISubscribeInvoker interface access modifier to public. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/537" title="GitHub Issue: dotnetcore/cap #537">#537</a>)</li>
+<li>Fix rabbitmq connection may be reused when close forced. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/533" title="GitHub Issue: dotnetcore/cap #533">#533</a>)</li>
+<li>Fix dashboard message reexecute button throws exception bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/525" title="GitHub Issue: dotnetcore/cap #525">#525</a>)</li>
+</ul>
+<h2 id="version-302-2020-02-05">Version 3.0.2 (2020-02-05)<a class="headerlink" href="#version-302-2020-02-05" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed diagnostics event data object error. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/504" title="GitHub Issue: dotnetcore/cap #504">#504</a> )</li>
+<li>Fixed RabbitMQ transport check not working. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/503" title="GitHub Issue: dotnetcore/cap #503">#503</a> )</li>
+<li>Fixed Azure Service Bus subscriber error. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/502" title="GitHub Issue: dotnetcore/cap #502">#502</a>  )</li>
+</ul>
+<h2 id="version-301-2020-01-19">Version 3.0.1 (2020-01-19)<a class="headerlink" href="#version-301-2020-01-19" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed Dashboard requeue and reconsume failed bug.  (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/482" title="GitHub Issue: dotnetcore/cap #482">#482</a> )</li>
+<li>Fixed Azure service bus null reference exception. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/483" title="GitHub Issue: dotnetcore/cap #483">#483</a> )</li>
+<li>Fixed type cast exception from storage. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/473" title="GitHub Issue: dotnetcore/cap #473">#473</a> )</li>
+<li>Fixed SqlServer  connection undisponse bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/477" title="GitHub Issue: dotnetcore/cap #477">#477</a> )</li>
+</ul>
+<h2 id="version-300-2019-12-30">Version 3.0.0 (2019-12-30)<a class="headerlink" href="#version-300-2019-12-30" title="Permanent link">&para;</a></h2>
+<p><strong>Breaking Changes:</strong></p>
+<p>In this version, we have made major improvements to the code structure, which have introduced some destructive changes.</p>
+<ul>
+<li>
+<p>Publisher and Consumer are not compatible with older versions
+This version is not compatible with older versions of the message protocol because we have improved the format in which messages are published and stored.</p>
+</li>
+<li>
+<p>Interface changes
+We have done a lot of refactoring of the code, and some of the interfaces may be incompatible with older versions</p>
+</li>
+<li>
+<p>Detach the dashboard project</p>
+</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Supports .NET Core 3.1.</li>
+<li>Upgrade dependent packages.</li>
+<li>New serialization interface <code>ISerializer</code> to support serialization of message body sent to MQ.</li>
+<li>Add new api for <code>ICapPublisher</code> to publish message with headers.</li>
+<li>Diagnostics event structure and names improved. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/378" title="GitHub Issue: dotnetcore/cap #378">#378</a></li>
+<li>Support consumer method to read the message headers. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/472" title="GitHub Issue: dotnetcore/cap #472">#472</a></li>
+<li>Support rename message storage tables. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/435" title="GitHub Issue: dotnetcore/cap #435">#435</a></li>
+<li>Support for Kafka to write such as Offset and Partition to the header. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/374" title="GitHub Issue: dotnetcore/cap #374">#374</a></li>
+<li>Improved the processor retry interval time. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/444" title="GitHub Issue: dotnetcore/cap #444">#444</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed SqlServer dashboard sql query bug. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/470" title="GitHub Issue: dotnetcore/cap #470">#470</a></li>
+<li>Fixed Kafka health check bug. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/436" title="GitHub Issue: dotnetcore/cap #436">#436</a></li>
+<li>Fixed dashboard bugs. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/412" title="GitHub Issue: dotnetcore/cap #412">#412</a> <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/404" title="GitHub Issue: dotnetcore/cap #404">#404</a></li>
+<li>Fixed transaction bug for sql server when using EF. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/402" title="GitHub Issue: dotnetcore/cap #402">#402</a></li>
+</ul>
+<h2 id="version-260-2019-08-29">Version 2.6.0 (2019-08-29)<a class="headerlink" href="#version-260-2019-08-29" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Improvement Diagnostic support. Thanks <a href="https://github.com/gfx687">@gfx687</a> </li>
+<li>Improvement documention. <a href="https://cap.dotnetcore.xyz">https://cap.dotnetcore.xyz</a></li>
+<li>Improvement <code>ConsumerInvoker</code> implementation. Thanks <a href="https://github.com/hetaoos">@hetaoos</a></li>
+<li>Support multiple consumer threads. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/295" title="GitHub Issue: dotnetcore/cap #295">#295</a>)</li>
+<li>Change DashboardMiddleware to async. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/390" title="GitHub Issue: dotnetcore/cap #390">#390</a>) Thanks <a href="https://github.com/liuzhenyulive">@liuzhenyulive</a> </li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>SQL Server Options Bug.</li>
+<li>Fix transaction scope disposed bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/365" title="GitHub Issue: dotnetcore/cap #365">#365</a>)</li>
+<li>Fix thread safe issue of ICapPublisher bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/371" title="GitHub Issue: dotnetcore/cap #371">#371</a>)</li>
+<li>Improved Ctrl+C action raised exception issue.</li>
+<li>Fixed asynchronous exception catching bug of sending.</li>
+<li>Fix MatchPoundUsingRegex "." not escaped bug (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/373" title="GitHub Issue: dotnetcore/cap #373">#373</a>)</li>
+</ul>
+<h2 id="version-251-2019-06-21">Version 2.5.1 (2019-06-21)<a class="headerlink" href="#version-251-2019-06-21" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Improved logs record.</li>
+<li>Upgrade dependent nuget packages version. (MySqlConnector, confluent-kafka-dotnet-1.0 )</li>
+<li>NodeId type change to string of DiscoveryOptions for Consul. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/314" title="GitHub Issue: dotnetcore/cap #314">#314</a>)</li>
+<li>Change the IConsumerServiceSelector interface access modifier to public. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/333" title="GitHub Issue: dotnetcore/cap #333">#333</a>)</li>
+<li>Improved RabbitMQOptions to provide extensions option to configure the client original configuration. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/350" title="GitHub Issue: dotnetcore/cap #350">#350</a>)</li>
+<li>Add index for MongoDB CAP collections. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/353" title="GitHub Issue: dotnetcore/cap #353">#353</a>)</li>
+</ul>
+<p><strong>Bugs Fixed:</strong></p>
+<ul>
+<li>Fixed consumer re-register transport bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/329" title="GitHub Issue: dotnetcore/cap #329">#329</a>)</li>
+<li>Handle messages retrieval failure. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/324" title="GitHub Issue: dotnetcore/cap #324">#324</a>)</li>
+<li>Fixed DiagnosticListener  null reference exception bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/335" title="GitHub Issue: dotnetcore/cap #335">#335</a>)</li>
+<li>Add subscription name validation for the AzureServerBus. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/344" title="GitHub Issue: dotnetcore/cap #344">#344</a>)</li>
+<li>Fixed thread safety issues of publisher. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/331" title="GitHub Issue: dotnetcore/cap #331">#331</a>)</li>
+</ul>
+<h2 id="version-250-2019-03-30">Version 2.5.0 (2019-03-30)<a class="headerlink" href="#version-250-2019-03-30" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Support Azure Service Bus. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/307" title="GitHub Issue: dotnetcore/cap #307">#307</a>)</li>
+<li>Support In-Memory Storage. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/296" title="GitHub Issue: dotnetcore/cap #296">#296</a>)</li>
+<li>Upgrade Dapper to version 1.60.1</li>
+<li>Support read environment variables CAP_WORKERID and CAP_DATACENTERID as the snowflake algorithm workerid and datacenterid.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Modify MySQL cap table encoding to utf8mb4. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/305" title="GitHub Issue: dotnetcore/cap #305">#305</a>)</li>
+<li>Move CapSubscribeAttribute class to DotNetCore.CAP project.</li>
+<li>Fixed multiple instance snowflake algorithm generating primary key conflicts. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/294" title="GitHub Issue: dotnetcore/cap #294">#294</a>)</li>
+</ul>
+<h2 id="version-242-2019-01-08">Version 2.4.2 (2019-01-08)<a class="headerlink" href="#version-242-2019-01-08" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Startup the CAP with the .NET Core 2.1 BackgroundService. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/265" title="GitHub Issue: dotnetcore/cap #265">#265</a>)</li>
+<li>Improved message delivery performance. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/261" title="GitHub Issue: dotnetcore/cap #261">#261</a></li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed PostgreSql version isolation feature bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/256" title="GitHub Issue: dotnetcore/cap #256">#256</a>)</li>
+<li>Fixed SQL Server sql bug for dashboard search. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/266" title="GitHub Issue: dotnetcore/cap #266">#266</a>)</li>
+</ul>
+<h2 id="version-241-2018-12-19">Version 2.4.1 (2018-12-19)<a class="headerlink" href="#version-241-2018-12-19" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed MongoDB version isolation feature bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/253" title="GitHub Issue: dotnetcore/cap #253">#253</a>)</li>
+</ul>
+<h2 id="version-240-2018-12-08">Version 2.4.0 (2018-12-08)<a class="headerlink" href="#version-240-2018-12-08" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Supported version options. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/220" title="GitHub Issue: dotnetcore/cap #220">#220</a>)</li>
+<li>Upgrade nuget package to .net core 2.2.</li>
+</ul>
+<p><strong>Breaking Changes:</strong></p>
+<p>In order to support the "version isolation" feature, we introduced a new version field in version 2.4.0 to isolate different versions of the message, so this requires some adjustments to the database table structure. You can use the following SQL to add a version field to your database CAP related table.</p>
+<p><strong>MySQL</strong>
+<div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="o">`</span><span class="n">cap</span><span class="p">.</span><span class="n">published</span><span class="o">`</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">Version</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="o">`</span><span class="n">cap</span><span class="p">.</span><span class="n">received</span><span class="o">`</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">Version</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+</code></pre></div></p>
+<p><strong>SQL Server</strong>
+<div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">Cap</span><span class="p">.[</span><span class="n">Published</span><span class="p">]</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">Version</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">Cap</span><span class="p">.[</span><span class="n">Received</span><span class="p">]</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="k">Version</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+</code></pre></div></p>
+<p><strong>PostgreSQL</strong>
+<div class="highlight"><pre><span></span><code><span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">cap</span><span class="p">.</span><span class="n">published</span><span class="w"> </span><span class="k">ADD</span><span class="w">  </span><span class="ss">&quot;Version&quot;</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+<span class="k">ALTER</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">cap</span><span class="p">.</span><span class="n">received</span><span class="w"> </span><span class="k">ADD</span><span class="w"> </span><span class="ss">&quot;Version&quot;</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span><span class="w"> </span><span class="k">NULL</span><span class="p">;</span>
+</code></pre></div></p>
+<p><strong>MongoDb</strong>
+<div class="highlight"><pre><span></span><code>db.CapPublishedMessage.update({},{&quot;$set&quot; : {&quot;Version&quot; : &quot;1&quot;}});
+db.CapReceivedMessage.update({},{&quot;$set&quot; : {&quot;Version&quot; : &quot;1&quot;}});
+</code></pre></div></p>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed different groups of the same topic name in one instance will cause routing bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/235" title="GitHub Issue: dotnetcore/cap #235">#235</a>)</li>
+<li>Fixed message presistence bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/240" title="GitHub Issue: dotnetcore/cap #240">#240</a>)</li>
+<li>Fixed RabbitMQ topic name contains numbers will cause exception bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/181" title="GitHub Issue: dotnetcore/cap #181">#181</a>)</li>
+</ul>
+<h2 id="version-231-2018-10-29">Version 2.3.1 (2018-10-29)<a class="headerlink" href="#version-231-2018-10-29" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Add Source Link Support</li>
+<li>Upgrade dependent NuGet packages.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed dashboard messages requeue error. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/205" title="GitHub Issue: dotnetcore/cap #205">#205</a>)</li>
+<li>Adjustment snowflake workerId to random id.</li>
+<li>Fixed flush unclaer data bug.</li>
+</ul>
+<h2 id="version-230-2018-08-30">Version 2.3.0 (2018-08-30)<a class="headerlink" href="#version-230-2018-08-30" title="Permanent link">&para;</a></h2>
+<p>In this version, we made some breaking changes for the publisher API, you can see this blog to understand the story behind.</p>
+<p>If you have any migration question, please comment in issue (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/190" title="GitHub Issue: dotnetcore/cap #190">#190</a>).</p>
+<p><strong>Breaking Changes:</strong></p>
+<ul>
+<li>Removed app.UseCap() from Startup.cs</li>
+<li>Message table primary key data type has been modified to Bigint and non auto-Increment. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/180" title="GitHub Issue: dotnetcore/cap #180">#180</a>)</li>
+<li>New publisher Api. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/188" title="GitHub Issue: dotnetcore/cap #188">#188</a>)</li>
+</ul>
+<p><strong>Features:</strong></p>
+<ul>
+<li>MongoDb supported. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/143" title="GitHub Issue: dotnetcore/cap #143">#143</a>)</li>
+<li>Automatic commit transaction. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/191" title="GitHub Issue: dotnetcore/cap #191">#191</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fix message still sent if transaction faild bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/118" title="GitHub Issue: dotnetcore/cap #118">#118</a>)</li>
+<li>Multiple events in one transaction. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/171" title="GitHub Issue: dotnetcore/cap #171">#171</a>)</li>
+</ul>
+<h2 id="version-225-2018-07-19">Version 2.2.5 (2018-07-19)<a class="headerlink" href="#version-225-2018-07-19" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong>
+- Performance improvement</p>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed message enqueue exception.</li>
+<li>Fixed Retry processor bugs.</li>
+<li>Fixed Kafka producer exception log without logging when publish message.</li>
+<li>Fixed Incorrect local IP address judgment of IPv6. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/140" title="GitHub Issue: dotnetcore/cap #140">#140</a>)</li>
+<li>Fixed DateTime localization format conversion error to sql. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/139" title="GitHub Issue: dotnetcore/cap #139">#139</a>)</li>
+<li>Fixed dashboard message page re-requeue and re-executed operate bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/158" title="GitHub Issue: dotnetcore/cap #158">#158</a>)</li>
+<li>Fixed SendAsync or ExecuteAsync recursion retries bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/160" title="GitHub Issue: dotnetcore/cap #160">#160</a>)</li>
+<li>Fixed configuration options of FailedThresholdCallback could not be invoke when the value less then three. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/161" title="GitHub Issue: dotnetcore/cap #161">#161</a>)</li>
+</ul>
+<h2 id="version-224-2018-06-05">Version 2.2.4 (2018-06-05)<a class="headerlink" href="#version-224-2018-06-05" title="Permanent link">&para;</a></h2>
+<p>Because version 2.2.3 was not released to nuget, so released 2.2.4.</p>
+<h2 id="version-223-2018-06-05">Version 2.2.3 (2018-06-05)<a class="headerlink" href="#version-223-2018-06-05" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Improved log output.</li>
+<li>Upgrade nuget packages.</li>
+<li>Support pattern matching for consumer. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/132" title="GitHub Issue: dotnetcore/cap #132">#132</a>)</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed exception thrown when terminate the program with Ctrl+C. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/130" title="GitHub Issue: dotnetcore/cap #130">#130</a>)</li>
+</ul>
+<h2 id="version-222-2018-04-28">Version 2.2.2 (2018-04-28)<a class="headerlink" href="#version-222-2018-04-28" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Improved log output. <a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/114" title="GitHub Issue: dotnetcore/cap #114">#114</a></li>
+<li>Add default timeout configuration for kafka client.</li>
+<li>Rename configuration options FailedCallback to FailedThresholdCallback.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed message enqueue exception.</li>
+<li>Fixed retry processor bugs.</li>
+<li>Fixed kafka producer exception log without logging when publish message.</li>
+</ul>
+<h2 id="version-221-2018-04-18">Version 2.2.1 (2018-04-18)<a class="headerlink" href="#version-221-2018-04-18" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed message enqueue bug in v2.2</li>
+</ul>
+<h2 id="version-220-2018-04-17">Version 2.2.0 (2018-04-17)<a class="headerlink" href="#version-220-2018-04-17" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Remove database queue mode. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/102" title="GitHub Issue: dotnetcore/cap #102">#102</a>)</li>
+<li>Support for Diagnostics. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/112" title="GitHub Issue: dotnetcore/cap #112">#112</a>)</li>
+<li>Upgrade dependent nuget packages.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed bug of the FailedRetryCount does not increase when raised SubscribeNotFoundException. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/90" title="GitHub Issue: dotnetcore/cap #90">#90</a>)</li>
+</ul>
+<h2 id="version-214-2018-03-16">Version 2.1.4 (2018-03-16)<a class="headerlink" href="#version-214-2018-03-16" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Remove TableNamePrefix option from MySqlOptions to EFOptions.</li>
+<li>Upgrade nuget package</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed the connection bug of getting message from table. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/83" title="GitHub Issue: dotnetcore/cap #83">#83</a>)</li>
+<li>Fixed entityframework rename table name prefix bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/84" title="GitHub Issue: dotnetcore/cap #84">#84</a>)</li>
+<li>Fixed sql server scripts bug of create table scheme. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/85" title="GitHub Issue: dotnetcore/cap #85">#85</a>)</li>
+<li>Fixed thread safety issue about KafkaOptions.(<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/89" title="GitHub Issue: dotnetcore/cap #89">#89</a>)</li>
+</ul>
+<h2 id="version-213-2018-01-24">Version 2.1.3 (2018-01-24)<a class="headerlink" href="#version-213-2018-01-24" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Upgrade dependent nuget packages version.</li>
+<li>NuGet package include xml doc now.</li>
+<li>NuGet now contains the CAP symbol files.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed thread conflict issue when sending messages with PublishAsync. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/80" title="GitHub Issue: dotnetcore/cap #80">#80</a>)</li>
+<li>Fixed kafka received message sava failed may caused the mssage loss bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/78" title="GitHub Issue: dotnetcore/cap #78">#78</a>)</li>
+<li>Fixed dashboard js syntax issue. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/77" title="GitHub Issue: dotnetcore/cap #77">#77</a>)</li>
+</ul>
+<h2 id="version-212-2017-12-18">Version 2.1.2 (2017-12-18)<a class="headerlink" href="#version-212-2017-12-18" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed and improve the performance of mysql processing messages. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/68" title="GitHub Issue: dotnetcore/cap #68">#68</a>) (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/36" title="GitHub Issue: dotnetcore/cap #36">#36</a>)</li>
+<li>Fixed dashboard manually trigger reconsumption bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/67" title="GitHub Issue: dotnetcore/cap #67">#67</a>)</li>
+<li>Fixed mysql 5.5 table initialization bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/65" title="GitHub Issue: dotnetcore/cap #65">#65</a>)</li>
+<li>Fixed mysql message queue executor bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/66" title="GitHub Issue: dotnetcore/cap #66">#66</a>)</li>
+</ul>
+<h2 id="version-211-2017-11-28">Version 2.1.1 (2017-11-28)<a class="headerlink" href="#version-211-2017-11-28" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed 'dotnet.exe' process incomplete quit when shutdown application (Ctrl+C). (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/64" title="GitHub Issue: dotnetcore/cap #64">#64</a>)</li>
+<li>Fixed failure to issue as expected of RabbitMQ SubscriberNotFoundException. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/63" title="GitHub Issue: dotnetcore/cap #63">#63</a>)</li>
+<li>Fixed Sent async message in the loop causes an exception. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/62" title="GitHub Issue: dotnetcore/cap #62">#62</a>)</li>
+</ul>
+<h2 id="version-210-2017-11-17">Version 2.1.0 (2017-11-17)<a class="headerlink" href="#version-210-2017-11-17" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Interface display optimization of dashboard.</li>
+<li>Adds a more friendly display when looks at the message content.</li>
+<li>Now you can see the exception infomation in the message conent filed when message send or executed failed.</li>
+<li>Optimize LAN to see Dashboard without authentication.</li>
+<li>Add IContentSerializer interface, you can customize the serialized message content.</li>
+<li>Add IMessagePacker interface, you can customize wapper of the message.</li>
+<li>Upgrade the dependent package.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed dashboard query bugs.</li>
+<li>Fixed dashboard multilanguage display bugs.</li>
+<li>Fixed RabbitMQ connection pool bug.</li>
+<li>Fixed dashboard display bugs on mobile.</li>
+</ul>
+<h2 id="version-202-2017-09-29">Version 2.0.2 (2017-09-29)<a class="headerlink" href="#version-202-2017-09-29" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed asp.net core 2.0 startup error of MySql and PostgreSql. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/44" title="GitHub Issue: dotnetcore/cap #44">#44</a></li>
+</ul>
+<h2 id="version-201-2017-09-16">Version 2.0.1 (2017-09-16)<a class="headerlink" href="#version-201-2017-09-16" title="Permanent link">&para;</a></h2>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>DbContext services bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/44" title="GitHub Issue: dotnetcore/cap #44">#44</a>)</li>
+<li>Dependency injection bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/45" title="GitHub Issue: dotnetcore/cap #45">#45</a>)</li>
+</ul>
+<h2 id="version-200-2017-09-01">Version 2.0.0 (2017-09-01)<a class="headerlink" href="#version-200-2017-09-01" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Supported .net standard 2.0.</li>
+<li>Supported PostgreSQL 9.5+.</li>
+<li>Supported asynchronous function subscriptions.</li>
+<li><code>ICapPublisher</code> api supported callback subsrciber.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed multiple subscriber subscribe bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/38" title="GitHub Issue: dotnetcore/cap #38">#38</a>)</li>
+<li>Fixed model binde bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/17" title="GitHub Issue: dotnetcore/cap #17">#17</a>) (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/18" title="GitHub Issue: dotnetcore/cap #18">#18</a>)</li>
+<li>Fixed database connection disposed bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/25" title="GitHub Issue: dotnetcore/cap #25">#25</a>)</li>
+<li>Fixed consumer method injection context bug. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/34" title="GitHub Issue: dotnetcore/cap #34">#34</a>)</li>
+</ul>
+<h2 id="version-110-2017-08-04">Version 1.1.0 (2017-08-04)<a class="headerlink" href="#version-110-2017-08-04" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>Support MySQL database persistent message.</li>
+<li>Add message failed call-back in CapOptions.</li>
+<li>Remove publish messages API of string name at <code>ICapPublisher</code>.</li>
+</ul>
+<p><strong>Bug Fixed:</strong></p>
+<ul>
+<li>Fixed can not send message for string type. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/17" title="GitHub Issue: dotnetcore/cap #17">#17</a>)</li>
+<li>Fixed model bind for type like datetime guid always failed. (<a class="magiclink magiclink-github magiclink-issue" href="https://github.com/dotnetcore/cap/issues/18" title="GitHub Issue: dotnetcore/cap #18">#18</a>)</li>
+</ul>
+<h2 id="version-101-2017-07-25">Version 1.0.1 (2017-07-25)<a class="headerlink" href="#version-101-2017-07-25" title="Permanent link">&para;</a></h2>
+<p><strong>Features:</strong></p>
+<ul>
+<li>ICapPublisher interface added synchronous publish API.</li>
+<li>Add infinity retry failed processor.</li>
+</ul>
+<h2 id="version-100-2017-07-19">Version 1.0.0 (2017-07-19)<a class="headerlink" href="#version-100-2017-07-19" title="Permanent link">&para;</a></h2>
+<ul>
+<li>Project published</li>
+</ul>
+
+
+  
+
+
+  
+    
+  
+
+
+
+                
+              </article>
+            </div>
+          
+          
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023 <a href="https://github.com/dotnetcore">NCC</a>, Maintained by the <a href="/about/contact-us/#cap-team">CAP Team</a>.
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/dotnetcore/CAP" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://twitter.com/ncc_community" target="_blank" rel="noopener" title="twitter.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M459.37 151.716c.325 4.548.325 9.097.325 13.645 0 138.72-105.583 298.558-298.558 298.558-59.452 0-114.68-17.219-161.137-47.106 8.447.974 16.568 1.299 25.34 1.299 49.055 0 94.213-16.568 130.274-44.832-46.132-.975-84.792-31.188-98.112-72.772 6.498.974 12.995 1.624 19.818 1.624 9.421 0 18.843-1.3 27.614-3.573-48.081-9.747-84.143-51.98-84.143-102.985v-1.299c13.969 7.797 30.214 12.67 47.431 13.319-28.264-18.843-46.781-51.005-46.781-87.391 0-19.492 5.197-37.36 14.294-52.954 51.655 63.675 129.3 105.258 216.365 109.807-1.624-7.797-2.599-15.918-2.599-24.04 0-57.828 46.782-104.934 104.934-104.934 30.213 0 57.502 12.67 76.67 33.137 23.715-4.548 46.456-13.32 66.599-25.34-7.798 24.366-24.366 44.833-46.132 57.827 21.117-2.273 41.584-8.122 60.426-16.243-14.292 20.791-32.161 39.308-52.628 54.253z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://weibo.com/dotnetcore" target="_blank" rel="noopener" title="weibo.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 6.2.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M407 177.6c7.6-24-13.4-46.8-37.4-41.7-22 4.8-28.8-28.1-7.1-32.8 50.1-10.9 92.3 37.1 76.5 84.8-6.8 21.2-38.8 10.8-32-10.3zM214.8 446.7C108.5 446.7 0 395.3 0 310.4c0-44.3 28-95.4 76.3-143.7C176 67 279.5 65.8 249.9 161c-4 13.1 12.3 5.7 12.3 6 79.5-33.6 140.5-16.8 114 51.4-3.7 9.4 1.1 10.9 8.3 13.1 135.7 42.3 34.8 215.2-169.7 215.2zm143.7-146.3c-5.4-55.7-78.5-94-163.4-85.7-84.8 8.6-148.8 60.3-143.4 116s78.5 94 163.4 85.7c84.8-8.6 148.8-60.3 143.4-116zM347.9 35.1c-25.9 5.6-16.8 43.7 8.3 38.3 72.3-15.2 134.8 52.8 111.7 124-7.4 24.2 29.1 37 37.4 12 31.9-99.8-55.1-195.9-157.4-174.3zm-78.5 311c-17.1 38.8-66.8 60-109.1 46.3-40.8-13.1-58-53.4-40.3-89.7 17.7-35.4 63.1-55.4 103.4-45.1 42 10.8 63.1 50.2 46 88.5zm-86.3-30c-12.9-5.4-30 .3-38 12.9-8.3 12.9-4.3 28 8.6 34 13.1 6 30.8.3 39.1-12.9 8-13.1 3.7-28.3-9.7-34zm32.6-13.4c-5.1-1.7-11.4.6-14.3 5.4-2.9 5.1-1.4 10.6 3.7 12.9 5.1 2 11.7-.3 14.6-5.4 2.8-5.2 1.1-10.9-4-12.9z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    <script id="__config" type="application/json">{"base": "../..", "features": ["navigation.tabs", "navigation.instant"], "search": "../../assets/javascripts/workers/search.e5c33ebb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.51d95adb.min.js"></script>
+      
+    
+  </body>
+</html>
