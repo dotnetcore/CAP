@@ -2,7 +2,7 @@
 
 CAP is an EventBus and a solution for solving distributed transaction problems in microservices or SOA systems. It helps create a microservices system that is scalable, reliable, and easy to change.
 
-In Microsoft's [eShopOnContainer](https://github.com/dotnet-architecture/eShopOnContainers) microservices sample project, it is recommended to use CAP as the EventBus in the production environment.
+In Microsoft's [eShop](https://github.com/dotnet/eShop) microservices sample project, it is recommended to use CAP as the EventBus in the production environment.
 
 
 !!! question "What is EventBus？"

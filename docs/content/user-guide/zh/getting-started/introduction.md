@@ -2,7 +2,7 @@
 
 CAP 是一个EventBus，同时也是一个在微服务或者SOA系统中解决分布式事务问题的一个框架。它有助于创建可扩展，可靠并且易于更改的微服务系统。
 
-在微软的 [eShopOnContainer](https://github.com/dotnet-architecture/eShopOnContainers) 微服务示例项目中，推荐使用 CAP 作为生产环境可用的 EventBus。
+在微软的 [eShop](https://github.com/dotnet/eShop) 微服务示例项目中，推荐使用 CAP 作为生产环境可用的 EventBus。
 
 !!! question "什么是 EventBus？"
 
