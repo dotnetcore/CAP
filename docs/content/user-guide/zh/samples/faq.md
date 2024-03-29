@@ -1,44 +1,44 @@
 # FAQ
 
-!!! faq "Any IM group(e.g Tencent QQ group) to learn and chat about CAP?"
+!!! faq "有没有学习和讨论 CAP 的即时通讯群组（例如腾讯 QQ 群）？"
 
-    None of that. Better than wasting much time in IM group, I hope developers could be capable of independent thinking more, and solve problems yourselves with referenced documents, even create issues or send emails when errors are remaining present.
+回答： 暂时没有。与其浪费大量时间在即时通讯群组里，我更希望开发者能够培养独立思考能力，并通过查阅文档自行解决问题，甚至可以在遇到错误时创建issue或发送电子邮件。
 
-!!! faq "Does it require different databases, one each for producer and consumer in CAP?"
+!!! faq "CAP 是否需要为生产者和消费者分别使用不同的数据库？"
 
-    No difference necessary, a recommendation is to use a dedicated database for each program.
+回答：没有必要使用完全不同的数据库，推荐为每个程序使用一个专用数据库。
 
-    Otherwise, look at Q&A below.
+否则，请参阅下面的问答部分。
 
-!!! faq "How to use the same database for different applications?"
-    
-    Define a table prefix name in `ConfigureServices` method.
-    
-    Code example：
+!!! faq "如何使用相同的数据库用于不同的应用程序？"
 
-    ```c#
-    public void ConfigureServices(IServiceCollection services)
+回答： 在 ConfigureServices 方法中定义表名前缀。
+
+代码示例：
+
+```c#
+public void ConfigureServices(IServiceCollection services)
+{
+    services.AddCap(x =>
     {
-        services.AddCap(x =>
+        x.UseKafka("");
+        x.UseMySql(opt =>
         {
-            x.UseKafka("");
-            x.UseMySql(opt =>
-            {
-                opt.ConnectionString = "connection string";
-                opt.TableNamePrefix = "appone"; // different table name prefix here
-            });
+            opt.ConnectionString = "connection string";
+            opt.TableNamePrefix = "appone"; // different table name prefix here
         });
-    }
-    ```
+    });
+}
+```
 
-!!! faq "Can CAP not use the database as event storage? I just want to send the message"
+!!! faq "CAP 能否不使用数据库作为事件存储？我只是想发送消息"
 
-    Not yet.
+回答： 完全不用是不可能的，你可以使用 InMemoryStorage 。
 
-    The purpose of CAP is that ensure consistency principle right in microservice or SOA architectures. The solution is based on ACID features of database, there is no sense about a single client wapper of message queue without database.
+CAP 的目的是在微服务或 SOA 架构中确保一致性原则。该解决方案基于数据库的 ACID 特性，如果没有数据库，单纯的消息队列消息传递是没有意义的。
 
-!!! faq "If the consumer is abnormal, can I roll back the database executed sql that the producer has executed?"
+!!! faq "如果消费者出现异常，能否回滚生产者执行的数据库语句？"
 
-    Can't roll back, CAP is the ultimate consistency solution.
+回答： 无法回滚，CAP 是最终一致性解决方案。
 
-    You can imagine your scenario is to call a third party payment. If you are doing a third-party payment operation, after calling Alipay's interface successfully, and your own code is wrong, will Alipay roll back? If you don't roll back, what should you do? The same is true here.
+可以想象您的场景是调用第三方支付。如果您正在进行第三方支付操作，在成功调用支付宝的接口后，您的代码出现错误，支付宝会回滚吗？如果不回滚，您该怎么办？CAP 的情况与此类似。

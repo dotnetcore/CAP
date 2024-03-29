@@ -4,6 +4,10 @@ RabbitMQ is an open-source message-broker software that originally implemented t
 
 RabbitMQ can be used in CAP as a message transporter. 
 
+!!! warning "Notes"
+    When using RabbitMQ, the consumer integrated with the CAP application will automatically create a persistent queue after it is started for the first time. Subsequent messages will be normally transmitted to the queue and consumed.
+    However, if you have never started the consumer, the queue will not be created. In this case, if you publish messages first, RabbitMQ Exchange will discard the messages received directly until the consumer is started and the queue is created.
+
 ## Configuration
 
 To use RabbitMQ transporter, you need to install the following package from NuGet:
