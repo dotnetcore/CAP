@@ -118,6 +118,3 @@ public void ConfigureServices(IServiceCollection services)
 ```
 
 以上就完成了所有的集成工作，可以开始进行测试了，有问题欢迎到 [Github issue](https://github.com/dotnetcore/CAP/issues) 反馈。
-
-
-**注意： CAP 需要使用 5.0 + 版本，目前(2021年1月6日)只有 preview 版本。**
