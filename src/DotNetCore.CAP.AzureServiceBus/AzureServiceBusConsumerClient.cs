@@ -214,10 +214,14 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                             new CreateSubscriptionOptions(topicPath, _subscriptionName)
                             {
                                 RequiresSession = _asbOptions.EnableSessions,
-                                AutoDeleteOnIdle = _asbOptions.SubscriptionAutoDeleteOnIdle
+                                AutoDeleteOnIdle = _asbOptions.SubscriptionAutoDeleteOnIdle,
+                                LockDuration = _asbOptions.SubscriptionMessageLockDuration,
+                                DefaultMessageTimeToLive = _asbOptions.SubscriptionDefaultMessageTimeToLive,
+                                MaxDeliveryCount = _asbOptions.SubscriptionMaxDeliveryCount,
                             };
 
                         await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
+
                         _logger.LogInformation(
                             $"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
                     }
@@ -225,7 +229,14 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
                 _serviceBusProcessor = !_asbOptions.EnableSessions
                     ? new ServiceBusProcessorFacade(
-                        _serviceBusClient.CreateProcessor(_asbOptions.TopicPath, _subscriptionName))
+                        serviceBusProcessor: _serviceBusClient.CreateProcessor(_asbOptions.TopicPath,
+                            _subscriptionName,
+                            new ServiceBusProcessorOptions
+                            {
+                                AutoCompleteMessages = _asbOptions.AutoCompleteMessages,
+                                MaxConcurrentCalls = _asbOptions.MaxConcurrentCalls,
+                                MaxAutoLockRenewalDuration = _asbOptions.MaxAutoLockRenewalDuration,
+                            }))
                     : new ServiceBusProcessorFacade(
                         serviceBusSessionProcessor: _serviceBusClient.CreateSessionProcessor(_asbOptions.TopicPath,
                             _subscriptionName,
@@ -233,7 +244,9 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                             {
                                 AutoCompleteMessages = _asbOptions.AutoCompleteMessages,
                                 MaxConcurrentCallsPerSession = _asbOptions.MaxConcurrentCalls,
-                                MaxAutoLockRenewalDuration = TimeSpan.FromSeconds(30),
+                                MaxAutoLockRenewalDuration = _asbOptions.MaxAutoLockRenewalDuration,
+                                MaxConcurrentSessions = _asbOptions.MaxConcurrentSessions,
+                                SessionIdleTimeout = _asbOptions.SessionIdleTimeout,
                             }));
             }
         }
