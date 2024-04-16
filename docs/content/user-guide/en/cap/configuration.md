@@ -144,15 +144,32 @@ The expiration time (in seconds) of the failed message. When the message is sent
 
 If `true` then all consumers within the same group pushes received messages to own dispatching pipeline channel. Each channel has set thread count to `ConsumerThreadCount` value.
 
-#### EnableConsumerPrefetch
+#### [Obsolete] EnableConsumerPrefetch
 
 > Default: false， Before version 7.0 the default behavior is true
 
-By default, CAP will only read one message from the message queue, then execute the subscription method. After the execution is done, it will read the next message for execution.
-If set to true, the consumer will prefetch some messages to the memory queue, and then distribute them to the .NET thread pool for execution.
+Renamed to `EnableSubscriberParallelExecute` option, Please use the new option.
+
+### EnableSubscriberParallelExecute
+
+> Default: false
+
+If `true`, CAP will prefetch some message from the broker as buffered, then execute the subscriber method. After the execution is done, it will fetch the next batch for execution.
 
 !!! note "Precautions"
     Setting it to true may cause some problems. When the subscription method executes too slowly and takes too long, it will cause the retry thread to pick up messages that have not yet been executed. The retry thread picks up messages from 4 minutes (FallbackWindowLookbackSeconds) ago by default , that is to say, if the message backlog of more than 4 minutes (FallbackWindowLookbackSeconds) on the consumer side will be picked up again and executed again
+
+### SubscriberParallelExecuteThreadCount
+
+> Default: `Environment.ProcessorCount`
+
+With the `EnableSubscriberParallelExecute` option enabled, specify the number of parallel task execution threads.
+
+### SubscriberParallelExecuteBufferFactor
+
+> Default: 1
+
+With the `EnableSubscriberParallelExecute` option enabled, multiplier used to determine the buffered capacity size in subscriber parallel execution. The buffer capacity is computed by multiplying this factor with the value of `SubscriberParallelExecuteThreadCount`, which represents the number of threads allocated for parallel processing.
 
 #### EnablePublishParallelSend
 

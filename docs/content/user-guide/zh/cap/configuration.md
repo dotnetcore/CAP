@@ -148,15 +148,32 @@ services.AddCap(config =>
 
 在同时配合使用 `EnableConsumerPrefetch` 时，请参考 issue [#1399](https://github.com/dotnetcore/CAP/issues/1399) 以清晰其预期行为。
 
-#### EnableConsumerPrefetch
+#### [已过时] EnableConsumerPrefetch
 
 > 默认值: false， 在 7.0 版本之前默认行为 true
 
-默认情况下，CAP只会从消息队列读取一条，然后执行订阅方法，执行完成后才会读取下一条来执行.
-如果设置为 true, 消费端会将消息预取到内存队列，然后再放入.NET 线程池并行执行。
+ 该配置项已被重命名为 `EnableSubscriberParallelExecute`，请使用新选项。
+
+### EnableSubscriberParallelExecute
+
+> 默认值: false
+
+如果设置为 `true`，CAP将提前从Broker拉取一批消息置于内存缓冲区，然后执行订阅方法；当订阅方法执行完成后，拉取下一批消息至于缓冲区然后执行。
 
 !!! note "注意事项"
     设置为 true 可能会产生一些问题，当订阅方法执行过慢耗时太久时，会导致重试线程拾取到还未执行的的消息。重试线程默认拾取4分钟前（FallbackWindowLookbackSeconds 配置项）的消息，也就是说如果消费端积压了超过4分钟（FallbackWindowLookbackSeconds 配置项）的消息就会被重新拾取到再次执行
+
+### SubscriberParallelExecuteThreadCount
+
+> Default: `Environment.ProcessorCount`
+
+当启用 `EnableSubscriberParallelExecute` 时, 可通过此参数执行并行处理的线程数，默认值为处理器个数。
+
+### SubscriberParallelExecuteBufferFactor
+
+> Default: 1
+
+当启用 `EnableSubscriberParallelExecute` 时, 通过此参数设置缓冲区和线程数的因子系数，也就是缓冲区大小等于 `SubscriberParallelExecuteThreadCount` 乘 `SubscriberParallelExecuteBufferFactor`.
 
 #### EnablePublishParallelSend
 

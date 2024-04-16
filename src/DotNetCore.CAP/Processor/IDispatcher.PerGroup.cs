@@ -27,7 +27,7 @@ internal class DispatcherPerGroup : IDispatcher
     private readonly IMessageSender _sender;
     private readonly IDataStorage _storage;
     private readonly PriorityQueue<MediumMessage, DateTime> _schedulerQueue;
-    private readonly bool _enablePrefetch;
+    private readonly bool _enableParallelExecute;
     private readonly bool _enableParallelSend;
 
     private Channel<MediumMessage> _publishedChannel = default!;
@@ -47,7 +47,7 @@ internal class DispatcherPerGroup : IDispatcher
         _executor = executor;
         _schedulerQueue = new PriorityQueue<MediumMessage, DateTime>();
         _storage = storage;
-        _enablePrefetch = options.Value.EnableConsumerPrefetch;
+        _enableParallelExecute = options.Value.EnableSubscriberParallelExecute;
         _enableParallelSend = options.Value.EnablePublishParallelSend;
     }
 
@@ -70,7 +70,7 @@ internal class DispatcherPerGroup : IDispatcher
 
         _receivedChannels =
             new ConcurrentDictionary<string, Channel<(MediumMessage, ConsumerExecutorDescriptor?)>>(
-                _options.ConsumerThreadCount, _options.ConsumerThreadCount * 2);
+                _options.SubscriberParallelExecuteThreadCount, _options.SubscriberParallelExecuteThreadCount * 2);
 
         GetOrCreateReceiverChannel(_options.DefaultGroupName);
 
@@ -191,19 +191,25 @@ internal class DispatcherPerGroup : IDispatcher
                 "Creating receiver channel for group {ConsumerGroup} with thread count {ConsumerThreadCount}", group,
                 _options.ConsumerThreadCount);
 
-            var capacity = _options.ConsumerThreadCount * 300;
             var channel = Channel.CreateBounded<(MediumMessage, ConsumerExecutorDescriptor?)>(
-                new BoundedChannelOptions(capacity > 3000 ? 3000 : capacity)
+                new BoundedChannelOptions(_options.SubscriberParallelExecuteThreadCount * _options.SubscriberParallelExecuteBufferFactor)
                 {
                     AllowSynchronousContinuations = true,
-                    SingleReader = _options.ConsumerThreadCount == 1,
+                    SingleReader = _options.SubscriberParallelExecuteThreadCount == 1,
                     SingleWriter = true,
                     FullMode = BoundedChannelFullMode.Wait
                 });
 
-            Task.WhenAll(Enumerable.Range(0, _options.ConsumerThreadCount)
-               .Select(_ => Task.Run(() => Processing(group, channel), _tasksCts!.Token)).ToArray());
-
+            if (_enableParallelExecute)
+            {
+                Task.WhenAll(Enumerable.Range(0, _options.SubscriberParallelExecuteThreadCount)
+                   .Select(_ => Task.Run(() => Processing(group, channel), _tasksCts!.Token)).ToArray())
+                   .ConfigureAwait(false);
+            }
+            else
+            {
+                _ = Task.Run(() => Processing(group, channel), _tasksCts!.Token).ConfigureAwait(false);
+            }
             return channel;
         });
     }
@@ -253,15 +259,7 @@ internal class DispatcherPerGroup : IDispatcher
 
                         var item1 = message.Item1;
                         var item2 = message.Item2;
-
-                        if (_enablePrefetch)
-                        {
-                            _ = Task.Run(() => _executor.ExecuteAsync(item1, item2, _tasksCts.Token).ConfigureAwait(false));
-                        }
-                        else
-                        {
-                            await _executor.ExecuteAsync(item1, item2, _tasksCts.Token).ConfigureAwait(false);
-                        }
+                        await _executor.ExecuteAsync(item1, item2, _tasksCts.Token).ConfigureAwait(false);
                     }
                     catch (OperationCanceledException)
                     {
