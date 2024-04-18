@@ -83,12 +83,6 @@ public class RabbitMQOptions
     /// <summary>
     /// If you need to get additional native delivery args, you can use this function to write into <see cref="CapHeader" />.
     /// </summary>
-    [Obsolete("Will be dropped in the next releases in favor of the CustomHeadersBuilder property")]
-    public Func<BasicDeliverEventArgs, List<KeyValuePair<string, string>>>? CustomHeaders { get; set; }
-
-    /// <summary>
-    /// If you need to get additional native delivery args, you can use this function to write into <see cref="CapHeader" />.
-    /// </summary>
     public Func<BasicDeliverEventArgs, IServiceProvider, List<KeyValuePair<string, string>>>? CustomHeadersBuilder
     {
         get;

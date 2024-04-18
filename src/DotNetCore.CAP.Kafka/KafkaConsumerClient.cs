@@ -119,17 +119,6 @@ public class KafkaConsumerClient : IConsumerClient
 
             headers.Add(Headers.Group, _groupId);
 
-#pragma warning disable CS0618 // Type or member is obsolete
-            if (_kafkaOptions.CustomHeaders != null)
-            {
-                var customHeaders = _kafkaOptions.CustomHeaders(consumerResult);
-                foreach (var customHeader in customHeaders)
-                {
-                    headers[customHeader.Key] = customHeader.Value;
-                }
-            }
-#pragma warning restore CS0618 // Type or member is obsolete
-
             if (_kafkaOptions.CustomHeadersBuilder != null)
             {
                 var customHeaders = _kafkaOptions.CustomHeadersBuilder(consumerResult, _serviceProvider);

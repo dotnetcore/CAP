@@ -195,17 +195,6 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
 
         headers.Add(Headers.Group, _queueName);
 
-#pragma warning disable CS0618 // Type or member is obsolete
-        if (_rabbitMQOptions.CustomHeaders != null)
-        {
-            var customHeaders = _rabbitMQOptions.CustomHeaders(e);
-            foreach (var customHeader in customHeaders)
-            {
-                headers[customHeader.Key] = customHeader.Value;
-            }
-        }
-#pragma warning restore CS0618 // Type or member is obsolete
-
         if (_rabbitMQOptions.CustomHeadersBuilder != null)
         {
             var customHeaders = _rabbitMQOptions.CustomHeadersBuilder(e, _serviceProvider);
