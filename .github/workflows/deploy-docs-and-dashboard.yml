@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - master
+permissions:
+  id-token: write
 jobs:
   changes:
     runs-on: ubuntu-latest
