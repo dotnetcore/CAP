@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - master
-permissions:
-  id-token: write
 jobs:
   changes:
     runs-on: ubuntu-latest
@@ -56,6 +54,8 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.docs == 'true' }}
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
     - name: Checkout 🛎️
       uses: actions/checkout@v3
