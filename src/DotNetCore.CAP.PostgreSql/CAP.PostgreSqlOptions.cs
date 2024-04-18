@@ -29,7 +29,9 @@ public class PostgreSqlOptions : EFOptions
     /// </summary>
     internal NpgsqlConnection CreateConnection()
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         return DataSource != null ? DataSource.CreateConnection() : new NpgsqlConnection(ConnectionString);
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 }
 

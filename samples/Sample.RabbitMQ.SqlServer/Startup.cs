@@ -1,5 +1,4 @@
-﻿using DotNetCore.CAP;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Sample.RabbitMQ.SqlServer
@@ -8,6 +7,7 @@ namespace Sample.RabbitMQ.SqlServer
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            //docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=yourStrong(!)Password" -e "MSSQL_PID=Evaluation" -p 1433:1433  --name sqlpreview --hostname sqlpreview -d mcr.microsoft.com/mssql/server:2022-preview-ubuntu-22.04
             services.AddDbContext<AppDbContext>();
 
             //services
@@ -17,17 +17,11 @@ namespace Sample.RabbitMQ.SqlServer
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ(opt =>
-                {
-                    opt.HostName = "localhost";
-                    opt.BasicQosOptions = new RabbitMQOptions.BasicQos(1);
-                });
+                x.UseRabbitMQ("localhost");
                 x.UseDashboard();
-                //x.ConsumerThreadCount = 4;
-                x.EnableConsumerPrefetch = true;
+        
+                x.EnablePublishParallelSend = true;
                 
-                //x.FailedRetryCount = 5;
-                //x.UseDispatchingPerGroup = true;
                 //x.FailedThresholdCallback = failed =>
                 //{
                 //    var logger = failed.ServiceProvider.GetRequiredService<ILogger<Startup>>();

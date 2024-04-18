@@ -80,16 +80,16 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
         }
 
         [Route("~/adonet/transaction")]
-        public IActionResult AdonetWithTransaction()
+        public async Task<IActionResult> AdonetWithTransaction()
         {
             using (var connection = new SqlConnection(AppDbContext.ConnectionString))
             {
-                using (var transaction = connection.BeginTransaction(_capBus, true))
+                using (var transaction = await connection.BeginTransactionAsync(_capBus, true))
                 {
                     //your business code
-                    connection.Execute("insert into test(name) values('test')", transaction: transaction);
+                    await connection.ExecuteAsync("insert into test(name) values('test')", transaction: transaction);
 
-                    _capBus.Publish("sample.rabbitmq.sqlserver", new Person()
+                    await _capBus.PublishAsync("sample.rabbitmq.sqlserver", new Person()
                     {
                         Id = 123,
                         Name = "Bar"
