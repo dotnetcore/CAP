@@ -147,7 +147,7 @@ If `true` then all consumers within the same group pushes received messages to o
 
 Renamed to `EnableSubscriberParallelExecute` option, Please use the new option.
 
-### EnableSubscriberParallelExecute
+#### EnableSubscriberParallelExecute
 
 > Default: false
 
@@ -156,13 +156,13 @@ If `true`, CAP will prefetch some message from the broker as buffered, then exec
 !!! note "Precautions"
     Setting it to true may cause some problems. When the subscription method executes too slowly and takes too long, it will cause the retry thread to pick up messages that have not yet been executed. The retry thread picks up messages from 4 minutes (FallbackWindowLookbackSeconds) ago by default , that is to say, if the message backlog of more than 4 minutes (FallbackWindowLookbackSeconds) on the consumer side will be picked up again and executed again
 
-### SubscriberParallelExecuteThreadCount
+#### SubscriberParallelExecuteThreadCount
 
 > Default: `Environment.ProcessorCount`
 
 With the `EnableSubscriberParallelExecute` option enabled, specify the number of parallel task execution threads.
 
-### SubscriberParallelExecuteBufferFactor
+#### SubscriberParallelExecuteBufferFactor
 
 > Default: 1
 

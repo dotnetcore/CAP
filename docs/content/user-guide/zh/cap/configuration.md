@@ -151,7 +151,7 @@ services.AddCap(config =>
 
  该配置项已被重命名为 `EnableSubscriberParallelExecute`，请使用新选项。
 
-### EnableSubscriberParallelExecute
+#### EnableSubscriberParallelExecute
 
 > 默认值: false
 
@@ -160,13 +160,13 @@ services.AddCap(config =>
 !!! note "注意事项"
     设置为 true 可能会产生一些问题，当订阅方法执行过慢耗时太久时，会导致重试线程拾取到还未执行的的消息。重试线程默认拾取4分钟前（FallbackWindowLookbackSeconds 配置项）的消息，也就是说如果消费端积压了超过4分钟（FallbackWindowLookbackSeconds 配置项）的消息就会被重新拾取到再次执行
 
-### SubscriberParallelExecuteThreadCount
+#### SubscriberParallelExecuteThreadCount
 
 > Default: `Environment.ProcessorCount`
 
 当启用 `EnableSubscriberParallelExecute` 时, 可通过此参数执行并行处理的线程数，默认值为处理器个数。
 
-### SubscriberParallelExecuteBufferFactor
+#### SubscriberParallelExecuteBufferFactor
 
 > Default: 1
 
