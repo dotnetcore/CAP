@@ -1,6 +1,6 @@
 # 配置
 
-默认情况下，你在向IoC容器中注册CAP服务的时候指定配置。
+默认情况下，你在向DI容器中注册CAP服务的时候指定此配置。
 
 ```c#
 services.AddCap(config=> {
@@ -10,21 +10,19 @@ services.AddCap(config=> {
 
 其中 `services` 代表的是 `IServiceCollection` 接口对象，它位于 `Microsoft.Extensions.DependencyInjection` 下面。 
 
-如果你不想使用微软的IoC容器，那么你可以查看 [ASP.NET Core 这里的文档](https://docs.microsoft.com/en-us/aspnet/core/fundamentals/dependency-injection?view=aspnetcore-2.2#default-service-container-replacement) 来了解如何替换默认的容器实现。
-
 ## 什么是最低配置？
 
-最简单的回答就是，至少你要配置一个消息队列和一个事件存储，如果你想快速开始你可以使用下面的配置：
+最简单的回答就是，至少你要配置一个传输器和一个存储，如果你想快速开始你可以使用下面的配置：
 
 ```C#
 services.AddCap(config => 
 {
-     config.UseInMemoryMessageQueue();
+     config.UseInMemoryMessageQueue(); //需要引用 Savorboard.CAP.InMemoryMessageQueue 包
      config.UseInMemoryStorage();
 });
 ```
 
-有关具体的消息队列的配置和存储的配置，你可以查看 Transports 章节和 Persistent 章节中具体组件提供的配置项。
+有关具体的传输器配置和存储配置，你可以查看 Transports 章节和 Persistent 章节中具体组件提供的配置项。
 
 ## CAP 中的自定义配置
 
@@ -42,7 +40,6 @@ services.AddCap(config =>
     在 Azure Service Bus 中映射到 Subscription Name。  
     在 NATS 中映射到 [Queue Group Name](https://docs.nats.io/nats-concepts/queue).
     在 Redis Streams 中映射到 [Consumer Group](https://redis.io/topics/streams-intro#creating-a-consumer-group).
-
 
 #### GroupNamePrefix
 
