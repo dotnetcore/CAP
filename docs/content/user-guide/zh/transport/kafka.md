@@ -41,9 +41,9 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 Servers | Broker 地址 | string | 
 ConnectionPoolSize | 用户名 | int | 10
-CustomHeaders | 设置自定义头 | Function | 
+CustomHeadersBuilder | 设置自定义头 | Function | 
 
-有关 `CustomHeaders` 的说明：
+有关 `CustomHeadersBuilder` 的说明：
 
 如果你想在消费消息的时候，通过从 `CapHeader` 获取 Kafka 中例如 Offset 或者 Partition 等信息，你可以通过自定义此函数来实现这一点。
 
@@ -54,7 +54,7 @@ x.UseKafka(opt =>
 {
     //...
 
-    opt.CustomHeaders = kafkaResult => new List<KeyValuePair<string, string>>
+    opt.CustomHeadersBuilder = (kafkaResult,sp) => new List<KeyValuePair<string, string>>
     {
         new KeyValuePair<string, string>("my.kafka.offset", kafkaResult.Offset.ToString()),
         new KeyValuePair<string, string>("my.kafka.partition", kafkaResult.Partition.ToString())

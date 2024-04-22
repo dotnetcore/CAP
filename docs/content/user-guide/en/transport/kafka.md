@@ -40,9 +40,9 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 Servers | Broker server address | string | 
 ConnectionPoolSize | connection pool size | int | 10
-CustomHeaders | Custom subscribe headers |  Func<> |  N/A
+CustomHeadersBuilder | Custom subscribe headers |  Func<> |  N/A
 
-#### CustomHeaders Options
+#### CustomHeadersBuilder Options
 
 When the message sent from a heterogeneous system, because of the CAP needs to define additional headers, so an exception will occur at this time. By providing this parameter to set the custom headersn to make the subscriber works.
 
@@ -57,7 +57,7 @@ x.UseKafka(opt =>
 {
     //...
 
-    opt.CustomHeaders = kafkaResult => new List<KeyValuePair<string, string>>
+    opt.CustomHeadersBuilder = (kafkaResult,sp) => new List<KeyValuePair<string, string>>
     {
         new KeyValuePair<string, string>("my.kafka.offset", kafkaResult.Offset.ToString()),
         new KeyValuePair<string, string>("my.kafka.partition", kafkaResult.Partition.ToString())

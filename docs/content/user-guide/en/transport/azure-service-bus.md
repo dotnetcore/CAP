@@ -53,7 +53,7 @@ The AzureServiceBus configuration options provided directly by the CAP:
 | MaxAutoLockRenewalDuration           | The maximum duration within which the lock will be renewed automatically. This value should be greater than the longest message lock duration.                        | TimeSpan                                             | 5 minutes                        |
 | ManagementTokenProvider              | Token provider                                                                                                                                                        | ITokenProvider                                       | null                             |
 | AutoCompleteMessages                 | Gets a value that indicates whether the processor should automatically complete messages after the message handler has completed processing                           | bool                                                 | true                             |
-| CustomHeaders                        | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                                                                                | `Func<Message, List<KeyValuePair<string, string>>>?` | null                             |
+| CustomHeadersBuilder                        | Adds custom and/or mandatory Headers for incoming messages from heterogeneous systems.                                                                                | `Func<Message, IServiceProvider, List<KeyValuePair<string, string>>>?` | null                             |
 | Namespace                            | Namespace of Servicebus , Needs to be set when using with TokenCredential Property                                                                                    | string                                               | null                             |
 | DefaultCorrelationHeaders            | Adds additional correlation properties to all [correlation filters](https://learn.microsoft.com/en-us/azure/service-bus-messaging/topic-filters#correlation-filters). | IDictionary<string, string>                          | Dictionary<string, string>.Empty |
 | SQLFilters                           | Custom SQL Filters by name and expression on Topic Subscribtion                                                                                                       | List<KeyValuePair<string, string>>                   | null                             |
@@ -84,12 +84,11 @@ Sometimes you might want to listen to a message that was published by an externa
 c.UseAzureServiceBus(asb =>
 {
     asb.ConnectionString = ...
-    asb.CustomHeaders = message => new List<KeyValuePair<string, string>>()
-    {
-        new(DotNetCore.CAP.Messages.Headers.MessageId,
-            SnowflakeId.Default().NextId().ToString()),
-        new(DotNetCore.CAP.Messages.Headers.MessageName, message.Label)
-    };
+    asb.CustomHeadersBuilder = (msg, sp) =>
+    [
+        new(DotNetCore.CAP.Messages.Headers.MessageId, sp.GetRequiredService<ISnowflakeId>().NextId().ToString()),
+        new(DotNetCore.CAP.Messages.Headers.MessageName, msg.RoutingKey)
+    ];
 });
 ```
 

@@ -265,24 +265,17 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
         headers.Add(Headers.Group, _subscriptionName);
 
-        List<KeyValuePair<string, string>>? customHeaders = null;
-#pragma warning disable CS0618 // Type or member is obsolete
-        if (_asbOptions.CustomHeaders != null) customHeaders = _asbOptions.CustomHeaders(message).ToList();
-#pragma warning restore CS0618 // Type or member is obsolete
-
         if (_asbOptions.CustomHeadersBuilder != null)
-            customHeaders = _asbOptions.CustomHeadersBuilder(message, _serviceProvider).ToList();
-
-        if (customHeaders?.Any() == true)
+        {
+            var customHeaders = _asbOptions.CustomHeadersBuilder(message, _serviceProvider);
             foreach (var customHeader in customHeaders)
             {
                 var added = headers.TryAdd(customHeader.Key, customHeader.Value);
 
                 if (!added)
-                    _logger.LogWarning(
-                        "Not possible to add the custom header {Header}. A value with the same key already exists in the Message headers.",
-                        customHeader.Key);
+                    _logger.LogWarning("Not possible to add the custom header {Header}. A value with the same key already exists in the Message headers.",customHeader.Key);
             }
+        }
 
         return new TransportMessage(headers, message.Body);
     }

@@ -51,7 +51,7 @@ Port | Port | int | -1
 ExchangeName | Default exchange name | string | cap.default.topic
 QueueArguments  | Extra queue `x-arguments` | QueueArgumentsOptions  |  N/A
 ConnectionFactoryOptions  |  RabbitMQClient native connection options | ConnectionFactory | N/A
-CustomHeaders  | Custom subscribe headers |  See the blow |  N/A
+CustomHeadersBuilder  | Custom subscribe headers |  See the blow |  N/A
 PublishConfirms | Enable [publish confirms](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
 BasicQosOptions | Specify [Qos](https://www.rabbitmq.com/consumer-prefetch.html) of message prefetch | BasicQos | N/A
 
@@ -74,7 +74,7 @@ services.AddCap(x =>
 
 ```
 
-#### CustomHeaders Option
+#### CustomHeadersBuilder Option
 
 When the message sent from the RabbitMQ management console or a heterogeneous system, because of the CAP needs to define additional headers, so an exception will occur at this time. By providing this parameter to set the custom headersn to make the subscriber works.
 
@@ -85,11 +85,11 @@ Example：
 ```cs
 x.UseRabbitMQ(aa =>
 {
-    aa.CustomHeaders = e => new List<KeyValuePair<string, string>>
-    {
-        new KeyValuePair<string, string>(Headers.MessageId, SnowflakeId.Default().NextId().ToString()),
-        new KeyValuePair<string, string>(Headers.MessageName, e.RoutingKey),
-    };
+    aa.CustomHeadersBuilder = (msg, sp) =>
+    [
+        new(DotNetCore.CAP.Messages.Headers.MessageId, sp.GetRequiredService<ISnowflakeId>().NextId().ToString()),
+        new(DotNetCore.CAP.Messages.Headers.MessageName, msg.RoutingKey)
+    ];
 });
 ```
 

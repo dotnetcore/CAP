@@ -48,7 +48,7 @@ CAP 直接对外提供的 Azure Service Bus 配置参数如下：
 | TopicPath               | Topic entity path                                                                                            | string                                               | cap     |
 | ManagementTokenProvider | Token provider                                                                                               | ITokenProvider                                       | null    |
 | AutoCompleteMessages    | 获取一个值，该值指示处理器是否应在消息处理程序完成处理后自动完成消息                                         | bool                                                 | false   |
-| CustomHeaders           | 为来自异构系统的传入消息添加自定义头                                                                         | `Func<Message, List<KeyValuePair<string, string>>>?` | null    |
+| CustomHeadersBuilder           | 为来自异构系统的传入消息添加自定义头                                                                         | `Func<Message, List<KeyValuePair<string, string>>>?` | null    |
 | Namespace               | Servicebus 的命名空间，与 TokenCredential 属性一起使用时需要设置                                             | string                                               | null    |
 | SQLFilters              | 根据名称和表达式自定义 SQL 过滤器                                                                              | List<KeyValuePair<string, string>>                   | null    |
 
@@ -79,12 +79,11 @@ capBus.Publish(yourEventName, yourEvent, extraHeaders);
 c.UseAzureServiceBus(asb =>
 {
     asb.ConnectionString = ...
-    asb.CustomHeaders = message => new List<KeyValuePair<string, string>>()
-    {
-        new(DotNetCore.CAP.Messages.Headers.MessageId,
-            SnowflakeId.Default().NextId().ToString()),
-        new(DotNetCore.CAP.Messages.Headers.MessageName, message.Label)
-    };
+    asb.CustomHeadersBuilder = (msg, sp) =>
+    [
+        new(DotNetCore.CAP.Messages.Headers.MessageId, sp.GetRequiredService<ISnowflakeId>().NextId().ToString()),
+        new(DotNetCore.CAP.Messages.Headers.MessageName, msg.RoutingKey)
+    ];
 });
 ```
 

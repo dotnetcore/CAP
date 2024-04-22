@@ -52,7 +52,7 @@ Port | 端口号 | int | -1
 ExchangeName | CAP默认Exchange名称 | string | cap.default.topic
 QueueArguments  | 队列额外参数 x-arguments | QueueArgumentsOptions  |  N/A
 ConnectionFactoryOptions  |  RabbitMQClient原生参数 | ConnectionFactory | N/A
-CustomHeaders  | 订阅者自定义头信息 |  见下文 |  N/A
+CustomHeadersBuilder  | 订阅者自定义头信息 |  见下文 |  N/A
 PublishConfirms | 是否启用[发布确认](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
 BasicQosOptions | 指定消费的[Qos](https://www.rabbitmq.com/consumer-prefetch.html) | BasicQos | N/A
 
@@ -75,7 +75,7 @@ services.AddCap(x =>
 
 ```
 
-#### CustomHeaders Option
+#### CustomHeadersBuilder Option
 
 当需要从异构系统或者直接接收从RabbitMQ 控制台发送的消息时，由于 CAP 需要定义额外的头信息才能正常订阅，所以此时会出现异常。通过提供此参数来进行自定义头信息的设置来使订阅者正常工作。
 
@@ -86,11 +86,11 @@ services.AddCap(x =>
 ```cs
 x.UseRabbitMQ(aa =>
 {
-    aa.CustomHeaders = e => new List<KeyValuePair<string, string>>
-    {
-        new KeyValuePair<string, string>(Headers.MessageId, SnowflakeId.Default().NextId().ToString()),
-        new KeyValuePair<string, string>(Headers.MessageName, e.RoutingKey),
-    };
+    aa.CustomHeadersBuilder = (msg, sp) =>
+    [
+        new(DotNetCore.CAP.Messages.Headers.MessageId, sp.GetRequiredService<ISnowflakeId>().NextId().ToString()),
+        new(DotNetCore.CAP.Messages.Headers.MessageName, msg.RoutingKey)
+    ];
 });
 ```
 
