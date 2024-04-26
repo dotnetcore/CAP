@@ -156,7 +156,7 @@ internal class CapPublisher : ICapPublisher
         {
             tracingTimestamp = TracingBefore(message);
 
-            if (Transaction == null)
+            if (Transaction?.DbTransaction == null)
             {
                 var mediumMessage = await _storage.StoreMessageAsync(name, message).ConfigureAwait(false);
 
