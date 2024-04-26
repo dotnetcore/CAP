@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
 using System.Threading;
@@ -33,11 +32,7 @@ public class SqlServerCapTransaction : CapTransactionBase
 
     protected override void AddToSent(MediumMessage msg)
     {
-        if (DbTransaction is NoopTransaction)
-        {
-            base.AddToSent(msg);
-            return;
-        }
+        base.AddToSent(msg);
 
         var dbTransaction = DbTransaction as IDbTransaction;
         if (dbTransaction == null)
@@ -49,15 +44,8 @@ public class SqlServerCapTransaction : CapTransactionBase
         }
 
         var transactionKey = ((SqlConnection)dbTransaction.Connection!).ClientConnectionId;
-        if (_diagnosticProcessor.BufferList.TryGetValue(transactionKey, out var list))
-        {
-            list.Add(msg);
-        }
-        else
-        {
-            var msgList = new List<MediumMessage>(1) { msg };
-            _diagnosticProcessor.BufferList.TryAdd(transactionKey, msgList);
-        }
+
+        _diagnosticProcessor.TransBuffer.TryAdd(transactionKey, this);
     }
 
     public override void Commit()
@@ -116,22 +104,6 @@ public class SqlServerCapTransaction : CapTransactionBase
                 await dbContextTransaction.RollbackAsync(cancellationToken).ConfigureAwait(false);
                 break;
         }
-    }
-
-    public override void Dispose()
-    {
-        switch (DbTransaction)
-        {
-            case IDbTransaction dbTransaction:
-                dbTransaction.Dispose();
-                break;
-            case IDbContextTransaction dbContextTransaction:
-                dbContextTransaction.Dispose();
-                break;
-        }
-
-        DbTransaction = null;
-        GC.SuppressFinalize(this);
     }
 }
 

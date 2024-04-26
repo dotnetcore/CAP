@@ -14,7 +14,7 @@ builder.Logging.AddConsole();
 // Add services to the container.
 builder.Services.AddRazorPages();
 
-var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!);
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -58,10 +58,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-app.MapGet("/",  () => Results.LocalRedirect("/index.html", true));
+app.MapGet("/", () => Results.LocalRedirect("/index.html", true));
 
 app.MapPost("/security/createToken",
-    [AllowAnonymous](User user) =>
+    [AllowAnonymous] (User user) =>
     {
         if (user is { UserName: "bob", Password: "bob" })
         {

@@ -18,7 +18,7 @@ namespace Sample.RabbitMQ.MySql
                 x.UseDashboard();
                 //x.EnableConsumerPrefetch = true;
                 x.UseDispatchingPerGroup = true;
-                x.EnableConsumerPrefetch = true;
+                x.EnableSubscriberParallelExecute = true;
                 x.FailedThresholdCallback = failed =>
                 {
                     var logger = failed.ServiceProvider.GetService<ILogger<Startup>>();

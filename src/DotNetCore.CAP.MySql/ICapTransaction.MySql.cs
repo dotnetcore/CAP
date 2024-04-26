@@ -86,13 +86,6 @@ public class MySqlCapTransaction : CapTransactionBase
                 break;
         }
     }
-
-    public override void Dispose()
-    {
-        (DbTransaction as IDisposable)?.Dispose();
-        DbTransaction = null;
-        GC.SuppressFinalize(this);
-    }
 }
 
 public static class CapTransactionExtensions

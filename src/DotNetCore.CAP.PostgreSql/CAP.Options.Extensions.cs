@@ -12,7 +12,9 @@ public static class CapOptionsExtensions
 {
     public static CapOptions UsePostgreSql(this CapOptions options, string connectionString)
     {
+#pragma warning disable CS0618 // Type or member is obsolete
         return options.UsePostgreSql(opt => { opt.ConnectionString = connectionString; });
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 
     public static CapOptions UsePostgreSql(this CapOptions options, Action<PostgreSqlOptions> configure)

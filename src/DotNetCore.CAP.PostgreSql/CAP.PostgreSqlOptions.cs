@@ -57,6 +57,8 @@ internal class ConfigurePostgreSqlOptions : IConfigureOptions<PostgreSqlOptions>
         using var dbContext = (DbContext)provider.GetRequiredService(options.DbContextType);
         var connectionString = dbContext.Database.GetConnectionString();
         if (string.IsNullOrEmpty(connectionString)) throw new ArgumentNullException(connectionString);
+#pragma warning disable CS0618 // Type or member is obsolete
         options.ConnectionString = connectionString;
+#pragma warning restore CS0618 // Type or member is obsolete
     }
 }

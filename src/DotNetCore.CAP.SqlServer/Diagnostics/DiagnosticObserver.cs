@@ -6,9 +6,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using DotNetCore.CAP.Messages;
-using DotNetCore.CAP.Persistence;
-using DotNetCore.CAP.Transport;
+using DotNetCore.CAP.Internal;
 using Microsoft.Data.SqlClient;
 
 namespace DotNetCore.CAP.SqlServer.Diagnostics;
@@ -20,14 +18,11 @@ internal class DiagnosticObserver : IObserver<KeyValuePair<string, object?>>
     public const string SqlAfterRollbackTransactionMicrosoft = "Microsoft.Data.SqlClient.WriteTransactionRollbackAfter";
     public const string SqlBeforeCloseConnectionMicrosoft = "Microsoft.Data.SqlClient.WriteConnectionCloseBefore";
 
-    private readonly ConcurrentDictionary<Guid, List<MediumMessage>> _bufferList;
-    private readonly IDispatcher _dispatcher;
+    private readonly ConcurrentDictionary<Guid, SqlServerCapTransaction> _transBuffer;
 
-    public DiagnosticObserver(IDispatcher dispatcher,
-        ConcurrentDictionary<Guid, List<MediumMessage>> bufferList)
+    public DiagnosticObserver(ConcurrentDictionary<Guid, SqlServerCapTransaction> bufferTrans)
     {
-        _dispatcher = dispatcher;
-        _bufferList = bufferList;
+        _transBuffer = bufferTrans;
     }
 
     public void OnCompleted()
@@ -47,22 +42,13 @@ internal class DiagnosticObserver : IObserver<KeyValuePair<string, object?>>
                     if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
                     var transactionKey = sqlConnection.ClientConnectionId;
 
-                    if (_bufferList.TryRemove(transactionKey, out var msgList))
+                    if (_transBuffer.TryRemove(transactionKey, out var transaction))
                     {
                         if (GetProperty(evt.Value, "Operation") as string == "Rollback")
                             return;
-                        foreach (var message in msgList)
-                        {
-                            var isDelayMessage = message.Origin.Headers.ContainsKey(Headers.DelayTime);
-                            if (isDelayMessage)
-                            {
-                                _dispatcher.EnqueueToScheduler(message, DateTime.Parse(message.Origin.Headers[Headers.SentTime]!)).ConfigureAwait(false);
-                            }
-                            else
-                            {
-                                _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
-                            }
-                        }
+                        transaction.DbTransaction = new NoopTransaction();
+                        transaction.Commit();
+                        transaction.Dispose(); 
                     }
 
                     break;
@@ -70,12 +56,12 @@ internal class DiagnosticObserver : IObserver<KeyValuePair<string, object?>>
             case SqlErrorCommitTransactionMicrosoft or SqlAfterRollbackTransactionMicrosoft
                 or SqlBeforeCloseConnectionMicrosoft:
                 {
-                    if (!_bufferList.IsEmpty)
+                    if (!_transBuffer.IsEmpty)
                     {
                         if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
                         var transactionKey = sqlConnection.ClientConnectionId;
 
-                        _bufferList.TryRemove(transactionKey, out _);
+                        _transBuffer.TryRemove(transactionKey, out _);
                     }
 
                     break;

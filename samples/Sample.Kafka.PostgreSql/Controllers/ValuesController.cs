@@ -46,18 +46,20 @@ namespace Sample.Kafka.PostgreSql.Controllers
         [Route("~/adonet/transaction")]
         public IActionResult AdonetWithTransaction()
         {
-            using (var connection = new NpgsqlConnection(""))
+            using (var connection = new NpgsqlConnection(Startup.DbConnectionString))
             {
                 using (var transaction = connection.BeginTransaction(producer, autoCommit: false))
                 {
                     //your business code
-                    connection.Execute("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
+                    connection.Execute("INSERT INTO \"Persons\"(\"Name\",\"Age\",\"CreateTime\") VALUES('Lucy',25, NOW())", transaction: (IDbTransaction)transaction.DbTransaction);
 
                     producer.Publish("sample.kafka.postgrsql", DateTime.Now);
 
                     transaction.Commit();
                 }
             }
+
+            producer.Publish("sample.kafka.postgrsql", DateTime.Now);
 
             return Ok();
         }

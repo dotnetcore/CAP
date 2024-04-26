@@ -39,8 +39,6 @@ public abstract class CapTransactionBase : ICapTransaction
 
     public abstract Task RollbackAsync(CancellationToken cancellationToken = default);
 
-    public abstract void Dispose();
-
     protected internal virtual void AddToSent(MediumMessage msg)
     {
         _bufferList.Enqueue(msg);
@@ -67,5 +65,11 @@ public abstract class CapTransactionBase : ICapTransaction
 #pragma warning restore CA2012 // Use ValueTasks correctly
             }
         }
+    }
+
+    public virtual void Dispose()
+    {
+        (DbTransaction as IDisposable)?.Dispose();
+        DbTransaction = null;
     }
 }

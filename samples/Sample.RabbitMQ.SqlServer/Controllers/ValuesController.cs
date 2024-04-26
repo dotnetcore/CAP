@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Data.Common;
 using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using NameGenerator.Generators;
 using Sample.RabbitMQ.SqlServer.Messages;
 
 namespace Sample.RabbitMQ.SqlServer.Controllers
@@ -65,7 +67,11 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
                 using (var transaction = connection.BeginTransaction(_capBus, true))
                 {
                     //your business code
-                    connection.Execute("insert into test(name) values('test')", transaction: transaction);
+                    connection.Execute("INSERT INTO Persons(Name,Age,CreateTime) VALUES(@Name,@Age, GETDATE())", new
+                    {
+                        Name = new RealNameGenerator().Generate(),
+                        Age = Random.Shared.Next(10, 99),
+                    }, transaction: transaction);
 
                     await _capBus.PublishDelayAsync(TimeSpan.FromSeconds(delaySeconds), "sample.rabbitmq.sqlserver",
                         new Person()
@@ -82,20 +88,30 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
         [Route("~/adonet/transaction")]
         public async Task<IActionResult> AdonetWithTransaction()
         {
+            var person = new Person
+            {
+                Name = new RealNameGenerator().Generate(),
+                Age = Random.Shared.Next(10, 99),
+            };
+
             using (var connection = new SqlConnection(AppDbContext.ConnectionString))
             {
-                using (var transaction = await connection.BeginTransactionAsync(_capBus, true))
-                {
-                    //your business code
-                    await connection.ExecuteAsync("insert into test(name) values('test')", transaction: transaction);
+                using var transaction = await connection.BeginTransactionAsync(_capBus, false);
 
-                    await _capBus.PublishAsync("sample.rabbitmq.sqlserver", new Person()
-                    {
-                        Id = 123,
-                        Name = "Bar"
-                    });
-                }
+                await _capBus.PublishAsync("sample.rabbitmq.sqlserver", person);
+
+                await connection.ExecuteAsync("INSERT INTO Persons(Name,Age,CreateTime) VALUES(@Name,@Age, GETDATE())",
+                      param: new { person.Name, person.Age },
+                      transaction: transaction);
+
+                await _capBus.PublishDelayAsync(TimeSpan.FromSeconds(5), "sample.rabbitmq.sqlserver", person);
+
+                await ((DbTransaction)transaction).CommitAsync();
             }
+
+            person.Name = new RealNameGenerator().Generate();
+
+            await _capBus.PublishAsync("sample.rabbitmq.sqlserver", person);
 
             return Ok();
         }

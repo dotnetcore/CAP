@@ -33,9 +33,5 @@ internal class InMemoryCapTransaction : CapTransactionBase
     public override Task RollbackAsync(CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
-    }
-
-    public override void Dispose()
-    {
-    }
+    } 
 }

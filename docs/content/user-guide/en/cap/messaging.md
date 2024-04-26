@@ -77,18 +77,19 @@ cap-senttime | string | sending time (not required)
 cap-kafka-key | string | Partitioning by Kafka Key
 
 ### Custom headers
-To consume messages sent without CAP headers, both AzureServiceBus, Kafka and RabbitMQ consumers can inject a minimal set of headers using the `CustomHeaders` property as shown below (RabbitMQ example):
+
+To consume messages sent without CAP headers, both AzureServiceBus, Kafka and RabbitMQ consumers can inject a minimal set of headers using the `CustomHeadersBuilder` property as shown below (RabbitMQ example):
 ```C#
 container.AddCap(x =>
 {
     x.UseRabbitMQ(z =>
     {
         z.ExchangeName = "TestExchange";
-        z.CustomHeaders = e => new List<KeyValuePair<string, string>>
-        {
-            new KeyValuePair<string, string>(DotNetCore.CAP.Messages.Headers.MessageId, SnowflakeId.Default().NextId().ToString()),
-            new KeyValuePair<string, string>(DotNetCore.CAP.Messages.Headers.MessageName, e.RoutingKey)
-        };
+        z.CustomHeadersBuilder = (msg, sp) =>
+        [
+            new(DotNetCore.CAP.Messages.Headers.MessageId, sp.GetRequiredService<ISnowflakeId>().NextId().ToString()),
+            new(DotNetCore.CAP.Messages.Headers.MessageName, msg.RoutingKey)
+        ];
     });
 });
 ```
