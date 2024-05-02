@@ -107,7 +107,55 @@ services
     });
 ```
 
-#### Example: 自定义认证 Scheme
+### 自定义认证
+
+从 8.0.0 版开始，CAP 控制面板利用 ASP.NET Core 身份验证机制，允许通过自定义授权策略和 ASP.NET Core 身份验证与授权中间件进行扩展。有关 ASP.NET Core 身份验证内部机制的更多详情，请查阅 [官方文档](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-8.0)。
+
+您可以在示例项目 `Sample.Dashboard.Auth` 中查看以下示例。
+
+#### 例子：Anonymous Access 匿名访问
+
+```csharp
+services.AddCap(cap =>
+    {
+        cap.UseDashboard(d =>
+        {
+            d.AllowAnonymousExplicit = true;
+        });
+        cap.UseInMemoryStorage();
+        cap.UseInMemoryMessageQueue();
+    });
+```
+
+#### 例子：使用 Open Id
+
+```csharp
+services
+    .AddAuthorization(options =>
+        { 
+            options.AddPolicy(DashboardAuthorizationPolicy, policy => policy
+                .AddAuthenticationSchemes(OpenIdConnectDefaults.AuthenticationScheme)
+                .RequireAuthenticatedUser());
+        })
+        .AddAuthentication(opt => opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme)
+        .AddCookie()
+        .AddOpenIdConnect(options =>
+        {
+            ...
+        });
+    
+    services.AddCap(cap =>
+    {
+        cap.UseDashboard(d =>
+        {
+            d.AuthorizationPolicy = DashboardAuthorizationPolicy;
+        });
+        cap.UseInMemoryStorage();
+        cap.UseInMemoryMessageQueue();
+    });
+```
+
+#### 例子：自定义 Authentication Scheme
 
 ```csharp
 const string MyDashboardAuthenticationPolicy = "MyDashboardAuthenticationPolicy";

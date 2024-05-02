@@ -90,9 +90,9 @@ spec:
       targetPort: 80
 ```
 
-## 独立使用 Dashboard
+## 独立使用 Dashboard 
 
-你可以独立使用 Dashboard 而不需要配置CAP，此时相当于Dashboard可作为单独的Pod部署到Kubernetes集群中仅用作查看数据，待查看的服务不再需要配置 `cap.UseK8sDiscovery()` 配置项。
+你可以独立使用 Dashboard 而不需要配置CAP，此时相当于 Dashboard 可作为单独的 Pod 部署到 Kubernetes 集群中仅用作查看数据，待查看的服务不再需要配置 `cap.UseK8sDiscovery()` 配置项。
 
 ```
 services.AddCapDashboardStandalone();
