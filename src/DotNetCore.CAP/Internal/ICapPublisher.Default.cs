@@ -107,7 +107,7 @@ internal class CapPublisher : ICapPublisher
 
     public void PublishDelay<T>(TimeSpan delayTime, string name, T? value, string? callbackName = null)
     {
-        PublishDelayAsync(delayTime, name, value, callbackName).ConfigureAwait(false);
+        PublishDelayAsync(delayTime, name, value, callbackName).ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     private async Task PublishInternalAsync<T>(string name, T? value, IDictionary<string, string?> headers, TimeSpan? delayTime = null,
