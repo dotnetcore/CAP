@@ -45,10 +45,14 @@ internal class DiagnosticObserver : IObserver<KeyValuePair<string, object?>>
                     if (_transBuffer.TryRemove(transactionKey, out var transaction))
                     {
                         if (GetProperty(evt.Value, "Operation") as string == "Rollback")
+                        {
+                            transaction.Dispose();
                             return;
+                        }
+
                         transaction.DbTransaction = new NoopTransaction();
                         transaction.Commit();
-                        transaction.Dispose(); 
+                        transaction.Dispose();
                     }
 
                     break;
@@ -61,7 +65,10 @@ internal class DiagnosticObserver : IObserver<KeyValuePair<string, object?>>
                         if (!TryGetSqlConnection(evt, out var sqlConnection)) return;
                         var transactionKey = sqlConnection.ClientConnectionId;
 
-                        _transBuffer.TryRemove(transactionKey, out _);
+                        if (_transBuffer.TryRemove(transactionKey, out var transaction))
+                        {
+                            transaction.Dispose();
+                        }
                     }
 
                     break;
