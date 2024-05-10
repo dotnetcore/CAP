@@ -1,6 +1,6 @@
 {
   "name": "cap-dashboard",
-  "version": "7.2.0",
+  "version": "8.0.0",
   "description": "Dashboard for CAP",
   "author": "Savorboard, NCC",
   "homepage": "https://github.com/dotnetcore/CAP",
@@ -16,24 +16,24 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
-    "axios": "^0.21.1",
-    "bootstrap": "^4.5.3",
-    "bootstrap-vue": "^2.21.2",
+    "axios": "^0.28.1",
+    "bootstrap": "^4.6.2",
+    "bootstrap-vue": "^2.23.1",
     "json-bigint": "^1.0.0",
-    "vue": "^2.7.7",
-    "vue-i18n": "^8.26.7",
-    "vue-json-pretty": "^1.8.0",
-    "vue-router": "^3.5.4",
+    "vue": "^2.7.16",
+    "vue-i18n": "^8.28.2",
+    "vue-json-pretty": "^1.9.5",
+    "vue-router": "^3.6.5",
     "vuex": "^3.6.2"
   },
   "devDependencies": {
-    "@rushstack/eslint-patch": "^1.1.0",
+    "@rushstack/eslint-patch": "^1.10.2",
     "@vitejs/plugin-vue2": "^1.1.2",
-    "@vue/eslint-config-prettier": "^7.0.0",
-    "eslint": "^8.5.0",
-    "eslint-plugin-vue": "^9.0.0",
-    "prettier": "^2.5.1",
-    "terser": "^5.14.2",
-    "vite": "^3.0.2"
+    "@vue/eslint-config-prettier": "^7.1.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-vue": "^9.26.0",
+    "prettier": "^2.8.8",
+    "terser": "^5.31.0",
+    "vite": "^3.2.10"
   }
 }
