@@ -3,8 +3,9 @@
 [NATS](https://nats.io/)是一个简单、安全、高性能的数字系统、服务和设备通信系统。NATS 是 CNCF 的一部分。
 
 !!! warning
-    CAP 5.2.0 以下的版本基于 Request/Response 实现, 现在我们已经基于  JetStream 实现。
-    查看 https://github.com/dotnetcore/CAP/issues/983 了解更多。 
+    自 CAP 5.2+ 的版本已经基于 [JetStream](https://docs.nats.io/nats-concepts/jetstream) 实现相关功能，所以需要在服务端显式启用。
+    
+    **你需要在 NATS Server 启动时候指定 `--jetstream` 参数来启用 JetSteram 相关功能，才能正常使用CAP.**
 
 ## 配置
 

@@ -3,8 +3,9 @@
 [NATS](https://nats.io/) is a simple, secure and performant communications system for digital systems, services and devices. NATS is part of the Cloud Native Computing Foundation (CNCF).
 
 !!! warning
-    Versions of CAP below 5.2.0 are implement based on Request/Response mode, and now we are based on JetStream implementation.
-    see https://github.com/dotnetcore/CAP/issues/983 for more information.
+    Since version 5.2+, CAP's relevant features have been implemented based on [JetStream](https://docs.nats.io/nats-concepts/jetstream), so it needs to be explicitly enabled on the server.
+
+    **You need to enable JetStream by specifying the `--jetstream` parameter when starting the NATS Server in order to use CAP properly.**
 
 ## Configuration
 
