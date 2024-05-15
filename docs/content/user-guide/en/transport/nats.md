@@ -45,6 +45,7 @@ ConnectionPoolSize  | number of connections pool | uint | 10
 DeliverPolicy | The point in the stream to receive messages from (⚠️ Removed from version 8.1.0, use `ConsumerOptions` instead.) | enum | DeliverPolicy.New
 StreamOptions | 🆕 Stream configuration |  Action | NULL
 ConsumerOptions | 🆕 Consumer configuration | Action | NULL
+CustomHeadersBuilder | Custom subscribe headers |  See the blow | NULL
 
 #### NATS ConfigurationOptions
 
@@ -62,3 +63,22 @@ services.AddCap(capOptions =>
 ```
 
 `Options` is a NATS.Client ConfigurationOptions , you can find more details through this [link](http://nats-io.github.io/nats.net/class_n_a_t_s_1_1_client_1_1_options.html)
+
+#### CustomHeadersBuilder Option
+
+When the message sent from a heterogeneous system, because of the CAP needs to define additional headers, so an exception will occur at this time. By providing this parameter to set the custom headersn to make the subscriber works.
+
+You can find the description of [Header Information](../cap/messaging.md#heterogeneous-system-integration) here.
+
+Example：
+
+```cs
+x.UseNATS(aa =>
+{
+    aa.CustomHeadersBuilder = (e, sp) =>
+    [
+        new(DotNetCore.CAP.Messages.Headers.MessageId, sp.GetRequiredService<ISnowflakeId>().NextId().ToString()),
+        new(DotNetCore.CAP.Messages.Headers.MessageName, e.Message.Subject)
+    ];
+});
+```

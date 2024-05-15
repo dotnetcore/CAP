@@ -46,6 +46,7 @@ ConnectionPoolSize  | 连接池数量 | uint | 10
 DeliverPolicy | 消费消息的策略点（⚠️在8.1.0版本移除，使用`ConsumerOptions`替代。） | enum | DeliverPolicy.New
 StreamOptions | 🆕 Stream 配置项 |  Action | NULL
 ConsumerOptions | 🆕 Consumer 配置项 | Action | NULL
+CustomHeadersBuilder | 订阅者自定义头信息 |  见下文 |  N/A
 
 #### NATS ConfigurationOptions
 
@@ -63,3 +64,22 @@ services.AddCap(capOptions =>
 ```
 
 `Options` 是 NATS.Client 客户端提供的配置， 你可以在这个[链接](http://nats-io.github.io/nats.net/class_n_a_t_s_1_1_client_1_1_options.html)找到更多详细信息。
+
+#### CustomHeadersBuilder Option
+
+当需要从异构系统或者直接接收从 NATS JetStream 发送的消息时，由于 CAP 需要定义额外的头信息才能正常订阅，所以此时会出现异常。通过提供此参数来进行自定义头信息的设置来使订阅者正常工作。
+
+你可以在这里找到有关 [头信息](../cap/messaging.md#异构系统集成) 的说明。
+
+用法如下：
+
+```cs
+x.UseNATS(aa =>
+{
+    aa.CustomHeadersBuilder = (e, sp) =>
+    [
+        new(DotNetCore.CAP.Messages.Headers.MessageId, sp.GetRequiredService<ISnowflakeId>().NextId().ToString()),
+        new(DotNetCore.CAP.Messages.Headers.MessageName, e.Message.Subject)
+    ];
+});
+```
