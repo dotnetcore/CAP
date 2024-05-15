@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using NATS.Client;
 using NATS.Client.JetStream;
 
@@ -32,6 +33,11 @@ namespace DotNetCore.CAP
         public Action<StreamConfiguration.StreamConfigurationBuilder>? StreamOptions { get; set; }
 
         public Action<ConsumerConfiguration.ConsumerConfigurationBuilder>? ConsumerOptions { get; set; }
+
+        /// <summary>
+        /// If you need to get additional native delivery args, you can use this function to write into <see cref="CapHeader" />.
+        /// </summary>
+        public Func<MsgHandlerEventArgs, IServiceProvider, List<KeyValuePair<string, string>>>? CustomHeadersBuilder { get; set; }
 
         public Func<string, string> NormalizeStreamName { get; set; } = origin => origin.Split('.')[0];
     }

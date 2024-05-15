@@ -20,13 +20,15 @@ namespace DotNetCore.CAP.NATS
         private static readonly SemaphoreSlim ConnectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
 
         private readonly string _groupId;
+        private readonly IServiceProvider _serviceProvider;
         private readonly NATSOptions _natsOptions;
 
         private IConnection? _consumerClient;
 
-        public NATSConsumerClient(string groupId, IOptions<NATSOptions> options)
+        public NATSConsumerClient(string groupId, IOptions<NATSOptions> options, IServiceProvider serviceProvider)
         {
             _groupId = groupId;
+            _serviceProvider = serviceProvider;
             _natsOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
@@ -141,6 +143,15 @@ namespace DotNetCore.CAP.NATS
             }
 
             headers.Add(Headers.Group, _groupId);
+
+            if (_natsOptions.CustomHeadersBuilder != null)
+            {
+                var customHeaders = _natsOptions.CustomHeadersBuilder(e, _serviceProvider);
+                foreach (var customHeader in customHeaders)
+                {
+                    headers[customHeader.Key] = customHeader.Value;
+                }
+            }
 
             OnMessageCallback!(new TransportMessage(headers, e.Message.Data), e.Message);
         }
