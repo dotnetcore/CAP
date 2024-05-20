@@ -47,10 +47,9 @@ internal class MessageSender : IMessageSender
         OperateResult result;
         do
         {
-            var executedResult = await SendWithoutRetryAsync(message).ConfigureAwait(false);
-            result = executedResult.Item2;
+            (retry, result) = await SendWithoutRetryAsync(message).ConfigureAwait(false);
             if (result.Equals(OperateResult.Success)) return result;
-            retry = executedResult.Item1;
+
         } while (retry);
 
         return result;
