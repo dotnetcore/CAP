@@ -21,13 +21,15 @@ internal sealed class RabbitMQConsumerClientFactory : IConsumerClientFactory
         _serviceProvider = serviceProvider;
     }
 
-    public IConsumerClient Create(string groupId)
+    public IConsumerClient Create(string groupId, byte concurrent)
     {
         try
         {
-            var client =
-                new RabbitMQConsumerClient(groupId, _connectionChannelPool, _rabbitMQOptions, _serviceProvider);
+            var client = new RabbitMQConsumerClient(groupId, concurrent, _connectionChannelPool,
+                _rabbitMQOptions, _serviceProvider);
+            
             client.Connect();
+            
             return client;
         }
         catch (Exception e)

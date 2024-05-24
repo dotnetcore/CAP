@@ -18,13 +18,17 @@ internal sealed class PulsarConsumerClient : IConsumerClient
 {
     private readonly PulsarClient _client;
     private readonly string _groupId;
+    private readonly byte _groupConcurrent;
+    private readonly SemaphoreSlim _semaphore;
     private readonly PulsarOptions _pulsarOptions;
     private IConsumer<byte[]>? _consumerClient;
 
-    public PulsarConsumerClient(PulsarClient client, string groupId, IOptions<PulsarOptions> options)
+    public PulsarConsumerClient(IOptions<PulsarOptions> options, PulsarClient client, string groupName, byte groupConcurrent)
     {
         _client = client;
-        _groupId = groupId;
+        _groupId = groupName;
+        _groupConcurrent = groupConcurrent;
+        _semaphore = new SemaphoreSlim(groupConcurrent);
         _pulsarOptions = options.Value;
     }
 
@@ -56,17 +60,30 @@ internal sealed class PulsarConsumerClient : IConsumerClient
             {
                 var consumerResult = _consumerClient!.ReceiveAsync(cancellationToken).GetAwaiter().GetResult();
 
-                var headers = new Dictionary<string, string?>(consumerResult.Properties.Count);
-                foreach (var header in consumerResult.Properties)
+                if (_groupConcurrent > 0)
                 {
-                    headers.Add(header.Key, header.Value);
+                    _semaphore.Wait(cancellationToken);
+                    Task.Run(() => Consume(), cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    Consume().GetAwaiter().GetResult();
                 }
 
-                headers.Add(Headers.Group, _groupId);
+                Task Consume()
+                {
+                    var headers = new Dictionary<string, string?>(consumerResult.Properties.Count);
+                    foreach (var header in consumerResult.Properties)
+                    {
+                        headers.Add(header.Key, header.Value);
+                    }
 
-                var message = new TransportMessage(headers, consumerResult.Data);
+                    headers.Add(Headers.Group, _groupId);
 
-                OnMessageCallback!(message, consumerResult.MessageId).GetAwaiter().GetResult();
+                    var message = new TransportMessage(headers, consumerResult.Data);
+
+                    return OnMessageCallback!(message, consumerResult.MessageId);
+                }
             }
             catch (Exception e)
             {
@@ -82,11 +99,13 @@ internal sealed class PulsarConsumerClient : IConsumerClient
     public void Commit(object? sender)
     {
         _consumerClient!.AcknowledgeAsync((MessageId)sender!);
+        _semaphore.Release();
     }
 
     public void Reject(object? sender)
     {
         if (sender is MessageId id) _consumerClient!.NegativeAcknowledge(id);
+        _semaphore.Release();
     }
 
     public void Dispose()

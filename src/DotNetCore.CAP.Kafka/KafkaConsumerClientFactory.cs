@@ -18,11 +18,11 @@ public class KafkaConsumerClientFactory : IConsumerClientFactory
         _serviceProvider = serviceProvider;
     }
 
-    public virtual IConsumerClient Create(string groupId)
+    public virtual IConsumerClient Create(string groupName, byte groupConcurrent)
     {
         try
         {
-            return new KafkaConsumerClient(groupId, _kafkaOptions, _serviceProvider);
+            return new KafkaConsumerClient(groupName, groupConcurrent, _kafkaOptions, _serviceProvider);
         }
         catch (Exception e)
         {

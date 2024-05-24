@@ -17,26 +17,39 @@ public class MethodMatcherCache
     {
         _selector = selector;
         Entries = new ConcurrentDictionary<string, IReadOnlyList<ConsumerExecutorDescriptor>>();
+        GroupConcurrent = new ConcurrentDictionary<string, byte>();
     }
 
     private ConcurrentDictionary<string, IReadOnlyList<ConsumerExecutorDescriptor>> Entries { get; }
+
+    private ConcurrentDictionary<string, byte> GroupConcurrent { get; }
 
     /// <summary>
     /// Get a dictionary of candidates.In the dictionary,
     /// the Key is the CAPSubscribeAttribute Group, the Value for the current Group of candidates
     /// </summary>
-    public ConcurrentDictionary<string, IReadOnlyList<ConsumerExecutorDescriptor>>
-        GetCandidatesMethodsOfGroupNameGrouped()
+    public ConcurrentDictionary<string, IReadOnlyList<ConsumerExecutorDescriptor>> GetCandidatesMethodsOfGroupNameGrouped()
     {
         if (Entries.Count != 0) return Entries;
 
         var executorCollection = _selector.SelectCandidates();
+
+        foreach (var executor in executorCollection)
+        {
+            GroupConcurrent.AddOrUpdate(executor.Attribute.Group, executor.Attribute.GroupConcurrent,
+                (group, val) => (byte)(val + executor.Attribute.GroupConcurrent));
+        }
 
         var groupedCandidates = executorCollection.GroupBy(x => x.Attribute.Group);
 
         foreach (var item in groupedCandidates) Entries.TryAdd(item.Key, item.ToList());
 
         return Entries;
+    }
+
+    public byte GetGroupConcurrentLimit(string group)
+    {
+        return GroupConcurrent.TryGetValue(group, out byte value) ? value : (byte)1;
     }
 
     public List<string> GetAllTopics()

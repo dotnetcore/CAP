@@ -21,19 +21,22 @@ namespace DotNetCore.CAP.AmazonSQS;
 
 internal sealed class AmazonSQSConsumerClient : IConsumerClient
 {
-    private static readonly SemaphoreSlim ConnectionLock = new(1, 1);
+    private static readonly object ConnectionLock = new();
     private readonly AmazonSQSOptions _amazonSQSOptions;
-
+    private readonly SemaphoreSlim _semaphore;
     private readonly string _groupId;
+    private readonly byte _groupConcurrent;
     private string _queueUrl = string.Empty;
 
     private IAmazonSimpleNotificationService? _snsClient;
     private IAmazonSQS? _sqsClient;
 
-    public AmazonSQSConsumerClient(string groupId, IOptions<AmazonSQSOptions> options)
+    public AmazonSQSConsumerClient(string groupId, byte groupConcurrent, IOptions<AmazonSQSOptions> options)
     {
         _groupId = groupId;
+        _groupConcurrent = groupConcurrent;
         _amazonSQSOptions = options.Value;
+        _semaphore = new SemaphoreSlim(groupConcurrent);
     }
 
     public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
@@ -89,16 +92,29 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
 
             if (response.Messages.Count == 1)
             {
-                var messageObj = JsonSerializer.Deserialize<SQSReceivedMessage>(response.Messages[0].Body);
+                if (_groupConcurrent > 0)
+                {
+                    _semaphore.Wait(cancellationToken);
+                    Task.Run(() => Consume(), cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    Consume().GetAwaiter().GetResult();
+                }
 
-                var header = messageObj!.MessageAttributes.ToDictionary(x => x.Key, x => x.Value.Value);
-                var body = messageObj.Message;
+                Task Consume()
+                {
+                    var messageObj = JsonSerializer.Deserialize<SQSReceivedMessage>(response.Messages[0].Body);
 
-                var message = new TransportMessage(header, body != null ? Encoding.UTF8.GetBytes(body) : null);
+                    var header = messageObj!.MessageAttributes.ToDictionary(x => x.Key, x => x.Value.Value);
+                    var body = messageObj.Message;
 
-                message.Headers.Add(Headers.Group, _groupId);
+                    var message = new TransportMessage(header, body != null ? Encoding.UTF8.GetBytes(body) : null);
 
-                OnMessageCallback!(message, response.Messages[0].ReceiptHandle);
+                    message.Headers.Add(Headers.Group, _groupId);
+
+                    return OnMessageCallback!(message, response.Messages[0].ReceiptHandle);
+                }
             }
             else
             {
@@ -113,6 +129,7 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
         try
         {
             _ = _sqsClient!.DeleteMessageAsync(_queueUrl, (string)sender!).GetAwaiter().GetResult();
+            _semaphore.Release();
         }
         catch (ReceiptHandleIsInvalidException ex)
         {
@@ -126,6 +143,7 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
         {
             // Visible again in 3 seconds
             _ = _sqsClient!.ChangeMessageVisibilityAsync(_queueUrl, (string)sender!, 3).GetAwaiter().GetResult();
+            _semaphore.Release();
         }
         catch (MessageNotInflightException ex)
         {
@@ -145,9 +163,7 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
 
         if (_snsClient == null && initSNS)
         {
-            ConnectionLock.Wait();
-
-            try
+            lock (ConnectionLock)
             {
                 if (string.IsNullOrWhiteSpace(_amazonSQSOptions.SNSServiceUrl))
                     _snsClient = _amazonSQSOptions.Credentials != null
@@ -159,19 +175,13 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
                         ? new AmazonSimpleNotificationServiceClient(_amazonSQSOptions.Credentials,
                             new AmazonSimpleNotificationServiceConfig { ServiceURL = _amazonSQSOptions.SNSServiceUrl })
                         : new AmazonSimpleNotificationServiceClient(new AmazonSimpleNotificationServiceConfig
-                            { ServiceURL = _amazonSQSOptions.SNSServiceUrl });
-            }
-            finally
-            {
-                ConnectionLock.Release();
+                        { ServiceURL = _amazonSQSOptions.SNSServiceUrl });
             }
         }
 
         if (_sqsClient == null && initSQS)
         {
-            ConnectionLock.Wait();
-
-            try
+            lock (ConnectionLock)
             {
                 if (string.IsNullOrWhiteSpace(_amazonSQSOptions.SQSServiceUrl))
                     _sqsClient = _amazonSQSOptions.Credentials != null
@@ -187,10 +197,6 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
                 // of all the queue's attributes, <code>CreateQueue</code> returns the queue URL for
                 // the existing queue.
                 _queueUrl = _sqsClient.CreateQueueAsync(_groupId.NormalizeForAws()).GetAwaiter().GetResult().QueueUrl;
-            }
-            finally
-            {
-                ConnectionLock.Release();
             }
         }
     }
@@ -252,11 +258,11 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
         foreach (var topicArn in topics)
         {
             await _snsClient!.SubscribeAsync(new SubscribeRequest
-                {
-                    TopicArn = topicArn,
-                    Protocol = "sqs",
-                    Endpoint = sqsQueueArn
-                })
+            {
+                TopicArn = topicArn,
+                Protocol = "sqs",
+                Endpoint = sqsQueueArn
+            })
                 .ConfigureAwait(false);
         }
     }

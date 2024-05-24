@@ -32,8 +32,14 @@ public abstract class TopicAttribute : Attribute
 
     /// <summary>
     /// Default group name is CapOptions setting.(Assembly name)
-    /// kafka --> groups.id
-    /// rabbit MQ --> queue.name
+    /// Kafka --> groups.id
+    /// RabbitMQ --> queue.name
     /// </summary>
     public string Group { get; set; } = default!;
+
+    /// <summary>
+    /// Limit the number of messages consumed concurrently.
+    /// If you set this value but don't specify the Group, we will automatically create a Group using the Name.
+    /// </summary>
+    public byte GroupConcurrent { get; set; }
 }

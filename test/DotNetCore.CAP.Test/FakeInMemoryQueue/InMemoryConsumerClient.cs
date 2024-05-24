@@ -12,15 +12,16 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
     {
         private readonly ILogger _logger;
         private readonly InMemoryQueue _queue;
+        private readonly SemaphoreSlim _semaphore;
+        private readonly byte _concurrent;
         private readonly string _subscriptionName;
 
-        public InMemoryConsumerClient(
-            ILogger logger,
-            InMemoryQueue queue,
-            string subscriptionName)
+        public InMemoryConsumerClient(ILogger logger, InMemoryQueue queue, string subscriptionName, byte concurrent)
         {
             _logger = logger;
             _queue = queue;
+            _concurrent = concurrent;
+            _semaphore = new SemaphoreSlim(_concurrent);
             _subscriptionName = subscriptionName;
         }
 
@@ -52,12 +53,12 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
 
         public void Commit(object sender)
         {
-            // ignore
+            _semaphore.Release();
         }
 
         public void Reject(object sender)
         {
-            // ignore
+            _semaphore.Release();
         }
 
         public void Dispose()
@@ -70,8 +71,16 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
         private void OnConsumerReceived(TransportMessage e)
         {
             var headers = e.Headers;
-            headers.TryAdd(Messages.Headers.Group, _subscriptionName);
-            OnMessageCallback(e, null).GetAwaiter().GetResult();
+            headers.TryAdd(Headers.Group, _subscriptionName);
+            if (_concurrent > 0)
+            {
+                _semaphore.Wait();
+                Task.Run(() => OnMessageCallback(e, null)).ConfigureAwait(false);
+            }
+            else
+            {
+                OnMessageCallback(e, null).GetAwaiter().GetResult();
+            }
         }
         #endregion private methods
     }

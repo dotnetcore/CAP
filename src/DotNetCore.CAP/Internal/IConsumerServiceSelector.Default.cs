@@ -169,9 +169,17 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
     protected virtual void SetSubscribeAttribute(TopicAttribute attribute)
     {
         var prefix = !string.IsNullOrEmpty(_capOptions.GroupNamePrefix)
-            ? $"{_capOptions.GroupNamePrefix}."
-            : string.Empty;
-        attribute.Group = $"{prefix}{attribute.Group ?? _capOptions.DefaultGroupName}.{_capOptions.Version}";
+           ? $"{_capOptions.GroupNamePrefix}."
+           : string.Empty;
+
+        if (attribute.Group == null && attribute.GroupConcurrent > 0)
+        {
+            attribute.Group = $"{prefix}{attribute.Name}.{_capOptions.Version}";
+        }
+        else
+        {
+            attribute.Group = $"{prefix}{attribute.Group ?? _capOptions.DefaultGroupName}.{_capOptions.Version}";
+        }
     }
 
     private ConsumerExecutorDescriptor InitDescriptor(

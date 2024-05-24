@@ -17,18 +17,21 @@ namespace DotNetCore.CAP.NATS
 {
     internal sealed class NATSConsumerClient : IConsumerClient
     {
-        private static readonly SemaphoreSlim ConnectionLock = new SemaphoreSlim(initialCount: 1, maxCount: 1);
+        private static readonly object ConnectionLock = new();
 
-        private readonly string _groupId;
+        private readonly string _groupName;
+        private readonly byte _groupConcurrent;
         private readonly IServiceProvider _serviceProvider;
         private readonly NATSOptions _natsOptions;
-
+        private readonly SemaphoreSlim _semaphore;
         private IConnection? _consumerClient;
 
-        public NATSConsumerClient(string groupId, IOptions<NATSOptions> options, IServiceProvider serviceProvider)
+        public NATSConsumerClient(string groupName, byte groupConcurrent, IOptions<NATSOptions> options, IServiceProvider serviceProvider)
         {
-            _groupId = groupId;
+            _groupName = groupName;
+            _groupConcurrent = groupConcurrent;
             _serviceProvider = serviceProvider;
+            _semaphore = new SemaphoreSlim(groupConcurrent);
             _natsOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
         }
 
@@ -90,37 +93,38 @@ namespace DotNetCore.CAP.NATS
             var js = _consumerClient!.CreateJetStreamContext();
             var streamGroup = topics.GroupBy(x => _natsOptions.NormalizeStreamName(x));
 
-            ConnectionLock.Wait();
-            foreach (var subjectStream in streamGroup)
+            lock (ConnectionLock)
             {
-                var groupName = Helper.Normalized(_groupId);
-
-                foreach (var subject in subjectStream)
+                foreach (var subjectStream in streamGroup)
                 {
-                    try
-                    {
-                        var consumerConfig = ConsumerConfiguration.Builder()
-                                  .WithDurable(Helper.Normalized(groupName + "-" + subject))
-                                  .WithDeliverPolicy(DeliverPolicy.New)
-                                  .WithAckWait(30000)
-                                  .WithAckPolicy(AckPolicy.Explicit);
-                        
-                        _natsOptions.ConsumerOptions?.Invoke(consumerConfig);
+                    var groupName = Helper.Normalized(_groupName);
 
-                        var pso = PushSubscribeOptions.Builder()
-                            .WithStream(subjectStream.Key)
-                            .WithConfiguration(consumerConfig.Build())
-                            .Build();
-
-                        js.PushSubscribeAsync(subject, groupName, SubscriptionMessageHandler, false, pso);
-                    }
-                    catch (Exception e)
+                    foreach (var subject in subjectStream)
                     {
-                        Console.WriteLine(e);
+                        try
+                        {
+                            var consumerConfig = ConsumerConfiguration.Builder()
+                                      .WithDurable(Helper.Normalized(groupName + "-" + subject))
+                                      .WithDeliverPolicy(DeliverPolicy.New)
+                                      .WithAckWait(30000)
+                                      .WithAckPolicy(AckPolicy.Explicit);
+
+                            _natsOptions.ConsumerOptions?.Invoke(consumerConfig);
+
+                            var pso = PushSubscribeOptions.Builder()
+                                .WithStream(subjectStream.Key)
+                                .WithConfiguration(consumerConfig.Build())
+                                .Build();
+
+                            js.PushSubscribeAsync(subject, groupName, SubscriptionMessageHandler, false, pso);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                        }
                     }
                 }
             }
-            ConnectionLock.Release();
         }
 
         public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
@@ -135,25 +139,38 @@ namespace DotNetCore.CAP.NATS
 
         private void SubscriptionMessageHandler(object? sender, MsgHandlerEventArgs e)
         {
-            var headers = new Dictionary<string, string?>();
-
-            foreach (string h in e.Message.Header.Keys)
+            if (_groupConcurrent > 0)
             {
-                headers.Add(h, e.Message.Header[h]);
+                _semaphore.Wait();
+                Task.Run(() => Consume()).ConfigureAwait(false);
+            }
+            else
+            {
+                Consume().GetAwaiter().GetResult();
             }
 
-            headers.Add(Headers.Group, _groupId);
-
-            if (_natsOptions.CustomHeadersBuilder != null)
+            Task Consume()
             {
-                var customHeaders = _natsOptions.CustomHeadersBuilder(e, _serviceProvider);
-                foreach (var customHeader in customHeaders)
+                var headers = new Dictionary<string, string?>();
+
+                foreach (string h in e.Message.Header.Keys)
                 {
-                    headers[customHeader.Key] = customHeader.Value;
+                    headers.Add(h, e.Message.Header[h]);
                 }
-            }
 
-            OnMessageCallback!(new TransportMessage(headers, e.Message.Data), e.Message);
+                headers.Add(Headers.Group, _groupName);
+
+                if (_natsOptions.CustomHeadersBuilder != null)
+                {
+                    var customHeaders = _natsOptions.CustomHeadersBuilder(e, _serviceProvider);
+                    foreach (var customHeader in customHeaders)
+                    {
+                        headers[customHeader.Key] = customHeader.Value;
+                    }
+                }
+
+                return OnMessageCallback!(new TransportMessage(headers, e.Message.Data), e.Message);
+            }
         }
 
         public void Commit(object? sender)
@@ -162,6 +179,7 @@ namespace DotNetCore.CAP.NATS
             {
                 msg.Ack();
             }
+            _semaphore.Release();
         }
 
         public void Reject(object? sender)
@@ -170,6 +188,7 @@ namespace DotNetCore.CAP.NATS
             {
                 msg.Nak();
             }
+            _semaphore.Release();
         }
 
         public void Dispose()
@@ -184,9 +203,7 @@ namespace DotNetCore.CAP.NATS
                 return;
             }
 
-            ConnectionLock.Wait();
-
-            try
+            lock (ConnectionLock)
             {
                 if (_consumerClient == null)
                 {
@@ -200,10 +217,6 @@ namespace DotNetCore.CAP.NATS
 
                     _consumerClient = new ConnectionFactory().CreateConnection(opts);
                 }
-            }
-            finally
-            {
-                ConnectionLock.Release();
             }
         }
 
