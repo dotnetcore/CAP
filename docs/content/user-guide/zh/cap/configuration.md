@@ -24,7 +24,53 @@ services.AddCap(config =>
 
 有关具体的传输器配置和存储配置，你可以查看 Transports 章节和 Persistent 章节中具体组件提供的配置项。
 
-## CAP 中的自定义配置
+## 订阅者中的配置
+
+订阅者使用 `[CapSubscribe]` 这个Attribute来标记成为一个订阅者，订阅者可以位于 ASP.NET Core 的 Controller 或 Service 中。
+
+当你在声明 `[CapSubscribe]` 时候，可以通过指定以下参数来改变订阅者的行为。
+
+## [CapSubscribe] Name
+
+> string, 必须项
+
+通过指定 `Name` 参数来订阅消息，其对应发布消息时通过 Publish("Name") 指定的名称。
+
+该名称在不同的 Broker 有不同的对应项。
+
+- 在 RabbitMQ 中对应 Routing Key。
+- 在 Kafka 中对应 Topic。
+- 在 AzureServiceBus 中对应 Subject。
+- 在 NATS 中对应 Subject。
+- 在 RedisStrems 中对应 Stream.
+
+## [CapSubscribe] Group
+
+> string, 可选项
+
+通过指定 `Group` 参数来使订阅者位于单独的消费者组中，消费者组的概念类似于 Kafka 中的消费者组。如果不指定此参数将使用当前程序集名称(`DefaultGroupName`)作为默认值。
+
+相同 `Name` 的订阅者设置为**不同的**组时，他们都会收到消息。相反如果相同 `Name` 的订阅者设置**相同的**组时，只有一个会收到消息。
+
+不同 `Name` 的订阅者设置为**不同的**组时，也是有意义的，他们可以拥有独立的线程来执行。相反如果不同 `Name` 的订阅者设置**相同的**组时，他们将共享消费线程。
+
+Group 在不同的 Broker 有不同的对应项。
+
+- 在 RabbitMQ 中对应 Queue。
+- 在 Kafka 中对应 Consumer Group。
+- 在 AzureServiceBus 中对应 Subscription Name。
+- 在 NATS 中对应 Queue Group。
+- 在 RedisStrems 中对应 Consuemr Group.
+
+## [CapSubscribe] GroupConcurrent
+
+> byte, 可选项
+
+通过指定 `GroupConcurrent` 参数的值来设置订阅者并行执行的并行度。并行执行意味着其需要位于独立线程中，因此如果你没有指定 `Group` 参数，则 CAP 将会以 `Name` 的值自动创建一个 Group。
+
+注意： 如果你有多个订阅者都设置为了相同的 Group，并且也给订阅者都设置了 `GroupConcurrent` 的值，则只会有（第）一个设置的值生效。
+
+## 自定义配置项
 
 在 `AddCap` 中 `CapOptions` 对象是用来存储配置相关信息，默认情况下它们都具有一些默认值，有些时候你可能需要自定义。
 
@@ -136,9 +182,11 @@ services.AddCap(config =>
 
 失败消息的过期时间（秒）。 当消息发送或者消费失败时候，在时间达到 `FailedMessageExpiredAfter` 秒时候将会从 Persistent 中删除，你可以通过指定此值来设置过期的时间。
 
-#### UseDispatchingPerGroup
+#### [已移除] UseDispatchingPerGroup 
 
 > 默认值: false
+
+> 版本 8.2.0 中移除，已是默认行为。
 
 默认情况下，CAP会将所有消费者组的消息都先放置到内存同一个Channel中，然后线性处理。
 如果设置为 true，则每个消费者组都会根据 `ConsumerThreadCount` 设置的值创建单独的线程进行处理。

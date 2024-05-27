@@ -61,11 +61,7 @@ public static class ServiceCollectionExtensions
         var options = new CapOptions();
         setupAction(options);
 
-        //Executors
-        if (options.UseDispatchingPerGroup)
-            services.TryAddSingleton<IDispatcher, DispatcherPerGroup>();
-        else
-            services.TryAddSingleton<IDispatcher, Dispatcher>();
+        services.TryAddSingleton<IDispatcher, Dispatcher>();
 
         foreach (var serviceExtension in options.Extensions)
             serviceExtension.AddServices(services);

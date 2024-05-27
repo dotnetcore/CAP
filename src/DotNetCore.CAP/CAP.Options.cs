@@ -34,7 +34,6 @@ public class CapOptions
         Version = "v1";
         DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name!.ToLower();
         CollectorCleaningInterval = 300;
-        UseDispatchingPerGroup = false;
         FallbackWindowLookbackSeconds = 240;
     }
 
@@ -127,14 +126,7 @@ public class CapOptions
     /// If true, the message send task will be parallel execute by .net thread pool.
     /// Default is false.
     /// </summary>
-    public bool EnablePublishParallelSend { get; set; }
-
-    /// <summary>
-    /// If true then each message group will have own independent dispatching pipeline. Each pipeline use as many threads as
-    /// <see cref="SubscriberParallelExecuteThreadCount" /> value is.
-    /// Default is false.
-    /// </summary>
-    public bool UseDispatchingPerGroup { get; set; }
+    public bool EnablePublishParallelSend { get; set; } 
 
     /// <summary>
     /// Configure the retry processor to pick up the backtrack time window for Scheduled or Failed status messages.
