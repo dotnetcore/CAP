@@ -23,12 +23,12 @@ internal sealed class PulsarConsumerClientFactory : IConsumerClientFactory
         if (_pulsarOptions.Value.EnableClientLog) PulsarClient.Logger = loggerFactory.CreateLogger<PulsarClient>();
     }
 
-    public IConsumerClient Create(string groupId)
+    public IConsumerClient Create(string groupName, byte groupConcurrent)
     {
         try
         {
             var client = _connection.RentClient();
-            var consumerClient = new PulsarConsumerClient(client, groupId, _pulsarOptions);
+            var consumerClient = new PulsarConsumerClient(_pulsarOptions, client, groupName, groupConcurrent);
             return consumerClient;
         }
         catch (Exception e)

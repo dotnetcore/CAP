@@ -14,10 +14,10 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
             _queue = queue;
         }
 
-        public IConsumerClient Create(string groupId)
+        public IConsumerClient Create(string groupName, byte groupConcurrent)
         {
             var logger = _loggerFactory.CreateLogger(typeof(InMemoryConsumerClient));
-            return new InMemoryConsumerClient(logger, _queue, groupId);
+            return new InMemoryConsumerClient(logger, _queue, groupName, groupConcurrent);
         }
     }
 }

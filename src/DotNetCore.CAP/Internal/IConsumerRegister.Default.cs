@@ -116,10 +116,11 @@ internal class ConsumerRegister : IConsumerRegister
         foreach (var matchGroup in groupingMatches)
         {
             ICollection<string> topics;
+            var limit = _selector.GetGroupConcurrentLimit(matchGroup.Key);
             try
             {
                 // ReSharper disable once ConvertToUsingDeclaration
-                using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                using (var client = _consumerClientFactory.Create(matchGroup.Key, limit))
                 {
                     client.OnLogCallback = WriteLog;
                     topics = client.FetchTopics(matchGroup.Value.Select(x => x.TopicName));
@@ -140,14 +141,14 @@ internal class ConsumerRegister : IConsumerRegister
                       try
                       {
                           // ReSharper disable once ConvertToUsingDeclaration
-                          using (var client = _consumerClientFactory.Create(matchGroup.Key))
+                          using (var client = _consumerClientFactory.Create(matchGroup.Key, limit))
                           {
                               _serverAddress = client.BrokerAddress;
 
                               RegisterMessageProcessor(client);
 
                               client.Subscribe(topicIds);
-                               
+
                               client.Listening(_pollingDelay, _cts.Token);
                           }
                       }
@@ -174,7 +175,7 @@ internal class ConsumerRegister : IConsumerRegister
     private void RegisterMessageProcessor(IConsumerClient client)
     {
         client.OnLogCallback = WriteLog;
-        client.OnMessageCallback = async (transportMessage,sender) =>
+        client.OnMessageCallback = async (transportMessage, sender) =>
         {
             long? tracingTimestamp = null;
             try
@@ -232,7 +233,7 @@ internal class ConsumerRegister : IConsumerRegister
                 {
                     var content = _serializer.Serialize(message);
 
-                    await _storage.StoreReceivedExceptionMessageAsync(name, group, content); 
+                    await _storage.StoreReceivedExceptionMessageAsync(name, group, content);
 
                     client.Commit(sender);
 
@@ -262,7 +263,7 @@ internal class ConsumerRegister : IConsumerRegister
                     TracingAfter(tracingTimestamp, transportMessage, _serverAddress);
 
                     await _dispatcher.EnqueueToExecute(mediumMessage, executor!);
-                    
+
                     client.Commit(sender);
 
                 }
@@ -276,7 +277,7 @@ internal class ConsumerRegister : IConsumerRegister
 
                 TracingError(tracingTimestamp, transportMessage, client.BrokerAddress, e);
             }
-        };       
+        };
     }
 
     private void WriteLog(LogMessageEventArgs logmsg)

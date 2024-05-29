@@ -16,11 +16,11 @@ internal sealed class AmazonSQSConsumerClientFactory : IConsumerClientFactory
         _amazonSQSOptions = amazonSQSOptions;
     }
 
-    public IConsumerClient Create(string groupId)
+    public IConsumerClient Create(string groupName, byte groupConcurrent)
     {
         try
         {
-            var client = new AmazonSQSConsumerClient(groupId, _amazonSQSOptions);
+            var client = new AmazonSQSConsumerClient(groupName, groupConcurrent, _amazonSQSOptions);
             return client;
         }
         catch (Exception e)

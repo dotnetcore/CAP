@@ -3,34 +3,34 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
-using RabbitMQ.Client.Events;
-using Headers = DotNetCore.CAP.Messages.Headers;
 
 namespace DotNetCore.CAP.RabbitMQ;
 
 internal sealed class RabbitMQConsumerClient : IConsumerClient
 {
+    private static readonly object Lock = new();
     private readonly IConnectionChannelPool _connectionChannelPool;
+    private readonly IServiceProvider _serviceProvider;
     private readonly string _exchangeName;
     private readonly string _queueName;
+    private readonly byte _groupConcurrent;
     private readonly RabbitMQOptions _rabbitMQOptions;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly object _syncLock = new();
+    private RabbitMQBasicConsumer? _consumer = null;
     private IModel? _channel;
 
-    public RabbitMQConsumerClient(string queueName,
+    public RabbitMQConsumerClient(string groupName, byte groupConcurrent,
         IConnectionChannelPool connectionChannelPool,
         IOptions<RabbitMQOptions> options,
         IServiceProvider serviceProvider)
     {
-        _queueName = queueName;
+        _queueName = groupName;
+        _groupConcurrent = groupConcurrent;
         _connectionChannelPool = connectionChannelPool;
         _serviceProvider = serviceProvider;
         _rabbitMQOptions = options.Value;
@@ -59,23 +59,26 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
     {
         Connect();
 
-        var consumer = new AsyncEventingBasicConsumer(_channel);
-        consumer.Received += OnConsumerReceived;
-        consumer.Shutdown += OnConsumerShutdown;
-        consumer.Registered += OnConsumerRegistered;
-        consumer.Unregistered += OnConsumerUnregistered;
-        consumer.ConsumerCancelled += OnConsumerConsumerCancelled;
-
-        if (_rabbitMQOptions.BasicQosOptions != null)
+        if (_groupConcurrent > 0)
+        {
+            _channel?.BasicQos(prefetchSize: 0, prefetchCount: _groupConcurrent, global: false);
+        }
+        else if (_rabbitMQOptions.BasicQosOptions != null)
+        {
             _channel?.BasicQos(0, _rabbitMQOptions.BasicQosOptions.PrefetchCount, _rabbitMQOptions.BasicQosOptions.Global);
+        }
+
+        _consumer = new RabbitMQBasicConsumer(_channel, _groupConcurrent, _queueName, OnMessageCallback!, OnLogCallback!,
+            _rabbitMQOptions.CustomHeadersBuilder, _serviceProvider);
 
         try
         {
-            _channel.BasicConsume(_queueName, false, consumer);
+            _channel.BasicConsume(_queueName, false, _consumer);
         }
         catch (TimeoutException ex)
         {
-            OnConsumerShutdown(null, new ShutdownEventArgs(ShutdownInitiator.Application, 0, ex.Message + "-->" + nameof(_channel.BasicConsume)));
+            _consumer.HandleModelShutdown(null!, new ShutdownEventArgs(ShutdownInitiator.Application, 0,
+                ex.Message + "-->" + nameof(_channel.BasicConsume))).GetAwaiter().GetResult();
         }
 
         while (true)
@@ -89,12 +92,12 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
 
     public void Commit(object? sender)
     {
-        if (_channel!.IsOpen) _channel.BasicAck((ulong)sender!, false);
+        _consumer!.BasicAck((ulong)sender!);
     }
 
     public void Reject(object? sender)
     {
-        if (_channel!.IsOpen && sender is ulong val) _channel.BasicReject(val, true);
+        _consumer!.BasicAck((ulong)sender!);
     }
 
     public void Dispose()
@@ -108,7 +111,7 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
     {
         var connection = _connectionChannelPool.GetConnection();
 
-        lock (_syncLock)
+        lock (Lock)
         {
             if (_channel == null || _channel.IsClosed)
             {
@@ -133,94 +136,15 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
                 }
                 catch (TimeoutException ex)
                 {
-                    OnConsumerShutdown(null, new ShutdownEventArgs(ShutdownInitiator.Application, 0, ex.Message + "-->" + nameof(_channel.QueueDeclare)));
+                    var args = new LogMessageEventArgs
+                    {
+                        LogType = MqLogType.ConsumerShutdown,
+                        Reason = ex.Message + "-->" + nameof(_channel.QueueDeclare)
+                    };
+
+                    OnLogCallback!(args);
                 }
             }
         }
     }
-
-    #region events
-
-    private Task OnConsumerConsumerCancelled(object? sender, ConsumerEventArgs e)
-    {
-        var args = new LogMessageEventArgs
-        {
-            LogType = MqLogType.ConsumerCancelled,
-            Reason = string.Join(",", e.ConsumerTags)
-        };
-
-        OnLogCallback!(args);
-
-        return Task.CompletedTask;
-    }
-
-    private Task OnConsumerUnregistered(object? sender, ConsumerEventArgs e)
-    {
-        var args = new LogMessageEventArgs
-        {
-            LogType = MqLogType.ConsumerUnregistered,
-            Reason = string.Join(",", e.ConsumerTags)
-        };
-
-        OnLogCallback!(args);
-
-        return Task.CompletedTask;
-    }
-
-    private Task OnConsumerRegistered(object? sender, ConsumerEventArgs e)
-    {
-        var args = new LogMessageEventArgs
-        {
-            LogType = MqLogType.ConsumerRegistered,
-            Reason = string.Join(",", e.ConsumerTags)
-        };
-
-        OnLogCallback!(args);
-
-        return Task.CompletedTask;
-    }
-
-    private async Task OnConsumerReceived(object? sender, BasicDeliverEventArgs e)
-    {
-        var headers = new Dictionary<string, string?>();
-
-        if (e.BasicProperties.Headers != null)
-            foreach (var header in e.BasicProperties.Headers)
-            {
-                if (header.Value is byte[] val)
-                    headers.Add(header.Key, Encoding.UTF8.GetString(val));
-                else
-                    headers.Add(header.Key, header.Value?.ToString());
-            }
-
-        headers.Add(Headers.Group, _queueName);
-
-        if (_rabbitMQOptions.CustomHeadersBuilder != null)
-        {
-            var customHeaders = _rabbitMQOptions.CustomHeadersBuilder(e, _serviceProvider);
-            foreach (var customHeader in customHeaders)
-            {
-                headers[customHeader.Key] = customHeader.Value;
-            }
-        }
-
-        var message = new TransportMessage(headers, e.Body.ToArray());
-
-        await OnMessageCallback!(message, e.DeliveryTag);
-    }
-
-    private Task OnConsumerShutdown(object? sender, ShutdownEventArgs e)
-    {
-        var args = new LogMessageEventArgs
-        {
-            LogType = MqLogType.ConsumerShutdown,
-            Reason = e.ReplyText
-        };
-
-        OnLogCallback!(args);
-
-        return Task.CompletedTask;
-    }
-
-    #endregion
 }

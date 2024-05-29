@@ -19,16 +19,20 @@ namespace DotNetCore.CAP.Kafka;
 
 public class KafkaConsumerClient : IConsumerClient
 {
-    private static readonly SemaphoreSlim ConnectionLock = new(1, 1);
-
+    private static readonly object Lock = new();
     private readonly string _groupId;
+    private readonly byte _groupConcurrent;
+    private readonly SemaphoreSlim _semaphore;
     private readonly KafkaOptions _kafkaOptions;
     private readonly IServiceProvider _serviceProvider;
     private IConsumer<string, byte[]>? _consumerClient;
 
-    public KafkaConsumerClient(string groupId, IOptions<KafkaOptions> options, IServiceProvider serviceProvider)
+    public KafkaConsumerClient(string groupId, byte groupConcurrent,
+        IOptions<KafkaOptions> options, IServiceProvider serviceProvider)
     {
         _groupId = groupId;
+        _groupConcurrent = groupConcurrent;
+        _semaphore = new SemaphoreSlim(groupConcurrent);
         _serviceProvider = serviceProvider;
         _kafkaOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
     }
@@ -94,7 +98,9 @@ public class KafkaConsumerClient : IConsumerClient
             try
             {
                 consumerResult = _consumerClient!.Consume(timeout);
+
                 if (consumerResult == null) continue;
+                if (consumerResult.IsPartitionEOF || consumerResult.Message.Value == null) continue;
             }
             catch (ConsumeException e) when (_kafkaOptions.RetriableErrorCodes.Contains(e.Error.Code))
             {
@@ -108,29 +114,15 @@ public class KafkaConsumerClient : IConsumerClient
                 continue;
             }
 
-            if (consumerResult.IsPartitionEOF || consumerResult.Message.Value == null) continue;
-
-            var headers = new Dictionary<string, string?>(consumerResult.Message.Headers.Count);
-            foreach (var header in consumerResult.Message.Headers)
+            if (_groupConcurrent > 0)
             {
-                var val = header.GetValueBytes();
-                headers.Add(header.Key, val != null ? Encoding.UTF8.GetString(val) : null);
+                _semaphore.Wait(cancellationToken);
+                Task.Run(() => Consume(consumerResult), cancellationToken).ConfigureAwait(false);
             }
-
-            headers.Add(Headers.Group, _groupId);
-
-            if (_kafkaOptions.CustomHeadersBuilder != null)
+            else
             {
-                var customHeaders = _kafkaOptions.CustomHeadersBuilder(consumerResult, _serviceProvider);
-                foreach (var customHeader in customHeaders)
-                {
-                    headers[customHeader.Key] = customHeader.Value;
-                }
+                Consume(consumerResult).GetAwaiter().GetResult();
             }
-
-            var message = new TransportMessage(headers, consumerResult.Message.Value);
-
-            OnMessageCallback!(message, consumerResult).GetAwaiter().GetResult();
         }
         // ReSharper disable once FunctionNeverReturns
     }
@@ -138,11 +130,13 @@ public class KafkaConsumerClient : IConsumerClient
     public void Commit(object? sender)
     {
         _consumerClient!.Commit((ConsumeResult<string, byte[]>)sender!);
+        _semaphore.Release();
     }
 
     public void Reject(object? sender)
     {
         _consumerClient!.Assign(_consumerClient.Assignment);
+        _semaphore.Release();
     }
 
     public void Dispose()
@@ -154,9 +148,7 @@ public class KafkaConsumerClient : IConsumerClient
     {
         if (_consumerClient != null) return;
 
-        ConnectionLock.Wait();
-
-        try
+        lock (Lock)
         {
             if (_consumerClient == null)
             {
@@ -171,10 +163,31 @@ public class KafkaConsumerClient : IConsumerClient
                 _consumerClient = BuildConsumer(config);
             }
         }
-        finally
+    }
+
+    private async Task Consume(ConsumeResult<string, byte[]> consumerResult)
+    {
+        var headers = new Dictionary<string, string?>(consumerResult.Message.Headers.Count);
+        foreach (var header in consumerResult.Message.Headers)
         {
-            ConnectionLock.Release();
+            var val = header.GetValueBytes();
+            headers.Add(header.Key, val != null ? Encoding.UTF8.GetString(val) : null);
         }
+
+        headers.Add(Headers.Group, _groupId);
+
+        if (_kafkaOptions.CustomHeadersBuilder != null)
+        {
+            var customHeaders = _kafkaOptions.CustomHeadersBuilder(consumerResult, _serviceProvider);
+            foreach (var customHeader in customHeaders)
+            {
+                headers[customHeader.Key] = customHeader.Value;
+            }
+        }
+
+        var message = new TransportMessage(headers, consumerResult.Message.Value);
+
+        await OnMessageCallback!(message, consumerResult);
     }
 
     protected virtual IConsumer<string, byte[]> BuildConsumer(ConsumerConfig config)

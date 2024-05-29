@@ -17,18 +17,23 @@ namespace DotNetCore.CAP.RedisStreams;
 internal class RedisConsumerClient : IConsumerClient
 {
     private readonly string _groupId;
+    private readonly byte _groupConcurrent;
+    private readonly SemaphoreSlim _semaphore;
     private readonly ILogger<RedisConsumerClient> _logger;
     private readonly IOptions<CapRedisOptions> _options;
     private readonly IRedisStreamManager _redis;
     private string[] _topics = default!;
 
-    public RedisConsumerClient(string groupId,
+    public RedisConsumerClient(string groupId, 
+        byte groupConcurrent,
         IRedisStreamManager redis,
         IOptions<CapRedisOptions> options,
         ILogger<RedisConsumerClient> logger
     )
     {
         _groupId = groupId;
+        _groupConcurrent = groupConcurrent;
+        _semaphore = new SemaphoreSlim(groupConcurrent);
         _redis = redis;
         _options = options;
         _logger = logger;
@@ -69,11 +74,13 @@ internal class RedisConsumerClient : IConsumerClient
         var (stream, group, id) = ((string stream, string group, string id))sender!;
 
         _redis.Ack(stream, group, id).GetAwaiter().GetResult();
+
+        _semaphore.Release();
     }
 
     public void Reject(object? sender)
     {
-        // ignore
+        _semaphore.Release();
     }
 
     public void Dispose()
@@ -105,29 +112,42 @@ internal class RedisConsumerClient : IConsumerClient
                 {
                     if (entry.IsNull) return;
 
-                    try
+                    if (_groupConcurrent > 0)
                     {
-                        var message = RedisMessage.Create(entry, _groupId);
-                        await OnMessageCallback!(message, (stream.Key.ToString(), _groupId, entry.Id.ToString()));
+                        _semaphore.Wait();
+                        _ = Task.Run(() => Consume(position, stream, entry)).ConfigureAwait(false);
                     }
-                    catch (Exception ex)
+                    else
                     {
-                        _logger.LogError(ex.Message, ex);
-                        var logArgs = new LogMessageEventArgs
-                        {
-                            LogType = MqLogType.ConsumeError,
-                            Reason = ex.ToString()
-                        };
-                        OnLogCallback!(logArgs);
-                    }
-                    finally
-                    {
-                        var positionName = position == StreamPosition.Beginning
-                            ? nameof(StreamPosition.Beginning)
-                            : nameof(StreamPosition.NewMessages);
-                        _logger.LogDebug($"Redis stream entry [{entry.Id}] [position : {positionName}] was delivered.");
+                        await Consume(position, stream, entry);
                     }
                 }
+            }
+        }
+
+        async Task Consume(RedisValue position, RedisStream stream, StreamEntry entry)
+        {
+            try
+            {
+                var message = RedisMessage.Create(entry, _groupId);
+                await OnMessageCallback!(message, (stream.Key.ToString(), _groupId, entry.Id.ToString()));
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message, ex);
+                var logArgs = new LogMessageEventArgs
+                {
+                    LogType = MqLogType.ConsumeError,
+                    Reason = ex.ToString()
+                };
+                OnLogCallback!(logArgs);
+            }
+            finally
+            {
+                var positionName = position == StreamPosition.Beginning
+                    ? nameof(StreamPosition.Beginning)
+                    : nameof(StreamPosition.NewMessages);
+                _logger.LogDebug($"Redis stream entry [{entry.Id}] [position : {positionName}] was delivered.");
             }
         }
     }

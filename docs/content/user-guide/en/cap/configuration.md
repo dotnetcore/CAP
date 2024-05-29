@@ -24,6 +24,52 @@ services.AddCap(capOptions =>
 
 For specific transport and storage configuration, you can take a look at the configuration options provided by the specific components in the [Transports](../transport/general.md) section and the [Persistent](../storage/general.md) section.
 
+## Configuration in Subscribers
+
+Subscribers use the `[CapSubscribe]` attribute to mark themselves as subscribers. They can be located in an ASP.NET Core Controller or Service.
+
+When you declare `[CapSubscribe]`, you can change the behavior of the subscriber by specifying the following parameters.
+
+## [CapSubscribe] Name
+
+> string, required
+
+Subscribe to messages by specifying the `Name` parameter, which corresponds to the name specified when publishing the message through _cap.Publish("Name").
+
+This name corresponds to different items in different Brokers:
+
+- In RabbitMQ, it corresponds to the Routing Key.
+- In Kafka, it corresponds to the Topic.
+- In AzureServiceBus, it corresponds to the Subject.
+- In NATS, it corresponds to the Subject.
+- In RedisStreams, it corresponds to the Stream.
+
+## [CapSubscribe] Group
+
+> string, optional
+
+Specify the `Group` parameter to place subscribers within a separate consumer group, a concept similar to consumer groups in Kafka. If this parameter is not specified, the current assembly name (`DefaultGroupName`) is used as the default.
+
+Subscribers with the same `Name` but set to **different** groups will all receive messages. Conversely, if subscribers with the same `Name` are set to the **same** group, only one will receive the message.
+
+It also makes sense for subscribers with different `Names` to be set to **different** groups; they can have independent threads for execution. Conversely, if subscribers with different `Names` are set to the **same** group, they will share consumption threads.
+
+Group corresponds to different items in different Brokers:
+
+- In RabbitMQ, it corresponds to Queue.
+- In Kafka, it corresponds to Consumer Group.
+- In AzureServiceBus, it corresponds to Subscription Name.
+- In NATS, it corresponds to Queue Group.
+- In RedisStreams, it corresponds to Consumer Group.
+
+## [CapSubscribe] GroupConcurrent
+
+> byte, optional
+
+Set the parallelism of concurrent execution for subscribers by specifying the value of the `GroupConcurrent` parameter. Concurrent execution means that it needs to be on an independent thread, so if you do not specify the `Group` parameter, CAP will automatically create a Group using the value of `Name`.
+
+Note: If you have multiple subscribers set to the same Group and also set the `GroupConcurrent` value for these subscribers, only the value set by the first subscriber will take effect.
+
 ## Custom configuration
 
 The `CapOptions` is used to store configuration information. By default they have default values, sometimes you may need to customize them.
@@ -135,9 +181,11 @@ The expiration time (in seconds) of the success message. When the message is sen
 
 The expiration time (in seconds) of the failed message. When the message is sent or consumed failed, it will be removed from database storage when the time reaches `FailedMessageExpiredAfter` seconds. You can set the expiration time by specifying this value.
 
-#### UseDispatchingPerGroup
+#### [Removed] UseDispatchingPerGroup 
 
 > Default: false
+
+> Removed in version 8.2, already default behavior
 
 If `true` then all consumers within the same group pushes received messages to own dispatching pipeline channel. Each channel has set thread count to `ConsumerThreadCount` value.
 

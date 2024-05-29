@@ -24,12 +24,12 @@ internal sealed class AzureServiceBusConsumerClientFactory : IConsumerClientFact
         _serviceProvider = serviceProvider;
     }
 
-    public IConsumerClient Create(string groupId)
+    public IConsumerClient Create(string groupName, byte groupConcurrent)
     {
         try
         {
             var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
-            var client = new AzureServiceBusConsumerClient(logger, groupId, _asbOptions, _serviceProvider);
+            var client = new AzureServiceBusConsumerClient(logger, groupName, groupConcurrent, _asbOptions, _serviceProvider);
             client.ConnectAsync().GetAwaiter().GetResult();
             return client;
         }

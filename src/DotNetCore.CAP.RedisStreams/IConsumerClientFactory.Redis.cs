@@ -21,8 +21,8 @@ internal class RedisConsumerClientFactory : IConsumerClientFactory
         _logger = logger;
     }
 
-    public IConsumerClient Create(string groupId)
+    public IConsumerClient Create(string groupName, byte groupConcurrent)
     {
-        return new RedisConsumerClient(groupId, _redis, _redisOptions, _logger);
+        return new RedisConsumerClient(groupName, groupConcurrent, _redis, _redisOptions, _logger);
     }
 }

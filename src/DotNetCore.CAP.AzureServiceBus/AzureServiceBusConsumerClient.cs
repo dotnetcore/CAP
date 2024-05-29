@@ -19,10 +19,11 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 {
     private readonly AzureServiceBusOptions _asbOptions;
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
-
     private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
     private readonly string _subscriptionName;
+    private readonly byte _groupConcurrent;
+    private readonly SemaphoreSlim _semaphore;
 
     private ServiceBusAdministrationClient? _administrationClient;
     private ServiceBusClient? _serviceBusClient;
@@ -31,11 +32,14 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     public AzureServiceBusConsumerClient(
         ILogger logger,
         string subscriptionName,
+        byte groupConcurrent,
         IOptions<AzureServiceBusOptions> options,
         IServiceProvider serviceProvider)
     {
         _logger = logger;
         _subscriptionName = subscriptionName;
+        _groupConcurrent = groupConcurrent;
+        _semaphore = new SemaphoreSlim(groupConcurrent);
         _serviceProvider = serviceProvider;
         _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
     }
@@ -45,7 +49,6 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
     public BrokerAddress BrokerAddress => new("AzureServiceBus", _asbOptions.ConnectionString);
-
 
     public void Subscribe(IEnumerable<string> topics)
     {
@@ -161,7 +164,15 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     {
         var context = ConvertMessage(arg.Message);
 
-        await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(arg));
+        if (_groupConcurrent > 0)
+        {
+            await _semaphore.WaitAsync();
+            _ = Task.Run(() => OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(arg))).ConfigureAwait(false);
+        }
+        else
+        {
+            await OnMessageCallback!(context, new AzureServiceBusConsumerCommitInput(arg));
+        }
     }
 
     private async Task _serviceBusProcessor_ProcessSessionMessageAsync(ProcessSessionMessageEventArgs arg)

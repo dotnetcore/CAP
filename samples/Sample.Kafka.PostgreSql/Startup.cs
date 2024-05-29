@@ -5,7 +5,7 @@ namespace Sample.Kafka.PostgreSql
 {
     public class Startup
     {
-        public const string DbConnectionString = "User ID=postgres;Password=mysecretpassword;Host=localhost;Port=5432;Database=postgres;";
+        public const string DbConnectionString = "User ID=postgres;Password=mysecretpassword;Host=127.0.0.1;Port=5432;Database=postgres;";
 
         public void ConfigureServices(IServiceCollection services)
         {

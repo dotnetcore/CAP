@@ -18,11 +18,11 @@ namespace DotNetCore.CAP.NATS
             _serviceProvider = serviceProvider;
         }
 
-        public IConsumerClient Create(string groupId)
+        public IConsumerClient Create(string groupName, byte groupConcurrent)
         {
             try
             {
-                var client = new NATSConsumerClient(groupId, _natsOptions, _serviceProvider);
+                var client = new NATSConsumerClient(groupName, groupConcurrent, _natsOptions, _serviceProvider);
                 client.Connect();
                 return client;
             }
