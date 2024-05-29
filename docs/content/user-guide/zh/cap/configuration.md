@@ -30,7 +30,7 @@ services.AddCap(config =>
 
 当你在声明 `[CapSubscribe]` 时候，可以通过指定以下参数来改变订阅者的行为。
 
-## [CapSubscribe] Name
+### Name
 
 > string, 必须项
 
@@ -44,7 +44,7 @@ services.AddCap(config =>
 - 在 NATS 中对应 Subject。
 - 在 RedisStrems 中对应 Stream.
 
-## [CapSubscribe] Group
+###  Group
 
 > string, 可选项
 
@@ -62,7 +62,7 @@ Group 在不同的 Broker 有不同的对应项。
 - 在 NATS 中对应 Queue Group。
 - 在 RedisStrems 中对应 Consuemr Group.
 
-## [CapSubscribe] GroupConcurrent
+### GroupConcurrent
 
 > byte, 可选项
 

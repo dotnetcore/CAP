@@ -30,7 +30,7 @@ Subscribers use the `[CapSubscribe]` attribute to mark themselves as subscribers
 
 When you declare `[CapSubscribe]`, you can change the behavior of the subscriber by specifying the following parameters.
 
-## [CapSubscribe] Name
+### Name
 
 > string, required
 
@@ -44,7 +44,7 @@ This name corresponds to different items in different Brokers:
 - In NATS, it corresponds to the Subject.
 - In RedisStreams, it corresponds to the Stream.
 
-## [CapSubscribe] Group
+### Group
 
 > string, optional
 
@@ -62,7 +62,7 @@ Group corresponds to different items in different Brokers:
 - In NATS, it corresponds to Queue Group.
 - In RedisStreams, it corresponds to Consumer Group.
 
-## [CapSubscribe] GroupConcurrent
+###  GroupConcurrent
 
 > byte, optional
 
