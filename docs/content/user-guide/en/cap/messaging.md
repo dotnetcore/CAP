@@ -54,6 +54,35 @@ public object DeductProductQty(JsonElement param)
 }
 ```
 
+### Controlling callback response
+
+You can inject the `CapHeader` parameter in the subscription method using the `[FromCap]` attribute and utilize its methods to add extra headers to the callback context or terminate the callback.
+
+Example:
+
+```cs
+[CapSubscribe("place.order.qty.deducted")]
+public object DeductProductQty(JsonElement param, [FromCap] CapHeader header)
+{
+    var orderId = param.GetProperty("OrderId").GetInt32();
+    var productId = param.GetProperty("ProductId").GetInt32();
+    var qty = param.GetProperty("Qty").GetInt32();
+
+    // Add additional headers to the response message
+    header.AddResponseHeader("some-message-info", "this is the test");
+    // Or add a callback to the response
+    header.AddResponseHeader(DotNetCore.CAP.Messages.Headers.CallbackName, "place.order.qty.deducted-callback");
+
+    // If you no longer want to follow the sender's specified callback and want to modify it, use the RewriteCallback method.
+    header.RewriteCallback("new-callback-name");
+
+    // If you want to terminate/stop, or no longer respond to the sender, call RemoveCallback to remove the callback.
+    header.RemoveCallback();
+
+    return new { OrderId = orderId, IsSuccess = true };
+}
+```
+
 ## Heterogeneous system integration
 
 In version 3.0+, we reconstructed the message structure. We used the Header in the message protocol in the message queue to transmit some additional information, so that we can do it in the Body without modifying or packaging the user’s original The message data format and content are sent.

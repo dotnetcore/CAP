@@ -57,6 +57,35 @@ public object DeductProductQty(JsonElement param)
 }
 ```
 
+### 控制回调响应
+
+你可以通过 `[FromCap]` 标记在订阅方法中注入 `CapHeader` 参数，并利用其提供的方法来向回调上下文中添加额外的头信息或者终止回调。
+
+示例如下：
+
+```cs
+[CapSubscribe("place.order.qty.deducted")]
+public object DeductProductQty(JsonElement param, [FromCap] CapHeader header)
+{
+    var orderId = param.GetProperty("OrderId").GetInt32();
+    var productId = param.GetProperty("ProductId").GetInt32();
+    var qty = param.GetProperty("Qty").GetInt32();
+
+    // 添加额外的头信息到响应消息中
+    header.AddResponseHeader("some-message-info", "this is the test");
+    // 或再次添加回调的回调
+    header.AddResponseHeader(DotNetCore.CAP.Messages.Headers.CallbackName, "place.order.qty.deducted-callback");
+
+    // 如果你不再遵从发送着指定的回调，想修改回调，可通过 RewriteCallback 方法修改。
+    header.RewriteCallback("new-callback-name");
+
+    // 如果你想终止/停止，或不再给发送方响应，调用 RemoveCallback 来移除回调。
+    header.RemoveCallback();
+
+    return new { OrderId = orderId, IsSuccess = true };
+}
+```
+
 ## 异构系统集成
 
 在 3.0+ 版本中，我们对消息结构进行了重构，我们利用了消息队列中消息协议中的 Header 来传输一些额外信息，以便于在 Body 中我们可以做到不需要修改或包装使用者的原始消息数据格式和内容进行发送。

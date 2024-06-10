@@ -185,17 +185,15 @@ internal class SubscribeExecutor : ISubscribeExecutor
 
             if (!string.IsNullOrEmpty(ret.CallbackName))
             {
-                var header = new Dictionary<string, string?>
-                {
-                    [Headers.CorrelationId] = message.Origin.GetId(),
-                    [Headers.CorrelationSequence] = (message.Origin.GetCorrelationSequence() + 1).ToString()
-                };
+                ret.CallbackHeader ??= new Dictionary<string, string?>();
+                ret.CallbackHeader[Headers.CorrelationId] = message.Origin.GetId();
+                ret.CallbackHeader[Headers.CorrelationSequence] = (message.Origin.GetCorrelationSequence() + 1).ToString();
 
-                if(message.Origin.Headers.TryGetValue(Headers.TraceParent, out var traceparent))
-                    header[Headers.TraceParent] = traceparent;
+                if (message.Origin.Headers.TryGetValue(Headers.TraceParent, out var traceparent))
+                    ret.CallbackHeader[Headers.TraceParent] = traceparent;
 
                 await _provider.GetRequiredService<ICapPublisher>()
-                    .PublishAsync(ret.CallbackName, ret.Result, header, cancellationToken).ConfigureAwait(false);
+                    .PublishAsync(ret.CallbackName, ret.Result, ret.CallbackHeader, cancellationToken).ConfigureAwait(false);
             }
         }
         catch (OperationCanceledException)

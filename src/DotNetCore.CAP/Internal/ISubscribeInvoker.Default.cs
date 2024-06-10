@@ -50,12 +50,14 @@ public class SubscribeInvoker : ISubscribeInvoker
         var message = context.DeliverMessage;
         var parameterDescriptors = context.ConsumerDescriptor.Parameters;
         var executeParameters = new object?[parameterDescriptors.Count];
+        var headerIndex = 0;
         for (var i = 0; i < parameterDescriptors.Count; i++)
         {
             var parameterDescriptor = parameterDescriptors[i];
             if (parameterDescriptor.IsFromCap)
             {
                 executeParameters[i] = GetCapProvidedParameter(parameterDescriptor, message, cancellationToken);
+                headerIndex = i;
             }
             else
             {
@@ -123,7 +125,7 @@ public class SubscribeInvoker : ISubscribeInvoker
             }
         }
 
-        return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName());
+        return new ConsumerExecutedResult(resultObj, message.GetId(), message.GetCallbackName(), (executeParameters[headerIndex] as CapHeader)?.ResponseHeader);
     }
 
     private static object GetCapProvidedParameter(ParameterDescriptor parameterDescriptor, Message message,
