@@ -14,6 +14,7 @@ namespace DotNetCore.CAP.NATS
     {
         private readonly NATSOptions _options;
         private readonly ConcurrentQueue<IConnection> _connectionPool;
+
         private readonly ConnectionFactory _connectionFactory;
         private int _pCount;
         private int _maxSize;
@@ -54,14 +55,17 @@ namespace DotNetCore.CAP.NATS
 
         public bool Return(IConnection connection)
         {
-            if (Interlocked.Increment(ref _pCount) <= _maxSize)
+            if (Interlocked.Increment(ref _pCount) <= _maxSize && connection.State == ConnState.CONNECTED)
             {
                 _connectionPool.Enqueue(connection);
 
                 return true;
             }
 
-            connection.Dispose();
+            if (!connection.IsReconnecting())
+            {
+                connection.Dispose();
+            }
 
             Interlocked.Decrement(ref _pCount);
 
@@ -75,7 +79,6 @@ namespace DotNetCore.CAP.NATS
             while (_connectionPool.TryDequeue(out var context))
             {
                 context.Dispose();
-
             }
         }
     }

@@ -18,7 +18,7 @@ namespace DotNetCore.CAP
         /// Gets or sets the server url/urls used to connect to the NATs server.
         /// </summary>
         /// <remarks>This may contain username/password information.</remarks>
-        public string Servers { get; set; } = "nats://localhost:4222";
+        public string Servers { get; set; } = "nats://127.0.0.1:4222";
 
         /// <summary>
         /// connection pool size, default is 10
