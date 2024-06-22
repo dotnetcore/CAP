@@ -23,8 +23,7 @@ public static class Helper
 
         if (typeInfo.ContainsGenericParameters) return false;
 
-        return !typeInfo.ContainsGenericParameters
-               && typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase);
+        return typeInfo.Name.EndsWith("Controller", StringComparison.OrdinalIgnoreCase);
     }
 
     public static bool IsComplexType(Type type)
