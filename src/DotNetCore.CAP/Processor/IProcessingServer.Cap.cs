@@ -61,7 +61,7 @@ public class CapProcessingServer : IProcessingServer
             _logger.ServerShuttingDown();
             _cts.Cancel();
 
-            _compositeTask?.Wait(TimeSpan.FromSeconds(10));
+            _compositeTask?.Wait(10_000);
         }
         catch (AggregateException ex)
         {
