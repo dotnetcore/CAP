@@ -43,37 +43,40 @@ namespace DotNetCore.CAP.NATS
 
         public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
         {
-            Connect();
-
-            var jsm = _consumerClient!.CreateJetStreamManagementContext();
-
-            var streamGroup = topicNames.GroupBy(x => _natsOptions.NormalizeStreamName(x));
-
-            foreach (var subjectStream in streamGroup)
+            if (_natsOptions.EnableSubscriberClientStreamAndSubjectCreation)
             {
-                var builder = StreamConfiguration.Builder()
-                    .WithName(subjectStream.Key)
-                    .WithNoAck(false)
-                    .WithStorageType(StorageType.Memory)
-                    .WithSubjects(subjectStream.ToList());
+                Connect();
 
-                _natsOptions.StreamOptions?.Invoke(builder);
+                var jsm = _consumerClient!.CreateJetStreamManagementContext();
 
-                try
+                var streamSubjectsGroups = topicNames.GroupBy(x => _natsOptions.NormalizeStreamName(x));
+
+                foreach (var streamSubjectsGroup in streamSubjectsGroups)
                 {
-                    jsm.GetStreamInfo(subjectStream.Key); // this throws if the stream does not exist
+                    var builder = StreamConfiguration.Builder()
+                        .WithName(streamSubjectsGroup.Key)
+                        .WithNoAck(false)
+                        .WithStorageType(StorageType.Memory)
+                        .WithSubjects(streamSubjectsGroup.ToList());
 
-                    jsm.UpdateStream(builder.Build());
-                }
-                catch (NATSJetStreamException)
-                {
+                    _natsOptions.StreamOptions?.Invoke(builder);
+
                     try
                     {
-                        jsm.AddStream(builder.Build());
+                        jsm.GetStreamInfo(streamSubjectsGroup.Key); // this throws if the stream does not exist
+
+                        jsm.UpdateStream(builder.Build());
                     }
-                    catch
+                    catch (NATSJetStreamException)
                     {
-                        // ignored
+                        try
+                        {
+                            jsm.AddStream(builder.Build());
+                        }
+                        catch
+                        {
+                            // ignored
+                        }
                     }
                 }
             }
