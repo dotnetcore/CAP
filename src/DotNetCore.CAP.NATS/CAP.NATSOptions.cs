@@ -26,6 +26,11 @@ namespace DotNetCore.CAP
         public int ConnectionPoolSize { get; set; } = 10;
 
         /// <summary>
+        /// Allows a nats consumer client to dynamically create a stream and configure the expected subjects on the stream. Defaults to true;
+        /// </summary>
+        public bool EnableSubscriberClientStreamAndSubjectCreation { get; set; } = true;
+
+        /// <summary>
         /// Used to setup all NATs client options
         /// </summary>
         public Options? Options { get; set; }
