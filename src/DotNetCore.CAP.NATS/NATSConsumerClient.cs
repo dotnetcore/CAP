@@ -123,7 +123,12 @@ namespace DotNetCore.CAP.NATS
                         }
                         catch (Exception e)
                         {
-                            Console.WriteLine(e);
+                            OnLogCallback!(new LogMessageEventArgs()
+                            {
+                                LogType = MqLogType.ConnectError,
+                                Reason = $"An error was encountered when attempting to subscribe to subject: {subject}.{Environment.NewLine}" +
+                                $"{e.Message}"
+                            });
                         }
                     }
                 }
