@@ -170,7 +170,7 @@ public class Dispatcher : IDispatcher
         {
             if (_tasksCts!.IsCancellationRequested) return;
 
-            if (_enableParallelExecute)
+            if (_enableParallelExecute && message.Retries == 0)
             {
                 if (!_receivedChannel.Writer.TryWrite((message, descriptor)))
                 {
