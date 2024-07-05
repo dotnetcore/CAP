@@ -153,10 +153,21 @@ public class Dispatcher : IDispatcher
     {
         try
         {
-            if (!_publishedChannel.Writer.TryWrite(message))
-                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
-                    if (_publishedChannel.Writer.TryWrite(message))
-                        return;
+            if (_tasksCts!.IsCancellationRequested) return;
+
+            if (_enableParallelSend && message.Retries == 0)
+            {
+                if (!_publishedChannel.Writer.TryWrite(message))
+                    while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
+                        if (_publishedChannel.Writer.TryWrite(message))
+                            return;
+            }
+            else
+            {
+                var result = await _sender.SendAsync(message).ConfigureAwait(false);
+                if (!result.Succeeded) _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
+
+            }
         }
         catch (OperationCanceledException)
         {
