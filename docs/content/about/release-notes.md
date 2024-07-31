@@ -5,10 +5,39 @@ hide:
 
 # Release Notes
 
+## Version 8.2.0 (Jun 23, 2024)
+
+**Features:**
+- Add support CustomHeadersBuilder option for NATS. (#1519)
+- Add GroupConcurrent option for [CapSubscribe] to support subscriber concurrent execution. (#1537)
+- Add option for controlling reponse from CapHeader. (#1541)
+- Improvements to the "EnablePublishParallelSend" option to "true" will put tasks into the .NET thread pool in batches. (#1540)
+
+**Bug Fixed:**
+- Fixed issue where CapTransaction was not disposed when the transaction failed for Sql Server. (#1521)
+- Fixed NATS reconnection publish issue after restarting server. (#1542)
+
+**What's Changed:**
+- Upgrade dashboard npm package to vue2 latest minor version.
+- Upgrade Ngpsql to 8.0.3 to fix "Npgsql vulnerable to SQL Injection via Protocol Message Size Overflow".
+- Simplify code using deconstruction. by @xiangxiren in #1533
+
+## Version 8.1.2 (May 7, 2024)
+
+**Bug Fixed:**
+* Fixed publish exception when event outside of transaction finishing scope. (#1521) Thanks @NikolozGob
+* Fixed PublishDelay synchronization method did not wait internally.
+
+## Version 8.1.1 (Apr 21, 2024)
+
+**Features:**
+- Add more granular option for AzureServiceBus. (#1514)
+- Add new options SubscriberParallelExecuteThreadCount,SubscriberParallelExecuteBufferFactor to better support parallel execte subscriber. (#1513)
+- Delete obsolete option CustomerHeader.
+
 ## Version 8.0.0 (Dec 14, 2023)
 
 **Breaking Changes**
-
 Removed `DefaultAuthenticationScheme`, `UseChallengeOnAuth`, `DefaultChallengeScheme` and `AuthorizationPolicy` options of DotNetCore.CAP.Dashboard.
 Now CAP dashboard auth/authz mechanism to leverage the "ASP.NET Core" way of doing it, see #1428.
 
