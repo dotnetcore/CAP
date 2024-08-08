@@ -12,6 +12,6 @@
     
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.0" />
-        <PackageReference Include="Savorboard.CAP.InMemoryMessageQueue" Version="7.0.0" />
+        <PackageReference Include="Savorboard.CAP.InMemoryMessageQueue" Version="8.2.1" />
     </ItemGroup>
 </Project>
