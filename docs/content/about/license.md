@@ -7,7 +7,7 @@ hide:
 
 **MIT License**
 
-Copyright (c) 2016 - 2023 Savorboard
+Copyright (c) 2016 - 2024 Savorboard
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
