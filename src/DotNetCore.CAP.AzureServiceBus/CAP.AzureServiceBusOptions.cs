@@ -7,6 +7,7 @@ using System.Threading;
 using Azure.Core;
 using Azure.Messaging.ServiceBus;
 using DotNetCore.CAP.AzureServiceBus;
+using DotNetCore.CAP.AzureServiceBus.Consumer;
 using DotNetCore.CAP.AzureServiceBus.Producer;
 
 // ReSharper disable once CheckNamespace
@@ -154,6 +155,19 @@ public class AzureServiceBusOptions
         var builder = new ServiceBusProducerDescriptorBuilder<T>();
         configuration(builder);
         CustomProducers.Add(builder.Build());
+
+        return this;
+    } 
+    
+    internal IDictionary<string, IServiceBusConsumerDescriptor> CustomConsumers{ get; set; } =
+        new Dictionary<string, IServiceBusConsumerDescriptor>();
+
+    public AzureServiceBusOptions ConfigureCustomConsumer(
+        Action<ServiceBusConsumerDescriptorBuilder> configuration)
+    {
+        var builder = new ServiceBusConsumerDescriptorBuilder();
+        configuration(builder);
+        CustomConsumers.Add(builder.Build());
 
         return this;
     }
