@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
+using DotNetCore.CAP.AzureServiceBus.Consumer;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
@@ -34,7 +35,9 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         string subscriptionName,
         byte groupConcurrent,
         IOptions<AzureServiceBusOptions> options,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IServiceBusConsumerDescriptor? consumerDescriptor = null
+        )
     {
         _logger = logger;
         _subscriptionName = subscriptionName;
@@ -42,6 +45,14 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         _semaphore = new SemaphoreSlim(groupConcurrent);
         _serviceProvider = serviceProvider;
         _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
+      
+        if (consumerDescriptor is not null)
+        {
+            _asbOptions.TopicPath = consumerDescriptor.TopicPath;
+            _asbOptions.Namespace = consumerDescriptor.Namespace ?? _asbOptions.Namespace;
+        }
+        
+        CheckValidSubscriptionName(subscriptionName);
     }
 
     public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }

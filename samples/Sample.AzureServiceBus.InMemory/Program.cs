@@ -11,7 +11,7 @@ builder.Services.AddLogging(l => l.AddConsole());
 
 builder.Services.AddCap(c =>
 {
-
+    c.Version = "v1";
     c.UseInMemoryStorage();
     c.UseAzureServiceBus(asb =>
     {
@@ -32,9 +32,15 @@ builder.Services.AddCap(c =>
         asb.SQLFilters = new List<KeyValuePair<string, string>>() {
             new("IsFromSampleProjectFilter","IsFromSampleProject = 'true'")
         };
-
+        
+        
         asb.ConfigureCustomProducer<EntityCreatedForIntegration>(cfg => cfg.UseTopic("entity-created").WithSubscription());
         asb.ConfigureCustomProducer<EntityDeletedForIntegration>(cfg => cfg.UseTopic("entity-deleted").WithSubscription());
+        asb.ConfigureCustomConsumer(cfg =>
+        {
+            cfg.UseGroupName($"test.{c.Version}");
+            cfg.UseTopic("entity-created");
+        });
     });
 
     c.UseDashboard();
