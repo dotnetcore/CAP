@@ -13,23 +13,28 @@ internal sealed class AzureServiceBusConsumerClientFactory : IConsumerClientFact
     private readonly IOptions<AzureServiceBusOptions> _asbOptions;
     private readonly ILoggerFactory _loggerFactory;
     private readonly IServiceProvider _serviceProvider;
+    private readonly CapOptions _capOptions;
 
     public AzureServiceBusConsumerClientFactory(
         ILoggerFactory loggerFactory,
         IOptions<AzureServiceBusOptions> asbOptions,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider,
+        IOptions<CapOptions> capOptions)
     {
         _loggerFactory = loggerFactory;
         _asbOptions = asbOptions;
         _serviceProvider = serviceProvider;
+        _capOptions = capOptions.Value;
     }
 
     public IConsumerClient Create(string groupName, byte groupConcurrent)
     {
         try
         {
+            var groupWithoutVersion = groupName.Replace($".{_capOptions.Version}", string.Empty);
+            
             var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
-            if (_asbOptions.Value.CustomConsumers.TryGetValue(groupName, out var customConsumer))
+            if (_asbOptions.Value.CustomConsumers.TryGetValue(groupWithoutVersion, out var customConsumer))
             {
                 var customClient = new AzureServiceBusConsumerClient(logger, groupName, groupConcurrent, _asbOptions, _serviceProvider, customConsumer);
                 customClient.ConnectAsync().GetAwaiter().GetResult();

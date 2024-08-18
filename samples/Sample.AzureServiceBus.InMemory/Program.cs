@@ -38,7 +38,7 @@ builder.Services.AddCap(c =>
         asb.ConfigureCustomProducer<EntityDeletedForIntegration>(cfg => cfg.UseTopic("entity-deleted").WithSubscription());
         asb.ConfigureCustomConsumer(cfg =>
         {
-            cfg.UseGroupName($"test.{c.Version}");
+            cfg.UseGroupName($"test");
             cfg.UseTopic("entity-created");
         });
     });

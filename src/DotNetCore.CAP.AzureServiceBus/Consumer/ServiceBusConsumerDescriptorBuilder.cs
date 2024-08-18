@@ -12,7 +12,6 @@ public class ServiceBusConsumerDescriptorBuilder
     private string? Namespace { get; set; } = null;
     private string TopicPath { get; set; } = null!;
     
-    
     public ServiceBusConsumerDescriptorBuilder UseGroupName(string groupName)
     {
         GroupName = groupName;
