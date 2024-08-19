@@ -109,3 +109,30 @@ c.UseAzureServiceBus(asb =>
         };
 });
 ```
+
+#### SQL Filters
+
+You can customize the setup for customer consumers in Azure by configuring extra service options per group. This includes integrating with extra topic or adjusting other relevant settings.
+
+```C#
+c.UseAzureServiceBus(asb =>
+{
+    asb.ConnectionString = ...
+           asb.ConfigureCustomGroupConsumer("test", cfg =>
+        {
+            cfg.UseTopic("entity-created");
+            cfg.UseConnectionString("external connection string");
+            cfg.UseDefaultOptions(); // Use default options from default consumer
+        });
+        
+        asb.ConfigureCustomGroupConsumer("test2", cfg =>
+        {
+            cfg.UseTopic("entity-deleted");
+            //Set custom options for this consumer
+            cfg.Configuration(c =>
+            {
+                c.EnableSessions = true;
+            });
+        });
+});
+```

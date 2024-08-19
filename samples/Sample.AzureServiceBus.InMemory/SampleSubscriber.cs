@@ -15,6 +15,7 @@ public class SampleSubscriber : ICapSubscribe
     }
     
     [CapSubscribe(nameof(EntityCreatedForIntegration), Group = "test")]
+    [CapSubscribe(nameof(EntityDeleted))]
     public void Handle(EntityCreatedForIntegration message)
     {
         Console.WriteLine($"Message {message.Id} received");

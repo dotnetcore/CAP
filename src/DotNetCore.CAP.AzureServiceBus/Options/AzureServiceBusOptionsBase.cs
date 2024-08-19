@@ -7,8 +7,6 @@ using System.Threading;
 using Azure.Core;
 using Azure.Messaging.ServiceBus;
 using DotNetCore.CAP.AzureServiceBus;
-using DotNetCore.CAP.AzureServiceBus.Consumer;
-using DotNetCore.CAP.AzureServiceBus.Producer;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;
@@ -16,34 +14,15 @@ namespace DotNetCore.CAP;
 /// <summary>
 /// Provides programmatic configuration for the CAP Azure Service Bus project.
 /// </summary>
-public class AzureServiceBusOptions
+public class AzureServiceBusOptionsBase
 {
-    /// <summary>
-    /// TopicPath default value for CAP.
-    /// </summary>
-    public const string DefaultTopicPath = "cap";
-
-    /// <summary>
-    /// Azure Service Bus Namespace connection string. Must not contain topic information.
-    /// </summary>
-    public string ConnectionString { get; set; } = default!;
-
-    /// <summary>
-    /// Namespace of service bus , Needs to be set when using with TokenCredential Property
-    /// </summary>
-    public string Namespace { get; set; } = default!;
-
+    
     /// <summary>
     /// Whether Service Bus sessions are enabled. If enabled, all messages must contain a
     /// <see cref="AzureServiceBusHeaders.SessionId" /> header. Defaults to false.
     /// </summary>
     public bool EnableSessions { get; set; } = false;
-
-    /// <summary>
-    /// The name of the topic relative to the service namespace base address.
-    /// </summary>
-    public string TopicPath { get; set; } = DefaultTopicPath;
-
+    
     /// <summary>
     /// The <see cref="TimeSpan" /> idle interval after which the subscription is automatically deleted.
     /// </summary>
@@ -125,11 +104,6 @@ public class AzureServiceBusOptions
     public TimeSpan MaxAutoLockRenewalDuration { get; set; } = TimeSpan.FromMinutes(5);
 
     /// <summary>
-    /// Represents the Azure Active Directory token provider for Azure Managed Service Identity integration.
-    /// </summary>
-    public TokenCredential? TokenCredential { get; set; }
-
-    /// <summary>
     /// Use this function to write additional headers from the original ASB Message or any Custom Header, i.e. to allow
     /// compatibility with heterogeneous systems, into <see cref="CapHeader" />
     /// </summary>
@@ -146,29 +120,5 @@ public class AzureServiceBusOptions
     /// </summary>
     public List<KeyValuePair<string, string>>? SQLFilters { get; set; }
 
-    internal ICollection<IServiceBusProducerDescriptor> CustomProducers { get; set; } =
-        new List<IServiceBusProducerDescriptor>();
 
-    public AzureServiceBusOptions ConfigureCustomProducer<T>(
-        Action<ServiceBusProducerDescriptorBuilder<T>> configuration)
-    {
-        var builder = new ServiceBusProducerDescriptorBuilder<T>();
-        configuration(builder);
-        CustomProducers.Add(builder.Build());
-
-        return this;
-    } 
-    
-    internal IDictionary<string, IServiceBusConsumerDescriptor> CustomConsumers{ get; set; } =
-        new Dictionary<string, IServiceBusConsumerDescriptor>();
-
-    public AzureServiceBusOptions ConfigureCustomConsumer(
-        Action<ServiceBusConsumerDescriptorBuilder> configuration)
-    {
-        var builder = new ServiceBusConsumerDescriptorBuilder();
-        configuration(builder);
-        CustomConsumers.Add(builder.Build());
-
-        return this;
-    }
 }

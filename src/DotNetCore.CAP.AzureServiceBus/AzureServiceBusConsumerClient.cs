@@ -16,9 +16,9 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.AzureServiceBus;
 
-internal sealed class AzureServiceBusConsumerClient : IConsumerClient
+internal class AzureServiceBusConsumerClient : IConsumerClient
 {
-    private readonly AzureServiceBusOptions _asbOptions;
+    private AzureServiceBusOptions _asbOptions;
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
     private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
@@ -35,8 +35,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         string subscriptionName,
         byte groupConcurrent,
         IOptions<AzureServiceBusOptions> options,
-        IServiceProvider serviceProvider,
-        IServiceBusConsumerDescriptor? consumerDescriptor = null
+        IServiceProvider serviceProvider
         )
     {
         _logger = logger;
@@ -45,12 +44,6 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         _semaphore = new SemaphoreSlim(groupConcurrent);
         _serviceProvider = serviceProvider;
         _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
-      
-        if (consumerDescriptor is not null)
-        {
-            _asbOptions.TopicPath = consumerDescriptor.TopicPath;
-            _asbOptions.Namespace = consumerDescriptor.Namespace ?? _asbOptions.Namespace;
-        }
         
         CheckValidSubscriptionName(subscriptionName);
     }
@@ -60,6 +53,17 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
     public BrokerAddress BrokerAddress => new("AzureServiceBus", _asbOptions.ConnectionString);
+    
+    public void ApplyCustomConsumer(IServiceBusConsumerDescriptor consumerDescriptor)
+    {
+        var consumerDescriptorOptions = consumerDescriptor.Options;
+        consumerDescriptorOptions.TopicPath = consumerDescriptor.TopicPath;
+        consumerDescriptorOptions.Namespace = consumerDescriptor.Namespace;
+        consumerDescriptorOptions.ConnectionString = consumerDescriptor.ConnectionString;
+        consumerDescriptorOptions.TokenCredential = consumerDescriptor.TokenCredential;
+        
+        _asbOptions = consumerDescriptorOptions;
+    }
 
     public void Subscribe(IEnumerable<string> topics)
     {

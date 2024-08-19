@@ -32,16 +32,14 @@ internal sealed class AzureServiceBusConsumerClientFactory : IConsumerClientFact
         try
         {
             var groupWithoutVersion = groupName.Replace($".{_capOptions.Version}", string.Empty);
-            
             var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
+            var client = new AzureServiceBusConsumerClient(logger, groupName, groupConcurrent, _asbOptions, _serviceProvider);
+            
             if (_asbOptions.Value.CustomConsumers.TryGetValue(groupWithoutVersion, out var customConsumer))
             {
-                var customClient = new AzureServiceBusConsumerClient(logger, groupName, groupConcurrent, _asbOptions, _serviceProvider, customConsumer);
-                customClient.ConnectAsync().GetAwaiter().GetResult();
-                return customClient;
+                client.ApplyCustomConsumer(customConsumer);
             }
             
-            var client = new AzureServiceBusConsumerClient(logger, groupName, groupConcurrent, _asbOptions, _serviceProvider);
             client.ConnectAsync().GetAwaiter().GetResult();
             return client;
         }
