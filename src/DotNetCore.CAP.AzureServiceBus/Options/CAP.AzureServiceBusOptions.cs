@@ -59,7 +59,7 @@ public class AzureServiceBusOptions : AzureServiceBusOptionsBase
     internal IDictionary<string, IServiceBusConsumerDescriptor> CustomConsumers{ get; set; } =
         new Dictionary<string, IServiceBusConsumerDescriptor>();
 
-    public AzureServiceBusOptions ConfigureCustomGroupConsumer(string groupName,
+    public AzureServiceBusOptions ConfigureCustomTopicConsumer(string groupName,
         Action<ServiceBusConsumerDescriptorBuilder> configuration)
     {
         var builder = new ServiceBusConsumerDescriptorBuilder(groupName);

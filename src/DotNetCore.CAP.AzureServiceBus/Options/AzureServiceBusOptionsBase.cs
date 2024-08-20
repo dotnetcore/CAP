@@ -68,7 +68,7 @@ public class AzureServiceBusOptionsBase
     /// Adds additional correlation properties to all correlation filters.
     /// https://learn.microsoft.com/en-us/azure/service-bus-messaging/topic-filters#correlation-filters
     /// </summary>
-    public IDictionary<string, string> DefaultCorrelationHeaders { get; } = new Dictionary<string, string>();
+    public IDictionary<string, string> DefaultCorrelationHeaders { get; set; } = new Dictionary<string, string>();
 
     /// <summary>
     /// Gets the maximum number of concurrent calls to the ProcessMessageAsync message handler the processor should initiate.

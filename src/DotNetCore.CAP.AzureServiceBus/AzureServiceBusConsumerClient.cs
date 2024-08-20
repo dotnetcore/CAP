@@ -16,9 +16,9 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.AzureServiceBus;
 
-internal class AzureServiceBusConsumerClient : IConsumerClient
+internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 {
-    private AzureServiceBusOptions _asbOptions;
+    private readonly AzureServiceBusOptions _asbOptions;
     private readonly SemaphoreSlim _connectionLock = new(1, 1);
     private readonly ILogger _logger;
     private readonly IServiceProvider _serviceProvider;
@@ -56,13 +56,9 @@ internal class AzureServiceBusConsumerClient : IConsumerClient
     
     public void ApplyCustomConsumer(IServiceBusConsumerDescriptor consumerDescriptor)
     {
-        var consumerDescriptorOptions = consumerDescriptor.Options;
-        consumerDescriptorOptions.TopicPath = consumerDescriptor.TopicPath;
-        consumerDescriptorOptions.Namespace = consumerDescriptor.Namespace;
-        consumerDescriptorOptions.ConnectionString = consumerDescriptor.ConnectionString;
-        consumerDescriptorOptions.TokenCredential = consumerDescriptor.TokenCredential;
-        
-        _asbOptions = consumerDescriptorOptions;
+        _asbOptions.TopicPath = consumerDescriptor.TopicPath;
+        _asbOptions.Namespace = consumerDescriptor.Namespace;
+        SetAzureOptions(_asbOptions);
     }
 
     public void Subscribe(IEnumerable<string> topics)
@@ -338,6 +334,22 @@ internal class AzureServiceBusConsumerClient : IConsumerClient
                     $@"'{subscriptionName}' contains character '{uriSchemeKey}' which is not allowed because it is reserved in the Uri scheme.",
                     subscriptionName);
         }
+    }
+    
+    private void SetAzureOptions(AzureServiceBusOptions options)
+    {
+        _asbOptions.AutoCompleteMessages = options.AutoCompleteMessages;
+        _asbOptions.MaxConcurrentCalls = options.MaxConcurrentCalls;
+        _asbOptions.MaxAutoLockRenewalDuration = options.MaxAutoLockRenewalDuration;
+        _asbOptions.MaxConcurrentSessions = options.MaxConcurrentSessions;
+        _asbOptions.SessionIdleTimeout = options.SessionIdleTimeout;
+        _asbOptions.SubscriptionAutoDeleteOnIdle = options.SubscriptionAutoDeleteOnIdle;
+        _asbOptions.SubscriptionMessageLockDuration = options.SubscriptionMessageLockDuration;
+        _asbOptions.SubscriptionDefaultMessageTimeToLive = options.SubscriptionDefaultMessageTimeToLive;
+        _asbOptions.SubscriptionMaxDeliveryCount = options.SubscriptionMaxDeliveryCount;
+        _asbOptions.SQLFilters = options.SQLFilters;
+        _asbOptions.DefaultCorrelationHeaders = options.DefaultCorrelationHeaders;
+        _asbOptions.CustomHeadersBuilder = options.CustomHeadersBuilder;
     }
 
     #endregion private methods

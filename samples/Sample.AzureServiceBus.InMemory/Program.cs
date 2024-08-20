@@ -37,13 +37,13 @@ builder.Services.AddCap(c =>
         asb.ConfigureCustomProducer<EntityCreatedForIntegration>(cfg => cfg.UseTopic("entity-created").WithSubscription());
         asb.ConfigureCustomProducer<EntityDeletedForIntegration>(cfg => cfg.UseTopic("entity-deleted").WithSubscription());
        
-        asb.ConfigureCustomGroupConsumer("test", cfg =>
+        asb.ConfigureCustomTopicConsumer("test", cfg =>
         {
             cfg.UseTopic("entity-created");
             cfg.UseDefaultOptions(); // Use default options from base consumer
         });
         
-        asb.ConfigureCustomGroupConsumer("test2", cfg =>
+        asb.ConfigureCustomTopicConsumer("test2", cfg =>
         {
             cfg.UseTopic("entity-deleted");
             //Set custom options for this consumer

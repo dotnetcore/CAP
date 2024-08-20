@@ -110,7 +110,7 @@ c.UseAzureServiceBus(asb =>
 });
 ```
 
-#### SQL Filters
+#### Custom Consumers
 
 You can customize the setup for customer consumers in Azure by configuring extra service options per group. This includes integrating with extra topic or adjusting other relevant settings.
 
