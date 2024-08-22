@@ -17,14 +17,28 @@ public class ServiceBusTransportTests
 
     public ServiceBusTransportTests()
     {
-        var config = new AzureServiceBusOptions();
+        var config = new AzureServiceBusOptions()
+        {
+            ConnectionString = "Endpoint=sb://mynamespace.servicebus.windows.net/;SharedAccessKeyName=myPolicy;SharedAccessKey=myKey" 
+        };
+        
         config.ConfigureCustomProducer<EntityCreated>(cfg => cfg.UseTopic("entity-created").WithSubscription());
 
         _options = Options.Create(config);
     }
 
     [Fact]
-    public void Custom_Producer_Should_Have_Custom_Topic()
+    public void Transport_ShouldHaveCorrectBrokerAddress()
+    {
+        // Given, When
+        var transport = new AzureServiceBusTransport(NullLogger<AzureServiceBusTransport>.Instance, _options);
+        
+        // Then
+        transport.BrokerAddress.Endpoint.ShouldBe("sb://mynamespace.servicebus.windows.net/");
+    }
+
+    [Fact]
+    public void CustomProducer_ShouldHaveCustomTopic()
     {
         // Given
         var transport = new AzureServiceBusTransport(NullLogger<AzureServiceBusTransport>.Instance, _options);
@@ -45,7 +59,7 @@ public class ServiceBusTransportTests
     }
 
     [Fact]
-    public void Default_Producer_Should_Have_Default_Topic()
+    public void DefaultProducer_ShouldHaveDefaultTopic()
     {
         // Given
         var transport = new AzureServiceBusTransport(NullLogger<AzureServiceBusTransport>.Instance, _options);

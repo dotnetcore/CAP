@@ -23,14 +23,14 @@ public class ServiceBusHelpersTests
     {
         // Arrange
         string? connectionString = null;
-        string? @namespace = "mynamespace";
+        string? @namespace = "sb://mynamespace.servicebus.windows.net/";
 
         // Act
         var result = ServiceBusHelpers.GetBrokerAddress(connectionString, @namespace);
 
         // Assert
         Assert.Equal("AzureServiceBus", result.Name);
-        Assert.Equal("mynamespace", result.Endpoint);
+        Assert.Equal("sb://mynamespace.servicebus.windows.net/", result.Endpoint);
     }
 
     [Fact]
@@ -45,7 +45,7 @@ public class ServiceBusHelpersTests
 
         // Assert
         Assert.Equal("AzureServiceBus", result.Name);
-        Assert.Equal("mynamespace", result.Endpoint);
+        Assert.Equal("sb://mynamespace.servicebus.windows.net/", result.Endpoint);
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class ServiceBusHelpersTests
 
         // Assert
         Assert.Equal("AzureServiceBus", result.Name);
-        Assert.Equal("mynamespace", result.Endpoint);
+        Assert.Equal("sb://mynamespace.servicebus.windows.net/", result.Endpoint);
     }
 
     [Fact]
@@ -95,13 +95,13 @@ public class ServiceBusHelpersTests
     {
         // Arrange
         string? connectionString = "";
-        string? @namespace = "mynamespace";
+        string? @namespace = "sb://mynamespace.servicebus.windows.net/";
 
         // Act
         var result = ServiceBusHelpers.GetBrokerAddress(connectionString, @namespace);
 
         // Assert
         Assert.Equal("AzureServiceBus", result.Name);
-        Assert.Equal("mynamespace", result.Endpoint);
+        Assert.Equal("sb://mynamespace.servicebus.windows.net/", result.Endpoint);
     }
 }

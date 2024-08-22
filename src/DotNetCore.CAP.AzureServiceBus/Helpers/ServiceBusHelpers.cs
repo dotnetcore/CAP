@@ -44,7 +44,7 @@ public static class ServiceBusHelpers
             var uri = new Uri(endpointParts[1]);
             
             // Namespace is the host part without the .servicebus.windows.net
-            @namespace = uri.Host.Split('.')[0];
+            @namespace = uri.ToString();
 
             return true;
         }
