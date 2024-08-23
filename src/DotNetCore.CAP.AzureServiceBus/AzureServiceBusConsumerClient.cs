@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
+using DotNetCore.CAP.AzureServiceBus.Helpers;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
@@ -48,7 +49,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-    public BrokerAddress BrokerAddress => new("AzureServiceBus", _asbOptions.ConnectionString);
+    public BrokerAddress BrokerAddress => ServiceBusHelpers.GetBrokerAddress(_asbOptions.ConnectionString, _asbOptions.Namespace);
 
     public void Subscribe(IEnumerable<string> topics)
     {
