@@ -14,7 +14,14 @@ public class K8sDiscoveryOptions
     public K8sDiscoveryOptions()
     {
         K8SClientConfig = KubernetesClientConfiguration.BuildDefaultConfig();
+        ShowOnlyExplicitVisibleNodes = true;
     }
 
     public KubernetesClientConfiguration K8SClientConfig { get; set; }
+
+    /// <summary>
+    /// If this is set to TRUE will make all nodes hidden by default. Only kubernetes services 
+    /// with label "dotnetcore.cap.visibility:show" will be listed in the nodes section.
+    /// </summary>
+    public bool ShowOnlyExplicitVisibleNodes { get; set; }
 }
