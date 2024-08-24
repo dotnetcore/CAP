@@ -16,6 +16,15 @@ namespace DotNetCore.CAP;
 /// </summary>
 public class AzureServiceBusOptionsBase
 {
+    /// <summary>
+    /// TopicPath default value for CAP.
+    /// </summary>
+    public const string DefaultTopicPath = "cap";
+    
+    /// <summary>
+    /// The name of the topic relative to the service namespace base address.
+    /// </summary>
+    public string TopicPath { get; set; } = DefaultTopicPath;
     
     /// <summary>
     /// Whether Service Bus sessions are enabled. If enabled, all messages must contain a

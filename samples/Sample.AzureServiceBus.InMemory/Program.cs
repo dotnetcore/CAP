@@ -33,7 +33,6 @@ builder.Services.AddCap(c =>
             new("IsFromSampleProjectFilter","IsFromSampleProject = 'true'")
         };
         
-        
         asb.ConfigureCustomProducer<EntityCreatedForIntegration>(cfg => cfg.UseTopic("entity-created").WithSubscription());
         asb.ConfigureCustomProducer<EntityDeletedForIntegration>(cfg => cfg.UseTopic("entity-deleted").WithSubscription());
        

@@ -57,7 +57,6 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     public void ApplyCustomConsumer(IServiceBusConsumerDescriptor consumerDescriptor)
     {
         _asbOptions.TopicPath = consumerDescriptor.TopicPath;
-        _asbOptions.Namespace = consumerDescriptor.Namespace;
         SetAzureOptions(_asbOptions);
     }
 

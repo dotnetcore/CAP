@@ -18,10 +18,6 @@ namespace DotNetCore.CAP;
 /// </summary>
 public class AzureServiceBusOptions : AzureServiceBusOptionsBase
 {
-    /// <summary>
-    /// TopicPath default value for CAP.
-    /// </summary>
-    public const string DefaultTopicPath = "cap";
 
     /// <summary>
     /// Azure Service Bus Namespace connection string. Must not contain topic information.
@@ -33,11 +29,6 @@ public class AzureServiceBusOptions : AzureServiceBusOptionsBase
     /// </summary>
     public string Namespace { get; set; } = default!;
     
-    /// <summary>
-    /// The name of the topic relative to the service namespace base address.
-    /// </summary>
-    public string TopicPath { get; set; } = DefaultTopicPath;
-
     /// <summary>
     /// Represents the Azure Active Directory token provider for Azure Managed Service Identity integration.
     /// </summary>
