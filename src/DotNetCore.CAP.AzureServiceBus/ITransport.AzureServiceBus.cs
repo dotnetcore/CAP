@@ -7,6 +7,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
+using DotNetCore.CAP.AzureServiceBus.Helpers;
 using DotNetCore.CAP.AzureServiceBus.Producer;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
@@ -51,7 +52,7 @@ internal class AzureServiceBusTransport : ITransport, IServiceBusProducerDescrip
                    _asbOptions.Value.TopicPath);
     }
 
-    public BrokerAddress BrokerAddress => new("AzureServiceBus", _asbOptions.Value.ConnectionString);
+    public BrokerAddress BrokerAddress => ServiceBusHelpers.GetBrokerAddress(_asbOptions.Value.ConnectionString, _asbOptions.Value.Namespace);
 
     public async Task<OperateResult> SendAsync(TransportMessage transportMessage)
     {
