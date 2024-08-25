@@ -56,7 +56,7 @@ public class K8sNodeDiscoveryProvider : INodeDiscoveryProvider
             if (ns == null) return new List<Node>();
 
             var nodes = await ListServices(ns);
-            
+
             CapCache.Global.AddOrUpdate("cap.nodes.count", nodes.Count, TimeSpan.FromSeconds(60), true);
 
             return nodes;
@@ -74,8 +74,20 @@ public class K8sNodeDiscoveryProvider : INodeDiscoveryProvider
     public async Task<List<string>> GetNamespaces(CancellationToken cancellationToken)
     {
         var client = new Kubernetes(_options.K8SClientConfig);
-        var namespaces = await client.ListNamespaceAsync(cancellationToken: cancellationToken);
-        return namespaces.Items.Select(x => x.Name()).ToList();
+        try
+        {
+            var namespaces = await client.ListNamespaceAsync(cancellationToken: cancellationToken);
+            return namespaces.Items.Select(x => x.Name()).ToList();
+        }
+        catch (Exception)
+        {
+            if (string.IsNullOrEmpty(_options.K8SClientConfig.Namespace))
+            {
+                return new List<string>();
+            }
+
+            return new List<string>() { _options.K8SClientConfig.Namespace };
+        }
     }
 
     public async Task<IList<Node>> ListServices(string? ns = null)
