@@ -134,7 +134,8 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
     public void Reject(object? sender)
     {
-        // ignore
+        var commitInput = (AzureServiceBusConsumerCommitInput)sender!;
+        commitInput.AbandonMessageAsync().GetAwaiter().GetResult();
     }
 
     public void Dispose()
