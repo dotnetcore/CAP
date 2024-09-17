@@ -50,6 +50,7 @@ VirtualHost | Broker virtual host | string | /
 Port | Port | int | -1
 ExchangeName | Default exchange name | string | cap.default.topic
 QueueArguments  | Extra queue `x-arguments` | QueueArgumentsOptions  |  N/A
+QueueOptions  | Change Options for created queue | QueueRabbitOptions  |  { Durable=true, Exclusive=false, AutoDelete=false }
 ConnectionFactoryOptions  |  RabbitMQClient native connection options | ConnectionFactory | N/A
 CustomHeadersBuilder  | Custom subscribe headers |  See the blow |  N/A
 PublishConfirms | Enable [publish confirms](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
