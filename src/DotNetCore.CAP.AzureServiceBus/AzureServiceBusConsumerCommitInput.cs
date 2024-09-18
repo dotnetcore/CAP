@@ -29,4 +29,11 @@ public class AzureServiceBusConsumerCommitInput
             ? ProcessMessageArgs.CompleteMessageAsync(Message)
             : ProcessSessionMessageArgs!.CompleteMessageAsync(Message);
     }
+
+    public Task AbandonMessageAsync()
+    {
+        return ProcessMessageArgs != null
+            ? ProcessMessageArgs.AbandonMessageAsync(Message)
+            : ProcessSessionMessageArgs!.AbandonMessageAsync(Message);
+    }
 }
