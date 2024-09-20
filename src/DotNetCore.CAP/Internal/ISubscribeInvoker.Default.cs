@@ -41,7 +41,7 @@ public class SubscribeInvoker : ISubscribeInvoker
         var executor = _executors.GetOrAdd(key,
             _ => ObjectMethodExecutor.Create(methodInfo, context.ConsumerDescriptor.ImplTypeInfo));
 
-        using var scope = _serviceProvider.CreateScope();
+        await using var scope = _serviceProvider.CreateAsyncScope();
 
         var provider = scope.ServiceProvider;
 
