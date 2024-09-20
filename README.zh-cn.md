@@ -248,7 +248,7 @@ public void ShowTime2(DateTime datetime)
 
 ```
 
-`ShowTime1` 和 `ShowTime2` 处于不同的组，他们在默认情况下被线性的接连调用，你可以通过设置`UseDispatchingPerGroup`为true来使两者互不影响的同时调用。
+`ShowTime1` 和 `ShowTime2` 将被同时调用。
 
 PS，你可以通过下面的方式来指定默认的消费者组名称：
 
