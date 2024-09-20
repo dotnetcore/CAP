@@ -1,35 +1,34 @@
-﻿// Copyright (c) .NET Core Community. All rights reserved.
+// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
-namespace DotNetCore.CAP.NATS
+namespace DotNetCore.CAP.NATS;
+
+internal sealed class NATSConsumerClientFactory : IConsumerClientFactory
 {
-    internal sealed class NATSConsumerClientFactory : IConsumerClientFactory
+    private readonly IOptions<NATSOptions> _natsOptions;
+    private readonly IServiceProvider _serviceProvider;
+
+    public NATSConsumerClientFactory(IOptions<NATSOptions> natsOptions, IServiceProvider serviceProvider)
     {
-        private readonly IOptions<NATSOptions> _natsOptions;
-        private readonly IServiceProvider _serviceProvider;
+        _natsOptions = natsOptions;
+        _serviceProvider = serviceProvider;
+    }
 
-        public NATSConsumerClientFactory(IOptions<NATSOptions> natsOptions, IServiceProvider serviceProvider)
+    public IConsumerClient Create(string groupName, byte groupConcurrent)
+    {
+        try
         {
-            _natsOptions = natsOptions;
-            _serviceProvider = serviceProvider;
+            var client = new NATSConsumerClient(groupName, groupConcurrent, _natsOptions, _serviceProvider);
+            client.Connect();
+            return client;
         }
-
-        public IConsumerClient Create(string groupName, byte groupConcurrent)
+        catch (System.Exception e)
         {
-            try
-            {
-                var client = new NATSConsumerClient(groupName, groupConcurrent, _natsOptions, _serviceProvider);
-                client.Connect();
-                return client;
-            }
-            catch (System.Exception e)
-            {
-                throw new BrokerConnectionException(e);
-            }
+            throw new BrokerConnectionException(e);
         }
     }
 }
