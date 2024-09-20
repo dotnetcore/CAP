@@ -18,6 +18,25 @@ services.AddCap(x =>
 
 ```
 
+## UseK8sDiscovery Configuration
+
+This configuration option is used to configure the Dashboard/Nodes to list every K8s `service` by default. If this is set to `True` then only services with the `dotnetcore.cap.visibility: show` label will be listed. More information on labels will be found on the **Kubernetes Labels Configuration** section.
+
+* ShowOnlyExplicitVisibleNodes 
+
+> Default ：false
+
+
+```cs
+services.AddCap(x =>
+{
+    // ...
+    x.UseK8sDiscovery(opt=>{
+      opt.ShowOnlyExplicitVisibleNodes = true;
+    });
+});
+```
+
 The component will automatically detect whether it is inside the cluster. If it is inside the cluster, the Pod must be granted Kubernetes Api permissions. Refer to the next section.
 
 ## Assign Pod Access to Kubernetes Api 
@@ -89,6 +108,67 @@ spec:
       port: 80
       targetPort: 80
 ```
+
+From version `8.3.0` and onwards you can use a `Role` instead of `ClusterRole` to allow discovery of services only inside the namespace that the dashboard is running. Kubernetes Roles has limited jurisdiction inside the namespace. In the above example just remove ClusterRole and ClusterRoleBinding and instead use the following: 
+
+```
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ns-svc-reader
+rules:
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "watch", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: read-pods
+subjects:
+- kind: ServiceAccount
+  name: api-access
+  namespace: default
+roleRef:
+  kind: ClusterRole
+  name: ns-svc-reader
+  apiGroup: rbac.authorization.k8s.io
+
+```
+
+## Kubernetes Labels Configuration
+
+The list of Nodes showed in the dashboard can be controlled by adding labels to the to your kubernetes services. 
+
+
+- `dotnetcore.cap.visibility` label is used to show or hide a service from the list. 
+
+    > Allowed Values: show | hide
+
+    > Examples: `dotnetcore.cap.visibility: show` or `dotnetcore.cap.visibility: hide`
+
+By default every k8s service is listed with the first port found in the service. However if more ports are present on the service you can select the wanted by using the following labels: 
+
+- `dotnetcore.cap.portName` label is used to filter the wanted port of the service. 
+
+    > Allowed Values: string
+
+    > Examples: `dotnetcore.cap.portName: grpc` or `dotnetcore.cap.portName: http`
+
+If not found any port with the given name, it will try to match the next label portIndex
+
+- `dotnetcore.cap.portIndex` label is used to filter the wanted port of the service. This filter is taken into consideration only if no label portName is set or a non matching portName is set.
+
+    > Allowed Values: number represented as string ex: '2' or '14'
+
+    > Examples: `dotnetcore.cap.portIndex: '1'` or `dotnetcore.cap.portIndex: '3'`
+
+  If the provided index is outside of bounds then it will fallback to the first port (index:0)
+
+
+
+
 
 ## Using Dashboard Standalone
 
