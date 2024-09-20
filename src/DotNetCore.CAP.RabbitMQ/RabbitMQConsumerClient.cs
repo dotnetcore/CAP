@@ -132,7 +132,7 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
 
                 try
                 {
-                    _channel.QueueDeclare(_queueName, true, false, false, arguments);
+                    _channel.QueueDeclare(_queueName, _rabbitMQOptions.QueueOptions.Durable, _rabbitMQOptions.QueueOptions.Exclusive, _rabbitMQOptions.QueueOptions.AutoDelete, arguments);
                 }
                 catch (TimeoutException ex)
                 {

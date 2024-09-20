@@ -51,6 +51,7 @@ VirtualHost | 虚拟主机 | string | /
 Port | 端口号 | int | -1
 ExchangeName | CAP默认Exchange名称 | string | cap.default.topic
 QueueArguments  | 队列额外参数 x-arguments | QueueArgumentsOptions  |  N/A
+QueueOptions  | 更改已创建队列的选项 | QueueRabbitOptions  |  { Durable=true, Exclusive=false, AutoDelete=false }
 ConnectionFactoryOptions  |  RabbitMQClient原生参数 | ConnectionFactory | N/A
 CustomHeadersBuilder  | 订阅者自定义头信息 |  见下文 |  N/A
 PublishConfirms | 是否启用[发布确认](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
