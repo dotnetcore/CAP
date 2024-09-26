@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Diagnostics;
@@ -142,11 +143,11 @@ internal class CapPublisher : ICapPublisher
         {
             publishTime += delayTime.Value;
             headers.Add(Headers.DelayTime, delayTime.Value.ToString());
-            headers.Add(Headers.SentTime, publishTime.ToString());
+            headers.Add(Headers.SentTime, publishTime.ToString(CultureInfo.InvariantCulture));
         }
         else
         {
-            headers.Add(Headers.SentTime, publishTime.ToString());
+            headers.Add(Headers.SentTime, publishTime.ToString(CultureInfo.InvariantCulture));
         }
 
         var message = new Message(headers, value);
