@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
+using DotNetCore.CAP.AzureServiceBus.Consumer;
 using DotNetCore.CAP.AzureServiceBus.Helpers;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
@@ -35,7 +36,8 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         string subscriptionName,
         byte groupConcurrent,
         IOptions<AzureServiceBusOptions> options,
-        IServiceProvider serviceProvider)
+        IServiceProvider serviceProvider
+        )
     {
         _logger = logger;
         _subscriptionName = subscriptionName;
@@ -43,6 +45,8 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         _semaphore = new SemaphoreSlim(groupConcurrent);
         _serviceProvider = serviceProvider;
         _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
+        
+        CheckValidSubscriptionName(subscriptionName);
     }
 
     public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
@@ -50,7 +54,13 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
     public BrokerAddress BrokerAddress => ServiceBusHelpers.GetBrokerAddress(_asbOptions.ConnectionString, _asbOptions.Namespace);
-
+    
+    public void ApplyCustomConsumer(IServiceBusConsumerDescriptor consumerDescriptor)
+    {
+        _asbOptions.TopicPath = consumerDescriptor.TopicPath;
+        SetAzureOptions(_asbOptions);
+    }
+    
     public void Subscribe(IEnumerable<string> topics)
     {
         if (topics == null) throw new ArgumentNullException(nameof(topics));
@@ -325,6 +335,22 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                     $@"'{subscriptionName}' contains character '{uriSchemeKey}' which is not allowed because it is reserved in the Uri scheme.",
                     subscriptionName);
         }
+    }
+    
+    private void SetAzureOptions(AzureServiceBusOptions options)
+    {
+        _asbOptions.AutoCompleteMessages = options.AutoCompleteMessages;
+        _asbOptions.MaxConcurrentCalls = options.MaxConcurrentCalls;
+        _asbOptions.MaxAutoLockRenewalDuration = options.MaxAutoLockRenewalDuration;
+        _asbOptions.MaxConcurrentSessions = options.MaxConcurrentSessions;
+        _asbOptions.SessionIdleTimeout = options.SessionIdleTimeout;
+        _asbOptions.SubscriptionAutoDeleteOnIdle = options.SubscriptionAutoDeleteOnIdle;
+        _asbOptions.SubscriptionMessageLockDuration = options.SubscriptionMessageLockDuration;
+        _asbOptions.SubscriptionDefaultMessageTimeToLive = options.SubscriptionDefaultMessageTimeToLive;
+        _asbOptions.SubscriptionMaxDeliveryCount = options.SubscriptionMaxDeliveryCount;
+        _asbOptions.SQLFilters = options.SQLFilters;
+        _asbOptions.DefaultCorrelationHeaders = options.DefaultCorrelationHeaders;
+        _asbOptions.CustomHeadersBuilder = options.CustomHeadersBuilder;
     }
 
     #endregion private methods
