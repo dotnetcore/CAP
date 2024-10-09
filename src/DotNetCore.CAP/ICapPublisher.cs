@@ -9,89 +9,103 @@ using System.Threading.Tasks;
 namespace DotNetCore.CAP;
 
 /// <summary>
-/// A publish service for publish a message to CAP.
+/// A publish service for publishing a message to CAP.
 /// </summary>
 public interface ICapPublisher
 {
+    /// <summary>
+    /// Gets the service provider.
+    /// </summary>
     IServiceProvider ServiceProvider { get; }
 
     /// <summary>
-    /// CAP transaction context object
+    /// Gets or sets the CAP transaction context object.
     /// </summary>
     ICapTransaction? Transaction { get; set; }
 
     /// <summary>
-    /// Asynchronous publish an object message.
+    /// Asynchronously publishes an object message.
     /// </summary>
-    /// <param name="name">the topic name or exchange router key.</param>
-    /// <param name="contentObj">message body content, that will be serialized. (can be null)</param>
-    /// <param name="callbackName">callback subscriber name</param>
-    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">The type of the message content object.</typeparam>
+    /// <param name="name">The topic name or exchange router key.</param>
+    /// <param name="contentObj">The message body content that will be serialized. (can be null)</param>
+    /// <param name="callbackName">The callback subscriber name.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     Task PublishAsync<T>(string name, T? contentObj, string? callbackName = null,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Asynchronous publish an object message with custom headers
+    /// Asynchronously publishes an object message with custom headers.
     /// </summary>
-    /// <typeparam name="T">content object</typeparam>
-    /// <param name="name">the topic name or exchange router key.</param>
-    /// <param name="contentObj">message body content, that will be serialized. (can be null)</param>
-    /// <param name="headers">message additional headers.</param>
-    /// <param name="cancellationToken"></param>
+    /// <typeparam name="T">The type of the message content object.</typeparam>
+    /// <param name="name">The topic name or exchange router key.</param>
+    /// <param name="contentObj">The message body content that will be serialized. (can be null)</param>
+    /// <param name="headers">The message additional headers.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     Task PublishAsync<T>(string name, T? contentObj, IDictionary<string, string?> headers,
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Publish an object message.
+    /// Publishes an object message.
     /// </summary>
-    /// <param name="name">the topic name or exchange router key.</param>
-    /// <param name="contentObj">message body content, that will be serialized. (can be null)</param>
-    /// <param name="callbackName">callback subscriber name</param>
+    /// <typeparam name="T">The type of the message content object.</typeparam>
+    /// <param name="name">The topic name or exchange router key.</param>
+    /// <param name="contentObj">The message body content that will be serialized. (can be null)</param>
+    /// <param name="callbackName">The callback subscriber name.</param>
     void Publish<T>(string name, T? contentObj, string? callbackName = null);
 
     /// <summary>
-    /// Publish an object message.
+    /// Publishes an object message with custom headers.
     /// </summary>
-    /// <param name="name">the topic name or exchange router key.</param>
-    /// <param name="contentObj">message body content, that will be serialized. (can be null)</param>
-    /// <param name="headers">message additional headers.</param>
+    /// <typeparam name="T">The type of the message content object.</typeparam>
+    /// <param name="name">The topic name or exchange router key.</param>
+    /// <param name="contentObj">The message body content that will be serialized. (can be null)</param>
+    /// <param name="headers">The message additional headers.</param>
     void Publish<T>(string name, T? contentObj, IDictionary<string, string?> headers);
 
     /// <summary>
-    /// Asynchronous schedule a message to be published at the feature time with headers.
+    /// Asynchronously schedules a message to be published at a future time with headers.
     /// </summary>
-    /// <param name="delayTime">The delay for message to published.</param>
+    /// <typeparam name="T">The type of the message content object.</typeparam>
+    /// <param name="delayTime">The delay for the message to be published.</param>
     /// <param name="name">The topic name or exchange router key.</param>
-    /// <param name="contentObj">Message body content, that will be serialized. (can be null)</param>
-    /// <param name="headers">message additional headers.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <param name="contentObj">The message body content that will be serialized. (can be null)</param>
+    /// <param name="headers">The message additional headers.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     Task PublishDelayAsync<T>(TimeSpan delayTime, string name, T? contentObj, IDictionary<string, string?> headers, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Asynchronous schedule a message to be published at the feature time.
+    /// Asynchronously schedules a message to be published at a future time.
     /// </summary>
-    /// <param name="delayTime">The delay for message to published.</param>
+    /// <typeparam name="T">The type of the message content object.</typeparam>
+    /// <param name="delayTime">The delay for the message to be published.</param>
     /// <param name="name">The topic name or exchange router key.</param>
-    /// <param name="contentObj">Message body content, that will be serialized. (can be null)</param>
-    /// <param name="callbackName">Callback subscriber name.</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <param name="contentObj">The message body content that will be serialized. (can be null)</param>
+    /// <param name="callbackName">The callback subscriber name.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task representing the asynchronous operation.</returns>
     Task PublishDelayAsync<T>(TimeSpan delayTime, string name, T? contentObj, string? callbackName = null, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Schedule a message to be published at the feature time.
+    /// Schedules a message to be published at a future time with headers.
     /// </summary>
-    /// <param name="delayTime">The delay for message to published.</param>
+    /// <typeparam name="T">The type of the message content object.</typeparam>
+    /// <param name="delayTime">The delay for the message to be published.</param>
     /// <param name="name">The topic name or exchange router key.</param>
-    /// <param name="contentObj">Message body content, that will be serialized. (can be null)</param>
-    /// <param name="headers">message additional headers.</param>
+    /// <param name="contentObj">The message body content that will be serialized. (can be null)</param>
+    /// <param name="headers">The message additional headers.</param>
     void PublishDelay<T>(TimeSpan delayTime, string name, T? contentObj, IDictionary<string, string?> headers);
 
     /// <summary>
-    /// Schedule a message to be published at the feature time.
+    /// Schedules a message to be published at a future time.
     /// </summary>
-    /// <param name="delayTime">The delay for message to published.</param>
+    /// <typeparam name="T">The type of the message content object.</typeparam>
+    /// <param name="delayTime">The delay for the message to be published.</param>
     /// <param name="name">The topic name or exchange router key.</param>
-    /// <param name="contentObj">Message body content, that will be serialized. (can be null)</param>
-    /// <param name="callbackName">Callback subscriber name.</param>
+    /// <param name="contentObj">The message body content that will be serialized. (can be null)</param>
+    /// <param name="callbackName">The callback subscriber name.</param>
     void PublishDelay<T>(TimeSpan delayTime, string name, T? contentObj, string? callbackName = null);
 }

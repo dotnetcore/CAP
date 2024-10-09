@@ -122,8 +122,6 @@ public class Dispatcher : IDispatcher
                 }
             }
         }, _tasksCts.Token).ConfigureAwait(false);
-
-        _logger.LogInformation("Starting default Dispatcher");
     }
 
     public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null)

@@ -17,7 +17,7 @@ namespace DotNetCore.CAP.Internal;
 /// </summary>
 internal class Bootstrapper : BackgroundService, IBootstrapper
 {
-    private readonly ILogger<Bootstrapper> _logger;
+    private readonly ILogger<IBootstrapper> _logger;
     private readonly IServiceProvider _serviceProvider;
 
     private CancellationTokenSource? _cts;
@@ -26,7 +26,7 @@ internal class Bootstrapper : BackgroundService, IBootstrapper
 
     public bool IsStarted => !_cts?.IsCancellationRequested ?? false;
 
-    public Bootstrapper(IServiceProvider serviceProvider, ILogger<Bootstrapper> logger)
+    public Bootstrapper(IServiceProvider serviceProvider, ILogger<IBootstrapper> logger)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
