@@ -34,8 +34,7 @@ public class KafkaOptions
             ErrorCode.RebalanceInProgress,
             ErrorCode.NotCoordinatorForGroup,
             ErrorCode.NetworkException,
-            ErrorCode.GroupCoordinatorNotAvailable,
-            ErrorCode.Local_MaxPollExceeded
+            ErrorCode.GroupCoordinatorNotAvailable
         };
     }
 
