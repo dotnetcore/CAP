@@ -26,7 +26,16 @@ public class KafkaOptions
         MainConfig = new Dictionary<string, string>();
         RetriableErrorCodes = new List<ErrorCode>
         {
-            ErrorCode.GroupLoadInProgress
+            ErrorCode.GroupLoadInProgress,
+            ErrorCode.Local_Retry,
+            ErrorCode.RequestTimedOut,
+            ErrorCode.LeaderNotAvailable,
+            ErrorCode.NotLeaderForPartition,
+            ErrorCode.RebalanceInProgress,
+            ErrorCode.NotCoordinatorForGroup,
+            ErrorCode.NetworkException,
+            ErrorCode.GroupCoordinatorNotAvailable,
+            ErrorCode.Local_MaxPollExceeded
         };
     }
 
