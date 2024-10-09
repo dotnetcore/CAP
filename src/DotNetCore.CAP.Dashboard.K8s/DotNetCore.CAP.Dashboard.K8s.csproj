@@ -5,7 +5,7 @@
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="KubernetesClient" Version="12.1.1" />
+		<PackageReference Include="KubernetesClient" Version="15.0.1" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\DotNetCore.CAP.Dashboard\DotNetCore.CAP.Dashboard.csproj" />
