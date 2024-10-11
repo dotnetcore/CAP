@@ -285,6 +285,7 @@ internal class ConsumerRegister : IConsumerRegister
         switch (logmsg.LogType)
         {
             case MqLogType.ConsumerCancelled:
+                _isHealthy = false;
                 _logger.LogWarning("RabbitMQ consumer cancelled. --> " + logmsg.Reason);
                 break;
             case MqLogType.ConsumerRegistered:
