@@ -40,8 +40,32 @@ CAP 直接对外提供的 Kafka 配置参数如下：
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 Servers | Broker 地址 | string | 
+MainConfig | librdkafka 的配置参数 | Dictionary<string, string> | 见下
 ConnectionPoolSize | 用户名 | int | 10
-CustomHeadersBuilder | 设置自定义头 | Function | 
+CustomHeadersBuilder | 设置自定义头 | Function | 见下
+RetriableErrorCodes |  ConsumeException 异常时的重试错误码集合  | IList<ErrorCode> |  见代码
+TopicOptions | 配置 NumPartitions 和 ReplicationFactor | KafkaTopicOptions |  -1
+
+#### Kafka MainConfig Options
+
+如果你需要 **更多** 原生 Kakfa 相关的配置项，可以通过 `MainConfig` 配置项进行设定：
+
+```csharp
+services.AddCap(capOptions => 
+{
+    capOptions.UseKafka(kafkaOption=>
+    {
+        // kafka options.
+        // kafkaOptions.MainConfig.Add("", "");
+    });
+});
+```
+
+MainConfig 为配置字典，你可以通过以下链接找到其支持的配置项列表。
+
+[https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
+
+#### CustomHeadersBuilder Options
 
 有关 `CustomHeadersBuilder` 的说明：
 
@@ -72,23 +96,3 @@ public void HeadersTest(DateTime value, [FromCap]CapHeader header)
     var partition = header["my.kafka.partition"];
 }
 ```
-
-#### Kafka MainConfig Options
-
-如果你需要 **更多** 原生 Kakfa 相关的配置项，可以通过 `MainConfig` 配置项进行设定：
-
-
-```csharp
-services.AddCap(capOptions => 
-{
-    capOptions.UseKafka(kafkaOption=>
-    {
-        // kafka options.
-        // kafkaOptions.MainConfig.Add("", "");
-    });
-});
-```
-
-MainConfig 为配置字典，你可以通过以下链接找到其支持的配置项列表。
-
-[https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)

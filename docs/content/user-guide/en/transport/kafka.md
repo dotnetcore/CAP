@@ -39,8 +39,30 @@ The Kafka configuration parameters provided directly by the CAP:
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 Servers | Broker server address | string | 
+MainConfig | librdkafka configuration parameters | Dictionary<string, string> | See below
 ConnectionPoolSize | connection pool size | int | 10
 CustomHeadersBuilder | Custom subscribe headers |  Func<> |  N/A
+RetriableErrorCodes | Retriable error codes when ConsumeException  | IList<ErrorCode> |  See code
+TopicOptions | The configuraiton of NumPartitions and ReplicationFactor | KafkaTopicOptions |  -1
+
+#### Kafka MainConfig Options
+
+If you need **more** native Kakfa related configuration options, you can set them in the `MainConfig` configuration option:
+
+```csharp
+services.AddCap(capOptions => 
+{
+    capOptions.UseKafka(kafkaOption=>
+    {
+        // kafka options.
+        // kafkaOptions.MainConfig.Add("", "");
+    });
+});
+```
+
+`MainConfig` is a configuration dictionary, you can find a list of supported configuration options through the following link.
+
+[https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
 
 #### CustomHeadersBuilder Options
 
@@ -76,22 +98,3 @@ public void HeadersTest(DateTime value, [FromCap]CapHeader header)
 }
 ```
 
-
-#### Kafka MainConfig Options
-
-If you need **more** native Kakfa related configuration options, you can set them in the `MainConfig` configuration option:
-
-```csharp
-services.AddCap(capOptions => 
-{
-    capOptions.UseKafka(kafkaOption=>
-    {
-        // kafka options.
-        // kafkaOptions.MainConfig.Add("", "");
-    });
-});
-```
-
-`MainConfig` is a configuration dictionary, you can find a list of supported configuration options through the following link.
-
-[https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
