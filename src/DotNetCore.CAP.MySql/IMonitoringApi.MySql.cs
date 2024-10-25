@@ -87,16 +87,16 @@ SELECT
     {
         var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
         var where = string.Empty;
-        if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " and StatusName=@StatusName";
+        if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " AND StatusName=@StatusName";
 
-        if (!string.IsNullOrEmpty(queryDto.Name)) where += " and Name=@Name";
+        if (!string.IsNullOrEmpty(queryDto.Name)) where += " AND Name=@Name";
 
-        if (!string.IsNullOrEmpty(queryDto.Group)) where += " and `Group`=@Group";
+        if (!string.IsNullOrEmpty(queryDto.Group)) where += " AND `Group`=@Group";
 
-        if (!string.IsNullOrEmpty(queryDto.Content)) where += " and Content like CONCAT('%',@Content,'%')";
+        if (!string.IsNullOrEmpty(queryDto.Content)) where += " AND Content LIKE CONCAT('%',@Content,'%')";
 
         var sqlQuery =
-            $"select * from `{tableName}` where 1=1 {where} order by Added desc limit @Limit offset @Offset";
+            $"SELECT * FROM `{tableName}` WHERE 1=1 {where} ORDER BY Added DESC LIMIT @Limit OFFSET @Offset";
 
         object[] sqlParams =
         {
@@ -177,10 +177,10 @@ SELECT
 
     private async ValueTask<int> GetNumberOfMessage(string tableName, string statusName)
     {
-        var sqlQuery = $"select count(Id) from `{tableName}` where StatusName = @state";
+        var sqlQuery = $"SELECT COUNT(Id) FROM `{tableName}` WHERE StatusName = @State";
         var connection = new MySqlConnection(_options.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
-        return await connection.ExecuteScalarAsync<int>(sqlQuery, new MySqlParameter("@state", statusName))
+        return await connection.ExecuteScalarAsync<int>(sqlQuery, new MySqlParameter("@State", statusName))
             .ConfigureAwait(false);
     }
 
@@ -205,22 +205,22 @@ SELECT
         IDictionary<string, DateTime> keyMaps)
     {
         var sqlQuery = $@"
-SELECT aggr.*
+SELECT Aggr.*
 FROM (
-         SELECT date_format(`Added`, '%Y-%m-%d-%H') AS `Key`,
-                count(id)                              `Count`
+         SELECT DATE_FORMAT(`Added`, '%Y-%m-%d-%H') AS `Key`,
+                COUNT(`Id`) AS `Count`
          FROM `{tableName}`
-         WHERE StatusName = @statusName
-         GROUP BY date_format(`Added`, '%Y-%m-%d-%H')
-     ) aggr
-WHERE `Key` >= @minKey
-  AND `Key` <= @maxKey;";
+         WHERE `StatusName` = @StatusName
+         GROUP BY DATE_FORMAT(`Added`, '%Y-%m-%d-%H')
+     ) AS Aggr
+WHERE `Key` >= @MinKey
+  AND `Key` <= @MaxKey;";
 
         object[] sqlParams =
         {
-            new MySqlParameter("@statusName", statusName),
-            new MySqlParameter("@minKey", keyMaps.Keys.Min()),
-            new MySqlParameter("@maxKey", keyMaps.Keys.Max())
+            new MySqlParameter("@StatusName", statusName),
+            new MySqlParameter("@MinKey", keyMaps.Keys.Min()),
+            new MySqlParameter("@MaxKey", keyMaps.Keys.Max())
         };
 
         Dictionary<string, int> valuesMap;
@@ -258,7 +258,7 @@ WHERE `Key` >= @minKey
 
     private async Task<MediumMessage?> GetMessageAsync(string tableName, long id)
     {
-        var sql = $@"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
+        var sql = $"SELECT `Id` as DbId, `Content`,`Added`,`ExpiresAt`,`Retries` FROM `{tableName}` WHERE Id={id};";
 
         var connection = new MySqlConnection(_options.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);

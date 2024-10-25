@@ -76,6 +76,8 @@ CREATE TABLE IF NOT EXISTS {GetReceivedTableName()}(
 	""StatusName"" VARCHAR(50) NOT NULL
 );
 
+CREATE INDEX IF NOT EXISTS ""idx_received_ExpiresAt_StatusName"" ON {GetReceivedTableName()} (""ExpiresAt"",""StatusName"");
+
 CREATE TABLE IF NOT EXISTS {GetPublishedTableName()}(
 	""Id"" BIGINT PRIMARY KEY NOT NULL,
     ""Version"" VARCHAR(20) NOT NULL,
@@ -86,6 +88,23 @@ CREATE TABLE IF NOT EXISTS {GetPublishedTableName()}(
     ""ExpiresAt"" TIMESTAMP NULL,
 	""StatusName"" VARCHAR(50) NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS ""idx_published_ExpiresAt_StatusName"" ON {GetPublishedTableName()}(""ExpiresAt"",""StatusName"");
+
+DO $$
+DECLARE
+    major_version INT;
+BEGIN
+    SELECT split_part(current_setting('server_version'), '.', 1)::int INTO major_version;
+
+    IF major_version >= 11 THEN
+        CREATE INDEX IF NOT EXISTS ""idx_received_Version_ExpiresAt_StatusName"" ON {GetReceivedTableName()} (""Version"",""ExpiresAt"",""StatusName"") INCLUDE (""Id"", ""Content"", ""Retries"", ""Added"");
+        CREATE INDEX IF NOT EXISTS ""idx_published_Version_ExpiresAt_StatusName"" ON {GetPublishedTableName()} (""Version"",""ExpiresAt"",""StatusName"") INCLUDE (""Id"", ""Content"", ""Retries"", ""Added"");
+    ELSE
+       CREATE INDEX IF NOT EXISTS ""idx_received_Version_ExpiresAt_StatusName"" ON {GetReceivedTableName()} (""Version"",""ExpiresAt"",""StatusName"");
+       CREATE INDEX IF NOT EXISTS ""idx_published_Version_ExpiresAt_StatusName"" ON {GetPublishedTableName()} (""Version"",""ExpiresAt"",""StatusName"");
+    END IF;
+END $$;
 ";
         if (_capOptions.Value.UseStorageLock)
             batchSql += $@"

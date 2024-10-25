@@ -86,6 +86,12 @@ CREATE TABLE {GetReceivedTableName()}(
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_{GetReceivedTableName()}_Version_ExpiresAt_StatusName] ON {GetReceivedTableName()} ([Version] ASC,[ExpiresAt] ASC,[StatusName] ASC) 
+INCLUDE ([Id], [Content], [Retries], [Added])
+
+CREATE NONCLUSTERED INDEX [IX_{GetReceivedTableName()}_ExpiresAt_StatusName] ON {GetReceivedTableName()} ([ExpiresAt] ASC,[StatusName] ASC)
+
 END;
 
 IF OBJECT_ID(N'{GetPublishedTableName()}',N'U') IS NULL
@@ -104,6 +110,12 @@ CREATE TABLE {GetPublishedTableName()}(
 	[Id] ASC
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
 ) ON [PRIMARY] TEXTIMAGE_ON [PRIMARY]
+
+CREATE NONCLUSTERED INDEX [IX_{GetPublishedTableName()}_Version_ExpiresAt_StatusName] ON {GetPublishedTableName()} ([Version] ASC,[ExpiresAt] ASC,[StatusName] ASC) 
+INCLUDE ([Id], [Content], [Retries], [Added])
+
+CREATE NONCLUSTERED INDEX [IX_{GetPublishedTableName()}_ExpiresAt_StatusName] ON {GetPublishedTableName()} ([ExpiresAt] ASC,[StatusName] ASC)
+
 END;
 ";
         if (_capOptions.Value.UseStorageLock)
