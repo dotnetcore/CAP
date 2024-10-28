@@ -68,7 +68,9 @@ Group 在不同的 Broker 有不同的对应项。
 
 通过指定 `GroupConcurrent` 参数的值来设置订阅者并行执行的并行度。并行执行意味着其需要位于独立线程中，因此如果你没有指定 `Group` 参数，则 CAP 将会以 `Name` 的值自动创建一个 Group。
 
-注意： 如果你有多个订阅者都设置为了相同的 Group，并且也给订阅者都设置了 `GroupConcurrent` 的值，则只会有（第）一个设置的值生效。
+!!! Note "注意"
+    如果你有多个订阅者都设置为了相同的 Group，并且也给订阅者都设置了 `GroupConcurrent` 的值，则只会有（第）一个设置的值生效。  
+    本设置只对新消息生效，重试的消息不受并行度限制。
 
 ## 自定义配置项
 
@@ -80,7 +82,7 @@ Group 在不同的 Broker 有不同的对应项。
 
 默认的消费者组的名字，在不同的 Transports 中对应不同的名字，可以通过自定义此值来自定义不同 Transports 中的名字，以便于查看。
 
-!!! info "Mapping"
+!!! info "映射"
     在 RabbitMQ 中映射到 [Queue Names](https://www.rabbitmq.com/queues.html#names)。  
     在 Apache Kafka 中映射到 [Consumer Group Id](http://kafka.apache.org/documentation/#group.id)。  
     在 Azure Service Bus 中映射到 Subscription Name。  

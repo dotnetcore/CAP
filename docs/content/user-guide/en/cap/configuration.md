@@ -68,7 +68,9 @@ Group corresponds to different items in different Brokers:
 
 Set the parallelism of concurrent execution for subscribers by specifying the value of the `GroupConcurrent` parameter. Concurrent execution means that it needs to be on an independent thread, so if you do not specify the `Group` parameter, CAP will automatically create a Group using the value of `Name`.
 
-Note: If you have multiple subscribers set to the same Group and also set the `GroupConcurrent` value for these subscribers, only the value set by the first subscriber will take effect.
+!!! Note
+    If you have multiple subscribers configured with the same Group and have also set the `GroupConcurrent` value for them, only the first configured value will take effect.  
+    This setting applies only to new messages; retried messages are not subject to the concurrency limit.
 
 ## Custom configuration
 
