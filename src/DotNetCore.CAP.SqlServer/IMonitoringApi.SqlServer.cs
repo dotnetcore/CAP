@@ -97,7 +97,7 @@ SELECT
         if (!string.IsNullOrEmpty(queryDto.Content)) where += " AND [Content] LIKE @Content";
 
         var sqlQuery2008 =
-            $@"SELECT * FROM (SELECT p.*, ROW_NUMBER() OVER(ORDER BY p.Added DESC) AS RowNum FROM {tableName} as p WHERE 1=1 {where}) as tbl WHERE tbl.RowNum BETWEEN @Offset AND @Offset + @Limit";
+            $"SELECT * FROM (SELECT p.*, ROW_NUMBER() OVER(ORDER BY p.Added DESC) AS RowNum FROM {tableName} AS p WHERE 1=1 {where}) as tbl WHERE tbl.RowNum BETWEEN @Offset AND @Offset + @Limit";
 
         var sqlQuery =
             $"SELECT * FROM {tableName} WHERE 1=1 {where} ORDER BY Added DESC OFFSET @Offset ROWS FETCH NEXT @Limit ROWS ONLY";
@@ -147,7 +147,7 @@ SELECT
             }, sqlParams: sqlParams).ConfigureAwait(false);
 
         return new PagedQueryResult<MessageDto>
-            { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
+        { Items = items, PageIndex = queryDto.CurrentPage, PageSize = queryDto.PageSize, Totals = count };
     }
 
     public ValueTask<int> PublishedFailedCount()
@@ -183,10 +183,10 @@ SELECT
     private async ValueTask<int> GetNumberOfMessage(string tableName, string statusName)
     {
         var sqlQuery =
-            $"select count(Id) from {tableName} with (nolock) where StatusName = @state";
+            $"SELECT COUNT(Id) FROM {tableName} WITH (NOLOCK) WHERE StatusName = @StatusName";
         var connection = new SqlConnection(_options.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
-        return await connection.ExecuteScalarAsync<int>(sqlQuery, new SqlParameter("@state", statusName))
+        return await connection.ExecuteScalarAsync<int>(sqlQuery, new SqlParameter("@StatusName", statusName))
             .ConfigureAwait(false);
     }
 
@@ -205,37 +205,34 @@ SELECT
         return GetTimelineStats(tableName, statusName, keyMaps);
     }
 
-    private async Task<Dictionary<DateTime, int>> GetTimelineStats(
-        string tableName,
-        string statusName,
-        IDictionary<string, DateTime> keyMaps)
+    private async Task<Dictionary<DateTime, int>> GetTimelineStats(string tableName, string statusName, IDictionary<string, DateTime> keyMaps)
     {
         var sqlQuery2008 = $@"
-with aggr as (
-    select replace(convert(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added)) as [Key],
-        count(Id) [Count]
-    from  {tableName}
-    where StatusName = @statusName
-    group by replace(convert(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added))
+WITH Aggr AS (
+SELECT REPLACE(CONVERT(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added)) AS [Key],
+    COUNT(Id) [Count]
+FROM  {tableName}
+WHERE StatusName = @StatusName
+GROUP BY REPLACE(CONVERT(varchar, Added, 111), '/','-') + '-' + CONVERT(varchar, DATEPART(hh, Added))
 )
-select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <= @maxKey;";
+SELECT [Key], [Count] FROM Aggr WITH (NOLOCK) WHERE [Key] >= @MinKey AND [Key] <= @MaxKey;";
 
         //SQL Server 2012+ 
         var sqlQuery = $@"
-with aggr as (
-    select FORMAT(Added,'yyyy-MM-dd-HH') as [Key],
-        count(Id) [Count]
-    from  {tableName}
-    where StatusName = @statusName
-    group by FORMAT(Added,'yyyy-MM-dd-HH')
+WITH Aggr AS (
+SELECT FORMAT(Added,'yyyy-MM-dd-HH') AS [Key],
+    COUNT(Id) [Count]
+FROM  {tableName}
+WHERE StatusName = @StatusName
+GROUP BY FORMAT(Added,'yyyy-MM-dd-HH')
 )
-select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <= @maxKey;";
+SELECT [Key], [Count] FROM Aggr WITH (NOLOCK) WHERE [Key] >= @MinKey AND [Key] <= @MaxKey;";
 
         object[] sqlParams =
         {
-            new SqlParameter("@statusName", statusName),
-            new SqlParameter("@minKey", keyMaps.Keys.Min()),
-            new SqlParameter("@maxKey", keyMaps.Keys.Max())
+            new SqlParameter("@StatusName", statusName),
+            new SqlParameter("@MinKey", keyMaps.Keys.Min()),
+            new SqlParameter("@MaxKey", keyMaps.Keys.Max())
         };
 
         Dictionary<string, int> valuesMap;
@@ -273,8 +270,7 @@ select [Key], [Count] from aggr with (nolock) where [Key] >= @minKey and [Key] <
 
     private async Task<MediumMessage?> GetMessageAsync(string tableName, long id)
     {
-        var sql =
-            $@"SELECT TOP 1 Id AS DbId, Content, Added, ExpiresAt, Retries FROM {tableName} WITH (readpast) WHERE Id={id}";
+        var sql = $"SELECT TOP 1 Id AS DbId, Content, Added, ExpiresAt, Retries FROM {tableName} WITH (READPAST) WHERE Id={id}";
 
         var connection = new SqlConnection(_options.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);

@@ -210,7 +210,7 @@ public class MySqlDataStorage : IDataStorage
         var connection = new MySqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
         return await connection.ExecuteNonQueryAsync(
-                $@"DELETE FROM `{table}` WHERE ExpiresAt < @timeout AND (StatusName='{StatusName.Succeeded}' OR StatusName='{StatusName.Failed}') limit @batchCount;",
+                $@"DELETE FROM `{table}` WHERE ExpiresAt < @timeout AND StatusName IN ('{StatusName.Succeeded}','{StatusName.Failed}') LIMIT @batchCount;",
                 null,
                 new MySqlParameter("@timeout", timeout), new MySqlParameter("@batchCount", batchCount))
             .ConfigureAwait(false);
@@ -318,7 +318,7 @@ public class MySqlDataStorage : IDataStorage
         var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds);
         var sql =
             $"SELECT `Id`,`Content`,`Retries`,`Added` FROM `{tableName}` WHERE `Retries`<@Retries " +
-            $"AND `Version`=@Version AND `Added`<@Added AND (`StatusName` = '{StatusName.Failed}' OR `StatusName` = '{StatusName.Scheduled}') LIMIT 200;";
+            $"AND `Version`=@Version AND `Added`<@Added AND `StatusName` IN ('{StatusName.Failed}','{StatusName.Scheduled}') LIMIT 200;";
 
         object[] sqlParams =
         {

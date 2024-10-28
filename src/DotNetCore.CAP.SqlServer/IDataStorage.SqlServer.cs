@@ -208,7 +208,7 @@ public class SqlServerDataStorage : IDataStorage
         var connection = new SqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
         return await connection.ExecuteNonQueryAsync(
-            $"DELETE TOP (@batchCount) FROM {table} WITH (readpast) WHERE ExpiresAt < @timeout AND (StatusName='{StatusName.Succeeded}' OR StatusName='{StatusName.Failed}');",
+            $"DELETE TOP (@batchCount) FROM {table} WITH (READPAST) WHERE ExpiresAt < @timeout AND StatusName IN('{StatusName.Succeeded}','{StatusName.Failed}');",
             null,
             new SqlParameter("@timeout", timeout), new SqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
     }
@@ -226,9 +226,12 @@ public class SqlServerDataStorage : IDataStorage
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
         CancellationToken token = default)
     {
-        var sql =
-            $"SELECT Id,Content,Retries,Added,ExpiresAt FROM {_pubName} WITH (UPDLOCK,READPAST) WHERE Version=@Version " +
-            $"AND ((ExpiresAt< @TwoMinutesLater AND StatusName = '{StatusName.Delayed}') OR (ExpiresAt< @OneMinutesAgo AND StatusName = '{StatusName.Queued}'))";
+        var sql = $@"
+            SELECT Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
+                WHERE Version = @Version AND StatusName = '{StatusName.Delayed}' AND ExpiresAt < @TwoMinutesLater
+            UNION ALL
+            SELECT Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
+                WHERE Version = @Version AND StatusName = '{StatusName.Queued}' AND ExpiresAt < @OneMinutesAgo;";
 
         object[] sqlParams =
         {
@@ -310,9 +313,10 @@ public class SqlServerDataStorage : IDataStorage
     private async Task<IEnumerable<MediumMessage>> GetMessagesOfNeedRetryAsync(string tableName, TimeSpan lookbackSeconds)
     {
         var fourMinAgo = DateTime.Now.Subtract(lookbackSeconds);
+
         var sql =
-            $"SELECT TOP (200) Id, Content, Retries, Added FROM {tableName} WITH (readpast) WHERE Retries<@Retries " +
-            $"AND Version=@Version AND Added<@Added AND (StatusName = '{StatusName.Failed}' OR StatusName = '{StatusName.Scheduled}')";
+            $"SELECT TOP (200) Id, Content, Retries, Added FROM {tableName} WITH (READPAST) " +
+            $"WHERE Retries < @Retries AND Version = @Version AND Added < @Added AND StatusName IN ('{StatusName.Failed}', '{StatusName.Scheduled}');";
 
         object[] sqlParams =
         {

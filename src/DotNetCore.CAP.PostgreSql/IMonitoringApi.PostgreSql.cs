@@ -87,21 +87,21 @@ SELECT
         var tableName = queryDto.MessageType == MessageType.Publish ? _pubName : _recName;
         var where = string.Empty;
 
-        if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " and Lower(\"StatusName\") = Lower(@StatusName)";
+        if (!string.IsNullOrEmpty(queryDto.StatusName)) where += " AND Lower(\"StatusName\") = Lower(@StatusName)";
 
-        if (!string.IsNullOrEmpty(queryDto.Name)) where += " and Lower(\"Name\") = Lower(@Name)";
+        if (!string.IsNullOrEmpty(queryDto.Name)) where += " AND Lower(\"Name\") = Lower(@Name)";
 
-        if (!string.IsNullOrEmpty(queryDto.Group)) where += " and Lower(\"Group\") = Lower(@Group)";
+        if (!string.IsNullOrEmpty(queryDto.Group)) where += " AND Lower(\"Group\") = Lower(@Group)";
 
-        if (!string.IsNullOrEmpty(queryDto.Content)) where += " and \"Content\" ILike @Content";
+        if (!string.IsNullOrEmpty(queryDto.Content)) where += " AND \"Content\" ILike @Content";
 
         var sqlQuery =
-            $"select * from {tableName} where 1=1 {where} order by \"Added\" desc offset @Offset limit @Limit";
+            $"SELECT * FROM {tableName} WHERE 1=1 {where} ORDER BY \"Added\" DESC OFFSET @Offset LIMIT @Limit";
 
         var connection = _options.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
 
-        var count = await connection.ExecuteScalarAsync<int>($"select count(1) from {tableName} where 1=1 {where}",
+        var count = await connection.ExecuteScalarAsync<int>($"SELECT COUNT(1) FROM {tableName} WHERE 1=1 {where}",
             new NpgsqlParameter("@StatusName", queryDto.StatusName ?? string.Empty),
             new NpgsqlParameter("@Group", queryDto.Group ?? string.Empty),
             new NpgsqlParameter("@Name", queryDto.Name ?? string.Empty),
@@ -180,11 +180,11 @@ SELECT
     private async ValueTask<int> GetNumberOfMessage(string tableName, string statusName)
     {
         var sqlQuery =
-            $"select count(\"Id\") from {tableName} where Lower(\"StatusName\") = Lower(@state)";
+            $"SELECT COUNT(\"Id\") FROM {tableName} WHERE Lower(\"StatusName\") = Lower(@State)";
 
         var connection = _options.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
-        return await connection.ExecuteScalarAsync<int>(sqlQuery, new NpgsqlParameter("@state", statusName))
+        return await connection.ExecuteScalarAsync<int>(sqlQuery, new NpgsqlParameter("@State", statusName))
             .ConfigureAwait(false);
     }
 
@@ -210,20 +210,20 @@ SELECT
     {
         var sqlQuery =
             $@"
-with aggr as (
-    select to_char(""Added"",'yyyy-MM-dd-HH') as ""Key"",
-    count(""Id"") as ""Count""
-    from {tableName}
-        where ""StatusName"" = @statusName
-    group by to_char(""Added"", 'yyyy-MM-dd-HH')
+WITH Aggr AS (
+    SELECT to_char(""Added"",'yyyy-MM-dd-HH') AS ""Key"",
+    COUNT(""Id"") AS ""Count""
+    FROM {tableName}
+        WHERE ""StatusName"" = @StatusName
+    GROUP BY to_char(""Added"", 'yyyy-MM-dd-HH')
 )
-select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxKey;";
+SELECT ""Key"",""Count"" from Aggr WHERE ""Key"" >= @MinKey AND ""Key"" <= @MaxKey;";
 
         object[] sqlParams =
         {
-            new NpgsqlParameter("@statusName", statusName),
-            new NpgsqlParameter("@minKey", keyMaps.Keys.Min()),
-            new NpgsqlParameter("@maxKey", keyMaps.Keys.Max())
+            new NpgsqlParameter("@StatusName", statusName),
+            new NpgsqlParameter("@MinKey", keyMaps.Keys.Min()),
+            new NpgsqlParameter("@MaxKey", keyMaps.Keys.Max())
         };
 
         Dictionary<string, int> valuesMap;
@@ -245,8 +245,7 @@ select ""Key"",""Count"" from aggr where ""Key"" >= @minKey and ""Key"" <= @maxK
 
         foreach (var key in keyMaps.Keys)
         {
-            if (!valuesMap.ContainsKey(key))
-                valuesMap.Add(key, 0);
+            valuesMap.TryAdd(key, 0);
         }
 
         var result = new Dictionary<DateTime, int>();
