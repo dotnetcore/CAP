@@ -25,7 +25,7 @@ public class MongoDBCapOptionsExtension : ICapOptionsExtension
         services.AddSingleton(new CapStorageMarkerService("MongoDB"));
 
         services.AddSingleton<IDataStorage, MongoDBDataStorage>();
-        services.AddSingleton<IStorageInitializer, MongoDBStorageInitializer>();
+        services.TryAddSingleton<IStorageInitializer, MongoDBStorageInitializer>();
 
         services.Configure(_configure);
 
