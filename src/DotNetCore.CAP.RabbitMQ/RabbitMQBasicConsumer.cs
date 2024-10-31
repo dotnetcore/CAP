@@ -86,6 +86,14 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         }
     }
 
+    public virtual void BasicAck(ulong deliveryTag)
+    {
+        if (Model.IsOpen)
+            Model.BasicAck(deliveryTag, false);
+
+        Semaphore.Release();
+    }
+
     public virtual void BasicReject(ulong deliveryTag)
     {
         if (Model.IsOpen)
@@ -95,14 +103,6 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
     }
 
     public virtual void BasicNack(ulong deliveryTag)
-    {
-        if (Model.IsOpen)
-            Model.BasicNack(deliveryTag, false, true);
-
-        Semaphore.Release();
-    }
-
-    public void BasicNack(ulong deliveryTag)
     {
         if (Model.IsOpen)
             Model.BasicNack(deliveryTag, false, true);
