@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.RabbitMQ;
 
 public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
 {
-    private readonly SemaphoreSlim _semaphore;
+    protected readonly SemaphoreSlim _semaphore;
     private readonly string _groupName;
     private readonly bool _usingTaskRun;
     private readonly Func<TransportMessage, object?, Task> _msgCallback;
@@ -85,18 +85,26 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         }
     }
 
-    public void BasicAck(ulong deliveryTag)
+    public virtual void BasicReject(ulong deliveryTag)
     {
         if (Model.IsOpen)
-            Model.BasicAck(deliveryTag, false);
+            Model.BasicReject(deliveryTag, true);
 
         _semaphore.Release();
     }
 
-    public void BasicReject(ulong deliveryTag)
+    public virtual void BasicNack(ulong deliveryTag)
     {
         if (Model.IsOpen)
-            Model.BasicReject(deliveryTag, true);
+            Model.BasicNack(deliveryTag, false, true);
+
+        _semaphore.Release();
+    }
+
+    public void BasicNack(ulong deliveryTag)
+    {
+        if (Model.IsOpen)
+            Model.BasicNack(deliveryTag, false, true);
 
         _semaphore.Release();
     }
