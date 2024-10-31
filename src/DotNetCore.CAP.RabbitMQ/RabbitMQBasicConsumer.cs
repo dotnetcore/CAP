@@ -15,13 +15,14 @@ namespace DotNetCore.CAP.RabbitMQ;
 
 public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
 {
-    protected readonly SemaphoreSlim _semaphore;
     private readonly string _groupName;
     private readonly bool _usingTaskRun;
     private readonly Func<TransportMessage, object?, Task> _msgCallback;
     private readonly Action<LogMessageEventArgs> _logCallback;
     private readonly Func<BasicDeliverEventArgs, IServiceProvider, List<KeyValuePair<string, string>>>? _customHeadersBuilder;
     private readonly IServiceProvider _serviceProvider;
+
+    protected SemaphoreSlim Semaphore { get; }
 
     public RabbitMQBasicConsumer(IModel? model,
         byte concurrent, string groupName,
@@ -31,7 +32,7 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         IServiceProvider serviceProvider)
             : base(model)
     {
-        _semaphore = new SemaphoreSlim(concurrent);
+        Semaphore = new SemaphoreSlim(concurrent);
         _groupName = groupName;
         _usingTaskRun = concurrent > 0;
         _msgCallback = msgCallback;
@@ -45,7 +46,7 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
     {
         if (_usingTaskRun)
         {
-            await _semaphore.WaitAsync();
+            await Semaphore.WaitAsync();
 
             _ = Task.Run(Consume).ConfigureAwait(false);
         }
@@ -90,7 +91,7 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         if (Model.IsOpen)
             Model.BasicReject(deliveryTag, true);
 
-        _semaphore.Release();
+        Semaphore.Release();
     }
 
     public virtual void BasicNack(ulong deliveryTag)
@@ -98,7 +99,7 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         if (Model.IsOpen)
             Model.BasicNack(deliveryTag, false, true);
 
-        _semaphore.Release();
+        Semaphore.Release();
     }
 
     public void BasicNack(ulong deliveryTag)
@@ -106,7 +107,7 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         if (Model.IsOpen)
             Model.BasicNack(deliveryTag, false, true);
 
-        _semaphore.Release();
+        Semaphore.Release();
     }
 
     public override async Task OnCancel(params string[] consumerTags)
