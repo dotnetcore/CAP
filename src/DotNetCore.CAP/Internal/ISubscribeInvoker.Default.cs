@@ -140,7 +140,7 @@ public class SubscribeInvoker : ISubscribeInvoker
     {
         if (typeof(CancellationToken).IsAssignableFrom(parameterDescriptor.ParameterType)) return cancellationToken;
 
-        if (parameterDescriptor.ParameterType.IsAssignableFrom(typeof(CapHeader)))
+        if (typeof(CapHeader).IsAssignableFrom(parameterDescriptor.ParameterType))
             return new CapHeader(message.Headers);
 
         throw new ArgumentException(parameterDescriptor.Name);
