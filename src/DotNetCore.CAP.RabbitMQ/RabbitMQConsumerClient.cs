@@ -97,7 +97,7 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
 
     public void Reject(object? sender)
     {
-        _consumer!.BasicAck((ulong)sender!);
+        _consumer!.BasicReject((ulong)sender!);
     }
 
     public void Dispose()
