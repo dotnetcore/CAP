@@ -82,7 +82,7 @@ public class AzureServiceBusOptions
     /// completed processing.
     /// If the message handler triggers an exception, the message will not be automatically completed.
     /// </summary>
-    public bool AutoCompleteMessages { get; set; } = true;
+    public bool AutoCompleteMessages { get; set; } = false;
 
     /// <summary>
     /// Adds additional correlation properties to all correlation filters.

@@ -128,7 +128,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     public void Commit(object? sender)
     {
         var commitInput = (AzureServiceBusConsumerCommitInput)sender!;
-        if (_serviceBusProcessor?.AutoCompleteMessages ?? false)
+        if (!_serviceBusProcessor!.AutoCompleteMessages)
             commitInput.CompleteMessageAsync().GetAwaiter().GetResult();
         _semaphore.Release();
     }
