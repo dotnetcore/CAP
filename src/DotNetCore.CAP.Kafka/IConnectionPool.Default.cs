@@ -77,8 +77,16 @@ public class ConnectionPool : IConnectionPool, IDisposable
         }
     }
 
-    protected virtual IProducer<string, byte[]> BuildProducer(ProducerConfig config)
+    protected virtual IProducer<string, byte[]> BuildProducer(ProducerConfig config, Action<Object, string>? oAuthCallback)
     {
-        return new ProducerBuilder<string, byte[]>(config).Build();
+        if (oAuthCallback is null)
+        {
+            return new ProducerBuilder<string, byte[]>(config)
+                .Build();
+        }
+        
+        return new ProducerBuilder<string, byte[]>(config)
+            .SetOAuthBearerTokenRefreshHandler(oAuthCallback)
+            .Build();
     }
 }
