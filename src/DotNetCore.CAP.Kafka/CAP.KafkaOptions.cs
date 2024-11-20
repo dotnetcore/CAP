@@ -52,6 +52,11 @@ public class KafkaOptions
     public string Servers { get; set; } = default!;
 
     /// <summary>
+    /// The callback to use to refresh the auth token when it expires
+    /// </summary>
+    public Action<Object, string> OAuthCallback { get; set; }
+
+    /// <summary>
     /// If you need to get offset and partition and so on.., you can use this function to write additional header into
     /// <see cref="CapHeader" />
     /// </summary>
