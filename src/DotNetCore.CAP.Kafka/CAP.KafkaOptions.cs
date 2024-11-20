@@ -54,7 +54,7 @@ public class KafkaOptions
     /// <summary>
     /// The callback to use to refresh the auth token when it expires
     /// </summary>
-    public Action<Object, string> OAuthCallback { get; set; }
+    public Action<Object, string> OAuthCallback { get; set; } = default!;
 
     /// <summary>
     /// If you need to get offset and partition and so on.., you can use this function to write additional header into
