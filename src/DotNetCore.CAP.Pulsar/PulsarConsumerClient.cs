@@ -63,7 +63,7 @@ internal sealed class PulsarConsumerClient : IConsumerClient
                 if (_groupConcurrent > 0)
                 {
                     _semaphore.Wait(cancellationToken);
-                    Task.Run(() => Consume(), cancellationToken).ConfigureAwait(false);
+                    Task.Run(Consume, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Net.Http;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
 
@@ -11,8 +10,7 @@ namespace Sample.ConsoleApp
         public async Task ShowTime(DateTime date)
         {
             Console.WriteLine(date);
-
-          
+            await Task.CompletedTask;
         }
     }
 }

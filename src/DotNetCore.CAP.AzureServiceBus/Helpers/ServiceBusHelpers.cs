@@ -17,7 +17,8 @@ public static class ServiceBusHelpers
             _ when string.IsNullOrWhiteSpace(@namespace)
                 => TryGetEndpointFromConnectionString(connectionString, out var extractedValue)
                     ? extractedValue!
-                    : throw new InvalidOperationException("Unable to extract namespace from connection string.")
+                    : throw new InvalidOperationException("Unable to extract namespace from connection string."),
+            _ => throw new InvalidOperationException("Unhandled case in switch expression.")
         };
 
         return new BrokerAddress("AzureServiceBus", host);

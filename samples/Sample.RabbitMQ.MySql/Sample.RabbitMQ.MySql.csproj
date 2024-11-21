@@ -7,7 +7,6 @@
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.0.138" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.0" />
-    <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.0-beta.2" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" /> 
   </ItemGroup>
   <ItemGroup>
