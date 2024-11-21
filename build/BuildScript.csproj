@@ -3,13 +3,21 @@
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>1701;1702;NU1903</NoWarn>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <NoWarn>1701;1702;NU1903</NoWarn>
+  </PropertyGroup>
  
   <ItemGroup>
     <None Remove="version.props" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FlubuCore" Version="8.0.0" />
+	  <PackageReference Include="FlubuCore" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

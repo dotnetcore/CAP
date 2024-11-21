@@ -28,15 +28,18 @@ namespace Sample.RabbitMQ.SqlServer
                   [CreateTime] datetime2(7) DEFAULT getdate() NULL
                 )
                 """);
-
             services.AddCap(x =>
             {
                 x.UseEntityFramework<AppDbContext>();
-                x.UseRabbitMQ("localhost");
-                x.UseDashboard();
-        
+                x.UseRabbitMQ("127.0.0.1");
                 x.EnablePublishParallelSend = true;
-                
+                x.UseDashboard();
+
+                //x.EnablePublishParallelSend = true;
+
+                //x.UseDispatchingPerGroup = true;
+
+
                 //x.FailedThresholdCallback = failed =>
                 //{
                 //    var logger = failed.ServiceProvider.GetRequiredService<ILogger<Startup>>();
