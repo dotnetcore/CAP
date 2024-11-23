@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Text.Json;
 using DotNetCore.CAP.Messages;
+using DotNetCore.CAP.Options;
 
 // ReSharper disable InconsistentNaming
 
@@ -149,6 +150,11 @@ public class CapOptions
     /// if true,cap will use only one instance to retry failure messages
     /// </summary>
     public bool UseStorageLock { get; set; }
+
+    /// <summary>
+    /// If this value is set, workers will delete expired messages only within the specified time ranges.
+    /// </summary>
+    public DeleteExpiredMessagesValidTimeRange? DeleteExpiredMessagesValidTimeRange { get; set; }
 
     /// <summary>
     /// Registers an extension that will be executed when building services.

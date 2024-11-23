@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
+using DotNetCore.CAP.Options;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
@@ -151,6 +152,10 @@ internal class InMemoryStorage : IDataStorage
     public Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
         CancellationToken token = default)
     {
+        if (_capOptions.Value.DeleteExpiredMessagesValidTimeRange is not null &&
+            !_capOptions.Value.DeleteExpiredMessagesValidTimeRange.CurrentTimeIsValid())
+            return Task.FromResult(0);
+
         var removed = 0;
         if (table == nameof(PublishedMessages))
         {

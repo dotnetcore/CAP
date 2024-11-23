@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
+using DotNetCore.CAP.Options;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Data.SqlClient;
@@ -205,6 +206,10 @@ public class SqlServerDataStorage : IDataStorage
     public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
         CancellationToken token = default)
     {
+        if (_capOptions.Value.DeleteExpiredMessagesValidTimeRange is not null &&
+            !_capOptions.Value.DeleteExpiredMessagesValidTimeRange.CurrentTimeIsValid())
+            return 0;
+
         var connection = new SqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
         return await connection.ExecuteNonQueryAsync(

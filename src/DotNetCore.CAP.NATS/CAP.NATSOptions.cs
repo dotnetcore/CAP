@@ -33,7 +33,7 @@ public class NATSOptions
     /// <summary>
     /// Used to setup all NATs client options
     /// </summary>
-    public Options? Options { get; set; }
+    public global::NATS.Client.Options? Options { get; set; }
 
     public Action<StreamConfiguration.StreamConfigurationBuilder>? StreamOptions { get; set; }
 
