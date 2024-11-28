@@ -3,6 +3,7 @@ using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -23,7 +24,7 @@ namespace Sample.Dashboard.Auth
         public MyDashboardAuthenticationHandler(IOptionsMonitor<MyDashboardAuthenticationSchemeOptions> options,
             ILoggerFactory logger, UrlEncoder encoder) : base(options, logger, encoder)
         {
-            options.CurrentValue.ForwardChallenge = "";
+           // options.CurrentValue.ForwardChallenge = "";
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
@@ -31,14 +32,17 @@ namespace Sample.Dashboard.Auth
             var testAuthHeaderPresent = Request.Headers["X-Base-Token"].Contains("xxx");
 
             var authResult = testAuthHeaderPresent ? CreateAuthenticatonTicket() : AuthenticateResult.NoResult();
-
+            
             return Task.FromResult(authResult);
         }
 
         protected override Task HandleChallengeAsync(AuthenticationProperties properties)
         {
-            Response.Headers["WWW-Authenticate"] = MyDashboardAuthenticationSchemeDefaults.Scheme;
-            return base.HandleChallengeAsync(properties);
+            //Response.Headers["WWW-Authenticate"] = MyDashboardAuthenticationSchemeDefaults.Scheme;
+            //return base.HandleChallengeAsync(properties);
+
+            // Challenge use OpenId for AddCapWithOpenIdAndCustomAuthorization
+            return Context.ChallengeAsync(OpenIdConnectDefaults.AuthenticationScheme, properties);
         }
 
         private AuthenticateResult CreateAuthenticatonTicket()
