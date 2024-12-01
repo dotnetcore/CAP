@@ -27,7 +27,10 @@ public enum MqLogType
 
     //Amazon SQS
     InvalidIdFormat,
-    MessageNotInflight
+    MessageNotInflight,
+
+    //RedisStreams
+    RedisConsumeError
 }
 
 public class LogMessageEventArgs : EventArgs

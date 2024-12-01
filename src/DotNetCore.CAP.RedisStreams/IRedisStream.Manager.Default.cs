@@ -13,20 +13,13 @@ using StackExchange.Redis;
 
 namespace DotNetCore.CAP.RedisStreams;
 
-internal class RedisStreamManager : IRedisStreamManager
+internal class RedisStreamManager(
+    IRedisConnectionPool _connectionsPool,
+    IOptions<CapRedisOptions> options,
+    ILogger<RedisStreamManager> _logger) : IRedisStreamManager
 {
-    private readonly IRedisConnectionPool _connectionsPool;
-    private readonly ILogger<RedisStreamManager> _logger;
-    private readonly CapRedisOptions _options;
+    private readonly CapRedisOptions _options = options.Value;
     private IConnectionMultiplexer? _redis;
-
-    public RedisStreamManager(IRedisConnectionPool connectionsPool, IOptions<CapRedisOptions> options,
-        ILogger<RedisStreamManager> logger)
-    {
-        _options = options.Value;
-        _connectionsPool = connectionsPool;
-        _logger = logger;
-    }
 
     public async Task CreateStreamWithConsumerGroupAsync(string stream, string consumerGroup)
     {
@@ -81,8 +74,7 @@ internal class RedisStreamManager : IRedisStreamManager
             yield return result;
 
             //Once we consumed our history of pending messages, we can break the loop.
-            if (result.All(s => s.Entries.Length < _options.StreamEntriesCount))
-                break;
+            if (result.All(s => s.Entries.Length < _options.StreamEntriesCount)) break;
 
             token.WaitHandle.WaitOne(pollDelay);
         }
@@ -104,7 +96,7 @@ internal class RedisStreamManager : IRedisStreamManager
         {
             token.ThrowIfCancellationRequested();
 
-            var createdPositions = new List<StreamPosition>();
+            List<StreamPosition> createdPositions = [];
 
             await ConnectAsync()
                 .ConfigureAwait(false);
@@ -118,12 +110,11 @@ internal class RedisStreamManager : IRedisStreamManager
                 createdPositions.Add(position);
             }
 
-            if (!createdPositions.Any()) return Array.Empty<RedisStream>();
+            if (createdPositions.Count == 0) return [];
 
             //calculate keys HashSlots to start reading per HashSlot
             var groupedPositions = createdPositions.GroupBy(s => _redis.GetHashSlot(s.Key))
-                .Select(group => database.StreamReadGroupAsync(group.ToArray(), consumerGroup, consumerGroup,
-                    (int)_options.StreamEntriesCount));
+                .Select(group => database.StreamReadGroupAsync([.. group], consumerGroup, consumerGroup, (int)_options.StreamEntriesCount));
 
             var readSet = await Task.WhenAll(groupedPositions)
                 .ConfigureAwait(false);
@@ -136,10 +127,10 @@ internal class RedisStreamManager : IRedisStreamManager
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"Redis error when trying read consumer group {consumerGroup}");
+            _logger.LogError(ex, "Redis error when trying read consumer group {consumerGroup}", consumerGroup);
         }
 
-        return Array.Empty<RedisStream>();
+        return [];
     }
 
     private async Task ConnectAsync()

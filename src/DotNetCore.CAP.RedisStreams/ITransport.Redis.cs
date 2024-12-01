@@ -11,19 +11,12 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.RedisStreams;
 
-internal class RedisTransport : ITransport
+internal class RedisTransport(
+    IRedisStreamManager _redis,
+    IOptions<CapRedisOptions> options,
+    ILogger<RedisTransport> _logger) : ITransport
 {
-    private readonly ILogger<RedisTransport> _logger;
-    private readonly CapRedisOptions _options;
-    private readonly IRedisStreamManager _redis;
-
-    public RedisTransport(IRedisStreamManager redis, IOptions<CapRedisOptions> options,
-        ILogger<RedisTransport> logger)
-    {
-        _redis = redis;
-        _options = options.Value;
-        _logger = logger;
-    }
+    private readonly CapRedisOptions _options = options.Value;
 
     public BrokerAddress BrokerAddress => new("redis", _options.Endpoint);
 
@@ -34,7 +27,7 @@ internal class RedisTransport : ITransport
             await _redis.PublishAsync(message.GetName(), message.AsStreamEntries())
                 .ConfigureAwait(false);
 
-            _logger.LogDebug($"Redis message [{message.GetName()}] has been published.");
+            _logger.LogDebug("Redis message [{message}] has been published.",message.GetName());
 
             return OperateResult.Success;
         }

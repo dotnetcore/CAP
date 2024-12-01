@@ -36,7 +36,7 @@ public static class CapRedisOptionsExtensions
     /// <exception cref="ArgumentNullException"><paramref name="configure" /> is <c>null</c>.</exception>
     public static CapOptions UseRedis(this CapOptions options, Action<CapRedisOptions> configure)
     {
-        if (configure is null) throw new ArgumentNullException(nameof(configure));
+        ArgumentNullException.ThrowIfNull(configure);
 
         options.RegisterExtension(new RedisOptionsExtension(configure));
 

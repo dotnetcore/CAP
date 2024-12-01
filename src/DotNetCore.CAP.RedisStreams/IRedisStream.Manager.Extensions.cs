@@ -28,12 +28,12 @@ internal static class RedisStreamManagerExtensions
             catch (Exception ex)
             {
                 if (ex.GetRedisErrorType() == RedisErrorTypes.Unknown)
-                    logger?.LogError(ex,
-                        $"Redis error while creating consumer group [{consumerGroup}] of stream [{position.Key}]");
+                {
+                    logger?.LogError(ex, "Redis error while creating consumer group [{consumerGroup}] of stream [{position}]", consumerGroup, position.Key);
+                }
             }
 
-            if (created)
-                yield return position;
+            if (created) yield return position;
         }
     }
 
@@ -66,8 +66,8 @@ internal static class RedisStreamManagerExtensions
         try
         {
             var groupInfo = await database.StreamGroupInfoAsync(stream);
-            if (groupInfo.Any(g => g.Name == consumerGroup))
-                return;
+            
+            if (groupInfo.Any(g => g.Name == consumerGroup)) return;
 
             await database.StreamCreateConsumerGroupAsync(stream, consumerGroup, StreamPosition.NewMessages)
                 .ConfigureAwait(false);

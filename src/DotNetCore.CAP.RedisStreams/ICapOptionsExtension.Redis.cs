@@ -14,14 +14,9 @@ using StackExchange.Redis;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;
 
-internal class RedisOptionsExtension : ICapOptionsExtension
+internal class RedisOptionsExtension(Action<CapRedisOptions> configure) : ICapOptionsExtension
 {
-    private readonly Action<CapRedisOptions> _configure;
-
-    public RedisOptionsExtension(Action<CapRedisOptions> configure)
-    {
-        _configure = configure ?? throw new ArgumentNullException(nameof(configure));
-    }
+    private readonly Action<CapRedisOptions> _configure = configure ?? throw new ArgumentNullException(nameof(configure));
 
     public void AddServices(IServiceCollection services)
     {

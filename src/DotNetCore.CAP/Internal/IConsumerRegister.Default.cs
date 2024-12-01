@@ -328,6 +328,10 @@ internal class ConsumerRegister : IConsumerRegister
                     "AmazonSQS subscriber change message's visibility failed, message isn't in flight. --> " +
                     logmsg.Reason);
                 break;
+            case MqLogType.RedisConsumeError:
+                _isHealthy = true;
+                _logger.LogError("Redis client consume error. --> {reason}", logmsg.Reason);
+                break;
             default:
                 throw new ArgumentOutOfRangeException();
         }

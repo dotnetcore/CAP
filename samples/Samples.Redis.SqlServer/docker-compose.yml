@@ -1,7 +1,6 @@
-version: '2'
 services:
   redis-node-0:
-    image: docker.io/bitnami/redis-cluster:6.2
+    image: docker.io/bitnami/redis-cluster:7.0
     volumes:
       - redis-cluster_data-0:/bitnami/redis/data
     environment:
@@ -9,7 +8,7 @@ services:
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-1:
-    image: docker.io/bitnami/redis-cluster:6.2
+    image: docker.io/bitnami/redis-cluster:7.0
     volumes:
       - redis-cluster_data-1:/bitnami/redis/data
     environment:
@@ -17,7 +16,7 @@ services:
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-2:
-    image: docker.io/bitnami/redis-cluster:6.2
+    image: docker.io/bitnami/redis-cluster:7.0
     volumes:
       - redis-cluster_data-2:/bitnami/redis/data
     environment:
@@ -25,7 +24,7 @@ services:
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-3:
-    image: docker.io/bitnami/redis-cluster:6.2
+    image: docker.io/bitnami/redis-cluster:7.0
     volumes:
       - redis-cluster_data-3:/bitnami/redis/data
     environment:
@@ -33,7 +32,7 @@ services:
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-4:
-    image: docker.io/bitnami/redis-cluster:6.2
+    image: docker.io/bitnami/redis-cluster:7.0
     volumes:
       - redis-cluster_data-4:/bitnami/redis/data
     environment:
@@ -41,7 +40,9 @@ services:
       - 'REDIS_NODES=redis-node-0 redis-node-1 redis-node-2 redis-node-3 redis-node-4 redis-node-5'
 
   redis-node-5:
-    image: docker.io/bitnami/redis-cluster:6.2
+    image: docker.io/bitnami/redis-cluster:7.0
+    ports:
+     - 6379:6379
     volumes:
       - redis-cluster_data-5:/bitnami/redis/data
     depends_on:
@@ -63,14 +64,17 @@ services:
         - 1433:1433
      environment:
        SA_PASSWORD: "P@ssw0rd"
-       ACCEPT_EULA: "Y"    
+       ACCEPT_EULA: "Y"
 
   redis-sample:
     build:
      context: ../..
      dockerfile: samples/Samples.Redis.SqlServer/Dockerfile
+    environment:
+     - ASPNETCORE_URLS:http://*:8080
+     - ASPNETCORE_ENVIRONMENT=Development
     ports:
-      - 5000:80
+      - 8080:8080
     depends_on:
      - db
      - redis-node-5

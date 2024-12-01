@@ -2,6 +2,8 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using StackExchange.Redis;
+using System;
+using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;
@@ -24,4 +26,8 @@ public class CapRedisOptions
     /// Gets or sets the number of connections that can be used with redis server
     /// </summary>
     public uint ConnectionPoolSize { get; set; }
+
+    public Func<ConsumeErrorContext, Task>? OnConsumeError { get; set; }
+
+    public record ConsumeErrorContext(Exception Exception, StreamEntry? Entry);
 }

@@ -7,20 +7,11 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.RedisStreams;
 
-internal class RedisConsumerClientFactory : IConsumerClientFactory
+internal class RedisConsumerClientFactory(
+    IOptions<CapRedisOptions> _redisOptions,
+    IRedisStreamManager _redis,
+    ILogger<RedisConsumerClient> _logger) : IConsumerClientFactory
 {
-    private readonly ILogger<RedisConsumerClient> _logger;
-    private readonly IRedisStreamManager _redis;
-    private readonly IOptions<CapRedisOptions> _redisOptions;
-
-    public RedisConsumerClientFactory(IOptions<CapRedisOptions> redisOptions, IRedisStreamManager redis,
-        ILogger<RedisConsumerClient> logger)
-    {
-        _redisOptions = redisOptions;
-        _redis = redis;
-        _logger = logger;
-    }
-
     public IConsumerClient Create(string groupName, byte groupConcurrent)
     {
         return new RedisConsumerClient(groupName, groupConcurrent, _redis, _redisOptions, _logger);

@@ -3,6 +3,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using DotNetCore.CAP.Messages;
 using StackExchange.Redis;
@@ -13,29 +14,60 @@ internal static class RedisMessage
 {
     private const string Headers = "headers";
     private const string Body = "body";
+    private readonly static JsonSerializerOptions JSON_OPTIONS = new(JsonSerializerDefaults.Web);
 
     public static NameValueEntry[] AsStreamEntries(this TransportMessage message)
     {
-        return new[]
-        {
+        return
+        [
             new NameValueEntry(Headers, ToJson(message.Headers)),
             new NameValueEntry(Body, ToJson(message.Body.ToArray()))
-        };
+        ];
     }
 
     public static TransportMessage Create(StreamEntry streamEntry, string? groupId = null)
     {
-        var headersRaw = streamEntry[Headers];
-        if (headersRaw.IsNullOrEmpty)
-            throw new ArgumentException($"Redis stream entry with id {streamEntry.Id} missing cap headers");
+        IDictionary<string, string?> headers;
+        byte[]? body;
 
-        var headers = JsonSerializer.Deserialize<IDictionary<string, string?>>(headersRaw!)!;
+        var streamDict = streamEntry.Values.ToDictionary(c => c.Name, c => c.Value);
 
-        var bodyRaw = streamEntry[Body];
+        if (!streamDict.TryGetValue(Headers, out var headersRaw) || headersRaw.IsNullOrEmpty)
+        {
+            throw new RedisConsumeMissingHeadersException(streamEntry);
+        }
 
-        var body = !bodyRaw.IsNullOrEmpty ? JsonSerializer.Deserialize<byte[]>(bodyRaw!) : null;
+        if (!streamDict.TryGetValue(Body, out var bodyRaw))
+        {
+            throw new RedisConsumeMissingBodyException(streamEntry);
+        }
 
-        headers.TryAdd(Messages.Headers.Group, groupId);
+        try
+        {
+            headers = JsonSerializer.Deserialize<IDictionary<string, string?>>(json: headersRaw!, JSON_OPTIONS)!;
+        }
+        catch (Exception ex)
+        {
+            throw new RedisConsumeInvalidHeadersException(streamEntry, ex);
+        }
+
+        if (!bodyRaw.IsNullOrEmpty)
+        {
+            try
+            {
+                body = JsonSerializer.Deserialize<byte[]>(json: bodyRaw!, JSON_OPTIONS);
+            }
+            catch (Exception ex)
+            {
+                throw new RedisConsumeInvalidBodyException(streamEntry, ex);
+            }
+        }
+        else body = null;
+
+        if (!string.IsNullOrEmpty(groupId))
+        {
+            headers[Messages.Headers.Group] = groupId;
+        }
 
         return new TransportMessage(headers, body);
     }
@@ -43,6 +75,6 @@ internal static class RedisMessage
     private static RedisValue ToJson(object? obj)
     {
         if (obj == null) return RedisValue.Null;
-        return JsonSerializer.Serialize(obj, new JsonSerializerOptions(JsonSerializerDefaults.Web));
+        return JsonSerializer.Serialize(obj, JSON_OPTIONS);
     }
 }
