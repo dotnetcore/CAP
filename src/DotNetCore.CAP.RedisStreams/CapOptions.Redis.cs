@@ -27,7 +27,9 @@ public class CapRedisOptions
     /// </summary>
     public uint ConnectionPoolSize { get; set; }
 
-    public Func<ConsumeErrorContext, Task>? OnConsumeError { get; set; }
-
+    /// <summary>
+    /// Callback function that will be invoked when an error occurred during message consumption.
+    /// </summary>
+    public Func<ConsumeErrorContext, Task>? OnConsumeError { get; set; }   
     public record ConsumeErrorContext(Exception Exception, StreamEntry? Entry);
 }
