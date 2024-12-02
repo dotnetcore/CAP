@@ -14,30 +14,16 @@ using StackExchange.Redis;
 
 namespace DotNetCore.CAP.RedisStreams;
 
-internal class RedisConsumerClient : IConsumerClient
+internal class RedisConsumerClient(
+    string _groupId,
+    byte _groupConcurrent,
+    IRedisStreamManager _redis,
+    IOptions<CapRedisOptions> _options,
+    ILogger<RedisConsumerClient> _logger
+    ) : IConsumerClient
 {
-    private readonly string _groupId;
-    private readonly byte _groupConcurrent;
-    private readonly SemaphoreSlim _semaphore;
-    private readonly ILogger<RedisConsumerClient> _logger;
-    private readonly IOptions<CapRedisOptions> _options;
-    private readonly IRedisStreamManager _redis;
+    private readonly SemaphoreSlim _semaphore = new(_groupConcurrent);
     private string[] _topics = default!;
-
-    public RedisConsumerClient(string groupId, 
-        byte groupConcurrent,
-        IRedisStreamManager redis,
-        IOptions<CapRedisOptions> options,
-        ILogger<RedisConsumerClient> logger
-    )
-    {
-        _groupId = groupId;
-        _groupConcurrent = groupConcurrent;
-        _semaphore = new SemaphoreSlim(groupConcurrent);
-        _redis = redis;
-        _options = options;
-        _logger = logger;
-    }
 
     public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
@@ -47,7 +33,7 @@ internal class RedisConsumerClient : IConsumerClient
 
     public void Subscribe(IEnumerable<string> topics)
     {
-        if (topics == null) throw new ArgumentNullException(nameof(topics));
+        ArgumentNullException.ThrowIfNull(topics);
 
         foreach (var topic in topics)
         {
@@ -134,20 +120,35 @@ internal class RedisConsumerClient : IConsumerClient
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message, ex);
+                _logger.LogError(ex, message: "Redis entry {entryId} on stream {streamKey} at position {position} of group {groupId} is not valid for Cap, see inner exception for more details.", entry.Id, stream.Key, position, _groupId);
+
                 var logArgs = new LogMessageEventArgs
                 {
-                    LogType = MqLogType.ConsumeError,
+                    LogType = MqLogType.RedisConsumeError,
                     Reason = ex.ToString()
                 };
-                OnLogCallback!(logArgs);
+
+                try
+                {
+                    var onError = _options.Value.OnConsumeError?.Invoke(new CapRedisOptions.ConsumeErrorContext(ex, entry));
+
+                    await (onError ?? Task.CompletedTask).ConfigureAwait(false);
+                }
+                catch (Exception onError)
+                {
+                    _logger.LogError(onError, "Unhandled exception occurred in {action} action, Exception has been caught.", nameof(CapRedisOptions.OnConsumeError));
+                }
+                finally
+                {
+                    OnLogCallback!(logArgs);
+                }
             }
             finally
             {
                 var positionName = position == StreamPosition.Beginning
                     ? nameof(StreamPosition.Beginning)
                     : nameof(StreamPosition.NewMessages);
-                _logger.LogDebug($"Redis stream entry [{entry.Id}] [position : {positionName}] was delivered.");
+                _logger.LogDebug("Redis stream entry [{entryId}] [position : {positionName}] was delivered.", entry.Id, positionName);
             }
         }
     }

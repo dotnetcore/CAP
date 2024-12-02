@@ -40,7 +40,7 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 Configuration | redis connection configuration (StackExchange.Redis) | ConfigurationOptions | ConfigurationOptions
 StreamEntriesCount | number of entries returned from a stream while reading | uint | 10
 ConnectionPoolSize  | number of connections pool | uint | 10
-
+OnConsumeError      | callback function that will be invoked when an error occurred during message consumption. | Func<ConsumeErrorContext, Task> | null
 #### Redis Configuration Options
 
 If you need **more** native Redis related configuration options, you can set them in the `Configuration` option:
