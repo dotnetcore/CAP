@@ -171,10 +171,10 @@ public class KafkaConsumerClient : IConsumerClient
         foreach (var header in consumerResult.Message.Headers)
         {
             var val = header.GetValueBytes();
-            headers.Add(header.Key, val != null ? Encoding.UTF8.GetString(val) : null);
+            headers[header.Key] = val != null ? Encoding.UTF8.GetString(val) : null;
         }
 
-        headers.Add(Headers.Group, _groupId);
+        headers[Headers.Group] = _groupId;
 
         if (_kafkaOptions.CustomHeadersBuilder != null)
         {

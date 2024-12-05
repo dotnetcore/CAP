@@ -78,7 +78,7 @@ internal sealed class PulsarConsumerClient : IConsumerClient
                         headers.Add(header.Key, header.Value);
                     }
 
-                    headers.Add(Headers.Group, _groupId);
+                    headers[Headers.Group] = _groupId;
 
                     var message = new TransportMessage(headers, consumerResult.Data);
 

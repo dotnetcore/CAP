@@ -166,7 +166,7 @@ internal sealed class NATSConsumerClient : IConsumerClient
                 headers.Add(h, e.Message.Header[h]);
             }
 
-            headers.Add(Headers.Group, _groupName);
+            headers[Headers.Group] = _groupName;
 
             if (_natsOptions.CustomHeadersBuilder != null)
             {
