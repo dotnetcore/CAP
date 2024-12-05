@@ -278,7 +278,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         var headers = message.ApplicationProperties
             .ToDictionary(x => x.Key, y => y.Value?.ToString());
 
-        headers.Add(Headers.Group, _subscriptionName);
+        headers[Headers.Group] = _subscriptionName;
 
         if (_asbOptions.CustomHeadersBuilder != null)
         {

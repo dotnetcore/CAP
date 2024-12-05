@@ -111,7 +111,7 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
 
                     var message = new TransportMessage(header, body != null ? Encoding.UTF8.GetBytes(body) : null);
 
-                    message.Headers.Add(Headers.Group, _groupId);
+                    message.Headers[Headers.Group] = _groupId;
 
                     return OnMessageCallback!(message, response.Messages[0].ReceiptHandle);
                 }

@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
@@ -67,7 +68,7 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
                         headers.Add(header.Key, header.Value?.ToString());
                 }
 
-            headers.Add(Messages.Headers.Group, _groupName);
+            headers[Messages.Headers.Group] = _groupName;
 
             if (_customHeadersBuilder != null)
             {
