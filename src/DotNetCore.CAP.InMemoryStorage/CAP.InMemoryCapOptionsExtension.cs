@@ -4,6 +4,7 @@
 using DotNetCore.CAP.InMemoryStorage;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;
@@ -16,6 +17,6 @@ internal class InMemoryCapOptionsExtension : ICapOptionsExtension
 
         services.AddTransient<ICapTransaction, InMemoryCapTransaction>();
         services.AddSingleton<IDataStorage, InMemoryStorage.InMemoryStorage>();
-        services.AddSingleton<IStorageInitializer, InMemoryStorageInitializer>();
+        services.TryAddSingleton<IStorageInitializer, InMemoryStorageInitializer>();
     }
 }
