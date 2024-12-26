@@ -34,7 +34,7 @@ public class MongoDBCapTransaction : CapTransactionBase
         if (DbTransaction is IClientSessionHandle session)
             await session.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
 
-        Flush();
+        await FlushAsync();
     }
 
     public override void Rollback()

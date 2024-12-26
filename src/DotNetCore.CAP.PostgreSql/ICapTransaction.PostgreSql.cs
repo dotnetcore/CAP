@@ -53,7 +53,7 @@ public class PostgreSqlCapTransaction : CapTransactionBase
                 break;
         }
 
-        Flush();
+        await FlushAsync();
     }
 
     public override void Rollback()
