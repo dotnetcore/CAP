@@ -47,32 +47,13 @@ public abstract class CapTransactionBase : ICapTransaction
 
     protected virtual void Flush()
     {
-        while (!_bufferList.IsEmpty)
-        {
-#pragma warning disable CA2012 // Use ValueTasks correctly
-            if (_bufferList.TryDequeue(out var message))
-            {
-                var isDelayMessage = message.Origin.Headers.ContainsKey(Headers.DelayTime);
-                if (isDelayMessage)
-                {
-
-                    _dispatcher.EnqueueToScheduler(message, DateTime.Parse(message.Origin.Headers[Headers.SentTime]!, CultureInfo.InvariantCulture)).ConfigureAwait(false);
-
-                }
-                else
-                {
-                    _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
-                }
-#pragma warning restore CA2012 // Use ValueTasks correctly
-            }
-        }
+        FlushAsync().GetAwaiter().GetResult();
     }
 
     protected virtual async Task FlushAsync()
     {
         while (!_bufferList.IsEmpty)
         {
-#pragma warning disable CA2012 // Use ValueTasks correctly
             if (_bufferList.TryDequeue(out var message))
             {
                 var isDelayMessage = message.Origin.Headers.ContainsKey(Headers.DelayTime);
@@ -86,7 +67,6 @@ public abstract class CapTransactionBase : ICapTransaction
                 {
                     await _dispatcher.EnqueueToPublish(message).ConfigureAwait(false);
                 }
-#pragma warning restore CA2012 // Use ValueTasks correctly
             }
         }
     }
