@@ -54,7 +54,7 @@ public class MySqlCapTransaction : CapTransactionBase
                 break;
         }
 
-        Flush();
+        await FlushAsync();
     }
 
     public override void Rollback()

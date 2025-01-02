@@ -69,7 +69,7 @@ public class SqlServerCapTransaction : CapTransactionBase
         switch (DbTransaction)
         {
             case NoopTransaction _:
-                Flush();
+                await FlushAsync();
                 break;
             case DbTransaction dbTransaction:
                 await dbTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
