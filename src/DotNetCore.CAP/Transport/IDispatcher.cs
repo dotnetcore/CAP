@@ -14,5 +14,5 @@ public interface IDispatcher : IProcessingServer
 
     ValueTask EnqueueToExecute(MediumMessage message, ConsumerExecutorDescriptor? descriptor = null);
 
-    ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null);
+    Task EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null);
 }

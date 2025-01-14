@@ -18,13 +18,12 @@ namespace DotNetCore.CAP.Processor;
 
 public class Dispatcher : IDispatcher
 {
-    private readonly CancellationTokenSource _delayCts = new();
     private readonly ISubscribeExecutor _executor;
     private readonly ILogger<Dispatcher> _logger;
     private readonly CapOptions _options;
     private readonly IMessageSender _sender;
     private readonly IDataStorage _storage;
-    private readonly PriorityQueue<MediumMessage, long> _schedulerQueue;
+    private readonly ScheduledMediumMessageQueue _schedulerQueue = new();
     private readonly bool _enableParallelExecute;
     private readonly bool _enableParallelSend;
     private readonly int _pChannelSize;
@@ -32,7 +31,6 @@ public class Dispatcher : IDispatcher
     private CancellationTokenSource? _tasksCts;
     private Channel<MediumMessage> _publishedChannel = default!;
     private Channel<(MediumMessage, ConsumerExecutorDescriptor?)> _receivedChannel = default!;
-    private long _nextSendTime = DateTime.MaxValue.Ticks;
 
     public Dispatcher(ILogger<Dispatcher> logger, IMessageSender sender, IOptions<CapOptions> options,
         ISubscribeExecutor executor, IDataStorage storage)
@@ -41,7 +39,6 @@ public class Dispatcher : IDispatcher
         _sender = sender;
         _options = options.Value;
         _executor = executor;
-        _schedulerQueue = new PriorityQueue<MediumMessage, long>();
         _storage = storage;
         _enableParallelExecute = options.Value.EnableSubscriberParallelExecute;
         _enableParallelSend = options.Value.EnablePublishParallelSend;
@@ -52,7 +49,6 @@ public class Dispatcher : IDispatcher
     {
         stoppingToken.ThrowIfCancellationRequested();
         _tasksCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, CancellationToken.None);
-        _tasksCts.Token.Register(() => _delayCts.Cancel());
 
         _publishedChannel = Channel.CreateBounded<MediumMessage>(new BoundedChannelOptions(_pChannelSize)
         {
@@ -88,7 +84,7 @@ public class Dispatcher : IDispatcher
                 {
                     if (_schedulerQueue.Count == 0) return;
 
-                    var messageIds = _schedulerQueue.UnorderedItems.Select(x => x.Element.DbId).ToArray();
+                    var messageIds = _schedulerQueue.UnorderedItems.Select(x => x.DbId).ToArray();
                     _storage.ChangePublishStateToDelayedAsync(messageIds).GetAwaiter().GetResult();
                     _logger.LogDebug("Update storage to delayed success of delayed message in memory queue!");
                 }
@@ -102,29 +98,32 @@ public class Dispatcher : IDispatcher
             {
                 try
                 {
-                    while (_schedulerQueue.TryPeek(out _, out _nextSendTime))
+                    await foreach (var nextMessage in _schedulerQueue.GetConsumingEnumerable(_tasksCts.Token))
                     {
-                        var delayTime = _nextSendTime - DateTime.Now.Ticks;
-
-                        if (delayTime > 500000) //50ms
-                        {
-                            await Task.Delay(new TimeSpan(delayTime), _delayCts.Token);
-                        }
                         _tasksCts.Token.ThrowIfCancellationRequested();
-
-                        await _sender.SendAsync(_schedulerQueue.Dequeue()).ConfigureAwait(false);
+                        await _sender.SendAsync(nextMessage).ConfigureAwait(false);
                     }
+
                     _tasksCts.Token.WaitHandle.WaitOne(100);
                 }
                 catch (OperationCanceledException)
                 {
                     //Ignore
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, 
+                        "Scheduled message publishing failed unexpectedly, which will stop future scheduled " +
+                        "messages from publishing. See more details here: https://github.com/dotnetcore/CAP/issues/1637. " +
+                        "Exception: {Message}", 
+                        ex.Message);
+                    throw;
+                }
             }
         }, _tasksCts.Token).ConfigureAwait(false);
     }
 
-    public async ValueTask EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null)
+    public async Task EnqueueToScheduler(MediumMessage message, DateTime publishTime, object? transaction = null)
     {
         message.ExpiresAt = publishTime;
 
@@ -135,11 +134,6 @@ public class Dispatcher : IDispatcher
             await _storage.ChangePublishStateAsync(message, StatusName.Queued, transaction);
 
             _schedulerQueue.Enqueue(message, publishTime.Ticks);
-
-            if (publishTime.Ticks < _nextSendTime)
-            {
-                _delayCts.Cancel();
-            }
         }
         else
         {
