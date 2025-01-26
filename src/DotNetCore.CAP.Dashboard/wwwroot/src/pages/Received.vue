@@ -255,6 +255,7 @@ export default {
             solid: true
           });
         });
+        _this.fetchData();
         _this.clear();
       });
     },
