@@ -4,7 +4,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
@@ -14,7 +13,7 @@ using RabbitMQ.Client.Events;
 
 namespace DotNetCore.CAP.RabbitMQ;
 
-public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
+public class RabbitMqBasicConsumer : AsyncDefaultBasicConsumer
 {
     private readonly SemaphoreSlim _semaphore;
     private readonly string _groupName;
@@ -24,13 +23,14 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
     private readonly Func<BasicDeliverEventArgs, IServiceProvider, List<KeyValuePair<string, string>>>? _customHeadersBuilder;
     private readonly IServiceProvider _serviceProvider;
 
-    public RabbitMQBasicConsumer(IModel? model,
-        byte concurrent, string groupName,
+    public RabbitMqBasicConsumer(IChannel channel, 
+        byte concurrent,
+        string groupName,
         Func<TransportMessage, object?, Task> msgCallback,
         Action<LogMessageEventArgs> logCallback,
         Func<BasicDeliverEventArgs, IServiceProvider, List<KeyValuePair<string, string>>>? customHeadersBuilder,
-        IServiceProvider serviceProvider)
-            : base(model)
+        IServiceProvider serviceProvider
+        ) : base(channel)
     {
         _semaphore = new SemaphoreSlim(concurrent);
         _groupName = groupName;
@@ -41,14 +41,15 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         _serviceProvider = serviceProvider;
     }
 
-    public override async Task HandleBasicDeliver(string consumerTag, ulong deliveryTag, bool redelivered, string exchange,
-        string routingKey, IBasicProperties properties, ReadOnlyMemory<byte> body)
+    public override async Task HandleBasicDeliverAsync(string consumerTag, ulong deliveryTag, bool redelivered, string exchange,
+        string routingKey, IReadOnlyBasicProperties properties, ReadOnlyMemory<byte> body,
+        CancellationToken cancellationToken = default)
     {
         if (_usingTaskRun)
         {
-            await _semaphore.WaitAsync();
+            await _semaphore.WaitAsync(cancellationToken);
 
-            _ = Task.Run(Consume).ConfigureAwait(false);
+            _ = Task.Run(Consume, cancellationToken).ConfigureAwait(false);
         }
         else
         {
@@ -86,25 +87,26 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         }
     }
 
-    public void BasicAck(ulong deliveryTag)
+    public async Task BasicAck(ulong deliveryTag)
     {
-        if (Model.IsOpen)
-            Model.BasicAck(deliveryTag, false);
+        if (Channel.IsOpen)
+           await Channel.BasicAckAsync(deliveryTag, false);
 
         _semaphore.Release();
     }
 
-    public void BasicReject(ulong deliveryTag)
+    public async Task BasicReject(ulong deliveryTag)
     {
-        if (Model.IsOpen)
-            Model.BasicReject(deliveryTag, true);
+        if (Channel.IsOpen)
+           await Channel.BasicRejectAsync(deliveryTag, true);
 
         _semaphore.Release();
     }
 
-    public override async Task OnCancel(params string[] consumerTags)
+
+    protected override async Task OnCancelAsync(string[] consumerTags, CancellationToken cancellationToken = default)
     {
-        await base.OnCancel(consumerTags);
+        await base.OnCancelAsync(consumerTags, cancellationToken);
 
         var args = new LogMessageEventArgs
         {
@@ -115,9 +117,9 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         _logCallback(args);
     }
 
-    public override async Task HandleBasicCancelOk(string consumerTag)
+    public override async Task HandleBasicCancelOkAsync(string consumerTag, CancellationToken cancellationToken = default)
     {
-        await base.HandleBasicCancelOk(consumerTag);
+        await base.HandleBasicCancelOkAsync(consumerTag, cancellationToken);
 
         var args = new LogMessageEventArgs
         {
@@ -128,9 +130,9 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         _logCallback(args);
     }
 
-    public override async Task HandleBasicConsumeOk(string consumerTag)
+    public override async Task HandleBasicConsumeOkAsync(string consumerTag, CancellationToken cancellationToken = default)
     {
-        await base.HandleBasicConsumeOk(consumerTag);
+        await base.HandleBasicConsumeOkAsync(consumerTag, cancellationToken);
 
         var args = new LogMessageEventArgs
         {
@@ -141,9 +143,9 @@ public class RabbitMQBasicConsumer : AsyncDefaultBasicConsumer
         _logCallback(args);
     }
 
-    public override async Task HandleModelShutdown(object model, ShutdownEventArgs reason)
+    public override async Task HandleChannelShutdownAsync(object channel, ShutdownEventArgs reason)
     {
-        await base.HandleModelShutdown(model, reason);
+        await base.HandleChannelShutdownAsync(channel, reason);
 
         var args = new LogMessageEventArgs
         {

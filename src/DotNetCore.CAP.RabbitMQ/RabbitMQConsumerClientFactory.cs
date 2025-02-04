@@ -7,16 +7,16 @@ using Microsoft.Extensions.Options;
 
 namespace DotNetCore.CAP.RabbitMQ;
 
-internal sealed class RabbitMQConsumerClientFactory : IConsumerClientFactory
+internal sealed class RabbitMqConsumerClientFactory : IConsumerClientFactory
 {
     private readonly IConnectionChannelPool _connectionChannelPool;
-    private readonly IOptions<RabbitMQOptions> _rabbitMQOptions;
+    private readonly IOptions<RabbitMQOptions> _rabbitMqOptions;
     private readonly IServiceProvider _serviceProvider;
 
-    public RabbitMQConsumerClientFactory(IOptions<RabbitMQOptions> rabbitMQOptions, IConnectionChannelPool channelPool,
+    public RabbitMqConsumerClientFactory(IOptions<RabbitMQOptions> rabbitMqOptions, IConnectionChannelPool channelPool,
         IServiceProvider serviceProvider)
     {
-        _rabbitMQOptions = rabbitMQOptions;
+        _rabbitMqOptions = rabbitMqOptions;
         _connectionChannelPool = channelPool;
         _serviceProvider = serviceProvider;
     }
@@ -25,10 +25,10 @@ internal sealed class RabbitMQConsumerClientFactory : IConsumerClientFactory
     {
         try
         {
-            var client = new RabbitMQConsumerClient(groupId, concurrent, _connectionChannelPool,
-                _rabbitMQOptions, _serviceProvider);
+            var client = new RabbitMqConsumerClient(groupId, concurrent, _connectionChannelPool,
+                _rabbitMqOptions, _serviceProvider);
             
-            client.Connect();
+            client.Connect().GetAwaiter().GetResult();
             
             return client;
         }

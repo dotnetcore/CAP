@@ -40,7 +40,7 @@ public class RabbitMQOptions
 
     /// <summary>
     /// The host to connect to.
-    /// If you want connect to the cluster, you can assign like “192.168.1.111,192.168.1.112”
+    /// If you want to connect to the cluster, you can assign like “192.168.1.111,192.168.1.112”
     /// </summary>
     public string HostName { get; set; } = "localhost";
 
@@ -104,7 +104,7 @@ public class RabbitMQOptions
     /// <summary>
     /// Specify quality of service.
     /// <br /><br />
-    /// This settings requests a specific quality of service.The QoS can be specified for the current channel or for all
+    /// These settings request a specific quality of service.The QoS can be specified for the current channel or for all
     /// channels on the connection.<br />
     /// The particular properties and semantics of a qos method always depend on the content class semantics.<br />
     /// Though the qos method could in principle apply to both peers, it is currently meaningful only for the server.<br />
@@ -121,7 +121,7 @@ public class RabbitMQOptions
         /// <summary>
         /// Gets or sets queue mode by supplying the 'x-queue-mode' declaration argument with a string specifying the desired mode.
         /// </summary>
-        public string QueueMode { get; set; } = default!;
+        public string QueueMode { get; set; } = null!;
 
         /// <summary>
         /// Gets or sets queue message automatic deletion time (in milliseconds) "x-message-ttl", Default 864000000 ms (10 days).
@@ -132,7 +132,7 @@ public class RabbitMQOptions
         /// <summary>
         /// Gets or sets queue type by supplying the 'x-queue-type' declaration argument with a string specifying the desired type.
         /// </summary>
-        public string QueueType { get; set; } = default!;
+        public string QueueType { get; set; } = null!;
     }
 
     public class BasicQos

@@ -9,22 +9,23 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Events;
 
 namespace DotNetCore.CAP.RabbitMQ;
 
-internal sealed class RabbitMQConsumerClient : IConsumerClient
+internal sealed class RabbitMqConsumerClient : IConsumerClient
 {
-    private static readonly object Lock = new();
+    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
     private readonly IConnectionChannelPool _connectionChannelPool;
     private readonly IServiceProvider _serviceProvider;
     private readonly string _exchangeName;
     private readonly string _queueName;
     private readonly byte _groupConcurrent;
-    private readonly RabbitMQOptions _rabbitMQOptions;
-    private RabbitMQBasicConsumer? _consumer = null;
-    private IModel? _channel;
+    private readonly RabbitMQOptions _rabbitMqOptions;
+    private RabbitMqBasicConsumer? _consumer = null;
+    private IChannel? _channel;
 
-    public RabbitMQConsumerClient(string groupName, byte groupConcurrent,
+    public RabbitMqConsumerClient(string groupName, byte groupConcurrent,
         IConnectionChannelPool connectionChannelPool,
         IOptions<RabbitMQOptions> options,
         IServiceProvider serviceProvider)
@@ -33,7 +34,7 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
         _groupConcurrent = groupConcurrent;
         _connectionChannelPool = connectionChannelPool;
         _serviceProvider = serviceProvider;
-        _rabbitMQOptions = options.Value;
+        _rabbitMqOptions = options.Value;
         _exchangeName = connectionChannelPool.Exchange;
     }
 
@@ -41,44 +42,44 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
 
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-    public BrokerAddress BrokerAddress => new("RabbitMQ", $"{_rabbitMQOptions.HostName}:{_rabbitMQOptions.Port}");
+    public BrokerAddress BrokerAddress => new("RabbitMQ", $"{_rabbitMqOptions.HostName}:{_rabbitMqOptions.Port}");
 
     public void Subscribe(IEnumerable<string> topics)
     {
         if (topics == null) throw new ArgumentNullException(nameof(topics));
 
-        Connect();
+        Connect().GetAwaiter().GetResult();
 
         foreach (var topic in topics)
         {
-            _channel.QueueBind(_queueName, _exchangeName, topic);
+            _channel!.QueueBindAsync(_queueName, _exchangeName, topic);
         }
     }
 
     public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
     {
-        Connect();
+        Connect().GetAwaiter().GetResult();
 
         if (_groupConcurrent > 0)
         {
-            _channel?.BasicQos(prefetchSize: 0, prefetchCount: _groupConcurrent, global: false);
+            _channel!.BasicQosAsync(prefetchSize: 0, prefetchCount: _groupConcurrent, global: false, cancellationToken).GetAwaiter().GetResult(); 
         }
-        else if (_rabbitMQOptions.BasicQosOptions != null)
+        else if (_rabbitMqOptions.BasicQosOptions != null)
         {
-            _channel?.BasicQos(0, _rabbitMQOptions.BasicQosOptions.PrefetchCount, _rabbitMQOptions.BasicQosOptions.Global);
+            _channel!.BasicQosAsync(0, _rabbitMqOptions.BasicQosOptions.PrefetchCount, _rabbitMqOptions.BasicQosOptions.Global, cancellationToken).GetAwaiter().GetResult();
         }
 
-        _consumer = new RabbitMQBasicConsumer(_channel, _groupConcurrent, _queueName, OnMessageCallback!, OnLogCallback!,
-            _rabbitMQOptions.CustomHeadersBuilder, _serviceProvider);
+        _consumer = new RabbitMqBasicConsumer(_channel!, _groupConcurrent, _queueName, OnMessageCallback!, OnLogCallback!,
+            _rabbitMqOptions.CustomHeadersBuilder, _serviceProvider);
 
         try
         {
-            _channel.BasicConsume(_queueName, false, _consumer);
+            _channel!.BasicConsumeAsync(_queueName, false, _consumer, cancellationToken);
         }
         catch (TimeoutException ex)
         {
-            _consumer.HandleModelShutdown(null!, new ShutdownEventArgs(ShutdownInitiator.Application, 0,
-                ex.Message + "-->" + nameof(_channel.BasicConsume))).GetAwaiter().GetResult();
+            _consumer.HandleChannelShutdownAsync(null!, new ShutdownEventArgs(ShutdownInitiator.Application, 0,
+                ex.Message + "-->" + nameof(_channel.BasicConsumeAsync))).GetAwaiter().GetResult();
         }
 
         while (true)
@@ -92,12 +93,12 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
 
     public void Commit(object? sender)
     {
-        _consumer!.BasicAck((ulong)sender!);
+        _consumer!.BasicAck((ulong)sender!).GetAwaiter().GetResult();
     }
 
     public void Reject(object? sender)
     {
-        _consumer!.BasicReject((ulong)sender!);
+        _consumer!.BasicReject((ulong)sender!).GetAwaiter().GetResult();
     }
 
     public void Dispose()
@@ -107,44 +108,45 @@ internal sealed class RabbitMQConsumerClient : IConsumerClient
         //_connection?.Dispose();
     }
 
-    public void Connect()
+    public async Task Connect()
     {
         var connection = _connectionChannelPool.GetConnection();
 
-        lock (Lock)
+        await _semaphore.WaitAsync();
+
+        if (_channel == null || _channel.IsClosed)
         {
-            if (_channel == null || _channel.IsClosed)
+            _channel = await connection.CreateChannelAsync();
+
+            await _channel.ExchangeDeclareAsync(_exchangeName, RabbitMQOptions.ExchangeType, true);
+
+            var arguments = new Dictionary<string, object?>
             {
-                _channel = connection.CreateModel();
+                { "x-message-ttl", _rabbitMqOptions.QueueArguments.MessageTTL }
+            };
 
-                _channel.ExchangeDeclare(_exchangeName, RabbitMQOptions.ExchangeType, true);
+            if (!string.IsNullOrEmpty(_rabbitMqOptions.QueueArguments.QueueMode))
+                arguments.Add("x-queue-mode", _rabbitMqOptions.QueueArguments.QueueMode);
 
-                var arguments = new Dictionary<string, object>
+            if (!string.IsNullOrEmpty(_rabbitMqOptions.QueueArguments.QueueType))
+                arguments.Add("x-queue-type", _rabbitMqOptions.QueueArguments.QueueType);
+
+            try
+            {
+                await _channel.QueueDeclareAsync(_queueName, _rabbitMqOptions.QueueOptions.Durable, _rabbitMqOptions.QueueOptions.Exclusive, _rabbitMqOptions.QueueOptions.AutoDelete, arguments);
+            }
+            catch (TimeoutException ex)
+            {
+                var args = new LogMessageEventArgs
                 {
-                    { "x-message-ttl", _rabbitMQOptions.QueueArguments.MessageTTL }
+                    LogType = MqLogType.ConsumerShutdown,
+                    Reason = ex.Message + "-->" + nameof(_channel.QueueDeclareAsync)
                 };
 
-                if (!string.IsNullOrEmpty(_rabbitMQOptions.QueueArguments.QueueMode))
-                    arguments.Add("x-queue-mode", _rabbitMQOptions.QueueArguments.QueueMode);
-
-                if (!string.IsNullOrEmpty(_rabbitMQOptions.QueueArguments.QueueType))
-                    arguments.Add("x-queue-type", _rabbitMQOptions.QueueArguments.QueueType);
-
-                try
-                {
-                    _channel.QueueDeclare(_queueName, _rabbitMQOptions.QueueOptions.Durable, _rabbitMQOptions.QueueOptions.Exclusive, _rabbitMQOptions.QueueOptions.AutoDelete, arguments);
-                }
-                catch (TimeoutException ex)
-                {
-                    var args = new LogMessageEventArgs
-                    {
-                        LogType = MqLogType.ConsumerShutdown,
-                        Reason = ex.Message + "-->" + nameof(_channel.QueueDeclare)
-                    };
-
-                    OnLogCallback!(args);
-                }
+                OnLogCallback!(args);
             }
         }
+
+        _semaphore.Release();
     }
 }

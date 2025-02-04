@@ -6,6 +6,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
@@ -17,10 +18,10 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     private const int DefaultPoolSize = 15;
     private static readonly object SLock = new();
 
-    private readonly Func<IConnection> _connectionActivator;
+    private readonly Func<Task<IConnection>> _connectionActivator;
     private readonly bool _isPublishConfirms;
     private readonly ILogger<ConnectionChannelPool> _logger;
-    private readonly ConcurrentQueue<IModel> _pool;
+    private readonly ConcurrentQueue<IChannel> _pool;
     private IConnection? _connection;
 
     private int _count;
@@ -33,7 +34,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
     {
         _logger = logger;
         _maxSize = DefaultPoolSize;
-        _pool = new ConcurrentQueue<IModel>();
+        _pool = new ConcurrentQueue<IChannel>();
 
         var capOptions = capOptionsAccessor.Value;
         var options = optionsAccessor.Value;
@@ -48,7 +49,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
             $"RabbitMQ configuration:'HostName:{options.HostName}, Port:{options.Port}, UserName:{options.UserName}, VirtualHost:{options.VirtualHost}, ExchangeName:{options.ExchangeName}'");
     }
 
-    IModel IConnectionChannelPool.Rent()
+    Task<IChannel> IConnectionChannelPool.Rent()
     {
         lock (SLock)
         {
@@ -61,7 +62,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
         }
     }
 
-    bool IConnectionChannelPool.Return(IModel connection)
+    bool IConnectionChannelPool.Return(IChannel connection)
     {
         return Return(connection);
     }
@@ -77,7 +78,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
             if (_connection != null && _connection.IsOpen) return _connection;
 
             _connection?.Dispose();
-            _connection = _connectionActivator();
+            _connection = _connectionActivator().GetAwaiter().GetResult();
             return _connection;
         }
     }
@@ -94,7 +95,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
         _connection?.Dispose();
     }
 
-    private static Func<IConnection> CreateConnection(RabbitMQOptions options)
+    private static Func<Task<IConnection>> CreateConnection(RabbitMQOptions options)
     {
         var factory = new ConnectionFactory
         {
@@ -102,7 +103,6 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
             Port = options.Port,
             Password = options.Password,
             VirtualHost = options.VirtualHost,
-            DispatchConsumersAsync = true,
             ClientProvidedName = Assembly.GetEntryAssembly()?.GetName().Name!.ToLower()
         };
 
@@ -110,15 +110,15 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
         {
             options.ConnectionFactoryOptions?.Invoke(factory);
 
-            return () => factory.CreateConnection(AmqpTcpEndpoint.ParseMultiple(options.HostName));
+            return () => factory.CreateConnectionAsync(AmqpTcpEndpoint.ParseMultiple(options.HostName));
         }
 
         factory.HostName = options.HostName;
         options.ConnectionFactoryOptions?.Invoke(factory);
-        return () => factory.CreateConnection();
+        return () => factory.CreateConnectionAsync();
     }
 
-    public virtual IModel Rent()
+    public virtual async Task<IChannel> Rent()
     {
         if (_pool.TryDequeue(out var model))
         {
@@ -131,9 +131,8 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
 
         try
         {
-            model = GetConnection().CreateModel();
-            model.ExchangeDeclare(Exchange, RabbitMQOptions.ExchangeType, true);
-            if (_isPublishConfirms) model.ConfirmSelect();
+            model = await GetConnection().CreateChannelAsync(new CreateChannelOptions(_isPublishConfirms, false));
+            await model.ExchangeDeclareAsync(Exchange, RabbitMQOptions.ExchangeType, true);
         }
         catch (Exception e)
         {
@@ -145,7 +144,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
         return model;
     }
 
-    public virtual bool Return(IModel channel)
+    public virtual bool Return(IChannel channel)
     {
         if (Interlocked.Increment(ref _count) <= _maxSize && channel.IsOpen)
         {

@@ -9,11 +9,11 @@ using Microsoft.Extensions.DependencyInjection;
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;
 
-internal sealed class RabbitMQCapOptionsExtension : ICapOptionsExtension
+internal sealed class RabbitMqCapOptionsExtension : ICapOptionsExtension
 {
     private readonly Action<RabbitMQOptions> _configure;
 
-    public RabbitMQCapOptionsExtension(Action<RabbitMQOptions> configure)
+    public RabbitMqCapOptionsExtension(Action<RabbitMQOptions> configure)
     {
         _configure = configure;
     }
@@ -23,8 +23,8 @@ internal sealed class RabbitMQCapOptionsExtension : ICapOptionsExtension
         services.AddSingleton(new CapMessageQueueMakerService("RabbitMQ"));
 
         services.Configure(_configure);
-        services.AddSingleton<ITransport, RabbitMQTransport>();
-        services.AddSingleton<IConsumerClientFactory, RabbitMQConsumerClientFactory>();
+        services.AddSingleton<ITransport, RabbitMqTransport>();
+        services.AddSingleton<IConsumerClientFactory, RabbitMqConsumerClientFactory>();
         services.AddSingleton<IConnectionChannelPool, ConnectionChannelPool>();
     }
 }

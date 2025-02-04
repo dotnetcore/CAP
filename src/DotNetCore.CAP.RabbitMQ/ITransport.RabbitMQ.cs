@@ -12,15 +12,13 @@ using RabbitMQ.Client;
 
 namespace DotNetCore.CAP.RabbitMQ;
 
-internal sealed class RabbitMQTransport : ITransport
+internal sealed class RabbitMqTransport : ITransport
 {
     private readonly IConnectionChannelPool _connectionChannelPool;
     private readonly string _exchange;
     private readonly ILogger _logger;
 
-    public RabbitMQTransport(
-        ILogger<RabbitMQTransport> logger,
-        IConnectionChannelPool connectionChannelPool)
+    public RabbitMqTransport(ILogger<RabbitMqTransport> logger, IConnectionChannelPool connectionChannelPool)
     {
         _logger = logger;
         _connectionChannelPool = connectionChannelPool;
@@ -29,26 +27,24 @@ internal sealed class RabbitMQTransport : ITransport
 
     public BrokerAddress BrokerAddress => new("RabbitMQ", _connectionChannelPool.HostAddress);
 
-    public Task<OperateResult> SendAsync(TransportMessage message)
+    public async Task<OperateResult> SendAsync(TransportMessage message)
     {
-        IModel? channel = null;
+        IChannel? channel = null;
         try
         {
-            channel = _connectionChannelPool.Rent();
+            channel = await _connectionChannelPool.Rent();
 
-            var props = channel.CreateBasicProperties();
-            props.DeliveryMode = 2;
-            props.Headers = message.Headers.ToDictionary(x => x.Key, x => (object?)x.Value);
+            var props = new BasicProperties
+            {
+                DeliveryMode = DeliveryModes.Persistent,
+                Headers = message.Headers.ToDictionary(x => x.Key, object? (x) => x.Value)
+            };
 
-            channel.BasicPublish(_exchange, message.GetName(), props, message.Body);
+            await channel.BasicPublishAsync(_exchange, message.GetName(), false, props, message.Body);
 
-            // Enable publish confirms
-            if (channel.NextPublishSeqNo > 0) channel.WaitForConfirmsOrDie(TimeSpan.FromSeconds(5));
+            _logger.LogInformation("CAP message '{0}' published, internal id '{1}'", message.GetName(), message.GetId());
 
-            _logger.LogInformation("CAP message '{0}' published, internal id '{1}'", message.GetName(),
-                message.GetId());
-
-            return Task.FromResult(OperateResult.Success);
+            return OperateResult.Success;
         }
         catch (Exception ex)
         {
@@ -59,7 +55,7 @@ internal sealed class RabbitMQTransport : ITransport
                 Description = ex.Message
             };
 
-            return Task.FromResult(OperateResult.Failed(wrapperEx, errors));
+            return OperateResult.Failed(wrapperEx, errors);
         }
         finally
         {
