@@ -45,7 +45,7 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
         Exchange = "v1" == capOptions.Version ? options.ExchangeName : $"{options.ExchangeName}.{capOptions.Version}";
 
         _logger.LogDebug(
-            $"RabbitMQ configuration:'HostName:{options.HostName}, Port:{options.Port}, UserName:{options.UserName}, Password:{options.Password}, ExchangeName:{options.ExchangeName}'");
+            $"RabbitMQ configuration:'HostName:{options.HostName}, Port:{options.Port}, UserName:{options.UserName}, VirtualHost:{options.VirtualHost}, ExchangeName:{options.ExchangeName}'");
     }
 
     IModel IConnectionChannelPool.Rent()
