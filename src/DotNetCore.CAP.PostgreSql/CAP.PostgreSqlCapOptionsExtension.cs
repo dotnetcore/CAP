@@ -5,6 +5,7 @@ using System;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.PostgreSql;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
 // ReSharper disable once CheckNamespace
@@ -26,6 +27,6 @@ internal class PostgreSqlCapOptionsExtension : ICapOptionsExtension
         services.AddSingleton<IConfigureOptions<PostgreSqlOptions>, ConfigurePostgreSqlOptions>();
 
         services.AddSingleton<IDataStorage, PostgreSqlDataStorage>();
-        services.AddSingleton<IStorageInitializer, PostgreSqlStorageInitializer>();
+        services.TryAddSingleton<IStorageInitializer, PostgreSqlStorageInitializer>();
     }
 }
