@@ -3,6 +3,7 @@
 
 // ReSharper disable once CheckNamespace
 
+using System.Threading;
 using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
@@ -17,7 +18,8 @@ public abstract class SubscribeFilter : ISubscribeFilter
     /// Called before the subscriber executes.
     /// </summary>
     /// <param name="context">The <see cref="ExecutingContext" />.</param>
-    public virtual Task OnSubscribeExecutingAsync(ExecutingContext context)
+    /// <param name="cancellationToken"></param>
+    public virtual Task OnSubscribeExecutingAsync(ExecutingContext context, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }
@@ -26,7 +28,8 @@ public abstract class SubscribeFilter : ISubscribeFilter
     /// Called after the subscriber executes.
     /// </summary>
     /// <param name="context">The <see cref="ExecutedContext" />.</param>
-    public virtual Task OnSubscribeExecutedAsync(ExecutedContext context)
+    /// <param name="cancellationToken"></param>
+    public virtual Task OnSubscribeExecutedAsync(ExecutedContext context, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }
@@ -35,10 +38,9 @@ public abstract class SubscribeFilter : ISubscribeFilter
     /// Called after the subscriber has thrown an <see cref="System.Exception" />.
     /// </summary>
     /// <param name="context">The <see cref="ExceptionContext" />.</param>
-    public virtual Task OnSubscribeExceptionAsync(ExceptionContext context)
+    /// <param name="cancellationToken"></param>
+    public virtual Task OnSubscribeExceptionAsync(ExceptionContext context, CancellationToken cancellationToken = default)
     {
         return Task.CompletedTask;
     }
-
-
 }
