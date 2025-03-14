@@ -24,7 +24,7 @@ public class ServiceBusTransportTests
         
         config.ConfigureCustomProducer<EntityCreated>(cfg => cfg.UseTopic("entity-created").WithSubscription());
 
-        _options = Options.Create(config);
+        _options = Microsoft.Extensions.Options.Options.Create(config);
     }
 
     [Fact]
