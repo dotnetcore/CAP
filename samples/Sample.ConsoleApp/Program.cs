@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP;
 using DotNetCore.CAP.Filter;
@@ -51,14 +52,14 @@ namespace Sample.ConsoleApp
 
     public class Filter : SubscribeFilter
     {
-        public override Task OnSubscribeExceptionAsync(ExceptionContext context)
+        public override Task OnSubscribeExceptionAsync(ExceptionContext context, CancellationToken cancellationToken = default)
         {
             if (context.Exception.InnerException is TimeoutException)
             {
                 throw new TimeoutException("Http request timeout");
             }
 
-            return base.OnSubscribeExceptionAsync(context);
+            return base.OnSubscribeExceptionAsync(context, cancellationToken);
         }
     }
 }

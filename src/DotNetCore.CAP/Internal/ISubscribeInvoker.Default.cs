@@ -94,7 +94,7 @@ public class SubscribeInvoker : ISubscribeInvoker
             if (filter != null)
             {
                 var etContext = new ExecutingContext(context, executeParameters);
-                await filter.OnSubscribeExecutingAsync(etContext).ConfigureAwait(false);
+                await filter.OnSubscribeExecutingAsync(etContext, cancellationToken).ConfigureAwait(false);
                 executeParameters = etContext.Arguments;
             }
 
@@ -103,7 +103,7 @@ public class SubscribeInvoker : ISubscribeInvoker
             if (filter != null)
             {
                 var edContext = new ExecutedContext(context, resultObj);
-                await filter.OnSubscribeExecutedAsync(edContext).ConfigureAwait(false);
+                await filter.OnSubscribeExecutedAsync(edContext, cancellationToken).ConfigureAwait(false);
                 resultObj = edContext.Result;
             }
         }
@@ -112,7 +112,7 @@ public class SubscribeInvoker : ISubscribeInvoker
             if (filter != null)
             {
                 var exContext = new ExceptionContext(context, e);
-                await filter.OnSubscribeExceptionAsync(exContext).ConfigureAwait(false);
+                await filter.OnSubscribeExceptionAsync(exContext, cancellationToken).ConfigureAwait(false);
                 if (!exContext.ExceptionHandled) exContext.Exception.ReThrow();
 
                 if (exContext.Result != null) resultObj = exContext.Result;
