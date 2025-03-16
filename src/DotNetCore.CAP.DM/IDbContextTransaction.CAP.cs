@@ -1,14 +1,10 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
-
-using System;
 using System.Data.Common;
-using System.Threading;
-using System.Threading.Tasks;
 using DotNetCore.CAP;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-// ReSharper disable once CheckNamespace
+
 namespace Microsoft.EntityFrameworkCore.Storage;
 
 internal class CapEFDbTransaction : IDbContextTransaction, IInfrastructure<DbTransaction>

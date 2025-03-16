@@ -1,13 +1,8 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
-
-using System;
 using System.Data;
 using System.Data.Common;
-using System.Threading;
-using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Transport;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
@@ -15,7 +10,6 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 
-// ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;
 
 public class DMCapTransaction : CapTransactionBase
