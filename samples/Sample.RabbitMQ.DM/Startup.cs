@@ -2,7 +2,7 @@
 {
     public class Startup
     {
-        public const string ConnectionString = "Server=localhost;User Id=SYSDBA;PWD=Chang@2025;DATABASE=DAMENG";
+        public const string ConnectionString = "";
 
         public void ConfigureServices(IServiceCollection services)
         {
