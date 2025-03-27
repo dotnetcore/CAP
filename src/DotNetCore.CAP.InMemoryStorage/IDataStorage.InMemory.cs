@@ -52,7 +52,10 @@ internal class InMemoryStorage : IDataStorage
     {
         foreach (var id in ids)
         {
-            PublishedMessages[id].StatusName = StatusName.Delayed;
+            if (PublishedMessages[id].StatusName != StatusName.Succeeded && PublishedMessages[id].StatusName != StatusName.Failed)
+            {
+                PublishedMessages[id].StatusName = StatusName.Delayed;
+            }
         }
 
         return Task.CompletedTask;

@@ -95,7 +95,7 @@ public class PostgreSqlDataStorage : IDataStorage
     public async Task ChangePublishStateToDelayedAsync(string[] ids)
     {
         var sql =
-            $"UPDATE {_pubName} SET \"StatusName\"='{StatusName.Delayed}' WHERE \"Id\" IN ({string.Join(',', ids)});";
+            $"UPDATE {_pubName} SET \"StatusName\"='{StatusName.Delayed}' WHERE \"Id\" IN ({string.Join(',', ids)}) AND \"StatusName\" <> '{StatusName.Succeeded}' AND \"StatusName\" <> '{StatusName.Failed}';";
         var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
         await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
