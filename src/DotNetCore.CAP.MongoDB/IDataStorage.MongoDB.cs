@@ -90,7 +90,9 @@ public class MongoDBDataStorage : IDataStorage
     {
         var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
         var updateDef = Builders<PublishedMessage>.Update.Set(x => x.StatusName, nameof(StatusName.Delayed));
-        var filter = Builders<PublishedMessage>.Filter.In(x => x.Id, ids.Select(long.Parse));
+        var filter = Builders<PublishedMessage>.Filter.In(x => x.Id, ids.Select(long.Parse)) &
+             Builders<PublishedMessage>.Filter.Ne(x => x.StatusName, nameof(StatusName.Succeeded)) &
+             Builders<PublishedMessage>.Filter.Ne(x => x.StatusName, nameof(StatusName.Failed));
 
         await collection.UpdateManyAsync(filter, updateDef).ConfigureAwait(false);
     }
