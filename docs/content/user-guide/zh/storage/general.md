@@ -92,4 +92,6 @@ CallbackName |	回调的订阅者名称 | string
 
 * SQLite & Oracle ([@cocosip](https://github.com/cocosip)) ：https://github.com/cocosip/CAP-Extensions   
 
-* SmartSql ([@xiangxiren](https://github.com/xiangxiren)) ：https://github.com/xiangxiren/SmartSql.CAP   
+* SmartSql ([@xiangxiren](https://github.com/xiangxiren)) ：https://github.com/xiangxiren/SmartSql.CAP
+
+* DM（达梦数据库）([@findersky](https://github.com/findersky)) ：https://github.com/findersky/CAP
