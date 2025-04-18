@@ -33,7 +33,7 @@ public class TransportCheckProcessor : IProcessor
         {
             _logger.LogWarning("Transport connection is unhealthy, reconnection...");
 
-            _register.ReStart();
+            await _register.ReStartAsync();
         }
         else
         {

@@ -89,7 +89,7 @@ internal class Bootstrapper : BackgroundService, IBootstrapper
             {
                 _cts!.Token.ThrowIfCancellationRequested();
 
-                await item.Start(_cts!.Token);
+                await item.StartAsync(_cts!.Token);
             }
             catch (OperationCanceledException)
             {

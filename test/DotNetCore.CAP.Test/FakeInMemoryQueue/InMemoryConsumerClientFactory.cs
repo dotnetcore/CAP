@@ -1,4 +1,5 @@
-﻿using DotNetCore.CAP.Transport;
+﻿using System.Threading.Tasks;
+using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 
 namespace DotNetCore.CAP.Test.FakeInMemoryQueue
@@ -14,10 +15,11 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
             _queue = queue;
         }
 
-        public IConsumerClient Create(string groupName, byte groupConcurrent)
+        public Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
         {
             var logger = _loggerFactory.CreateLogger(typeof(InMemoryConsumerClient));
-            return new InMemoryConsumerClient(logger, _queue, groupName, groupConcurrent);
+            var client = new InMemoryConsumerClient(logger, _queue, groupName, groupConcurrent);
+            return Task.FromResult<IConsumerClient>(client);
         }
     }
 }

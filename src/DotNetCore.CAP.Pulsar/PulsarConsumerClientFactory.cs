@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -23,13 +24,13 @@ internal sealed class PulsarConsumerClientFactory : IConsumerClientFactory
         if (_pulsarOptions.Value.EnableClientLog) PulsarClient.Logger = loggerFactory.CreateLogger<PulsarClient>();
     }
 
-    public IConsumerClient Create(string groupName, byte groupConcurrent)
+    public Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
     {
         try
         {
             var client = _connection.RentClient();
             var consumerClient = new PulsarConsumerClient(_pulsarOptions, client, groupName, groupConcurrent);
-            return consumerClient;
+            return Task.FromResult<IConsumerClient>(consumerClient);
         }
         catch (Exception e)
         {

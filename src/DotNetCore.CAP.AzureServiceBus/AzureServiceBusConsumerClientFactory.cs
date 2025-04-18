@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -24,13 +25,13 @@ internal sealed class AzureServiceBusConsumerClientFactory : IConsumerClientFact
         _serviceProvider = serviceProvider;
     }
 
-    public IConsumerClient Create(string groupName, byte groupConcurrent)
+    public async Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
     {
         try
         {
             var logger = _loggerFactory.CreateLogger(typeof(AzureServiceBusConsumerClient));
             var client = new AzureServiceBusConsumerClient(logger, groupName, groupConcurrent, _asbOptions, _serviceProvider);
-            client.ConnectAsync().GetAwaiter().GetResult();
+            await client.ConnectAsync();
             return client;
         }
         catch (Exception e)

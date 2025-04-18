@@ -16,7 +16,7 @@ internal class ConsulProcessingNodeServer : IProcessingServer
         _discoveryProvider = discoveryProvider;
     }
 
-    public async Task Start(CancellationToken stoppingToken)
+    public async ValueTask StartAsync(CancellationToken stoppingToken)
     {
         await _discoveryProvider.RegisterNode(stoppingToken);
     }

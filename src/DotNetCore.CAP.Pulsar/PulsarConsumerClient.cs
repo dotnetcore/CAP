@@ -38,39 +38,39 @@ internal sealed class PulsarConsumerClient : IConsumerClient
 
     public BrokerAddress BrokerAddress => new("Pulsar", _pulsarOptions.ServiceUrl);
 
-    public void Subscribe(IEnumerable<string> topics)
+    public async Task SubscribeAsync(IEnumerable<string> topics)
     {
         if (topics == null) throw new ArgumentNullException(nameof(topics));
 
         var serviceName = Assembly.GetEntryAssembly()?.GetName().Name!.ToLower();
 
-        _consumerClient = _client.NewConsumer()
+        _consumerClient = await _client.NewConsumer()
             .Topics(topics)
             .SubscriptionName(_groupId)
             .ConsumerName(serviceName)
             .SubscriptionType(SubscriptionType.Shared)
-            .SubscribeAsync().GetAwaiter().GetResult();
+            .SubscribeAsync();
     }
 
-    public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
+    public async Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
         while (!cancellationToken.IsCancellationRequested)
         {
             try
             {
-                var consumerResult = _consumerClient!.ReceiveAsync(cancellationToken).GetAwaiter().GetResult();
+                var consumerResult = await _consumerClient!.ReceiveAsync(cancellationToken);
 
                 if (_groupConcurrent > 0)
                 {
                     _semaphore.Wait(cancellationToken);
-                    Task.Run(Consume, cancellationToken).ConfigureAwait(false);
+                    _ = Task.Run(ConsumeAsync, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    Consume().GetAwaiter().GetResult();
+                    await ConsumeAsync();
                 }
 
-                Task Consume()
+                Task ConsumeAsync()
                 {
                     var headers = new Dictionary<string, string?>(consumerResult.Properties.Count);
                     foreach (var header in consumerResult.Properties)
@@ -96,20 +96,21 @@ internal sealed class PulsarConsumerClient : IConsumerClient
         }
     }
 
-    public void Commit(object? sender)
+    public async Task CommitAsync(object? sender)
     {
-        _consumerClient!.AcknowledgeAsync((MessageId)sender!);
+        await _consumerClient!.AcknowledgeAsync((MessageId)sender!);
         _semaphore.Release();
     }
 
-    public void Reject(object? sender)
+    public async Task RejectAsync(object? sender)
     {
-        if (sender is MessageId id) _consumerClient!.NegativeAcknowledge(id);
+        if (sender is MessageId id) 
+           await _consumerClient!.NegativeAcknowledge(id);
         _semaphore.Release();
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
-        _consumerClient?.DisposeAsync();
+        return _consumerClient?.DisposeAsync() ?? ValueTask.CompletedTask;
     }
 }

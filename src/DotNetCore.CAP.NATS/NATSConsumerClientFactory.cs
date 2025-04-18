@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
@@ -18,13 +19,13 @@ internal sealed class NATSConsumerClientFactory : IConsumerClientFactory
         _serviceProvider = serviceProvider;
     }
 
-    public IConsumerClient Create(string groupName, byte groupConcurrent)
+    public Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
     {
         try
         {
             var client = new NATSConsumerClient(groupName, groupConcurrent, _natsOptions, _serviceProvider);
             client.Connect();
-            return client;
+            return Task.FromResult<IConsumerClient>(client);
         }
         catch (System.Exception e)
         {

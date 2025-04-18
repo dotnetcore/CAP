@@ -45,7 +45,7 @@ public class Dispatcher : IDispatcher
         _pChannelSize = Environment.ProcessorCount * 500;
     }
 
-    public async Task Start(CancellationToken stoppingToken)
+    public async ValueTask StartAsync(CancellationToken stoppingToken)
     {
         stoppingToken.ThrowIfCancellationRequested();
         _tasksCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, CancellationToken.None);

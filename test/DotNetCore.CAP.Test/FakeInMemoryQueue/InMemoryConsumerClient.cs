@@ -31,7 +31,7 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
 
         public BrokerAddress BrokerAddress => new BrokerAddress("InMemory", string.Empty);
 
-        public void Subscribe(IEnumerable<string> topics)
+        public Task SubscribeAsync(IEnumerable<string> topics)
         {
             if (topics == null) throw new ArgumentNullException(nameof(topics));
 
@@ -41,29 +41,35 @@ namespace DotNetCore.CAP.Test.FakeInMemoryQueue
 
                 _logger.LogInformation($"InMemory message queue initialize the topic: {topic}");
             }
+
+            return Task.CompletedTask;
         }
 
-        public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
+        public Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
         {
             while (!cancellationToken.IsCancellationRequested)
             {
                 cancellationToken.WaitHandle.WaitOne(timeout);
             }
+            return Task.CompletedTask;
         }
 
-        public void Commit(object sender)
+        public Task CommitAsync(object sender)
         {
             _semaphore.Release();
+            return Task.CompletedTask;
         }
 
-        public void Reject(object sender)
+        public Task RejectAsync(object sender)
         {
             _semaphore.Release();
+            return Task.CompletedTask;
         }
 
-        public void Dispose()
+        public ValueTask DisposeAsync()
         {
             _queue.ClearSubscriber();
+            return ValueTask.CompletedTask;
         }
 
         #region private methods

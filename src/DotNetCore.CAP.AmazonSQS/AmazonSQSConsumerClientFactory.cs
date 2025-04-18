@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
@@ -16,12 +17,12 @@ internal sealed class AmazonSQSConsumerClientFactory : IConsumerClientFactory
         _amazonSQSOptions = amazonSQSOptions;
     }
 
-    public IConsumerClient Create(string groupName, byte groupConcurrent)
+    public Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
     {
         try
         {
             var client = new AmazonSQSConsumerClient(groupName, groupConcurrent, _amazonSQSOptions);
-            return client;
+            return Task.FromResult<IConsumerClient>(client);
         }
         catch (Exception e)
         {

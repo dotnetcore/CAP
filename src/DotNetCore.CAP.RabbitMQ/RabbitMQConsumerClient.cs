@@ -15,7 +15,7 @@ namespace DotNetCore.CAP.RabbitMQ;
 
 internal sealed class RabbitMqConsumerClient : IConsumerClient
 {
-    private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    private readonly SemaphoreSlim _semaphore = new(1, 1);
     private readonly IConnectionChannelPool _connectionChannelPool;
     private readonly IServiceProvider _serviceProvider;
     private readonly string _exchangeName;
@@ -44,29 +44,29 @@ internal sealed class RabbitMqConsumerClient : IConsumerClient
 
     public BrokerAddress BrokerAddress => new("RabbitMQ", $"{_rabbitMqOptions.HostName}:{_rabbitMqOptions.Port}");
 
-    public void Subscribe(IEnumerable<string> topics)
+    public async Task SubscribeAsync(IEnumerable<string> topics)
     {
         if (topics == null) throw new ArgumentNullException(nameof(topics));
 
-        Connect().GetAwaiter().GetResult();
+        await ConnectAsync();
 
         foreach (var topic in topics)
         {
-            _channel!.QueueBindAsync(_queueName, _exchangeName, topic).GetAwaiter().GetResult();
+            await _channel!.QueueBindAsync(_queueName, _exchangeName, topic);
         }
     }
 
-    public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
+    public async Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
-        Connect().GetAwaiter().GetResult();
+        await ConnectAsync();
 
         if (_groupConcurrent > 0)
         {
-            _channel!.BasicQosAsync(prefetchSize: 0, prefetchCount: _groupConcurrent, global: false, cancellationToken).GetAwaiter().GetResult(); 
+            await _channel!.BasicQosAsync(prefetchSize: 0, prefetchCount: _groupConcurrent, global: false, cancellationToken);
         }
         else if (_rabbitMqOptions.BasicQosOptions != null)
         {
-            _channel!.BasicQosAsync(0, _rabbitMqOptions.BasicQosOptions.PrefetchCount, _rabbitMqOptions.BasicQosOptions.Global, cancellationToken).GetAwaiter().GetResult();
+            await _channel!.BasicQosAsync(0, _rabbitMqOptions.BasicQosOptions.PrefetchCount, _rabbitMqOptions.BasicQosOptions.Global, cancellationToken);
         }
 
         _consumer = new RabbitMqBasicConsumer(_channel!, _groupConcurrent, _queueName, OnMessageCallback!, OnLogCallback!,
@@ -74,12 +74,11 @@ internal sealed class RabbitMqConsumerClient : IConsumerClient
 
         try
         {
-            _channel!.BasicConsumeAsync(_queueName, false, _consumer, cancellationToken).GetAwaiter().GetResult();
+            await _channel!.BasicConsumeAsync(_queueName, false, _consumer, cancellationToken);
         }
         catch (TimeoutException ex)
         {
-            _consumer.HandleChannelShutdownAsync(null!, new ShutdownEventArgs(ShutdownInitiator.Application, 0,
-                ex.Message + "-->" + nameof(_channel.BasicConsumeAsync))).GetAwaiter().GetResult();
+            await _consumer.HandleChannelShutdownAsync(null!, new ShutdownEventArgs(ShutdownInitiator.Application, 0, ex.Message + "-->" + nameof(_channel.BasicConsumeAsync)));
         }
 
         while (true)
@@ -87,28 +86,28 @@ internal sealed class RabbitMqConsumerClient : IConsumerClient
             cancellationToken.ThrowIfCancellationRequested();
             cancellationToken.WaitHandle.WaitOne(timeout);
         }
-
         // ReSharper disable once FunctionNeverReturns
     }
 
-    public void Commit(object? sender)
+    public async Task CommitAsync(object? sender)
     {
-        _consumer!.BasicAck((ulong)sender!).GetAwaiter().GetResult();
+        await _consumer!.BasicAck((ulong)sender!);
     }
 
-    public void Reject(object? sender)
+    public async Task RejectAsync(object? sender)
     {
-        _consumer!.BasicReject((ulong)sender!).GetAwaiter().GetResult();
+        await _consumer!.BasicReject((ulong)sender!);
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
         _channel?.Dispose();
+        return ValueTask.CompletedTask;
         //The connection should not be closed here, because the connection is still in use elsewhere. 
         //_connection?.Dispose();
     }
 
-    public async Task Connect()
+    public async Task ConnectAsync()
     {
         var connection = _connectionChannelPool.GetConnection();
 

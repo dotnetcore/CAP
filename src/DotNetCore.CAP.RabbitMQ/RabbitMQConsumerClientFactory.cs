@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
@@ -21,14 +22,14 @@ internal sealed class RabbitMqConsumerClientFactory : IConsumerClientFactory
         _serviceProvider = serviceProvider;
     }
 
-    public IConsumerClient Create(string groupId, byte concurrent)
+    public async Task<IConsumerClient> CreateAsync(string groupId, byte concurrent)
     {
         try
         {
             var client = new RabbitMqConsumerClient(groupId, concurrent, _connectionChannelPool,
                 _rabbitMqOptions, _serviceProvider);
             
-            client.Connect().GetAwaiter().GetResult();
+            await client.ConnectAsync();
             
             return client;
         }

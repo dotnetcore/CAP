@@ -43,7 +43,7 @@ public class KafkaConsumerClient : IConsumerClient
 
     public BrokerAddress BrokerAddress => new("Kafka", _kafkaOptions.Servers);
 
-    public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+    public async Task<ICollection<string>> FetchTopicsAsync(IEnumerable<string> topicNames)
     {
         if (topicNames == null) throw new ArgumentNullException(nameof(topicNames));
 
@@ -55,12 +55,12 @@ public class KafkaConsumerClient : IConsumerClient
 
             using var adminClient = new AdminClientBuilder(config).Build();
 
-            adminClient.CreateTopicsAsync(regexTopicNames.Select(x => new TopicSpecification
+           await adminClient.CreateTopicsAsync(regexTopicNames.Select(x => new TopicSpecification
             {
                 Name = x,
                 NumPartitions = _kafkaOptions.TopicOptions.NumPartitions,
                 ReplicationFactor = _kafkaOptions.TopicOptions.ReplicationFactor
-            })).GetAwaiter().GetResult();
+            }));
         }
         catch (CreateTopicsException ex) when (ex.Message.Contains("already exists"))
         {
@@ -78,16 +78,18 @@ public class KafkaConsumerClient : IConsumerClient
         return regexTopicNames;
     }
 
-    public void Subscribe(IEnumerable<string> topics)
+    public Task SubscribeAsync(IEnumerable<string> topics)
     {
         if (topics == null) throw new ArgumentNullException(nameof(topics));
 
         Connect();
 
         _consumerClient!.Subscribe(topics);
+
+        return Task.CompletedTask;
     }
 
-    public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
+    public async Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
         Connect();
 
@@ -117,31 +119,34 @@ public class KafkaConsumerClient : IConsumerClient
             if (_groupConcurrent > 0)
             {
                 _semaphore.Wait(cancellationToken);
-                Task.Run(() => Consume(consumerResult), cancellationToken).ConfigureAwait(false);
+                _ = Task.Run(() => ConsumeAsync(consumerResult), cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                Consume(consumerResult).GetAwaiter().GetResult();
+                await ConsumeAsync(consumerResult);
             }
         }
         // ReSharper disable once FunctionNeverReturns
     }
 
-    public void Commit(object? sender)
+    public Task CommitAsync(object? sender)
     {
         _consumerClient!.Commit((ConsumeResult<string, byte[]>)sender!);
         _semaphore.Release();
+        return Task.CompletedTask;
     }
 
-    public void Reject(object? sender)
+    public Task RejectAsync(object? sender)
     {
         _consumerClient!.Assign(_consumerClient.Assignment);
         _semaphore.Release();
+        return Task.CompletedTask;
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
         _consumerClient?.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     public void Connect()
@@ -165,7 +170,7 @@ public class KafkaConsumerClient : IConsumerClient
         }
     }
 
-    private async Task Consume(ConsumeResult<string, byte[]> consumerResult)
+    private async Task ConsumeAsync(ConsumeResult<string, byte[]> consumerResult)
     {
         var headers = new Dictionary<string, string?>(consumerResult.Message.Headers.Count);
         foreach (var header in consumerResult.Message.Headers)

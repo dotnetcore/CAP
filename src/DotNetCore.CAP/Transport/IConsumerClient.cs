@@ -12,44 +12,61 @@ namespace DotNetCore.CAP.Transport;
 
 /// <inheritdoc />
 /// <summary>
-/// Message queue consumer client
+/// Message queue consumer client interface that defines operations for consuming messages from various message brokers
 /// </summary>
-public interface IConsumerClient : IDisposable
+public interface IConsumerClient : IAsyncDisposable
 {
+    /// <summary>
+    /// Gets the broker address information that this consumer is connected to
+    /// </summary>
     BrokerAddress BrokerAddress { get; }
 
     /// <summary>
-    /// Create (if necessary) and get topic identifiers
+    /// Creates (if necessary) and retrieves topic identifiers from the message broker
     /// </summary>
-    /// <param name="topicNames">Names of the requested topics</param>
-    /// <returns>Topic identifiers</returns>
-    ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+    /// <param name="topicNames">Names of the requested topics to fetch</param>
+    /// <returns>A collection of topic identifiers returned by the broker</returns>
+    Task<ICollection<string>> FetchTopicsAsync(IEnumerable<string> topicNames)
     {
-        return topicNames.ToList();
+        return Task.FromResult<ICollection<string>>(topicNames.ToList());
     }
 
     /// <summary>
-    /// Subscribe to a set of topics to the message queue
+    /// Subscribes to a set of topics in the message broker
     /// </summary>
-    /// <param name="topics"></param>
-    void Subscribe(IEnumerable<string> topics);
+    /// <param name="topics">Collection of topic identifiers to subscribe to</param>
+    /// <returns>A task that represents the asynchronous subscribe operation</returns>
+    Task SubscribeAsync(IEnumerable<string> topics);
 
     /// <summary>
-    /// Start listening
+    /// Starts listening for messages from the subscribed topics
     /// </summary>
-    void Listening(TimeSpan timeout, CancellationToken cancellationToken);
+    /// <param name="timeout">Maximum time to wait when polling for messages</param>
+    /// <param name="cancellationToken">Token to cancel the listening operation</param>
+    /// <returns>A task that represents the asynchronous listening operation</returns>
+    Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken);
 
     /// <summary>
-    /// Manual submit message offset when the message consumption is complete
+    /// Manually commits message offset when the message consumption is complete
     /// </summary>
-    void Commit(object? sender);
+    /// <param name="sender">The message or context object to commit</param>
+    /// <returns>A task that represents the asynchronous commit operation</returns>
+    Task CommitAsync(object? sender);
 
     /// <summary>
-    /// Reject message and resumption
+    /// Rejects the message and optionally returns it to the queue for reprocessing
     /// </summary>
-    void Reject(object? sender);
+    /// <param name="sender">The message or context object to reject</param>
+    /// <returns>A task that represents the asynchronous reject operation</returns>
+    Task RejectAsync(object? sender);
 
+    /// <summary>
+    /// Callback that is invoked when a message is received from the broker
+    /// </summary>
     public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
 
+    /// <summary>
+    /// Callback that is invoked when logging events occur in the consumer client
+    /// </summary>
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 }

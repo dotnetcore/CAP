@@ -45,7 +45,7 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
 
     public BrokerAddress BrokerAddress => new("AmazonSQS", _queueUrl);
 
-    public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+    public async Task<ICollection<string>> FetchTopicsAsync(IEnumerable<string> topicNames)
     {
         if (topicNames == null) throw new ArgumentNullException(nameof(topicNames));
 
@@ -56,27 +56,26 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
         {
             var createTopicRequest = new CreateTopicRequest(topic.NormalizeForAws());
 
-            var createTopicResponse = _snsClient!.CreateTopicAsync(createTopicRequest).GetAwaiter().GetResult();
+            var createTopicResponse = await _snsClient!.CreateTopicAsync(createTopicRequest);
 
             topicArns.Add(createTopicResponse.TopicArn);
         }
 
-        GenerateSqsAccessPolicyAsync(topicArns)
-            .GetAwaiter().GetResult();
+        await GenerateSqsAccessPolicyAsync(topicArns);
 
         return topicArns;
     }
 
-    public void Subscribe(IEnumerable<string> topics)
+    public async Task SubscribeAsync(IEnumerable<string> topics)
     {
         if (topics == null) throw new ArgumentNullException(nameof(topics));
 
         Connect();
 
-        SubscribeToTopics(topics).GetAwaiter().GetResult();
+        await SubscribeToTopics(topics);
     }
 
-    public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
+    public async Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
         Connect();
 
@@ -88,21 +87,21 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
 
         while (true)
         {
-            var response = _sqsClient!.ReceiveMessageAsync(request, cancellationToken).GetAwaiter().GetResult();
+            var response = await _sqsClient!.ReceiveMessageAsync(request, cancellationToken);
 
             if (response.Messages.Count == 1)
             {
                 if (_groupConcurrent > 0)
                 {
                     _semaphore.Wait(cancellationToken);
-                    Task.Run(() => Consume(), cancellationToken).ConfigureAwait(false);
+                    _ = Task.Run(() => ConsumeAsync(), cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    Consume().GetAwaiter().GetResult();
+                    await ConsumeAsync();
                 }
 
-                Task Consume()
+                Task ConsumeAsync()
                 {
                     var messageObj = JsonSerializer.Deserialize<SQSReceivedMessage>(response.Messages[0].Body);
 
@@ -124,11 +123,11 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
         }
     }
 
-    public void Commit(object? sender)
+    public async Task CommitAsync(object? sender)
     {
         try
         {
-            _ = _sqsClient!.DeleteMessageAsync(_queueUrl, (string)sender!).GetAwaiter().GetResult();
+            await _sqsClient!.DeleteMessageAsync(_queueUrl, (string)sender!);
             _semaphore.Release();
         }
         catch (ReceiptHandleIsInvalidException ex)
@@ -137,12 +136,11 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
         }
     }
 
-    public void Reject(object? sender)
+    public async Task RejectAsync(object? sender)
     {
         try
         {
-            // Visible again in 3 seconds
-            _ = _sqsClient!.ChangeMessageVisibilityAsync(_queueUrl, (string)sender!, 3).GetAwaiter().GetResult();
+            await _sqsClient!.ChangeMessageVisibilityAsync(_queueUrl, (string)sender!, 3);
             _semaphore.Release();
         }
         catch (MessageNotInflightException ex)
@@ -151,10 +149,12 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
         }
     }
 
-    public void Dispose()
+
+    public ValueTask DisposeAsync()
     {
         _sqsClient?.Dispose();
         _snsClient?.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     public void Connect(bool initSNS = true, bool initSQS = true)

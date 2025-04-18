@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Threading.Tasks;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Options;
 
@@ -18,11 +19,11 @@ public class KafkaConsumerClientFactory : IConsumerClientFactory
         _serviceProvider = serviceProvider;
     }
 
-    public virtual IConsumerClient Create(string groupName, byte groupConcurrent)
+    public virtual Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
     {
         try
         {
-            return new KafkaConsumerClient(groupName, groupConcurrent, _kafkaOptions, _serviceProvider);
+            return Task.FromResult<IConsumerClient>(new KafkaConsumerClient(groupName, groupConcurrent, _kafkaOptions, _serviceProvider));
         }
         catch (Exception e)
         {

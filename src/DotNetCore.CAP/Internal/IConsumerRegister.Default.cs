@@ -54,7 +54,7 @@ internal class ConsumerRegister : IConsumerRegister
         return _isHealthy;
     }
 
-    public Task Start(CancellationToken stoppingToken)
+    public async ValueTask StartAsync(CancellationToken stoppingToken)
     {
         _cts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken);
         _cts.Token.Register(Dispose);
@@ -65,14 +65,12 @@ internal class ConsumerRegister : IConsumerRegister
         _storage = _serviceProvider.GetRequiredService<IDataStorage>();
         _consumerClientFactory = _serviceProvider.GetRequiredService<IConsumerClientFactory>();
 
-        Execute();
+        await ExecuteAsync();
 
         _disposed = 0;
-
-        return Task.CompletedTask;
     }
 
-    public void ReStart(bool force = false)
+    public async ValueTask ReStartAsync(bool force = false)
     {
         if (!IsHealthy() || force)
         {
@@ -81,7 +79,7 @@ internal class ConsumerRegister : IConsumerRegister
             _cts = new CancellationTokenSource();
             _isHealthy = true;
 
-            Execute();
+            await ExecuteAsync();
         }
     }
 
@@ -109,7 +107,7 @@ internal class ConsumerRegister : IConsumerRegister
         _cts.Dispose();
     }
 
-    public void Execute()
+    public async ValueTask ExecuteAsync()
     {
         var groupingMatches = _selector.GetCandidatesMethodsOfGroupNameGrouped();
 
@@ -119,12 +117,9 @@ internal class ConsumerRegister : IConsumerRegister
             var limit = _selector.GetGroupConcurrentLimit(matchGroup.Key);
             try
             {
-                // ReSharper disable once ConvertToUsingDeclaration
-                using (var client = _consumerClientFactory.Create(matchGroup.Key, limit))
-                {
-                    client.OnLogCallback = WriteLog;
-                    topics = client.FetchTopics(matchGroup.Value.Select(x => x.TopicName));
-                }
+                await using var client = await _consumerClientFactory.CreateAsync(matchGroup.Key, limit);
+                client.OnLogCallback = WriteLog;
+                topics = await client.FetchTopicsAsync(matchGroup.Value.Select(x => x.TopicName));
             }
             catch (BrokerConnectionException e)
             {
@@ -136,21 +131,19 @@ internal class ConsumerRegister : IConsumerRegister
             for (var i = 0; i < _options.ConsumerThreadCount; i++)
             {
                 var topicIds = topics.Select(t => t);
-                _ = Task.Factory.StartNew(() =>
+                _ = Task.Factory.StartNew(async () =>
                   {
                       try
                       {
-                          // ReSharper disable once ConvertToUsingDeclaration
-                          using (var client = _consumerClientFactory.Create(matchGroup.Key, limit))
-                          {
-                              _serverAddress = client.BrokerAddress;
+                          await using var client = await _consumerClientFactory.CreateAsync(matchGroup.Key, limit);
 
-                              RegisterMessageProcessor(client);
+                          _serverAddress = client.BrokerAddress;
 
-                              client.Subscribe(topicIds);
+                          RegisterMessageProcessor(client);
 
-                              client.Listening(_pollingDelay, _cts.Token);
-                          }
+                          await client.SubscribeAsync(topicIds);
+
+                          await client.ListeningAsync(_pollingDelay, _cts.Token);
                       }
                       catch (OperationCanceledException)
                       {
@@ -235,7 +228,7 @@ internal class ConsumerRegister : IConsumerRegister
 
                     await _storage.StoreReceivedExceptionMessageAsync(name, group, content);
 
-                    client.Commit(sender);
+                    await client.CommitAsync(sender);
 
                     try
                     {
@@ -264,7 +257,7 @@ internal class ConsumerRegister : IConsumerRegister
 
                     await _dispatcher.EnqueueToExecute(mediumMessage, executor!);
 
-                    client.Commit(sender);
+                    await client.CommitAsync(sender);
 
                 }
             }
@@ -273,7 +266,7 @@ internal class ConsumerRegister : IConsumerRegister
                 _logger.LogError(e, "An exception occurred when process received message. Message:'{0}'.",
                     transportMessage);
 
-                client.Reject(sender);
+                await client.RejectAsync(sender);
 
                 TracingError(tracingTimestamp, transportMessage, client.BrokerAddress, e);
             }
