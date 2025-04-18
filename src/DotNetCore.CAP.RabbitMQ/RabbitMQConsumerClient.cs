@@ -52,7 +52,7 @@ internal sealed class RabbitMqConsumerClient : IConsumerClient
 
         foreach (var topic in topics)
         {
-            _channel!.QueueBindAsync(_queueName, _exchangeName, topic);
+            _channel!.QueueBindAsync(_queueName, _exchangeName, topic).GetAwaiter().GetResult();
         }
     }
 
@@ -74,7 +74,7 @@ internal sealed class RabbitMqConsumerClient : IConsumerClient
 
         try
         {
-            _channel!.BasicConsumeAsync(_queueName, false, _consumer, cancellationToken);
+            _channel!.BasicConsumeAsync(_queueName, false, _consumer, cancellationToken).GetAwaiter().GetResult();
         }
         catch (TimeoutException ex)
         {
