@@ -18,7 +18,7 @@ you have to configure at least a transport and a storage. If you want to get sta
 services.AddCap(capOptions => 
 {
      capOptions.UseInMemoryQueue();  //Required Savorboard.CAP.InMemoryMessageQueue nuget package.
-     capOptions.UseInmemoryStorage();
+     capOptions.UseInMemoryStorage();
 });
 ```
 
