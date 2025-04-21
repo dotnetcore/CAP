@@ -39,7 +39,7 @@ public class CollectorProcessor : IProcessor
             _logger.LogDebug($"Collecting expired data from table: {table}");
 
             int deletedCount;
-            var time = DateTime.Now;
+            var time = DateTime.Now.AddHours(-1);
             do
             {
                 deletedCount = await _serviceProvider.GetRequiredService<IDataStorage>()
