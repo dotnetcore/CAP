@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading;
+﻿using System.Threading;
 using DotNetCore.CAP.Test.FakeInMemoryQueue;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit.Abstractions;
