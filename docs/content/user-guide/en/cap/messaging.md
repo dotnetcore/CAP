@@ -3,18 +3,18 @@
 The data sent by using the `ICapPublisher` interface is called `Message`.
 
 !!! WARNING "TimeoutException thrown in consumer using HTTPClient"
-    By default, if the consumer throws an `OperationCanceledException` (including `TaskCanceledException`), we consider this to be normal user behavior and ignore the exception. If you use HTTPClient in the consumer method and configure the request timeout, due to the [design issue](https://github.com/dotnet/runtime/issues/21965) of HTTP Client, you may need to handle the exception separately and re-throw non `OperationCanceledException`, refer to #1368.
+    By default, if the consumer throws an `OperationCanceledException` (including `TaskCanceledException`), it is considered normal user behavior, and the exception is ignored. However, if you use `HttpClient` in the consumer method and configure a request timeout, you may need to handle exceptions separately and re-throw non-`OperationCanceledException` exceptions due to a [design issue](https://github.com/dotnet/runtime/issues/21965) in `HttpClient`. Refer to issue #1368 for more details.
 
 ## Compensating transaction
 
 Wiki :
 [Compensating transaction](https://en.wikipedia.org/wiki/Compensating_transaction)
 
-In some cases, consumers need to return the execution value to tell the publisher, so that the publisher can implement some compensation actions, usually we called message compensation.
+In some cases, consumers need to return an execution result to inform the publisher, enabling the publisher to perform compensation actions. This process is commonly referred to as message compensation.
 
-Usually you can notify the upstream by republishing a new message in the consumer code. CAP provides a simple way to do this. You can specify `callbackName` parameter when publishing message, usually this only applies to point-to-point consumption. The following is an example.
+Typically, you can notify the upstream system by republishing a new message in the consumer code. CAP simplifies this process by allowing you to specify the `callbackName` parameter when publishing a message. This feature is generally applicable to point-to-point consumption. Below is an example.
 
-For example, in an e-commerce application, the initial status of the order is pending, and the status is marked as succeeded when the product quantity is successfully deducted, otherwise it is failed.
+For instance, in an e-commerce application, the initial status of an order is "pending." The status is updated to "succeeded" when the product quantity is successfully deducted; otherwise, it is marked as "failed."
 
 ```C#
 // =============  Publisher =================
@@ -87,7 +87,7 @@ public object DeductProductQty(JsonElement param, [FromCap] CapHeader header)
 
 In version 3.0+, we reconstructed the message structure. We used the Header in the message protocol in the message queue to transmit some additional information, so that we can do it in the Body without modifying or packaging the user’s original The message data format and content are sent.
 
-This approach is reasonable. It helps to better integrate in heterogeneous systems. Compared with previous versions, users do not need to know the message structure used inside CAP to complete the integration work.
+This approach facilitates better integration with heterogeneous systems. Compared to previous versions, users no longer need to understand the internal message structure used by CAP to complete integration tasks.
 
 Now we divide the message into Header and Body for transmission.
 
@@ -149,7 +149,7 @@ CAP will store the message after receiving it. For more information on storage, 
 
 ## Retry
 
-Retrying plays an important role in the overall CAP architecture design, CAP retry messages that fail to send or fail to execute. There are several retry strategies used throughout the CAP design process.
+Retrying is a crucial aspect of the CAP architecture. CAP retries messages that fail to send or execute, employing several retry strategies throughout its design.
 
 ### Send retry
 
