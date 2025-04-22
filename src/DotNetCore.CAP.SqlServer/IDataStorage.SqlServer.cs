@@ -204,47 +204,22 @@ public class SqlServerDataStorage : IDataStorage
     }
 
     public async Task<int> DeleteExpiresAsync(string table, DateTime timeout, int batchCount = 1000,
-    CancellationToken token = default)
+        CancellationToken token = default)
     {
-        // see: https://github.com/dotnetcore/CAP/issues/1661
-        
         var connection = new SqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
 
-        // Step 1: Query the primary keys (Ids) to delete
-        var query = $@"
-        SELECT TOP (@batchCount) Id FROM {table} WITH (READPAST)
-        WHERE ExpiresAt < @timeout 
-        AND StatusName IN('{StatusName.Succeeded}','{StatusName.Failed}');";
-
-        object[] sqlParams =
-        {
-            new SqlParameter("@timeout", timeout),
-            new SqlParameter("@batchCount", batchCount)
-        };
-
-        var idsToDelete = await connection.ExecuteReaderAsync(query, async reader =>
-        {
-            var ids = new List<long>();
-            while (await reader.ReadAsync(token).ConfigureAwait(false))
-            {
-                ids.Add(reader.GetInt64(0));
-            }
-
-            return ids;
-        }, sqlParams: sqlParams).ConfigureAwait(false);
-
-        if (!idsToDelete.Any())
-        {
-            return 0;
-        }
-
-        // Step 2: Delete records by the Ids queried
-        var idsSql = string.Join(",", idsToDelete);
-
         return await connection.ExecuteNonQueryAsync(
-            $@"DELETE FROM {table} WHERE Id IN ({idsSql});",
-            null).ConfigureAwait(false);
+            $@"DELETE FROM {table} 
+               WHERE Id IN (
+                   SELECT TOP (@batchCount) Id 
+                   FROM {table} WITH (READPAST)
+                   WHERE ExpiresAt < @timeout 
+                   AND StatusName IN('{StatusName.Succeeded}','{StatusName.Failed}')
+               );",
+            null,
+            new SqlParameter("@timeout", timeout), 
+            new SqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
     }
 
     public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
