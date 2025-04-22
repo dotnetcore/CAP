@@ -26,14 +26,12 @@ internal class CapPublisher : ICapPublisher
     private readonly ISnowflakeId _snowflakeId;
     private readonly IDispatcher _dispatcher;
     private readonly IDataStorage _storage;
-    private readonly IBootstrapper _bootstrapper;
 
     private readonly AsyncLocal<CapTransactionHolder> _asyncLocal;
 
     public CapPublisher(IServiceProvider service)
     {
         ServiceProvider = service;
-        _bootstrapper = service.GetRequiredService<IBootstrapper>();
         _dispatcher = service.GetRequiredService<IDispatcher>();
         _storage = service.GetRequiredService<IDataStorage>();
         _capOptions = service.GetRequiredService<IOptions<CapOptions>>().Value;
@@ -43,8 +41,8 @@ internal class CapPublisher : ICapPublisher
 
     public IServiceProvider ServiceProvider { get; }
 
-    public ICapTransaction? Transaction {
-
+    public ICapTransaction? Transaction
+    {
         get => _asyncLocal.Value?.Transaction;
         set
         {
@@ -114,11 +112,6 @@ internal class CapPublisher : ICapPublisher
     private async Task PublishInternalAsync<T>(string name, T? value, IDictionary<string, string?> headers, TimeSpan? delayTime = null,
         CancellationToken cancellationToken = default)
     {
-        if (!_bootstrapper.IsStarted)
-        {
-            throw new InvalidOperationException("CAP has not been started!");
-        }
-
         if (string.IsNullOrEmpty(name)) throw new ArgumentNullException(nameof(name));
 
         if (!string.IsNullOrEmpty(_capOptions.TopicNamePrefix)) name = $"{_capOptions.TopicNamePrefix}.{name}";
@@ -176,8 +169,7 @@ internal class CapPublisher : ICapPublisher
             {
                 var transaction = (CapTransactionBase)Transaction;
 
-                var mediumMessage = await _storage.StoreMessageAsync(name, message, transaction.DbTransaction)
-                    .ConfigureAwait(false);
+                var mediumMessage = await _storage.StoreMessageAsync(name, message, transaction.DbTransaction).ConfigureAwait(false);
 
                 TracingAfter(tracingTimestamp, message);
 

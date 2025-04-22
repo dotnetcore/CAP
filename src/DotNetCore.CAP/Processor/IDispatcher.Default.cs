@@ -112,10 +112,10 @@ public class Dispatcher : IDispatcher
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex, 
+                    _logger.LogWarning(ex,
                         "Scheduled message publishing failed unexpectedly, which will stop future scheduled " +
                         "messages from publishing. See more details here: https://github.com/dotnetcore/CAP/issues/1637. " +
-                        "Exception: {Message}", 
+                        "Exception: {Message}",
                         ex.Message);
                     throw;
                 }
@@ -145,7 +145,11 @@ public class Dispatcher : IDispatcher
     {
         try
         {
-            if (_tasksCts!.IsCancellationRequested) return;
+            if (_tasksCts!.IsCancellationRequested)
+            {
+                _logger.LogWarning("The message has been persisted, but CAP is currently stopped. It will be attempted to be sent once CAP becomes available.");
+                return;
+            }
 
             if (_enableParallelSend && message.Retries == 0)
             {
