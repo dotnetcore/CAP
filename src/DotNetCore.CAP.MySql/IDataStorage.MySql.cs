@@ -211,14 +211,14 @@ public class MySqlDataStorage : IDataStorage
         await using var _ = connection.ConfigureAwait(false);
 
         return await connection.ExecuteNonQueryAsync(
-            $@"DELETE FROM `{table}` 
-               WHERE Id IN (
+            $@"DELETE P FROM `{table}` AS P
+               JOIN (
                    SELECT Id 
                    FROM `{table}`
                    WHERE ExpiresAt < @timeout 
                    AND StatusName IN ('{StatusName.Succeeded}', '{StatusName.Failed}')
                    LIMIT @batchCount
-               );",
+               ) AS T ON P.Id = T.Id;",
             null,
             new MySqlParameter("@timeout", timeout), 
             new MySqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
