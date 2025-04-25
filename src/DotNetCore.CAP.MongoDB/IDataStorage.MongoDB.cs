@@ -290,6 +290,20 @@ public class MongoDBDataStorage : IDataStorage
         }).ToList();
     }
 
+    public async Task<int> DeleteReceivedMessageAsync(long id)
+    {
+        var collection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
+        var deleteResult = await collection.DeleteOneAsync(x => x.Id == id).ConfigureAwait(false);
+        return (int)deleteResult.DeletedCount;
+    }
+
+    public async Task<int> DeletePublishedMessageAsync(long id)
+    {
+        var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
+        var deleteResult = await collection.DeleteOneAsync(x => x.Id == id).ConfigureAwait(false);
+        return (int)deleteResult.DeletedCount;
+    }
+
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
         CancellationToken token = default)
     {
