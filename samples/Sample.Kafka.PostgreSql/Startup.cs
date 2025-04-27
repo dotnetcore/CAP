@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Sample.Kafka.PostgreSql
@@ -9,8 +11,15 @@ namespace Sample.Kafka.PostgreSql
 
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<AppDbContext>((sp, opt) =>
+            {
+                opt.UseNpgsql(DbConnectionString)
+                 .ReplaceService<IRelationalConnection, CapNpgsqlRelationalConnection>();
+            });
+
             services.AddCap(x =>
             {
+                //x.UseEntityFramework<AppDbContext>();
                 //docker run --name postgres -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres
                 x.UsePostgreSql(DbConnectionString);
 
