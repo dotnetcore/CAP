@@ -219,7 +219,7 @@ public class MySqlDataStorage : IDataStorage
                    AND StatusName IN ('{StatusName.Succeeded}', '{StatusName.Failed}')
                    ORDER BY Id
                    LIMIT @batchCount
-                   FOR UPDATE SKIP LOCKED
+                   { (SupportSkipLocked ? "FOR UPDATE SKIP LOCKED" : "FOR UPDATE")}
                ) AS T ON P.Id = T.Id;",
             null,
             new MySqlParameter("@timeout", timeout), 
