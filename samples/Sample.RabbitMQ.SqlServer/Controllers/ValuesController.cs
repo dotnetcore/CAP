@@ -1,12 +1,12 @@
-﻿using System;
-using System.Data.Common;
-using System.Threading.Tasks;
-using Dapper;
+﻿using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using NameGenerator.Generators;
 using Sample.RabbitMQ.SqlServer.Messages;
+using System;
+using System.Data.Common;
+using System.Threading.Tasks;
 
 namespace Sample.RabbitMQ.SqlServer.Controllers
 {
@@ -128,6 +128,24 @@ namespace Sample.RabbitMQ.SqlServer.Controllers
                     Id = 123,
                     Name = "Bar"
                 });
+            }
+            return Ok();
+        }
+
+        [Route("~/ef/transaction/existing")]
+        public IActionResult EntityFrameworkWithExistingTransaction([FromServices] AppDbContext dbContext)
+        {
+            using (var transaction = dbContext.Database.BeginTransaction(_capBus))
+            {
+                dbContext.Persons.Add(new Person() { Name = "ef.transaction" });
+                dbContext.SaveChanges();
+                transaction.SubscribeCap(_capBus);
+                _capBus.Publish("sample.rabbitmq.sqlserver", new Person()
+                {
+                    Id = 123,
+                    Name = "Bar"
+                });
+                transaction.Commit();
             }
             return Ok();
         }
