@@ -217,7 +217,9 @@ public class MySqlDataStorage : IDataStorage
                    FROM `{table}`
                    WHERE ExpiresAt < @timeout 
                    AND StatusName IN ('{StatusName.Succeeded}', '{StatusName.Failed}')
+                   ORDER BY Id
                    LIMIT @batchCount
+                   FOR UPDATE SKIP LOCKED
                ) AS T ON P.Id = T.Id;",
             null,
             new MySqlParameter("@timeout", timeout), 
