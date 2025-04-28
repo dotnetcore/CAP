@@ -1,11 +1,6 @@
 ﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-using System;
-using System.Data;
-using System.Data.Common;
-using System.Threading;
-using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.SqlServer.Diagnostics;
@@ -15,6 +10,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Data;
+using System.Data.Common;
+using System.Threading;
+using System.Threading.Tasks;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;
@@ -138,6 +138,17 @@ public static class CapTransactionExtensions
         publisher.Transaction.DbTransaction = dbTransaction;
         publisher.Transaction.AutoCommit = autoCommit;
         return new CapEFDbTransaction(publisher.Transaction);
+    }
+
+    /// <summary>
+    /// Subscribe cap publisher to an existing entity framework transaction
+    /// </summary>
+    /// <param name="transaction">The <see cref="IDbContextTransaction" />.</param>
+    /// <param name="publisher">The <see cref="ICapPublisher" />.</param>
+    public static void SubscribeCap(this IDbContextTransaction transaction, ICapPublisher publisher)
+    {
+        publisher.Transaction = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
+        publisher.Transaction.DbTransaction = transaction.GetDbTransaction();
     }
 
     /// <summary>
