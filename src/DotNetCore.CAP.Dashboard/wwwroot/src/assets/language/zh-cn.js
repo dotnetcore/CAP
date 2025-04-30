@@ -57,6 +57,7 @@ export default {
     Tags: "标签",
     Actions: "动作",
     ReexecuteSuccess: "😀 重新执行成功！",
+    DeleteSuccess: "😀 删除成功！",
     RequeueSuccess: "😀 重新发布成功！",
     SwitchedNode: "切换的节点",
     Storage: "存储",

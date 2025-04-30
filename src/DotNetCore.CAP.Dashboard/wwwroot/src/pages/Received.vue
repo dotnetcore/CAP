@@ -39,9 +39,13 @@
     <b-row>
       <b-col md="12">
         <b-btn-toolbar class="mt-4">
-          <b-button size="sm" variant="dark" @click="reexecute" :disabled="!selectedItems.length">
+          <b-button size="sm" variant="dark" @click="reexecute" :disabled="!selectedItems.length" class="action-button">
             <b-icon-arrow-repeat aria-hidden="true"></b-icon-arrow-repeat>
             {{ $t("Re-execute") }}
+          </b-button>
+          <b-button size="sm" variant="danger" @click="deletemsg" :disabled="!selectedItems.length" class="action-button">
+            <b-icon-trash aria-hidden="true"></b-icon-trash>
+            {{ $t("Delete") }}
           </b-button>
           <div class="pagination">
             <span style="font-size: 14px"> {{ $t("Page Size") }}:</span>
@@ -98,7 +102,8 @@ import axios from "axios";
 import JSONBIG from "json-bigint";
 import {
   BIconArrowRepeat,
-  BIconSearch
+  BIconSearch,
+    BIconTrash,
 } from 'bootstrap-vue';
 
 const formDataTpl = {
@@ -111,7 +116,8 @@ const formDataTpl = {
 export default {
   components: {
     BIconArrowRepeat,
-    BIconSearch
+    BIconSearch,
+    BIconTrash
   },
   props: {
     status: {},
@@ -259,6 +265,22 @@ export default {
         _this.clear();
       });
     },
+    deletemsg: function () {
+      const _this = this;
+      axios.post('/received/delete', this.selectedItems.map((item) => item.id)).then(() => {
+        this.selectedItems.map((item) => {
+          _this.$bvToast.toast(this.$t("DeleteSuccess") + "   " + item.id, {
+            title: "Tips",
+            variant: "secondary",
+            autoHideDelay: 1000,
+            appendToast: true,
+            solid: true
+          });
+        });
+        _this.fetchData();
+        _this.clear();
+      });
+    },
     clear() {
       this.items = this.items.map((item) => {
         return {
@@ -295,5 +317,9 @@ export default {
 .capPagination::v-deep .active .page-link {
   color: white;
   background-color: black;
+}
+
+.action-button {
+  margin-right: 1rem;
 }
 </style>

@@ -58,6 +58,7 @@ export default {
     Tags: "Tags",
     Actions: "Actions",
     ReexecuteSuccess: "😀 Reexecute Successful !",
+    DeleteSuccess: "😀 Delete Successful !",
     RequeueSuccess: "😀 Requeue Successfull !",
     SelectNamespaces: "-- Please select a kubernetes namespace --",
     Latency: "Latency",
