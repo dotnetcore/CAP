@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
+using DotNetCore.CAP.Options;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
 using Microsoft.Extensions.Options;
@@ -226,6 +227,10 @@ public class MongoDBDataStorage : IDataStorage
     public async Task<int> DeleteExpiresAsync(string collection, DateTime timeout, int batchCount = 1000,
         CancellationToken cancellationToken = default)
     {
+        if (_capOptions.Value.DeleteExpiredMessagesValidTimeRange is not null &&
+            !_capOptions.Value.DeleteExpiredMessagesValidTimeRange.CurrentTimeIsValid())
+            return 0;
+
         if (collection == _options.Value.PublishedCollection)
         {
             var publishedCollection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
