@@ -22,7 +22,7 @@ public static class ServiceCollectionExtensions
     /// </summary>
     /// <param name="services">The services available in the application.</param>
     /// <param name="setupAction">An action to configure the <see cref="CapOptions" />.</param>
-    /// <returns>An <see cref="CapBuilder" /> for application services.</returns>
+    /// <returns>A <see cref="CapBuilder" /> for application services.</returns>
     public static CapBuilder AddCap(this IServiceCollection services, Action<CapOptions> setupAction)
     {
         ArgumentNullException.ThrowIfNull(setupAction);
