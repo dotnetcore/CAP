@@ -43,20 +43,9 @@ public class ConnectionPool : IConnectionPool, IDisposable
             BootstrapServers = _options.Servers,
         };
 
-        if (!_options.MainConfig.ContainsKey("queue.buffering.max.messages"))
-        {
-            config.QueueBufferingMaxMessages = 10;
-        }
-
-        if(!_options.MainConfig.ContainsKey("message.timeout.ms"))
-        {
-            config.MessageTimeoutMs = 5000;
-        }
-
-        if (!_options.MainConfig.ContainsKey("request.timeout.ms"))
-        {
-            config.RequestTimeoutMs = 3000;
-        }
+        config.QueueBufferingMaxMessages ??= 10;
+        config.MessageTimeoutMs ??= 5000;
+        config.RequestTimeoutMs ??= 3000;
 
         producer = BuildProducer(config);
 
