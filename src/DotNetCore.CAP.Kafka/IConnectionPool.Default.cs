@@ -41,10 +41,11 @@ public class ConnectionPool : IConnectionPool, IDisposable
         var config = new ProducerConfig(new Dictionary<string, string>(_options.MainConfig))
         {
             BootstrapServers = _options.Servers,
-            QueueBufferingMaxMessages = 10,
-            MessageTimeoutMs = 5000,
-            RequestTimeoutMs = 3000
         };
+
+        config.QueueBufferingMaxMessages ??= 10;
+        config.MessageTimeoutMs ??= 5000;
+        config.RequestTimeoutMs ??= 3000;
 
         producer = BuildProducer(config);
 
