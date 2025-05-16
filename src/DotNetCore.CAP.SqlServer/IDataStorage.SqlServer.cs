@@ -209,15 +209,15 @@ public class SqlServerDataStorage : IDataStorage
         await using var _ = connection.ConfigureAwait(false);
 
         return await connection.ExecuteNonQueryAsync(
-            $@"DELETE FROM {table} 
+            $@"DELETE FROM {table}
                WHERE Id IN (
-                   SELECT TOP (@batchCount) Id 
+                   SELECT TOP (@batchCount) Id
                    FROM {table} WITH (READPAST)
-                   WHERE ExpiresAt < @timeout 
+                   WHERE ExpiresAt < @timeout
                    AND StatusName IN('{StatusName.Succeeded}','{StatusName.Failed}')
                );",
             null,
-            new SqlParameter("@timeout", timeout), 
+            new SqlParameter("@timeout", timeout),
             new SqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
     }
 
@@ -229,6 +229,26 @@ public class SqlServerDataStorage : IDataStorage
     public Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
         return GetMessagesOfNeedRetryAsync(_recName, lookbackSeconds);
+    }
+
+    public async Task<int> DeleteReceivedMessageAsync(long id)
+    {
+        var sql = $"DELETE FROM {_recName} WHERE Id={id}";
+
+        var connection = new SqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var affectedRowCount = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        return affectedRowCount;
+    }
+
+    public async Task<int> DeletePublishedMessageAsync(long id)
+    {
+        var sql = $"DELETE FROM {_pubName} WHERE Id={id}";
+
+        var connection = new SqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var affectedRowCount = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        return affectedRowCount;
     }
 
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
