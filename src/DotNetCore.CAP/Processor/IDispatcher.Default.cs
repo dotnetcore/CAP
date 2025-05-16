@@ -75,6 +75,7 @@ public class Dispatcher : IDispatcher
                 .Select(_ => Task.Run(Processing, _tasksCts.Token)).ToArray())
                 .ConfigureAwait(false);
         }
+
         _ = Task.Run(async () =>
         {
             //When canceling, place the message status of unsent in the queue to delayed
@@ -101,7 +102,18 @@ public class Dispatcher : IDispatcher
                     await foreach (var nextMessage in _schedulerQueue.GetConsumingEnumerable(_tasksCts.Token))
                     {
                         _tasksCts.Token.ThrowIfCancellationRequested();
-                        await _sender.SendAsync(nextMessage).ConfigureAwait(false);
+                        try
+                        {
+                            var result = await _sender.SendAsync(nextMessage).ConfigureAwait(false);
+                            if (!result.Succeeded)
+                            {
+                                _logger.LogError("Delay message sending failed. MessageId: {MessageId} ", nextMessage.DbId);
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error sending scheduled message. MessageId: {MessageId}", nextMessage.DbId);
+                        }
                     }
 
                     _tasksCts.Token.WaitHandle.WaitOne(100);
@@ -112,11 +124,11 @@ public class Dispatcher : IDispatcher
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogWarning(ex,
-                        "Scheduled message publishing failed unexpectedly, which will stop future scheduled " +
-                        "messages from publishing. See more details here: https://github.com/dotnetcore/CAP/issues/1637. " +
-                        "Exception: {Message}",
-                        ex.Message);
+                    _logger.LogError(ex,
+                         "Delay message publishing failed unexpectedly, which will stop future scheduled " +
+                         "messages from publishing. See more details here: https://github.com/dotnetcore/CAP/issues/1637. " +
+                         "Exception: {Message}",
+                         ex.Message);
                     throw;
                 }
             }
