@@ -5,13 +5,13 @@ namespace Sample.RabbitMQ.MySql
 {
     public class Startup
     {
-        public const string ConnectionString = "";
-
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDbContext<AppDbContext>();
+
             services.AddCap(x =>
             {
-                x.UseMySql(ConnectionString);
+                x.UseEntityFramework<AppDbContext>();
                 x.UseRabbitMQ("localhost");
                 x.UseDashboard();
             });
