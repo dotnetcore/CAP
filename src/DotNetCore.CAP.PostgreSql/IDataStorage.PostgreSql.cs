@@ -209,11 +209,11 @@ public class PostgreSqlDataStorage : IDataStorage
         await using var _ = connection.ConfigureAwait(false);
 
         return await connection.ExecuteNonQueryAsync(
-            $@"DELETE FROM {table} 
+            $@"DELETE FROM {table}
                WHERE ""Id"" IN (
-                   SELECT ""Id"" 
-                   FROM {table} 
-                   WHERE ""ExpiresAt"" < @timeout 
+                   SELECT ""Id""
+                   FROM {table}
+                   WHERE ""ExpiresAt"" < @timeout
                    AND ""StatusName"" IN ('{StatusName.Succeeded}','{StatusName.Failed}')
                    LIMIT @batchCount
                )",
@@ -230,6 +230,26 @@ public class PostgreSqlDataStorage : IDataStorage
     public async Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
         return await GetMessagesOfNeedRetryAsync(_recName, lookbackSeconds).ConfigureAwait(false);
+    }
+
+    public async Task<int> DeleteReceivedMessageAsync(long id)
+    {
+        var sql = $@"DELETE FROM {_recName} WHERE ""Id""={id} FOR DELETE SKIP LOCKED";
+
+        var connection = _options.Value.CreateConnection();
+        await using var _ = connection.ConfigureAwait(false);
+        var result = await connection.ExecuteNonQueryAsync(sql);
+        return result;
+    }
+
+    public async Task<int> DeletePublishedMessageAsync(long id)
+    {
+        var sql = $@"DELETE FROM {_pubName} WHERE ""Id""={id} FOR DELETE SKIP LOCKED";
+
+        var connection = _options.Value.CreateConnection();
+        await using var _ = connection.ConfigureAwait(false);
+        var result = await connection.ExecuteNonQueryAsync(sql);
+        return result;
     }
 
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
