@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Messaging.ServiceBus;
@@ -25,6 +26,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     private readonly string _subscriptionName;
     private readonly byte _groupConcurrent;
     private readonly SemaphoreSlim _semaphore;
+    private readonly bool _usingDevelopmentEmulator;
 
     private ServiceBusAdministrationClient? _administrationClient;
     private ServiceBusClient? _serviceBusClient;
@@ -43,6 +45,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         _semaphore = new SemaphoreSlim(groupConcurrent);
         _serviceProvider = serviceProvider;
         _asbOptions = options.Value ?? throw new ArgumentNullException(nameof(options));
+        _usingDevelopmentEmulator = CheckUsingDevelopmentEmulator(_asbOptions.ConnectionString);
     }
 
     public Func<TransportMessage, object?, Task>? OnMessageCallback { get; set; }
@@ -54,6 +57,8 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     public void Subscribe(IEnumerable<string> topics)
     {
         if (topics == null) throw new ArgumentNullException(nameof(topics));
+
+        if (_usingDevelopmentEmulator) return;
 
         ConnectAsync().GetAwaiter().GetResult();
 
@@ -208,37 +213,40 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                     _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString);
                 }
 
-                var topicConfigs =
-                    _asbOptions.CustomProducers.Select(producer =>
-                            (topicPaths: producer.TopicPath, subscribe: producer.CreateSubscription))
-                        .Append((topicPaths: _asbOptions.TopicPath, subscribe: true))
-                        .GroupBy(n => n.topicPaths, StringComparer.OrdinalIgnoreCase)
-                        .Select(n => (topicPaths: n.Key, subscribe: n.Max(o => o.subscribe)));
-
-                foreach (var (topicPath, subscribe) in topicConfigs)
+                if (!_usingDevelopmentEmulator)
                 {
-                    if (!await _administrationClient.TopicExistsAsync(topicPath))
+                    var topicConfigs =
+                        _asbOptions.CustomProducers.Select(producer =>
+                                (topicPaths: producer.TopicPath, subscribe: producer.CreateSubscription))
+                            .Append((topicPaths: _asbOptions.TopicPath, subscribe: true))
+                            .GroupBy(n => n.topicPaths, StringComparer.OrdinalIgnoreCase)
+                            .Select(n => (topicPaths: n.Key, subscribe: n.Max(o => o.subscribe)));
+
+                    foreach (var (topicPath, subscribe) in topicConfigs)
                     {
-                        await _administrationClient.CreateTopicAsync(topicPath);
-                        _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
-                    }
+                        if (!await _administrationClient.TopicExistsAsync(topicPath))
+                        {
+                            await _administrationClient.CreateTopicAsync(topicPath);
+                            _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
+                        }
 
-                    if (subscribe && !await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
-                    {
-                        var subscriptionDescription =
-                            new CreateSubscriptionOptions(topicPath, _subscriptionName)
-                            {
-                                RequiresSession = _asbOptions.EnableSessions,
-                                AutoDeleteOnIdle = _asbOptions.SubscriptionAutoDeleteOnIdle,
-                                LockDuration = _asbOptions.SubscriptionMessageLockDuration,
-                                DefaultMessageTimeToLive = _asbOptions.SubscriptionDefaultMessageTimeToLive,
-                                MaxDeliveryCount = _asbOptions.SubscriptionMaxDeliveryCount,
-                            };
+                        if (subscribe && !await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
+                        {
+                            var subscriptionDescription =
+                                new CreateSubscriptionOptions(topicPath, _subscriptionName)
+                                {
+                                    RequiresSession = _asbOptions.EnableSessions,
+                                    AutoDeleteOnIdle = _asbOptions.SubscriptionAutoDeleteOnIdle,
+                                    LockDuration = _asbOptions.SubscriptionMessageLockDuration,
+                                    DefaultMessageTimeToLive = _asbOptions.SubscriptionDefaultMessageTimeToLive,
+                                    MaxDeliveryCount = _asbOptions.SubscriptionMaxDeliveryCount,
+                                };
 
-                        await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
+                            await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
 
-                        _logger.LogInformation(
-                            $"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
+                            _logger.LogInformation(
+                                $"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
+                        }
                     }
                 }
 
@@ -288,7 +296,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                 var added = headers.TryAdd(customHeader.Key, customHeader.Value);
 
                 if (!added)
-                    _logger.LogWarning("Not possible to add the custom header {Header}. A value with the same key already exists in the Message headers.",customHeader.Key);
+                    _logger.LogWarning("Not possible to add the custom header {Header}. A value with the same key already exists in the Message headers.", customHeader.Key);
             }
         }
 
@@ -327,6 +335,15 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                     $@"'{subscriptionName}' contains character '{uriSchemeKey}' which is not allowed because it is reserved in the Uri scheme.",
                     subscriptionName);
         }
+    }
+
+    private bool CheckUsingDevelopmentEmulator(string connectionString)
+    {
+        var properties = ServiceBusConnectionStringProperties.Parse(connectionString);
+
+        var property = typeof(ServiceBusConnectionStringProperties).GetProperty("UseDevelopmentEmulator", BindingFlags.Instance | BindingFlags.NonPublic);
+
+        return (bool?)property?.GetValue(properties) ?? false;
     }
 
     #endregion private methods
