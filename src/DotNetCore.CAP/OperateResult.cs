@@ -53,7 +53,7 @@ public struct OperateResult : IEqualityComparer<OperateResult>
 public record struct OperateError
 {
     /// <summary>
-    /// Gets or sets ths code for this error.
+    /// Gets or sets the code for this error.
     /// </summary>
     public string Code { get; set; }
 
