@@ -26,7 +26,7 @@ namespace DotNetCore.CAP.MySql.Test
         }
 
         [Fact]
-        public void StorageMessageTest()
+        public async Task StorageMessageTest()
         {
             var msgId = _snowflakeId.NextId().ToString();
             var header = new Dictionary<string, string>()
@@ -35,12 +35,12 @@ namespace DotNetCore.CAP.MySql.Test
             };
             var message = new Message(header, null);
 
-            var mdMessage = _storage.StoreMessageAsync("test.name", message);
+            var mdMessage = await _storage.StoreMessageAsync("test.name", message);
             Assert.NotNull(mdMessage);
         }
 
         [Fact]
-        public void StoreReceivedMessageTest()
+        public async Task StoreReceivedMessageTest()
         {
             var msgId = _snowflakeId.NextId().ToString();
             var header = new Dictionary<string, string>()
@@ -49,7 +49,7 @@ namespace DotNetCore.CAP.MySql.Test
             };
             var message = new Message(header, null);
 
-            var mdMessage = _storage.StoreReceivedMessageAsync("test.name", "test.group", message);
+            var mdMessage = await _storage.StoreReceivedMessageAsync("test.name", "test.group", message);
             Assert.NotNull(mdMessage);
         }
 
@@ -84,7 +84,7 @@ namespace DotNetCore.CAP.MySql.Test
             };
             var message = new Message(header, null);
 
-            var mdMessage = await _storage.StoreMessageAsync("test.name", message);
+            var mdMessage = await _storage.StoreReceivedMessageAsync("test.name", "test.group", message);
 
             await _storage.ChangeReceiveStateAsync(mdMessage, StatusName.Succeeded);
         }

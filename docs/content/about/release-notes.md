@@ -49,7 +49,7 @@ Now CAP dashboard auth/authz mechanism to leverage the "ASP.NET Core" way of doi
 * Add `FallbackWindowLookbackSeconds` option to configure the retry processor to pick up the backtrack time window for Scheduled or Failed status messages. (#1455) Thanks @apatozi
 * Update IConsumerRegister.Default.cs to make dispose thread safe. (#1438) Thanks @blashbul
 * Compatible with .NET 8's dependency injection KeyedService. (#1436) Thanks @EashShow
-* Add virtual method to custom delay backtrack time window during delayed publishing large messges. (#1429) Thanks @PoteRii
+* Add virtual method to custom delay backtrack time window during delayed publishing large messages. (#1429) Thanks @PoteRii
 
 **Bug Fixed:**
 
@@ -624,7 +624,7 @@ db.CapReceivedMessage.update({},{"$set" : {"Version" : "1"}});
 **Bug Fixed:**
 
 - Fixed different groups of the same topic name in one instance will cause routing bug. (#235)
-- Fixed message presistence bug. (#240)
+- Fixed message persistence bug. (#240)
 - Fixed RabbitMQ topic name contains numbers will cause exception bug. (#181)
 
 ## Version 2.3.1 (2018-10-29)
@@ -659,7 +659,7 @@ If you have any migration question, please comment in issue (#190).
 
 **Bug Fixed:**
 
-- Fix message still sent if transaction faild bug. (#118)
+- Fix message still sent if transaction failed bug. (#118)
 - Multiple events in one transaction. (#171)
 
 ## Version 2.2.5 (2018-07-19)
