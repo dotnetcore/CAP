@@ -47,7 +47,7 @@ public abstract class CapTransactionBase : ICapTransaction
 
     protected virtual void Flush()
     {
-        FlushAsync().GetAwaiter().GetResult();
+        FlushAsync().ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     protected virtual async Task FlushAsync()

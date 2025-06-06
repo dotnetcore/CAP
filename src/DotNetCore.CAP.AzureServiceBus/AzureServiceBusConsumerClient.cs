@@ -55,7 +55,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
     {
         if (topics == null) throw new ArgumentNullException(nameof(topics));
 
-        ConnectAsync().GetAwaiter().GetResult();
+        ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
 
         topics = topics.Concat(_asbOptions!.SQLFilters?.Select(o => o.Key) ?? Enumerable.Empty<string>());
 

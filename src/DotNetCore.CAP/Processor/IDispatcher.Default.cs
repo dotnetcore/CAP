@@ -85,7 +85,7 @@ public class Dispatcher : IDispatcher
                     if (_schedulerQueue.Count == 0) return;
 
                     var messageIds = _schedulerQueue.UnorderedItems.Select(x => x.DbId).ToArray();
-                    _storage.ChangePublishStateToDelayedAsync(messageIds).GetAwaiter().GetResult();
+                    _storage.ChangePublishStateToDelayedAsync(messageIds).ConfigureAwait(false).GetAwaiter().GetResult();
                     _logger.LogDebug("Update storage to delayed success of delayed message in memory queue!");
                 }
                 catch (Exception e)
