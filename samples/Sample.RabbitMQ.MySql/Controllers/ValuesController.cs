@@ -52,7 +52,7 @@ namespace Sample.RabbitMQ.MySql.Controllers
         [Route("~/adonet/transaction")]
         public async Task<IActionResult> AdonetWithTransaction()
         {
-            using (var connection = new MySqlConnection(Startup.ConnectionString))
+            using (var connection = new MySqlConnection(AppDbContext.ConnectionString))
             {
                 using var transaction = await connection.BeginTransactionAsync(_capBus, true);
                 await connection.ExecuteAsync("insert into test(name) values('test')", transaction: (IDbTransaction)transaction.DbTransaction);
@@ -62,18 +62,18 @@ namespace Sample.RabbitMQ.MySql.Controllers
             return Ok();
         }
 
-        //[Route("~/ef/transaction")]
-        //public async Task<IActionResult> EntityFrameworkWithTransaction([FromServices] AppDbContext dbContext)
-        //{
-        //    using (var trans = await dbContext.Database.BeginTransactionAsync(_capBus, autoCommit: false))
-        //    {
-        //        await dbContext.Persons.AddAsync(new Person() { Name = "ef.transaction" });
-        //        await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
-        //        await dbContext.SaveChangesAsync();
-        //        await trans.CommitAsync();
-        //    }
-        //    return Ok();
-        //}
+        [Route("~/ef/transaction")]
+        public async Task<IActionResult> EntityFrameworkWithTransaction([FromServices] AppDbContext dbContext)
+        {
+            using (var trans = await dbContext.Database.BeginTransactionAsync(_capBus, autoCommit: false))
+            {
+                await dbContext.Persons.AddAsync(new Person() { Name = "ef.transaction" });
+                await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
+                await dbContext.SaveChangesAsync();
+                await trans.CommitAsync();
+            }
+            return Ok();
+        }
 
         [NonAction]
         [CapSubscribe("sample.rabbitmq.mysql")]
