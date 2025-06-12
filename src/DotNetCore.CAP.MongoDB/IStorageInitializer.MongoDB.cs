@@ -100,7 +100,8 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 new(builder.Ascending(x => x.ExpiresAt)),
                 new(builder.Ascending(x => x.StatusName)),
                 new(builder.Ascending(x => x.Retries)),
-                new(builder.Ascending(x => x.Version))
+                new(builder.Ascending(x => x.Version)),
+                new(builder.Ascending(x => x.StatusName).Ascending(x => x.ExpiresAt))
             };
 
             await col.Indexes.CreateManyAsync(indexes, cancellationToken);
