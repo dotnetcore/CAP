@@ -146,7 +146,13 @@ If set to true, we will use a database-based distributed lock to solve the probl
 
 The interval of the collector processor deletes expired messages.
 
-#### ConsumerThreadCount 
+#### SchedulerBatchSize
+
+> Default: 1000
+
+Maximum number of delayed or queued messages fetched per scheduler cycle.
+
+#### ConsumerThreadCount
 
 > Default: 1
 
