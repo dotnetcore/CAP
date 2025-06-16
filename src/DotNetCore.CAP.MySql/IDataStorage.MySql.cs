@@ -243,13 +243,14 @@ public class MySqlDataStorage : IDataStorage
 
         var sql =
             $"SELECT `Id`,`Content`,`Retries`,`Added`,`ExpiresAt` FROM `{_pubName}` WHERE `Version`=@Version " +
-            $"AND ((`ExpiresAt`< @TwoMinutesLater AND `StatusName` = '{StatusName.Delayed}') OR (`ExpiresAt`< @OneMinutesAgo AND `StatusName` = '{StatusName.Queued}')) {lockSql};";
+            $"AND ((`ExpiresAt`< @TwoMinutesLater AND `StatusName` = '{StatusName.Delayed}') OR (`ExpiresAt`< @OneMinutesAgo AND `StatusName` = '{StatusName.Queued}')) LIMIT @BatchSize {lockSql};";
 
         object[] sqlParams =
         {
             new MySqlParameter("@Version", _capOptions.Value.Version),
             new MySqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
-            new MySqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1))
+            new MySqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1)),
+            new MySqlParameter("@BatchSize", _capOptions.Value.SchedulerBatchSize)
         };
 
         await using var connection = new MySqlConnection(_options.Value.ConnectionString);

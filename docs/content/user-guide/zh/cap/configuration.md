@@ -152,6 +152,12 @@ Group 在不同的 Broker 有不同的对应项。
 
 收集器删除已经过期消息的时间间隔。
 
+#### SchedulerBatchSize
+
+> 默认值：1000
+
+调度器每次循环获取的延迟或排队消息的最大数量。
+
 #### FailedRetryCount
 
 > 默认值：50

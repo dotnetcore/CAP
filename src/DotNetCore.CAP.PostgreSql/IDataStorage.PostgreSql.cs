@@ -237,13 +237,14 @@ public class PostgreSqlDataStorage : IDataStorage
     {
         var sql =
             $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\" FROM {_pubName} WHERE \"Version\"=@Version " +
-            $"AND ((\"ExpiresAt\"< @TwoMinutesLater AND \"StatusName\" = '{StatusName.Delayed}') OR (\"ExpiresAt\"< @OneMinutesAgo AND \"StatusName\" = '{StatusName.Queued}')) FOR UPDATE SKIP LOCKED;";
+            $"AND ((\"ExpiresAt\"< @TwoMinutesLater AND \"StatusName\" = '{StatusName.Delayed}') OR (\"ExpiresAt\"< @OneMinutesAgo AND \"StatusName\" = '{StatusName.Queued}')) FOR UPDATE SKIP LOCKED LIMIT @BatchSize;";
 
         var sqlParams = new object[]
         {
             new NpgsqlParameter("@Version", _capOptions.Value.Version),
             new NpgsqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
-            new NpgsqlParameter("@OneMinutesAgo", QueuedMessageFetchTime())
+            new NpgsqlParameter("@OneMinutesAgo", QueuedMessageFetchTime()),
+            new NpgsqlParameter("@BatchSize", _capOptions.Value.SchedulerBatchSize)
         };
 
         await using var connection = _options.Value.CreateConnection();

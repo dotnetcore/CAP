@@ -35,6 +35,7 @@ public class CapOptions
         DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name!.ToLower();
         CollectorCleaningInterval = 300;
         FallbackWindowLookbackSeconds = 240;
+        SchedulerBatchSize = 1000;
     }
 
     internal IList<ICapOptionsExtension> Extensions { get; }
@@ -139,6 +140,12 @@ public class CapOptions
     /// Default is 300 seconds.
     /// </summary>
     public int CollectorCleaningInterval { get; set; }
+
+    /// <summary>
+    /// Maximum number of delayed or queued messages fetched per scheduler cycle.
+    /// Default is 1000.
+    /// </summary>
+    public int SchedulerBatchSize { get; set; }
 
     /// <summary>
     /// Configure JSON serialization settings
