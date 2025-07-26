@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -207,6 +208,18 @@ internal class InMemoryStorage : IDataStorage
             .Select(x => (MediumMessage)x).ToList();
 
         return Task.FromResult(result);
+    }
+
+    public Task<int> DeleteReceivedMessageAsync(long id)
+    {
+        var deleteResult = ReceivedMessages.TryRemove(id.ToString(CultureInfo.InvariantCulture), out _);
+        return Task.FromResult(deleteResult ? 1 : 0);
+    }
+
+    public Task<int> DeletePublishedMessageAsync(long id)
+    {
+        var deleteResult = PublishedMessages.TryRemove(id.ToString(CultureInfo.InvariantCulture), out _);
+        return Task.FromResult(deleteResult ? 1 : 0);
     }
 
     public Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,

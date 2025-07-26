@@ -39,6 +39,10 @@ public interface IDataStorage
 
     Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds);
 
+    Task<int> DeleteReceivedMessageAsync(long id);
+
+    Task<int> DeletePublishedMessageAsync(long id);
+
     //dashboard api
     IMonitoringApi GetMonitoringApi();
 }

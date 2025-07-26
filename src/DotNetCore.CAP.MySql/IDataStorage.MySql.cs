@@ -213,16 +213,16 @@ public class MySqlDataStorage : IDataStorage
         return await connection.ExecuteNonQueryAsync(
             $@"DELETE P FROM `{table}` AS P
                JOIN (
-                   SELECT Id 
+                   SELECT Id
                    FROM `{table}`
-                   WHERE ExpiresAt < @timeout 
+                   WHERE ExpiresAt < @timeout
                    AND StatusName IN ('{StatusName.Succeeded}', '{StatusName.Failed}')
                    ORDER BY Id
                    LIMIT @batchCount
                    { (SupportSkipLocked ? "FOR UPDATE SKIP LOCKED" : "FOR UPDATE")}
                ) AS T ON P.Id = T.Id;",
             null,
-            new MySqlParameter("@timeout", timeout), 
+            new MySqlParameter("@timeout", timeout),
             new MySqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
     }
 
@@ -234,6 +234,26 @@ public class MySqlDataStorage : IDataStorage
     public Task<IEnumerable<MediumMessage>> GetReceivedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
     {
         return GetMessagesOfNeedRetryAsync(_recName, lookbackSeconds);
+    }
+
+    public async Task<int> DeleteReceivedMessageAsync(long id)
+    {
+        var sql = $"DELETE FROM `{_recName}` WHERE Id={id};";
+
+        var connection = new MySqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var result = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        return result;
+    }
+
+    public async Task<int> DeletePublishedMessageAsync(long id)
+    {
+        var sql = $"DELETE FROM `{_pubName}` WHERE Id={id};";
+
+        var connection = new MySqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var result = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        return result;
     }
 
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
