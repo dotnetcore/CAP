@@ -336,7 +336,9 @@ public class MongoDBDataStorage : IDataStorage
                     await collection.UpdateManyAsync(session, filter, update, cancellationToken: linkedTs.Token)
                         .ConfigureAwait(false);
 
-                    var queryResult = await collection.Find(session, filter).ToListAsync(linkedTs.Token)
+                    var queryResult = await collection.Find(session, filter)
+                        .Limit(_capOptions.Value.SchedulerBatchSize)
+                        .ToListAsync(linkedTs.Token)
                         .ConfigureAwait(false);
 
                     var result = queryResult.Select(x => new MediumMessage

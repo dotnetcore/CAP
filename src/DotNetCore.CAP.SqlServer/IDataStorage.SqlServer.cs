@@ -255,17 +255,18 @@ public class SqlServerDataStorage : IDataStorage
         CancellationToken token = default)
     {
         var sql = $@"
-            SELECT Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
+            SELECT TOP (@BatchSize) Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
                 WHERE Version = @Version AND StatusName = '{StatusName.Delayed}' AND ExpiresAt < @TwoMinutesLater
             UNION ALL
-            SELECT Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
+            SELECT TOP (@BatchSize) Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
                 WHERE Version = @Version AND StatusName = '{StatusName.Queued}' AND ExpiresAt < @OneMinutesAgo;";
 
         object[] sqlParams =
         {
             new SqlParameter("@Version", _capOptions.Value.Version),
             new SqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
-            new SqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1))
+            new SqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1)),
+            new SqlParameter("@BatchSize", _capOptions.Value.SchedulerBatchSize)
         };
 
         await using var connection = new SqlConnection(_options.Value.ConnectionString);

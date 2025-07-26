@@ -228,6 +228,7 @@ internal class InMemoryStorage : IDataStorage
         var result = PublishedMessages.Values.Where(x =>
                 (x.StatusName == StatusName.Delayed && x.ExpiresAt < DateTime.Now.AddMinutes(2))
                 || (x.StatusName == StatusName.Queued && x.ExpiresAt < DateTime.Now.AddMinutes(-1)))
+            .Take(_capOptions.Value.SchedulerBatchSize)
             .Select(x => (MediumMessage)x);
 
         return scheduleTask(null!, result);
