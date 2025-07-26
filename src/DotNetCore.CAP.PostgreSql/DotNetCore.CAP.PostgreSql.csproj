@@ -7,7 +7,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.36" />
-		<PackageReference Include="Npgsql" Version="8.0.5" />
+		<PackageReference Include="Npgsql" Version="9.0.3" />
 		<ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
 	</ItemGroup>
 

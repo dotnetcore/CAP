@@ -13,12 +13,12 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="StackExchange.Redis" Version="2.8.16" />
+		<PackageReference Include="StackExchange.Redis" Version="2.8.58" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
-		<InternalsVisibleTo Include="DotNetCore.CAP.RedisStreams.Test"/>
+		<InternalsVisibleTo Include="DotNetCore.CAP.RedisStreams.Test" />
 	</ItemGroup>
 
 </Project>
