@@ -37,6 +37,7 @@ export default {
     Succeeded: "Succeeded",
     Failed: "Failed",
     Requeue: "Requeue",
+    Delete: "Delete",
     PublishNow: "Immediately Publish",
     DelayedInfo: "Only show delay time more than 1 minute messages here, the status of shorter than 1 minute messages name is 'Queued', you can check it in the database",
     Name: "Name",

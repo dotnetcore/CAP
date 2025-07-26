@@ -35,6 +35,7 @@ export default {
     Succeeded: "成功",
     Failed: "失败",
     Requeue: "重新发布",
+    Delete: "删除",
     PublishNow: "立即发布",
     DelayedInfo: "这里只显示1分钟后的延迟消息，1分钟内的状态为 Queued 你可以在数据库查看",
     Name: "名称",
