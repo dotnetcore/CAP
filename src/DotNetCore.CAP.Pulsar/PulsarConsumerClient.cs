@@ -36,7 +36,7 @@ internal sealed class PulsarConsumerClient : IConsumerClient
 
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-    public BrokerAddress BrokerAddress => new("Pulsar", _pulsarOptions.ServiceUrl);
+    public BrokerAddress BrokerAddress => new("pulsar", _pulsarOptions.ServiceUrl);
 
     public void Subscribe(IEnumerable<string> topics)
     {

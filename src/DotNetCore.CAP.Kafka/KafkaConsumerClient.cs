@@ -41,7 +41,7 @@ public class KafkaConsumerClient : IConsumerClient
 
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-    public BrokerAddress BrokerAddress => new("Kafka", _kafkaOptions.Servers);
+    public BrokerAddress BrokerAddress => new("kafka", _kafkaOptions.Servers);
 
     public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
     {

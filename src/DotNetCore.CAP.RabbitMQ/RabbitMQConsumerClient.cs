@@ -42,7 +42,7 @@ internal sealed class RabbitMqConsumerClient : IConsumerClient
 
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-    public BrokerAddress BrokerAddress => new("RabbitMQ", $"{_rabbitMqOptions.HostName}:{_rabbitMqOptions.Port}");
+    public BrokerAddress BrokerAddress => new("rabbitmq", $"{_rabbitMqOptions.HostName}:{_rabbitMqOptions.Port}");
 
     public void Subscribe(IEnumerable<string> topics)
     {

@@ -43,7 +43,7 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
 
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-    public BrokerAddress BrokerAddress => new("AmazonSQS", _queueUrl);
+    public BrokerAddress BrokerAddress => new("aws_sqs", _queueUrl);
 
     public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
     {

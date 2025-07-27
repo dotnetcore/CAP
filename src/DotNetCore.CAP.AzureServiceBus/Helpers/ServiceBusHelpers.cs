@@ -21,7 +21,7 @@ public static class ServiceBusHelpers
             _ => throw new InvalidOperationException("Unhandled case in switch expression.")
         };
 
-        return new BrokerAddress("AzureServiceBus", host);
+        return new BrokerAddress("servicebus", host);
     }
 
 
