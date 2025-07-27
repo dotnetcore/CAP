@@ -40,7 +40,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     var eventData = (CapEventDataPubStore)evt.Value!;
                     ActivityContext parentContext = Propagator.Extract(default, eventData.Message, (msg, key) =>
                     {
-                        if (msg.Headers.TryGetValue(key, out var value)) return new[] { value };
+                        if (msg.Headers.TryGetValue(key, out var value) && value != null) return new string[] { value };
                         return Enumerable.Empty<string>();
                     }).ActivityContext;
 
@@ -83,7 +83,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (Activity.Current is { } activity)
                     {
                         var exception = eventData.Exception!;
-                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
+                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
                         activity.RecordException(exception);
                         activity.Stop();
                     }
@@ -142,7 +142,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (Activity.Current is { } activity)
                     {
                         var exception = eventData.Exception!;
-                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
+                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
                         activity.RecordException(exception);
                         activity.Stop();
                     }
@@ -153,7 +153,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     var eventData = (CapEventDataSubStore)evt.Value!;
                     var parentContext = Propagator.Extract(default, eventData.TransportMessage, (msg, key) =>
                     {
-                        if (msg.Headers.TryGetValue(key, out var value)) return new[] { value };
+                        if (msg.Headers.TryGetValue(key, out var value) && value != null) return new string[] { value };
                         return Enumerable.Empty<string>();
                     });
 
@@ -196,7 +196,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (Activity.Current is { } activity)
                     {
                         var exception = eventData.Exception!;
-                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
+                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
                         activity.RecordException(exception);
                         activity.Stop();
                     }
@@ -208,7 +208,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     var eventData = (CapEventDataSubExecute)evt.Value!;
                     var propagatedContext = Propagator.Extract(default, eventData.Message, (msg, key) =>
                     {
-                        if (msg.Headers.TryGetValue(key, out var value)) return new[] { value };
+                        if (msg.Headers.TryGetValue(key, out var value) && value != null) return new string[] { value };
                         return Enumerable.Empty<string>();
                     });
 
@@ -251,7 +251,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (Activity.Current is { } activity)
                     {
                         var exception = eventData.Exception!;
-                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
+                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
                         activity.RecordException(exception);
                         activity.Stop();
                     }

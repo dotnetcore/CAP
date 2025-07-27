@@ -7,6 +7,7 @@ using DotNetCore.CAP;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
+using System.Data.Common;
 
 namespace Sample.Kafka.PostgreSql
 {
@@ -34,15 +35,18 @@ namespace Sample.Kafka.PostgreSql
         public DbSet<Person> Persons { get; set; }
     }
 
+#pragma warning disable EF1001 // Internal EF Core API usage.
+
     public class CapNpgsqlRelationalConnection : NpgsqlRelationalConnection
     {
         private readonly ICapPublisher _cap;
 
-        public CapNpgsqlRelationalConnection(RelationalConnectionDependencies dependencies, INpgsqlSingletonOptions options)
-            : base(dependencies, options)
+        protected CapNpgsqlRelationalConnection(RelationalConnectionDependencies dependencies, DbDataSource dataSource) : base(dependencies, dataSource)
         {
             _cap = dependencies.CurrentContext.Context.GetService<ICapPublisher>();
         }
+
+#pragma warning restore EF1001
 
         public override void CommitTransaction()
         {

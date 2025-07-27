@@ -81,5 +81,13 @@ namespace Sample.RabbitMQ.MySql.Controllers
         {
             Console.WriteLine("Publishing time:" + time);
         }
+
+
+        [NonAction]
+        [CapSubscribe("sample.rabbitmq.test")]
+        public void Subscriber2(string message)
+        {
+            Console.WriteLine("Publishing message:" + message);
+        }
     }
 }

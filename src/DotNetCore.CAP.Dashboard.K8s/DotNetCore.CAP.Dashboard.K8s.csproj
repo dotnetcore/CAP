@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="KubernetesClient" Version="15.0.1" />
+		<PackageReference Include="KubernetesClient" Version="17.0.4" />
 	</ItemGroup>
 	<ItemGroup>
 	  <ProjectReference Include="..\DotNetCore.CAP.Dashboard\DotNetCore.CAP.Dashboard.csproj" />
