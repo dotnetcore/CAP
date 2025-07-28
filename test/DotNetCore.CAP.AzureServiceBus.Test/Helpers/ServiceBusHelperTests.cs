@@ -16,7 +16,7 @@ public class ServiceBusHelpersTests
         // Act & Assert
         var ex = Assert.Throws<ArgumentException>(() => ServiceBusHelpers.GetBrokerAddress(connectionString, @namespace));
         Assert.Equal("Either connection string or namespace are required.", ex.Message);
-    }`
+    }
 
     [Fact]
     public void GetBrokerAddress_ShouldReturnNamespace_WhenConnectionStringIsNull()
