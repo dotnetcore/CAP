@@ -101,7 +101,7 @@ public sealed class CapBuilder
     /// <typeparam name="T">Type of filter</typeparam>
     public CapBuilder AddSubscribeFilter<T>() where T : class, ISubscribeFilter
     {
-        Services.TryAddScoped<ISubscribeFilter, T>();
+        Services.AddScoped<ISubscribeFilter, T>();
         return this;
     }
 
