@@ -45,7 +45,7 @@ public class RabbitMqBasicConsumer : AsyncDefaultBasicConsumer
         string routingKey, IReadOnlyBasicProperties properties, ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default)
     {
-        // ReadOnlyMemory<byte> body 异步处理时，原始缓冲区可能已被覆盖，需要复制一份
+        // ReadOnlyMemory<byte> body 异步处理时，原始缓冲区可能已被覆盖，需要复制一份 
         var bodyCopy = body.ToArray();
         if (_usingTaskRun)
         {
