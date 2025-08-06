@@ -34,7 +34,7 @@ public class MongoDBDataStorage : IDataStorage
         IMongoClient client,
         ISerializer serializer,
         ISnowflakeId snowflakeId,
-        ILogger logger)
+        ILogger<MongoDBDataStorage> logger)
     {
         _capOptions = capOptions;
         _options = options;
