@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +6,6 @@ using MySqlConnector;
 
 namespace Sample.RabbitMQ.MySql.Controllers
 {
-
     [Route("api/[controller]")]
     public class ValuesController : Controller
     {
@@ -81,7 +78,6 @@ namespace Sample.RabbitMQ.MySql.Controllers
         {
             Console.WriteLine("Publishing time:" + time);
         }
-
 
         [NonAction]
         [CapSubscribe("sample.rabbitmq.test")]
