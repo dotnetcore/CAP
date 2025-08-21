@@ -45,6 +45,9 @@ public class RabbitMqBasicConsumer : AsyncDefaultBasicConsumer
         string routingKey, IReadOnlyBasicProperties properties, ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default)
     {
+        // copy body to avoid reusing the same body for multiple messages
+        var messageBody = body.ToArray();
+
         if (_usingTaskRun)
         {
             await _semaphore.WaitAsync(cancellationToken);
@@ -73,7 +76,7 @@ public class RabbitMqBasicConsumer : AsyncDefaultBasicConsumer
 
             if (_customHeadersBuilder != null)
             {
-                var e = new BasicDeliverEventArgs(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, body);
+                var e = new BasicDeliverEventArgs(consumerTag, deliveryTag, redelivered, exchange, routingKey, properties, messageBody);
                 var customHeaders = _customHeadersBuilder(e, _serviceProvider);
                 foreach (var customHeader in customHeaders)
                 {
@@ -81,7 +84,7 @@ public class RabbitMqBasicConsumer : AsyncDefaultBasicConsumer
                 }
             }
 
-            var message = new TransportMessage(headers, body);
+            var message = new TransportMessage(headers, messageBody);
 
             return _msgCallback(message, deliveryTag);
         }
