@@ -2,12 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB;
@@ -98,12 +100,12 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 new(builder.Ascending(x => x.Name)),
                 new(builder.Ascending(x => x.Added)),
                 new(builder.Ascending(x => x.ExpiresAt)),
-                new(builder.Ascending(x => x.StatusName)),
                 new(builder.Ascending(x => x.Retries)),
                 new(builder.Ascending(x => x.Version)),
                 new(builder.Ascending(x => x.StatusName).Ascending(x => x.ExpiresAt))
             };
-
+            
+            await DropUnmatchedIndexesAsync(col, indexes);
             await col.Indexes.CreateManyAsync(indexes, cancellationToken);
         }
 
@@ -117,13 +119,42 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 new(builder.Ascending(x => x.Name)),
                 new(builder.Ascending(x => x.Added)),
                 new(builder.Ascending(x => x.ExpiresAt)),
-                new(builder.Ascending(x => x.StatusName)),
                 new(builder.Ascending(x => x.Retries)),
                 new(builder.Ascending(x => x.Version)),
                 new(builder.Ascending(x => x.StatusName).Ascending(x => x.ExpiresAt))
             };
-
+            
+            await DropUnmatchedIndexesAsync(col, indexes);
             await col.Indexes.CreateManyAsync(indexes, cancellationToken);
+        }
+        
+        async Task DropUnmatchedIndexesAsync<T>(
+            IMongoCollection<T> collection,
+            IEnumerable<CreateIndexModel<T>> desiredIndexes)
+        {
+            var desiredPatterns = new HashSet<string>(
+                desiredIndexes.Select(i => GetIndexKeyPattern(i.Keys.Render(new RenderArgs<T>(collection.DocumentSerializer, collection.Settings.SerializerRegistry))))
+            );
+
+            var indexList = await collection.Indexes.ListAsync(cancellationToken);
+            var indexes = await indexList.ToListAsync(cancellationToken);
+
+            foreach (var index in indexes)
+            {
+                var name = index["name"].AsString;
+                if (name == "_id_") continue;
+
+                var keyPattern = GetIndexKeyPattern(index["key"].AsBsonDocument);
+                if (!desiredPatterns.Contains(keyPattern))
+                {
+                    await collection.Indexes.DropOneAsync(name, cancellationToken);
+                }
+            }
+        }
+        
+        static string GetIndexKeyPattern(BsonDocument keyDoc)
+        {
+            return string.Join(",", keyDoc.Elements.Select(e => $"{e.Name}:{e.Value}"));
         }
     }
 }
