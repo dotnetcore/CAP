@@ -2,7 +2,6 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Buffers;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading;
@@ -46,9 +45,7 @@ public class RabbitMqBasicConsumer : AsyncDefaultBasicConsumer
         string routingKey, IReadOnlyBasicProperties properties, ReadOnlyMemory<byte> body,
         CancellationToken cancellationToken = default)
     {
-        var bodyCopy = ArrayPool<byte>.Shared.Rent(body.Length);
-        
-        body.Span.CopyTo(bodyCopy);
+        var safeBody = _usingTaskRun ? body.ToArray() : body;
 
         if (_usingTaskRun)
         {
@@ -63,40 +60,33 @@ public class RabbitMqBasicConsumer : AsyncDefaultBasicConsumer
 
         Task Consume()
         {
-            try
-            {
-                var headers = new Dictionary<string, string?>();
+            var headers = new Dictionary<string, string?>();
 
-                if (properties.Headers != null)
-                    foreach (var header in properties.Headers)
-                    {
-                        if (header.Value is byte[] val)
-                            headers.Add(header.Key, Encoding.UTF8.GetString(val));
-                        else
-                            headers.Add(header.Key, header.Value?.ToString());
-                    }
-
-                headers[Messages.Headers.Group] = _groupName;
-
-                if (_customHeadersBuilder != null)
+            if (properties.Headers != null)
+                foreach (var header in properties.Headers)
                 {
-                    var e = new BasicDeliverEventArgs(consumerTag, deliveryTag, redelivered, exchange, routingKey,
-                        properties, bodyCopy);
-                    var customHeaders = _customHeadersBuilder(e, _serviceProvider);
-                    foreach (var customHeader in customHeaders)
-                    {
-                        headers[customHeader.Key] = customHeader.Value;
-                    }
+                    if (header.Value is byte[] val)
+                        headers.Add(header.Key, Encoding.UTF8.GetString(val));
+                    else
+                        headers.Add(header.Key, header.Value?.ToString());
                 }
 
-                var message = new TransportMessage(headers, bodyCopy);
+            headers[Messages.Headers.Group] = _groupName;
 
-                return _msgCallback(message, deliveryTag);
-            }
-            finally
+            if (_customHeadersBuilder != null)
             {
-                ArrayPool<byte>.Shared.Return(bodyCopy);
+                var e = new BasicDeliverEventArgs(consumerTag, deliveryTag, redelivered, exchange, routingKey,
+                    properties, safeBody);
+                var customHeaders = _customHeadersBuilder(e, _serviceProvider);
+                foreach (var customHeader in customHeaders)
+                {
+                    headers[customHeader.Key] = customHeader.Value;
+                }
             }
+
+            var message = new TransportMessage(headers, safeBody);
+
+            return _msgCallback(message, deliveryTag);
         }
     }
 
