@@ -2,12 +2,14 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Persistence;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DotNetCore.CAP.MongoDB;
@@ -98,13 +100,12 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 new(builder.Ascending(x => x.Name)),
                 new(builder.Ascending(x => x.Added)),
                 new(builder.Ascending(x => x.ExpiresAt)),
-                new(builder.Ascending(x => x.StatusName)),
                 new(builder.Ascending(x => x.Retries)),
                 new(builder.Ascending(x => x.Version)),
                 new(builder.Ascending(x => x.StatusName).Ascending(x => x.ExpiresAt))
             };
-
-            await col.Indexes.CreateManyAsync(indexes, cancellationToken);
+            
+            await CreateNewIndexesAsync(col, indexes);
         }
 
         async Task CreatePublishedMessageIndexesAsync()
@@ -117,13 +118,41 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 new(builder.Ascending(x => x.Name)),
                 new(builder.Ascending(x => x.Added)),
                 new(builder.Ascending(x => x.ExpiresAt)),
-                new(builder.Ascending(x => x.StatusName)),
                 new(builder.Ascending(x => x.Retries)),
                 new(builder.Ascending(x => x.Version)),
                 new(builder.Ascending(x => x.StatusName).Ascending(x => x.ExpiresAt))
             };
-
-            await col.Indexes.CreateManyAsync(indexes, cancellationToken);
+            
+            await CreateNewIndexesAsync(col, indexes);
+        }
+        
+        async Task CreateNewIndexesAsync<T>(
+            IMongoCollection<T> collection,
+            IEnumerable<CreateIndexModel<T>> desiredIndexes)
+        {
+            var indexList = await collection.Indexes.ListAsync(cancellationToken);
+            var indexes = await indexList.ToListAsync(cancellationToken);
+          
+            var existingIndexes = new HashSet<string>(
+                indexes.Select(i => GetIndexKeyPattern(i["key"].AsBsonDocument))
+            );
+            
+            foreach (var desiredIndex in desiredIndexes)
+            {
+                var desiredPattern = GetIndexKeyPattern(desiredIndex.Keys.Render(new RenderArgs<T>(
+                    collection.DocumentSerializer,
+                    collection.Settings.SerializerRegistry)));
+                
+                if (!existingIndexes.Contains(desiredPattern))
+                {
+                    await collection.Indexes.CreateOneAsync(desiredIndex, cancellationToken: cancellationToken);
+                }
+            }
+        }
+        
+        static string GetIndexKeyPattern(BsonDocument keyDoc)
+        {
+            return string.Join(",", keyDoc.Elements.Select(e => $"{e.Name}:{e.Value}"));
         }
     }
 }
