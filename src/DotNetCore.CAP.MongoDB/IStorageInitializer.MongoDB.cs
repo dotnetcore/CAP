@@ -105,7 +105,7 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 new(builder.Ascending(x => x.StatusName).Ascending(x => x.ExpiresAt))
             };
             
-            await CreateNewIndexesAsync(col, indexes);
+            await CreateIndexesIfKeyPatternMissingAsync(col, indexes);
         }
 
         async Task CreatePublishedMessageIndexesAsync()
@@ -123,10 +123,14 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 new(builder.Ascending(x => x.StatusName).Ascending(x => x.ExpiresAt))
             };
             
-            await CreateNewIndexesAsync(col, indexes);
+            await CreateIndexesIfKeyPatternMissingAsync(col, indexes);
         }
         
-        async Task CreateNewIndexesAsync<T>(
+        /// <summary>
+        /// It creates indexes if an index with the same key pattern does not already exist.
+        /// This ensures backward compatibility with previous versions that created indexes with different names but the same key pattern.
+        /// </summary>
+        async Task CreateIndexesIfKeyPatternMissingAsync<T>(
             IMongoCollection<T> collection,
             IEnumerable<CreateIndexModel<T>> desiredIndexes)
         {
@@ -139,9 +143,10 @@ public class MongoDBStorageInitializer : IStorageInitializer
             
             foreach (var desiredIndex in desiredIndexes)
             {
-                var desiredPattern = GetIndexKeyPattern(desiredIndex.Keys.Render(new RenderArgs<T>(
+                var indexBsonDocument = desiredIndex.Keys.Render(new RenderArgs<T>(
                     collection.DocumentSerializer,
-                    collection.Settings.SerializerRegistry)));
+                    collection.Settings.SerializerRegistry));
+                var desiredPattern = GetIndexKeyPattern(indexBsonDocument);
                 
                 if (!existingIndexes.Contains(desiredPattern))
                 {
