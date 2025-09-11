@@ -234,7 +234,7 @@ public class PostgreSqlDataStorage : IDataStorage
 
     public async Task<int> DeleteReceivedMessageAsync(long id)
     {
-        var sql = $@"DELETE FROM {_recName} WHERE ""Id""={id} FOR DELETE SKIP LOCKED";
+        var sql = $@"DELETE FROM {_recName} WHERE ""Id""={id}";
 
         var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
@@ -244,7 +244,7 @@ public class PostgreSqlDataStorage : IDataStorage
 
     public async Task<int> DeletePublishedMessageAsync(long id)
     {
-        var sql = $@"DELETE FROM {_pubName} WHERE ""Id""={id} FOR DELETE SKIP LOCKED";
+        var sql = $@"DELETE FROM {_pubName} WHERE ""Id""={id}";
 
         var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
