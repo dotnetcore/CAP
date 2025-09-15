@@ -64,6 +64,18 @@ services.AddCap(capOptions =>
 
 [https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
 
+To prevent CAP from creating topics automatically, disable topic auto creation:
+
+```csharp
+services.AddCap(capOptions =>
+{
+    capOptions.UseKafka(kafkaOption =>
+    {
+        kafkaOption.MainConfig.Add("allow.auto.create.topics", "false");
+    });
+});
+```
+
 #### CustomHeadersBuilder Options
 
 When the message sent from a heterogeneous system, because of the CAP needs to define additional headers, so an exception will occur at this time. By providing this parameter to set the custom headersn to make the subscriber works.
