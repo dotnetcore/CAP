@@ -36,6 +36,7 @@ internal sealed class RabbitMqTransport : ITransport
 
             var props = new BasicProperties
             {
+                MessageId = message.GetId(),
                 DeliveryMode = DeliveryModes.Persistent,
                 Headers = message.Headers.ToDictionary(x => x.Key, object? (x) => x.Value)
             };
