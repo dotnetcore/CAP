@@ -2,6 +2,7 @@
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -68,6 +69,10 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 .ConfigureAwait(false);
 
         await Task.WhenAll(
+            DropReceivedMessageDeprecatedIndexesAsync(), 
+            DropPublishedMessageDeprecatedIndexesAsync()).ConfigureAwait(false);
+
+        await Task.WhenAll(
             CreateReceivedMessageIndexesAsync(),
             CreatePublishedMessageIndexesAsync()).ConfigureAwait(false);
 
@@ -98,7 +103,6 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 new(builder.Ascending(x => x.Name)),
                 new(builder.Ascending(x => x.Added)),
                 new(builder.Ascending(x => x.ExpiresAt)),
-                new(builder.Ascending(x => x.StatusName)),
                 new(builder.Ascending(x => x.Retries)),
                 new(builder.Ascending(x => x.Version)),
                 new(builder.Ascending(x => x.StatusName).Ascending(x => x.ExpiresAt))
@@ -117,13 +121,52 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 new(builder.Ascending(x => x.Name)),
                 new(builder.Ascending(x => x.Added)),
                 new(builder.Ascending(x => x.ExpiresAt)),
-                new(builder.Ascending(x => x.StatusName)),
                 new(builder.Ascending(x => x.Retries)),
                 new(builder.Ascending(x => x.Version)),
                 new(builder.Ascending(x => x.StatusName).Ascending(x => x.ExpiresAt))
             };
 
             await col.Indexes.CreateManyAsync(indexes, cancellationToken);
+        }
+
+        async Task DropReceivedMessageDeprecatedIndexesAsync()
+        {
+            var obsoleteIndexes = new HashSet<string> { "Name", "Added", "ExpiresAt", "StatusName", "Retries", "Version" };
+           
+            var col = database.GetCollection<ReceivedMessage>(options.ReceivedCollection);
+           
+            await DropIndexesAsync(col, obsoleteIndexes);
+        }
+
+        async Task DropPublishedMessageDeprecatedIndexesAsync()
+        {
+            var obsoleteIndexes = new HashSet<string> { "Name", "Added", "ExpiresAt", "StatusName", "Retries", "Version" };
+            
+            var col = database.GetCollection<PublishedMessage>(options.PublishedCollection);
+           
+            await DropIndexesAsync(col, obsoleteIndexes);
+            
+        }
+
+        async Task DropIndexesAsync<T>(IMongoCollection<T> col, ISet<string> obsoleteIndexes)
+        {
+            using var cursor = await col.Indexes.ListAsync(cancellationToken);
+            var indexList = await cursor.ToListAsync(cancellationToken);
+
+            foreach (var index in indexList)
+            {
+                var indexName = index["name"].AsString;
+                if (!obsoleteIndexes.Contains(indexName)) continue;
+                
+                try
+                {
+                    await col.Indexes.DropOneAsync(indexName, cancellationToken);
+                }
+                catch (MongoCommandException ex) when (ex.CodeName == "IndexNotFound")
+                {
+                    // Index already dropped or not found, ignore
+                }
+            }
         }
     }
 }
