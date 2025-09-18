@@ -157,14 +157,17 @@ public class MongoDBStorageInitializer : IStorageInitializer
             {
                 var indexName = index["name"].AsString;
                 if (!obsoleteIndexes.Contains(indexName)) continue;
-                
+
                 try
                 {
                     await col.Indexes.DropOneAsync(indexName, cancellationToken);
                 }
                 catch (MongoCommandException ex) when (ex.CodeName == "IndexNotFound")
                 {
-                    // Index already dropped or not found, ignore
+                    _logger.LogWarning(
+                        "Index '{IndexName}' on collection '{CollectionName}' was not found when attempting to drop it. " +
+                        "This may indicate concurrent initialization or an unexpected state. Verify deployment strategy if this happens repeatedly.",
+                        indexName, col.CollectionNamespace.CollectionName);
                 }
             }
         }
