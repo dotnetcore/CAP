@@ -109,8 +109,12 @@ public class ConnectionChannelPool : IConnectionChannelPool, IDisposable
         if (options.HostName.Contains(","))
         {
             options.ConnectionFactoryOptions?.Invoke(factory);
-
-            return () => factory.CreateConnectionAsync(AmqpTcpEndpoint.ParseMultiple(options.HostName));
+            var endpoints = AmqpTcpEndpoint.ParseMultiple(options.HostName);
+            foreach (var endpoint in endpoints)
+            {
+                endpoint.Ssl = factory.Ssl;
+            }
+            return () => factory.CreateConnectionAsync(endpoints);
         }
 
         factory.HostName = options.HostName;
