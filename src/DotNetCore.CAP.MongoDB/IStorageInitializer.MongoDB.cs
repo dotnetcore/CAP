@@ -70,6 +70,10 @@ public class MongoDBStorageInitializer : IStorageInitializer
                 .ConfigureAwait(false);
 
         await Task.WhenAll(
+            DropReceivedMessageDeprecatedIndexesAsync(), 
+            DropPublishedMessageDeprecatedIndexesAsync()).ConfigureAwait(false);
+
+        await Task.WhenAll(
             CreateReceivedMessageIndexesAsync(),
             CreatePublishedMessageIndexesAsync()).ConfigureAwait(false);
 
@@ -159,5 +163,47 @@ public class MongoDBStorageInitializer : IStorageInitializer
         {
             return string.Join(",", keyDoc.Elements.Select(e => $"{e.Name}:{e.Value}"));
         }
+        
+        async Task DropReceivedMessageDeprecatedIndexesAsync()
+        {
+            var obsoleteIndexes = new HashSet<string> { "Name", "Added", "ExpiresAt", "StatusName", "Retries", "Version" };
+           
+            var col = database.GetCollection<ReceivedMessage>(options.ReceivedCollection);
+           
+            await DropIndexesAsync(col, obsoleteIndexes);
+        }
+        
+        async Task DropPublishedMessageDeprecatedIndexesAsync()
+        {
+            var obsoleteIndexes = new HashSet<string> { "Name", "Added", "ExpiresAt", "StatusName", "Retries", "Version" };
+            
+            var col = database.GetCollection<PublishedMessage>(options.PublishedCollection);
+           
+            await DropIndexesAsync(col, obsoleteIndexes);
+            
+        }
+        
+        async Task DropIndexesAsync<T>(IMongoCollection<T> col, ISet<string> obsoleteIndexes)
+        {
+            using var cursor = await col.Indexes.ListAsync(cancellationToken);
+            var indexList = await cursor.ToListAsync(cancellationToken);
+
+            foreach (var index in indexList)
+            {
+                var indexName = index["name"].AsString;
+                if (!obsoleteIndexes.Contains(indexName)) continue;
+                
+                try
+                {
+                    await col.Indexes.DropOneAsync(indexName, cancellationToken);
+                }
+                catch (MongoCommandException ex) when (ex.CodeName == "IndexNotFound")
+                {
+                    // Index already dropped or not found, ignore
+                }
+            }
+        }
     }
+
+    
 }
