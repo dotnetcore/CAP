@@ -49,30 +49,41 @@ public class KafkaConsumerClient : IConsumerClient
 
         var regexTopicNames = topicNames.Select(Helper.WildcardToRegex).ToList();
 
-        try
+        var allowAutoCreate = true;
+        if (_kafkaOptions.MainConfig.TryGetValue("allow.auto.create.topics", out var autoCreateValue)
+            && bool.TryParse(autoCreateValue, out var parsedValue))
         {
-            var config = new AdminClientConfig(_kafkaOptions.MainConfig) { BootstrapServers = _kafkaOptions.Servers };
-
-            using var adminClient = new AdminClientBuilder(config).Build();
-
-            adminClient.CreateTopicsAsync(regexTopicNames.Select(x => new TopicSpecification
-            {
-                Name = x,
-                NumPartitions = _kafkaOptions.TopicOptions.NumPartitions,
-                ReplicationFactor = _kafkaOptions.TopicOptions.ReplicationFactor
-            })).GetAwaiter().GetResult();
+            allowAutoCreate = parsedValue;
         }
-        catch (CreateTopicsException ex) when (ex.Message.Contains("already exists"))
+
+        if (allowAutoCreate)
         {
-        }
-        catch (Exception ex)
-        {
-            var logArgs = new LogMessageEventArgs
+            try
             {
-                LogType = MqLogType.ConsumeError,
-                Reason = "An error was encountered when automatically creating topic! -->" + ex.Message
-            };
-            OnLogCallback!(logArgs);
+                var config = new AdminClientConfig(_kafkaOptions.MainConfig)
+                    { BootstrapServers = _kafkaOptions.Servers };
+
+                using var adminClient = new AdminClientBuilder(config).Build();
+
+                adminClient.CreateTopicsAsync(regexTopicNames.Select(x => new TopicSpecification
+                {
+                    Name = x,
+                    NumPartitions = _kafkaOptions.TopicOptions.NumPartitions,
+                    ReplicationFactor = _kafkaOptions.TopicOptions.ReplicationFactor
+                })).GetAwaiter().GetResult();
+            }
+            catch (CreateTopicsException ex) when (ex.Message.Contains("already exists"))
+            {
+            }
+            catch (Exception ex)
+            {
+                var logArgs = new LogMessageEventArgs
+                {
+                    LogType = MqLogType.ConsumeError,
+                    Reason = "An error was encountered when automatically creating topic! -->" + ex.Message
+                };
+                OnLogCallback!(logArgs);
+            }
         }
 
         return regexTopicNames;

@@ -65,6 +65,18 @@ MainConfig 为配置字典，你可以通过以下链接找到其支持的配置
 
 [https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md](https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md)
 
+要禁止 CAP 自动创建主题，可以关闭该功能：
+
+```csharp
+services.AddCap(capOptions =>
+{
+    capOptions.UseKafka(kafkaOption =>
+    {
+        kafkaOption.MainConfig.Add("allow.auto.create.topics", "false");
+    });
+});
+```
+
 #### CustomHeadersBuilder Options
 
 有关 `CustomHeadersBuilder` 的说明：
