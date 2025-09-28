@@ -5,7 +5,6 @@ using System.Collections.Specialized;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using Xunit;
 
 namespace DotNetCore.CAP.Test.Helpers
 {

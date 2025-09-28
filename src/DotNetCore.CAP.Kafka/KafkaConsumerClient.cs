@@ -41,38 +41,49 @@ public class KafkaConsumerClient : IConsumerClient
 
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-    public BrokerAddress BrokerAddress => new("Kafka", _kafkaOptions.Servers);
+    public BrokerAddress BrokerAddress => new("kafka", _kafkaOptions.Servers);
 
-    public async Task<ICollection<string>> FetchTopicsAsync(IEnumerable<string> topicNames)
+    public async Task<ICollection<string>> FetchTopics(IEnumerable<string> topicNames)
     {
         if (topicNames == null) throw new ArgumentNullException(nameof(topicNames));
 
         var regexTopicNames = topicNames.Select(Helper.WildcardToRegex).ToList();
 
-        try
+        var allowAutoCreate = true;
+        if (_kafkaOptions.MainConfig.TryGetValue("allow.auto.create.topics", out var autoCreateValue)
+            && bool.TryParse(autoCreateValue, out var parsedValue))
         {
-            var config = new AdminClientConfig(_kafkaOptions.MainConfig) { BootstrapServers = _kafkaOptions.Servers };
-
-            using var adminClient = new AdminClientBuilder(config).Build();
-
-           await adminClient.CreateTopicsAsync(regexTopicNames.Select(x => new TopicSpecification
-            {
-                Name = x,
-                NumPartitions = _kafkaOptions.TopicOptions.NumPartitions,
-                ReplicationFactor = _kafkaOptions.TopicOptions.ReplicationFactor
-            }));
+            allowAutoCreate = parsedValue;
         }
-        catch (CreateTopicsException ex) when (ex.Message.Contains("already exists"))
+
+        if (allowAutoCreate)
         {
-        }
-        catch (Exception ex)
-        {
-            var logArgs = new LogMessageEventArgs
+            try
             {
-                LogType = MqLogType.ConsumeError,
-                Reason = "An error was encountered when automatically creating topic! -->" + ex.Message
-            };
-            OnLogCallback!(logArgs);
+                var config = new AdminClientConfig(_kafkaOptions.MainConfig)
+                { BootstrapServers = _kafkaOptions.Servers };
+
+                using var adminClient = new AdminClientBuilder(config).Build();
+
+                await adminClient.CreateTopicsAsync(regexTopicNames.Select(x => new TopicSpecification
+                {
+                    Name = x,
+                    NumPartitions = _kafkaOptions.TopicOptions.NumPartitions,
+                    ReplicationFactor = _kafkaOptions.TopicOptions.ReplicationFactor
+                }));
+            }
+            catch (CreateTopicsException ex) when (ex.Message.Contains("already exists"))
+            {
+            }
+            catch (Exception ex)
+            {
+                var logArgs = new LogMessageEventArgs
+                {
+                    LogType = MqLogType.ConsumeError,
+                    Reason = "An error was encountered when automatically creating topic! -->" + ex.Message
+                };
+                OnLogCallback!(logArgs);
+            }
         }
 
         return regexTopicNames;

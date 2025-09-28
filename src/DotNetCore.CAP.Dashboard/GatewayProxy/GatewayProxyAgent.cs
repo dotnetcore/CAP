@@ -148,18 +148,16 @@ public class GatewayProxyAgent
             uriBuilder = new UriBuilder(node.Address + requestPath + queryString);
         else
             uriBuilder = new UriBuilder("http://", node.Address, node.Port, requestPath, queryString);
-        
+
         if (node.Port > 0)
             uriBuilder.Port = node.Port;
-        
+
         DownstreamRequest.RequestUri = uriBuilder.Uri;
     }
 
-    private static void AddHeaderIfDoesntExist(HttpContext context,
-        KeyValuePair<string, IEnumerable<string>> httpResponseHeader)
+    private static void AddHeaderIfDoesntExist(HttpContext context, KeyValuePair<string, IEnumerable<string>> httpResponseHeader)
     {
         if (!context.Response.Headers.ContainsKey(httpResponseHeader.Key))
-            context.Response.Headers.Add(httpResponseHeader.Key,
-                new StringValues(httpResponseHeader.Value.ToArray()));
+            context.Response.Headers.Append(httpResponseHeader.Key, new StringValues(httpResponseHeader.Value.ToArray()));
     }
 }

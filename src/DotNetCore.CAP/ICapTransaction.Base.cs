@@ -47,7 +47,7 @@ public abstract class CapTransactionBase : ICapTransaction
 
     protected virtual void Flush()
     {
-        FlushAsync().GetAwaiter().GetResult();
+        FlushAsync().ConfigureAwait(false).GetAwaiter().GetResult();
     }
 
     protected virtual async Task FlushAsync()
@@ -59,9 +59,7 @@ public abstract class CapTransactionBase : ICapTransaction
                 var isDelayMessage = message.Origin.Headers.ContainsKey(Headers.DelayTime);
                 if (isDelayMessage)
                 {
-
                     await _dispatcher.EnqueueToScheduler(message, DateTime.Parse(message.Origin.Headers[Headers.SentTime]!, CultureInfo.InvariantCulture)).ConfigureAwait(false);
-
                 }
                 else
                 {

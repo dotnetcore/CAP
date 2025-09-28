@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
 	<Nullable>enable</Nullable>
     <PackageTags>$(PackageTags);AmazonSQS;SQS</PackageTags>
   </PropertyGroup>
@@ -12,8 +12,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="3.7.400.25" />
-    <PackageReference Include="AWSSDK.SQS" Version="3.7.400.25" />
+    <PackageReference Include="AWSSDK.SimpleNotificationService" Version="4.0.0.15" />
+    <PackageReference Include="AWSSDK.SQS" Version="4.0.0.17" />
   </ItemGroup>
 
   <ItemGroup>

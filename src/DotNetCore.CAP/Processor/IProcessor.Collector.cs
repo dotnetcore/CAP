@@ -42,14 +42,25 @@ public class CollectorProcessor : IProcessor
             var time = DateTime.Now;
             do
             {
-                deletedCount = await _serviceProvider.GetRequiredService<IDataStorage>()
-                    .DeleteExpiresAsync(table, time, ItemBatch, context.CancellationToken).ConfigureAwait(false);
-
-                if (deletedCount != 0)
+                try
                 {
-                    await context.WaitAsync(_delay).ConfigureAwait(false);
-                    context.ThrowIfStopping();
+                    deletedCount = await _serviceProvider.GetRequiredService<IDataStorage>()
+                        .DeleteExpiresAsync(table, time, ItemBatch, context.CancellationToken).ConfigureAwait(false);
+
+                    if (deletedCount != 0)
+                    {
+                        _logger.LogDebug($"Successfully deleted {deletedCount} expired items from table '{table}'.");
+
+                        await context.WaitAsync(_delay).ConfigureAwait(false);
+                        context.ThrowIfStopping();
+                    }
                 }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, $"An error occurred while attempting to delete expired data from table '{table}':{ex.Message}");
+                    throw;
+                }
+
             } while (deletedCount != 0);
         }
 

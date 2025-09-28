@@ -209,11 +209,21 @@ public class MySqlDataStorage : IDataStorage
     {
         var connection = new MySqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
+
         return await connection.ExecuteNonQueryAsync(
-                $@"DELETE FROM `{table}` WHERE ExpiresAt < @timeout AND StatusName IN ('{StatusName.Succeeded}','{StatusName.Failed}') LIMIT @batchCount;",
-                null,
-                new MySqlParameter("@timeout", timeout), new MySqlParameter("@batchCount", batchCount))
-            .ConfigureAwait(false);
+            $@"DELETE P FROM `{table}` AS P
+               JOIN (
+                   SELECT Id
+                   FROM `{table}`
+                   WHERE ExpiresAt < @timeout
+                   AND StatusName IN ('{StatusName.Succeeded}', '{StatusName.Failed}')
+                   ORDER BY Id
+                   LIMIT @batchCount
+                   { (SupportSkipLocked ? "FOR UPDATE SKIP LOCKED" : "FOR UPDATE")}
+               ) AS T ON P.Id = T.Id;",
+            null,
+            new MySqlParameter("@timeout", timeout),
+            new MySqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
     }
 
     public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
@@ -226,6 +236,26 @@ public class MySqlDataStorage : IDataStorage
         return GetMessagesOfNeedRetryAsync(_recName, lookbackSeconds);
     }
 
+    public async Task<int> DeleteReceivedMessageAsync(long id)
+    {
+        var sql = $"DELETE FROM `{_recName}` WHERE Id={id};";
+
+        var connection = new MySqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var result = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        return result;
+    }
+
+    public async Task<int> DeletePublishedMessageAsync(long id)
+    {
+        var sql = $"DELETE FROM `{_pubName}` WHERE Id={id};";
+
+        var connection = new MySqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var result = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        return result;
+    }
+
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
         CancellationToken token = default)
     {
@@ -233,13 +263,14 @@ public class MySqlDataStorage : IDataStorage
 
         var sql =
             $"SELECT `Id`,`Content`,`Retries`,`Added`,`ExpiresAt` FROM `{_pubName}` WHERE `Version`=@Version " +
-            $"AND ((`ExpiresAt`< @TwoMinutesLater AND `StatusName` = '{StatusName.Delayed}') OR (`ExpiresAt`< @OneMinutesAgo AND `StatusName` = '{StatusName.Queued}')) {lockSql};";
+            $"AND ((`ExpiresAt`< @TwoMinutesLater AND `StatusName` = '{StatusName.Delayed}') OR (`ExpiresAt`< @OneMinutesAgo AND `StatusName` = '{StatusName.Queued}')) LIMIT @BatchSize {lockSql};";
 
         object[] sqlParams =
         {
             new MySqlParameter("@Version", _capOptions.Value.Version),
             new MySqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
-            new MySqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1))
+            new MySqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1)),
+            new MySqlParameter("@BatchSize", _capOptions.Value.SchedulerBatchSize)
         };
 
         await using var connection = new MySqlConnection(_options.Value.ConnectionString);

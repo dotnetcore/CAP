@@ -39,7 +39,7 @@ internal sealed class NATSConsumerClient : IConsumerClient
 
     public Action<LogMessageEventArgs>? OnLogCallback { get; set; }
 
-    public BrokerAddress BrokerAddress => new("NATS", _natsOptions.Servers);
+    public BrokerAddress BrokerAddress => new("nats", _natsOptions.Servers);
 
     public Task<ICollection<string>> FetchTopicsAsync(IEnumerable<string> topicNames)
     {

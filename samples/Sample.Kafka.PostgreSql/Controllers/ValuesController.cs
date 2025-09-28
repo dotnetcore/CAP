@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Npgsql;
 
 namespace Sample.Kafka.PostgreSql.Controllers
@@ -24,7 +25,7 @@ namespace Sample.Kafka.PostgreSql.Controllers
             await bootstrapper.DisposeAsync();
             return Ok();
         }
-         
+
 
         [Route("~/delay/{delaySeconds:int}")]
         public async Task<IActionResult> Delay(int delaySeconds)
@@ -61,6 +62,22 @@ namespace Sample.Kafka.PostgreSql.Controllers
 
             producer.Publish("sample.kafka.postgrsql", DateTime.Now);
 
+            return Ok();
+        }
+
+        [Route("~/ef/transaction")]
+        public IActionResult EntityFrameworkWithTransaction([FromServices] AppDbContext dbContext)
+        {
+            using (dbContext.Database.BeginTransaction(producer, false))
+            {
+                dbContext.Persons.Add(new Person() { Name = "ef.transaction", Age = 11 });
+
+                dbContext.SaveChanges();
+
+                producer.Publish("sample.kafka.postgrsql", DateTime.UtcNow);
+
+                dbContext.Database.CommitTransaction();
+            }
             return Ok();
         }
 

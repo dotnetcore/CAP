@@ -1,33 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-  
-  <PropertyGroup>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-	<Nullable>enable</Nullable>
-  </PropertyGroup>
-  
-  <PropertyGroup>
-	<GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>1701;1702;1705;CS1591</NoWarn>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-  </PropertyGroup>
-  
-  <ItemGroup>
-    <None Include="..\..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-  
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net8.0' ">
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="6.0.4" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="6.0.1" />
-  </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-    <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Options" Version="8.0.0" />
-  </ItemGroup>
-	
+	<PropertyGroup>
+		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<NoWarn>1701;1702;1705;CS1591</NoWarn>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.7" />
+		<PackageReference Include="Microsoft.Extensions.Options" Version="9.0.7" />
+	</ItemGroup>
+
 </Project>

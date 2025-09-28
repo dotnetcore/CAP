@@ -69,7 +69,7 @@ public class SqlServerCapTransaction : CapTransactionBase
         switch (DbTransaction)
         {
             case NoopTransaction _:
-                await FlushAsync();
+                await FlushAsync().ConfigureAwait(false);
                 break;
             case DbTransaction dbTransaction:
                 await dbTransaction.CommitAsync(cancellationToken).ConfigureAwait(false);
@@ -166,7 +166,7 @@ public static class CapTransactionExtensions
     public static Task<IDbContextTransaction> BeginTransactionAsync(this DatabaseFacade database,
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
     {
-        var dbTransaction = database.BeginTransactionAsync(isolationLevel, cancellationToken).GetAwaiter().GetResult();
+        var dbTransaction = database.BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
         publisher.Transaction = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
         publisher.Transaction.DbTransaction = dbTransaction;
         publisher.Transaction.AutoCommit = autoCommit;
@@ -232,9 +232,9 @@ public static class CapTransactionExtensions
     public static Task<IDbTransaction> BeginTransactionAsync(this IDbConnection dbConnection,
         IsolationLevel isolationLevel, ICapPublisher publisher, bool autoCommit = false, CancellationToken cancellationToken = default)
     {
-        if (dbConnection.State == ConnectionState.Closed) ((DbConnection)dbConnection).OpenAsync(cancellationToken).GetAwaiter().GetResult();
+        if (dbConnection.State == ConnectionState.Closed) ((DbConnection)dbConnection).OpenAsync(cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
 
-        var dbTransaction = ((DbConnection)dbConnection).BeginTransactionAsync(isolationLevel, cancellationToken).GetAwaiter().GetResult();
+        var dbTransaction = ((DbConnection)dbConnection).BeginTransactionAsync(isolationLevel, cancellationToken).ConfigureAwait(false).GetAwaiter().GetResult();
         publisher.Transaction = ActivatorUtilities.CreateInstance<SqlServerCapTransaction>(publisher.ServiceProvider);
         publisher.Transaction.DbTransaction = dbTransaction;
         publisher.Transaction.AutoCommit = autoCommit;

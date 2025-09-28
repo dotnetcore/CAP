@@ -8,7 +8,6 @@ using System.Linq;
 using DotNetCore.CAP.Diagnostics;
 using OpenTelemetry;
 using OpenTelemetry.Context.Propagation;
-using OpenTelemetry.Trace;
 using CapEvents = DotNetCore.CAP.Diagnostics.CapDiagnosticListenerNames;
 
 namespace DotNetCore.CAP.OpenTelemetry;
@@ -40,7 +39,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     var eventData = (CapEventDataPubStore)evt.Value!;
                     ActivityContext parentContext = Propagator.Extract(default, eventData.Message, (msg, key) =>
                     {
-                        if (msg.Headers.TryGetValue(key, out var value)) return new[] { value };
+                        if (msg.Headers.TryGetValue(key, out var value) && value != null) return new string[] { value };
                         return Enumerable.Empty<string>();
                     }).ActivityContext;
 
@@ -52,7 +51,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                         ActivityKind.Internal, parentContext);
                     if (activity != null)
                     {
-                        activity.SetTag("message.name", eventData.Operation);
+                        activity.SetTag("messaging.destination.name", eventData.Operation);
                         activity.AddEvent(new ActivityEvent("CAP message persistence start...",
                             DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
 
@@ -61,7 +60,8 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                             Propagator.Inject(new PropagationContext(Activity.Current.Context, Baggage.Current),
                                 eventData.Message,
                                 (msg, key, value) => { msg.Headers[key] = value; });
-                        };
+                        }
+                        ;
                     }
                 }
                 break;
@@ -83,8 +83,8 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (Activity.Current is { } activity)
                     {
                         var exception = eventData.Exception!;
-                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
-                        activity.RecordException(exception);
+                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+                        activity.AddException(exception);
                         activity.Stop();
                     }
                 }
@@ -108,12 +108,22 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (activity != null)
                     {
                         activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
-                        activity.SetTag("messaging.destination", eventData.Operation);
-                        activity.SetTag("messaging.destination_kind", "topic");
-                        activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint?.Replace("-1", "5672"));
-                        activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
-                        activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
-
+                        activity.SetTag("messaging.message.id", eventData.TransportMessage.GetId());
+                        activity.SetTag("messaging.message.body.size", eventData.TransportMessage.Body.Length);
+                        activity.SetTag("messaging.message.conversation_id", eventData.TransportMessage.GetCorrelationId());
+                        activity.SetTag("messaging.destination.name", eventData.Operation);
+                        if (eventData.BrokerAddress.Endpoint is { } endpoint)
+                        {
+                            var parts = endpoint.Split(':');
+                            if (parts.Length > 0)
+                            {
+                                activity.SetTag("server.address", parts[0]);
+                            }
+                            if (parts.Length > 1 && int.TryParse(parts[1], out var port))
+                            {
+                                activity.SetTag("server.port", port);
+                            }
+                        }
                         activity.AddEvent(new ActivityEvent("Message publishing start...",
                             DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
 
@@ -142,8 +152,8 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (Activity.Current is { } activity)
                     {
                         var exception = eventData.Exception!;
-                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
-                        activity.RecordException(exception);
+                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+                        activity.AddException(exception);
                         activity.Stop();
                     }
                 }
@@ -153,7 +163,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     var eventData = (CapEventDataSubStore)evt.Value!;
                     var parentContext = Propagator.Extract(default, eventData.TransportMessage, (msg, key) =>
                     {
-                        if (msg.Headers.TryGetValue(key, out var value)) return new[] { value };
+                        if (msg.Headers.TryGetValue(key, out var value) && value != null) return new string[] { value };
                         return Enumerable.Empty<string>();
                     });
 
@@ -166,12 +176,24 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (activity != null)
                     {
                         activity.SetTag("messaging.system", eventData.BrokerAddress.Name);
-                        activity.SetTag("messaging.destination", eventData.Operation);
-                        activity.SetTag("messaging.destination_kind", "topic");
-                        activity.SetTag("messaging.url", eventData.BrokerAddress.Endpoint?.Replace("-1", "5672"));
-                        activity.SetTag("messaging.message_id", eventData.TransportMessage.GetId());
-                        activity.SetTag("messaging.message_payload_size_bytes", eventData.TransportMessage.Body.Length);
-
+                        activity.SetTag("messaging.message.id", eventData.TransportMessage.GetId());
+                        activity.SetTag("messaging.message.body.size", eventData.TransportMessage.Body.Length);
+                        activity.SetTag("messaging.operation.type", "receive");
+                        activity.SetTag("messaging.client.id", eventData.TransportMessage.GetExecutionInstanceId());
+                        activity.SetTag("messaging.destination.name", eventData.Operation);
+                        activity.SetTag("messaging.consumer.group.name", eventData.TransportMessage.GetGroup());
+                        if (eventData.BrokerAddress.Endpoint is { } endpoint)
+                        {
+                            var parts = endpoint.Split(':');
+                            if (parts.Length > 0)
+                            {
+                                activity.SetTag("server.address", parts[0]);
+                            }
+                            if (parts.Length > 1 && int.TryParse(parts[1], out var port))
+                            {
+                                activity.SetTag("server.port", port);
+                            }
+                        }
                         activity.AddEvent(new ActivityEvent("CAP message persistence start...",
                             DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
                     }
@@ -196,8 +218,8 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (Activity.Current is { } activity)
                     {
                         var exception = eventData.Exception!;
-                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
-                        activity.RecordException(exception);
+                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+                        activity.AddException(exception);
                         activity.Stop();
                     }
                 }
@@ -208,7 +230,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     var eventData = (CapEventDataSubExecute)evt.Value!;
                     var propagatedContext = Propagator.Extract(default, eventData.Message, (msg, key) =>
                     {
-                        if (msg.Headers.TryGetValue(key, out var value)) return new[] { value };
+                        if (msg.Headers.TryGetValue(key, out var value) && value != null) return new string[] { value };
                         return Enumerable.Empty<string>();
                     });
 
@@ -224,8 +246,7 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
 
                     if (activity != null)
                     {
-                        activity.SetTag("messaging.operation", "process");
-                        activity.SetTag("code.function", eventData.MethodInfo.Name);
+                        activity.SetTag("code.function.name", eventData.MethodInfo.Name);
 
                         activity.AddEvent(new ActivityEvent("Begin invoke the subscriber:" + eventData.MethodInfo.Name,
                             DateTimeOffset.FromUnixTimeMilliseconds(eventData.OperationTimestamp!.Value)));
@@ -251,8 +272,8 @@ internal class DiagnosticListener : IObserver<KeyValuePair<string, object?>>
                     if (Activity.Current is { } activity)
                     {
                         var exception = eventData.Exception!;
-                        activity.SetStatus(Status.Error.WithDescription(exception.Message));
-                        activity.RecordException(exception);
+                        activity.SetStatus(ActivityStatusCode.Error, exception.Message);
+                        activity.AddException(exception);
                         activity.Stop();
                     }
                 }

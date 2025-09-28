@@ -1,13 +1,14 @@
 # Configuration
 
-By default, you can specify configuration when you register CAP services into the DI container for ASP.NET Core project.
+By default, you can specify configurations when you register CAP services into the DI container for an ASP.NET Core project.
 
 ```c#
-services.AddCap(config=> 
+services.AddCap(config=>
 {
-    // config.XXX 
+    // config.XXX
 });
 ```
+
 `services` is `IServiceCollection` interface, which can be found in the `Microsoft.Extensions.DependencyInjection` package.
 
 ## What is minimum configuration required for CAP
@@ -145,7 +146,13 @@ If set to true, we will use a database-based distributed lock to solve the probl
 
 The interval of the collector processor deletes expired messages.
 
-#### ConsumerThreadCount 
+#### SchedulerBatchSize
+
+> Default: 1000
+
+Maximum number of delayed or queued messages fetched per scheduler cycle.
+
+#### ConsumerThreadCount
 
 > Default: 1
 

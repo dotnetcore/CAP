@@ -40,7 +40,8 @@ public class RouteActionProvider
         _agent = _serviceProvider.GetService<GatewayProxyAgent>(); // may be null
     }
 
-    private IMonitoringApi MonitoringApi => _serviceProvider.GetRequiredService<IDataStorage>().GetMonitoringApi();
+    private IDataStorage DataStorage => _serviceProvider.GetRequiredService<IDataStorage>();
+    private IMonitoringApi MonitoringApi => DataStorage.GetMonitoringApi();
 
     public void MapDashboardRoutes()
     {
@@ -54,7 +55,9 @@ public class RouteActionProvider
         _builder.MapGet(prefixMatch + "/published/message/{id:long}", PublishedMessageDetails).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapGet(prefixMatch + "/received/message/{id:long}", ReceivedMessageDetails).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapPost(prefixMatch + "/published/requeue", PublishedRequeue).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapPost(prefixMatch + "/published/delete", PublishedDelete).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapPost(prefixMatch + "/received/reexecute", ReceivedRequeue).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
+        _builder.MapPost(prefixMatch + "/received/delete", ReceivedDelete).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapGet(prefixMatch + "/published/{status}", PublishedList).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapGet(prefixMatch + "/received/{status}", ReceivedList).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
         _builder.MapGet(prefixMatch + "/subscriber", Subscribers).AllowAnonymousIf(_options.AllowAnonymousExplicit, _options.AuthorizationPolicy);
@@ -79,7 +82,7 @@ public class RouteActionProvider
         var cap = _serviceProvider.GetService<CapMarkerService>();
         var broker = _serviceProvider.GetService<CapMessageQueueMakerService>();
         var storage = _serviceProvider.GetService<CapStorageMarkerService>();
-        
+
         await httpContext.Response.WriteAsJsonAsync(new
         {
             cap,
@@ -215,6 +218,23 @@ public class RouteActionProvider
         httpContext.Response.StatusCode = StatusCodes.Status204NoContent;
     }
 
+    public async Task PublishedDelete(HttpContext httpContext)
+    {
+        if (_agent != null && await _agent.Invoke(httpContext)) return;
+
+        var messageIds = await httpContext.Request.ReadFromJsonAsync<long[]>();
+        if (messageIds == null || messageIds.Length == 0)
+        {
+            httpContext.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+            return;
+        }
+
+        foreach (var messageId in messageIds)
+            _ = await DataStorage.DeletePublishedMessageAsync(messageId);
+
+        httpContext.Response.StatusCode = StatusCodes.Status204NoContent;
+    }
+
     public async Task ReceivedRequeue(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
@@ -235,6 +255,24 @@ public class RouteActionProvider
 
         httpContext.Response.StatusCode = StatusCodes.Status204NoContent;
     }
+
+    public async Task ReceivedDelete(HttpContext httpContext)
+    {
+        if (_agent != null && await _agent.Invoke(httpContext)) return;
+
+        var messageIds = await httpContext.Request.ReadFromJsonAsync<long[]>();
+        if (messageIds == null || messageIds.Length == 0)
+        {
+            httpContext.Response.StatusCode = StatusCodes.Status422UnprocessableEntity;
+            return;
+        }
+
+        foreach (var messageId in messageIds)
+            _ = await DataStorage.DeleteReceivedMessageAsync(messageId);
+
+        httpContext.Response.StatusCode = StatusCodes.Status204NoContent;
+    }
+
 
     public async Task PublishedList(HttpContext httpContext)
     {
@@ -293,7 +331,7 @@ public class RouteActionProvider
     public async Task Subscribers(HttpContext httpContext)
     {
         if (_agent != null && await _agent.Invoke(httpContext)) return;
-        
+
         var cache = _serviceProvider.GetRequiredService<MethodMatcherCache>();
         var subscribers = cache.GetCandidatesMethodsOfGroupNameGrouped();
 

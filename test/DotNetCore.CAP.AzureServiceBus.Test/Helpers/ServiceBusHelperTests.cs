@@ -2,7 +2,7 @@ using System;
 using DotNetCore.CAP.AzureServiceBus.Helpers;
 using Xunit;
 
-namespace DotNetCore.CAP.AzureServiceBus.Test.Helpers;
+namespace DotNetCore.CAP.servicebus.Test.Helpers;
 
 public class ServiceBusHelpersTests
 {
@@ -29,7 +29,7 @@ public class ServiceBusHelpersTests
         var result = ServiceBusHelpers.GetBrokerAddress(connectionString, @namespace);
 
         // Assert
-        Assert.Equal("AzureServiceBus", result.Name);
+        Assert.Equal("servicebus", result.Name);
         Assert.Equal("sb://mynamespace.servicebus.windows.net/", result.Endpoint);
     }
 
@@ -44,7 +44,7 @@ public class ServiceBusHelpersTests
         var result = ServiceBusHelpers.GetBrokerAddress(connectionString, @namespace);
 
         // Assert
-        Assert.Equal("AzureServiceBus", result.Name);
+        Assert.Equal("servicebus", result.Name);
         Assert.Equal("sb://mynamespace.servicebus.windows.net/", result.Endpoint);
     }
 
@@ -71,7 +71,7 @@ public class ServiceBusHelpersTests
         var result = ServiceBusHelpers.GetBrokerAddress(connectionString, @namespace);
 
         // Assert
-        Assert.Equal("AzureServiceBus", result.Name);
+        Assert.Equal("servicebus", result.Name);
         Assert.Equal("anothernamespace", result.Endpoint);
     }
 
@@ -86,7 +86,7 @@ public class ServiceBusHelpersTests
         var result = ServiceBusHelpers.GetBrokerAddress(connectionString, @namespace);
 
         // Assert
-        Assert.Equal("AzureServiceBus", result.Name);
+        Assert.Equal("servicebus", result.Name);
         Assert.Equal("sb://mynamespace.servicebus.windows.net/", result.Endpoint);
     }
 
@@ -101,7 +101,7 @@ public class ServiceBusHelpersTests
         var result = ServiceBusHelpers.GetBrokerAddress(connectionString, @namespace);
 
         // Assert
-        Assert.Equal("AzureServiceBus", result.Name);
+        Assert.Equal("servicebus", result.Name);
         Assert.Equal("sb://mynamespace.servicebus.windows.net/", result.Endpoint);
     }
 }

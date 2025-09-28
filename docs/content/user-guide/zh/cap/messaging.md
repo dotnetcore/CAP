@@ -102,10 +102,10 @@ Body 中的数据为用户发送的原始消息内容，也就是调用 Publish 
 
  键 | 类型 | 说明
 -- | --| --
-cap-msg-id |  string | 消息Id， 由雪花算法生成，也可以是 guid
+cap-msg-id |  long | 消息Id， 由雪花算法生成
 cap-msg-name | string | 消息名称，即 Topic 名字
 cap-msg-type | string | 消息的类型, 即 typeof(T).FullName (非必须)
-cap-senttime | stringg | 发送的时间 (非必须)
+cap-senttime | string | 发送的时间 (非必须)
 
 以 Java 系统发送 RabbitMQ 为例：
 

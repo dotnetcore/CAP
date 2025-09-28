@@ -1,4 +1,4 @@
-// Copyright (c) .NET Core Community. All rights reserved.
+﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
@@ -207,10 +207,18 @@ public class SqlServerDataStorage : IDataStorage
     {
         var connection = new SqlConnection(_options.Value.ConnectionString);
         await using var _ = connection.ConfigureAwait(false);
+
         return await connection.ExecuteNonQueryAsync(
-            $"DELETE TOP (@batchCount) FROM {table} WITH (READPAST) WHERE ExpiresAt < @timeout AND StatusName IN('{StatusName.Succeeded}','{StatusName.Failed}');",
+            $@"DELETE FROM {table}
+               WHERE Id IN (
+                   SELECT TOP (@batchCount) Id
+                   FROM {table} WITH (READPAST)
+                   WHERE ExpiresAt < @timeout
+                   AND StatusName IN('{StatusName.Succeeded}','{StatusName.Failed}')
+               );",
             null,
-            new SqlParameter("@timeout", timeout), new SqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
+            new SqlParameter("@timeout", timeout),
+            new SqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
     }
 
     public Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
@@ -223,21 +231,42 @@ public class SqlServerDataStorage : IDataStorage
         return GetMessagesOfNeedRetryAsync(_recName, lookbackSeconds);
     }
 
+    public async Task<int> DeleteReceivedMessageAsync(long id)
+    {
+        var sql = $"DELETE FROM {_recName} WHERE Id={id}";
+
+        var connection = new SqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var affectedRowCount = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        return affectedRowCount;
+    }
+
+    public async Task<int> DeletePublishedMessageAsync(long id)
+    {
+        var sql = $"DELETE FROM {_pubName} WHERE Id={id}";
+
+        var connection = new SqlConnection(_options.Value.ConnectionString);
+        await using var _ = connection.ConfigureAwait(false);
+        var affectedRowCount = await connection.ExecuteNonQueryAsync(sql).ConfigureAwait(false);
+        return affectedRowCount;
+    }
+
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
         CancellationToken token = default)
     {
         var sql = $@"
-            SELECT Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
+            SELECT TOP (@BatchSize) Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
                 WHERE Version = @Version AND StatusName = '{StatusName.Delayed}' AND ExpiresAt < @TwoMinutesLater
             UNION ALL
-            SELECT Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
+            SELECT TOP (@BatchSize) Id, Content, Retries, Added, ExpiresAt FROM {_pubName} WITH (UPDLOCK, READPAST)
                 WHERE Version = @Version AND StatusName = '{StatusName.Queued}' AND ExpiresAt < @OneMinutesAgo;";
 
         object[] sqlParams =
         {
             new SqlParameter("@Version", _capOptions.Value.Version),
             new SqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
-            new SqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1))
+            new SqlParameter("@OneMinutesAgo", DateTime.Now.AddMinutes(-1)),
+            new SqlParameter("@BatchSize", _capOptions.Value.SchedulerBatchSize)
         };
 
         await using var connection = new SqlConnection(_options.Value.ConnectionString);

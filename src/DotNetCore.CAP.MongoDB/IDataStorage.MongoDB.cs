@@ -11,6 +11,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
 using DotNetCore.CAP.Persistence;
 using DotNetCore.CAP.Serialization;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -25,13 +26,15 @@ public class MongoDBDataStorage : IDataStorage
     private readonly IOptions<MongoDBOptions> _options;
     private readonly ISerializer _serializer;
     private readonly ISnowflakeId _snowflakeId;
+    private readonly ILogger _logger;
 
     public MongoDBDataStorage(
         IOptions<CapOptions> capOptions,
         IOptions<MongoDBOptions> options,
         IMongoClient client,
         ISerializer serializer,
-        ISnowflakeId snowflakeId)
+        ISnowflakeId snowflakeId,
+        ILogger<MongoDBDataStorage> logger)
     {
         _capOptions = capOptions;
         _options = options;
@@ -39,29 +42,36 @@ public class MongoDBDataStorage : IDataStorage
         _database = _client.GetDatabase(_options.Value.DatabaseName);
         _serializer = serializer;
         _snowflakeId = snowflakeId;
+        _logger = logger;
     }
 
     public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance,
         CancellationToken token = default)
     {
+
         var collection = _database.GetCollection<Lock>(_options.Value.LockCollection);
         using var session = await _client.StartSessionAsync(cancellationToken: token).ConfigureAwait(false);
         var transactionOptions =
             new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
-        session.StartTransaction(transactionOptions);
+
         try
         {
-            var opResult = await collection.UpdateOneAsync(session,
-                model => model.Key == key && model.LastLockTime < DateTime.Now.Subtract(ttl),
-                Builders<Lock>.Update.Set(model => model.Instance, instance)
-                    .Set(model => model.LastLockTime, DateTime.Now), null, token);
-            var isAcquired = opResult.IsModifiedCountAvailable && opResult.ModifiedCount > 0;
-            await session.CommitTransactionAsync(token).ConfigureAwait(false);
-            return isAcquired;
+            var result = await session.WithTransactionAsync(async (handle, cancellationToken) =>
+            {
+                var opResult = await collection.UpdateOneAsync(handle,
+                    model => model.Key == key && model.LastLockTime < DateTime.Now.Subtract(ttl),
+                    Builders<Lock>.Update.Set(model => model.Instance, instance)
+                        .Set(model => model.LastLockTime, DateTime.Now), null, cancellationToken);
+                var isAcquired = opResult.IsModifiedCountAvailable && opResult.ModifiedCount > 0;
+                return isAcquired;
+            }, transactionOptions, token);
+
+            return result;
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            await session.AbortTransactionAsync(token).ConfigureAwait(false);
+            _logger.LogWarning(
+                ex, "Failed to acquire lock for key '{Key}' with instance '{Instance}'.", key, instance);
             return false;
         }
     }
@@ -290,6 +300,20 @@ public class MongoDBDataStorage : IDataStorage
         }).ToList();
     }
 
+    public async Task<int> DeleteReceivedMessageAsync(long id)
+    {
+        var collection = _database.GetCollection<ReceivedMessage>(_options.Value.ReceivedCollection);
+        var deleteResult = await collection.DeleteOneAsync(x => x.Id == id).ConfigureAwait(false);
+        return (int)deleteResult.DeletedCount;
+    }
+
+    public async Task<int> DeletePublishedMessageAsync(long id)
+    {
+        var collection = _database.GetCollection<PublishedMessage>(_options.Value.PublishedCollection);
+        var deleteResult = await collection.DeleteOneAsync(x => x.Id == id).ConfigureAwait(false);
+        return (int)deleteResult.DeletedCount;
+    }
+
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
         CancellationToken token = default)
     {
@@ -322,7 +346,9 @@ public class MongoDBDataStorage : IDataStorage
                     await collection.UpdateManyAsync(session, filter, update, cancellationToken: linkedTs.Token)
                         .ConfigureAwait(false);
 
-                    var queryResult = await collection.Find(session, filter).ToListAsync(linkedTs.Token)
+                    var queryResult = await collection.Find(session, filter)
+                        .Limit(_capOptions.Value.SchedulerBatchSize)
+                        .ToListAsync(linkedTs.Token)
                         .ConfigureAwait(false);
 
                     var result = queryResult.Select(x => new MediumMessage

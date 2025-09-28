@@ -48,4 +48,9 @@ public readonly struct TransportMessage
     {
         return Headers.TryGetValue(Messages.Headers.CorrelationId, out var value) ? value : null;
     }
+
+    public string? GetExecutionInstanceId()
+    {
+        return Headers.TryGetValue(Messages.Headers.ExecutionInstanceId, out var value) ? value : null;
+    }
 }

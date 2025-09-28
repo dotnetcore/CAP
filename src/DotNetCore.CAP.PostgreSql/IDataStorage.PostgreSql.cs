@@ -1,4 +1,4 @@
-// Copyright (c) .NET Core Community. All rights reserved.
+﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
@@ -207,11 +207,19 @@ public class PostgreSqlDataStorage : IDataStorage
     {
         var connection = _options.Value.CreateConnection();
         await using var _ = connection.ConfigureAwait(false);
+
         return await connection.ExecuteNonQueryAsync(
-                $"DELETE FROM {table} WHERE \"Id\" IN (SELECT \"Id\" FROM {table} WHERE \"ExpiresAt\" < @timeout AND \"StatusName\" IN ('{StatusName.Succeeded}','{StatusName.Failed}') LIMIT @batchCount);",
-                null,
-                new NpgsqlParameter("@timeout", timeout), new NpgsqlParameter("@batchCount", batchCount))
-            .ConfigureAwait(false);
+            $@"DELETE FROM {table}
+               WHERE ""Id"" IN (
+                   SELECT ""Id""
+                   FROM {table}
+                   WHERE ""ExpiresAt"" < @timeout
+                   AND ""StatusName"" IN ('{StatusName.Succeeded}','{StatusName.Failed}')
+                   LIMIT @batchCount
+               )",
+             null,
+             new NpgsqlParameter("@timeout", timeout),
+             new NpgsqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
     }
 
     public async Task<IEnumerable<MediumMessage>> GetPublishedMessagesOfNeedRetry(TimeSpan lookbackSeconds)
@@ -224,18 +232,39 @@ public class PostgreSqlDataStorage : IDataStorage
         return await GetMessagesOfNeedRetryAsync(_recName, lookbackSeconds).ConfigureAwait(false);
     }
 
+    public async Task<int> DeleteReceivedMessageAsync(long id)
+    {
+        var sql = $@"DELETE FROM {_recName} WHERE ""Id""={id}";
+
+        var connection = _options.Value.CreateConnection();
+        await using var _ = connection.ConfigureAwait(false);
+        var result = await connection.ExecuteNonQueryAsync(sql);
+        return result;
+    }
+
+    public async Task<int> DeletePublishedMessageAsync(long id)
+    {
+        var sql = $@"DELETE FROM {_pubName} WHERE ""Id""={id}";
+
+        var connection = _options.Value.CreateConnection();
+        await using var _ = connection.ConfigureAwait(false);
+        var result = await connection.ExecuteNonQueryAsync(sql);
+        return result;
+    }
+
     public async Task ScheduleMessagesOfDelayedAsync(Func<object, IEnumerable<MediumMessage>, Task> scheduleTask,
         CancellationToken token = default)
     {
         var sql =
             $"SELECT \"Id\",\"Content\",\"Retries\",\"Added\",\"ExpiresAt\" FROM {_pubName} WHERE \"Version\"=@Version " +
-            $"AND ((\"ExpiresAt\"< @TwoMinutesLater AND \"StatusName\" = '{StatusName.Delayed}') OR (\"ExpiresAt\"< @OneMinutesAgo AND \"StatusName\" = '{StatusName.Queued}')) FOR UPDATE SKIP LOCKED;";
+            $"AND ((\"ExpiresAt\"< @TwoMinutesLater AND \"StatusName\" = '{StatusName.Delayed}') OR (\"ExpiresAt\"< @OneMinutesAgo AND \"StatusName\" = '{StatusName.Queued}')) FOR UPDATE SKIP LOCKED LIMIT @BatchSize;";
 
         var sqlParams = new object[]
         {
             new NpgsqlParameter("@Version", _capOptions.Value.Version),
             new NpgsqlParameter("@TwoMinutesLater", DateTime.Now.AddMinutes(2)),
-            new NpgsqlParameter("@OneMinutesAgo", QueuedMessageFetchTime())
+            new NpgsqlParameter("@OneMinutesAgo", QueuedMessageFetchTime()),
+            new NpgsqlParameter("@BatchSize", _capOptions.Value.SchedulerBatchSize)
         };
 
         await using var connection = _options.Value.CreateConnection();

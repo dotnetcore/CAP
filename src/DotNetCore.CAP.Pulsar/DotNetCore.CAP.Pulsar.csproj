@@ -1,22 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
-	<Nullable>enable</Nullable>
-    <PackageTags>$(PackageTags);Pulsar</PackageTags>
-	<NoWarn>CS0067</NoWarn>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<PackageTags>$(PackageTags);Pulsar</PackageTags>
+		<NoWarn>CS0067</NoWarn>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net8.0' ">
-    <PackageReference Include="Pulsar.Client" Version="2.16.0" />
-  </ItemGroup>
-  
-	<ItemGroup Condition=" '$(TargetFramework)' == 'net8.0' ">
-    <PackageReference Include="Pulsar.Client" Version="3.6.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
+		<PackageReference Include="Pulsar.Client" Version="3.9.5" />
+	</ItemGroup>
 
 </Project>

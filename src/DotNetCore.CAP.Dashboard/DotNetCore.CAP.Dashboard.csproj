@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>net6.0</TargetFramework>
+		<TargetFramework>net8.0</TargetFramework>
 		<LangVersion>default</LangVersion>
 		<Nullable>disable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-		<PackageReference Include="Consul" Version="1.7.14.4" />
+		<PackageReference Include="Consul" Version="1.7.14.7" />
 		<SupportedPlatform Include="browser" />
 	</ItemGroup>
 

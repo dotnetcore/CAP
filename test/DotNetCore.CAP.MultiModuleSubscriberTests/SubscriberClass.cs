@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace DotNetCore.CAP.MultiModuleSubscriberTests
+﻿namespace DotNetCore.CAP.MultiModuleSubscriberTests
 {
     public class SubscriberClass
     {

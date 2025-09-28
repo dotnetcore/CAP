@@ -209,6 +209,21 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
+#### 异步订阅
+
+你能够实现异步订阅。订阅方法应返回 `Task` 并接收 `CancellationToken` 作为参数。
+
+```c#
+public class AsyncSubscriber : ICapSubscribe
+{
+    [CapSubscribe("name")]
+    public async Task ProcessAsync(Message message, CancellationToken cancellationToken)
+    {
+        await SomeOperationAsync(message, cancellationToken);
+    }
+}
+```
+
 #### 使用多部分订阅名
 
 要在类级别对订阅的Topic进行分组，您可以将在方法上的订阅设置为部分订阅。 消息队列上的订阅将是类上定义的topic加上方法上定义的topic的拼合。 
