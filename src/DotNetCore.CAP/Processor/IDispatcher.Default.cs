@@ -103,7 +103,7 @@ public class Dispatcher : IDispatcher
                     {
                         _tasksCts.Token.ThrowIfCancellationRequested();
 
-                        if (_enableParallelSend)
+                        if (_enableParallelSend && nextMessage.Retries == 0)
                         {
                             if (!_publishedChannel.Writer.TryWrite(nextMessage))
                                 while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
