@@ -102,17 +102,29 @@ public class Dispatcher : IDispatcher
                     await foreach (var nextMessage in _schedulerQueue.GetConsumingEnumerable(_tasksCts.Token))
                     {
                         _tasksCts.Token.ThrowIfCancellationRequested();
-                        try
+
+                        if (_enableParallelSend)
                         {
-                            var result = await _sender.SendAsync(nextMessage).ConfigureAwait(false);
-                            if (!result.Succeeded)
-                            {
-                                _logger.LogError("Delay message sending failed. MessageId: {MessageId} ", nextMessage.DbId);
-                            }
+                            if (_publishedChannel.Writer.TryWrite(nextMessage))
+                                continue;
+
+                            while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
+                                _publishedChannel.Writer.TryWrite(nextMessage);
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            _logger.LogError(ex, "Error sending scheduled message. MessageId: {MessageId}", nextMessage.DbId);
+                            try
+                            {
+                                var result = await _sender.SendAsync(nextMessage).ConfigureAwait(false);
+                                if (!result.Succeeded)
+                                {
+                                    _logger.LogError("Delay message sending failed. MessageId: {MessageId} ", nextMessage.DbId);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error sending scheduled message. MessageId: {MessageId}", nextMessage.DbId);
+                            }
                         }
                     }
 
