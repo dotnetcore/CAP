@@ -105,11 +105,9 @@ public class Dispatcher : IDispatcher
 
                         if (_enableParallelSend)
                         {
-                            if (_publishedChannel.Writer.TryWrite(nextMessage))
-                                continue;
-
-                            while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
-                                _publishedChannel.Writer.TryWrite(nextMessage);
+                            if (!_publishedChannel.Writer.TryWrite(nextMessage))
+                                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
+                                    _publishedChannel.Writer.TryWrite(nextMessage);
                         }
                         else
                         {

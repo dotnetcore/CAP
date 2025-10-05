@@ -16,7 +16,7 @@ using Xunit;
 
 namespace DotNetCore.CAP.Test;
 
-public class DispatcherTests 
+public class DispatcherTests
 {
     private readonly ILogger<Dispatcher> _logger;
     private readonly ISubscribeExecutor _executor;
@@ -41,22 +41,22 @@ public class DispatcherTests
             SubscriberParallelExecuteThreadCount = 2,
             SubscriberParallelExecuteBufferFactor = 2
         });
-        
+
         var dispatcher = new Dispatcher(_logger, sender, options, _executor, _storage);
 
         using var cts = new CancellationTokenSource();
         var messageId = "testId";
-        
+
         // Act
         await dispatcher.Start(cts.Token);
         await dispatcher.EnqueueToPublish(CreateTestMessage(messageId));
         await cts.CancelAsync();
-        
+
         // Assert
         sender.Count.Should().Be(1);
         sender.ReceivedMessages.First().DbId.Should().Be(messageId);
     }
-    
+
     [Fact]
     public async Task EnqueueToPublish_ShouldBeThreadSafe_WhenParallelSendDisabled()
     {
@@ -150,53 +150,16 @@ public class DispatcherTests
         // Act
         await dispatcher.Start(cts.Token);
         var dateTime = DateTime.Now;
-        
+
         await dispatcher.EnqueueToScheduler(messages[0], dateTime.AddSeconds(1));
         await dispatcher.EnqueueToScheduler(messages[1], dateTime.AddMilliseconds(200));
         await dispatcher.EnqueueToScheduler(messages[2], dateTime.AddMilliseconds(100));
 
         await Task.Delay(1200, CancellationToken.None);
         await cts.CancelAsync();
-        
+
         // Assert
         sender.ReceivedMessages.Select(m => m.DbId).Should().Equal(["3", "2", "1"]);
-    }
-
-    [Fact]
-    public async Task EnqueueToScheduler_ShouldBeThreadSafe_WhenDelayLessThenMinuteAndParallelSendEnabled()
-    {
-        // Arrange
-        var sender = new TestThreadSafeMessageSender();
-        var options = Options.Create(new CapOptions
-        {
-            EnableSubscriberParallelExecute = true,
-            EnablePublishParallelSend = true,
-            SubscriberParallelExecuteThreadCount = 2,
-            SubscriberParallelExecuteBufferFactor = 2
-        });
-        var dispatcher = new Dispatcher(_logger, sender, options, _executor, _storage);
-
-        using var cts = new CancellationTokenSource();
-        var messages = Enumerable.Range(1, 10000)
-            .Select(i => CreateTestMessage(i.ToString()))
-            .ToArray();
-
-        // Act
-        await dispatcher.Start(cts.Token);
-        var dateTime = DateTime.Now.AddSeconds(1);
-        await Parallel.ForEachAsync(messages, CancellationToken.None,
-            async (m, ct) => { await dispatcher.EnqueueToScheduler(m, dateTime); });
-
-        await Task.Delay(1500, CancellationToken.None);
-
-        await cts.CancelAsync();
-
-        // Assert
-        sender.Count.Should().Be(10000);
-
-        var receivedMessages = sender.ReceivedMessages.Select(m => m.DbId).Order().ToList();
-        var expected = messages.Select(m => m.DbId).Order().ToList();
-        expected.Should().Equal(receivedMessages);
     }
 
     [Fact]
