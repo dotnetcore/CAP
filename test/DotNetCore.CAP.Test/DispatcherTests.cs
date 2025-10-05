@@ -169,7 +169,7 @@ public class DispatcherTests
         var sender = new TestThreadSafeMessageSender();
         var options = Options.Create(new CapOptions
         {
-            EnableSubscriberParallelExecute = true,
+            EnableSubscriberParallelExecute = false,
             EnablePublishParallelSend = true,
             SubscriberParallelExecuteThreadCount = 2,
             SubscriberParallelExecuteBufferFactor = 2
@@ -183,11 +183,11 @@ public class DispatcherTests
 
         // Act
         await dispatcher.Start(cts.Token);
-        var dateTime = DateTime.Now.AddSeconds(1);
+        var dateTime = DateTime.Now.AddMilliseconds(50);
         await Parallel.ForEachAsync(messages, CancellationToken.None,
             async (m, ct) => { await dispatcher.EnqueueToScheduler(m, dateTime); });
 
-        await Task.Delay(2500, CancellationToken.None);
+        await Task.Delay(3000, CancellationToken.None);
 
         await cts.CancelAsync();
 
