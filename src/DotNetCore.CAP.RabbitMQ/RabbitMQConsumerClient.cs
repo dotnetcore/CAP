@@ -60,13 +60,14 @@ internal sealed class RabbitMqConsumerClient : IConsumerClient
     {
         Connect().GetAwaiter().GetResult();
 
-        if (_groupConcurrent > 0)
-        {
-            _channel!.BasicQosAsync(prefetchSize: 0, prefetchCount: _groupConcurrent, global: false, cancellationToken).GetAwaiter().GetResult(); 
-        }
-        else if (_rabbitMqOptions.BasicQosOptions != null)
+        if (_rabbitMqOptions.BasicQosOptions != null)
         {
             _channel!.BasicQosAsync(0, _rabbitMqOptions.BasicQosOptions.PrefetchCount, _rabbitMqOptions.BasicQosOptions.Global, cancellationToken).GetAwaiter().GetResult();
+        }
+        else
+        {
+            ushort prefetch = _groupConcurrent > 0 ? _groupConcurrent : (ushort)1;
+            _channel!.BasicQosAsync(prefetchSize: 0, prefetchCount: prefetch, global: false, cancellationToken).GetAwaiter().GetResult();
         }
 
         _consumer = new RabbitMqBasicConsumer(_channel!, _groupConcurrent, _queueName, OnMessageCallback!, OnLogCallback!,
