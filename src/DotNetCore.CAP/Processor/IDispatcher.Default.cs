@@ -31,6 +31,7 @@ public class Dispatcher : IDispatcher
     private CancellationTokenSource? _tasksCts;
     private Channel<MediumMessage> _publishedChannel = default!;
     private Channel<(MediumMessage, ConsumerExecutorDescriptor?)> _receivedChannel = default!;
+    private bool _disposed;
 
     public Dispatcher(ILogger<Dispatcher> logger, IMessageSender sender, IOptions<CapOptions> options,
         ISubscribeExecutor executor, IDataStorage storage)
@@ -47,6 +48,14 @@ public class Dispatcher : IDispatcher
 
     public async Task Start(CancellationToken stoppingToken)
     {
+        // If already disposed and restarting, recreate the CancellationTokenSource and reset state
+        if (_disposed || (_tasksCts != null && _tasksCts.IsCancellationRequested))
+        {
+            _tasksCts?.Dispose();
+            _tasksCts = null;
+            _disposed = false;
+        }
+
         stoppingToken.ThrowIfCancellationRequested();
         _tasksCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, CancellationToken.None);
 
@@ -226,6 +235,8 @@ public class Dispatcher : IDispatcher
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         _tasksCts?.Dispose();
         GC.SuppressFinalize(this);
     }

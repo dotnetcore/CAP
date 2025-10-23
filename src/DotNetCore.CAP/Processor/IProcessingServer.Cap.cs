@@ -14,7 +14,7 @@ namespace DotNetCore.CAP.Processor;
 
 public class CapProcessingServer : IProcessingServer
 {
-    private readonly CancellationTokenSource _cts;
+    private CancellationTokenSource _cts;
     private readonly ILogger _logger;
     private readonly ILoggerFactory _loggerFactory;
     private readonly IServiceProvider _provider;
@@ -36,6 +36,14 @@ public class CapProcessingServer : IProcessingServer
 
     public Task Start(CancellationToken stoppingToken)
     {
+        // If already disposed and restarting, recreate the CancellationTokenSource
+        if (_disposed || _cts.IsCancellationRequested)
+        {
+            _cts?.Dispose();
+            _cts = new CancellationTokenSource();
+            _disposed = false;
+        }
+
         stoppingToken.Register(() => _cts.Cancel());
 
         _logger.ServerStarting();
