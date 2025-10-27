@@ -1,17 +1,26 @@
-﻿using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using MongoDB.Driver;
 
-namespace Sample.RabbitMQ.MongoDB
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure services
+builder.Services.AddSingleton<IMongoClient>(new MongoClient(builder.Configuration.GetConnectionString("MongoDB")));
+
+builder.Services.AddCap(x =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateWebHostBuilder(args).Build().Run();
-        }
+    x.UseMongoDB(builder.Configuration.GetConnectionString("MongoDB"));
+    x.UseRabbitMQ("");
+    x.UseDashboard();
+});
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>();
-    }
-}
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+// Configure middleware pipeline
+app.UseRouting();
+app.MapControllers();
+
+app.Run();
