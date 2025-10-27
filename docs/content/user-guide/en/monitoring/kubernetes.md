@@ -4,7 +4,7 @@
 
 ## Kubernetes in the Dashboard
 
-Our Dashboard has supported Kubernetes as a service discovery from version 7.2.0 onwards. You can switch to the *Node* page, then select a k8s namespace, and CAP will list all Services under that namespace. After clicking the *Switch* button, the Dashboard will detect whether the CAP service of that node is available. If it is available, it will proxy to the switched node for data viewing.
+The Dashboard has supported Kubernetes as a service discovery mechanism since version 7.2.0. You can navigate to the Nodes page, select a Kubernetes namespace, and CAP will list all Services within that namespace. After clicking the Switch button, the Dashboard will check if the CAP service of that node is available. If it is, the Dashboard will proxy to the switched node to display data.
 
 Here is a configuration example:
 
@@ -15,35 +15,34 @@ services.AddCap(x =>
     x.UseDashboard();
     x.UseK8sDiscovery();
 });
-
 ```
 
 ## UseK8sDiscovery Configuration
 
-This configuration option is used to configure the Dashboard/Nodes to list every K8s `service` by default. If this is set to `True` then only services with the `dotnetcore.cap.visibility: show` label will be listed. More information on labels will be found on the **Kubernetes Labels Configuration** section.
+This configuration option controls whether the Dashboard/Nodes page lists every K8s `Service` by default. If set to `True`, only services with the `dotnetcore.cap.visibility: show` label will be listed. See the **Kubernetes Labels Configuration** section for more information about labels.
 
-* ShowOnlyExplicitVisibleNodes 
+* **ShowOnlyExplicitVisibleNodes** 
 
-> Default ：false
-
+> Default: false
 
 ```cs
 services.AddCap(x =>
 {
     // ...
-    x.UseK8sDiscovery(opt=>{
-      opt.ShowOnlyExplicitVisibleNodes = true;
+    x.UseK8sDiscovery(opt =>
+    {
+        opt.ShowOnlyExplicitVisibleNodes = true;
     });
 });
 ```
 
-The component will automatically detect whether it is inside the cluster. If it is inside the cluster, the Pod must be granted Kubernetes Api permissions. Refer to the next section.
+The component automatically detects whether it is running inside a Kubernetes cluster. If it is, the Pod must be granted Kubernetes API permissions. Refer to the next section.
 
-## Assign Pod Access to Kubernetes Api 
+## Assigning Pod Access to Kubernetes API 
 
-If the ServiceAccount associated with your Deployment does not have access to the K8s Api, you need to grant the `namespaces`, `services` resources the `get`, `list` permissions.
+If the ServiceAccount associated with your Deployment does not have access to the Kubernetes API, you must grant `namespaces` and `services` resources with `get` and `list` permissions.
 
-Here is an example yaml. First create a ServiceAccount and ClusterRole and set the related permissions, then bind them using ClusterRoleBinding. Finally, use `serviceAccountName: api-access` to specify in Deployment.
+Here is an example YAML. First, create a ServiceAccount and ClusterRole with the appropriate permissions, then bind them using ClusterRoleBinding. Finally, use `serviceAccountName: api-access` in your Deployment.
 
 ```
 apiVersion: v1

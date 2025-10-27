@@ -1,10 +1,10 @@
 # In-Memory Storage
 
-In-memory storage is often used in development and test environments, and if you use memory-based storage you lose the reliability of local transaction messages.
+In-memory storage is commonly used in development and test environments. However, if you use memory-based storage, you lose the reliability guarantee of local transaction messages.
 
 ## Configuration
 
-To use in-memory storage, you need to install following package from NuGet:
+To use in-memory storage, you need to install the following package from NuGet:
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.InMemoryStorage
@@ -27,8 +27,8 @@ public void ConfigureServices(IServiceCollection services)
 
 ```
 
- CAP will clean **every 5 minutes** Successful messages in memory.
+CAP will clean successful messages from memory every 5 minutes.
 
 ## Publish with transaction
 
-In-Memory Storage **does not support** Transaction mode to send messages.
+In-memory storage does **not support** transactional message publishing.

@@ -1,6 +1,6 @@
 # Quick Start
 
-Learn how to build a microservices event bus architecture using CAP, which offers advantages over direct integration of message queues, and what out-of-the-box features it provides.
+Learn how to build a microservices event bus architecture using CAP. This offers advantages over directly integrating message queues and provides many out-of-the-box features.
 
 ## Installation
 
@@ -8,16 +8,16 @@ Learn how to build a microservices event bus architecture using CAP, which offer
 PM> Install-Package DotNetCore.CAP
 ```
 
-##  Integrated in Asp.Net Core
+## Integrated in ASP.NET Core
 
-For quick start, we use memory-based event storage and message transport.
+For a quick start, we use memory-based event storage and message transport.
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.InMemoryStorage
 PM> Install-Package Savorboard.CAP.InMemoryMessageQueue
 ```
 
-In `Startup.cs` ，add the following configuration:
+In `Startup.cs`, add the following configuration:
 
 ```c#
 public void ConfigureServices(IServiceCollection services)
@@ -30,13 +30,13 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-## Publish Message
+## Publishing a Message
 
 ```c#
 public class PublishController : Controller
 {
     [Route("~/send")]
-    public IActionResult SendMessage([FromServices]ICapPublisher capBus)
+    public IActionResult SendMessage([FromServices] ICapPublisher capBus)
     {
         capBus.Publish("test.show.time", DateTime.Now);
 
@@ -45,23 +45,22 @@ public class PublishController : Controller
 }
 ```
 
-### Publish delay message
+### Publishing a Delayed Message
 
 ```c#
 public class PublishController : Controller
 {
     [Route("~/send/delay")]
-    public IActionResult SendDelayMessage([FromServices]ICapPublisher capBus)
+    public IActionResult SendDelayMessage([FromServices] ICapPublisher capBus)
     {
-        capBus.PublishDelay(TimeSpan.FromSeconds(100),"test.show.time", DateTime.Now);
+        capBus.PublishDelay(TimeSpan.FromSeconds(100), "test.show.time", DateTime.Now);
 
         return Ok();
     }
 }
 ```
 
-
-### Publish with extra header
+### Publishing with Extra Headers
 
 ```c#
 var header = new Dictionary<string, string>()
@@ -71,10 +70,9 @@ var header = new Dictionary<string, string>()
 };
 
 capBus.Publish("test.show.time", DateTime.Now, header);
-
 ```
 
-## Process Message
+## Processing a Message
 
 ```C#
 public class ConsumerController : Controller
@@ -83,24 +81,23 @@ public class ConsumerController : Controller
     [CapSubscribe("test.show.time")]
     public void ReceiveMessage(DateTime time)
     {
-        Console.WriteLine("message time is:" + time);
+        Console.WriteLine("message time is: " + time);
     }
 }
 ```
 
-### Process with extra header
+### Processing with Extra Headers
 
 ```c#
 [CapSubscribe("test.show.time")]
-public void ReceiveMessage(DateTime time, [FromCap]CapHeader header)
+public void ReceiveMessage(DateTime time, [FromCap] CapHeader header)
 {
-    Console.WriteLine("message time is:" + time);
-    Console.WriteLine("message firset header :" + header["my.header.first"]);
-    Console.WriteLine("message second header :" + header["my.header.second"]);
+    Console.WriteLine("message time is: " + time);
+    Console.WriteLine("message first header: " + header["my.header.first"]);
+    Console.WriteLine("message second header: " + header["my.header.second"]);
 }
-
 ```
 
 ## Summary
 
-One of the most powerful advantages of asynchronous messaging over direct integrated message queues is reliability, where failures in one part of the system do not propagate or cause the entire system to crash. Messages are stored inside the CAP to ensure the reliability of the message, and strategies such as retry are used to achieve the final consistency of data between services.
+One of the most powerful advantages of asynchronous messaging over direct message queue integration is reliability. Failures in one part of the system don't propagate or cause the entire system to crash. Messages are stored inside CAP to ensure message reliability, and strategies such as retries are used to achieve eventual consistency of data between services.

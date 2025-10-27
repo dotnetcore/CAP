@@ -1,37 +1,36 @@
 # Filter
 
-Subscriber filters are similar to ASP.NET MVC filters and are mainly used to process additional work before and after the subscriber method is executed. Such as transaction management or logging, etc.
+Subscriber filters are similar to ASP.NET MVC filters and are mainly used to perform additional work before and after the subscriber method executes, such as transaction management or logging.
 
-## Create subscribe filter
+## Creating a Subscriber Filter
 
 ### Create Filter
 
-Create a new filter class and inherit the `SubscribeFilter` abstract class.
+Create a new filter class that inherits from the `SubscribeFilter` abstract class.
 
 ```C#
-public class MyCapFilter: SubscribeFilter
+public class MyCapFilter : SubscribeFilter
 {
     public override Task OnSubscribeExecutingAsync(ExecutingContext context)
     {
-        // before subscribe method exectuing
+        // Execute before the subscriber method runs
     }
 
     public override Task OnSubscribeExecutedAsync(ExecutedContext context)
     {
-        // after subscribe method executed
+        // Execute after the subscriber method completes
     }
 
     public override Task OnSubscribeExceptionAsync(ExceptionContext context)
     {
-        // subscribe method execution exception
+        // Handle exceptions during subscriber method execution
     }
 }
 ```
 
-In some scenarios, if you want to terminate the subscriber method execution, you can throw an exception in `OnSubscribeExecutingAsync`, and choose to ignore the exception in `OnSubscribeExceptionAsync`.
+In some scenarios, if you want to terminate the subscriber method execution, you can throw an exception in `OnSubscribeExecutingAsync`, and choose to handle the exception in `OnSubscribeExceptionAsync`.
 
-To ignore exceptions, you can setting `context.ExceptionHandled = true` in `ExceptionContext`
-
+To ignore exceptions, set `context.ExceptionHandled = true` in `ExceptionContext`:
 
 ```C#
 public override Task OnSubscribeExceptionAsync(ExceptionContext context)
@@ -40,15 +39,15 @@ public override Task OnSubscribeExceptionAsync(ExceptionContext context)
 }
 ```
 
-### Configuration Filter
+### Registering a Filter
 
-Use `AddSubscribeFilter<>` to add a filter.
+Use `AddSubscribeFilter<>` to register a filter.
 
 ```C#
 services.AddCap(opt =>
 {
-    // ***
-}.AddSubscribeFilter<MyCapFilter>();
+    // ...
+}).AddSubscribeFilter<MyCapFilter>();
 ```
 
-Currently, we do not support adding multiple filters.
+Currently, multiple filters are not supported.

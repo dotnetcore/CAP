@@ -1,16 +1,16 @@
 # Consul
 
-[Consul](https://www.consul.io/) is a distributed service mesh to connect, secure, and configure services across any runtime platform and public or private cloud.
+[Consul](https://www.consul.io/) is a distributed service mesh tool to connect, secure, and configure services across any runtime platform and public or private cloud.
 
-## Consul Configuration for dashboard
+## Consul Configuration for Dashboard
 
-CAP's Dashboard uses Consul as a service discovery to get the data of other nodes, and you can switch to the Servers page to see other nodes.
+CAP's Dashboard uses Consul for service discovery to retrieve data from other nodes. You can switch to the Servers page to view other nodes.
 
 ![](https://camo.githubusercontent.com/54c00c6ae65ce1d7b9109ed8cbcdca703a050c47/687474703a2f2f696d61676573323031372e636e626c6f67732e636f6d2f626c6f672f3235303431372f3230313731302f3235303431372d32303137313030343232313030313838302d313136323931383336322e706e67)
 
-Click the `Switch` button to switch to the target node, CAP will use a proxy to get the data of the node you switched to.
+Click the `Switch` button to switch to a different node. CAP will use a proxy to retrieve the data from that node.
 
-The following is a configuration example, you need to configure them on each node.
+The following is a configuration example that you need to configure on each node:
 
 ```C#
 services.AddCap(x =>
@@ -30,13 +30,13 @@ services.AddCap(x =>
 });
 ```
 
-Consul 1.6.2:
+Running Consul 1.6.2:
 
 ```
 consul agent -dev
 ```
 
-Windows 10, ASP.NET Core 3.1:
+Windows 10 with ASP.NET Core 3.1:
 
 ```sh
 set ASPNETCORE_HOSTNAME=localhost&& set ASPNETCORE_PORT=5001&& dotnet run --urls=http://localhost:5001 NodeId=1 NodeName=CAP-1 ConnectionString="Server=localhost;Database=aaa;UserId=xxx;Password=xxx;"

@@ -1,10 +1,8 @@
 # MongoDB
 
-MongoDB is a cross-platform document-oriented database program. Classified as a NoSQL database program, MongoDB uses JSON-like documents with schema.
+MongoDB is a cross-platform, document-oriented database program. Classified as a NoSQL database, MongoDB uses JSON-like documents with dynamic schema.
 
-CAP supports MongoDB since version 2.3 .
-
-MongoDB supports ACID transactions since version 4.0, so CAP only supports MongoDB above 4.0, and MongoDB needs to be deployed as a cluster, because MongoDB's ACID transaction requires a cluster to be used.
+CAP has supported MongoDB since version 2.3. MongoDB supports ACID transactions starting from version 4.0, so CAP requires MongoDB 4.0 or higher. Additionally, MongoDB must be deployed as a cluster because ACID transactions require a replica set.
 
 For a quick development of the MongoDB 4.0+ cluster for the development environment, you can refer to [this article](https://www.cnblogs.com/savorboard/p/mongodb-4-cluster-install.html).
 
@@ -47,15 +45,12 @@ PublishedCollection | Database published message collection name | string | cap.
 
 ## Publish with transaction
 
-The following example shows how to leverage CAP and MongoDB for local transaction integration.
-
+The following example shows how to integrate CAP with MongoDB for local transactions:
 
 ```csharp
-
-//NOTE: Before your test, your need to create database and collection at first.
-//      Mongo can't create databases and collections in transactions automatic, 
-//      so you need to create them separately, simulating a record insert 
-//      will automatically create.
+// NOTE: Before testing, you need to create the database and collection first.
+// MongoDB cannot automatically create databases and collections within transactions,
+// so you must create them separately. For example, insert a record to auto-create the collection.
 
 // var mycollection = _client.GetDatabase("test")
 //          .GetCollection<BsonDocument>("test.collection");
@@ -72,5 +67,4 @@ using (var session = _client.StartTransaction(_capBus, autoCommit: false))
 
     session.CommitTransaction();
 }
-     
 ```

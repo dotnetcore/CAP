@@ -1,10 +1,10 @@
 # In-Memory Queue
 
-In Memory Queue is a memory-based message queue provided by [Community](https://github.com/yang-xiaodong/Savorboard.CAP.InMemoryMessageQueue).
+In-Memory Queue is a memory-based message queue provided by the [community](https://github.com/yang-xiaodong/Savorboard.CAP.InMemoryMessageQueue).
 
 ## Configuration
 
-To use In Memory Queue as a message transporter, you need to install the following package from NuGet:
+To use in-memory queue as a message transporter, you need to install the following package from NuGet:
 
 ```powershell
 PM> Install-Package Savorboard.CAP.InMemoryMessageQueue

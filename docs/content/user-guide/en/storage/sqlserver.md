@@ -1,9 +1,9 @@
 # SQL Server
 
-SQL Server is a relational database management system developed by Microsoft. CAP supports SQL Server database. 
+SQL Server is a relational database management system developed by Microsoft. CAP fully supports SQL Server. 
 
 !!! warning "Warning"
-    We currently use `Microsoft.Data.SqlClient` as the database driver, which is the future of SQL Server drivers, and we have abandoned `System.Data.SqlClient`, we suggest that you switch to.
+    We currently use `Microsoft.Data.SqlClient` as the database driver, which is the future of SQL Server drivers. We have deprecated `System.Data.SqlClient` and recommend upgrading to the new driver.
 
 ## Configuration
 
@@ -42,17 +42,16 @@ ConnectionString | Database connection string | string |
 
 ## Publish with transaction
 
-### ADO.NET with transaction
+### ADO.NET with Transaction
 
 ```csharp
-
 private readonly ICapPublisher _capBus;
 
 using (var connection = new SqlConnection("ConnectionString"))
 {
     using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
     {
-        //your business code
+        // Your business code
         connection.Execute("insert into test(name) values('test')", 
             transaction: (IDbTransaction)transaction.DbTransaction);
         
@@ -63,10 +62,9 @@ using (var connection = new SqlConnection("ConnectionString"))
 }
 ```
 
-### EntityFramework with transaction
+### Entity Framework with Transaction
 
 ```csharp
-
 private readonly ICapPublisher _capBus;
 
 using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
@@ -78,5 +76,4 @@ using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: fals
     dbContext.SaveChanges();
     trans.Commit();
 }
-
 ```

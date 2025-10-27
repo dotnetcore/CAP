@@ -1,17 +1,16 @@
 # Introduction
 
-CAP is an EventBus and a solution for solving distributed transaction problems in microservices or SOA systems. It helps create a microservices system that is scalable, reliable, and easy to change.
+CAP is an EventBus and a solution for solving distributed transaction problems in microservices or SOA systems. It helps you create a microservices system that is scalable, reliable, and easy to modify.
 
-In Microsoft's [eShop](https://github.com/dotnet/eShop) microservices sample project, it is recommended to use CAP as the EventBus in the production environment.
+In Microsoft's [eShop](https://github.com/dotnet/eShop) microservices sample project, CAP is recommended as the EventBus for production environments.
 
+!!! question "What is EventBus?"
 
-!!! question "What is EventBus？"
+    An EventBus is a mechanism that allows different components to communicate with each other without knowing each other. A component can send an Event to the EventBus without knowing who will pick it up or how many others will. Components can also listen to Events on an EventBus without knowing who sent them. This way, components can communicate without depending on each other. Also, it's very easy to substitute a component – as long as the new component understands the events being sent and received, other components will never know about the substitution.
 
-    An Eventbus is a mechanism that allows different components to communicate with each other without knowing about each other. A component can send an Event to the Eventbus without knowing who will pick it up or how many others will pick it up. Components can also listen to Events on an Eventbus, without knowing who sent the Events. That way, components can communicate without depending on each other. Also, it is very easy to substitute a component. As long as the new component understands events that are being sent and received, other components will never know about the substitution.
+Compared to other service buses or event buses, CAP has its own characteristics. It does not require users to implement or inherit any interface when sending or processing messages, providing very high flexibility. We believe that convention is greater than configuration, so CAP is very simple to use, very friendly to beginners, and lightweight.
 
-Compared to other Services Bus or Event Bus, CAP has its own characteristics. It does not require users to implement or inherit any interface when sending messages or processing messages. It has very high flexibility. We have always believed that the appointment is greater than the configuration, so the CAP is very simple to use, very friendly to the novice, and lightweight.
-
-CAP is modular in design and highly scalable. You have many options to choose from, including message queues, storage, serialization, etc. Many elements of the system can be replaced with custom implementations.
+CAP is modular in design and highly scalable. You have many options to choose from, including message queues, storage, serialization, and more. Many system elements can be replaced with custom implementations.
 
 ## Related videos
 

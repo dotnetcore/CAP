@@ -1,27 +1,26 @@
 # Idempotence
 
-Imdempotence (which you may read a formal definition of on [Wikipedia](https://en.wikipedia.org/wiki/Idempotence), when we are talking about messaging, is when a message redelivery can be handled without ending up in an unintended state.
+Idempotence (which you can read a formal definition of on [Wikipedia](https://en.wikipedia.org/wiki/Idempotence)) in messaging systems means that a message redelivery can be handled without resulting in an unintended state.
 
-## Delivery guarantees[^1]
+## Delivery Guarantees[^1]
 
 [^1]: The chapter refers to the [Delivery guarantees](https://github.com/rebus-org/Rebus/wiki/Delivery-guarantees) of rebus, which I think is described very good.
 
-Before we talk about idempotency, let's talk about the delivery of messages on the consumer side.
+Before discussing idempotency, let's discuss message delivery guarantees on the consumer side.
 
-Since CAP doesn't uses MS DTC or other type of 2PC distributed transaction mechanism, there is a problem that the message is strictly delivered at least once. Specifically, in a message-based system, there are three possibilities:
+Since CAP doesn't use MS DTC or other 2PC (Two-Phase Commit) distributed transaction mechanisms, there is an inherent limitation: messages are delivered at least once. Specifically, in a message-based system, there are three possibilities:
 
-* Exactly Once(*)  
+* Exactly Once (*)  
 * At Most Once 
 * At Least Once  
 
-Exactly once has a (*) next to it, because in the general case, it is simply not possible.
+Exactly Once has a (*) next to it because, in the general case, it is simply not possible.
 
 ### At Most Once
 
-The At Most Once delivery guarantee covers the case when you are guaranteed to receive all messages either once, or maybe not at all.
+The At Most Once delivery guarantee ensures that you receive all messages either once or not at all.
 
-This type of delivery guarantee can arise from your messaging system and your code performing its actions in the following order:
-
+This type of delivery guarantee can arise from your messaging system and your code performing actions in the following order:
 
 ```
 1. Remove message from queue
@@ -35,19 +34,19 @@ This type of delivery guarantee can arise from your messaging system and your co
         2. Put message back into the queue
 ```
 
-In the best case scenario, this is all well and good – your messages will be received, and work transactions will be committed, and you will be happy.
+In the best case scenario, this works well – your messages will be received, work transactions will be committed, and you will be happy.
 
-However, the sun does not always shine, and stuff tends to fail – especially if you do alot of stuff. Consider e.g. what would happen if anything fails after having performed step (1), and then – when you try to execute step (4)/(2) (i.e. put the message back into the queue) – the network was temporarily unavailable, or the message broker restarted, or the host machine decided to reboot because it had installed an update.
+However, things can fail – especially if you do a lot of work. For example, consider what happens if anything fails after step (1), and then – when you try to execute step (4)/(2) (i.e., put the message back into the queue) – the network becomes temporarily unavailable, the message broker restarts, or the host machine reboots due to a system update.
 
-This can be OK if it's what you want, but most things in CAP revolve around the concept of DURABLE messages, i.e. messages whose contents is just as important as the data in your database.
+This might be acceptable if that's what you want, but most things in CAP revolve around the concept of DURABLE messages – messages whose contents are as important as the data in your database.
 
 ### At Least Once
 
-This delivery guarantee covers the case when you are guaranteed to receive all messages either once, or maybe more times if something has failed.
+The At Least Once delivery guarantee ensures that you receive all messages one or more times if something fails.
 
-It requires a slight change to the order we are executing our steps in, and it requires that the message queue system supports transactions, either in the form of the traditional begin-commit-rollback protocol (MSMQ does this), or in the form of a receive-ack-nack protocol (RabbitMQ, Azure Service Bus, etc. do this).
+This requires a slight change in the order of execution and requires that the message queue system supports transactions, either through the traditional begin-commit-rollback protocol (MSMQ does this) or through a receive-ack-nack protocol (RabbitMQ, Azure Service Bus, etc. do this).
 
-Check this out – if we do this:
+Consider this approach:
 
 ```
 1. Grab lease on message in queue
@@ -62,50 +61,49 @@ Check this out – if we do this:
         2. Release lease on message
 ```
 
-and the "lease" we grabbed on the message in step (1) is associated with an appropriate timeout, then we are guaranteed that no matter how wrong things go, we will only actually remove the message from the queue (i.e. execute step (4)/(2)) if we have successfully committed our "work transaction".
+If the "lease" grabbed in step (1) has an appropriate timeout associated with it, then we are guaranteed that no matter how wrong things go, we will only actually remove the message from the queue (step 4/2) if we have successfully committed our "work transaction".
 
-### What is a "work transaction"?
+### What is a "Work Transaction"?
 
-It depends on what you're doing 😄 maybe it's a transaction in a relational database (which traditionally have pretty good support in this regard), maybe it's a transaction in a document database that happens to support transaction (like RavenDB or Postgres), or maybe it's a conceptual transaction in the form of whichever work you happen to carry out as a consequence of handling a message, e.g. update a bunch of documents in MongoDB, move some files around in the file system, or mutate some obscure in-mem data structure.
+It depends on what you're doing 😄 Maybe it's a transaction in a relational database (which traditionally have good support for this), maybe it's a transaction in a document database that supports transactions (like RavenDB or PostgreSQL), or maybe it's a conceptual transaction representing the work you perform as a consequence of handling a message, e.g., updating documents in MongoDB, moving files in the file system, or modifying in-memory data structures.
 
-The fact that the "work transaction" is just a conceptual thing is what makes it impossible to support the aforementioned Exactly Once delivery guarantee – it's just not generally possible to commit or roll back a "work transaction" and a "queue transaction" (which is what we could call the protocol carried out with the message queue systems) atomically and consistently.
+The fact that the "work transaction" is conceptual makes it impossible to support Exactly Once delivery – it's simply not generally possible to commit or roll back a "work transaction" and a "queue transaction" (the protocol with the message queue system) atomically and consistently.
 
-## Idempotence at CAP
+## Idempotence in CAP
 
-In CAP, **At Least Once**  delivery guarantee is used.
+In CAP, the **At Least Once** delivery guarantee is used.
 
-Since we have a temporary storage medium (database table), we may be able to do At Most Once, but in order to strictly guarantee that the message will not be lost, we do not provide related functions or configurations.
+Since CAP uses a temporary storage medium (database table), At Most Once could theoretically be achieved, but to strictly guarantee that messages are not lost, we do not provide related functions or configurations.
 
-### Why are we not providing(achieving) idempotency ?
+### Why We Don't Provide (Achieve) Idempotency
 
-1. The message was successfully written, but the execution of the Consumer method failed.  
+1. Message successfully written, but Consumer method execution failed.  
 
-    There are a lot of reasons why the Consumer method fails. I don't know if the specific scene is blindly retrying or not retrying is an incorrect choice.
-    For example, if the consumer is debiting service, if the execution of the debit is successful, but fails to write the debit log, the CAP will judge that the consumer failed to execute and try again. If the client does not guarantee idempotency, the framework will retry it, which will inevitably lead to serious consequences for multiple debits.
+    There are many reasons why the Consumer method might fail. Without knowing the specific scenario, it's unclear whether retrying blindly or not retrying is the correct choice.
+    For example, if the consumer is a debit service and the debit execution succeeds but fails to write the debit log, CAP will consider the consumer failed and retry. If the client doesn't guarantee idempotency, the framework will retry, inevitably leading to serious consequences like multiple debits.
 
-2. The execution of the Consumer method succeeded, but received the same message.  
+2. Consumer method execution succeeded, but the same message is received again.  
 
-    This scenario is also possible. If the Consumer has been successfully executed at the beginning, but for some reason, such as the Broker recovery, same message has been received, CAP will consider this as a new message after receiving the Broker message. Message will be executed again by the Consumer. Because it is a new message, CAP cannot be idempotent at this time.
+    This scenario is also possible. If the Consumer has already executed successfully but for some reason (e.g., broker recovery), the same message is received again, CAP will treat it as a new message. Message will be executed again by the Consumer. Because it is a new message, CAP cannot ensure idempotency at this point.
 
-3. The current data storage mode can not be idempotent.  
+3. Current data storage mode cannot guarantee idempotency.  
 
-    Since the table of the CAP message is deleted after 1 hour for the successfully consumed message, if the historical message cannot be idempotent. Historically, if the broker has maintained or manually processed some messages for some reason.
+    Since the CAP message table for successfully consumed messages is deleted after 1 hour, historical messages cannot be verified for idempotency. If the broker has been maintained or manually processed some messages for some reason, there's no way to verify if they were already processed.
 
 4. Industry practices.
 
-    Many event-driven frameworks require users to ensure idempotent operations, such as ENode, RocketMQ, etc...
+    Many event-driven frameworks require users to ensure idempotent operations, such as ENode, RocketMQ, etc.
 
-From an implementation point of view, CAP can do some less stringent idempotence, but strict idempotent can not be guaranteed.
+From an implementation perspective, CAP could provide some less stringent idempotency, but strict idempotency cannot be guaranteed.
 
-### Naturally idempotent message processing
+### Naturally Idempotent Message Processing
 
-Generally, the best way to deal with message redeliveries is to make the processing of each message naturally idempotent.
+Generally, the best way to handle message redeliveries is to make the processing of each message naturally idempotent.
 
-Natural idempotence arises when the processing of a message consists of calling an idempotent method on a domain object, like
+Natural idempotence occurs when processing a message consists of calling an idempotent method on a domain object, like:
 
 ```
 obj.MarkAsDeleted();
-
 ```
 
 or
@@ -114,13 +112,13 @@ or
 obj.UpdatePeriod(message.NewPeriod);
 ```
 
-You can use the `INSERT ON DUPLICATE KEY UPDATE` provided by the database to easily done.
+You can use `INSERT ON DUPLICATE KEY UPDATE` provided by the database to achieve this easily.
 
-### Explicitly handling redeliveries
+### Explicitly Handling Redeliveries
 
-Another way of making message processing idempotent, is to simply track IDs of processed messages explicitly, and then make your code handle a redelivery.
+Another way to make message processing idempotent is to explicitly track IDs of processed messages and then handle redeliveries in your code.
 
-Assuming that you are keeping track of message IDs by using an `IMessageTracker` that uses the same transactional data store as the rest of your work, your code might look somewhat like this:
+Assuming you track message IDs using an `IMessageTracker` that uses the same transactional data store as the rest of your work, your code might look like this:
 
 ```c#
 readonly IMessageTracker _messageTracker;
@@ -138,12 +136,12 @@ public async Task Handle(SomeMessage message)
         return;
     }
 
-    // do the work here
+    // Do the actual work here
     // ...
 
-    // remember that this message has been processed
-    await _messageTracker.MarkAsProcessed(messageId);
+    // Record that this message has been processed
+    await _messageTracker.MarkAsProcessed(message.Id);
 }
 ```
 
-As for the implementation of `IMessageTracker`, you can use a storage message Id such as Redis or a database and the corresponding processing state.
+For the `IMessageTracker` implementation, you can use a message ID storage system like Redis or a database with a corresponding processing state.

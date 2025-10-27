@@ -1,20 +1,18 @@
 # FAQ
 
-!!! faq "Any IM group(e.g Tencent QQ group) to learn and chat about CAP?"
+!!! faq "Is there an IM group (e.g., Tencent QQ group) to learn and chat about CAP?"
 
-    None of that. Better than wasting much time in IM group, I hope developers could be capable of independent thinking more, and solve problems yourselves with referenced documents, even create issues or send emails when errors are remaining present.
+    There is not. Instead of spending time in IM groups, I encourage developers to develop independent thinking skills and solve problems using the documentation. You can also create issues or send emails if problems persist.
 
-!!! faq "Does it require different databases, one each for producer and consumer in CAP?"
+!!! faq "Does each application need a separate database for producer and consumer in CAP?"
 
-    No difference necessary, a recommendation is to use a dedicated database for each program.
+    Not necessarily. A recommendation is to use a dedicated database for each application. However, see the Q&A below for alternatives.
 
-    Otherwise, look at Q&A below.
-
-!!! faq "How to use the same database for different applications?"
+!!! faq "How can I use the same database for different applications?"
     
-    Define a table prefix name in `ConfigureServices` method.
+    Define a table prefix name in the `ConfigureServices` method.
     
-    Code example：
+    Code example:
 
     ```c#
     public void ConfigureServices(IServiceCollection services)
@@ -25,20 +23,18 @@
             x.UseMySql(opt =>
             {
                 opt.ConnectionString = "connection string";
-                opt.TableNamePrefix = "appone"; // different table name prefix here
+                opt.TableNamePrefix = "appone"; // Use different table name prefix here
             });
         });
     }
     ```
 
-!!! faq "Can CAP not use the database as event storage? I just want to send the message"
+!!! faq "Can CAP avoid using the database for event storage? I just want to send messages."
 
-    Not yet.
+    Not yet. CAP's purpose is to ensure consistency in microservice or SOA architectures. The solution is based on ACID features of the database. There's no point in a simple message queue wrapper without database support.
 
-    The purpose of CAP is that ensure consistency principle right in microservice or SOA architectures. The solution is based on ACID features of database, there is no sense about a single client wapper of message queue without database.
+!!! faq "If the consumer fails, can I roll back the SQL executed by the producer?"
 
-!!! faq "If the consumer is abnormal, can I roll back the database executed sql that the producer has executed?"
+    No, you cannot roll back. CAP provides eventual consistency, not immediate rollback.
 
-    Can't roll back, CAP is the ultimate consistency solution.
-
-    You can imagine your scenario is to call a third party payment. If you are doing a third-party payment operation, after calling Alipay's interface successfully, and your own code is wrong, will Alipay roll back? If you don't roll back, what should you do? The same is true here.
+    Consider a scenario where you call a third-party payment service. If you successfully call Alipay's interface but your own code fails afterward, will Alipay roll back? If not, what should you do? The same principle applies here.

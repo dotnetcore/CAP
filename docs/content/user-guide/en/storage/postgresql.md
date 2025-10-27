@@ -1,6 +1,6 @@
-# Postgre SQL
+# PostgreSQL
 
-PostgreSQL is an open-source relational database management system. CAP supports PostgreSQL database. 
+PostgreSQL is an open-source relational database management system. CAP fully supports PostgreSQL. 
 
 ## Configuration
 
@@ -40,17 +40,16 @@ DataSource | [Data source](https://www.npgsql.org/doc/basic-usage.html#data-sour
 
 ## Publish with transaction
 
-### ADO.NET with transaction
+### ADO.NET with Transaction
 
 ```csharp
-
 private readonly ICapPublisher _capBus;
 
 using (var connection = new NpgsqlConnection("ConnectionString"))
 {
     using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
     {
-        //your business code
+        // Your business code
         connection.Execute("insert into test(name) values('test')", 
             transaction: (IDbTransaction)transaction.DbTransaction);
         
@@ -61,10 +60,9 @@ using (var connection = new NpgsqlConnection("ConnectionString"))
 }
 ```
 
-### EntityFramework with transaction
+### Entity Framework with Transaction
 
 ```csharp
-
 private readonly ICapPublisher _capBus;
 
 using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
@@ -76,5 +74,4 @@ using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: fals
     dbContext.SaveChanges();
     trans.Commit();
 }
-
 ```
