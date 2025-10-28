@@ -31,6 +31,7 @@ public class Dispatcher : IDispatcher
     private CancellationTokenSource? _tasksCts;
     private Channel<MediumMessage> _publishedChannel = default!;
     private Channel<(MediumMessage, ConsumerExecutorDescriptor?)> _receivedChannel = default!;
+    private bool _disposed;
 
     public Dispatcher(ILogger<Dispatcher> logger, IMessageSender sender, IOptions<CapOptions> options,
         ISubscribeExecutor executor, IDataStorage storage)
@@ -47,6 +48,14 @@ public class Dispatcher : IDispatcher
 
     public async ValueTask StartAsync(CancellationToken stoppingToken)
     {
+        // If already disposed and restarting, recreate the CancellationTokenSource and reset state
+        if (_disposed || (_tasksCts != null && _tasksCts.IsCancellationRequested))
+        {
+            _tasksCts?.Dispose();
+            _tasksCts = null;
+            _disposed = false;
+        }
+
         stoppingToken.ThrowIfCancellationRequested();
         _tasksCts = CancellationTokenSource.CreateLinkedTokenSource(stoppingToken, CancellationToken.None);
 
@@ -102,17 +111,28 @@ public class Dispatcher : IDispatcher
                     await foreach (var nextMessage in _schedulerQueue.GetConsumingEnumerable(_tasksCts.Token))
                     {
                         _tasksCts.Token.ThrowIfCancellationRequested();
-                        try
+
+                        if (_enableParallelSend && nextMessage.Retries == 0)
                         {
-                            var result = await _sender.SendAsync(nextMessage).ConfigureAwait(false);
-                            if (!result.Succeeded)
-                            {
-                                _logger.LogError("Delay message sending failed. MessageId: {MessageId} ", nextMessage.DbId);
-                            }
+                            if (!_publishedChannel.Writer.TryWrite(nextMessage))
+                                while (await _publishedChannel.Writer.WaitToWriteAsync(_tasksCts!.Token).ConfigureAwait(false))
+                                    if (_publishedChannel.Writer.TryWrite(nextMessage))
+                                        break;
                         }
-                        catch (Exception ex)
+                        else
                         {
-                            _logger.LogError(ex, "Error sending scheduled message. MessageId: {MessageId}", nextMessage.DbId);
+                            try
+                            {
+                                var result = await _sender.SendAsync(nextMessage).ConfigureAwait(false);
+                                if (!result.Succeeded)
+                                {
+                                    _logger.LogError("Delay message sending failed. MessageId: {MessageId} ", nextMessage.DbId);
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                _logger.LogError(ex, "Error sending scheduled message. MessageId: {MessageId}", nextMessage.DbId);
+                            }
                         }
                     }
 
@@ -215,6 +235,8 @@ public class Dispatcher : IDispatcher
 
     public void Dispose()
     {
+        if (_disposed) return;
+        _disposed = true;
         _tasksCts?.Dispose();
         GC.SuppressFinalize(this);
     }
