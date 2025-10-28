@@ -1,11 +1,10 @@
 # MySQL
 
-MySQL is an open-source relational database management system. CAP supports MySQL database. 
+MySQL is an open-source relational database management system. CAP fully supports MySQL. 
 
 ## Configuration
 
 To use MySQL storage, you need to install the following package from NuGet:
- 
 ```powershell
 PM> Install-Package DotNetCore.CAP.MySql
 
@@ -39,17 +38,16 @@ ConnectionString | Database connection string | string | null
 
 ## Publish with transaction
 
-### ADO.NET with transaction
+### ADO.NET with Transaction
 
 ```csharp
-
 private readonly ICapPublisher _capBus;
 
 using (var connection = new MySqlConnection(AppDbContext.ConnectionString))
 {
     using (var transaction = connection.BeginTransaction(_capBus, autoCommit: false))
     {
-        //your business code
+        // Your business code
         connection.Execute("insert into test(name) values('test')", 
             transaction: (IDbTransaction)transaction.DbTransaction);
         
@@ -60,10 +58,9 @@ using (var connection = new MySqlConnection(AppDbContext.ConnectionString))
 }
 ```
 
-### EntityFramework with transaction
+### Entity Framework with Transaction
 
 ```csharp
-
 private readonly ICapPublisher _capBus;
 
 using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: false))
@@ -75,5 +72,4 @@ using (var trans = dbContext.Database.BeginTransaction(_capBus, autoCommit: fals
     dbContext.SaveChanges();
     trans.Commit();
 }
-
 ```

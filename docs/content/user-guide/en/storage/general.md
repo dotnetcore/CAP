@@ -1,25 +1,25 @@
 # General
 
-CAP needs to use storage media with persistence capabilities to store event messages in databases or other NoSql facilities. CAP uses this approach to deal with loss of messages in all environments or network anomalies. Reliability of messages is the cornerstone of distributed transactions, so messages cannot be lost under any circumstances.
+CAP requires a storage medium with persistence capabilities to store event messages in databases or other NoSQL facilities. CAP uses this approach to protect against message loss in any environment or network issues. Reliability of messages is the cornerstone of distributed transactions, so messages must never be lost.
 
 ## Persistence
 
-### Before sent
+### Before Sent
 
-Before message enters the message queue, CAP uses the local database table to persist the message, which ensures that the message is not lost when the message queue is abnormal or a network error occurs.
+Before the message enters the message queue, CAP persists the message in a local database table. This ensures that the message is not lost when the message queue is unavailable or a network error occurs.
 
-To ensure the reliability of this mechanism, CAP uses the same database transactions as the business code to ensure that business operations and CAP messages are consistent in the persistence process. That is to say, in the process of message persistence, the database will be rolled back when any one of the exceptions occurs.
+To ensure the reliability of this mechanism, CAP uses the same database transactions as the business code to ensure that business operations and CAP messages are consistent during persistence. If any exception occurs during message persistence, the database will roll back.
 
-###  After sent
+### After Sent
 
-After the message enters the message queue, CAP will start the persistence function of the message queue. We need to explain how CAP message is persisted in RabbitMQ and Kafka.
+After the message enters the message queue, CAP starts the persistence function of the message queue. Here's how CAP messages are persisted in RabbitMQ and Kafka.
 
-For message persistence in RabbitMQ, CAP uses a consumer queue with message persistence, but there may be exceptions here.
+For message persistence in RabbitMQ, CAP uses a consumer queue with message persistence, though exceptions may occur.
 
-!!! info "Ready for production?"
-    By default, queues registered by CAP in RabbitMQ are persistent. When used in a production environment, we recommend that you start all consumers once to create the queues with persistence, which ensures that all queues are created before the message is sent.
+!!! info "Ready for Production?"
+    By default, queues registered by CAP in RabbitMQ are persistent. For production use, we recommend that you start all consumers once to create persistent queues. This ensures all queues are created before messages are sent.
 
-Since Kafka is born with message persistence using files, Kafka will ensure that messages are properly persisted without loss after the message enters Kafka.
+Since Kafka has built-in message persistence using files, it automatically ensures that messages are properly persisted without loss once they enter Kafka.
 
 ## Storage
 

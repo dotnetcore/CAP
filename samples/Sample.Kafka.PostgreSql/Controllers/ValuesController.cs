@@ -47,7 +47,7 @@ namespace Sample.Kafka.PostgreSql.Controllers
         [Route("~/adonet/transaction")]
         public IActionResult AdonetWithTransaction()
         {
-            using (var connection = new NpgsqlConnection(Startup.DbConnectionString))
+            using (var connection = new NpgsqlConnection(AppConstants.DbConnectionString))
             {
                 using (var transaction = connection.BeginTransaction(producer, autoCommit: false))
                 {

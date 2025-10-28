@@ -1,20 +1,19 @@
 # Message
 
-The data sent by using the `ICapPublisher` interface is called `Message`.
+The data sent using the `ICapPublisher` interface is called a `Message`.
 
 !!! WARNING "TimeoutException thrown in consumer using HTTPClient"
     By default, if the consumer throws an `OperationCanceledException` (including `TaskCanceledException`), it is considered normal user behavior, and the exception is ignored. However, if you use `HttpClient` in the consumer method and configure a request timeout, you may need to handle exceptions separately and re-throw non-`OperationCanceledException` exceptions due to a [design issue](https://github.com/dotnet/runtime/issues/21965) in `HttpClient`. Refer to issue #1368 for more details.
 
-## Compensating transaction
+## Compensating Transaction
 
-Wiki :
-[Compensating transaction](https://en.wikipedia.org/wiki/Compensating_transaction)
+Wiki: [Compensating Transaction](https://en.wikipedia.org/wiki/Compensating_transaction)
 
-In some cases, consumers need to return an execution result to inform the publisher, enabling the publisher to perform compensation actions. This process is commonly referred to as message compensation.
+In some cases, consumers need to return an execution result to notify the publisher, allowing the publisher to perform compensation actions. This process is called message compensation.
 
-Typically, you can notify the upstream system by republishing a new message in the consumer code. CAP simplifies this process by allowing you to specify the `callbackName` parameter when publishing a message. This feature is generally applicable to point-to-point consumption. Below is an example.
+Typically, you can notify the upstream system by publishing a new message in the consumer code. CAP simplifies this by allowing you to specify the `callbackName` parameter when publishing a message. This feature is generally applicable to point-to-point consumption. Here is an example:
 
-For instance, in an e-commerce application, the initial status of an order is "pending." The status is updated to "succeeded" when the product quantity is successfully deducted; otherwise, it is marked as "failed."
+For instance, in an e-commerce application, an order's initial status is "pending." The status is updated to "succeeded" when the product quantity is successfully deducted; otherwise, it is marked as "failed."
 
 ```C#
 // =============  Publisher =================
@@ -54,9 +53,9 @@ public object DeductProductQty(JsonElement param)
 }
 ```
 
-### Controlling callback response
+### Controlling Callback Response
 
-You can inject the `CapHeader` parameter in the subscription method using the `[FromCap]` attribute and utilize its methods to add extra headers to the callback context or terminate the callback.
+You can inject the `CapHeader` parameter in the subscription method using the `[FromCap]` attribute and use its methods to add extra headers to the callback context or terminate the callback.
 
 Example:
 
@@ -107,7 +106,7 @@ The following is the content that needs to be written into the header of the mes
 
 ### Custom headers
 
-To consume messages sent without CAP headers, both AzureServiceBus, Kafka and RabbitMQ consumers can inject a minimal set of headers using the `CustomHeadersBuilder` property as shown below (RabbitMQ example):
+To consume messages sent without CAP headers, Azure Service Bus, Kafka, and RabbitMQ consumers can inject a minimal set of headers using the `CustomHeadersBuilder` property as shown below (RabbitMQ example):
 ```C#
 container.AddCap(x =>
 {
@@ -123,58 +122,58 @@ container.AddCap(x =>
 });
 ```
 
-After adding `cap-msg-id` and `cap-msg-name`, CAP consumers receive messages sent directly from any external system, like the RabbitMQ management tool when using RabbitMQ as a transport.
+After adding `cap-msg-id` and `cap-msg-name`, CAP consumers can receive messages sent directly from external systems, such as the RabbitMQ management tool when using RabbitMQ as a transport.
 
-To publish messages with CAP headers 
+To publish messages with CAP headers:
+
 ```C#
 var headers = new Dictionary<string, string?>()
 {
-    {"cap-kafka-key", request.OrderId }
+    { "cap-kafka-key", request.OrderId }
 };
-_publisher.Publish<OrderRequest>("OrderRequest", request,headers);
+_publisher.Publish<OrderRequest>("OrderRequest", request, headers);
 ```
-
 
 ## Scheduling
 
-After CAP receives a message, it sends the message to Transport(RabitMq, Kafka...), which is transported by transport.
+After CAP receives a message, it sends the message to Transport (RabbitMQ, Kafka...), which handles the transportation.
  
-When you send message using the `ICapPublisher` interface, CAP will dispatch message to the corresponding Transport. Currently, bulk messaging is not supported.
+When you send a message using the `ICapPublisher` interface, CAP dispatches it to the corresponding Transport. Currently, bulk messaging is not supported.
 
-For more information on transports, see [Transports](../transport/general.md) section.
+For more information on transports, see the [Transports](../transport/general.md) section.
 
 ## Storage 
 
-CAP will store the message after receiving it. For more information on storage, see the [Storage](../storage/general.md) section.
+CAP stores messages after receiving them. For more information on storage, see the [Storage](../storage/general.md) section.
 
 ## Retry
 
-Retrying is a crucial aspect of the CAP architecture. CAP retries messages that fail to send or execute, employing several retry strategies throughout its design.
+Retrying is a crucial aspect of the CAP architecture. CAP retries messages that fail to send or consume, employing several retry strategies throughout its design.
 
-### Send retry
+### Send Retry
 
-During the message sending process, when the broker crashes or the connection fails or an abnormality occurs, CAP will retry the sending. Retry 3 times for the first time, retry every minute after 4 minutes (FallbackWindowLookbackSeconds), and +1 retry. When the total number of retries reaches 50, CAP will stop retrying.
+When the broker crashes, connection fails, or an abnormality occurs during message sending, CAP retries the send. It performs 3 immediate retries, then after 4 minutes (FallbackWindowLookbackSeconds), it retries every minute with a +1 increment. When the total number of retries reaches 50, CAP stops retrying.
 
-You can adjust the total number of retries by setting [FailedRetryCount](configuration.md#failedretrycount) in CapOptions Or use [FailedThresholdCallback](configuration.md#failedthresholdcallback) to receive notifications when the maximum retry count is reached.
+You can adjust the total number of retries by setting [FailedRetryCount](configuration.md#failedretrycount) in CapOptions or use [FailedThresholdCallback](configuration.md#failedthresholdcallback) to receive notifications when the maximum retry count is reached.
 
-It will stop when the maximum number of times is reached. You can see the reason for the failure in Dashboard and choose whether to manually retry.
+Retries will stop when the maximum is reached. You can see the failure reason in Dashboard and choose whether to manually retry.
 
-### Consumption retry
+### Consumption Retry
 
-The consumer method is executed when the Consumer receives the message and will retry when an exception occurs. This retry strategy is the same as the send retry.
+When the Consumer receives a message, the consumer method is executed and will retry if an exception occurs. This retry strategy is the same as the send retry.
 
-We introduced database-based distributed locks in version 7.1.0 to deal with the problem of concurrent data acquisition of database retries under multiple instances, you need to explicitly configure `UseStorageLock` option to true.
+Version 7.1.0 introduced database-based distributed locks to handle concurrent database fetches during retry operations across multiple instances. You need to explicitly configure the `UseStorageLock` option to true.
 
-Whether sending fails or consumption fails, we will store the exception message in the cap-exception field within the message header. You can find it in the Content field's JSON in the database table.
+Whether sending or consumption fails, the exception message is stored in the cap-exception field within the message header. You can find it in the Content field's JSON in the database table.
 
 ## Data Cleanup
 
-There is an `ExpiresAt` field in the database message table indicating the expiration time of the message. When the message is sent successfully, status will be changed to `Successed`, and `ExpiresAt` will be set to **1 day** later. 
+The database message table has an `ExpiresAt` field indicating the message expiration time. When a message is sent successfully, its status changes to `Successed`, and `ExpiresAt` is set to **1 day** later. 
 
-Consuming failure will change the message status to `Failed` and `ExpiresAt` will be set to **15 days** later (You can use [FailedMessageExpiredAfter](configuration.md#failedmessageexpiredafter) configuration items to custom).
+When consumption fails, the message status changes to `Failed` and `ExpiresAt` is set to **15 days** later (you can customize this using the [FailedMessageExpiredAfter](configuration.md#failedmessageexpiredafter) configuration option).
 
-By default, the data of the message in the table is deleted every **5 minutes** to avoid performance degradation caused by too much data. The cleanup strategy `ExpiresAt` is performed when field is not empty and is less than the current time. 
+By default, messages in the table are deleted every **5 minutes** to prevent performance degradation from excessive data. The cleanup process is performed when the `ExpiresAt` field is not empty and is less than the current time. 
 
-That is to say, the message with the status Failed (by default they have been retried 50 times), if you do not have manual intervention for 15 days, it will **also be** cleaned up.
+That is, messages with `Failed` status (by default, they have been retried 50 times) will also be cleaned up after **15 days** if you do not manually intervene.
 
-You can use [CollectorCleaningInterval](configuration.md#collectorcleaninginterval) configuration items to custom the interval time.
+You can customize the cleanup interval time using the [CollectorCleaningInterval](configuration.md#collectorcleaninginterval) configuration option.

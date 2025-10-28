@@ -1,57 +1,57 @@
 # Dashboard
 
-CAP provides a Dashboard for viewing messages, and features provided by Dashboard make it easy to view and manage messages.
+CAP provides a Dashboard for viewing messages. The features provided by the Dashboard make it easy to view and manage messages.
 
 !!! WARNING "Usage Limit"
-    The Dashboard is only supported for use in ASP.NET Core, Not supported for console application
+    The Dashboard is only supported for ASP.NET Core. Console applications are not supported.
     
 ## Enable Dashboard
 
-By default, Dashboard middleware will not be launched. To enable Dashboard functionality you need to add the following code to your configuration:
+By default, the Dashboard middleware is not launched. To enable Dashboard functionality, add the following code to your configuration:
 
 ```C#
 services.AddCap(x =>
 {
-    //...
+    // ...
 
     // Register Dashboard
     x.UseDashboard();
 });
 ```
 
-By default, you can open the Dashboard by visiting the url `http://localhost:xxx/cap`.
+By default, you can access the Dashboard at the URL `http://localhost:xxx/cap`.
 
 ### Dashboard Configuration
 
-* PathMatch
+* **PathMatch**
 
-> Default ：'/cap'
+> Default: '/cap'
 
-You can change the path of the Dashboard by modifying this configuration option.
+Change the path of the Dashboard by modifying this configuration option.
 
-* StatsPollingInterval
+* **StatsPollingInterval**
 
 > Default: 2000ms
 
-This configuration option is used to configure the Dashboard front end to get the polling time of the status interface (/stats).
+Configures the polling interval for the Dashboard frontend to get the status from the /stats interface.
 
-* AllowAnonymousExplicit
+* **AllowAnonymousExplicit**
 
 > Default: true
 
-Explicitly allows anonymous access for the CAP dashboard API, passing AllowAnonymous to the ASP.NET Core global authorization filter.
+Explicitly allows anonymous access for the CAP dashboard API by passing AllowAnonymous to the ASP.NET Core global authorization filter.
 
-* AuthorizationPolicy
+* **AuthorizationPolicy**
 
-> Default: null.
+> Default: null
 
 Authorization policy for the Dashboard. Required if `AllowAnonymousExplicit` is false.
 
-###  Custom Authentication
+### Custom Authentication
 
-From version 8.0.0, the CAP Dashboard leverages ASP.NET Core authentication mechanisms allowing extensibility through custom authorization policies and ASP.NET Core authentication and authorization middlewares to authorize Dashboard access. For more details of ASP.NET Core authentication internals, check [the official docs](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-8.0).
+From version 8.0.0, the CAP Dashboard leverages ASP.NET Core authentication mechanisms, allowing extensibility through custom authorization policies and ASP.NET Core authentication and authorization middlewares. For more details on ASP.NET Core authentication, see [the official documentation](https://learn.microsoft.com/en-us/aspnet/core/security/authentication/?view=aspnetcore-8.0).
 
-You can view the examples below in the sample project `Sample.Dashboard.Auth`.
+You can view the examples below in the `Sample.Dashboard.Auth` sample project.
 
 #### Example: Anonymous Access
 
@@ -67,7 +67,7 @@ services.AddCap(cap =>
     });
 ```
 
-#### Example: Open Id
+#### Example: Open ID Connect
 
 ```csharp
 services
@@ -103,11 +103,11 @@ const string MyDashboardAuthenticationPolicy = "MyDashboardAuthenticationPolicy"
 services.AddAuthorization(options =>
     { 
         options.AddPolicy(MyDashboardAuthenticationPolicy, policy => policy
-        .AddAuthenticationSchemes(MyDashboardAuthenticationSchemeDefaults.Scheme)
-        .RequireAuthenticatedUser());
+            .AddAuthenticationSchemes(MyDashboardAuthenticationSchemeDefaults.Scheme)
+            .RequireAuthenticatedUser());
     })
     .AddAuthentication()
-    .AddScheme<MyDashboardAuthenticationSchemeOptions, MyDashboardAuthenticationHandler>(MyDashboardAuthenticationSchemeDefaults.Scheme,null);
+    .AddScheme<MyDashboardAuthenticationSchemeOptions, MyDashboardAuthenticationHandler>(MyDashboardAuthenticationSchemeDefaults.Scheme, null);
     
 services.AddCap(cap =>
     {

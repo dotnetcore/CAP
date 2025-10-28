@@ -6,7 +6,7 @@ Pulsar can be used in CAP as a message transporter.
 
 ## Configuration
 
-To use Pulsar transporter, you need to install the following package from NuGet:
+To use Pulsar as a transporter, you need to install the following package from NuGet:
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.Pulsar

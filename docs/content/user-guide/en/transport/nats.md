@@ -3,13 +3,13 @@
 [NATS](https://nats.io/) is a simple, secure and performant communications system for digital systems, services and devices. NATS is part of the Cloud Native Computing Foundation (CNCF).
 
 !!! warning
-    Since version 5.2+, CAP's relevant features have been implemented based on [JetStream](https://docs.nats.io/nats-concepts/jetstream), so it needs to be explicitly enabled on the server.
+    Since version 5.2+, CAP features are implemented based on [JetStream](https://docs.nats.io/nats-concepts/jetstream), so JetStream must be explicitly enabled on the server.
 
-    **You need to enable JetStream by specifying the `--jetstream` parameter when starting the NATS Server in order to use CAP properly.**
+    **You must enable JetStream by specifying the `--jetstream` parameter when starting the NATS server to use CAP properly.**
 
 ## Configuration
 
-To use NATS transporter, you need to install the following package from NuGet:
+To use NATS as a transporter, you need to install the following package from NuGet:
 
 ```powershell
 
@@ -47,9 +47,9 @@ StreamOptions | 🆕 Stream configuration |  Action | NULL
 ConsumerOptions | 🆕 Consumer configuration | Action | NULL
 CustomHeadersBuilder | Custom subscribe headers |  See the blow | NULL
 
-#### NATS ConfigurationOptions
+#### NATS Configuration Options
 
-If you need **more** native NATS related configuration options, you can set them in the `Options` option:
+If you need additional native NATS configuration options, you can set them in the `Options` option:
 
 ```csharp
 services.AddCap(capOptions => 
@@ -62,15 +62,15 @@ services.AddCap(capOptions =>
 });
 ```
 
-`Options` is a NATS.Client ConfigurationOptions , you can find more details through this [link](http://nats-io.github.io/nats.net/class_n_a_t_s_1_1_client_1_1_options.html)
+`Options` is a NATS.Client `ConfigurationOptions`. You can find more details at this [link](http://nats-io.github.io/nats.net/class_n_a_t_s_1_1_client_1_1_options.html).
 
-#### CustomHeadersBuilder Option
+#### Custom Headers Builder Option
 
-When the message sent from a heterogeneous system, because of the CAP needs to define additional headers, so an exception will occur at this time. By providing this parameter to set the custom headersn to make the subscriber works.
+When messages are sent from a heterogeneous system, CAP requires additional headers to be defined. By providing this parameter, you can set custom headers to ensure the subscriber works correctly.
 
 You can find the description of [Header Information](../cap/messaging.md#heterogeneous-system-integration) here.
 
-Example：
+Example:
 
 ```cs
 x.UseNATS(aa =>

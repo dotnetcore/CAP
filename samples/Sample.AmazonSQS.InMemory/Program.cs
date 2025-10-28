@@ -1,20 +1,23 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Hosting;
+﻿using Amazon;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace Sample.AmazonSQS.InMemory
+var builder = WebApplication.CreateBuilder(args);
+
+// Configure services
+builder.Services.AddCap(x =>
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            CreateHostBuilder(args).Build().Run();
-        }
+    x.UseInMemoryStorage();
+    x.UseAmazonSQS(RegionEndpoint.CNNorthWest1);
+    x.UseDashboard();
+});
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                });
-    }
-}
+builder.Services.AddControllers();
+
+var app = builder.Build();
+
+// Configure middleware pipeline
+app.UseRouting();
+app.MapControllers();
+
+app.Run();

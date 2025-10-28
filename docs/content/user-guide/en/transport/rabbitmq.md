@@ -1,16 +1,17 @@
 # RabbitMQ
 
-RabbitMQ is an open-source message-broker software that originally implemented the Advanced Message Queuing Protocol and has since been extended with a plug-in architecture to support Streaming Text Oriented Messaging Protocol, Message Queuing Telemetry Transport, and other protocols.
+RabbitMQ is an open-source message broker software that implements the Advanced Message Queuing Protocol (AMQP) and has been extended with a plug-in architecture to support additional protocols such as Streaming Text Oriented Messaging Protocol (STOMP), Message Queuing Telemetry Transport (MQTT), and others.
 
 RabbitMQ can be used in CAP as a message transporter. 
 
-!!! warning "Notes"
-    When using RabbitMQ, the consumer integrated with the CAP application will automatically create a persistent queue after it is started for the first time. Subsequent messages will be normally transmitted to the queue and consumed.
-    However, if you have never started the consumer, the queue will not be created. In this case, if you publish messages first, RabbitMQ Exchange will discard the messages received directly until the consumer is started and the queue is created.
+!!! warning "Important Notes"
+    When using RabbitMQ, the consumer integrated with the CAP application will automatically create a persistent queue after it starts for the first time. Subsequent messages will be normally transmitted to the queue and consumed.
+    
+    However, if you have never started the consumer, the queue will not be created. In this case, if you publish messages first, the RabbitMQ exchange will discard the messages until the consumer is started and the queue is created.
 
 ## Configuration
 
-To use RabbitMQ transporter, you need to install the following package from NuGet:
+To use RabbitMQ as a transporter, you need to install the following package from NuGet:
 
 ```powershell
 PM> Install-Package DotNetCore.CAP.RabbitMQ
@@ -77,7 +78,7 @@ services.AddCap(x =>
 
 #### CustomHeadersBuilder Option
 
-When the message sent from the RabbitMQ management console or a heterogeneous system, because of the CAP needs to define additional headers, so an exception will occur at this time. By providing this parameter to set the custom headersn to make the subscriber works.
+When the message is sent from the RabbitMQ management console or a heterogeneous system, CAP requires additional headers to be defined. By providing this parameter, you can set custom headers to ensure the subscriber works correctly.
 
 You can find the description of [Header Information](../cap/messaging.md#heterogeneous-system-integration) here.
 
@@ -94,9 +95,9 @@ x.UseRabbitMQ(aa =>
 });
 ```
 
-#### How to connect cluster
+#### How to Connect to a Cluster
 
-using comma split connection string, like this:
+Use a comma-separated connection string like this:
 
 ```
 x=> x.UseRabbitMQ("localhost:5672,localhost:5673,localhost:5674")

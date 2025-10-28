@@ -4,18 +4,18 @@ AWS SQS is a fully managed message queuing service that enables you to decouple 
 
 AWS SNS is a highly available, durable, secure, fully managed pub/sub messaging service that enables you to decouple microservices, distributed systems, and serverless applications.
 
-## How CAP uses AWS SNS and SQS
+## How CAP Uses AWS SNS and SQS
 
 ### SNS
 
-Because CAP works based on the topic pattern, it needs to use AWS SNS, which simplifies the publish and subscribe architecture of messages.
+Because CAP works based on the topic pattern, it requires AWS SNS, which simplifies the publish-subscribe architecture for messaging.
 
-When CAP startups, all subscription names will be registered as SNS topics, and you will see a list of all registered topics in the management console.
+When CAP starts, all subscription names are registered as SNS topics. You will see a list of all registered topics in the AWS management console.
 
-SNS does not support use of symbols such as `.` `:` as the name of the topic, so we replaced it. We replaced `.` with `-` and `:` with `_`
+SNS does not support certain characters such as `.`, `:` in topic names, so CAP replaces them. It replaces `.` with `-` and `:` with `_`.
 
 !!! note "Precautions"
-    Amazon SNS currently allows maximum size of published messages to be 256KB
+    Amazon SNS currently limits published messages to a maximum size of 256 KB.
 
 For example, you have the following two subscriber methods in your current project
 
@@ -36,19 +36,19 @@ After CAP startups, you will see in SNS management console:
 
 ### SQS
 
-For each consumer group, CAP will create a corresponding SQS queue, the name of the queue is the name of the `DefaultGroup` in the configuration options, and the queue type is Standard.
+For each consumer group, CAP will create a corresponding SQS queue. The queue name is the value of `DefaultGroup` in the configuration options, and the queue type is Standard.
 
-The SQS queue will subscribe to Topic in SNS, as shown below:
+The SQS queue will subscribe to the SNS topic as shown below:
 
 ![img](../../../img/aws-sns-demo.png)
 
 !!! warning "Precautions"
-    Due to the limitation of AWS SNS, when you remove the subscription method, CAP will not delete topics or queues on AWS SNS or SQS, you need to delete them manually.
+    Due to AWS SNS limitations, when you remove a subscription method, CAP will not automatically delete the topics or queues in AWS SNS or SQS. You need to delete them manually.
 
 
 ## Configuration
 
-To use AWS SQS as the transport, you need to install the packages from NuGet:
+To use AWS SQS as a transporter, you need to install the following package from NuGet:
 
 ```shell
 
@@ -85,6 +85,6 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 Region | AWS Region | Amazon.RegionEndpoint | 
 Credentials | AWS AK SK Information | Amazon.Runtime.AWSCredentials | 
 
-If your project runs in AWS EC2, you don't need to set Credentials, you can directly apply IAM policy for EC2.
+If your application runs on AWS EC2, you don't need to set credentials. Instead, you can directly apply an IAM policy to the EC2 instance.
 
-Credentials requires the SNS,SQS IAM policy.
+Credentials require SNS and SQS IAM permissions.

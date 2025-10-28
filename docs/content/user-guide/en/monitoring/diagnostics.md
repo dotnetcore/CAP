@@ -1,53 +1,46 @@
 # Diagnostics
 
-Diagnostics provides a set of features that make it easy for us to document critical operations that occurs during the application's operation, their execution time, etc., allowing administrators to find the root cause of problems, especially in production environments.
+Diagnostics provides a set of features that make it easy to document critical operations that occur during application execution, their execution time, etc., allowing administrators to find the root cause of problems, especially in production environments.
 
 ## Tracing
 
-The CAP provides support for `DiagnosticSource` with a listener name of `CapDiagnosticListener`.
+CAP provides support for `DiagnosticSource` with a listener name of `CapDiagnosticListener`.
 
-Diagnostics provides tracing event information as follows:
+Diagnostics provides the following tracing event information:
 
 * Before the message is persisted
 * After the message is persisted
 * Message persistence exception
-* Before the message is sent to MQ
-* After the message is sent to MQ
-* The message sends an exception to MQ.
-* Messages saved from MQ consumption before saving
-* After the message is saved from MQ consumption
+* Before the message is sent to the message queue
+* After the message is sent to the message queue
+* Message sending exception to the message queue
+* Messages saved from message queue consumption before persistence
+* After messages are saved from message queue consumption
 * Before the subscriber method is executed
 * After the subscriber method is executed
 * Subscriber method execution exception
 
-Related objects, you can find at the `DotNetCore.CAP.Diagnostics` namespace.
+Related objects can be found in the `DotNetCore.CAP.Diagnostics` namespace.
 
+### Tracing with Apache Skywalking
 
-### Tracing with [Apache Skywalking](https://github.com/apache/skywalking)
+Skywalking's C# client provides support for CAP Diagnostics. You can use [SkyAPM-dotnet](https://github.com/SkyAPM/SkyAPM-dotnet) for tracking.
 
-Skywalking's C# client provides support for CAP Diagnostics. You can use [SkyAPM-dotnet](https://github.com/SkyAPM/SkyAPM-dotnet) to tracking.
+Read the [README](https://github.com/SkyAPM/SkyAPM-dotnet/blob/master/README.md) to integrate it into your project.
 
-Try to read the [README](https://github.com/SkyAPM/SkyAPM-dotnet/blob/master/README.md) to integrate it in your project.
-
- Example tracking image :
+Example tracking images:
 
 ![](https://user-images.githubusercontent.com/8205994/71006463-51025980-2120-11ea-82dc-bffa5530d515.png)
 
-
 ![](https://user-images.githubusercontent.com/8205994/71006589-7b541700-2120-11ea-910b-7e0f2dfddce8.png)
 
-### Others APM support
+### Other APM Support
 
-There is currently no support for APMs other than Skywalking, and if you would like to support CAP diagnostic events in other APM, you can refer to the code here to implement it:
-
-At present, apart from Skywalking, we have not provided support for other APMs. If you need it, you can refer the code [here](https://github.com/SkyAPM/SkyAPM-dotnet/tree/master/src/SkyApm.Diagnostics.CAP) to implementation, and we also welcome the Pull Request.
-
-https://github.com/SkyAPM/SkyAPM-dotnet/tree/master/src/SkyApm.Diagnostics.CAP
-
+Currently, we only support Skywalking. If you want to support CAP diagnostic events in other APMs, you can refer to the code [here](https://github.com/SkyAPM/SkyAPM-dotnet/tree/master/src/SkyApm.Diagnostics.CAP) for implementation. We also welcome Pull Requests.
 
 ## Metrics
 
-Metrics are numerical measurements reported over time, most often used to monitor the health of an application and generate alerts. For example, a web service might track how many requests it receives each second, how many milliseconds it took to respond, and how many of the responses sent an error back to the user.
+Metrics are numerical measurements reported over time. They are typically used to monitor application health and generate alerts. For example, a web service might track the number of requests it receives each second, how many milliseconds it takes to respond, and how many responses return an error to the user.
 
 CAP 7.0 is support for `EventSource`, and the counters name is `DotNetCore.CAP.EventCounter`.
 

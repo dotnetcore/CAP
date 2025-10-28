@@ -1,13 +1,12 @@
-﻿using System.Threading.Tasks;
+﻿using System.Data.Common;
 using System.Threading;
+using System.Threading.Tasks;
+using DotNetCore.CAP;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
-using DotNetCore.CAP;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Storage.Internal;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure.Internal;
-using System.Data.Common;
 
 namespace Sample.Kafka.PostgreSql
 {

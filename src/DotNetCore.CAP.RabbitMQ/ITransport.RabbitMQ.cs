@@ -9,6 +9,7 @@ using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Transport;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
+using RabbitMQ.Client.Exceptions;
 
 namespace DotNetCore.CAP.RabbitMQ;
 
@@ -49,6 +50,16 @@ internal sealed class RabbitMqTransport : ITransport
         }
         catch (Exception ex)
         {
+            if (ex is AlreadyClosedException && channel?.IsOpen == true)
+            {
+                // There are cases when channel's property IsOpen returns true, but the connection is actually closed, e.g. https://github.com/rabbitmq/rabbitmq-dotnet-client/issues/1871
+                // This is a workaround to abort the channel in this case to avoid returning a faulty channel back to the pool.
+
+                _logger.LogWarning("Channel state inconsistency detected: channel is reported as open, but its underlying connection is closed. Forcing channel closure.");
+
+                await channel.DisposeAsync();
+            }
+
             var wrapperEx = new PublisherSentFailedException(ex.Message, ex);
             var errors = new OperateError
             {
