@@ -249,39 +249,24 @@ public class Dispatcher : IDispatcher
             {
                 if (_enableParallelSend)
                 {
-                    var tasks = new List<Task>();
-                    var batchSize = _pChannelSize / 50;
+                    // Use direct async sends instead of Task.Run to reduce thread pool scheduling and allocations
+                    var batchSize = Math.Max(1, _pChannelSize / 50);
+                    var tasks = new List<Task>(batchSize);
+
                     for (var i = 0; i < batchSize && _publishedChannel.Reader.TryRead(out var message); i++)
                     {
-                        var item = message;
-                        tasks.Add(Task.Run(async () =>
-                        {
-                            try
-                            {
-                                var result = await _sender.SendAsync(item).ConfigureAwait(false);
-                                if (!result.Succeeded) _logger.MessagePublishException(item.Origin.GetId(), result.ToString(), result.Exception);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, $"An exception occurred when sending a message to the transport. Id:{message.DbId}");
-                            }
-                        }));
+                        tasks.Add(SendMessageAsync(message));
                     }
 
-                    await Task.WhenAll(tasks);
+                    if (tasks.Count > 0)
+                    {
+                        await Task.WhenAll(tasks).ConfigureAwait(false);
+                    }
                 }
                 else
                 {
                     while (_publishedChannel.Reader.TryRead(out var message))
-                        try
-                        {
-                            var result = await _sender.SendAsync(message).ConfigureAwait(false);
-                            if (!result.Succeeded) _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, $"An exception occurred when sending a message to the transport. Id:{message.DbId}");
-                        }
+                        await SendMessageAsync(message).ConfigureAwait(false);
                 }
             }
 
@@ -289,6 +274,22 @@ public class Dispatcher : IDispatcher
         catch (OperationCanceledException)
         {
             // expected
+        }
+    }
+
+    private async Task SendMessageAsync(MediumMessage message)
+    {
+        try
+        {
+            var result = await _sender.SendAsync(message).ConfigureAwait(false);
+            if (!result.Succeeded)
+            {
+                _logger.MessagePublishException(message.Origin.GetId(), result.ToString(), result.Exception);
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "An exception occurred when sending a message to the transport. Id:{MessageId}", message.DbId);
         }
     }
 
