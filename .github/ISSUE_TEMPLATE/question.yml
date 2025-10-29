@@ -1,0 +1,66 @@
+name: ❓ Question or Help
+description: Ask a question or request usage help about CAP
+title: "[Question] "
+labels: [question]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Need help or have a question?
+
+        Before submitting, please:
+        - Read the documentation: [https://cap.dotnetcore.xyz](https://cap.dotnetcore.xyz)
+        - Check existing [Discussions](https://github.com/dotnetcore/CAP/discussions) and [Issues](https://github.com/dotnetcore/CAP/issues)
+        - Use this form for **usage questions**, **configuration issues**, or **how-to** discussions.
+        - If you think this is a **bug**, please use the *Bug Report* template instead.
+
+  - type: input
+    id: topic
+    attributes:
+      label: Question Summary
+      description: A short summary of what you need help with.
+      placeholder: e.g. How to retry messages when using RabbitMQ?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Explain your question, what you have tried, and what you expected.
+      placeholder: |
+        I'm using CAP with MySQL and RabbitMQ.
+        The message was not retried after exception.
+        Is there a configuration to enable retry?
+
+  - type: textarea
+    id: code
+    attributes:
+      label: Relevant Code or Configuration
+      description: Provide related code snippets, config, or setup details.
+      render: csharp
+      placeholder: |
+        builder.Services.AddCap(x =>
+        {
+            x.UseRabbitMQ("localhost");
+            x.UseMySql("Server=127.0.0.1;Database=capdb;Uid=root;Pwd=123456;");
+        });
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Environment
+      description: What environment are you using CAP in?
+      options:
+        - .NET 8.0
+        - .NET 7.0
+        - .NET 6.0
+        - Other
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Add any other context or reference links that may help answer your question.
+      placeholder: e.g. Related GitHub issue, article, or code sample link.
