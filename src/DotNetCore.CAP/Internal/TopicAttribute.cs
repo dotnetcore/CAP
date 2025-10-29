@@ -42,4 +42,14 @@ public abstract class TopicAttribute : Attribute
     /// If you set this value but don't specify the Group, we will automatically create a Group using the Name.
     /// </summary>
     public byte GroupConcurrent { get; set; }
+
+    /// <summary>
+    /// Sent or received succeed message after time span of due, then the message will be deleted at due time.
+    /// </summary>
+    public int SucceedMessageExpiredAfter { get; set; }
+    
+    /// <summary>
+    /// Sent or received failed message after time span of due, then the message will be deleted at due time.
+    /// </summary>
+    public int FailedMessageExpiredAfter { get; set; }
 }
