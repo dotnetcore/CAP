@@ -30,40 +30,47 @@ internal class NATSTransport : ITransport
 
     public async Task<OperateResult> SendAsync(TransportMessage message)
     {
-        var connection = _connectionPool.RentConnection();
-
         try
         {
-            var msg = new Msg(message.GetName(), message.Body.ToArray());
-            foreach (var header in message.Headers)
+            var connection = _connectionPool.RentConnection();
+            try
             {
-                msg.Header[header.Key] = header.Value;
+                var msg = new Msg(message.GetName(), message.Body.ToArray());
+                foreach (var header in message.Headers)
+                {
+                    msg.Header[header.Key] = header.Value;
+                }
+
+                var js = connection.CreateJetStreamContext(_jetStreamOptions);
+
+                var builder = PublishOptions.Builder().WithMessageId(message.GetId());
+
+                var resp = await js.PublishAsync(msg, builder.Build());
+
+                if (resp.Seq > 0)
+                {
+                    _logger.LogDebug($"NATS stream message [{message.GetName()}] has been published.");
+
+                    return OperateResult.Success;
+                }
+
+                throw new PublisherSentFailedException("NATS message send failed, no consumer reply!");
             }
-
-            var js = connection.CreateJetStreamContext(_jetStreamOptions);
-
-            var builder = PublishOptions.Builder().WithMessageId(message.GetId());
-
-            var resp = await js.PublishAsync(msg, builder.Build());
-
-            if (resp.Seq > 0)
+            catch (Exception ex)
             {
-                _logger.LogDebug($"NATS stream message [{message.GetName()}] has been published.");
+                var warpEx = new PublisherSentFailedException(ex.Message, ex);
 
-                return OperateResult.Success;
+                return OperateResult.Failed(warpEx);
             }
-
-            throw new PublisherSentFailedException("NATS message send failed, no consumer reply!");
+            finally
+            {
+                _connectionPool.Return(connection);
+            }
         }
-        catch (Exception ex)
+        catch (Exception e)
         {
-            var warpEx = new PublisherSentFailedException(ex.Message, ex);
-
+            var warpEx = new PublisherSentFailedException(e.Message, e);
             return OperateResult.Failed(warpEx);
-        }
-        finally
-        {
-            _connectionPool.Return(connection);
         }
     }
 }
