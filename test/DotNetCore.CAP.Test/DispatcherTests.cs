@@ -182,7 +182,7 @@ public class DispatcherTests
             .ToArray();
 
         // Act
-        await dispatcher.Start(cts.Token);
+        await dispatcher.StartAsync(cts.Token);
         var dateTime = DateTime.Now.AddMilliseconds(50);
         await Parallel.ForEachAsync(messages, CancellationToken.None,
             async (m, ct) => { await dispatcher.EnqueueToScheduler(m, dateTime); });
@@ -219,7 +219,7 @@ public class DispatcherTests
             .ToArray();
 
         // Act
-        await dispatcher.Start(cts.Token);
+        await dispatcher.StartAsync(cts.Token);
         var dateTime = DateTime.Now;
 
         await dispatcher.EnqueueToScheduler(messages[0], dateTime.AddSeconds(1));

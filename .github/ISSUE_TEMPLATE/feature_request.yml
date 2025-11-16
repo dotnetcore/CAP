@@ -1,0 +1,80 @@
+name: ✨ Feature Request
+description: Suggest a new feature or improvement for CAP
+title: "[Feature] "
+labels: [enhancement]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thanks for contributing ideas to CAP!
+
+        Before submitting:
+        - Please make sure your idea isn’t already discussed in [Issues](https://github.com/dotnetcore/CAP/issues) or [Discussions](https://github.com/dotnetcore/CAP/discussions).
+        - For minor code changes (typos, docs, small improvements), submitting a PR directly is recommended.
+        - Be specific — describe the **problem**, not just the solution.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A short, clear summary of your proposed feature.
+      placeholder: e.g. Add native support for Azure Event Hubs
+    validations:
+      required: true
+
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation / Problem
+      description: Explain why this feature is needed. What problem does it solve or what limitation does it remove?
+      placeholder: |
+        CAP currently doesn't support Azure Event Hubs as a transport layer.
+        This feature would allow easier integration with Azure cloud environments.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution
+      description: Describe how you think the feature should work or be implemented.
+      placeholder: |
+        Add a new `UseEventHubs()` extension similar to `UseRabbitMQ()` and `UseKafka()`.
+        It should handle publish and consume operations via Azure SDK.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any workarounds or alternative approaches?
+      placeholder: |
+        We can currently bridge Event Hubs via Kafka protocol, but it adds complexity.
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Expected Impact
+      description: Describe how this feature would improve CAP or its usability.
+      placeholder: |
+        This would expand CAP’s support for Azure ecosystems and help enterprise users.
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Feature Scope
+      description: What area of CAP does this feature affect most?
+      options:
+        - Core
+        - Transport (e.g., RabbitMQ, Kafka, Pulsar)
+        - Storage (e.g., MySQL, PostgreSQL, MongoDB)
+        - Dashboard / UI
+        - Documentation
+        - Other
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other relevant details, links, or references.
+      placeholder: e.g. Related issue numbers, design documents, or PR references.

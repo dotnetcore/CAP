@@ -1,4 +1,6 @@
-﻿using Sample.RabbitMQ.MySql;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using Sample.RabbitMQ.MySql;
 
 var builder = WebApplication.CreateBuilder(args);
 

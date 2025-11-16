@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="RabbitMQ.Client" Version="7.1.2" />
+    <PackageReference Include="RabbitMQ.Client" Version="7.2.0" />
   </ItemGroup>
 
   <ItemGroup>

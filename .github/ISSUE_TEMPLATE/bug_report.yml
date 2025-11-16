@@ -1,0 +1,115 @@
+name: 🐞 Bug Report
+description: Report a reproducible issue or unexpected behavior in CAP
+title: "[Bug] "
+labels: [bug]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Thanks for reporting a CAP issue!
+
+        Before submitting:
+        - Make sure you've read the documentation at [https://cap.dotnetcore.xyz](https://cap.dotnetcore.xyz).
+        - It's **recommended** to submit a PR directly for typos or trivial fixes.
+        - If this is a **feature request**, please use the *Feature Request* template instead.
+
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: A short, clear summary of the bug.
+      placeholder: e.g. CAP fails to publish message after transaction commit
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce_steps
+    attributes:
+      label: Steps to Reproduce
+      description: Describe how to reproduce the issue step by step.
+      placeholder: |
+        1. Configure CAP with MySQL and RabbitMQ
+        2. Publish message inside a transaction
+        3. Commit transaction
+        4. Observe error or missing message
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: What should have happened?
+      placeholder: The message should be published and consumed successfully.
+
+  - type: textarea
+    id: actual_behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened?
+      placeholder: Message not sent / consumer not triggered / error occurred
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Log Output
+      description: Paste the relevant CAP logs or exception stack traces here.
+      render: shell
+      placeholder: |
+        [Error] DotNetCore.CAP.Internal.SubscriberExecutor: Exception occurred while processing message
+        System.NullReferenceException: Object reference not set to an instance of an object
+          at DotNetCore.CAP...
+
+  - type: textarea
+    id: config
+    attributes:
+      label: CAP Configuration
+      description: Paste your CAP configuration or initialization code.
+      render: yaml
+      placeholder: |
+        {
+          "UseDashboard": true,
+          "UseMySql": "Server=localhost;Database=capdb;Uid=root;Pwd=123456;",
+          "UseRabbitMQ": "HostName=localhost"
+        }
+
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Transport Used
+      description: Which message broker are you using?
+      options:
+        - RabbitMQ
+        - Kafka
+        - Pulsar
+        - Azure Service Bus
+        - InMemory
+        - Other
+
+  - type: dropdown
+    id: storage
+    attributes:
+      label: Storage Provider
+      description: Which storage provider are you using?
+      options:
+        - MySQL
+        - PostgreSQL
+        - SQL Server
+        - MongoDB
+        - InMemory
+        - Other
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, .NET version, and CAP version.
+      placeholder: e.g. Windows 11 / .NET 8.0 / CAP 7.2.1
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Context
+      description: Add any other information, configuration, or screenshots that may help.
+      placeholder: e.g. This issue only occurs under heavy load or after multiple retries.

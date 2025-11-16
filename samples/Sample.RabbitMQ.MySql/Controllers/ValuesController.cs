@@ -1,4 +1,6 @@
-﻿using System.Data;
+﻿using System;
+using System.Data;
+using System.Threading.Tasks;
 using Dapper;
 using DotNetCore.CAP;
 using Microsoft.AspNetCore.Mvc;
