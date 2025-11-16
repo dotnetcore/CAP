@@ -4,6 +4,8 @@ environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
   Cap_MySql_ConnectionString: Server=localhost;Database=cap_test;Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=Required
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_NOLOGO: true
 install:
   - ps: |
       Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -UseBasicParsing -OutFile $env:TEMP\dotnet-install.ps1
@@ -11,9 +13,13 @@ install:
 init:
   - ps: Start-Service MySQL80
 before_build:
-  - ps: dotnet tool install --global FlubuCore.Tool --version 8.0.0
+  - ps: |
+      dotnet tool install --global FlubuCore.Tool --version 8.0.0
+      # optional: expose tools path for this step if needed later
+      $toolPath = Join-Path $env:USERPROFILE ".dotnet\tools"
+      if (Test-Path $toolPath) { $env:PATH = "$toolPath;$env:PATH" }
 build_script:
-  - ps: flubu
+  - ps: dotnet tool run flubu
 test: off
 artifacts:
   - path: artifacts/**
