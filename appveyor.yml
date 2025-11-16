@@ -19,7 +19,7 @@ before_build:
       $toolPath = Join-Path $env:USERPROFILE ".dotnet\tools"
       if (Test-Path $toolPath) { $env:PATH = "$toolPath;$env:PATH" }
 build_script:
-  - ps: dotnet tool run flubu
+  - ps: flubu
 test: off
 artifacts:
   - path: artifacts/**
