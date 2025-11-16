@@ -97,13 +97,6 @@ public class CapOptions
     public int ConsumerThreadCount { get; set; }
 
     /// <summary>
-    /// If true, the message will be buffered to memory queue for parallel execute.
-    /// <para>The option is obsolete, use EnableSubscriberParallelExecute instead!</para>
-    /// </summary>
-    [Obsolete("Renamed to EnableSubscriberParallelExecute option.")]
-    public bool EnableConsumerPrefetch { get => EnableSubscriberParallelExecute; set => EnableSubscriberParallelExecute = value; }
-
-    /// <summary>
     /// If true, the message will be buffered to memory queue for parallel execute; 
     /// Default is false.
     /// <para>Use <see cref="SubscriberParallelExecuteThreadCount"/> to specify the number of parallel threads.</para>
