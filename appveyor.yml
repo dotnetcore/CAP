@@ -4,6 +4,10 @@ environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
   Cap_MySql_ConnectionString: Server=localhost;Database=cap_test;Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=Required
+install:
+  - ps: |
+    Invoke-WebRequest -Uri 'https://dot.net/v1/dotnet-install.ps1' -UseBasicParsing -OutFile "$env:temp\dotnet-install.ps1"
+    & $env:temp\dotnet-install.ps1 -Architecture x64 -Version '10.0.100' -InstallDir "$env:ProgramFiles\dotnet"
 init:
   - ps: Start-Service MySQL80
 before_build:
