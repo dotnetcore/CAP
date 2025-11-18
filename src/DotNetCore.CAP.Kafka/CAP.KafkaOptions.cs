@@ -28,6 +28,7 @@ public class KafkaOptions
         {
             ErrorCode.GroupLoadInProgress,
             ErrorCode.Local_Retry,
+            ErrorCode.Local_TimedOut,
             ErrorCode.RequestTimedOut,
             ErrorCode.LeaderNotAvailable,
             ErrorCode.NotLeaderForPartition,
