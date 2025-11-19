@@ -10,14 +10,6 @@ public class ServiceBusProducerDescriptorBuilder<T>
     private string TopicPath { get; set; } = null!;
     private bool CreateSubscription { get; set; }
 
-    [Obsolete("Use .UseTopic($topicPath).WithSubscription() for same behavior.")]
-    public ServiceBusProducerDescriptorBuilder<T> WithTopic(string topicPath)
-    {
-        TopicPath = topicPath;
-        CreateSubscription = true;
-        return this;
-    }
-
     public ServiceBusProducerDescriptorBuilder<T> UseTopic(string topicPath)
     {
         TopicPath = topicPath;

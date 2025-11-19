@@ -41,7 +41,7 @@ internal sealed class NATSConsumerClient : IConsumerClient
 
     public BrokerAddress BrokerAddress => new("nats", _natsOptions.Servers);
 
-    public ICollection<string> FetchTopics(IEnumerable<string> topicNames)
+    public Task<ICollection<string>> FetchTopicsAsync(IEnumerable<string> topicNames)
     {
         if (_natsOptions.EnableSubscriberClientStreamAndSubjectCreation)
         {
@@ -81,10 +81,10 @@ internal sealed class NATSConsumerClient : IConsumerClient
             }
         }
 
-        return topicNames.ToList();
+        return Task.FromResult<ICollection<string>>(topicNames.ToList());
     }
 
-    public void Subscribe(IEnumerable<string> topics)
+    public Task SubscribeAsync(IEnumerable<string> topics)
     {
         if (topics == null)
         {
@@ -133,31 +133,31 @@ internal sealed class NATSConsumerClient : IConsumerClient
                 }
             }
         }
+        return Task.CompletedTask;
     }
 
-    public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
+    public Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
         while (true)
         {
             cancellationToken.ThrowIfCancellationRequested();
             cancellationToken.WaitHandle.WaitOne(timeout);
         }
-        // ReSharper disable once FunctionNeverReturns
     }
 
-    private void SubscriptionMessageHandler(object? sender, MsgHandlerEventArgs e)
+    private async void SubscriptionMessageHandler(object? sender, MsgHandlerEventArgs e)
     {
         if (_groupConcurrent > 0)
         {
             _semaphore.Wait();
-            Task.Run(() => Consume()).ConfigureAwait(false);
+            _ = Task.Run(ConsumeAsync).ConfigureAwait(false);
         }
         else
         {
-            Consume().GetAwaiter().GetResult();
+            await ConsumeAsync();
         }
 
-        Task Consume()
+        Task ConsumeAsync()
         {
             var headers = new Dictionary<string, string?>();
 
@@ -181,27 +181,30 @@ internal sealed class NATSConsumerClient : IConsumerClient
         }
     }
 
-    public void Commit(object? sender)
+    public Task CommitAsync(object? sender)
     {
         if (sender is Msg msg)
         {
             msg.Ack();
         }
         _semaphore.Release();
+        return Task.CompletedTask;
     }
 
-    public void Reject(object? sender)
+    public Task RejectAsync(object? sender)
     {
         if (sender is Msg msg)
         {
             msg.Nak();
         }
         _semaphore.Release();
+        return Task.CompletedTask;
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
         _consumerClient?.Dispose();
+        return ValueTask.CompletedTask;
     }
 
     public void Connect()

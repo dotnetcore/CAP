@@ -13,16 +13,66 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 namespace Microsoft.Extensions.DependencyInjection;
 
 /// <summary>
-/// Contains extension methods to <see cref="IServiceCollection" /> for configuring consistence services.
+/// Provides extension methods for registering and configuring CAP (Consistency And Partition) services
+/// in a <see cref="IServiceCollection"/> dependency injection container.
 /// </summary>
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Adds and configures the consistence services for the consistency.
+    /// Registers and configures all CAP services in the dependency injection container.
     /// </summary>
-    /// <param name="services">The services available in the application.</param>
-    /// <param name="setupAction">An action to configure the <see cref="CapOptions" />.</param>
-    /// <returns>A <see cref="CapBuilder" /> for application services.</returns>
+    /// <remarks>
+    /// This method performs the following registrations:
+    /// <list type="bullet">
+    /// <item><description>Core services: Message publisher, consumer selector, subscription invoker, and method matcher cache.</description></item>
+    /// <item><description>Message processors: Retry processor, transport check processor, delayed message processor, and message collector.</description></item>
+    /// <item><description>Message transport: Message sender and default JSON serializer.</description></item>
+    /// <item><description>Processing servers: Consumer registration server, dispatcher, and main CAP processing server.</description></item>
+    /// <item><description>Bootstrapper and hosted service for application startup and lifecycle management.</description></item>
+    /// <item><description>Extensions: Any configured storage and transport extensions (registered via <see cref="CapOptions.RegisterExtension"/>).</description></item>
+    /// </list>
+    /// All core services are registered with singleton lifetime to ensure consistency across the application.
+    /// Storage and transport extensions must be added before calling this method (typically through AddCap callback).
+    /// </remarks>
+    /// <param name="services">
+    /// The <see cref="IServiceCollection"/> where CAP services will be registered.
+    /// This collection represents the application's dependency injection container.
+    /// </param>
+    /// <param name="setupAction">
+    /// A delegate that configures the <see cref="CapOptions"/> settings for CAP.
+    /// This action is invoked to customize behavior such as message expiration, retry policies, concurrency settings,
+    /// and to register storage and transport extensions.
+    /// Use this to call <c>UseRabbitMQ()</c>, <c>UseSqlServer()</c>, and other extension methods.
+    /// </param>
+    /// <returns>
+    /// A <see cref="CapBuilder"/> instance that provides a fluent API for additional CAP configuration,
+    /// such as registering subscriber filters and custom subscriber assembly scanning.
+    /// </returns>
+    /// <exception cref="ArgumentNullException">
+    /// Thrown if <paramref name="setupAction"/> is null.
+    /// </exception>
+    /// <example>
+    /// <code>
+    /// services.AddCap(options =>
+    /// {
+    ///     // Configure options
+    ///     options.SucceedMessageExpiredAfter = 24 * 3600;
+    ///     options.FailedRetryCount = 50;
+    ///     
+    ///     // Register storage backend
+    ///     options.UseSqlServer("your_connection_string");
+    ///     
+    ///     // Register message transport
+    ///     options.UseRabbitMQ(rabbitMqOptions =>
+    ///     {
+    ///         rabbitMqOptions.HostName = "localhost";
+    ///         rabbitMqOptions.Port = 5672;
+    ///     });
+    /// })
+    /// .AddSubscribeFilter&lt;LoggingFilter&gt;()
+    /// .AddSubscriberAssembly(typeof(MyCapHandlers));
+    /// </code>
+    /// </example>
     public static CapBuilder AddCap(this IServiceCollection services, Action<CapOptions> setupAction)
     {
         ArgumentNullException.ThrowIfNull(setupAction);

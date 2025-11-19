@@ -23,9 +23,10 @@ public class DiagnosticRegister : IProcessingServer
         GC.SuppressFinalize(this);
     }
 
-    public Task Start(CancellationToken stoppingToken)
+    public ValueTask StartAsync(CancellationToken stoppingToken)
     {
         DiagnosticListener.AllListeners.Subscribe(_diagnosticProcessorObserver);
-        return Task.CompletedTask;
+
+        return ValueTask.CompletedTask;
     }
 }

@@ -67,56 +67,71 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
         return MatchWildcardUsingRegex(key, executeDescriptor);
     }
 
-    protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(
-        IServiceProvider provider)
+    protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromInterfaceTypes(IServiceProvider provider)
     {
-        var executorDescriptorList = new List<ConsumerExecutorDescriptor>();
-
-        var capSubscribeTypeInfo = typeof(ICapSubscribe).GetTypeInfo();
+        // Single-pass scan over service registrations to discover ICapSubscribe implementations (keyed & non-keyed)
+        var results = new List<ConsumerExecutorDescriptor>();
+        var subscribeTypeInfo = typeof(ICapSubscribe).GetTypeInfo();
 
         using var scope = provider.CreateScope();
         var scopeProvider = scope.ServiceProvider;
-
         var serviceCollection = scopeProvider.GetRequiredService<IServiceCollection>();
 
-        IEnumerable<ServiceDescriptor>? services = serviceCollection;
-
-#if NET8_0_OR_GREATER
-        var keyedSvc = serviceCollection.Where(o => o.IsKeyedService == true && (o.KeyedImplementationType != null || o.KeyedImplementationFactory != null));
-
-        foreach (var service in keyedSvc)
+        foreach (var service in serviceCollection)
         {
-            var detectType = service.KeyedImplementationType ?? service.ServiceType;
-            if (!capSubscribeTypeInfo.IsAssignableFrom(detectType)) continue;
+            Type detectType;
+            Type? actualType = null;
 
-            var actualType = service.KeyedImplementationType;
-            if (actualType == null && service.KeyedImplementationFactory != null)
-                actualType = scopeProvider.GetRequiredKeyedService(service.ServiceType, service.ServiceKey).GetType();
+            if (service.IsKeyedService)
+            {
+                // Fast skip for keyed services
+                var hasKeyedImpl = service.KeyedImplementationType != null || service.KeyedImplementationFactory != null;
+                if (!hasKeyedImpl)
+                    continue;
 
-            if (actualType == null) throw new NullReferenceException(nameof(service.ServiceType));
+                detectType = service.KeyedImplementationType ?? service.ServiceType;
+                if (!subscribeTypeInfo.IsAssignableFrom(detectType))
+                    continue;
 
-            executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(), service.ServiceType.GetTypeInfo()));
+                actualType = service.KeyedImplementationType;
+                if (actualType == null && service.KeyedImplementationFactory != null)
+                {
+                    // Resolve keyed instance to get its runtime type
+                    var instance = scopeProvider.GetRequiredKeyedService(service.ServiceType, service.ServiceKey);
+                    actualType = instance?.GetType();
+                }
+            }
+            else
+            {
+                // Fast skip for non-keyed services
+                var hasImpl = service.ImplementationType != null || service.ImplementationFactory != null;
+                if (!hasImpl)
+                    continue;
+
+                detectType = service.ImplementationType ?? service.ServiceType;
+                if (!subscribeTypeInfo.IsAssignableFrom(detectType))
+                    continue;
+
+                actualType = service.ImplementationType;
+                if (actualType == null && service.ImplementationFactory != null)
+                {
+                    // Resolve instance produced by factory to inspect runtime type
+                    var instance = scopeProvider.GetRequiredService(service.ServiceType);
+                    actualType = instance?.GetType();
+                }
+            }
+
+            if (actualType == null)
+            {
+                // Consistent error message for diagnostic purposes
+                throw new InvalidOperationException($"Unable to resolve actual subscriber type for service: {service.ServiceType.FullName}");
+            }
+
+            var serviceTypeInfo = service.ServiceType.GetTypeInfo();
+            results.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(), serviceTypeInfo));
         }
 
-        services = services.Where(x => x.IsKeyedService == false);
-#endif
-
-        services = services.Where(o => o.ImplementationType != null || o.ImplementationFactory != null);
-        foreach (var service in services)
-        {
-            var detectType = service.ImplementationType ?? service.ServiceType;
-            if (!capSubscribeTypeInfo.IsAssignableFrom(detectType)) continue;
-
-            var actualType = service.ImplementationType;
-            if (actualType == null && service.ImplementationFactory != null)
-                actualType = scopeProvider.GetRequiredService(service.ServiceType).GetType();
-
-            if (actualType == null) throw new NullReferenceException(nameof(service.ServiceType));
-
-            executorDescriptorList.AddRange(GetTopicAttributesDescription(actualType.GetTypeInfo(), service.ServiceType.GetTypeInfo()));
-        }
-
-        return executorDescriptorList;
+        return results;
     }
 
     protected virtual IEnumerable<ConsumerExecutorDescriptor> FindConsumersFromControllerTypes()

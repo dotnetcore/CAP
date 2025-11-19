@@ -19,8 +19,7 @@ internal class RedisConsumerClient(
     byte _groupConcurrent,
     IRedisStreamManager _redis,
     IOptions<CapRedisOptions> _options,
-    ILogger<RedisConsumerClient> _logger
-    ) : IConsumerClient
+    ILogger<RedisConsumerClient> _logger) : IConsumerClient
 {
     private readonly SemaphoreSlim _semaphore = new(_groupConcurrent);
     private string[] _topics = default!;
@@ -31,19 +30,19 @@ internal class RedisConsumerClient(
 
     public BrokerAddress BrokerAddress => new("redis", _options.Value.Endpoint);
 
-    public void Subscribe(IEnumerable<string> topics)
+    public async Task SubscribeAsync(IEnumerable<string> topics)
     {
         ArgumentNullException.ThrowIfNull(topics);
 
         foreach (var topic in topics)
         {
-            _redis.CreateStreamWithConsumerGroupAsync(topic, _groupId).GetAwaiter().GetResult();
+            await _redis.CreateStreamWithConsumerGroupAsync(topic, _groupId);
         }
 
         _topics = topics.ToArray();
     }
 
-    public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
+    public Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
         _ = ListeningForMessagesAsync(timeout, cancellationToken);
 
@@ -55,23 +54,24 @@ internal class RedisConsumerClient(
         // ReSharper disable once FunctionNeverReturns
     }
 
-    public void Commit(object? sender)
+    public async Task CommitAsync(object? sender)
     {
         var (stream, group, id) = ((string stream, string group, string id))sender!;
 
-        _redis.Ack(stream, group, id).GetAwaiter().GetResult();
+        await _redis.Ack(stream, group, id);
 
         _semaphore.Release();
     }
 
-    public void Reject(object? sender)
+    public Task RejectAsync(object? sender)
     {
         _semaphore.Release();
+        return Task.CompletedTask;
     }
 
-    public void Dispose()
+    public ValueTask DisposeAsync()
     {
-        //ignore
+        return ValueTask.CompletedTask;
     }
 
     private async Task ListeningForMessagesAsync(TimeSpan timeout, CancellationToken cancellationToken)
@@ -79,8 +79,7 @@ internal class RedisConsumerClient(
         //first time, we want to read our pending messages, in case we crashed and are recovering.
         var pendingMsgs = _redis.PollStreamsPendingMessagesAsync(_topics, _groupId, timeout, cancellationToken);
 
-        await ConsumeMessages(pendingMsgs, StreamPosition.Beginning)
-            .ConfigureAwait(false);
+        await ConsumeMessages(pendingMsgs, StreamPosition.Beginning).ConfigureAwait(false);
 
         //Once we consumed our history, we can start getting new messages.
         var newMsgs = _redis.PollStreamsLatestMessagesAsync(_topics, _groupId, timeout, cancellationToken);
@@ -101,17 +100,17 @@ internal class RedisConsumerClient(
                     if (_groupConcurrent > 0)
                     {
                         _semaphore.Wait();
-                        _ = Task.Run(() => Consume(position, stream, entry)).ConfigureAwait(false);
+                        _ = Task.Run(() => ConsumeAsync(position, stream, entry)).ConfigureAwait(false);
                     }
                     else
                     {
-                        await Consume(position, stream, entry);
+                        await ConsumeAsync(position, stream, entry);
                     }
                 }
             }
         }
 
-        async Task Consume(RedisValue position, RedisStream stream, StreamEntry entry)
+        async Task ConsumeAsync(RedisValue position, RedisStream stream, StreamEntry entry)
         {
             try
             {

@@ -13,5 +13,5 @@ namespace DotNetCore.CAP.Internal;
 /// </summary>
 public interface IProcessingServer : IDisposable
 {
-    Task Start(CancellationToken stoppingToken);
+    ValueTask StartAsync(CancellationToken stoppingToken);
 }

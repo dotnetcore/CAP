@@ -51,11 +51,11 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
     public BrokerAddress BrokerAddress => ServiceBusHelpers.GetBrokerAddress(_asbOptions.ConnectionString, _asbOptions.Namespace);
 
-    public void Subscribe(IEnumerable<string> topics)
+    public async Task SubscribeAsync(IEnumerable<string> topics)
     {
         if (topics == null) throw new ArgumentNullException(nameof(topics));
 
-        ConnectAsync().ConfigureAwait(false).GetAwaiter().GetResult();
+        await ConnectAsync();
 
         topics = topics.Concat(_asbOptions!.SQLFilters?.Select(o => o.Key) ?? Enumerable.Empty<string>());
 
@@ -88,7 +88,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                 currentRuleToAdd = correlationRule;
             }
 
-            _administrationClient.CreateRuleAsync(_asbOptions.TopicPath, _subscriptionName,
+           await _administrationClient.CreateRuleAsync(_asbOptions.TopicPath, _subscriptionName,
                 new CreateRuleOptions
                 {
                     Name = newRule,
@@ -100,16 +100,15 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
         foreach (var oldRule in allRuleNames.Except(topics))
         {
-            _administrationClient.DeleteRuleAsync(_asbOptions.TopicPath, _subscriptionName, oldRule).GetAwaiter()
-                .GetResult();
+            await _administrationClient.DeleteRuleAsync(_asbOptions.TopicPath, _subscriptionName, oldRule);
 
             _logger.LogInformation($"Azure Service Bus remove rule: {oldRule}");
         }
     }
 
-    public void Listening(TimeSpan timeout, CancellationToken cancellationToken)
+    public async Task ListeningAsync(TimeSpan timeout, CancellationToken cancellationToken)
     {
-        ConnectAsync().GetAwaiter().GetResult();
+        await ConnectAsync();
 
         if (_serviceBusProcessor!.IsSessionProcessor)
         {
@@ -122,27 +121,28 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
         _serviceBusProcessor.ProcessErrorAsync += _serviceBusProcessor_ProcessErrorAsync;
 
-        _serviceBusProcessor.StartProcessingAsync(cancellationToken).GetAwaiter().GetResult();
+        await _serviceBusProcessor.StartProcessingAsync(cancellationToken);
     }
 
-    public void Commit(object? sender)
+    public async Task CommitAsync(object? sender)
     {
         var commitInput = (AzureServiceBusConsumerCommitInput)sender!;
         if (!_serviceBusProcessor!.AutoCompleteMessages)
-            commitInput.CompleteMessageAsync().GetAwaiter().GetResult();
+            await commitInput.CompleteMessageAsync();
         _semaphore.Release();
     }
 
-    public void Reject(object? sender)
+    public async Task RejectAsync(object? sender)
     {
         var commitInput = (AzureServiceBusConsumerCommitInput)sender!;
-        commitInput.AbandonMessageAsync().GetAwaiter().GetResult();
+        await commitInput.AbandonMessageAsync();
         _semaphore.Release();
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        if (!_serviceBusProcessor!.IsProcessing) _serviceBusProcessor.DisposeAsync().GetAwaiter().GetResult();
+        if (!_serviceBusProcessor!.IsProcessing) 
+            await _serviceBusProcessor.DisposeAsync();
     }
 
     private Task _serviceBusProcessor_ProcessErrorAsync(ProcessErrorEventArgs args)

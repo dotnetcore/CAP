@@ -52,7 +52,7 @@ public class Dispatcher : IDispatcher
 
     #region Public Methods
 
-    public async Task Start(CancellationToken stoppingToken)
+    public async ValueTask StartAsync(CancellationToken stoppingToken)
     {
         ResetStateIfNeeded();
 

@@ -18,7 +18,6 @@ public class PostgreSqlOptions : EFOptions
     /// <summary>
     /// Gets or sets the database's connection string that will be used to store database entities.
     /// </summary>
-    [Obsolete("Use .DataSource = NpgsqlDataSource.Create(<connectionString>) for same behavior.")]
     public string? ConnectionString { get; set; }
 
     /// <summary>
@@ -31,9 +30,7 @@ public class PostgreSqlOptions : EFOptions
     /// </summary>
     internal NpgsqlConnection CreateConnection()
     {
-#pragma warning disable CS0618 // Type or member is obsolete
         return DataSource != null ? DataSource.CreateConnection() : new NpgsqlConnection(ConnectionString);
-#pragma warning restore CS0618 // Type or member is obsolete
     }
 }
 
@@ -63,9 +60,7 @@ internal class ConfigurePostgreSqlOptions : IConfigureOptions<PostgreSqlOptions>
         options.DataSource = extension.GetType().GetProperty(nameof(options.DataSource))?.GetValue(extension) as NpgsqlDataSource;
         if (options.DataSource == null)
         {
-#pragma warning disable CS0618 // Type or member is obsolete
             options.ConnectionString = extension.GetType().GetProperty(nameof(options.ConnectionString))?.GetValue(extension) as string;
-#pragma warning restore CS0618 // Type or member is obsolete
         }
     }
 }

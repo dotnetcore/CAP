@@ -34,7 +34,7 @@ public class CapProcessingServer : IProcessingServer
         _cts = new CancellationTokenSource();
     }
 
-    public Task Start(CancellationToken stoppingToken)
+    public ValueTask StartAsync(CancellationToken stoppingToken)
     {
         // If already disposed and restarting, recreate the CancellationTokenSource
         if (_disposed || _cts.IsCancellationRequested)
@@ -55,7 +55,7 @@ public class CapProcessingServer : IProcessingServer
             .Select(p => p.ProcessAsync(_context));
          _compositeTask = Task.WhenAll(processorTasks);
 
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
     public void Dispose()
