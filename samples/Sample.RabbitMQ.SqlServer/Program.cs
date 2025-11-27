@@ -35,13 +35,9 @@ builder.Services.AddCap(x =>
 {
     x.UseEntityFramework<AppDbContext>();
     x.UseRabbitMQ("127.0.0.1");
-    x.EnablePublishParallelSend = true;
     x.UseDashboard();
 
     //x.EnablePublishParallelSend = true;
-
-    //x.UseDispatchingPerGroup = true;
-
 
     //x.FailedThresholdCallback = failed =>
     //{
