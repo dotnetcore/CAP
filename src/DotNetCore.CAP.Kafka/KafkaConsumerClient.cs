@@ -43,7 +43,7 @@ public class KafkaConsumerClient : IConsumerClient
 
     public BrokerAddress BrokerAddress => new("kafka", _kafkaOptions.Servers);
 
-    public async Task<ICollection<string>> FetchTopics(IEnumerable<string> topicNames)
+    public async Task<ICollection<string>> FetchTopicsAsync(IEnumerable<string> topicNames)
     {
         if (topicNames == null) throw new ArgumentNullException(nameof(topicNames));
 
