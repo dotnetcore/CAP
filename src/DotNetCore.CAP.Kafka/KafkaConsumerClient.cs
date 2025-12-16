@@ -190,6 +190,20 @@ public class KafkaConsumerClient : IConsumerClient
             headers[header.Key] = val != null ? Encoding.UTF8.GetString(val) : null;
         }
 
+        // Ensure required headers exist for compatibility with non-CAP message producers.
+        // If the message is produced by a non-CAP component, these headers may be missing,
+        // but they are required by the CAP consumer for proper message processing.
+        if (!headers.ContainsKey(Headers.MessageId))
+        {
+            headers.Add(Headers.MessageId, "");
+        }
+
+        if (!headers.ContainsKey(Headers.MessageName))
+        {
+            // Use the Kafka topic as the message name if not provided in headers.
+            headers.Add(Headers.MessageName, consumerResult.Topic);
+        }
+
         headers[Headers.Group] = _groupId;
 
         if (_kafkaOptions.CustomHeadersBuilder != null)
