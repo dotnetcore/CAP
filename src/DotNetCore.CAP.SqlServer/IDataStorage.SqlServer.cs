@@ -311,7 +311,7 @@ public class SqlServerDataStorage : IDataStorage
             new SqlParameter("@Id", message.DbId),
             new SqlParameter("@Content", _serializer.Serialize(message.Origin)),
             new SqlParameter("@Retries", message.Retries),
-            new SqlParameter("@ExpiresAt", message.ExpiresAt),
+            new SqlParameter("@ExpiresAt", message.ExpiresAt.HasValue ?  message.ExpiresAt.Value : DBNull.Value),
             new SqlParameter("@StatusName", state.ToString("G"))
         };
 

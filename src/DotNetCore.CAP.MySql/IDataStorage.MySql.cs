@@ -316,7 +316,7 @@ public class MySqlDataStorage : IDataStorage
             new MySqlParameter("@Id", message.DbId),
             new MySqlParameter("@Content", _serializer.Serialize(message.Origin)),
             new MySqlParameter("@Retries", message.Retries),
-            new MySqlParameter("@ExpiresAt", message.ExpiresAt),
+            new MySqlParameter("@ExpiresAt", message.ExpiresAt.HasValue ?  message.ExpiresAt.Value : DBNull.Value),
             new MySqlParameter("@StatusName", state.ToString("G"))
         };
 
