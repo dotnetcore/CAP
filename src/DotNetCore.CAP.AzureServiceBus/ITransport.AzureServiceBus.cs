@@ -68,7 +68,7 @@ internal class AzureServiceBusTransport : ITransport, IServiceBusProducerDescrip
                 CorrelationId = transportMessage.GetCorrelationId()
             };
 
-            if (_asbOptions.Value.EnableSessions)
+            if (_asbOptions.Value.EnableSessions || producer.EnableSessions)
             {
                 transportMessage.Headers.TryGetValue(AzureServiceBusHeaders.SessionId, out var sessionId);
                 message.SessionId = string.IsNullOrEmpty(sessionId) ? transportMessage.GetId() : sessionId;
