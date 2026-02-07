@@ -57,7 +57,10 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
         await ConnectAsync();
 
-        topics = topics.Concat(_asbOptions!.SQLFilters?.Select(o => o.Key) ?? Enumerable.Empty<string>());
+        if (!_asbOptions.AutoProvision) 
+            return;
+
+        topics = topics.Concat(_asbOptions!.SQLFilters?.Select(o => o.Key) ?? []);
 
         var allRules = _administrationClient!.GetRulesAsync(_asbOptions!.TopicPath, _subscriptionName).ToEnumerable();
         var allRuleNames = allRules.Select(o => o.Name);
@@ -88,21 +91,21 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
                 currentRuleToAdd = correlationRule;
             }
 
-           await _administrationClient.CreateRuleAsync(_asbOptions.TopicPath, _subscriptionName,
-                new CreateRuleOptions
-                {
-                    Name = newRule,
-                    Filter = currentRuleToAdd
-                });
+            await _administrationClient.CreateRuleAsync(_asbOptions.TopicPath, _subscriptionName,
+                 new CreateRuleOptions
+                 {
+                     Name = newRule,
+                     Filter = currentRuleToAdd
+                 });
 
-            _logger.LogInformation($"Azure Service Bus add rule: {newRule}");
+            _logger.LogInformation("Azure Service Bus add rule: {RuleName}", newRule);
         }
 
         foreach (var oldRule in allRuleNames.Except(topics))
         {
             await _administrationClient.DeleteRuleAsync(_asbOptions.TopicPath, _subscriptionName, oldRule);
 
-            _logger.LogInformation($"Azure Service Bus remove rule: {oldRule}");
+            _logger.LogInformation("Azure Service Bus remove rule: {RuleName}", oldRule);
         }
     }
 
@@ -141,7 +144,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
     public async ValueTask DisposeAsync()
     {
-        if (!_serviceBusProcessor!.IsProcessing) 
+        if (!_serviceBusProcessor!.IsProcessing)
             await _serviceBusProcessor.DisposeAsync();
     }
 
@@ -196,49 +199,55 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         {
             if (_serviceBusProcessor == null)
             {
-                if (_asbOptions.TokenCredential != null)
-                {
-                    _administrationClient =
-                        new ServiceBusAdministrationClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
-                    _serviceBusClient = new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
-                }
-                else
-                {
-                    _administrationClient = new ServiceBusAdministrationClient(_asbOptions.ConnectionString);
-                    _serviceBusClient = new ServiceBusClient(_asbOptions.ConnectionString);
-                }
 
-                var topicConfigs =
-                    _asbOptions.CustomProducers.Select(producer =>
-                            (topicPaths: producer.TopicPath, subscribe: producer.CreateSubscription))
-                        .Append((topicPaths: _asbOptions.TopicPath, subscribe: true))
-                        .GroupBy(n => n.topicPaths, StringComparer.OrdinalIgnoreCase)
-                        .Select(n => (topicPaths: n.Key, subscribe: n.Max(o => o.subscribe)));
+                _serviceBusClient = _asbOptions.TokenCredential is not null ?
+                    new ServiceBusClient(_asbOptions.Namespace, _asbOptions.TokenCredential) :
+                    new ServiceBusClient(_asbOptions.ConnectionString);
 
-                foreach (var (topicPath, subscribe) in topicConfigs)
+                if (_asbOptions.AutoProvision)
                 {
-                    if (!await _administrationClient.TopicExistsAsync(topicPath))
+                    if (_asbOptions.TokenCredential != null)
                     {
-                        await _administrationClient.CreateTopicAsync(topicPath);
-                        _logger.LogInformation($"Azure Service Bus created topic: {topicPath}");
+                        _administrationClient =
+                            new ServiceBusAdministrationClient(_asbOptions.Namespace, _asbOptions.TokenCredential);
+                    }
+                    else
+                    {
+                        _administrationClient = new ServiceBusAdministrationClient(_asbOptions.ConnectionString);
                     }
 
-                    if (subscribe && !await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
+                    var topicConfigs =
+                        _asbOptions.CustomProducers.Select(producer =>
+                                (topicPaths: producer.TopicPath, subscribe: producer.CreateSubscription))
+                            .Append((topicPaths: _asbOptions.TopicPath, subscribe: true))
+                            .GroupBy(n => n.topicPaths, StringComparer.OrdinalIgnoreCase)
+                            .Select(n => (topicPaths: n.Key, subscribe: n.Max(o => o.subscribe)));
+
+                    foreach (var (topicPath, subscribe) in topicConfigs)
                     {
-                        var subscriptionDescription =
-                            new CreateSubscriptionOptions(topicPath, _subscriptionName)
-                            {
-                                RequiresSession = _asbOptions.EnableSessions,
-                                AutoDeleteOnIdle = _asbOptions.SubscriptionAutoDeleteOnIdle,
-                                LockDuration = _asbOptions.SubscriptionMessageLockDuration,
-                                DefaultMessageTimeToLive = _asbOptions.SubscriptionDefaultMessageTimeToLive,
-                                MaxDeliveryCount = _asbOptions.SubscriptionMaxDeliveryCount,
-                            };
+                        if (!await _administrationClient.TopicExistsAsync(topicPath))
+                        {
+                            await _administrationClient.CreateTopicAsync(topicPath);
+                            _logger.LogInformation("Azure Service Bus created topic: {TopicPath}", topicPath);
+                        }
 
-                        await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
+                        if (subscribe && !await _administrationClient.SubscriptionExistsAsync(topicPath, _subscriptionName))
+                        {
+                            var subscriptionDescription =
+                                new CreateSubscriptionOptions(topicPath, _subscriptionName)
+                                {
+                                    RequiresSession = _asbOptions.EnableSessions,
+                                    AutoDeleteOnIdle = _asbOptions.SubscriptionAutoDeleteOnIdle,
+                                    LockDuration = _asbOptions.SubscriptionMessageLockDuration,
+                                    DefaultMessageTimeToLive = _asbOptions.SubscriptionDefaultMessageTimeToLive,
+                                    MaxDeliveryCount = _asbOptions.SubscriptionMaxDeliveryCount,
+                                };
 
-                        _logger.LogInformation(
-                            $"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
+                            await _administrationClient.CreateSubscriptionAsync(subscriptionDescription);
+
+                            _logger.LogInformation(
+                                $"Azure Service Bus topic {topicPath} created subscription: {_subscriptionName}");
+                        }
                     }
                 }
 
@@ -293,40 +302,6 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
         }
 
         return new TransportMessage(headers, message.Body);
-    }
-
-    private static void CheckValidSubscriptionName(string subscriptionName)
-    {
-        const string pathDelimiter = @"/";
-        const int ruleNameMaximumLength = 50;
-        char[] invalidEntityPathCharacters = { '@', '?', '#', '*' };
-
-        if (string.IsNullOrWhiteSpace(subscriptionName)) throw new ArgumentNullException(subscriptionName);
-
-        // and "\" will be converted to "/" on the REST path anyway. Gateway/REST do not
-        // have to worry about the begin/end slash problem, so this is purely a client side check.
-        var tmpName = subscriptionName.Replace(@"\", pathDelimiter);
-        if (tmpName.Length > ruleNameMaximumLength)
-            throw new ArgumentOutOfRangeException(subscriptionName,
-                $@"Subscribe name '{subscriptionName}' exceeds the '{ruleNameMaximumLength}' character limit.");
-
-        if (tmpName.StartsWith(pathDelimiter, StringComparison.OrdinalIgnoreCase) ||
-            tmpName.EndsWith(pathDelimiter, StringComparison.OrdinalIgnoreCase))
-            throw new ArgumentException(
-                $@"The subscribe name cannot contain '/' as prefix or suffix. The supplied value is '{subscriptionName}'",
-                subscriptionName);
-
-        if (tmpName.Contains(pathDelimiter))
-            throw new ArgumentException($@"The subscribe name contains an invalid character '{pathDelimiter}'",
-                subscriptionName);
-
-        foreach (var uriSchemeKey in invalidEntityPathCharacters)
-        {
-            if (subscriptionName.IndexOf(uriSchemeKey) >= 0)
-                throw new ArgumentException(
-                    $@"'{subscriptionName}' contains character '{uriSchemeKey}' which is not allowed because it is reserved in the Uri scheme.",
-                    subscriptionName);
-        }
     }
 
     #endregion private methods

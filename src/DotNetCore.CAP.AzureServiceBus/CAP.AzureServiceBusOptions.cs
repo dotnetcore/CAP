@@ -33,6 +33,14 @@ public class AzureServiceBusOptions
     public string Namespace { get; set; } = default!;
 
     /// <summary>
+    /// When set to <c>true</c> (default), CAP will automatically create topics, subscriptions,
+    /// and rules using the <see cref="Azure.Messaging.ServiceBus.Administration.ServiceBusAdministrationClient"/>.
+    /// Set to <c>false</c> to skip automatic provisioning, which is useful when the admin API
+    /// is unavailable (e.g., Azure Service Bus Emulator).
+    /// </summary>
+    public bool AutoProvision { get; set; } = true;
+
+    /// <summary>
     /// Whether Service Bus sessions are enabled. If enabled, all messages must contain a
     /// <see cref="AzureServiceBusHeaders.SessionId" /> header. Defaults to false.
     /// </summary>
