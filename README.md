@@ -287,6 +287,25 @@ services.AddCap(x =>
 });
 ```
 
+### Azure Service Bus Emulator Support
+
+The [Azure Service Bus Emulator](https://learn.microsoft.com/en-us/azure/service-bus-messaging/overview-emulator) uses separate ports for AMQP messaging (5672) and the HTTP Admin API (5300). Because CAP uses a single connection string for both the `ServiceBusClient` (AMQP) and the `ServiceBusAdministrationClient` (HTTP), it cannot target both ports simultaneously.
+
+To work around this, set `AutoProvision` to `false` to skip automatic creation of topics, subscriptions, and rules via the Admin API. You must pre-create the required entities in the emulator's configuration instead.
+
+```csharp
+services.AddCap(x =>
+{
+    x.UseAzureServiceBus(opt =>
+    {
+        opt.ConnectionString = "Endpoint=sb://localhost;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=SAS_KEY_VALUE;UseDevelopmentEmulator=true;";
+        opt.AutoProvision = false;
+    });
+});
+```
+
+> **Note:** When `AutoProvision` is `false`, topics, subscriptions, and subscription filter rules must already exist before the application starts. This option is also useful when entities are managed externally (e.g., via Infrastructure as Code).
+
 ## Dashboard
 
 CAP provides a real-time dashboard to view sent and received messages and their status.
