@@ -149,8 +149,8 @@ internal sealed class NATSConsumerClient : IConsumerClient
     {
         if (_groupConcurrent > 0)
         {
-            _semaphore.Wait();
-            _ = Task.Run(ConsumeAsync).ConfigureAwait(false);
+            await _semaphore.WaitAsync().ConfigureAwait(false);
+            _ = Task.Run(ConsumeAsync);
         }
         else
         {
@@ -183,21 +183,69 @@ internal sealed class NATSConsumerClient : IConsumerClient
 
     public Task CommitAsync(object? sender)
     {
-        if (sender is Msg msg)
+        try
         {
-            msg.Ack();
+            if (sender is Msg msg)
+            {
+                msg.Ack();
+            }
         }
-        _semaphore.Release();
+        catch (Exception ex)
+        {
+            OnLogCallback?.Invoke(new LogMessageEventArgs
+            {
+                LogType = MqLogType.AsyncErrorEvent,
+                Reason = $"NATS message ACK failed: {ex}"
+            });
+        }
+        finally
+        {
+            if (_groupConcurrent > 0)
+            {
+                try
+                {
+                    _semaphore.Release();
+                }
+                catch (SemaphoreFullException)
+                {
+                    // ignore (defensive)
+                }
+            }
+        }
         return Task.CompletedTask;
     }
 
     public Task RejectAsync(object? sender)
     {
-        if (sender is Msg msg)
+        try
         {
-            msg.Nak();
+            if (sender is Msg msg)
+            {
+                msg.Nak();
+            }
         }
-        _semaphore.Release();
+        catch (Exception ex)
+        {
+            OnLogCallback?.Invoke(new LogMessageEventArgs
+            {
+                LogType = MqLogType.AsyncErrorEvent,
+                Reason = $"NATS message NAK failed: {ex}"
+            });
+        }
+        finally
+        {
+            if (_groupConcurrent > 0)
+            {
+                try
+                {
+                    _semaphore.Release();
+                }
+                catch (SemaphoreFullException)
+                {
+                    // ignore (defensive)
+                }
+            }
+        }
         return Task.CompletedTask;
     }
 
