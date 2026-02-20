@@ -191,7 +191,6 @@ export default {
   },
   mounted() {
     this.fetchData();
-    window.abc = this;
   },
   watch: {
     status: function () {

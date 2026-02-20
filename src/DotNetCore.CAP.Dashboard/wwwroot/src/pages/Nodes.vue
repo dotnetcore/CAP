@@ -84,7 +84,7 @@
 import axios from 'axios';
 import { BIconInfoCircleFill, BIconSpeedometer2, BIconArrowClockwise, BIconSearch } from 'bootstrap-vue';
 
-var cancelToken = axios.CancelToken.source();
+var abortController = new AbortController();
 
 export default {
   components: {
@@ -152,8 +152,8 @@ export default {
       this.isBusy = true;
       var name = this.getCookie('cap.node');
       if (this.pinging == true) {
-        cancelToken.cancel();
-        cancelToken = axios.CancelToken.source();
+        abortController.abort();
+        abortController = new AbortController();
       }
       axios.get('/list-svc/' + this.selected).then(res => {
         for (var item of res.data) {
@@ -177,7 +177,7 @@ export default {
               endpoint: item.address + ":" + item.port
             },
             timeout: 3000,
-            cancelToken: cancelToken.token
+            signal: abortController.signal
           });
           item.latency = res.data;
         } catch (err) {
@@ -211,8 +211,8 @@ export default {
         timeout: 3000
       }).then(res => {
         item.latency = res.data;
-        document.cookie = `cap.node=${escape(item.name)};`;
-        document.cookie = `cap.node.ns=${this.selected};`;
+        document.cookie = `cap.node=${encodeURIComponent(item.name)};SameSite=Strict`;
+        document.cookie = `cap.node.ns=${encodeURIComponent(this.selected)};SameSite=Strict`;
         item._ping = false;
         location.reload();
       }).catch(err => {
