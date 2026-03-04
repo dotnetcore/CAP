@@ -90,7 +90,7 @@ internal sealed class AmazonSQSConsumerClient : IConsumerClient
         {
             var response = _sqsClient!.ReceiveMessageAsync(request, cancellationToken).GetAwaiter().GetResult();
 
-            if (response.Messages.Count == 1)
+            if (response?.Messages?.Count == 1)
             {
                 if (_groupConcurrent > 0)
                 {
