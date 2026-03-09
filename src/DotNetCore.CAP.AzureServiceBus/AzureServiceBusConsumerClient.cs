@@ -62,7 +62,7 @@ internal sealed class AzureServiceBusConsumerClient : IConsumerClient
 
         topics = topics.Concat(_asbOptions!.SQLFilters?.Select(o => o.Key) ?? []);
 
-        var allRules = _administrationClient!.GetRulesAsync(_asbOptions!.TopicPath, _subscriptionName).ToEnumerable();
+        var allRules = _administrationClient!.GetRulesAsync(_asbOptions!.TopicPath, _subscriptionName).ToBlockingEnumerable();
         var allRuleNames = allRules.Select(o => o.Name);
 
         foreach (var newRule in topics.Except(allRuleNames))
