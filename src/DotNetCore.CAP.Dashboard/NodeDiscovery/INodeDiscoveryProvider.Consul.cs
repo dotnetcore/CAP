@@ -147,4 +147,11 @@ public class ConsulNodeDiscoveryProvider : INodeDiscoveryProvider
                 $"Get consul nodes raised an exception. Exception:{ex.Message},{ex.InnerException.Message}");
         }
     }
+
+    public async Task<IList<Node>> ListServices(string ns = null)
+    {
+        // For Consul, namespace is not directly supported, so we return all CAP services
+        // This is similar to GetNodes but provides a consistent interface
+        return await GetNodes(ns, CancellationToken.None);
+    }
 }
