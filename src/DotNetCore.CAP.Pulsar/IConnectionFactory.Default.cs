@@ -61,7 +61,6 @@ public class ConnectionFactory : IConnectionFactory, IAsyncDisposable
                 var builder = new PulsarClientBuilder().ServiceUrl(_options.ServiceUrl);
                 if (_options.TlsOptions != null)
                 {
-                    builder.EnableTls(_options.TlsOptions.UseTls);
                     builder.EnableTlsHostnameVerification(_options.TlsOptions.TlsHostnameVerificationEnable);
                     builder.AllowTlsInsecureConnection(_options.TlsOptions.TlsAllowInsecureConnection);
                     builder.TlsTrustCertificate(_options.TlsOptions.TlsTrustCertificate);

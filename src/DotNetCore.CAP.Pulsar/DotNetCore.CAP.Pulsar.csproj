@@ -9,7 +9,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\DotNetCore.CAP\DotNetCore.CAP.csproj" />
-		<PackageReference Include="Pulsar.Client" Version="3.13.0" />
+		<PackageReference Include="Pulsar.Client" Version="3.15.1" />
 	</ItemGroup>
 
 </Project>
