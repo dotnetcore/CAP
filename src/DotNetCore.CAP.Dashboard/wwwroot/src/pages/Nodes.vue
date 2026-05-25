@@ -136,14 +136,15 @@ export default {
       axios.get('/list-ns').then(res => {
         if (res.data.length > 0) {
           this.nsList = res.data;
+          var ns = this.getCookie("cap.node.ns");
+          if (ns) {
+            this.selected = ns;
+            this.fetchSvcs();
+          }
         }
+      }).finally(() => {
+        this.isBusy = false;
       });
-      this.isBusy = false;
-      var ns = this.getCookie("cap.node.ns");
-      if (ns) {
-        this.selected = ns;
-        this.fetchSvcs();
-      }
     },
 
     fetchSvcs() {
