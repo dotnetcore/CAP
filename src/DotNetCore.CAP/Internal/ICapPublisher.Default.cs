@@ -46,6 +46,12 @@ internal class CapPublisher : ICapPublisher
         get => _asyncLocal.Value?.Transaction;
         set
         {
+            if (value == null)
+            {
+                // Clear the CapTransactionHolder held in the ExecutionContext to avoid long-term reference retention.
+                _asyncLocal.Value = null;
+                return;
+            }
             _asyncLocal.Value ??= new CapTransactionHolder();
             _asyncLocal.Value.Transaction = value;
         }
@@ -183,6 +189,11 @@ internal class CapPublisher : ICapPublisher
             TracingError(tracingTimestamp, message, e);
 
             throw;
+        }
+        finally 
+        {
+            // Whether successful or exceptional, explicitly clear the transaction reference in the current context after the release is completed.
+            Transaction = null; 
         }
     }
 
