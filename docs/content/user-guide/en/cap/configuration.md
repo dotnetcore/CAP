@@ -132,13 +132,14 @@ During the message consumption process, if the consumer method fails, CAP will r
     Send and consume failures are retried 3 times immediately. After the initial 3 attempts, retries follow a polling schedule, at which point the FailedRetryInterval configuration takes effect.
 
 !!! WARNING "Multi-instance Concurrent Retries"
-    Version 7.1.0 introduced database-based distributed locks to solve the problem of concurrent database fetches during retry operations across multiple instances. You must explicitly set `UseStorageLock` to true to enable this.
+    Version 7.1.0 introduced database-based distributed locks to reduce duplicate database fetches during retry operations across multiple instances. You must explicitly set `UseStorageLock` to true to enable this.
+    `UseStorageLock` coordinates each retry processor's database fetch, but it does not provide a cluster-wide throttle for a single poisoned message. In multi-instance deployments, a message that keeps failing may be picked up by different instances during later polling cycles, so the observed retry cadence can be affected by the number of replicas.
 
 #### UseStorageLock
 
 > Default: false
 
-If set to true, we will use a database-based distributed lock to handle concurrent data fetches by retry processes across multiple instances. This will generate the cap.lock table in the database.
+If set to true, we will use a database-based distributed lock to handle concurrent data fetches by retry processes across multiple instances. This will generate the cap.lock table in the database. The lock only protects retry-message fetching; it does not guarantee that each failed message is retried at most once per `FailedRetryInterval` across the whole cluster.
 
 #### CollectorCleaningInterval
 

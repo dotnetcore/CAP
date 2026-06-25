@@ -162,7 +162,7 @@ Retries will stop when the maximum is reached. You can see the failure reason in
 
 When the Consumer receives a message, the consumer method is executed and will retry if an exception occurs. This retry strategy is the same as the send retry.
 
-Version 7.1.0 introduced database-based distributed locks to handle concurrent database fetches during retry operations across multiple instances. You need to explicitly configure the `UseStorageLock` option to true.
+Version 7.1.0 introduced database-based distributed locks to reduce concurrent database fetches during retry operations across multiple instances. You need to explicitly configure the `UseStorageLock` option to true. This lock protects the retry-message fetch operation, but it is not a cluster-wide per-message rate limiter; in multi-instance deployments, continuously failing messages can still be retried by different instances in later polling cycles.
 
 Whether sending or consumption fails, the exception message is stored in the cap-exception field within the message header. You can find it in the Content field's JSON in the database table.
 
