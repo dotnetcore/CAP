@@ -61,19 +61,6 @@ namespace Sample.RabbitMQ.MySql.Controllers
             return Ok();
         }
 
-        [Route("~/ef/transaction")]
-        public async Task<IActionResult> EntityFrameworkWithTransaction([FromServices] AppDbContext dbContext)
-        {
-            using (var trans = await dbContext.Database.BeginTransactionAsync(_capBus, autoCommit: false))
-            {
-                await dbContext.Persons.AddAsync(new Person() { Name = "ef.transaction" });
-                await _capBus.PublishAsync("sample.rabbitmq.mysql", DateTime.Now);
-                await dbContext.SaveChangesAsync();
-                await trans.CommitAsync();
-            }
-            return Ok();
-        }
-
         [NonAction]
         [CapSubscribe("sample.rabbitmq.mysql")]
         public void Subscriber(DateTime time)
