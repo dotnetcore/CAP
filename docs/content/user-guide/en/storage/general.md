@@ -96,4 +96,6 @@ Thanks to the community for supporting CAP, the following is the implementation 
 
 * LiteDB ([@maikebing](https://github.com/maikebing)) ：https://github.com/maikebing/CAP.Extensions
 
-* SQLite & Oracle ([@cocosip](https://github.com/cocosip)) ：https://github.com/cocosip/CAP-Extensions   
+* SQLite & Oracle ([@cocosip](https://github.com/cocosip)) ：https://github.com/cocosip/CAP-Extensions
+
+* GaussDB ([@JASONPANZ](https://github.com/JASONPANZ)) ：https://github.com/JASONPANZ/CAP   
