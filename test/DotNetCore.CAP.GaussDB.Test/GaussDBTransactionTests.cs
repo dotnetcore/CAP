@@ -2,8 +2,6 @@ using System;
 using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
-using DotNetCore.CAP;
-using DotNetCore.CAP.GaussDB;
 using HuaweiCloud.GaussDB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,6 +17,8 @@ public class GaussDBTransactionTests
     [Fact]
     public async Task AdoTransaction_CommitPersistsInsertedRecord()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         await EnsureSchemaAsync();
         var id = DateTime.UtcNow.Ticks;
         using var provider = CreateCapProvider();
@@ -36,6 +36,8 @@ public class GaussDBTransactionTests
     [Fact]
     public async Task AdoTransaction_RollbackRemovesInsertedRecord()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         await EnsureSchemaAsync();
         var id = DateTime.UtcNow.Ticks;
         using var provider = CreateCapProvider();
@@ -52,6 +54,8 @@ public class GaussDBTransactionTests
     [Fact]
     public async Task AdoTransactionAsync_RollbackRemovesInsertedRecord()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         await EnsureSchemaAsync();
         var id = DateTime.UtcNow.Ticks;
         using var provider = CreateCapProvider();
@@ -68,6 +72,8 @@ public class GaussDBTransactionTests
     [Fact]
     public async Task EntityFrameworkTransaction_RollbackRemovesInsertedRecord()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         await EnsureSchemaAsync();
         var id = DateTime.UtcNow.Ticks;
         var services = new ServiceCollection();
@@ -91,6 +97,8 @@ public class GaussDBTransactionTests
     [Fact]
     public async Task EntityFrameworkTransactionAsync_CommitPersistsInsertedRecord()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         await EnsureSchemaAsync();
         var id = DateTime.UtcNow.Ticks;
         var services = new ServiceCollection();

@@ -10,6 +10,10 @@ internal static class ConnectionUtil
 
     public const string DefaultDatabase = "DB_PG";
 
+    public static bool IsConnectionAvailable =>
+        !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(ConnectionStringEnvironmentVariable))
+        || !string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable(ConnectionStringTemplateEnvironmentVariable));
+
     public static string GetConnectionString(string databaseName = DefaultDatabase)
     {
         var connectionString = Environment.GetEnvironmentVariable(ConnectionStringEnvironmentVariable)

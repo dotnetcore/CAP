@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Monitoring;
@@ -14,6 +13,8 @@ public class GaussDBMonitoringApiTests
     [Fact]
     public async Task MonitoringApi_CoversStatisticsPagedDetailCountsAndHourlyTimeline()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         var (storage, initializer) = await GaussDBTestSupport.CreateStorageAsync();
         var api = storage.GetMonitoringApi();
         var publishedId = GaussDBTestSupport.NextId();

@@ -11,6 +11,8 @@ public class GaussDBCompatibilityTests
     [Fact]
     public async Task ServerMeetsRequiredCompatibilityVersions()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         await using var connection = ConnectionUtil.CreateConnection();
         await connection.OpenAsync();
 

@@ -17,6 +17,8 @@ public class GaussDBStorageInitializerTests
     [InlineData("DB_PG", 3)]
     public async Task InitializeAsync_CreatesCapObjectsAndDetectsCompatibilityMode(string databaseName, int expectedMode)
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         var initializer = new GaussDBStorageInitializer(
             NullLogger<GaussDBStorageInitializer>.Instance,
             Options.Create(new GaussDBOptions { ConnectionString = ConnectionUtil.GetConnectionString(databaseName) }),
@@ -30,6 +32,8 @@ public class GaussDBStorageInitializerTests
     [Fact]
     public async Task InitializeAsync_ThrowsWhenDatabaseDoesNotExist()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         var initializer = new GaussDBStorageInitializer(
             NullLogger<GaussDBStorageInitializer>.Instance,
             Options.Create(new GaussDBOptions

@@ -1,6 +1,4 @@
-using System;
 using System.Reflection;
-using DotNetCore.CAP;
 using HuaweiCloud.GaussDB;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;

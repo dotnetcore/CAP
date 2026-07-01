@@ -1,10 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using DotNetCore.CAP.Internal;
-using DotNetCore.CAP.Messages;
 using DotNetCore.CAP.Persistence;
 using Xunit;
 
@@ -16,6 +14,8 @@ public class GaussDBDataStorageTests
     [Fact]
     public async Task PublishedMessage_CoversStoreRetryDelayScheduleStateAndDelete()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         var (storage, initializer) = await GaussDBTestSupport.CreateStorageAsync();
         var id = GaussDBTestSupport.NextId();
         var message = GaussDBTestSupport.CreateMessage(id);
@@ -46,6 +46,8 @@ public class GaussDBDataStorageTests
     [Fact]
     public async Task ReceivedMessage_CoversStoreExceptionRetryStateDeleteAndExpiryCleanup()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         var (storage, initializer) = await GaussDBTestSupport.CreateStorageAsync();
         var id = GaussDBTestSupport.NextId();
         var message = await storage.StoreReceivedMessageAsync(
@@ -71,6 +73,8 @@ public class GaussDBDataStorageTests
     [Fact]
     public async Task StorageLock_IsExclusiveUntilReleased()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         var (storage, _) = await GaussDBTestSupport.CreateStorageAsync();
         const string key = "publish_retry_v1";
 
@@ -85,6 +89,8 @@ public class GaussDBDataStorageTests
     [Fact]
     public async Task GetMonitoringApi_ReturnsGaussDBMonitoringApi()
     {
+        if (!ConnectionUtil.IsConnectionAvailable) return;
+
         var (storage, _) = await GaussDBTestSupport.CreateStorageAsync();
 
         Assert.IsType<GaussDBMonitoringApi>(storage.GetMonitoringApi());
