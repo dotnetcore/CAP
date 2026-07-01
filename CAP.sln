@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.5.11716.220 stable
+VisualStudioVersion = 18.5.11716.220
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9B2AE124-6636-4DE9-83A3-70360DABD0C4}"
 EndProject
@@ -85,6 +85,10 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Dashboard.Jwt", "samples\Sample.Dashboard.Jwt\Sample.Dashboard.Jwt.csproj", "{F739A8C9-565F-4B1D-8F91-FEE056C03FBD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.Dashboard.K8s", "src\DotNetCore.CAP.Dashboard.K8s\DotNetCore.CAP.Dashboard.K8s.csproj", "{48655118-CEC3-4BD9-B510-64C1195C2729}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.GaussDB", "src\DotNetCore.CAP.GaussDB\DotNetCore.CAP.GaussDB.csproj", "{E10DE621-AF7A-3B28-06EE-479CD79D5785}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.GaussDB.Test", "test\DotNetCore.CAP.GaussDB.Test\DotNetCore.CAP.GaussDB.Test.csproj", "{DF91961D-0922-E5E2-B74B-0A9E75E93A35}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -212,6 +216,14 @@ Global
 		{48655118-CEC3-4BD9-B510-64C1195C2729}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48655118-CEC3-4BD9-B510-64C1195C2729}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48655118-CEC3-4BD9-B510-64C1195C2729}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E10DE621-AF7A-3B28-06EE-479CD79D5785}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E10DE621-AF7A-3B28-06EE-479CD79D5785}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E10DE621-AF7A-3B28-06EE-479CD79D5785}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E10DE621-AF7A-3B28-06EE-479CD79D5785}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DF91961D-0922-E5E2-B74B-0A9E75E93A35}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DF91961D-0922-E5E2-B74B-0A9E75E93A35}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DF91961D-0922-E5E2-B74B-0A9E75E93A35}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DF91961D-0922-E5E2-B74B-0A9E75E93A35}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -247,6 +259,8 @@ Global
 		{D9681967-DAC2-43EF-999F-3727F1046711} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 		{F739A8C9-565F-4B1D-8F91-FEE056C03FBD} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 		{48655118-CEC3-4BD9-B510-64C1195C2729} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{E10DE621-AF7A-3B28-06EE-479CD79D5785} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{DF91961D-0922-E5E2-B74B-0A9E75E93A35} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E70565D-94CF-40B4-BFE1-AC18D5F736AB}
