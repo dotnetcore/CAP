@@ -4,6 +4,7 @@ environment:
   BUILDING_ON_PLATFORM: win
   BuildEnvironment: appveyor
   Cap_MySql_ConnectionString: Server=localhost;Database=cap_test;Uid=root;Pwd=Password12!;Allow User Variables=True;SslMode=Required
+  Cap_GaussDB_ConnectionStringTemplate: host=localhost;port=25432;uid=gaussdb;pwd=openGauss@123;sslmode=Disable;timezone=Asia/Shanghai
   DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
   DOTNET_NOLOGO: true
 install:
@@ -14,6 +15,29 @@ init:
   - ps: Start-Service MySQL80
 before_build:
   - ps: |
+      # 1. 启动 openGauss 容器
+      docker run -d --name opengauss `
+        --privileged=true `
+        -e GS_PASSWORD=openGauss@123 `
+        -p 25432:5432 `
+        opengauss/opengauss:5.0.1
+
+      # 2. 等待数据库就绪
+      Write-Host "Waiting for openGauss to be ready..."
+      $retry = 0
+      do {
+        Start-Sleep -Seconds 5
+        $retry++
+        docker exec opengauss gsql -d postgres -U gaussdb -W 'openGauss@123' -c "SELECT 1;" 2>$null
+      } while ($LASTEXITCODE -ne 0 -and $retry -lt 30)
+
+      # 3. 创建测试数据库（4 种兼容模式）
+      docker exec opengauss gsql -d postgres -U gaussdb -W 'openGauss@123' -c "CREATE DATABASE DB_A WITH DBCOMPATIBILITY='A';"
+      docker exec opengauss gsql -d postgres -U gaussdb -W 'openGauss@123' -c "CREATE DATABASE DB_B WITH DBCOMPATIBILITY='B';"
+      docker exec opengauss gsql -d postgres -U gaussdb -W 'openGauss@123' -c "CREATE DATABASE DB_C WITH DBCOMPATIBILITY='C';"
+      docker exec opengauss gsql -d postgres -U gaussdb -W 'openGauss@123' -c "CREATE DATABASE DB_PG WITH DBCOMPATIBILITY='PG';"
+
+       # 4. 安装 Flubu
       dotnet tool install --global FlubuCore.Tool --version 8.0.0
       # optional: expose tools path for this step if needed later
       $toolPath = Join-Path $env:USERPROFILE ".dotnet\tools"
