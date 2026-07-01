@@ -95,3 +95,5 @@ CallbackName |	回调的订阅者名称 | string
 * SmartSql ([@xiangxiren](https://github.com/xiangxiren)) ：https://github.com/xiangxiren/SmartSql.CAP
 
 * DM（达梦数据库）([@findersky](https://github.com/findersky)) ：https://github.com/findersky/CAP
+
+* GaussDB ([@JASONPANZ](https://github.com/JASONPANZ)) ：https://github.com/JASONPANZ/CAP
