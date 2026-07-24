@@ -24,7 +24,7 @@ public class ConnectionFactory : IConnectionFactory, IAsyncDisposable
         _options = options.Value;
         _topicProducers = new ConcurrentDictionary<string, Task<IProducer<byte[]>>>();
 
-        logger.LogDebug("CAP Pulsar configuration: {0}", JsonConvert.SerializeObject(_options, Formatting.Indented));
+        logger.LogDebug("CAP Pulsar configuration: {capPulsarConfig}", JsonConvert.SerializeObject(_options, Formatting.Indented));
     }
 
     public async ValueTask DisposeAsync()

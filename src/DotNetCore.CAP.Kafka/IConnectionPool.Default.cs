@@ -24,7 +24,7 @@ public class ConnectionPool : IConnectionPool, IDisposable
         _producerPool = new ConcurrentQueue<IProducer<string, byte[]>>();
         _maxSize = _options.ConnectionPoolSize;
 
-        logger.LogDebug("CAP Kafka servers: {0}", _options.Servers);
+        logger.LogDebug("CAP Kafka servers: {kafkaServers}", _options.Servers);
     }
 
     public string ServersAddress => _options.Servers;

@@ -263,7 +263,7 @@ internal class ConsumerRegister : IConsumerRegister
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "An exception occurred when process received message. Message:'{0}'.",
+                _logger.LogError(e, "An exception occurred when process received message. Message:'{transportMessage}'.",
                     transportMessage);
 
                 await client.RejectAsync(sender);
