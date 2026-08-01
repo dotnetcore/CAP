@@ -1,20 +1,19 @@
-﻿using Dapper;
+using Dapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using MySqlConnector;
-using Sample.RabbitMQ.MySql;
+using Npgsql;
+using Sample.RabbitMQ.PostgreSql;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddCap(x =>
 {
-    x.UseMySql(opt =>
+    x.UsePostgreSql(opt =>
     {
         opt.ConnectionString = AppDbContext.ConnectionString;
-        // Custom table names: MySQL has no real schema object, so the prefix
-        // is simply concatenated into the table name, e.g. `shop.Orders`.
-        opt.TableNamePrefix = "shop";
+        // Custom table names: PostgreSql uses a real schema object.
+        opt.Schema = "shop";
         opt.PublishedTableName = "Orders";
         opt.ReceivedTableName = "OrderEvents";
         opt.LockTableName = "OrderLocks";
@@ -27,9 +26,9 @@ builder.Services.AddControllers();
 
 var app = builder.Build();
 
-using (var connection = new MySqlConnection(AppDbContext.ConnectionString))
+using (var connection = new NpgsqlConnection(AppDbContext.ConnectionString))
 {
-    connection.Execute("CREATE TABLE IF NOT EXISTS test (id INT AUTO_INCREMENT PRIMARY KEY, name VARCHAR(255) NOT NULL);");
+    connection.Execute("CREATE TABLE IF NOT EXISTS test (id SERIAL PRIMARY KEY, name TEXT NOT NULL);");
 }
 
 // Configure the HTTP request pipeline

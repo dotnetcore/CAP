@@ -7,8 +7,7 @@ using Sample.RabbitMQ.SqlServer;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure services
-//docker run -e "ACCEPT_EULA=Y" -e "MSSQL_SA_PASSWORD=yourStrong(!)Password" -e "MSSQL_PID=Evaluation" -p 1433:1433 \
-// --name sqlpreview --hostname sqlpreview -d mcr.microsoft.com/mssql/server:2022-preview-ubuntu-22.04
+// docker-compose -f test/docker-compose.yml up -d sqlserver
 builder.Services.AddDbContext<AppDbContext>();
 
 //builder.Services
@@ -33,7 +32,14 @@ await using (var connection = new SqlConnection(AppDbContext.ConnectionString))
 
 builder.Services.AddCap(x =>
 {
-    x.UseEntityFramework<AppDbContext>();
+    x.UseEntityFramework<AppDbContext>(opt =>
+    {
+        // Custom table names: SqlServer uses a real schema object.
+        opt.Schema = "shop";
+        opt.PublishedTableName = "Orders";
+        opt.ReceivedTableName = "OrderEvents";
+        opt.LockTableName = "OrderLocks";
+    });
     x.UseRabbitMQ("127.0.0.1");
     x.UseDashboard();
 
