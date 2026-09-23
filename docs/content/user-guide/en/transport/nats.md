@@ -39,13 +39,14 @@ NATS configuration parameters provided directly by the CAP:
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-Options | NATS client configuration | Options | Options
-Servers | Server url/urls used to connect to the NATs server. | string | NULL
-ConnectionPoolSize  | number of connections pool | uint | 10
-DeliverPolicy | The point in the stream to receive messages from (⚠️ Removed from version 8.1.0, use `ConsumerOptions` instead.) | enum | DeliverPolicy.New
+Options | Optional NATS.Client connection configuration; if omitted, the client library defaults are used. | `NATS.Client.Options` | Client defaults
+Servers | Server URL or URLs. | string | `nats://127.0.0.1:4222`
+ConnectionPoolSize  | Number of pooled connections. | int | 10
+EnableSubscriberClientStreamAndSubjectCreation | Allow consumer clients to create streams and subjects. | bool | true
 StreamOptions | 🆕 Stream configuration |  Action | NULL
 ConsumerOptions | 🆕 Consumer configuration | Action | NULL
 CustomHeadersBuilder | Custom subscribe headers |  See the blow | NULL
+NormalizeStreamName | Converts a topic name to its stream name. | `Func<string, string>` | First segment before `.`
 
 #### NATS Configuration Options
 
@@ -57,7 +58,8 @@ services.AddCap(capOptions =>
     capOptions.UseNATS(natsOptions=>
     {
         // NATS options.
-        natsOptions.Options.Url="";
+        natsOptions.Options = NATS.Client.ConnectionFactory.GetDefaultOptions();
+        natsOptions.Options.Url = "nats://127.0.0.1:4222";
     });
 });
 ```

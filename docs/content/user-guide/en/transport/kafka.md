@@ -41,7 +41,7 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 Servers | Broker server address | string | 
 MainConfig | librdkafka configuration parameters | Dictionary<string, string> | See below
 ConnectionPoolSize | connection pool size | int | 10
-CustomHeadersBuilder | Custom subscribe headers |  Func<> |  N/A
+CustomHeadersBuilder | Add broker metadata to the CAP headers during consumption | `Func<ConsumeResult<string, byte[]>, IServiceProvider, List<KeyValuePair<string, string>>>?` | null
 RetriableErrorCodes | Retriable error codes when ConsumeException  | IList<ErrorCode> |  See code
 TopicOptions | The configuraiton of NumPartitions and ReplicationFactor | KafkaTopicOptions |  -1
 

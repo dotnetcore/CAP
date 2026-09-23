@@ -49,7 +49,7 @@ UserName | Broker user name | string | guest
 Password | Broker password | string | guest
 VirtualHost | Broker virtual host | string | /
 Port | Port | int | -1
-ExchangeName | Default exchange name | string | cap.default.topic
+ExchangeName | Default exchange name | string | cap.default.router
 QueueArguments  | Extra queue `x-arguments` | QueueArgumentsOptions  |  N/A
 QueueOptions  | Change Options for created queue | QueueRabbitOptions  |  { Durable=true, Exclusive=false, AutoDelete=false }
 ConnectionFactoryOptions  |  RabbitMQClient native connection options | ConnectionFactory | N/A

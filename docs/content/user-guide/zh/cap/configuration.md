@@ -48,7 +48,7 @@ services.AddCap(config =>
 
 > string, 可选项
 
-通过指定 `Group` 参数来使订阅者位于单独的消费者组中，消费者组的概念类似于 Kafka 中的消费者组。如果不指定此参数将使用当前程序集名称(`DefaultGroupName`)作为默认值。
+通过指定 `Group` 参数来使订阅者位于单独的消费者组中，消费者组的概念类似于 Kafka 中的消费者组。如果不指定此参数将使用 `DefaultGroupName`，其默认值为 `cap.queue.` 加上小写的入口程序集名称。
 
 相同 `Name` 的订阅者设置为**不同的**组时，他们都会收到消息。相反如果相同 `Name` 的订阅者设置**相同的**组时，只有一个会收到消息。
 
@@ -190,23 +190,6 @@ Group 在不同的 Broker 有不同的对应项。
 > 默认值：15*24*3600 秒（15天后）
 
 失败消息的过期时间（秒）。 当消息发送或者消费失败时候，在时间达到 `FailedMessageExpiredAfter` 秒时候将会从 Persistent 中删除，你可以通过指定此值来设置过期的时间。
-
-#### [已移除] UseDispatchingPerGroup 
-
-> 默认值: false
-
-> 版本 8.2.0 中移除，已是默认行为。
-
-默认情况下，CAP会将所有消费者组的消息都先放置到内存同一个Channel中，然后线性处理。
-如果设置为 true，则每个消费者组都会根据 `ConsumerThreadCount` 设置的值创建单独的线程进行处理。
-
-在同时配合使用 `EnableConsumerPrefetch` 时，请参考 issue [#1399](https://github.com/dotnetcore/CAP/issues/1399) 以清晰其预期行为。
-
-#### [已过时] EnableConsumerPrefetch
-
-> 默认值: false， 在 7.0 版本之前默认行为 true
-
- 该配置项已被重命名为 `EnableSubscriberParallelExecute`，请使用新选项。
 
 #### EnableSubscriberParallelExecute
 

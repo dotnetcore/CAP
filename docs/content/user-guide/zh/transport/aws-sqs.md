@@ -37,7 +37,7 @@ public void TestBar(DateTime value)
 
 ### SQS
 
-针对每个消费者组，CAP 将创建一个与之对应的 SQS 队列，队列的名称为配置项中 DefaultGroup 的名称，类型为 Standard Queue 。
+针对每个消费者组，CAP 会创建一个与之对应的 SQS 队列。队列名称基于订阅者组（显式设置的 `Group` 或 CAP 的 `DefaultGroupName`），队列类型为 Standard。
 
 该 SQS 队列将订阅 SNS 中的 Topic ，如下图：
 
@@ -57,7 +57,7 @@ Install-Package DotNetCore.CAP.AmazonSQS
 
 ```
 
-然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于 RabbitMQ 的配置项。
+然后，你可以在 `Startup.cs` 的 `ConfigureServices` 方法中添加基于 Amazon SQS 的配置项。
 
 ```csharp
 
@@ -85,6 +85,8 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 Region | AWS 所处的区域 | Amazon.RegionEndpoint | 
 Credentials | AWS AK SK信息 | Amazon.Runtime.AWSCredentials | 
+SNSServiceUrl | 本地开发时覆盖 SNS 服务端点，例如连接 LocalStack。 | string | null
+SQSServiceUrl | 本地开发时覆盖 SQS 服务端点，例如连接 LocalStack。 | string | null
 
 如果你的项目运行在 AWS EC2 中，则不需要设置 Credentials，直接对 EC2 应用 IAM 策略即可。
 

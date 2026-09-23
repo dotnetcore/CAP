@@ -36,7 +36,7 @@ After CAP startups, you will see in SNS management console:
 
 ### SQS
 
-For each consumer group, CAP will create a corresponding SQS queue. The queue name is the value of `DefaultGroup` in the configuration options, and the queue type is Standard.
+For each consumer group, CAP creates a corresponding SQS queue. The queue name is based on the subscriber group (`Group` or CAP's `DefaultGroupName`), and the queue type is Standard.
 
 The SQS queue will subscribe to the SNS topic as shown below:
 
@@ -84,6 +84,8 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 Region | AWS Region | Amazon.RegionEndpoint | 
 Credentials | AWS AK SK Information | Amazon.Runtime.AWSCredentials | 
+SNSServiceUrl | Optional SNS endpoint override for local development, such as LocalStack. | string | null
+SQSServiceUrl | Optional SQS endpoint override for local development, such as LocalStack. | string | null
 
 If your application runs on AWS EC2, you don't need to set credentials. Instead, you can directly apply an IAM policy to the EC2 instance.
 

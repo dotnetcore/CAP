@@ -18,7 +18,7 @@ You must configure at least one transport and one storage. If you want to get st
 ```C#
 services.AddCap(capOptions => 
 {
-     capOptions.UseInMemoryQueue();  // Requires the Savorboard.CAP.InMemoryMessageQueue NuGet package.
+     capOptions.UseInMemoryMessageQueue();  // Requires the Savorboard.CAP.InMemoryMessageQueue NuGet package.
      capOptions.UseInMemoryStorage();
 });
 ```
@@ -49,7 +49,7 @@ This name corresponds to different items in different message brokers:
 
 > string, optional
 
-Specify the `Group` parameter to place subscribers within a separate consumer group, a concept similar to consumer groups in Kafka. If this parameter is not specified, the current assembly name (`DefaultGroupName`) is used as the default.
+Specify the `Group` parameter to place subscribers within a separate consumer group, a concept similar to consumer groups in Kafka. If this parameter is not specified, CAP uses `DefaultGroupName`, which defaults to `cap.queue.` followed by the entry assembly name in lowercase.
 
 Subscribers with the same `Name` but set to **different** groups will all receive messages. Conversely, if subscribers with the same `Name` are set to the **same** group, only one will receive the message.
 
@@ -190,20 +190,6 @@ Expiration time (in seconds) for successfully sent or consumed messages. When a 
 > Default: 15*24*3600 sec (15 days)
 
 Expiration time (in seconds) for failed messages. When a message fails to send or consume, it will be removed from the database after `FailedMessageExpiredAfter` seconds. You can set the expiration time by modifying this value.
-
-#### [Removed] UseDispatchingPerGroup 
-
-> Default: false
-
-> Removed in version 8.2, now default behavior
-
-If multiple consumers are within the same group, each consumer group pushes received messages to its own dispatching pipeline channel. Each channel has a thread count set to the `ConsumerThreadCount` value.
-
-#### [Obsolete] EnableConsumerPrefetch
-
-> Default: false (Before version 7.0, the default was true)
-
-This option has been renamed to `EnableSubscriberParallelExecute`. Please use the new option instead.
 
 #### EnableSubscriberParallelExecute
 

@@ -44,6 +44,7 @@ CAP 直接对外提供的 Azure Service Bus 配置参数如下：
 | 名称                                 | 描述                                                                                                                                       | 类型                                                                   | 默认值                           |
 | :----------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- | :------------------------------- |
 | ConnectionString                     | 终端地址                                                                                                                                   | string                                                                 |                                  |
+| AutoProvision                        | 自动创建主题、订阅和规则。当 Service Bus 管理 API 不可用时（例如使用模拟器）可关闭此选项。                                                     | bool                                                                   | true                             |
 | TopicPath                            | 主题实体路径                                                                                                                               | string                                                                 | cap                              |
 | EnableSessions                       | 启用 [Service Bus 会话](https://docs.microsoft.com/zh-cn/azure/service-bus-messaging/message-sessions)                                     | bool                                                                   | false                            |
 | MaxConcurrentSessions                | 处理器可处理的最大并发会话数。当 EnableSessions 为 false 时不适用。                                                                        | int                                                                    | 8                                |
@@ -53,9 +54,10 @@ CAP 直接对外提供的 Azure Service Bus 配置参数如下：
 | SubscriptionDefaultMessageTimeToLive | 订阅的默认消息生存时间值。这是消息到期前的持续时间。                                                                                       | TimeSpan                                                               | TimeSpan.MaxValue                |
 | SubscriptionMaxDeliveryCount         | 消息在被传递给订阅后进入死信队列之前的最大传递次数。                                                                                       | int                                                                    | 10                               |
 | MaxAutoLockRenewalDuration           | 锁自动续订的最长持续时间。该值应大于最长的消息锁定持续时间。                                                                               | TimeSpan                                                               | 5 分钟                           |
-| ManagementTokenProvider              | 令牌提供程序                                                                                                                               | ITokenProvider                                                         | null                             |
+| TokenCredential                      | 用于身份验证的 Azure 凭据。使用此选项时还需设置 `Namespace`。                                                                                | TokenCredential                                                        | null                             |
+| MaxConcurrentCalls                   | 消息处理程序调用的最大并发数。                                                                                                               | int                                                                    | 1                                |
 | AutoCompleteMessages                 | 获取一个值，该值指示在消息处理程序完成处理后，处理器是否应自动完成消息。                                                                   | bool                                                                   | false                            |
-| CustomHeadersBuilder                 | 为来自异构系统的传入消息添加自定义和/或强制性标头。                                                                                        | `Func<Message, IServiceProvider, List<KeyValuePair<string, string>>>?` | null                             |
+| CustomHeadersBuilder                 | 为来自异构系统的传入消息添加自定义和/或强制性标头。                                                                                        | `Func<ServiceBusReceivedMessage, IServiceProvider, List<KeyValuePair<string, string>>>?` | null                 |
 | Namespace                            | Servicebus 的命名空间，在使用 TokenCredential 属性时需要设置。                                                                             | string                                                                 | null                             |
 | DefaultCorrelationHeaders            | 将附加的关联属性添加到所有 [关联筛选器](https://learn.microsoft.com/zh-cn/azure/service-bus-messaging/topic-filters#correlation-filters)。 | IDictionary<string, string>                                            | Dictionary<string, string>.Empty |
 | SQLFilters                           | 在主题订阅上按名称和表达式定义的自定义 SQL 筛选器。                                                                                        | List<KeyValuePair<string, string>>                                     | null                             |
@@ -90,7 +92,7 @@ c.UseAzureServiceBus(asb =>
     asb.CustomHeadersBuilder = (msg, sp) =>
     [
         new(DotNetCore.CAP.Messages.Headers.MessageId, sp.GetRequiredService<ISnowflakeId>().NextId().ToString()),
-        new(DotNetCore.CAP.Messages.Headers.MessageName, msg.RoutingKey)
+        new(DotNetCore.CAP.Messages.Headers.MessageName, msg.Subject)
     ];
 });
 ```

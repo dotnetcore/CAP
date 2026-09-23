@@ -41,8 +41,8 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
 Servers | Broker 地址 | string | 
 MainConfig | librdkafka 的配置参数 | Dictionary<string, string> | 见下
-ConnectionPoolSize | 用户名 | int | 10
-CustomHeadersBuilder | 设置自定义头 | Function | 见下
+ConnectionPoolSize | Producer 连接池大小 | int | 10
+CustomHeadersBuilder | 消费时将 Broker 元数据添加到 CAP 标头 | `Func<ConsumeResult<string, byte[]>, IServiceProvider, List<KeyValuePair<string, string>>>?` | null
 RetriableErrorCodes |  ConsumeException 异常时的重试错误码集合  | IList<ErrorCode> |  见代码
 TopicOptions | 配置 NumPartitions 和 ReplicationFactor | KafkaTopicOptions |  -1
 

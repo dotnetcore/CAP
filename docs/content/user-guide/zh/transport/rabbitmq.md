@@ -5,8 +5,7 @@ RabbitMQ是实现了高级消息队列协议（AMQP）的开源消息代理软�
 CAP 支持使用 RabbitMQ 作为消息传输器。
 
 !!! warning "注意事项" 
-    在使用RabbitMQ时，集成了CAP的消费者应用在启动过一次后会自动创建持久化的队列，后续消息会正常传递到队列中并消费。
-    如果你从来没有启动过消费者，则队列不会被自动创建，此时如果先行发布消息，在此时间段的消息 RabbitMQ Exchange 收到后会直接丢弃。
+    CAP 在消费者启动并注册订阅时声明队列和绑定。若发布时对应的队列和绑定尚未创建，RabbitMQ 不会为该队列保留消息。生产环境建议在开始发布前启动消费者，或自行预先创建所需队列和绑定。
 
 ## 配置
 
@@ -49,7 +48,7 @@ UserName | 用户名 | string | guest
 Password | 密码 | string | guest
 VirtualHost | 虚拟主机 | string | /
 Port | 端口号 | int | -1
-ExchangeName | CAP默认Exchange名称 | string | cap.default.topic
+ExchangeName | CAP默认Exchange名称 | string | cap.default.router
 QueueArguments  | 队列额外参数 x-arguments | QueueArgumentsOptions  |  N/A
 QueueOptions  | 更改已创建队列的选项 | QueueRabbitOptions  |  { Durable=true, Exclusive=false, AutoDelete=false }
 ConnectionFactoryOptions  |  RabbitMQClient原生参数 | ConnectionFactory | N/A

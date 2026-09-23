@@ -40,13 +40,14 @@ CAP 直接提供的关于 NATS 的配置参数：
 
 NAME | DESCRIPTION | TYPE | DEFAULT
 :---|:---|---|:---
-Options | NATS 客户端配置 | Options | Options
-Servers | 服务器Urls地址 | string | NULL
-ConnectionPoolSize  | 连接池数量 | uint | 10
-DeliverPolicy | 消费消息的策略点（⚠️在8.1.0版本移除，使用`ConsumerOptions`替代。） | enum | DeliverPolicy.New
+Options | 可选的 NATS.Client 连接配置；未设置时使用客户端库默认值。 | `NATS.Client.Options` | 客户端默认值
+Servers | NATS 服务端 URL | string | `nats://127.0.0.1:4222`
+ConnectionPoolSize  | 连接池数量 | int | 10
+EnableSubscriberClientStreamAndSubjectCreation | 是否允许消费者客户端创建 Stream 和 Subject | bool | true
 StreamOptions | 🆕 Stream 配置项 |  Action | NULL
 ConsumerOptions | 🆕 Consumer 配置项 | Action | NULL
 CustomHeadersBuilder | 订阅者自定义头信息 |  见下文 |  N/A
+NormalizeStreamName | 将主题名称转换为 Stream 名称 | `Func<string, string>` | 取第一个 `.` 之前的部分
 
 #### NATS ConfigurationOptions
 
@@ -58,7 +59,8 @@ services.AddCap(capOptions =>
     capOptions.UseNATS(natsOptions=>
     {
         // NATS options.
-        natsOptions.Options.Url="";
+        natsOptions.Options = NATS.Client.ConnectionFactory.GetDefaultOptions();
+        natsOptions.Options.Url = "nats://127.0.0.1:4222";
     });
 });
 ```
