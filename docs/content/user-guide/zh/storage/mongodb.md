@@ -42,7 +42,8 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 DatabaseName | 数据库名称 | string | cap 
 DatabaseConnection | 数据库连接字符串 | string | mongodb://localhost:27017
 ReceivedCollection | 接收消息集合名称 | string | cap.received
-PublishedCollection | 发送消息集合名称 | string | cap.published
+PublishedCollection | 已发布消息集合名称 | string | cap.published
+LockCollection | 锁集合名称，启用存储锁时使用 | string | cap.lock
 
 ## 使用事务发布消息
 

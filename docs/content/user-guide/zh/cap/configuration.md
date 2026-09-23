@@ -44,6 +44,10 @@ services.AddCap(config =>
 - 在 NATS 中对应 Subject。
 - 在 RedisStrems 中对应 Stream.
 
+CAP 使用 `*` 匹配一个或多个 ASCII 字母或数字，使用 `#` 匹配一个或多个 ASCII 字母、数字或点号。比如 `orders.*` 可匹配 `orders.created`，`orders.#` 还可匹配 `orders.created.eu`。匹配时要求整个主题名符合模式。
+
+可以在类级别设置公共主题前缀，并将方法级主题标记为部分主题以进行拼接。例如，类上的 `[CapSubscribe("orders")]` 和方法上的 `[CapSubscribe("created", isPartial: true)]` 会订阅 `orders.created`。
+
 ###  Group
 
 > string, 可选项

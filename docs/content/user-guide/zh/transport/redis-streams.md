@@ -39,6 +39,7 @@ NAME | DESCRIPTION | TYPE | DEFAULT
 Configuration | redis连接配置 (StackExchange.Redis) | ConfigurationOptions | ConfigurationOptions
 StreamEntriesCount | 读取时从 stream 返回的条目数  | uint | 10
 ConnectionPoolSize  | 连接池数  | uint | 10
+OnConsumeError | 消费消息发生错误时调用的回调函数。 | `Func<ConsumeErrorContext, Task>` | null
 
 #### Redis Configuration Options
 

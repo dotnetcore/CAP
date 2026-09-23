@@ -23,6 +23,12 @@ By default, you can access the Dashboard at the URL `http://localhost:xxx/cap`.
 
 ### Dashboard Configuration
 
+* **PathBase**
+
+> Default: empty
+
+Set the base path used by the Dashboard frontend when it is served behind a reverse proxy under a path prefix.
+
 * **PathMatch**
 
 > Default: '/cap'

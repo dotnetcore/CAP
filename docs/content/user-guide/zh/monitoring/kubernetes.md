@@ -24,7 +24,11 @@ services.AddCap(x =>
 
 * ShowOnlyExplicitVisibleNodes
 
-> 默认值：false
+> 默认值：true
+
+默认值为 `true`，因此只有带有 `dotnetcore.cap.visibility: show` 标签的服务会显示。设为 `false` 后默认列出服务（仍可使用标签显式显示或隐藏服务）。
+
+`K8SClientConfig` 默认使用 Kubernetes 客户端库 `BuildDefaultConfig()` 返回的配置。需要连接到其他 Kubernetes 集群时，可以在此处指定。
 
 
 ```cs

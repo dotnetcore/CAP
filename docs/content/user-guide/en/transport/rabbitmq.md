@@ -5,9 +5,7 @@ RabbitMQ is an open-source message broker software that implements the Advanced 
 RabbitMQ can be used in CAP as a message transporter. 
 
 !!! warning "Important Notes"
-    When using RabbitMQ, the consumer integrated with the CAP application will automatically create a persistent queue after it starts for the first time. Subsequent messages will be normally transmitted to the queue and consumed.
-    
-    However, if you have never started the consumer, the queue will not be created. In this case, if you publish messages first, the RabbitMQ exchange will discard the messages until the consumer is started and the queue is created.
+    CAP declares queues and bindings when a consumer starts and registers its subscriptions. If a message is published before its queue and binding exist, RabbitMQ does not retain it for that queue. In production, start consumers before publishing or provision the required queues and bindings in advance.
 
 ## Configuration
 
@@ -56,6 +54,14 @@ ConnectionFactoryOptions  |  RabbitMQClient native connection options | Connecti
 CustomHeadersBuilder  | Custom subscribe headers |  See the blow |  N/A
 PublishConfirms | Enable [publish confirms](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
 BasicQosOptions | Specify [Qos](https://www.rabbitmq.com/consumer-prefetch.html) of message prefetch | BasicQos | N/A
+
+`QueueArguments` supports these optional queue declaration arguments:
+
+| Property | Description | Default |
+| :--- | :--- | :--- |
+| `QueueType` | Queue type, such as `classic` or `quorum` (`x-queue-type`). | Not set |
+| `QueueMode` | Queue mode (`x-queue-mode`). | Not set |
+| `MessageTTL` | Message time-to-live in milliseconds (`x-message-ttl`). | 864000000 (10 days) |
 
 #### ConnectionFactory Option
 

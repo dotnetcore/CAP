@@ -62,6 +62,21 @@ CAP 直接对外提供的 Azure Service Bus 配置参数如下：
 | DefaultCorrelationHeaders            | 将附加的关联属性添加到所有 [关联筛选器](https://learn.microsoft.com/zh-cn/azure/service-bus-messaging/topic-filters#correlation-filters)。 | IDictionary<string, string>                                            | Dictionary<string, string>.Empty |
 | SQLFilters                           | 在主题订阅上按名称和表达式定义的自定义 SQL 筛选器。                                                                                        | List<KeyValuePair<string, string>>                                     | null                             |
 
+#### 自定义 Producer
+
+使用 `ConfigureCustomProducer<T>` 可以将消息名发布到 `TopicPath` 以外的主题。泛型类型名称必须与 `Publish` 时传入的消息名称一致。启用 `AutoProvision` 时，`WithSubscription()` 会让 CAP 为该主题创建订阅。`WithSessions()` 会为此 Producer 发布的消息添加 Session ID；如果提供了 `AzureServiceBusHeaders.SessionId` 标头就使用其值，否则使用 CAP 消息 ID。若要从启用了 Session 的订阅中消费，还需启用全局 `EnableSessions` 选项。
+
+```csharp
+services.AddCap(cap => cap.UseAzureServiceBus(asb =>
+{
+    asb.ConnectionString = "...";
+    asb.ConfigureCustomProducer<OrderCreated>(producer =>
+        producer.UseTopic("orders").WithSubscription());
+}));
+
+await capPublisher.PublishAsync(nameof(OrderCreated), new OrderCreated(...));
+```
+
 #### Sessions
 
 当使用 `EnableSessions` 选项启用 sessions 后，每个发送的消息都会具有一个 session id。 要控制 seesion id 你可以在发送消息时在消息头中使用 `AzureServiceBusHeaders.SessionId` 携带它。

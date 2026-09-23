@@ -10,7 +10,7 @@ CAP's Dashboard uses Consul for service discovery to retrieve data from other no
 
 Click the `Switch` button to switch to a different node. CAP will use a proxy to retrieve the data from that node.
 
-The following is a configuration example that you need to configure on each node:
+The following is a configuration example that you need to configure on each node. `ConsulDiscoveryOptions` also supports `Scheme` (default `http`) for the node health-check URL and `CustomTags` to add tags to the service registration. Use `https` when the node's health endpoint is served over HTTPS:
 
 ```C#
 services.AddCap(x =>

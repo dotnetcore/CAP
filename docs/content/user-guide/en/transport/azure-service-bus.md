@@ -60,6 +60,21 @@ The Azure Service Bus configuration options provided by CAP:
 | DefaultCorrelationHeaders            | Adds additional correlation properties to all [correlation filters](https://learn.microsoft.com/en-us/azure/service-bus-messaging/topic-filters#correlation-filters). | IDictionary<string, string>                                            | Dictionary<string, string>.Empty |
 | SQLFilters                           | Custom SQL Filters by name and expression on Topic Subscribtion                                                                                                       | List<KeyValuePair<string, string>>                                     | null                             |
 
+#### Custom producers
+
+Use `ConfigureCustomProducer<T>` to publish a message name to a topic other than `TopicPath`. The generic type name must match the name passed to `Publish`. `WithSubscription()` asks CAP to create a subscription when `AutoProvision` is enabled. `WithSessions()` adds a session ID to outgoing messages for this producer; CAP uses the `AzureServiceBusHeaders.SessionId` header when provided and otherwise uses the CAP message ID. To consume from session-enabled subscriptions, also enable the global `EnableSessions` option.
+
+```csharp
+services.AddCap(cap => cap.UseAzureServiceBus(asb =>
+{
+    asb.ConnectionString = "...";
+    asb.ConfigureCustomProducer<OrderCreated>(producer =>
+        producer.UseTopic("orders").WithSubscription());
+}));
+
+await capPublisher.PublishAsync(nameof(OrderCreated), new OrderCreated(...));
+```
+
 #### Sessions
 
 When sessions are enabled (see the `EnableSessions` option above), every message sent will have a session ID. To control the session ID, include an extra header with the name `AzureServiceBusHeaders.SessionId` when publishing events:

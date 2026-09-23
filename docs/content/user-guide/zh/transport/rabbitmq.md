@@ -56,6 +56,14 @@ CustomHeadersBuilder  | 订阅者自定义头信息 |  见下文 |  N/A
 PublishConfirms | 是否启用[发布确认](https://www.rabbitmq.com/confirms.html#publisher-confirms) | bool | false
 BasicQosOptions | 指定消费的[Qos](https://www.rabbitmq.com/consumer-prefetch.html) | BasicQos | N/A
 
+`QueueArguments` 支持以下可选的队列声明参数：
+
+| 属性 | 说明 | 默认值 |
+| :--- | :--- | :--- |
+| `QueueType` | 队列类型，例如 `classic` 或 `quorum`（`x-queue-type`）。 | 未设置 |
+| `QueueMode` | 队列模式（`x-queue-mode`）。 | 未设置 |
+| `MessageTTL` | 消息生存时间，单位为毫秒（`x-message-ttl`）。 | 864000000（10 天） |
+
 #### ConnectionFactory Option
 
 如果你需要 **更多** 原生 `ConnectionFactory` 相关的配置项，可以通过 `ConnectionFactoryOptions` 配置项进行设定：

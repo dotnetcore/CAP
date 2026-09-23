@@ -42,6 +42,7 @@ DatabaseName | Database name | string | cap
 DatabaseConnection | Database connection string | string | mongodb://localhost:27017
 ReceivedCollection | Database received message collection name | string | cap.received
 PublishedCollection | Database published message collection name | string | cap.published
+LockCollection | Database lock collection name, used when storage locking is enabled | string | cap.lock
 
 ## Publish with transaction
 

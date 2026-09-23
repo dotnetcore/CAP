@@ -9,21 +9,26 @@
 创建一个过滤器类，并继承 `SubscribeFilter` 抽象类。
 
 ```C#
+using System.Threading.Tasks;
+
 public class MyCapFilter: SubscribeFilter
 {
     public override Task OnSubscribeExecutingAsync(ExecutingContext context)
     {
         // 订阅方法执行前
+        return Task.CompletedTask;
     }
 
     public override Task OnSubscribeExecutedAsync(ExecutedContext context)
     {
         // 订阅方法执行后
+        return Task.CompletedTask;
     }
 
     public override Task OnSubscribeExceptionAsync(ExceptionContext context)
     {
         // 订阅方法执行异常
+        return Task.CompletedTask;
     }
 }
 ```
@@ -36,6 +41,7 @@ public class MyCapFilter: SubscribeFilter
 public override Task OnSubscribeExceptionAsync(ExceptionContext context)
 {
     context.ExceptionHandled = true;
+    return Task.CompletedTask;
 }
 ```
 

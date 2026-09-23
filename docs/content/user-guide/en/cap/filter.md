@@ -9,21 +9,26 @@ Subscriber filters are similar to ASP.NET MVC filters and are mainly used to per
 Create a new filter class that inherits from the `SubscribeFilter` abstract class.
 
 ```C#
+using System.Threading.Tasks;
+
 public class MyCapFilter : SubscribeFilter
 {
     public override Task OnSubscribeExecutingAsync(ExecutingContext context)
     {
         // Execute before the subscriber method runs
+        return Task.CompletedTask;
     }
 
     public override Task OnSubscribeExecutedAsync(ExecutedContext context)
     {
         // Execute after the subscriber method completes
+        return Task.CompletedTask;
     }
 
     public override Task OnSubscribeExceptionAsync(ExceptionContext context)
     {
         // Handle exceptions during subscriber method execution
+        return Task.CompletedTask;
     }
 }
 ```
@@ -36,6 +41,7 @@ To ignore exceptions, set `context.ExceptionHandled = true` in `ExceptionContext
 public override Task OnSubscribeExceptionAsync(ExceptionContext context)
 {
     context.ExceptionHandled = true;
+    return Task.CompletedTask;
 }
 ```
 

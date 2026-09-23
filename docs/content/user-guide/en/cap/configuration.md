@@ -45,6 +45,10 @@ This name corresponds to different items in different message brokers:
 - In NATS, it corresponds to the Subject.
 - In Redis Streams, it corresponds to the Stream.
 
+CAP supports `*` as one or more ASCII letters or digits, and `#` as one or more ASCII letters, digits, or dots. For example, `orders.*` matches `orders.created`, while `orders.#` can also match `orders.created.eu`. These patterns match the entire topic name.
+
+You can apply a common topic prefix at class level and mark method topics as partial to append them. For example, `[CapSubscribe("orders")]` on a class and `[CapSubscribe("created", isPartial: true)]` on a method subscribe to `orders.created`.
+
 ### Group
 
 > string, optional

@@ -23,7 +23,11 @@ This configuration option controls whether the Dashboard/Nodes page lists every 
 
 * **ShowOnlyExplicitVisibleNodes** 
 
-> Default: false
+> Default: true
+
+The default is `true`, so services are hidden unless they have the `dotnetcore.cap.visibility: show` label. Set this option to `false` to list services by default (labels can still explicitly show or hide services).
+
+`K8SClientConfig` defaults to the Kubernetes client configuration returned by the client library's `BuildDefaultConfig()`. Set it when the Dashboard must connect using a different Kubernetes client configuration.
 
 ```cs
 services.AddCap(x =>

@@ -10,7 +10,7 @@ CAP的 Dashboard 使用 Consul 作为服务发现来显示其他节点的数据�
 
 通过点击 Switch 按钮来切换到其他的节点看到其他节点的数据，而不必访问很多地址来分别查看。
  
-以下是一个配置示例, 你需要在每个节点分别配置：
+以下是一个配置示例, 你需要在每个节点分别配置。`ConsulDiscoveryOptions` 还支持 `Scheme`（默认 `http`），用于设置节点健康检查 URL 的协议；`CustomTags` 可为服务注册添加自定义标签。健康检查接口使用 HTTPS 时，请将 `Scheme` 设为 `https`：
 
 ```C#
 services.AddCap(x =>
