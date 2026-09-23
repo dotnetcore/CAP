@@ -33,60 +33,25 @@ CAP supports the following types of transaction-enabled databases for storage:
 * [MongoDB](mongodb.md)
 * [In-Memory Storage](in-memory-storage.md)
 
-After CAP is started, two tables are generated in used storage, by default the name is `Cap.Published` and `Cap.Received`.
+After CAP starts, it initializes published-message and received-message storage. Physical names and schemas vary by provider and can be customized with provider options such as `TableNamePrefix` or collection-name settings. The storage-lock table is created only when `UseStorageLock` is enabled.
 
-### Storage Data Structure
+### Stored message data
 
-Table structure of **Published** :
+Relational providers store the following logical fields. Exact database types, indexes, naming, and provider-specific fields vary by implementation. MongoDB stores corresponding documents.
 
-NAME | DESCRIPTION | TYPE
-:---|:---|:---
-Id | Message Id | int
-Version | Message Version | string
-Name | Topic Name | string
-Content | Json Content | string
-Added | Added Time | DateTime
-ExpiresAt | Expire time | DateTime
-Retries | Retry times | int
-StatusName | Status Name | string
- 
-Table structure of **Received** :
+Field | Description
+:---|:---
+Id | CAP message identifier (stored as a 64-bit integer by the built-in relational providers).
+Version | Message version configured by CAP.
+Name | Message topic or name.
+Content | Serialized CAP message, including headers and payload.
+Retries | Retry count.
+Added | Time the message was stored.
+ExpiresAt | Optional expiration time.
+StatusName | Current message state.
+Group | Consumer group; present on received messages.
 
-NAME | DESCRIPTION | TYPE
-:---|:---|:---
-Id | Message Id | int
-Version | Message Version | string
-Name | Topic Name | string
-Group | Group Name | string
-Content | Json Content | string
-Added | Added Time | DateTime
-ExpiresAt | Expire time | DateTime
-Retries | Retry times | int
-StatusName | Status Name | string
-
-Table structure of **Lock** (Optional):
-
-NAME | DESCRIPTION | TYPE
-:---|:---|:---
-Key | Lock Id | string
-Instance | Acquired instance of lock | string
-LastLockTime | Last acquired lock time | DateTime
-
-### Wapper Object
-
-When CAP sends a message, it will store original message object in a second package in the `Content` field. 
-
-The following is the **Wapper Object** data structure of Content field.
-
-NAME | DESCRIPTION | TYPE
-:---|:---|:---
-Id	| Message Id	| string
-Timestamp |	Message created time |	string
-Content |	Message content |	string
-CallbackName |	Consumer callback topic name | string
-
-The `Id` field is generate using the mongo [objectid algorithm](https://www.mongodb.com/blog/post/generating-globally-unique-identifiers-for-use-with-mongodb).
-
+The storage `Content` value serializes CAP's message object, which contains message headers and the payload value. It is not an additional wrapper with a MongoDB ObjectId. For provider-specific schemas and migrations, consult the relevant storage implementation documentation.
 
 ## Community-supported extensions
 

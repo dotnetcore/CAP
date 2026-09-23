@@ -30,57 +30,25 @@ CAP 支持以下几种具有事务支持的数据库做为存储：
 * [MongoDB](mongodb.md)
 * [In-Memory Storage](in-memory-storage.md)
 
-在 CAP 启动后，会向持久化介质中生成两个表，默认情况下名称为：`Cap.Published` `Cap.Received`。
+CAP 启动后会初始化已发布消息和已接收消息的存储。物理名称和结构因存储提供程序而异，并可通过 `TableNamePrefix` 或集合名称等提供程序选项自定义。只有启用 `UseStorageLock` 时才会创建存储锁表。
 
-### 存储格式
+### 消息存储字段
 
-**Published** 表结构：
+关系型存储包含以下逻辑字段。具体数据库类型、索引、命名和提供程序专属字段因实现而异；MongoDB 保存对应的文档。
 
-NAME | DESCRIPTION | TYPE
-:---|:---|:---
-Id | Message Id | int
-Version | Message Version | string
-Name | Topic Name | string
-Content | Json Content | string
-Added | Added Time | DateTime
-ExpiresAt | Expire time | DateTime
-Retries | Retry times | int
-StatusName | Status Name | string
+字段 | 说明
+:---|:---
+Id | CAP 消息标识符（内置关系型存储中为 64 位整数）。
+Version | CAP 配置的消息版本。
+Name | 消息主题或名称。
+Content | 序列化后的 CAP 消息，包含标头和负载。
+Retries | 重试次数。
+Added | 消息存储时间。
+ExpiresAt | 可选的过期时间。
+StatusName | 当前消息状态。
+Group | 消费者组，仅接收消息包含此字段。
 
-**Received** 表结构：
-
-NAME | DESCRIPTION | TYPE
-:---|:---|:---
-Id | Message Id | int
-Version | Message Version | string
-Name | Topic Name | string
-Group | Group Name | string
-Content | Json Content | string
-Added | Added Time | DateTime
-ExpiresAt | Expire time | DateTime
-Retries | Retry times | int
-StatusName | Status Name | string
-
-**Lock** 表结构（可选）：
-
-NAME | DESCRIPTION | TYPE
-:---|:---|:---
-Key | Lock Id | string
-Instance | Acquired instance of lock | string
-LastLockTime | Last acquired lock time | DateTime
-
-### 包装器对象
-
-CAP 在进行消息发送到时候，会对原始消息对象进行一个二次包装存储到 `Content` 字段中，以下为包装 Content 的 Message 对象数据结构：
-
-NAME | DESCRIPTION | TYPE
-:---|:---|:---
-Id	| CAP生成的消息编号	| string
-Timestamp |	消息创建时间 |	string
-Content |	内容 |	string
-CallbackName |	回调的订阅者名称 | string
-
-其中 Id 字段，CAP 采用的 MongoDB 中的 ObjectId 分布式Id生成算法生成。
+存储的 `Content` 值是 CAP 消息对象的序列化结果，其中包含消息标头和负载。它不是额外嵌套的包装对象，消息编号也不是 MongoDB ObjectId。有关各提供程序的实际结构和迁移，请查看相应的存储文档。
 
 ## 社区支持的持久化
 
