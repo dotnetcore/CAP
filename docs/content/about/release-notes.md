@@ -5,6 +5,83 @@ hide:
 
 # Release Notes
 
+## Version 10.0.2 (Jul 1, 2026)
+
+**Features and improvements:**
+
+* Add Azure Service Bus emulator support and an option to automatically provision entities.
+* Add session ID support for custom Azure Service Bus producers.
+* Improve delayed-message sending and RabbitMQ consumer handling.
+* Update Kafka topic auto-creation behavior to honor `allow.auto.create.topics`.
+* Improve MongoDB index cleanup and dashboard behavior when Kubernetes namespaces are unavailable.
+
+See the [10.0.2 release history](https://github.com/dotnetcore/CAP/compare/v10.0.1...v10.0.2) for the complete change list.
+
+## Version 10.0.1 (Jan 9, 2026)
+
+Fix an asynchronous topic-fetch issue and update the core package version. See the [10.0.1 release history](https://github.com/dotnetcore/CAP/compare/v10.0.0...v10.0.1).
+
+## Version 10.0.0 (Nov 27, 2025)
+
+**Features and improvements:**
+
+* Add .NET 10 support.
+* Refactor message dispatching and improve RabbitMQ consumer concurrency and handling.
+* Add scheduler batch-size configuration and dashboard message deletion.
+
+See the [10.0.0 release history](https://github.com/dotnetcore/CAP/compare/v8.4.1...v10.0.0) for the complete change list.
+
+## Version 8.4.1 (Oct 23, 2025)
+
+**Improvements:**
+
+* Honor `allow.auto.create.topics` for Kafka topic creation.
+* Add the CAP message ID to RabbitMQ message properties and prefer connection-factory SSL settings for clusters.
+* Remove obsolete MongoDB indexes and improve their cleanup logging.
+* Fix invalid SQL in deletion statements.
+
+See the [8.4.1 release history](https://github.com/dotnetcore/CAP/compare/v8.2.0...v8.4.1) for the complete change list.
+
+## Version 8.4.0 (Aug 25, 2025)
+
+**Features and improvements:**
+
+* Add dashboard support for deleting one or more messages.
+* Add `SchedulerBatchSize` to configure the number of scheduled messages fetched per cycle.
+* Improve delayed-message error handling, MongoDB index maintenance, and storage cleanup queries.
+* Improve compatibility with current RabbitMQ and database client libraries.
+
+See the [8.4.0 release history](https://github.com/dotnetcore/CAP/compare/v8.3.5...v8.4.0) for the complete change list.
+
+## Version 8.3.5 (May 16, 2025)
+
+Improve error handling when sending delayed messages. See the [8.3.5 release history](https://github.com/dotnetcore/CAP/compare/v8.3.0...v8.3.5) for the complete change list.
+
+## Version 8.3.4 (Apr 22, 2025)
+
+Patch release. See the [8.3.4 release history](https://github.com/dotnetcore/CAP/compare/v8.3.3...v8.3.4).
+
+## Version 8.3.3 (Feb 4, 2025)
+
+Maintenance release. See the [8.3.3 release history](https://github.com/dotnetcore/CAP/compare/v8.3.2...v8.3.3).
+
+## Version 8.3.2 (Dec 5, 2024)
+
+Allow CAP message group headers to be overwritten and tolerate duplicate Kafka headers. See the [8.3.2 release history](https://github.com/dotnetcore/CAP/compare/v8.3.1...v8.3.2).
+
+## Version 8.3.1 (Nov 5, 2024)
+
+Fix a RabbitMQ transport reject call error. See the [8.3.1 release history](https://github.com/dotnetcore/CAP/compare/v8.3.0...v8.3.1).
+
+## Version 8.3.0 (Oct 9, 2024)
+
+**Features and improvements:**
+
+* Add Kubernetes service filtering for dashboard node discovery.
+* Add RabbitMQ queue options and improve Azure Service Bus message handling.
+* Add retryable Kafka consumer error codes.
+
+See the [8.3.0 release history](https://github.com/dotnetcore/CAP/compare/v8.2.0...v8.3.0) for the complete change list.
 ## Version 8.2.0 (Jun 23, 2024)
 
 **Features:**

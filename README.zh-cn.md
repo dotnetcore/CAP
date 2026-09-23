@@ -10,9 +10,9 @@
 [![Member project of .NET Core Community](https://img.shields.io/badge/member%20project%20of-NCC-9e20c9.svg)](https://github.com/dotnetcore)
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 
-CAP 是一个基于 .NET Standard 的 C# 库，它是一种处理分布式事务的解决方案，同样具有 EventBus 的功能，它具有轻量级、易使用、高性能等特点。
+CAP 是一个 .NET 库，用于处理分布式事务并提供 EventBus 功能。当前版本支持 .NET 8、.NET 9 和 .NET 10，具有轻量、易用和高性能等特点。
 
-你可以在这里 [CAP docs](http://cap.dotnetcore.xyz) 看到更多详细资料。
+你可以在这里 [CAP docs](https://cap.dotnetcore.xyz) 看到更多详细资料。
 
 你可以在这里看到 [CAP 视频教程](https://www.cnblogs.com/savorboard/p/cap-video-1.html)，学习如何在项目中集成CAP。
 

@@ -1,6 +1,6 @@
 # Project information
 site_name: CAP
-site_url: http://cap.dotnetcore.xyz
+site_url: https://cap.dotnetcore.xyz
 site_description: A distributed transaction solution in micro-service base on eventually consistency, also an eventbus with Outbox pattern.
 site_author: CAP Team
 

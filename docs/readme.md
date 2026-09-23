@@ -2,7 +2,7 @@
 
 The folder contains the documentation for CAP.
 
-We are using [Github Pages](https://github.com/dotnetcore/CAP/tree/gh-pages) to host the documentation and the rendered version can be found [here](http://cap.dotnetcore.xyz).
+Documentation is built with the workflow in `.github/workflows/deploy-docs-and-dashboard.yml` and hosted on [GitHub Pages](https://cap.dotnetcore.xyz).
 
 ## Docs site
 

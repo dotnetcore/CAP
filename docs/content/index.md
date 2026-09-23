@@ -15,7 +15,7 @@ Title: CAP - A distributed transaction solution in micro-service base on eventua
 [![GitHub license](https://img.shields.io/badge/license-MIT-blue.svg)](https://raw.githubusercontent.com/dotnetcore/CAP/master/LICENSE.txt)
 [![Member project of .NET Core Community](https://img.shields.io/badge/member%20project%20of-NCC-9e20c9.svg)](https://github.com/dotnetcore)
 
-CAP is a library based on .net standard, which is a solution to deal with distributed transactions, also has the function of EventBus, it is lightweight, easy to use, and efficient.
+CAP is a .NET library that supports distributed transactions and event-driven communication through an EventBus. It uses the Outbox pattern to persist messages alongside application data and supports pluggable message transports and storage providers. The current CAP release targets .NET 8, .NET 9, and .NET 10.
 
 ## Introduction
 
