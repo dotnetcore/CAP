@@ -48,25 +48,20 @@ public class MongoDBDataStorage : IDataStorage
     public async Task<bool> AcquireLockAsync(string key, TimeSpan ttl, string instance,
         CancellationToken token = default)
     {
-
         var collection = _database.GetCollection<Lock>(_options.Value.LockCollection);
-        using var session = await _client.StartSessionAsync(cancellationToken: token).ConfigureAwait(false);
-        var transactionOptions =
-            new TransactionOptions(ReadConcern.Majority, ReadPreference.Primary, WriteConcern.WMajority);
+        var now = DateTime.Now;
 
         try
         {
-            var result = await session.WithTransactionAsync(async (handle, cancellationToken) =>
-            {
-                var opResult = await collection.UpdateOneAsync(handle,
-                    model => model.Key == key && model.LastLockTime < DateTime.Now.Subtract(ttl),
-                    Builders<Lock>.Update.Set(model => model.Instance, instance)
-                        .Set(model => model.LastLockTime, DateTime.Now), null, cancellationToken);
-                var isAcquired = opResult.IsModifiedCountAvailable && opResult.ModifiedCount > 0;
-                return isAcquired;
-            }, transactionOptions, token);
-
-            return result;
+            var filter = Builders<Lock>.Filter.Eq(x => x.Key, key) &
+                         Builders<Lock>.Filter.Lt(x => x.LastLockTime, now.Subtract(ttl));
+            
+            var updateDefinition = Builders<Lock>.Update
+                .Set(model => model.Instance, instance)
+                .Set(model => model.LastLockTime, now);
+            var opResult = await collection.UpdateOneAsync(filter, updateDefinition, null, token);
+            var isAcquired = opResult.IsModifiedCountAvailable && opResult.ModifiedCount > 0;
+            return isAcquired;
         }
         catch (Exception ex)
         {
