@@ -44,7 +44,7 @@ internal sealed class RabbitMqTransport : ITransport
 
             await channel.BasicPublishAsync(_exchange, message.GetName(), false, props, message.Body);
 
-            _logger.LogInformation("CAP message '{0}' published, internal id '{1}'", message.GetName(), message.GetId());
+            _logger.LogInformation("CAP message '{capMessageName}' published, internal id '{capMessageId}'", message.GetName(), message.GetId());
 
             return OperateResult.Success;
         }
