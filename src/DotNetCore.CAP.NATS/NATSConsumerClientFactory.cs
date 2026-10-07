@@ -19,13 +19,21 @@ internal sealed class NATSConsumerClientFactory : IConsumerClientFactory
         _serviceProvider = serviceProvider;
     }
 
-    public Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
+    public async Task<IConsumerClient> CreateAsync(string groupName, byte groupConcurrent)
     {
         try
         {
             var client = new NATSConsumerClient(groupName, groupConcurrent, _natsOptions, _serviceProvider);
-            client.Connect();
-            return Task.FromResult<IConsumerClient>(client);
+            try
+            {
+                await client.ConnectAsync().ConfigureAwait(false);
+                return client;
+            }
+            catch
+            {
+                await client.DisposeAsync().ConfigureAwait(false);
+                throw;
+            }
         }
         catch (System.Exception e)
         {
