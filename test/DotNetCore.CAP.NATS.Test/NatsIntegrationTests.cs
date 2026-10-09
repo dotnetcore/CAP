@@ -19,7 +19,7 @@ namespace DotNetCore.CAP.NATS.Test;
 
 public class NatsIntegrationTests
 {
-    [Fact]
+    [NatsIntegrationFact]
     public async Task PublishPreservesBytesHeadersAndDeduplicatesMessageId()
     {
         await using var scope = new NatsTestScope();
@@ -48,7 +48,7 @@ public class NatsIntegrationTests
         Assert.Empty(scope.Logs);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task SameGroupCompetesAndDifferentGroupReceivesEveryMessage()
     {
         await using var scope = new NatsTestScope();
@@ -79,7 +79,7 @@ public class NatsIntegrationTests
         Assert.Empty(scope.Logs);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task ConcurrentStartupUsesOneDurableConsumer()
     {
         await using var scope = new NatsTestScope();
@@ -97,7 +97,7 @@ public class NatsIntegrationTests
         Assert.Empty(scope.Logs);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task NakAndAckWaitRedeliverMessages()
     {
         await using var scope = new NatsTestScope();
@@ -117,7 +117,7 @@ public class NatsIntegrationTests
         Assert.Empty(scope.Logs);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task CustomHeadersAcceptHeaderlessForeignMessagesAndRecoverAfterException()
     {
         await using var scope = new NatsTestScope();
@@ -146,7 +146,7 @@ public class NatsIntegrationTests
         Assert.Contains(scope.Logs, log => log.Reason?.Contains("test header error") == true);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task ConcurrencyIsBoundedAcrossTopicsAndCancellationDrainsCallbacks()
     {
         await using var scope = new NatsTestScope();
@@ -179,7 +179,7 @@ public class NatsIntegrationTests
         Assert.Empty(scope.Logs);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task StreamSubjectsAndExistingSettingsArePreserved()
     {
         await using var scope = new NatsTestScope();
@@ -198,7 +198,7 @@ public class NatsIntegrationTests
         Assert.Equal(new[] { scope.Topic, scope.Stream + ".original", scope.Stream + ".second" }.Order(), stream.Info.Config.Subjects!.Order());
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task DisabledStreamCreationDoesNotModifyStream()
     {
         await using var scope = new NatsTestScope();
@@ -210,7 +210,7 @@ public class NatsIntegrationTests
         Assert.Equal(new[] { scope.Topic }, stream.Info.Config.Subjects);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task NewConsumerStartsWithNewMessagesButRestartKeepsPendingMessages()
     {
         await using var scope = new NatsTestScope();
@@ -239,7 +239,7 @@ public class NatsIntegrationTests
         Assert.Empty(scope.Logs);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task OldAndNewClientsShareDurableAndCanRollBackWithoutRecreatingIt()
     {
         await using var scope = new NatsTestScope();
@@ -282,7 +282,7 @@ public class NatsIntegrationTests
         Assert.Empty(scope.Logs);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task UpgradeRedeliversOldClientPendingMessageAndPreservesAckFloor()
     {
         await using var scope = new NatsTestScope();
@@ -327,7 +327,7 @@ public class NatsIntegrationTests
         Assert.Empty(scope.Logs);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task IncompatibleExistingConsumerFailsWithoutBeingRecreated()
     {
         await using var scope = new NatsTestScope();
@@ -346,7 +346,7 @@ public class NatsIntegrationTests
         Assert.Equal("wrong-group", after.Info.Config.DeliverGroup);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task PublishToMissingStreamReturnsCapFailure()
     {
         await using var scope = new NatsTestScope();
@@ -357,7 +357,7 @@ public class NatsIntegrationTests
         Assert.False(result.Succeeded);
     }
 
-    [Fact]
+    [NatsIntegrationFact]
     public async Task PoolReusesConnectionsAndDisposesReturnsAfterShutdown()
     {
         await using var scope = new NatsTestScope();
@@ -374,5 +374,14 @@ public class NatsIntegrationTests
         }, Array.Empty<byte>()));
         Assert.False(failed.Succeeded);
         Assert.IsType<PublisherSentFailedException>(failed.Exception);
+    }
+}
+
+internal sealed class NatsIntegrationFactAttribute : FactAttribute
+{
+    public NatsIntegrationFactAttribute()
+    {
+        if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("APPVEYOR_BUILD_ID")))
+            Skip = "Requires a NATS server with JetStream enabled; AppVeyor does not provision one.";
     }
 }
