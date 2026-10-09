@@ -1,84 +1,91 @@
-// Copyright (c) .NET Core Community. All rights reserved.
+﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
-using System.Collections.Concurrent;
-using System.Threading;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NATS.Client;
+using NATS.Client.Core;
 
 namespace DotNetCore.CAP.NATS;
 
-public class ConnectionPool : IConnectionPool, IDisposable
+public class ConnectionPool : IConnectionPool, IAsyncDisposable
 {
     private readonly NATSOptions _options;
-    private readonly ConcurrentQueue<IConnection> _connectionPool;
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly Queue<INatsConnection> _connections = new();
+    private readonly object _lock = new();
+    private bool _disposed;
 
-    private readonly ConnectionFactory _connectionFactory;
-    private int _pCount;
-    private int _maxSize;
-
-    public ConnectionPool(ILogger<ConnectionPool> logger, IOptions<NATSOptions> options)
+    public ConnectionPool(ILoggerFactory loggerFactory, IOptions<NATSOptions> options)
     {
         _options = options.Value;
-        _connectionPool = new ConcurrentQueue<IConnection>();
-        _connectionFactory = new ConnectionFactory();
-        _maxSize = _options.ConnectionPoolSize;
-
-        logger.LogDebug("NATS configuration: {0}", options.Value.Options);
+        _loggerFactory = loggerFactory;
+        if (_options.ConnectionPoolSize < 0)
+            throw new ArgumentOutOfRangeException(nameof(options), "ConnectionPoolSize must not be negative.");
     }
 
     public string ServersAddress => _options.Servers;
 
-    public IConnection RentConnection()
+    public async ValueTask<INatsConnection> RentConnectionAsync()
     {
-        if (_connectionPool.TryDequeue(out var connection))
+        INatsConnection? connection;
+        lock (_lock)
         {
-            Interlocked.Decrement(ref _pCount);
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            connection = _connections.Count > 0 ? _connections.Dequeue() : null;
+        }
 
+        connection ??= new NatsConnection((_options.Options ?? NatsOpts.Default) with
+        {
+            Url = _options.Servers,
+            LoggerFactory = _options.Options?.LoggerFactory ?? _loggerFactory,
+            PublishTimeoutOnDisconnected = true
+        });
+
+        try
+        {
+            await connection.ConnectAsync().ConfigureAwait(false);
+            lock (_lock)
+                ObjectDisposedException.ThrowIf(_disposed, this);
             return connection;
         }
-
-        if (_options.Options != null)
+        catch
         {
-            _options.Options.Url = _options.Servers;
-            connection = _connectionFactory.CreateConnection(_options.Options);
+            await connection.DisposeAsync().ConfigureAwait(false);
+            throw;
         }
-        else
-        {
-            connection = _connectionFactory.CreateConnection(_options.Servers);
-        }
-
-        return connection;
     }
 
-    public bool Return(IConnection connection)
+    public async ValueTask<bool> ReturnAsync(INatsConnection connection)
     {
-        if (Interlocked.Increment(ref _pCount) <= _maxSize && connection.State == ConnState.CONNECTED)
+        lock (_lock)
         {
-            _connectionPool.Enqueue(connection);
-
-            return true;
+            if (!_disposed && _connections.Count < _options.ConnectionPoolSize &&
+                connection.ConnectionState == NatsConnectionState.Open)
+            {
+                _connections.Enqueue(connection);
+                return true;
+            }
         }
 
-        if (!connection.IsReconnecting())
-        {
-            connection.Dispose();
-        }
-
-        Interlocked.Decrement(ref _pCount);
-
+        await connection.DisposeAsync().ConfigureAwait(false);
         return false;
     }
 
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
-        _maxSize = 0;
-
-        while (_connectionPool.TryDequeue(out var context))
+        INatsConnection[] connections;
+        lock (_lock)
         {
-            context.Dispose();
+            if (_disposed) return;
+            _disposed = true;
+            connections = _connections.ToArray();
+            _connections.Clear();
         }
+
+        foreach (var connection in connections)
+            await connection.DisposeAsync().ConfigureAwait(false);
     }
 }

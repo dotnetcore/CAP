@@ -1,10 +1,11 @@
-// Copyright (c) .NET Core Community. All rights reserved.
+﻿// Copyright (c) .NET Core Community. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
 using System;
 using System.Collections.Generic;
-using NATS.Client;
+using NATS.Client.Core;
 using NATS.Client.JetStream;
+using NATS.Client.JetStream.Models;
 
 // ReSharper disable once CheckNamespace
 namespace DotNetCore.CAP;
@@ -21,7 +22,7 @@ public class NATSOptions
     public string Servers { get; set; } = "nats://127.0.0.1:4222";
 
     /// <summary>
-    /// connection pool size, default is 10
+    /// Maximum number of idle publisher connections retained in the pool, default is 10.
     /// </summary>
     public int ConnectionPoolSize { get; set; } = 10;
 
@@ -31,18 +32,21 @@ public class NATSOptions
     public bool EnableSubscriberClientStreamAndSubjectCreation { get; set; } = true;
 
     /// <summary>
-    /// Used to setup all NATs client options
+    /// Native connection options. Servers takes precedence over NatsOpts.Url.
     /// </summary>
-    public Options? Options { get; set; }
+    public NatsOpts? Options { get; set; }
 
-    public Action<StreamConfiguration.StreamConfigurationBuilder>? StreamOptions { get; set; }
+    public Action<StreamConfig>? StreamOptions { get; set; }
 
-    public Action<ConsumerConfiguration.ConsumerConfigurationBuilder>? ConsumerOptions { get; set; }
+    /// <summary>
+    /// Configures new durable push consumers. Existing server-side consumers are validated and reused.
+    /// </summary>
+    public Func<NatsJSPushConsumerOpts, NatsJSPushConsumerOpts>? ConsumerOptions { get; set; }
 
     /// <summary>
     /// If you need to get additional native delivery args, you can use this function to write into <see cref="CapHeader" />.
     /// </summary>
-    public Func<MsgHandlerEventArgs, IServiceProvider, List<KeyValuePair<string, string>>>? CustomHeadersBuilder { get; set; }
+    public Func<INatsJSMsg<byte[]>, IServiceProvider, List<KeyValuePair<string, string>>>? CustomHeadersBuilder { get; set; }
 
     public Func<string, string> NormalizeStreamName { get; set; } = origin => origin.Split('.')[0];
 }

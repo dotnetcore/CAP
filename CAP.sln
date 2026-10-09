@@ -86,6 +86,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sample.Dashboard.Jwt", "sam
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DotNetCore.CAP.Dashboard.K8s", "src\DotNetCore.CAP.Dashboard.K8s\DotNetCore.CAP.Dashboard.K8s.csproj", "{48655118-CEC3-4BD9-B510-64C1195C2729}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotNetCore.CAP.NATS.Test", "test\DotNetCore.CAP.NATS.Test\DotNetCore.CAP.NATS.Test.csproj", "{4D69732A-C270-49A8-B010-A3B2154CB12C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -212,6 +214,10 @@ Global
 		{48655118-CEC3-4BD9-B510-64C1195C2729}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{48655118-CEC3-4BD9-B510-64C1195C2729}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{48655118-CEC3-4BD9-B510-64C1195C2729}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D69732A-C270-49A8-B010-A3B2154CB12C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D69732A-C270-49A8-B010-A3B2154CB12C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D69732A-C270-49A8-B010-A3B2154CB12C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D69732A-C270-49A8-B010-A3B2154CB12C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -247,6 +253,7 @@ Global
 		{D9681967-DAC2-43EF-999F-3727F1046711} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 		{F739A8C9-565F-4B1D-8F91-FEE056C03FBD} = {3A6B6931-A123-477A-9469-8B468B5385AF}
 		{48655118-CEC3-4BD9-B510-64C1195C2729} = {9B2AE124-6636-4DE9-83A3-70360DABD0C4}
+		{4D69732A-C270-49A8-B010-A3B2154CB12C} = {C09CDAB0-6DD4-46E9-B7F3-3EF2A4741EA0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {2E70565D-94CF-40B4-BFE1-AC18D5F736AB}
