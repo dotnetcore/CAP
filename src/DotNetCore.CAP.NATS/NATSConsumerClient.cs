@@ -196,7 +196,7 @@ internal sealed class NATSConsumerClient : IConsumerClient
                     {
                         consumer = await js.CreatePushConsumerAsync(stream, opts, _stopping.Token).ConfigureAwait(false);
                     }
-                    catch (NatsJSApiException conflict) when (conflict.Error.ErrCode is 10013 or 10148)
+                    catch (NatsJSApiException conflict) when (conflict.Error.ErrCode is 10013 or 10105 or 10148)
                     {
                         consumer = await js.GetPushConsumerAsync(stream, opts.DurableName, _stopping.Token).ConfigureAwait(false);
                     }
