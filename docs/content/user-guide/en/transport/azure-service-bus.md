@@ -58,7 +58,7 @@ The Azure Service Bus configuration options provided by CAP:
 | CustomHeadersBuilder                 | Adds custom and/or mandatory headers for incoming messages from heterogeneous systems.                                                                               | `Func<ServiceBusReceivedMessage, IServiceProvider, List<KeyValuePair<string, string>>>?` | null                 |
 | Namespace                            | Namespace of Servicebus , Needs to be set when using with TokenCredential Property                                                                                    | string                                                                 | null                             |
 | DefaultCorrelationHeaders            | Adds additional correlation properties to all [correlation filters](https://learn.microsoft.com/en-us/azure/service-bus-messaging/topic-filters#correlation-filters). | IDictionary<string, string>                                            | Dictionary<string, string>.Empty |
-| SQLFilters                           | Custom SQL Filters by name and expression on Topic Subscribtion                                                                                                       | List<KeyValuePair<string, string>>                                     | null                             |
+| SQLFilters                           | Custom SQL Filters by name and expression on Topic Subscription                                                                                                       | List<KeyValuePair<string, string>>                                     | null                             |
 
 #### Custom producers
 
