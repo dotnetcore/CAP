@@ -209,14 +209,17 @@ public class PostgreSqlDataStorage : IDataStorage
         await using var _ = connection.ConfigureAwait(false);
 
         return await connection.ExecuteNonQueryAsync(
-            $@"DELETE FROM {table}
-               WHERE ""Id"" IN (
+            $@"WITH expired_messages AS (
                    SELECT ""Id""
                    FROM {table}
                    WHERE ""ExpiresAt"" < @timeout
                    AND ""StatusName"" IN ('{StatusName.Succeeded}','{StatusName.Failed}')
                    LIMIT @batchCount
-               )",
+                   FOR UPDATE SKIP LOCKED
+               )
+               DELETE FROM {table} AS message
+               USING expired_messages
+               WHERE message.""Id"" = expired_messages.""Id""",
              null,
              new NpgsqlParameter("@timeout", timeout),
              new NpgsqlParameter("@batchCount", batchCount)).ConfigureAwait(false);
