@@ -32,10 +32,15 @@ public class CapOptions
         SubscriberParallelExecuteBufferFactor = 1;
         Extensions = new List<ICapOptionsExtension>();
         Version = "v1";
-        DefaultGroupName = "cap.queue." + Assembly.GetEntryAssembly()?.GetName().Name!.ToLower();
+        DefaultGroupName = BuildDefaultGroupName(Assembly.GetEntryAssembly()?.GetName().Name);
         CollectorCleaningInterval = 300;
         FallbackWindowLookbackSeconds = 240;
         SchedulerBatchSize = 1000;
+    }
+
+    internal static string BuildDefaultGroupName(string? entryAssemblyName)
+    {
+        return "cap.queue." + entryAssemblyName?.ToLowerInvariant();
     }
 
     internal IList<ICapOptionsExtension> Extensions { get; }
