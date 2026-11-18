@@ -56,7 +56,7 @@ services.AddCap(capOptions =>
 });
 ```
 
-`Configuration` is a StackExchange.Redis `ConfigurationOptions`. You can find more details at this [link](https://stackexchange.github.io/StackExchange.Redis/Configuration).
+`Configuration` is a StackExchange.Redis `ConfigurationOptions`. You can find more details at this [link](https://seredis.dev/Configuration).
 
 ### Streams Cleanup Notes
 

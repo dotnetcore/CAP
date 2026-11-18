@@ -56,7 +56,7 @@ services.AddCap(capOptions =>
 });
 ```
 
-`Configuration` 是 StackExchange.Redis ConfigurationOptions ，您可以通过此[链接](https://stackexchange.github.io/StackExchange.Redis/Configuration)找到更多详细信息。
+`Configuration` 是 StackExchange.Redis ConfigurationOptions ，您可以通过此[链接](https://seredis.dev/Configuration)找到更多详细信息。
 
 ### 流清理注意事项
 
