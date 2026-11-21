@@ -20,10 +20,7 @@ namespace DotNetCore.CAP.Internal;
 /// </summary>
 public class ConsumerServiceSelector : IConsumerServiceSelector
 {
-    /// <summary>
-    /// since this class be designed as a Singleton service,the following two list must be thread safe!
-    /// </summary>
-    private readonly ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>> _cacheList;
+    private readonly ConcurrentDictionary<string, RegexExecuteDescriptor<ConsumerExecutorDescriptor>[]> _cacheList;
 
     private readonly CapOptions _capOptions;
     private readonly ILogger<ConsumerServiceSelector> _logger;
@@ -37,7 +34,7 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
         _serviceProvider = serviceProvider;
         _capOptions = serviceProvider.GetRequiredService<IOptions<CapOptions>>().Value;
         _logger = serviceProvider.GetRequiredService<ILogger<ConsumerServiceSelector>>();
-        _cacheList = new ConcurrentDictionary<string, List<RegexExecuteDescriptor<ConsumerExecutorDescriptor>>>();
+        _cacheList = new ConcurrentDictionary<string, RegexExecuteDescriptor<ConsumerExecutorDescriptor>[]>();
     }
 
     public IReadOnlyList<ConsumerExecutorDescriptor> SelectCandidates()
@@ -232,27 +229,37 @@ public class ConsumerServiceSelector : IConsumerServiceSelector
         IReadOnlyList<ConsumerExecutorDescriptor> executeDescriptor)
     {
         var group = executeDescriptor[0].Attribute.Group;
-        if (!_cacheList.TryGetValue(group, out var tmpList))
-        {
-            tmpList = executeDescriptor.Select(x => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>
-            {
-                Name = Helper.WildcardToRegex(x.TopicName),
-                Descriptor = x
-            }).ToList();
-            _cacheList.TryAdd(group, tmpList);
-        }
 
-        foreach (var red in tmpList)
-            if (Regex.IsMatch(key, red.Name, RegexOptions.Singleline))
-                return red.Descriptor;
+        var regexDescriptors = _cacheList.GetOrAdd(group, BuildRegexDescriptors, executeDescriptor);
 
-        return null;
+        return regexDescriptors.FirstOrDefault(x => x.Regex.IsMatch(key))?.Descriptor;
     }
 
-    private class RegexExecuteDescriptor<T>
+    private static RegexExecuteDescriptor<ConsumerExecutorDescriptor>[] BuildRegexDescriptors(
+        string _,
+        IReadOnlyList<ConsumerExecutorDescriptor> descriptors)
     {
-        public string Name { get; set; } = default!;
+        return descriptors
+            .Select(CreateRegexDescriptorFactory()).ToArray();
+    }
 
-        public T Descriptor { get; set; } = default!;
+    private static Func<ConsumerExecutorDescriptor, RegexExecuteDescriptor<ConsumerExecutorDescriptor>> CreateRegexDescriptorFactory()
+    {
+        return o => new RegexExecuteDescriptor<ConsumerExecutorDescriptor>(
+                        new(Helper.WildcardToRegex(o.TopicName), RegexOptions.Singleline),
+                        o);
+    }
+
+    private sealed class RegexExecuteDescriptor<T>
+    {
+        public RegexExecuteDescriptor(Regex regex, T descriptor)
+        {
+            Regex = regex;
+            Descriptor = descriptor;
+        }
+
+        public Regex Regex { get; }
+
+        public T Descriptor { get; }
     }
 }
