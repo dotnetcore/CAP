@@ -60,7 +60,7 @@ internal class SubscribeExecutor : ISubscribeExecutor
                 TracingError(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(), message.Origin, null, new Exception(error));
 
                 var ex = new SubscriberNotFoundException(error);
-                await SetFailedState(message, ex);
+                await SetFailedState(message, ex, descriptor.Attribute.FailedMessageExpiredAfter);
                 return OperateResult.Failed(ex);
             }
         }
@@ -100,7 +100,7 @@ internal class SubscribeExecutor : ISubscribeExecutor
 
             sp.Stop();
 
-            await SetSuccessfulState(message).ConfigureAwait(false);
+            await SetSuccessfulState(message, descriptor.Attribute.SucceedMessageExpiredAfter).ConfigureAwait(false);
 
             CapEventCounterSource.Log.WriteInvokeTimeMetrics(sp.Elapsed.TotalMilliseconds);
             _logger.ConsumerExecuted(descriptor.ImplTypeInfo.Name, descriptor.MethodInfo.Name,
@@ -113,18 +113,19 @@ internal class SubscribeExecutor : ISubscribeExecutor
             _logger.ConsumerExecuteFailed(message.Origin.GetName(), message.DbId,
                 message.Origin.GetExecutionInstanceId(), ex);
 
-            return (await SetFailedState(message, ex).ConfigureAwait(false), OperateResult.Failed(ex));
+            return (await SetFailedState(message, ex, descriptor.Attribute.FailedMessageExpiredAfter).ConfigureAwait(false), OperateResult.Failed(ex));
         }
     }
 
-    private Task SetSuccessfulState(MediumMessage message)
+    private Task SetSuccessfulState(MediumMessage message, int expiredAfter)
     {
-        message.ExpiresAt = DateTime.Now.AddSeconds(_options.SucceedMessageExpiredAfter);
+        expiredAfter = expiredAfter > 0 ? expiredAfter : _options.SucceedMessageExpiredAfter;
+        message.ExpiresAt = DateTime.Now.AddSeconds(expiredAfter);
 
         return _dataStorage.ChangeReceiveStateAsync(message, StatusName.Succeeded);
     }
 
-    private async Task<bool> SetFailedState(MediumMessage message, Exception ex)
+    private async Task<bool> SetFailedState(MediumMessage message, Exception ex, int expiredAfter)
     {
         if (ex is SubscriberNotFoundException)
             message.Retries = _options.FailedRetryCount; // not retry if SubscriberNotFoundException
@@ -132,7 +133,8 @@ internal class SubscribeExecutor : ISubscribeExecutor
         var needRetry = UpdateMessageForRetry(message);
 
         message.Origin.AddOrUpdateException(ex);
-        message.ExpiresAt = message.Added.AddSeconds(_options.FailedMessageExpiredAfter);
+        expiredAfter = expiredAfter > 0 ? expiredAfter : _options.FailedMessageExpiredAfter;
+        message.ExpiresAt = message.Added.AddSeconds(expiredAfter);
 
         await _dataStorage.ChangeReceiveStateAsync(message, StatusName.Failed).ConfigureAwait(false);
 
